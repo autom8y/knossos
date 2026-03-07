@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"os"
 	"time"
@@ -66,15 +67,13 @@ func runFray(ctx *cmdContext, opts frayOptions) error {
 		var err error
 		parentID, err = ctx.GetSessionID()
 		if err != nil {
-			printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-			return err
+			return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		}
 	}
 
 	if parentID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	projectDir := ""
@@ -84,8 +83,7 @@ func runFray(ctx *cmdContext, opts frayOptions) error {
 
 	result, err := fraySession(projectDir, parentID, opts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	return printer.Print(result)

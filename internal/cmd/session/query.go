@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -66,16 +67,14 @@ func runQuery(ctx *cmdContext, opts queryOptions) error {
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
 		err = errors.Wrap(errors.CodeGeneralError, "failed to resolve session", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	if sessionID == "" {
 		// No active session — mirror hook's no-session path
 		if opts.field != "" {
 			err := errors.New(errors.CodeSessionNotFound, "no active session")
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 		return printer.Print(output.QueryOutput{HasSession: false})
 	}
@@ -90,8 +89,7 @@ func runQuery(ctx *cmdContext, opts queryOptions) error {
 		} else {
 			err = errors.Wrap(errors.CodeGeneralError, "failed to load session context", err)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Read active rite with backward compatibility (same as hook)
@@ -109,8 +107,7 @@ func runQuery(ctx *cmdContext, opts queryOptions) error {
 		if !ok {
 			err := errors.New(errors.CodeUsageError,
 				fmt.Sprintf("unknown field %q: valid fields are session_id, status, initiative, complexity, active_rite, execution_mode, current_phase, frayed_from, frame_ref, park_source, claimed_by", opts.field))
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 		printer.PrintLine(value)
 		return nil

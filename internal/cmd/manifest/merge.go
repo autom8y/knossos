@@ -3,6 +3,7 @@ package manifest
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/manifest"
 	"github.com/autom8y/knossos/internal/output"
@@ -32,7 +33,7 @@ Strategies:
   ours    Prefer our changes on conflict
   theirs  Prefer their changes on conflict
   union   Merge arrays with union (no duplicates)`,
-		Args:         cobra.ExactArgs(3),
+		Args:         common.ExactArgs(3),
 		SilenceUsage: true, // Don't print usage on errors
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runMerge(ctx, args[0], args[1], args[2], opts)
@@ -52,20 +53,17 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 	// Load all three manifests
 	base, err := manifest.Load(basePath)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	ours, err := manifest.Load(oursPath)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	theirs, err := manifest.Load(theirsPath)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Parse strategy
@@ -81,8 +79,7 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 		strategy = manifest.StrategySmart
 	default:
 		err := errors.New(errors.CodeUsageError, "Invalid strategy: "+opts.strategy)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Perform merge
@@ -92,8 +89,7 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 	}
 	result, err := manifest.Merge(base, ours, theirs, mergeOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Convert to output format
@@ -138,8 +134,7 @@ func runMerge(ctx *cmdContext, basePath, oursPath, theirsPath string, opts merge
 
 		mergedManifest := result.ToManifest(opts.outputPath, format)
 		if err := mergedManifest.Save(opts.outputPath); err != nil {
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 	}
 

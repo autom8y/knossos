@@ -3,6 +3,7 @@ package manifest
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/manifest"
 	"github.com/autom8y/knossos/internal/output"
@@ -20,7 +21,7 @@ func newValidateCmd(ctx *cmdContext) *cobra.Command {
 		Use:   "validate <path>",
 		Short: "Validate manifest against schema",
 		Long:  `Validates a manifest file against its JSON schema.`,
-		Args:  cobra.ExactArgs(1),
+		Args:  common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runValidate(ctx, args[0], opts)
 		},
@@ -39,8 +40,7 @@ func runValidate(ctx *cmdContext, path string, opts validateOptions) error {
 	// Load manifest
 	m, err := manifest.Load(path)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Determine schema name
@@ -48,8 +48,7 @@ func runValidate(ctx *cmdContext, path string, opts validateOptions) error {
 	if schemaName == "" {
 		detected, err := manifest.DetectSchemaFromPath(path)
 		if err != nil {
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 		schemaName = detected
 	}
@@ -57,15 +56,13 @@ func runValidate(ctx *cmdContext, path string, opts validateOptions) error {
 	// Create validator
 	validator, err := ctx.getSchemaValidator()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate
 	result, err := validator.Validate(m, schemaName, opts.strict)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Convert to output format

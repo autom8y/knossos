@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -57,21 +58,18 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Acquire exclusive lock
 	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-park")
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-park")
@@ -83,14 +81,12 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 		if errors.IsNotFound(err) {
 			err = errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate transition
 	if err := fsm.ValidateTransition(sessCtx.Status, session.StatusParked); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Update context
@@ -115,8 +111,7 @@ func runPark(ctx *cmdContext, opts parkOptions) error {
 
 	// Save context
 	if err := sessCtx.Save(ctxPath); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Emit Clew Contract events

@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
@@ -77,7 +78,7 @@ Context:
   Acquires exclusive lock and emits field.updated event automatically.
   Read-only fields return actionable errors pointing to the correct command.
   Prefer this over editing SESSION_CONTEXT.md directly.`,
-		Args: cobra.ExactArgs(2),
+		Args: common.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runFieldSet(ctx, args[0], args[1])
 		},
@@ -108,7 +109,7 @@ Context:
   For richer context with timeline and decisions, prefer 'ari session status'.
   For role-scoped context injection, use 'ari session context snapshot'.
   Acquires shared lock -- safe for concurrent reads.`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key := ""
 			if len(args) > 0 {
@@ -131,8 +132,7 @@ func runFieldSet(ctx *cmdContext, key, value string) error {
 	// Check if field is read-only — return actionable redirect message
 	if redirect, ok := readOnlyRedirects[key]; ok {
 		err := errors.New(errors.CodeUsageError, redirect)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Check if field is in the settable set — validate value
@@ -140,32 +140,27 @@ func runFieldSet(ctx *cmdContext, key, value string) error {
 	if !ok {
 		msg := fmt.Sprintf("unknown field %q: settable fields are complexity, initiative, active_rite", key)
 		err := errors.New(errors.CodeUsageError, msg)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	if err := validator(value); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Acquire exclusive lock (same pattern as transition.go)
 	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-field-set")
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-field-set")
@@ -177,8 +172,7 @@ func runFieldSet(ctx *cmdContext, key, value string) error {
 		if errors.IsNotFound(err) {
 			err = errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Capture previous value for output
@@ -189,8 +183,7 @@ func runFieldSet(ctx *cmdContext, key, value string) error {
 
 	// Save context
 	if err := sessCtx.Save(ctxPath); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Emit field.updated event to session log (backplane-only)
@@ -230,20 +223,17 @@ func runFieldGet(ctx *cmdContext, key string, opts fieldGetOptions) error {
 	// Validate: must have key or --all, but not neither
 	if key == "" && !opts.all {
 		err := errors.New(errors.CodeUsageError, "specify a field key or use --all to return all fields")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Acquire shared lock for consistent read (non-fatal if unavailable)
@@ -262,8 +252,7 @@ func runFieldGet(ctx *cmdContext, key string, opts fieldGetOptions) error {
 		if errors.IsNotFound(err) {
 			err = errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	if opts.all {
@@ -286,8 +275,7 @@ func runFieldGet(ctx *cmdContext, key string, opts fieldGetOptions) error {
 	if !ok {
 		msg := fmt.Sprintf("unknown field %q: valid fields are %v", key, allReadableFields)
 		err := errors.New(errors.CodeUsageError, msg)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	result := output.FieldOutput{

@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/worktree"
 )
@@ -81,7 +82,7 @@ Examples:
   ari worktree sync
   ari worktree sync feature-auth
   ari worktree sync feature-auth --pull`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			idOrName := ""
 			if len(args) > 0 {
@@ -101,8 +102,7 @@ func runSync(ctx *cmdContext, idOrName string, opts syncOptions) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// If no ID specified, try current worktree
@@ -121,8 +121,7 @@ func runSync(ctx *cmdContext, idOrName string, opts syncOptions) error {
 
 	result, err := mgr.Sync(idOrName, syncOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Determine message

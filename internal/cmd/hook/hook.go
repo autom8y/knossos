@@ -68,10 +68,6 @@ Performance Targets:
 				ctx.timeout = min(time.Duration(timeoutMs)*time.Millisecond, MaxTimeout)
 			}
 		},
-		Run: func(cmd *cobra.Command, args []string) {
-			// Show help when no subcommand specified
-			_ = cmd.Help()
-		},
 	}
 
 	// Add persistent flags for all hook subcommands
@@ -98,6 +94,7 @@ Performance Targets:
 
 	// Hook commands do NOT require project context
 	common.SetNeedsProject(cmd, false, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

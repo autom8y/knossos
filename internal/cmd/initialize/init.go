@@ -131,8 +131,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	// Determine project directory: use cwd unless --project-dir was explicitly set.
 	projectDir, err := os.Getwd()
 	if err != nil {
-		printer.PrintError(fmt.Errorf("failed to get current directory: %w", err))
-		return err
+		return common.PrintAndReturn(printer, fmt.Errorf("failed to get current directory: %w", err))
 	}
 
 	// Only check explicit --project-dir when running through cobra (cmd is non-nil).
@@ -162,8 +161,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	if _, err := os.Stat(claudeDir); err == nil && !force {
 		// .claude/ exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.
 		errMsg := errors.New(errors.CodeUsageError, ".claude/ exists but is not Knossos-managed; use --force to initialize")
-		printer.PrintError(errMsg)
-		return errMsg
+		return common.PrintAndReturn(printer, errMsg)
 	}
 
 	// Create resolver targeting the project directory.
@@ -221,8 +219,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 			KeepOrphans: true,
 		})
 		if err != nil {
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 
 		sourceType := "filesystem"
@@ -248,8 +245,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 
 	_, err = mat.MaterializeMinimal(materialize.Options{})
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	out := initOutput{

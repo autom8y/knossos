@@ -1,6 +1,7 @@
 package worktree
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 
@@ -94,14 +95,12 @@ func runList(ctx *cmdContext) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	worktrees, err := mgr.List()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Check if we're in a worktree

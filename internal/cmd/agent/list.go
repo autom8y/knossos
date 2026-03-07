@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"os"
 	"path/filepath"
 	"strings"
@@ -89,14 +90,12 @@ func runList(ctx *cmdContext, opts listOptions) error {
 		agentsDir := filepath.Join(ritePath, "agents")
 		agentPaths, err = collectAgentsInDir(agentsDir)
 		if err != nil {
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 	} else {
 		agentPaths, err = collectAllAgents(resolver)
 		if err != nil {
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 	}
 

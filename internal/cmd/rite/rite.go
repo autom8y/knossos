@@ -48,6 +48,7 @@ Rites are composable practice bundles. The invoke operation is additive
 
 	// Rite commands require project context
 	common.SetNeedsProject(cmd, true, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

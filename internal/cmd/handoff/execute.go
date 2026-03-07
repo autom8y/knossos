@@ -2,6 +2,7 @@
 package handoff
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 	"time"
@@ -61,14 +62,12 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 	// Get session ID
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.New(errors.CodeSessionNotFound, "No active session. Use 'ari session create' first.")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Load session context
@@ -78,16 +77,14 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 		if errors.IsNotFound(err) {
 			err = errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate session is ACTIVE
 	if sessCtx.Status != session.StatusActive {
 		err := errors.ErrLifecycleViolation(string(sessCtx.Status), "handoff",
 			"session must be ACTIVE for handoff")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate target agent
@@ -97,8 +94,7 @@ func runExecute(ctx *cmdContext, opts executeOptions) error {
 	if !isValidAgent(opts.toAgent, validAgents) {
 		err := errors.NewWithDetails(errors.CodeUsageError, "invalid target agent",
 			map[string]any{"to": opts.toAgent, "valid_agents": validAgents})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Determine target phase

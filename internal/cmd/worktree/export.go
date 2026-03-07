@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 // ExportOutput represents the output of worktree export.
@@ -45,7 +47,7 @@ The archive includes:
 Examples:
   ari worktree export feature-auth ./feature-auth.tar.gz
   ari worktree export wt-20260104-143052-a1b2 ~/backups/worktree.tar.gz`,
-		Args: cobra.ExactArgs(2),
+		Args: common.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runExport(ctx, args[0], args[1])
 		},
@@ -59,15 +61,13 @@ func runExport(ctx *cmdContext, idOrName, targetPath string) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Get worktree info for output
 	status, err := mgr.Status(idOrName)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Ensure .tar.gz extension
@@ -82,8 +82,7 @@ func runExport(ctx *cmdContext, idOrName, targetPath string) error {
 	}
 
 	if err := mgr.Export(idOrName, absPath); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Get archive size

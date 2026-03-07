@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/output"
 	sess "github.com/autom8y/knossos/internal/session"
@@ -32,7 +33,7 @@ Context:
   Use after 'ari session fray' to bind a new CC instance to the child session.
   Use to disambiguate when multiple active sessions exist.
   Idempotent: re-claiming overwrites any previous binding.`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runClaim(ctx, args[0], ccSessionID)
 		},

@@ -1,6 +1,7 @@
 package land
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -140,8 +141,7 @@ func runSynthesize(ctx *cmdContext, domain string) error {
 		if !isValidDomain(domain) {
 			err := errors.New(errors.CodeUsageError,
 				fmt.Sprintf("invalid domain %q: must be one of %s", domain, strings.Join(validDomains, ", ")))
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 	}
 	effectiveDomain := domain

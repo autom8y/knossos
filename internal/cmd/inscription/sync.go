@@ -1,6 +1,7 @@
 package inscription
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 	"time"
@@ -73,8 +74,7 @@ func runSync(ctx *cmdContext, opts syncOptions) error {
 
 	result, err := pipeline.Sync(syncOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	out := SyncOutput{
@@ -103,8 +103,7 @@ func runSync(ctx *cmdContext, opts syncOptions) error {
 func runSyncDryRun(ctx *cmdContext, pipeline *inscription.Pipeline, opts inscription.InscriptionSyncOptions, printer *output.Printer) error {
 	preview, err := pipeline.DryRun(opts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	out := SyncPreviewOutput{

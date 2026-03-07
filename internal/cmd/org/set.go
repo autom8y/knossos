@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -23,7 +24,7 @@ Can also be set via the KNOSSOS_ORG environment variable.
 Examples:
   ari org set autom8y
   ari org set my-team`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSet(ctx, args[0])
 		},

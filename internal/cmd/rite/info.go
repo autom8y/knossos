@@ -3,6 +3,7 @@ package rite
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
 	ritelib "github.com/autom8y/knossos/internal/rite"
 )
@@ -25,7 +26,7 @@ Examples:
   ari rite info 10x-dev --budget
   ari rite info forge --components
   ari rite info ecosystem -o json`,
-		Args:  cobra.ExactArgs(1),
+		Args:  common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runInfo(ctx, args[0], opts)
 		},

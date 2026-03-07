@@ -1,6 +1,7 @@
 package artifact
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -43,13 +44,11 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 				var err error
 				sid, err = ctx.GetSessionID()
 				if err != nil {
-					printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-					return err
+					return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 				}
 				if sid == "" {
 					err := errors.New(errors.CodeUsageError, "no active session and --session not specified")
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 			}
 
@@ -62,15 +61,13 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 				e := errors.NewWithDetails(errors.CodeFileNotFound,
 					"artifact file not found",
 					map[string]any{"path": path})
-				printer.PrintError(e)
-				return e
+				return common.PrintAndReturn(printer, e)
 			}
 
 			// Detect artifact type and ID from filename
 			artifactType, artifactID, err := detectArtifact(filepath.Base(absPath))
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Determine phase (default from artifact type if not specified)
@@ -101,8 +98,7 @@ Phase and specialist can be specified explicitly or inferred from context.`,
 
 			// Register to session
 			if err := registry.Register(sid, entry); err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Aggregate to project unless --skip-aggregate

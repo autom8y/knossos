@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -61,8 +62,7 @@ func runNew(ctx *cmdContext, opts newOptions) error {
 	// Validate archetype
 	archetype, err := agentpkg.GetArchetype(opts.archetype)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate rite exists
@@ -71,8 +71,7 @@ func runNew(ctx *cmdContext, opts newOptions) error {
 		err := errors.NewWithDetails(errors.CodeRiteNotFound,
 			fmt.Sprintf("rite %q not found at %s", opts.riteName, riteDir),
 			map[string]any{"rite": opts.riteName, "path": riteDir})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Ensure agents directory exists
@@ -80,8 +79,7 @@ func runNew(ctx *cmdContext, opts newOptions) error {
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		wrappedErr := errors.Wrap(errors.CodePermissionDenied,
 			fmt.Sprintf("failed to create agents directory: %s", agentsDir), err)
-		printer.PrintError(wrappedErr)
-		return wrappedErr
+		return common.PrintAndReturn(printer, wrappedErr)
 	}
 
 	// Check target file does not already exist
@@ -91,23 +89,20 @@ func runNew(ctx *cmdContext, opts newOptions) error {
 		err := errors.NewWithDetails(errors.CodeSessionExists,
 			fmt.Sprintf("agent file already exists: %s", relPath),
 			map[string]any{"path": targetPath})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Scaffold the agent
 	content, err := agentpkg.ScaffoldAgent(archetype, opts.name, opts.riteName, opts.description)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Write the file
 	if err := os.WriteFile(targetPath, content, 0644); err != nil {
 		wrappedErr := errors.Wrap(errors.CodePermissionDenied,
 			fmt.Sprintf("failed to write agent file: %s", targetPath), err)
-		printer.PrintError(wrappedErr)
-		return wrappedErr
+		return common.PrintAndReturn(printer, wrappedErr)
 	}
 
 	// Print success message

@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -60,14 +61,12 @@ func runAudit(ctx *cmdContext, opts auditOptions) error {
 
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Acquire shared lock for consistent read
@@ -83,8 +82,7 @@ func runAudit(ctx *cmdContext, opts auditOptions) error {
 	eventsPath := resolver.SessionEventsFile(sessionID)
 	events, err := sess.ReadEvents(eventsPath)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Parse since timestamp
@@ -92,8 +90,7 @@ func runAudit(ctx *cmdContext, opts auditOptions) error {
 	if opts.since != "" {
 		t, err := time.Parse(time.RFC3339, opts.since)
 		if err != nil {
-			printer.PrintError(errors.Wrap(errors.CodeUsageError, "invalid --since timestamp", err))
-			return err
+			return common.PrintAndReturn(printer, errors.Wrap(errors.CodeUsageError, "invalid --since timestamp", err))
 		}
 		sinceTime = t
 	}

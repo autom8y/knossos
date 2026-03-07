@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
@@ -53,7 +54,7 @@ Context:
   Fails if an active or parked session exists (use 'wrap' or 'park' first).
   Agents should never call this directly -- Moirai owns session creation.
   Use --seed for parallel session preparation in CI or batch workflows.`,
-		Args:  cobra.ExactArgs(1),
+		Args:  common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCreate(ctx, args[0], opts)
 		},
@@ -92,22 +93,19 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	// Validate complexity
 	if !session.IsValidComplexity(opts.complexity) {
 		err := errors.New(errors.CodeUsageError, "invalid complexity: must be PATCH, MODULE, SYSTEM, INITIATIVE, or MIGRATION")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Ensure sessions directory exists
 	if err := paths.EnsureDir(resolver.SessionsDir()); err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to create sessions directory", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Acquire exclusive lock for creation (using a special "create" lock)
 	createLock, err := lockMgr.Acquire("__create__", lock.Exclusive, lock.DefaultTimeout, "ari-session-create")
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 	defer func() { _ = createLock.Release() }()
 
@@ -115,8 +113,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	currentID, err := session.FindActiveSession(resolver.SessionsDir())
 	if err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to read current session", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	if currentID != "" {
@@ -127,8 +124,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 			existingCtx, err := session.LoadContext(ctxPath)
 			if err == nil {
 				err := errors.ErrSessionExists(currentID, string(existingCtx.Status))
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 		}
 	}
@@ -136,8 +132,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	// Validate FSM transition (defense-in-depth: NONE -> ACTIVE)
 	fsm := session.NewFSM()
 	if err := fsm.ValidateTransition(session.StatusNone, session.StatusActive); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Create new session context
@@ -147,8 +142,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	// Create session directory
 	if err := paths.EnsureDir(sessionDir); err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to create session directory", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Save context
@@ -156,8 +150,7 @@ func runCreate(ctx *cmdContext, initiative string, opts createOptions) error {
 	if err := newCtx.Save(ctxPath); err != nil {
 		// Cleanup on failure
 		_ = os.RemoveAll(sessionDir)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Emit lifecycle event
@@ -199,8 +192,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	// Validate complexity
 	if !session.IsValidComplexity(opts.complexity) {
 		err := errors.New(errors.CodeUsageError, "invalid complexity: must be PATCH, MODULE, SYSTEM, INITIATIVE, or MIGRATION")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Generate unique worktree path
@@ -213,8 +205,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	printer.VerboseLog("info", "creating ephemeral worktree", map[string]any{"path": worktreePath})
 	if err := createWorktree(worktreePath); err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to create worktree", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Ensure cleanup of worktree unless --seed-keep is set
@@ -234,16 +225,14 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	if err := paths.EnsureDir(worktreeResolver.SessionsDir()); err != nil {
 		cleanupWorktree()
 		err := errors.Wrap(errors.CodeGeneralError, "failed to create sessions directory in worktree", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Ensure locks directory exists in worktree
 	if err := paths.EnsureDir(worktreeResolver.LocksDir()); err != nil {
 		cleanupWorktree()
 		err := errors.Wrap(errors.CodeGeneralError, "failed to create locks directory in worktree", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Create new session context (starts as ACTIVE)
@@ -254,8 +243,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	if err := paths.EnsureDir(worktreeSessionDir); err != nil {
 		cleanupWorktree()
 		err := errors.Wrap(errors.CodeGeneralError, "failed to create session directory in worktree", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Immediately transition to PARKED status (seeded sessions start parked)
@@ -269,8 +257,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	if err := newCtx.Save(worktreeCtxPath); err != nil {
 		_ = os.RemoveAll(worktreeSessionDir)
 		cleanupWorktree()
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Emit lifecycle events in worktree before copying
@@ -287,8 +274,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 	if err := paths.EnsureDir(mainSessionsDir); err != nil {
 		cleanupWorktree()
 		err := errors.Wrap(errors.CodeGeneralError, "failed to ensure main sessions directory", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	mainSessionDir := resolver.SessionDir(newCtx.SessionID)
@@ -306,8 +292,7 @@ func runCreateSeeded(ctx *cmdContext, initiative string, opts createOptions) err
 			})
 		}
 		err := errors.Wrap(errors.CodeGeneralError, "failed to copy session to main repo", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Cleanup worktree (respects --seed-keep)

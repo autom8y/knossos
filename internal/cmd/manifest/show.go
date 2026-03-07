@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
@@ -59,8 +60,7 @@ func runShow(ctx *cmdContext, opts showOptions) error {
 			}
 			return printer.Print(out)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Build output

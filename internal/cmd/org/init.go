@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -33,7 +34,7 @@ Org names must be kebab-case (lowercase letters, digits, hyphens).
 Examples:
   ari org init autom8y
   ari org init my-team`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			orgName := args[0]
 			return runInit(ctx, orgName)

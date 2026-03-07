@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"os"
 	"path/filepath"
 	"strings"
@@ -139,8 +140,7 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 	// Find active session
 	activeID, err := session.FindActiveSession(resolver.SessionsDir())
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Build result

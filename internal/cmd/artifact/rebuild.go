@@ -1,6 +1,7 @@
 package artifact
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 	"time"
@@ -47,8 +48,7 @@ into the project-level registry. Use this for recovery or initial index build.`,
 				// Load current project registry to show stats
 				projectReg, err := registry.LoadProjectRegistry()
 				if err != nil {
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 
 				return printer.Print(rebuildOutput{
@@ -61,8 +61,7 @@ into the project-level registry. Use this for recovery or initial index build.`,
 
 			// Perform rebuild
 			if err := aggregator.AggregateAll(); err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			elapsed := time.Since(start)
@@ -70,8 +69,7 @@ into the project-level registry. Use this for recovery or initial index build.`,
 			// Load result
 			projectReg, err := registry.LoadProjectRegistry()
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			return printer.Print(rebuildOutput{

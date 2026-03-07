@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	ariErrors "github.com/autom8y/knossos/internal/errors"
 )
 
@@ -53,7 +54,7 @@ The imported worktree will have:
 Examples:
   ari worktree import ./feature-auth.tar.gz
   ari worktree import ~/backups/worktree.tar.gz`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runImport(ctx, args[0])
 		},
@@ -67,21 +68,18 @@ func runImport(ctx *cmdContext, archivePath string) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate archive exists
 	if !strings.HasSuffix(archivePath, ".tar.gz") && !strings.HasSuffix(archivePath, ".tgz") {
 		err := ariErrors.New(ariErrors.CodeUsageError, "archive must be a .tar.gz or .tgz file")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	wt, err := mgr.Import(archivePath)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	result := ImportOutput{

@@ -529,3 +529,29 @@ func IsBudgetExceeded(err error) bool {
 func IsInvocationNotFound(err error) bool {
 	return isCode(err, CodeInvocationNotFound)
 }
+
+// --- Handled error sentinel ---
+
+// handledError wraps an error that has already been printed to the user.
+// main.go should extract the exit code but NOT print it again.
+type handledError struct {
+	cause error
+}
+
+func (e *handledError) Error() string { return e.cause.Error() }
+func (e *handledError) Unwrap() error { return e.cause }
+
+// Handled wraps an error to indicate it was already printed to the user.
+// GetExitCode still works through the wrapper via errors.As traversal.
+func Handled(err error) error {
+	if err == nil {
+		return nil
+	}
+	return &handledError{cause: err}
+}
+
+// IsHandled returns true if the error has already been printed to the user.
+func IsHandled(err error) bool {
+	var h *handledError
+	return stderrors.As(err, &h)
+}

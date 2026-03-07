@@ -3,6 +3,7 @@ package session
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/output"
@@ -44,7 +45,7 @@ Context:
   Hooks auto-log commits via --type=commit; agents should not duplicate these.
   Always include --rationale with decisions for timeline auditability.
   Reconstructible: lost timeline entries can be rebuilt from events.jsonl.`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLog(ctx, args[0], opts)
 		},
@@ -68,21 +69,18 @@ func runLog(ctx *cmdContext, message string, opts logOptions) error {
 
 	// Validate flags before resolving session ID.
 	if err := validateLogFlags(opts); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Resolve session ID. No lock is acquired -- timeline is append-only.
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Build the typed event based on --type flag.

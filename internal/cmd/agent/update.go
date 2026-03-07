@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -117,8 +118,7 @@ func runUpdate(ctx *cmdContext, opts updateOptions) error {
 	}
 
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	if len(agentPaths) == 0 {

@@ -2,6 +2,7 @@
 package handoff
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"slices"
 	"strings"
@@ -62,14 +63,12 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 	// Get session ID
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.New(errors.CodeSessionNotFound, "No active session. Use 'ari session create' first.")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Load session context
@@ -79,16 +78,14 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 		if errors.IsNotFound(err) {
 			err = errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate session is ACTIVE
 	if sessCtx.Status != session.StatusActive {
 		err := errors.ErrLifecycleViolation(string(sessCtx.Status), "handoff",
 			"session must be ACTIVE for handoff")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate agents are known
@@ -98,14 +95,12 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 	if !isValidAgent(opts.fromAgent, validAgents) {
 		err := errors.NewWithDetails(errors.CodeUsageError, "invalid source agent",
 			map[string]any{"from": opts.fromAgent, "valid_agents": validAgents})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 	if !isValidAgent(opts.toAgent, validAgents) {
 		err := errors.NewWithDetails(errors.CodeUsageError, "invalid target agent",
 			map[string]any{"to": opts.toAgent, "valid_agents": validAgents})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Prevent self-handoff (C3 edge case)
@@ -115,8 +110,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 				"agent": opts.fromAgent,
 				"hint":  "Handoff requires a different agent. Cannot handoff to self.",
 			})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate agents exist in active rite (C3 cross-team validation)
@@ -130,8 +124,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 						"active_rite": sessCtx.ActiveRite,
 						"rite_agents": riteAgents,
 					})
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 			if !isValidAgent(opts.toAgent, riteAgents) {
 				err := errors.NewWithDetails(errors.CodeUsageError, "target agent not in active rite",
@@ -140,8 +133,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 						"active_rite": sessCtx.ActiveRite,
 						"rite_agents": riteAgents,
 					})
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 		}
 	}
@@ -154,8 +146,7 @@ func runPrepare(ctx *cmdContext, opts prepareOptions) error {
 				"to":   opts.toAgent,
 				"hint": "Handoffs must follow workflow: requirements-analyst -> architect -> principal-engineer -> qa-adversary",
 			})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Determine phase for artifact validation

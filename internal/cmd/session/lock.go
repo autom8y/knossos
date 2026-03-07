@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -90,21 +91,18 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 	if opts.agent != validAgent {
 		err := errors.New(errors.CodeValidationFailed,
 			"invalid agent name: only 'moirai' is currently supported")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Get current session ID
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Construct lock file path
@@ -117,8 +115,7 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 		if !lock.IsMoiraiLockStale(existingLock) {
 			err := errors.New(errors.CodeLifecycleViolation,
 				"lock already held by "+existingLock.Agent)
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 		// Stale lock, will overwrite with warning
 		printer.VerboseLog("warn", "overwriting stale lock", map[string]any{
@@ -137,13 +134,11 @@ func runLock(ctx *cmdContext, opts lockOptions) error {
 	// Write lock file
 	data, err := json.MarshalIndent(moiraiLock, "", "  ")
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to marshal lock", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to marshal lock", err))
 	}
 
 	if err := os.WriteFile(lockPath, data, 0644); err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to write lock file", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to write lock file", err))
 	}
 
 	// Output success
@@ -165,21 +160,18 @@ func runUnlock(ctx *cmdContext, opts lockOptions) error {
 	if opts.agent != validAgent {
 		err := errors.New(errors.CodeValidationFailed,
 			"invalid agent name: only 'moirai' is currently supported")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Get current session ID
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Construct lock file path
@@ -191,25 +183,21 @@ func runUnlock(ctx *cmdContext, opts lockOptions) error {
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := errors.New(errors.CodeValidationFailed, "no lock exists to release")
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to read lock file", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to read lock file", err))
 	}
 
 	// Validate agent matches
 	if existingLock.Agent != opts.agent {
 		err := errors.New(errors.CodeValidationFailed,
 			"lock held by different agent: "+existingLock.Agent)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Remove lock file
 	if err := os.Remove(lockPath); err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to remove lock file", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to remove lock file", err))
 	}
 
 	// Output success

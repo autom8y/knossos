@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-06T08:42:30Z"
+generated_at: "2026-03-06T22:00:26Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "94dc82f"
+source_hash: "c6d04eb"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -124,3 +124,29 @@ max_incremental_cycles: 0
 - Total chain: ~166s — consistent with historical avg (~150-190s)
 - Cached release knowledge skipped cartographer reconnaissance entirely
 - Headline features: L2 Perception, L6 Position, L7 Surface, L8 Horizon perspective layers + full simulate mode
+
+### v0.6.0 — 2026-03-06
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-06 |
+| Version | v0.5.0 -> v0.6.0 (minor) |
+| Commits | 34 (4 feat, 8 fix, 17 refactor, 2 chore, 3 other) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | ca7caa98060592aa89c77399b04e131c06a7e7b6 |
+| Commit SHA | c6d04eb |
+| release.yml | GREEN (113s, run 22783545282) |
+| e2e-distribution.yml | GREEN (43s, run 22783603668) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.6.0, commit 6fd03caa) |
+| Verdict | PASS |
+| Duration | ~2 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Thirteenth consecutive PASS verdict (v0.3.2 → ... → v0.5.0 → v0.6.0)
+- Attempt 2: attempt 1 failed due to goreleaser config referencing non-existent docs/guides/ariadne-cli.md; fixed and retagged
+- Dispatch latency: ~5s
+- Total chain: ~150s (below historical baseline)
+- Cached release knowledge skipped cartographer and dependency-resolver entirely
+- Headline features: session schema v2.3 (strand struct, frame linkage, complexity enum, claim command), /sos unified session interface, context-session alignment, dromena v2.3 hook fields
+- Bulk refactor: 11 commits migrating fmt.Errorf → errors.New across internal packages

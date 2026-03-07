@@ -3,6 +3,7 @@ package rite
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
 	ritelib "github.com/autom8y/knossos/internal/rite"
 )
@@ -27,7 +28,7 @@ Examples:
   ari rite invoke documentation skills           # Borrow skills only
   ari rite invoke security-rite agents           # Borrow agents only
   ari rite invoke code-review agents --dry-run   # Preview changes`,
-		Args: cobra.RangeArgs(1, 2),
+		Args: common.RangeArgs(1, 2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			component := ""
 			if len(args) > 1 {
@@ -56,8 +57,7 @@ func runInvoke(ctx *cmdContext, riteName, component string, opts invokeOptions) 
 
 	result, err := invoker.Invoke(invokeOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Convert agent names for output

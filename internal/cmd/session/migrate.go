@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"os"
 	"path/filepath"
 	"strings"
@@ -85,8 +86,7 @@ func runMigrate(ctx *cmdContext, opts migrateOptions) error {
 				return printer.Print(result)
 			}
 			err := errors.Wrap(errors.CodeGeneralError, "failed to read sessions directory", err)
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 
 		for _, entry := range entries {
@@ -98,13 +98,11 @@ func runMigrate(ctx *cmdContext, opts migrateOptions) error {
 		// Get session from flag or current
 		sessionID, err := ctx.GetSessionID()
 		if err != nil {
-			printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-			return err
+			return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 		}
 		if sessionID == "" {
 			err := errors.New(errors.CodeUsageError, "no session specified. Use --session-id or --all")
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 		sessionIDs = []string{sessionID}
 	}

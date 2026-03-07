@@ -45,6 +45,7 @@ Examples:
 
 	// Org commands do NOT require a project context
 	common.SetNeedsProject(cmd, false, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

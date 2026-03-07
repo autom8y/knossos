@@ -44,6 +44,7 @@ and machine-parseable metadata for analytics and future context loading.`,
 
 	// Tribute commands do NOT require project context (can specify session-dir)
 	common.SetNeedsProject(cmd, false, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

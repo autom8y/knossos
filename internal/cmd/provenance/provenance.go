@@ -50,6 +50,7 @@ Examples:
 
 	// Provenance commands require project context
 	common.SetNeedsProject(cmd, true, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

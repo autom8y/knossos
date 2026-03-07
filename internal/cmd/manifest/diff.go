@@ -3,6 +3,7 @@ package manifest
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/manifest"
 	"github.com/autom8y/knossos/internal/output"
@@ -24,7 +25,7 @@ func newDiffCmd(ctx *cmdContext) *cobra.Command {
 Paths can be:
 - Local file paths: .claude/manifest.json
 - Git refs: HEAD:.claude/manifest.json, origin/main:.claude/manifest.json`,
-		Args:         cobra.ExactArgs(2),
+		Args:         common.ExactArgs(2),
 		SilenceUsage: true, // Don't print usage on errors
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDiff(ctx, args[0], args[1], opts)
@@ -43,14 +44,12 @@ func runDiff(ctx *cmdContext, path1, path2 string, opts diffOptions) error {
 	// Load both manifests
 	base, err := manifest.Load(path1)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	compare, err := manifest.Load(path2)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Compute diff
@@ -59,8 +58,7 @@ func runDiff(ctx *cmdContext, path1, path2 string, opts diffOptions) error {
 	}
 	result, err := manifest.Diff(base, compare, diffOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Convert to output format

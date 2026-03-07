@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -57,8 +58,7 @@ func runValidate(ctx *cmdContext, opts validateOptions, paths []string) error {
 	// Create validator
 	validator, err := agentpkg.NewAgentValidator()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Determine validation mode
@@ -80,16 +80,14 @@ func runValidate(ctx *cmdContext, opts validateOptions, paths []string) error {
 		agentsDir := filepath.Join(ritePath, "agents")
 		ritePaths, err := collectAgentsInDir(agentsDir)
 		if err != nil {
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 		agentPaths = ritePaths
 	default:
 		// Validate all agents (default behavior)
 		allPaths, err := collectAllAgents(resolver)
 		if err != nil {
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 		agentPaths = allPaths
 	}

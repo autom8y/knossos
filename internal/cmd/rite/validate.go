@@ -1,6 +1,7 @@
 package rite
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
@@ -49,16 +50,14 @@ func runValidate(ctx *cmdContext, opts validateOptions) error {
 		riteName = discovery.ActiveRiteName()
 		if riteName == "" {
 			err := errors.New(errors.CodeFileNotFound, "No active rite set. Use --rite to specify.")
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 	}
 
 	// Run validation
 	result, err := validator.Validate(riteName)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Apply fixes if requested

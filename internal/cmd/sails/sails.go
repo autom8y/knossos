@@ -44,6 +44,7 @@ Quality gate checks return exit code 0 for WHITE, non-zero for GRAY/BLACK.`,
 
 	// Sails commands do NOT require project context (can check arbitrary paths)
 	common.SetNeedsProject(cmd, false, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

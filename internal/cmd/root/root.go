@@ -62,6 +62,18 @@ func SetVersion(v, c, d string) {
 	version = v
 	commit = c
 	date = d
+
+	// Enable --version flag on root command
+	rootCmd.Version = versionOutput{
+		Version: v, Commit: c, Date: d,
+		Go: runtime.Version(), OS: runtime.GOOS, Arch: runtime.GOARCH,
+	}.Text()
+	rootCmd.SetVersionTemplate(`{{.Version}}`)
+}
+
+// GetOutputFormat returns the current output format flag value.
+func GetOutputFormat() string {
+	return globalOpts.Output
 }
 
 // Execute runs the root command.
@@ -100,8 +112,7 @@ The clew that makes the maze survivable.`,
 				// Only fail if this is a command that needs a project
 				if needsProject(cmd) {
 					printer := output.NewPrinter(output.ParseFormat(globalOpts.Output), os.Stdout, os.Stderr, globalOpts.Verbose)
-					printer.PrintError(errors.ErrProjectNotFound())
-					return err
+					return common.PrintAndReturn(printer, errors.ErrProjectNotFound())
 				}
 			} else {
 				globalOpts.ProjectDir = projectRoot

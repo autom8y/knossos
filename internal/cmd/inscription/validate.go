@@ -1,6 +1,7 @@
 package inscription
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 
@@ -37,8 +38,7 @@ func runValidate(ctx *cmdContext) error {
 
 	result, err := pipeline.Validate()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	out := ValidateOutput{

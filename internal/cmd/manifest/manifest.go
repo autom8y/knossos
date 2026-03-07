@@ -38,6 +38,7 @@ func NewManifestCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *
 
 	// Manifest commands require project context
 	common.SetNeedsProject(cmd, true, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

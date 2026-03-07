@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/lock"
@@ -44,7 +45,7 @@ Context:
   Validates forward-only progression and checks for required artifacts.
   Use --force to skip artifact validation during rapid prototyping.
   Emits phase.transitioned event. Orchestrators call this at phase gates.`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runTransition(ctx, args[0], opts)
 		},
@@ -63,27 +64,23 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 	// Validate phase
 	if !sess.IsValidPhase(targetPhase) {
 		err := errors.New(errors.CodeUsageError, "invalid phase: must be requirements, design, implementation, validation, or complete")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Acquire exclusive lock
 	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-transition")
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-transition")
@@ -95,16 +92,14 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 		if errors.IsNotFound(err) {
 			err = errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Check session is active
 	if sessCtx.Status != sess.StatusActive {
 		err := errors.ErrLifecycleViolation(string(sessCtx.Status), "phase transition",
 			"session must be ACTIVE to transition phases")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	fromPhase := sessCtx.CurrentPhase
@@ -117,8 +112,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 				"from_phase": fromPhase,
 				"to_phase":   targetPhase,
 			})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate artifacts if not forced
@@ -132,8 +126,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 					"to_phase":         targetPhase,
 					"missing_artifacts": missing,
 				})
-			printer.PrintError(err)
-			return err
+			return common.PrintAndReturn(printer, err)
 		}
 	}
 
@@ -155,8 +148,7 @@ func runTransition(ctx *cmdContext, targetPhase string, opts transitionOptions) 
 
 	// Save context
 	if err := sessCtx.Save(ctxPath); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Emit lifecycle event

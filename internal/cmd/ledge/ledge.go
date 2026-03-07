@@ -32,6 +32,7 @@ func NewLedgeCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cob
 	cmd.AddCommand(newListCmd(ctx))
 
 	common.SetNeedsProject(cmd, true, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

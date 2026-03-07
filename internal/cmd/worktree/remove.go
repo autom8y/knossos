@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 type removeOptions struct {
@@ -43,7 +45,7 @@ Examples:
   ari worktree remove wt-20260104-143052-a1b2
   ari worktree remove feature-auth
   ari worktree remove feature-auth --force`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runRemove(ctx, args[0], opts)
 		},
@@ -59,14 +61,12 @@ func runRemove(ctx *cmdContext, idOrName string, opts removeOptions) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	err = mgr.Remove(idOrName, opts.force)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	result := RemoveOutput{

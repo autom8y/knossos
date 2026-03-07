@@ -1,14 +1,14 @@
 ---
 domain: "scar-tissue"
-generated_at: "2026-03-05T19:15:00Z"
+generated_at: "2026-03-06T21:00:00Z"
 expires_after: "14d"
 source_scope: [".sos/archive/**"]
 generator: "dionysus"
-source_hash: "1bf2630"
-confidence: 0.75
+source_hash: "3053e84"
+confidence: 0.85
 format_version: "1.0"
-sessions_synthesized: 31
-last_session: "session-20260305-191804-8e309d1f"
+sessions_synthesized: 37
+last_session: "session-20260306-201337-8581513b"
 ---
 
 ## Blocker Catalog
@@ -42,11 +42,12 @@ last_session: "session-20260305-191804-8e309d1f"
 ## Friction Signals
 
 - **Recurring**: Patterns across 2+ sessions
-  - Session parking at requirements phase: 21/31 sessions never left requirements (68%), suggesting rapid-fire initiative creation with deferred execution
+  - Session parking at requirements phase: 25/37 sessions never left requirements (68%), suggesting rapid-fire initiative creation with deferred execution
   - Duplicate initiative starts: session-20260302-151610-273eeb4a and session-20260302-151730-bffc2248 are the same initiative started 80 seconds apart
   - Cross-reference link rot: seen in session-20260304-154410-af90596d (15 broken links) and session-20260304-001522-1c07b3bd (75 findings across 3 vectors)
-  - Requirements-phase-only sessions dominating archive: pattern across 2026-03-02 sessions (13 of 18 parked at requirements)
+  - Requirements-phase-only sessions dominating archive: pattern across 2026-03-02 sessions (13/18 parked at requirements) and 2026-03-06 sessions (5/6 parked at requirements)
   - Phase skipping for spike/framing-driven work: session-20260303-132132-f3031827, session-20260303-135856-c525b918 both skipped requirements phase based on pre-existing spike artifacts
+  - Multi-phase embody sessions: session-20260305-191804-8e309d1f, session-20260306-084705-0f5ea0c7, session-20260306-092108-0c1f2ce9 (3 sessions for phases 1-3 of same feature, all parked at different phases)
 - **One-time**: Isolated friction events
   - GoReleaser GITHUB_TOKEN event suppression blocking CI pipeline: session-20260303-163517-f43d2334
   - Content rewriting bypass in materialization pipeline (3 code paths missed by initial TDD): session-20260304-154410-af90596d
@@ -56,11 +57,11 @@ last_session: "session-20260305-191804-8e309d1f"
 
 | Sails Color | Sessions | Common Failure Proofs |
 |------------|---------|---------------------|
-| GRAY | 31 | All proofs UNKNOWN across all sessions (log files not found) |
+| GRAY | 37 | All proofs UNKNOWN across all sessions (log files not found) |
 | WHITE | 0 | N/A |
 | BLACK | 0 | N/A |
 
-- 0/31 sessions have any proof status other than UNKNOWN
+- 0/37 sessions have any proof status other than UNKNOWN
 - Universal GRAY is caused by absence of CI log integration, not by test failures
 - Sessions with manual test verification (confirmed green via go test ./...): session-20260302-123250-636200b5, session-20260304-154410-af90596d
 
@@ -76,12 +77,10 @@ last_session: "session-20260305-191804-8e309d1f"
 - Releaser rite improvements (two sessions): session-20260302-122213-1e802b37, session-20260302-131246-b6788294, both parked
 - .know/ Incremental Refresh: session-20260303-132132-f3031827, parked at implementation
 - Release Context Persistence: session-20260303-135856-c525b918, parked at implementation
-- P4 low-priority findings from content path hygiene: session-20260304-154410-af90596d (10+ items deferred as boy-scout fixes)
+- P4 low-priority findings from content path hygiene: session-20260304-154410-af90596d (deferred as boy-scout fixes)
 - E2E Distribution Dispatch fix implementation: session-20260303-163517-f43d2334, investigation complete but fix not applied
-
-## Confidence Notes
-
-- All 31 sessions are GRAY sails with all proofs UNKNOWN -- no CI proof data available
-- agent.decision events absent from all sessions; scar-tissue signals extracted from SESSION_CONTEXT body text and SMELLS.md
-- Only 1 session has SMELLS.md enrichment (session-20260304-154410-af90596d)
-- Blocker catalog may be incomplete for sessions that only contain "Blockers: None yet." boilerplate
+- embody phase 2 workflow awareness: session-20260306-084705-0f5ea0c7, parked at requirements
+- embody phase 3 L8 horizon: session-20260306-092108-0c1f2ce9, parked at requirements
+- Session Dromena Legacy Removal: session-20260306-152208-d302cc16, parked at requirements
+- Release hardening post legacy removal: session-20260306-164058-a8e7e897, parked at requirements
+- Hygiene printer bypasses + fmt.Errorf cleanup: session-20260306-201337-8581513b, parked at requirements

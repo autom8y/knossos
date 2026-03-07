@@ -1,6 +1,7 @@
 package worktree
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 	"time"
@@ -99,8 +100,7 @@ func runCleanup(ctx *cmdContext, opts cleanupOptions) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Parse duration
@@ -110,8 +110,7 @@ func runCleanup(ctx *cmdContext, opts cleanupOptions) error {
 			"value":   opts.olderThan,
 			"example": "7d, 24h, 1h",
 		})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	cleanupOpts := worktree.CleanupOptions{
@@ -122,8 +121,7 @@ func runCleanup(ctx *cmdContext, opts cleanupOptions) error {
 
 	result, err := mgr.Cleanup(cleanupOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	output := CleanupOutput{

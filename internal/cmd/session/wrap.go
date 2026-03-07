@@ -1,6 +1,7 @@
 package session
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"os"
 	"time"
@@ -74,14 +75,12 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 	sessionID, err := ctx.GetSessionID()
 	if err != nil {
-		printer.PrintError(errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
-		return err
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to get session ID", err))
 	}
 
 	if sessionID == "" {
 		err := errors.ErrSessionNotFound("")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Check if session is already archived before acquiring lock
@@ -94,15 +93,13 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 				"archive_path": archiveSessionPath,
 				"hint":         "Session was previously wrapped and cannot be wrapped again.",
 			})
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Acquire exclusive lock
 	sessionLock, err := lockMgr.Acquire(sessionID, lock.Exclusive, lock.DefaultTimeout, "ari-session-wrap")
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 	defer func() { _ = sessionLock.Release() }()
 	emitLockEvent(resolver, sessionID, "ari-session-wrap")
@@ -115,14 +112,12 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		if errors.IsNotFound(err) {
 			err = errors.ErrSessionNotFound(sessionID)
 		}
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate transition
 	if err := fsm.ValidateTransition(sessCtx.Status, session.StatusArchived); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Generate White Sails confidence signal before archiving
@@ -142,8 +137,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 						"color":   string(sailsResult.Color),
 						"reasons": sailsResult.Reasons,
 					})
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 			// If --force, emit warning but continue
 			printer.VerboseLog("warn", "wrapping session with BLACK sails (--force used)", map[string]any{
@@ -204,8 +198,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	// path and bypass the guard through direct Go file I/O (os.WriteFile).
 	// See: hooks/session-guards/session-write-guard.sh lines 32-35
 	if err := sessCtx.Save(ctxPath); err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Emit Clew Contract events

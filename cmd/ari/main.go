@@ -3,13 +3,13 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/autom8y/knossos"
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/cmd/root"
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/output"
 )
 
 // Version information set at build time
@@ -25,8 +25,12 @@ func main() {
 	common.SetEmbeddedAssets(knossos.EmbeddedRites, knossos.EmbeddedTemplates, knossos.EmbeddedHooksYAML)
 	common.SetEmbeddedUserAssets(knossos.EmbeddedAgents, knossos.EmbeddedMena)
 	if err := root.Execute(); err != nil {
-		// Print error to stderr (SilenceErrors is enabled on root cmd)
-		fmt.Fprintln(os.Stderr, "Error:", err)
+		if !errors.IsHandled(err) {
+			// Error was not already printed by a command — print it format-aware
+			format := output.ParseFormat(root.GetOutputFormat())
+			printer := output.NewPrinter(format, os.Stdout, os.Stderr, false)
+			printer.PrintError(err)
+		}
 		os.Exit(errors.GetExitCode(err))
 	}
 }

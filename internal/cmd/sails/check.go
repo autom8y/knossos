@@ -9,6 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/sails"
@@ -48,7 +49,7 @@ Examples:
 
   # Quiet mode (exit code only)
   ari sails check --quiet`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCheck(ctx, flags, args)
 		},

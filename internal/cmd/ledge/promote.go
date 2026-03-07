@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	ledgepkg "github.com/autom8y/knossos/internal/ledge"
 	"github.com/autom8y/knossos/internal/output"
 )
@@ -21,7 +22,7 @@ file. Promotable categories: decisions, specs, reviews.
 Examples:
   ari ledge promote .ledge/reviews/GAP-auth-refactor.md
   ari ledge promote .ledge/decisions/ADR-0030.md`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runPromote(ctx, args[0])
 		},

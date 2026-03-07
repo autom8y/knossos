@@ -1,6 +1,7 @@
 package rite
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/spf13/cobra"
 
 	ritelib "github.com/autom8y/knossos/internal/rite"
@@ -58,8 +59,7 @@ func runContext(ctx *cmdContext, opts contextOptions) error {
 	// Load the context
 	riteCtx, err := loader.Load(riteName)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Build output based on format

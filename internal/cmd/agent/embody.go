@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/perspective"
@@ -39,7 +40,7 @@ Examples:
   ari agent embody qa-adversary --audit            # With audit overlay
   ari agent embody pythia --simulate --simulate-prompt "read a file"
   ari agent embody pythia -o json                  # JSON output`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runEmbody(ctx, opts, args[0])
 		},
@@ -78,8 +79,7 @@ func runEmbody(ctx *cmdContext, opts embodyOptions, agentName string) error {
 	parseCtx, err := perspective.NewParseContext(perspOpts)
 	if err != nil {
 		err := errors.Wrap(errors.CodeGeneralError, "failed to build perspective context", err)
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Assemble perspective document

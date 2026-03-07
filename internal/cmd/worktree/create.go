@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/worktree"
 )
@@ -59,7 +60,7 @@ Examples:
   ari worktree create feature-auth --rite=10x-dev
   ari worktree create bugfix --from=develop
   ari worktree create experiment --complexity=PATCH`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runCreate(ctx, args[0], opts)
 		},
@@ -77,15 +78,13 @@ func runCreate(ctx *cmdContext, name string, opts createOptions) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Validate complexity
 	if !isValidComplexity(opts.complexity) {
 		err := errors.New(errors.CodeUsageError, "invalid complexity: must be PATCH, MODULE, SYSTEM, INITIATIVE, or MIGRATION")
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	createOpts := worktree.CreateOptions{
@@ -97,8 +96,7 @@ func runCreate(ctx *cmdContext, name string, opts createOptions) error {
 
 	wt, err := mgr.Create(createOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	result := CreateOutput{

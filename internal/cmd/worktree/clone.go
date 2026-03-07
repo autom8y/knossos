@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/worktree"
 )
 
@@ -62,7 +63,7 @@ Examples:
   ari worktree clone wt-20260104-143052-a1b2 experiment
   ari worktree clone feature-auth branch-b --rite=10x-dev
   ari worktree clone feature-auth backup --copy-session`,
-		Args: cobra.ExactArgs(2),
+		Args: common.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runClone(ctx, args[0], args[1], opts)
 		},
@@ -79,8 +80,7 @@ func runClone(ctx *cmdContext, sourceIDOrName, newName string, opts cloneOptions
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Get source info for output
@@ -99,8 +99,7 @@ func runClone(ctx *cmdContext, sourceIDOrName, newName string, opts cloneOptions
 
 	wt, err := mgr.Clone(sourceIDOrName, newName, cloneOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	result := CloneOutput{

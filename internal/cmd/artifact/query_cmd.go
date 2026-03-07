@@ -1,6 +1,7 @@
 package artifact
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 
@@ -83,8 +84,7 @@ Multiple filters are ANDed together. Results can be output in JSON, YAML, or tab
 			// Execute query
 			result, err := querier.Query(filter)
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Apply limit

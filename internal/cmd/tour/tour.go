@@ -34,7 +34,7 @@ This is a read-only command -- it does not modify any state.
 Examples:
   ari tour              # Human-readable directory tour
   ari tour -o json      # Machine-readable JSON output`,
-		Args: cobra.NoArgs,
+		Args: common.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			printer := ctx.GetPrinter(output.FormatText)
 			resolver := ctx.GetResolver()

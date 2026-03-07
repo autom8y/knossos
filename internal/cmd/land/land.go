@@ -31,6 +31,7 @@ func NewLandCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 	cmd.AddCommand(newSynthesizeCmd(ctx))
 
 	common.SetNeedsProject(cmd, true, true)
+	common.SetGroupCommand(cmd)
 
 	return cmd
 }

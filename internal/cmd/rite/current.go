@@ -1,6 +1,7 @@
 package rite
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/output"
@@ -62,8 +63,7 @@ func runCurrent(ctx *cmdContext, opts currentOptions) error {
 	// Get invocation state
 	state, err := invoker.GetCurrentState()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Build invocation output

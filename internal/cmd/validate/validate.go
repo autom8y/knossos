@@ -115,7 +115,7 @@ Examples:
   ari validate artifact --type=prd .ledge/specs/PRD-user-auth.md
   ari validate artifact --type=tdd .ledge/specs/TDD-user-auth.md
   ari validate artifact .ledge/decisions/ADR-0001.md`,
-		Args: cobra.ExactArgs(1),
+		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			printer := ctx.getPrinter()
 			filePath := args[0]
@@ -129,8 +129,7 @@ Examples:
 			// Create validator
 			validator, err := validation.NewArtifactValidator()
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Parse artifact type if specified
@@ -144,16 +143,14 @@ Examples:
 							"type":  artifactType,
 							"valid": validation.ValidArtifactTypes(),
 						})
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 			}
 
 			// Validate the file
 			result, err := validator.ValidateFile(filePath, aType)
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Create output
@@ -323,8 +320,7 @@ Examples:
 			// Create handoff validator
 			hv, err := validation.NewHandoffValidator()
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Handle --list-phases
@@ -349,13 +345,11 @@ Examples:
 			if showCriteria {
 				if phase == "" {
 					err := errors.New(errors.CodeUsageError, "--phase is required with --show-criteria")
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 				if artifactType == "" {
 					err := errors.New(errors.CodeUsageError, "--type is required with --show-criteria")
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 
 				p := validation.ParsePhase(phase)
@@ -363,8 +357,7 @@ Examples:
 					err := errors.NewWithDetails(errors.CodeUsageError,
 						"invalid phase",
 						map[string]any{"phase": phase, "valid": validation.ValidPhases()})
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 
 				at := validation.ParseArtifactType(artifactType)
@@ -372,14 +365,12 @@ Examples:
 					err := errors.NewWithDetails(errors.CodeUsageError,
 						"invalid artifact type",
 						map[string]any{"type": artifactType, "valid": validation.ValidArtifactTypes()})
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 
 				criteria, err := hv.GetCriteria(p, at)
 				if err != nil {
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 
 				out := CriteriaDetailOutput{
@@ -394,13 +385,11 @@ Examples:
 			// Validate handoff - requires --phase and --artifact
 			if phase == "" {
 				err := errors.New(errors.CodeUsageError, "--phase is required for handoff validation")
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 			if artifactPath == "" {
 				err := errors.New(errors.CodeUsageError, "--artifact is required for handoff validation")
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			p := validation.ParsePhase(phase)
@@ -408,8 +397,7 @@ Examples:
 				err := errors.NewWithDetails(errors.CodeUsageError,
 					"invalid phase",
 					map[string]any{"phase": phase, "valid": validation.ValidPhases()})
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Resolve artifact path
@@ -422,8 +410,7 @@ Examples:
 			// Validate handoff
 			result, err := hv.ValidateHandoffFile(p, filePath)
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			out := HandoffOutput{
@@ -510,7 +497,7 @@ Examples:
   ari validate schema prd .ledge/specs/PRD-user-auth.md
   ari validate schema tdd .ledge/specs/TDD-user-auth.md
   ari validate schema adr .ledge/decisions/ADR-0001.md`,
-		Args: cobra.ExactArgs(2),
+		Args: common.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			printer := ctx.getPrinter()
 			schemaName := args[0]
@@ -531,22 +518,19 @@ Examples:
 						"schema": schemaName,
 						"valid":  validation.ValidArtifactTypes(),
 					})
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Create validator
 			validator, err := validation.NewArtifactValidator()
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Validate the file
 			result, err := validator.ValidateFile(filePath, aType)
 			if err != nil {
-				printer.PrintError(err)
-				return err
+				return common.PrintAndReturn(printer, err)
 			}
 
 			// Create output

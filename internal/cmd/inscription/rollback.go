@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func newRollbackCmd(ctx *cmdContext) *cobra.Command {
@@ -26,7 +28,7 @@ You can provide a partial timestamp to match:
 Examples:
   ari inscription rollback                    # Restore most recent backup
   ari inscription rollback 2026-01-06T10-30   # Restore specific backup`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			timestamp := ""
 			if len(args) > 0 {
@@ -46,8 +48,7 @@ func runRollback(ctx *cmdContext, timestamp string) error {
 	// Get backup info before rollback
 	backups, err := pipeline.ListBackups()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	if len(backups) == 0 {
@@ -71,8 +72,7 @@ func runRollback(ctx *cmdContext, timestamp string) error {
 	// Perform rollback
 	err = pipeline.Rollback(timestamp)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	out := RollbackOutput{

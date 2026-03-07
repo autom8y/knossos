@@ -2,6 +2,8 @@ package inscription
 
 import (
 	"github.com/spf13/cobra"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func newDiffCmd(ctx *cmdContext) *cobra.Command {
@@ -20,7 +22,7 @@ Examples:
   ari inscription diff                  # Diff all regions
   ari inscription diff quick-start      # Diff specific region
   ari inscription diff execution-mode   # Diff execution-mode region`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			regionName := ""
 			if len(args) > 0 {
@@ -39,8 +41,7 @@ func runDiff(ctx *cmdContext, regionName string) error {
 
 	diff, err := pipeline.GetDiff(regionName)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	if diff == "" {

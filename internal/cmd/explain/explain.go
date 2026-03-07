@@ -36,7 +36,7 @@ Examples:
   ari explain rite         # Full definition of "rite"
   ari explain -o json      # All concepts as JSON
   ari explain rite -o json # Single concept as JSON`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			printer := ctx.GetPrinter(output.FormatText)
 

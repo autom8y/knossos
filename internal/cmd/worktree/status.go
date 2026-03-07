@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/worktree"
 )
 
@@ -94,7 +95,7 @@ Examples:
   ari worktree status
   ari worktree status wt-20260104-143052-a1b2
   ari worktree status feature-auth`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			idOrName := ""
 			if len(args) > 0 {
@@ -112,8 +113,7 @@ func runStatus(ctx *cmdContext, idOrName string) error {
 
 	mgr, err := ctx.getManager()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	var status *worktree.WorktreeStatus
@@ -130,8 +130,7 @@ func runStatus(ctx *cmdContext, idOrName string) error {
 
 	status, err = mgr.Status(idOrName)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	result := StatusOutput{

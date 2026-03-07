@@ -1,6 +1,7 @@
 package inscription
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 	"time"
@@ -37,8 +38,7 @@ func runBackups(ctx *cmdContext) error {
 
 	backups, err := pipeline.ListBackups()
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	out := BackupsListOutput{

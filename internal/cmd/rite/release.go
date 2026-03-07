@@ -3,6 +3,7 @@ package rite
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/output"
 	ritelib "github.com/autom8y/knossos/internal/rite"
 )
@@ -24,7 +25,7 @@ Examples:
   ari rite release documentation           # Release specific rite
   ari rite release --all                   # Release everything borrowed
   ari rite release inv-20260106-abc123     # Release by invocation ID`,
-		Args: cobra.MaximumNArgs(1),
+		Args: common.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			target := ""
 			if len(args) > 0 {
@@ -52,8 +53,7 @@ func runRelease(ctx *cmdContext, target string, opts releaseOptions) error {
 
 	result, err := invoker.Release(releaseOpts)
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	out := output.RiteReleaseOutput{

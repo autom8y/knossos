@@ -1,6 +1,7 @@
 package artifact
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
 	"strings"
 
@@ -64,8 +65,7 @@ Dimensions:
 			case "phase":
 				phaseCounts, err := querier.ListPhases()
 				if err != nil {
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 				counts = make(map[string]int)
 				for phase, count := range phaseCounts {
@@ -76,8 +76,7 @@ Dimensions:
 			case "type":
 				typeCounts, err := querier.ListTypes()
 				if err != nil {
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 				counts = make(map[string]int)
 				for t, count := range typeCounts {
@@ -88,8 +87,7 @@ Dimensions:
 			case "specialist":
 				counts, err = querier.ListSpecialists()
 				if err != nil {
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 				for _, count := range counts {
 					total += count
@@ -98,8 +96,7 @@ Dimensions:
 			case "session":
 				counts, err = querier.ListSessions()
 				if err != nil {
-					printer.PrintError(err)
-					return err
+					return common.PrintAndReturn(printer, err)
 				}
 				for _, count := range counts {
 					total += count
@@ -109,8 +106,7 @@ Dimensions:
 				e := errors.NewWithDetails(errors.CodeUsageError,
 					"invalid dimension",
 					map[string]any{"by": by, "valid": "phase, type, specialist, session"})
-				printer.PrintError(e)
-				return e
+				return common.PrintAndReturn(printer, e)
 			}
 
 			return printer.Print(listOutput{

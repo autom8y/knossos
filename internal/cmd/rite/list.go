@@ -1,6 +1,7 @@
 package rite
 
 import (
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/output"
@@ -60,8 +61,7 @@ func runList(ctx *cmdContext, opts listOptions) error {
 	}
 
 	if err != nil {
-		printer.PrintError(err)
-		return err
+		return common.PrintAndReturn(printer, err)
 	}
 
 	// Build output structure
