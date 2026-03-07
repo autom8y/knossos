@@ -26,7 +26,6 @@ Paths can be:
 - Local file paths: .claude/manifest.json
 - Git refs: HEAD:.claude/manifest.json, origin/main:.claude/manifest.json`,
 		Args:         common.ExactArgs(2),
-		SilenceUsage: true, // Don't print usage on errors
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDiff(ctx, args[0], args[1], opts)
 		},

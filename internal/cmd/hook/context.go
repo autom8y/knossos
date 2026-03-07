@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -160,7 +161,7 @@ func (c ContextOutput) Text() string {
 		for k := range c.ThroughlineIDs {
 			keys = append(keys, k)
 		}
-		sortStrings(keys)
+		slices.Sort(keys)
 		for _, k := range keys {
 			b.WriteString(fmt.Sprintf("  %s: %s\n", k, c.ThroughlineIDs[k]))
 		}
@@ -173,15 +174,6 @@ func (c ContextOutput) Text() string {
 	return b.String()
 }
 
-// sortStrings sorts a slice of strings in place.
-// Defined here to avoid importing sort just for this helper.
-func sortStrings(s []string) {
-	for i := 1; i < len(s); i++ {
-		for j := i; j > 0 && s[j] < s[j-1]; j-- {
-			s[j], s[j-1] = s[j-1], s[j]
-		}
-	}
-}
 
 // convertStrands converts session.Strand slice to StrandOutput slice for hook output.
 // Returns nil when input is nil or empty (omitempty will suppress the field).
@@ -269,7 +261,7 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	}
 
 	// Determine execution mode
-	mode := determineExecutionMode(sessCtx, activeRite)
+	mode := session.DeriveExecutionMode(sessCtx.Status, activeRite)
 
 	// Gather git context (best-effort, errors produce empty strings)
 	projectDir := resolver.ProjectRoot()
@@ -397,26 +389,6 @@ func getBaseBranch(projectDir string) string {
 	return strings.TrimPrefix(ref, "refs/remotes/origin/")
 }
 
-// listAvailableRites returns the names of directories under ritesDir that contain manifest.yaml.
-// Returns nil on error or if the directory does not exist.
-func listAvailableRites(ritesDir string) []string {
-	entries, err := os.ReadDir(ritesDir)
-	if err != nil {
-		return nil
-	}
-	var rites []string
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		manifestPath := filepath.Join(ritesDir, e.Name(), "manifest.yaml")
-		if _, err := os.Stat(manifestPath); err == nil {
-			rites = append(rites, e.Name())
-		}
-	}
-	return rites
-}
-
 // listAvailableAgents returns the names of .md files in agentsDir, with the extension stripped.
 // Returns nil on error or if the directory does not exist.
 func listAvailableAgents(agentsDir string) []string {
@@ -505,18 +477,3 @@ func knowStatus(projectDir, cwd string) string {
 	return summary
 }
 
-// determineExecutionMode determines the execution mode based on session and rite.
-func determineExecutionMode(sessCtx *session.Context, activeRite string) string {
-	// No session = native mode
-	if sessCtx == nil {
-		return "native"
-	}
-
-	// Session with rite = orchestrated mode
-	if activeRite != "" && activeRite != "none" {
-		return "orchestrated"
-	}
-
-	// Session without rite = cross-cutting mode
-	return "cross-cutting"
-}

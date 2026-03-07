@@ -25,7 +25,6 @@ func newValidateCmd(ctx *cmdContext) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runValidate(ctx, args[0], opts)
 		},
-		SilenceUsage: true, // Don't print usage on errors
 	}
 
 	cmd.Flags().StringVar(&opts.schema, "schema", "", "Schema name to validate against (auto-detects if not specified)")

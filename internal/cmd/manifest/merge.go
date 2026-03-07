@@ -34,7 +34,6 @@ Strategies:
   theirs  Prefer their changes on conflict
   union   Merge arrays with union (no duplicates)`,
 		Args:         common.ExactArgs(3),
-		SilenceUsage: true, // Don't print usage on errors
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runMerge(ctx, args[0], args[1], args[2], opts)
 		},

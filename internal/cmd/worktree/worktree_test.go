@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/internal/worktree"
 	"github.com/spf13/cobra"
 )
@@ -932,13 +933,13 @@ func TestParseDuration_EmptyString_ReturnsError(t *testing.T) {
 	}
 }
 
-// --- isValidComplexity helper ---
+// --- isValidComplexity (now delegates to session.IsValidComplexity) ---
 
 func TestIsValidComplexity_ValidValues(t *testing.T) {
 	valid := []string{"PATCH", "MODULE", "SYSTEM", "INITIATIVE", "MIGRATION"}
 	for _, v := range valid {
-		if !isValidComplexity(v) {
-			t.Errorf("isValidComplexity(%q) = false, want true", v)
+		if !session.IsValidComplexity(v) {
+			t.Errorf("session.IsValidComplexity(%q) = false, want true", v)
 		}
 	}
 }
@@ -946,8 +947,8 @@ func TestIsValidComplexity_ValidValues(t *testing.T) {
 func TestIsValidComplexity_InvalidValues(t *testing.T) {
 	invalid := []string{"patch", "module", "system", "UNKNOWN", "", "COMPLEX", "LARGE"}
 	for _, v := range invalid {
-		if isValidComplexity(v) {
-			t.Errorf("isValidComplexity(%q) = true, want false", v)
+		if session.IsValidComplexity(v) {
+			t.Errorf("session.IsValidComplexity(%q) = true, want false", v)
 		}
 	}
 }

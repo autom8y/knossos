@@ -63,12 +63,9 @@ func SetVersion(v, c, d string) {
 	commit = c
 	date = d
 
-	// Enable --version flag on root command
-	rootCmd.Version = versionOutput{
-		Version: v, Commit: c, Date: d,
-		Go: runtime.Version(), OS: runtime.GOOS, Arch: runtime.GOARCH,
-	}.Text()
-	rootCmd.SetVersionTemplate(`{{.Version}}`)
+	// Enable --version flag on root command (clean one-liner like `claude --version`)
+	rootCmd.Version = v
+	rootCmd.SetVersionTemplate("{{.Version}}\n")
 }
 
 // GetOutputFormat returns the current output format flag value.
@@ -87,8 +84,9 @@ var rootCmd = &cobra.Command{
 	Long: `Ariadne (ari) manages sessions, rites, manifests, and sync for Claude Code agentic workflows.
 
 The clew that makes the maze survivable.`,
-	SilenceUsage:  true,
-	SilenceErrors: true,
+	SilenceUsage:              true,
+	SilenceErrors:             true,
+	SuggestionsMinimumDistance: 2,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Skip project discovery for version command
 		if cmd.Name() == "version" {
@@ -183,15 +181,13 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show version information",
 	Long: `Display the ari binary version, build commit, build date, Go version,
-and platform architecture.
-
-Examples:
-  ari version              # Human-readable output
+and platform architecture.`,
+	Example: `  ari version              # Human-readable output
   ari version -o json      # Machine-readable JSON output`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		format := output.ParseFormat(globalOpts.Output)
 		printer := output.NewPrinter(format, os.Stdout, os.Stderr, globalOpts.Verbose)
-		_ = printer.Print(versionOutput{
+		return printer.Print(versionOutput{
 			Version: version,
 			Commit:  commit,
 			Date:    date,

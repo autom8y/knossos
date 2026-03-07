@@ -285,7 +285,6 @@ Examples:
   ari knows --scope-dir services/payments/    # Hierarchical view from service dir
   ari knows --discover                        # Discover service boundaries
   ari knows -o json                           # JSON output for scripting`,
-		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runKnows(ctx, args, scopeDir, checkFlag, validateFlag, deltaFlag, semanticDiffFlag, discoverFlag)
 		},
@@ -371,8 +370,7 @@ func runKnows(ctx *cmdContext, args []string, scopeDir string, checkFlag, valida
 				printer.PrintLine(fmt.Sprintf("STALE: %s (%s, expires %s)", d.Domain, stalenessLabel(d), d.Expires))
 			}
 		}
-		os.Exit(1)
-		return nil // unreachable, but required for compiler
+		return errors.New(errors.CodeValidationFailed, "stale domains detected")
 	}
 
 	result := KnowsOutput{
@@ -417,9 +415,10 @@ func runValidate(printer *output.Printer, projectDir string, args []string) erro
 		return err
 	}
 
-	// Exit 1 if any broken references found, matching the --check pattern.
+	// Return error if any broken references found, matching the --check pattern.
 	if validateOut.BrokenRefs > 0 {
-		os.Exit(1)
+		return errors.New(errors.CodeValidationFailed,
+			fmt.Sprintf("%d broken reference(s) found", validateOut.BrokenRefs))
 	}
 
 	return nil

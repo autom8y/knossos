@@ -98,7 +98,7 @@ func runStatus(ctx *cmdContext) error {
 	}
 
 	// Determine execution mode
-	executionMode := deriveExecutionMode(sessCtx, ctx.getActiveRite())
+	executionMode := session.DeriveExecutionMode(sessCtx.Status, ctx.getActiveRite())
 
 	// Get git info
 	gitBranch, gitChanges := getGitInfo()
@@ -137,32 +137,6 @@ func runStatus(ctx *cmdContext) error {
 	}
 
 	return printer.Print(result)
-}
-
-// deriveExecutionMode determines the execution mode based on session and rite state.
-func deriveExecutionMode(ctx *session.Context, activeRite string) string {
-	// No session = native
-	if ctx == nil {
-		return "native"
-	}
-
-	// Parked sessions are cross-cutting
-	if ctx.Status == session.StatusParked {
-		return "cross-cutting"
-	}
-
-	// Archived sessions are native (not active)
-	if ctx.Status == session.StatusArchived {
-		return "native"
-	}
-
-	// Check rite configuration
-	if activeRite == "" || activeRite == "none" {
-		return "cross-cutting"
-	}
-
-	// Active session with rite = orchestrated
-	return "orchestrated"
 }
 
 // getGitInfo returns the current git branch and number of changes.

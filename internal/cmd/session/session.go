@@ -98,12 +98,7 @@ func emitLockEvent(resolver *paths.Resolver, sessionID, holder string) {
 	_ = w.Close()
 }
 
-// getActiveRite reads the active rite from ACTIVE_RITE file.
-// Returns "none" as a fallback if the file doesn't exist or is empty.
+// getActiveRite delegates to common.BaseContext.GetActiveRite().
 func (c *cmdContext) getActiveRite() string {
-	rite := c.GetResolver().ReadActiveRite()
-	if rite == "" {
-		return "none"
-	}
-	return rite
+	return c.GetActiveRite()
 }

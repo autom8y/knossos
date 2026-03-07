@@ -98,8 +98,8 @@ func runQuery(ctx *cmdContext, opts queryOptions) error {
 		activeRite = sessCtx.ActiveRite
 	}
 
-	// Determine execution mode using the same logic as the hook
-	mode := determineQueryExecutionMode(sessCtx, activeRite)
+	// Determine execution mode using the canonical shared implementation
+	mode := sess.DeriveExecutionMode(sessCtx.Status, activeRite)
 
 	// --field: single field lookup
 	if opts.field != "" {
@@ -131,19 +131,6 @@ func runQuery(ctx *cmdContext, opts queryOptions) error {
 	}
 
 	return printer.Print(result)
-}
-
-// determineQueryExecutionMode mirrors hook.determineExecutionMode.
-// It lives here to avoid a cross-package import of the hook package from the
-// session command package (which would create an import cycle).
-func determineQueryExecutionMode(sessCtx *sess.Context, activeRite string) string {
-	if sessCtx == nil {
-		return "native"
-	}
-	if activeRite != "" && activeRite != "none" {
-		return "orchestrated"
-	}
-	return "cross-cutting"
 }
 
 // convertQueryStrands converts session.Strand slice to output.QueryStrand slice.

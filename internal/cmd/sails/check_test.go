@@ -708,7 +708,7 @@ func TestGateOutput_Formatting(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			text := tt.output.String()
+			text := tt.output.Text()
 			for _, s := range tt.contains {
 				assert.Contains(t, text, s, "Output should contain %q", s)
 			}

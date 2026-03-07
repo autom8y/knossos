@@ -171,7 +171,6 @@ Examples:
   ari lint --scope=agents     # Agents only
   ari lint --scope=dromena    # Dromena only
   ari lint --scope=legomena   # Legomena only`,
-		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runLint(ctx, scope)
 		},
