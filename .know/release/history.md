@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-06T22:00:26Z"
+generated_at: "2026-03-07T11:18:30Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "c6d04eb"
+source_hash: "2b4a43c"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -150,3 +150,26 @@ max_incremental_cycles: 0
 - Cached release knowledge skipped cartographer and dependency-resolver entirely
 - Headline features: session schema v2.3 (strand struct, frame linkage, complexity enum, claim command), /sos unified session interface, context-session alignment, dromena v2.3 hook fields
 - Bulk refactor: 11 commits migrating fmt.Errorf → errors.New across internal packages
+
+### v0.6.1 — 2026-03-07
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-07 |
+| Version | v0.6.0 -> v0.6.1 (patch) |
+| Commits | 1 (fix(cli): remediate help tooling and error UX) |
+| Complexity | PATCH |
+| Tag SHA | 6df2d74c94758d30b691376a48eefd0128507d80 |
+| Commit SHA | 2b4a43c |
+| release.yml | GREEN (113s, run 22798027635) |
+| e2e-distribution.yml | GREEN (44s, run 22798053204) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.6.1, commit 476891a) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Fourteenth consecutive PASS verdict (v0.3.2 → ... → v0.6.0 → v0.6.1)
+- Total chain: 147s (below historical baseline ~150-190s)
+- Cached release knowledge accelerated cartographer reconnaissance
+- Single fix commit: CLI help tooling and error UX remediation

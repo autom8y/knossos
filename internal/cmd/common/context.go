@@ -44,8 +44,13 @@ func (c *BaseContext) GetResolver() *paths.Resolver {
 }
 
 // GetActiveRite reads the active rite from the project.
+// Returns "none" as fallback when no rite file exists or is empty.
 func (c *BaseContext) GetActiveRite() string {
-	return c.GetResolver().ReadActiveRite()
+	rite := c.GetResolver().ReadActiveRite()
+	if rite == "" {
+		return "none"
+	}
+	return rite
 }
 
 // GetSessionID returns the session ID from the flag or reads the current session.

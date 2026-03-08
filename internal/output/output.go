@@ -371,15 +371,9 @@ func (l SessionListOutput) Rows() [][]string {
 	return rows
 }
 
-// Text implements Textable for SessionListOutput.
-func (l SessionListOutput) Text() string {
-	if len(l.Sessions) == 0 {
-		return "No sessions found"
-	}
-	var b strings.Builder
-	// Let tabular handle headers/rows
-	return b.String()
-}
+// Note: SessionListOutput intentionally does NOT implement Textable.
+// The Tabular interface (Headers/Rows) is the correct rendering path.
+// If no sessions exist, Rows() returns an empty table which the printer handles.
 
 // TransitionOutput represents a state transition result.
 type TransitionOutput struct {

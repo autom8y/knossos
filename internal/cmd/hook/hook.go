@@ -62,11 +62,22 @@ Environment Variables:
 Performance Targets:
   Early exit: <5ms   (when hooks disabled or no session)
   Full execution: <100ms (with all processing)`,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Chain root's PersistentPreRunE — Cobra does not chain persistent
+			// pre-runs automatically; a child's overrides the parent's entirely.
+			// Without this, hook subcommands skip output format validation and
+			// config init from root.
+			if root := cmd.Root(); root != nil && root.PersistentPreRunE != nil {
+				if err := root.PersistentPreRunE(cmd, args); err != nil {
+					return err
+				}
+			}
+
 			// Convert timeout flag to duration
 			if timeoutMs > 0 {
 				ctx.timeout = min(time.Duration(timeoutMs)*time.Millisecond, MaxTimeout)
 			}
+			return nil
 		},
 	}
 

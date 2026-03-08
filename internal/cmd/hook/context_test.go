@@ -190,48 +190,50 @@ func TestContextOutput_Text_OmitsEmptyFields(t *testing.T) {
 	}
 }
 
-func TestDetermineExecutionMode(t *testing.T) {
+func TestDeriveExecutionMode(t *testing.T) {
 	tests := []struct {
 		name       string
-		hasSession bool
+		status     session.Status
 		activeRite string
 		want       string
 	}{
 		{
-			name:       "nil session is native",
-			hasSession: false,
-			activeRite: "",
-			want:       "native",
-		},
-		{
-			name:       "session with rite is orchestrated",
-			hasSession: true,
+			name:       "active session with rite is orchestrated",
+			status:     session.StatusActive,
 			activeRite: "10x-dev",
 			want:       "orchestrated",
 		},
 		{
-			name:       "session with 'none' rite is cross-cutting",
-			hasSession: true,
+			name:       "active session with 'none' rite is cross-cutting",
+			status:     session.StatusActive,
 			activeRite: "none",
 			want:       "cross-cutting",
 		},
 		{
-			name:       "session with empty rite is cross-cutting",
-			hasSession: true,
+			name:       "active session with empty rite is cross-cutting",
+			status:     session.StatusActive,
 			activeRite: "",
 			want:       "cross-cutting",
+		},
+		{
+			name:       "parked session is cross-cutting",
+			status:     session.StatusParked,
+			activeRite: "10x-dev",
+			want:       "cross-cutting",
+		},
+		{
+			name:       "archived session is native",
+			status:     session.StatusArchived,
+			activeRite: "10x-dev",
+			want:       "native",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var sessCtx *session.Context
-			if tt.hasSession {
-				sessCtx = &session.Context{} // Non-nil
-			}
-			result := determineExecutionMode(sessCtx, tt.activeRite)
+			result := session.DeriveExecutionMode(tt.status, tt.activeRite)
 			if result != tt.want {
-				t.Errorf("determineExecutionMode() = %q, want %q", result, tt.want)
+				t.Errorf("DeriveExecutionMode() = %q, want %q", result, tt.want)
 			}
 		})
 	}
@@ -588,39 +590,6 @@ func TestGetBaseBranch_FallbackToMain(t *testing.T) {
 	base := getBaseBranch(tmpDir)
 	if base != "main" {
 		t.Errorf("getBaseBranch() fallback = %q, want %q", base, "main")
-	}
-}
-
-func TestListAvailableRites(t *testing.T) {
-	tmpDir := t.TempDir()
-	ritesDir := filepath.Join(tmpDir, "rites")
-	os.MkdirAll(ritesDir, 0755)
-
-	// Create rite with manifest
-	riteWithManifest := filepath.Join(ritesDir, "alpha")
-	os.MkdirAll(riteWithManifest, 0755)
-	os.WriteFile(filepath.Join(riteWithManifest, "manifest.yaml"), []byte("name: alpha"), 0644)
-
-	// Create rite without manifest (should be excluded)
-	riteWithoutManifest := filepath.Join(ritesDir, "beta")
-	os.MkdirAll(riteWithoutManifest, 0755)
-
-	// Create a file (not a directory, should be excluded)
-	os.WriteFile(filepath.Join(ritesDir, "readme.md"), []byte("# Rites"), 0644)
-
-	rites := listAvailableRites(ritesDir)
-	if len(rites) != 1 {
-		t.Fatalf("listAvailableRites() returned %d rites, want 1: %v", len(rites), rites)
-	}
-	if rites[0] != "alpha" {
-		t.Errorf("listAvailableRites()[0] = %q, want %q", rites[0], "alpha")
-	}
-}
-
-func TestListAvailableRites_NonexistentDir(t *testing.T) {
-	rites := listAvailableRites("/nonexistent/path/rites")
-	if rites != nil {
-		t.Errorf("listAvailableRites() on missing dir = %v, want nil", rites)
 	}
 }
 

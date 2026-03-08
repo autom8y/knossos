@@ -2,9 +2,7 @@
 package sails
 
 import (
-	stderrors "errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -94,13 +92,7 @@ func runCheck(ctx *cmdContext, flags *checkFlags, args []string) error {
 		if !flags.quiet {
 			printer.PrintError(err)
 		}
-		// Get exit code from error
-		var e *errors.Error
-		if stderrors.As(err, &e) {
-			os.Exit(e.ExitCode)
-		}
-		os.Exit(errors.ExitGeneralError)
-		return nil
+		return errors.Handled(err)
 	}
 
 	// Output the result
@@ -108,10 +100,9 @@ func runCheck(ctx *cmdContext, flags *checkFlags, args []string) error {
 		_ = printer.Print(formatGateResult(result))
 	}
 
-	// Set exit code based on result
-	exitCode := sails.GateExitCode(result)
-	if exitCode != 0 {
-		os.Exit(exitCode)
+	// Return error with appropriate exit code for gate failures
+	if exitCode := sails.GateExitCode(result); exitCode != 0 {
+		return errors.New(errors.CodeValidationFailed, "quality gate failed")
 	}
 
 	return nil
@@ -148,8 +139,8 @@ type gateOutput struct {
 	Summary            string                    `json:"summary" yaml:"summary"`
 }
 
-// String returns the text representation of the gate output.
-func (g *gateOutput) String() string {
+// Text implements output.Textable for the gate output.
+func (g *gateOutput) Text() string {
 	var b strings.Builder
 
 	// Header with pass/fail indicator

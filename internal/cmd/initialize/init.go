@@ -109,7 +109,6 @@ Examples:
   ari init                    # Minimal scaffold
   ari init --rite 10x-dev     # Scaffold with 10x-dev rite
   ari init --force            # Re-initialize existing project`,
-		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runInit(ctx, riteName, source, force, cmd)
 		},

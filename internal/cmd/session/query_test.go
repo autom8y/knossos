@@ -177,26 +177,27 @@ func TestQuery_GetQueryField_UnknownField(t *testing.T) {
 	}
 }
 
-// --- determineQueryExecutionMode unit tests ---
+// --- DeriveExecutionMode unit tests (canonical function in session package) ---
 
-func TestQuery_DetermineExecutionMode(t *testing.T) {
+func TestQuery_DeriveExecutionMode(t *testing.T) {
 	cases := []struct {
 		name       string
-		sessCtx    *session.Context
+		status     session.Status
 		activeRite string
 		want       string
 	}{
-		{"nil session", nil, "ecosystem", "native"},
-		{"with rite", &session.Context{}, "ecosystem", "orchestrated"},
-		{"empty rite", &session.Context{}, "", "cross-cutting"},
-		{"none rite", &session.Context{}, "none", "cross-cutting"},
+		{"active with rite", session.StatusActive, "ecosystem", "orchestrated"},
+		{"active empty rite", session.StatusActive, "", "cross-cutting"},
+		{"active none rite", session.StatusActive, "none", "cross-cutting"},
+		{"parked with rite", session.StatusParked, "ecosystem", "cross-cutting"},
+		{"archived with rite", session.StatusArchived, "ecosystem", "native"},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := determineQueryExecutionMode(tc.sessCtx, tc.activeRite)
+			got := session.DeriveExecutionMode(tc.status, tc.activeRite)
 			if got != tc.want {
-				t.Errorf("determineQueryExecutionMode(%q) = %q, want %q", tc.activeRite, got, tc.want)
+				t.Errorf("DeriveExecutionMode(%q, %q) = %q, want %q", tc.status, tc.activeRite, got, tc.want)
 			}
 		})
 	}

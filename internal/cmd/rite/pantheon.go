@@ -20,7 +20,6 @@ func newPantheonCmd(ctx *cmdContext) *cobra.Command {
 
 Shows all agents available in the current rite along with their roles.
 This is useful for understanding what specialists are available for delegation.`,
-		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runPantheon(ctx)
 		},

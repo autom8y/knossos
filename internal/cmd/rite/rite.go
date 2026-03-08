@@ -77,7 +77,7 @@ func (c *cmdContext) getValidator() *rite.Validator {
 	return rite.NewValidator(resolver, m)
 }
 
-// getActiveRite reads the active rite from ACTIVE_RITE file.
+// getActiveRite delegates to common.BaseContext.GetActiveRite().
 func (c *cmdContext) getActiveRite() string {
-	return c.GetResolver().ReadActiveRite()
+	return c.GetActiveRite()
 }

@@ -37,7 +37,7 @@ func NewSyncCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 		resource          string
 		orgName           string
 		dryRun            bool
-		recover_          bool
+		recoverMode          bool
 		overwriteDiverged bool
 		keepOrphans       bool
 		soft              bool
@@ -80,7 +80,6 @@ Examples:
   ari sync --recover                    # Adopt existing untracked files
   ari sync --keep-orphans               # Don't auto-remove orphaned files
   ari sync --budget                     # Show context token budget after sync`,
-		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Validate scope
 			syncScope := materialize.SyncScope(scope)
@@ -110,7 +109,7 @@ Examples:
 				Resource:          syncResource,
 				OrgName:           orgName,
 				DryRun:            dryRun,
-				Recover:           recover_,
+				Recover:           recoverMode,
 				OverwriteDiverged: overwriteDiverged,
 				KeepOrphans:       keepOrphans,
 				Soft:              soft,
@@ -128,7 +127,7 @@ Examples:
 	cmd.Flags().StringVar(&orgName, "org", "", "Organization name (defaults to active org)")
 	cmd.Flags().StringVar(&resource, "resource", "", "Filter to resource type: agents, mena, or hooks")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Preview changes without applying")
-	cmd.Flags().BoolVar(&recover_, "recover", false, "Adopt existing untracked files into manifest")
+	cmd.Flags().BoolVar(&recoverMode, "recover", false, "Adopt existing untracked files into manifest")
 	cmd.Flags().BoolVar(&overwriteDiverged, "overwrite-diverged", false, "Overwrite locally modified files")
 	cmd.Flags().BoolVar(&keepOrphans, "keep-orphans", false, "Preserve orphaned knossos files")
 	cmd.Flags().BoolVar(&soft, "soft", false, "CC-safe mode: update only agents and CLAUDE.md (skip hooks/mena/rules)")
