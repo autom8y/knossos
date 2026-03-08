@@ -21,7 +21,7 @@ The **Coda** is the philosophical foundation—the "why" behind every design dec
 | Myth | Component | Function |
 |------|-----------|----------|
 | **Knossos** | The platform | The labyrinth itself |
-| **Ariadne** | CLI binary (`ari`) | The clew ensuring return |
+| **Ariadne** | CLI binary (`ari`) | The intelligent navigator ensuring return |
 | **Theseus** | Claude Code agent | The navigator with amnesia |
 | **Moirai** | Session lifecycle | The Fates who spin, measure, and cut |
 | **White Sails** | Confidence signal | Honest return indicator |

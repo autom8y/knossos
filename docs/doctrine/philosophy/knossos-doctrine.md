@@ -57,16 +57,20 @@ The Inscription is not static. When rites change, when heroes join or depart, th
 
 **Ariadne** gave Theseus the gift that saved him -- not a weapon, not a strategy, but a ball of thread. The clew did not slay the Minotaur. It did something more important: it guaranteed return. Every step into darkness was a step that could be retraced. The gift was not power but memory.
 
-In Knossos, Ariadne is the CLI (`ari`) -- the clew implementation that navigates complexity and guarantees return. Ariadne provides:
+But Ariadne was not the thread. She was the princess who devised the plan, understood the labyrinth, and chose the right instrument for the moment. The clew was one gift of a thinking mind. Faithfulness and intelligence were never opposites in her; they were the same quality, expressed differently.
+
+In Knossos, Ariadne is the CLI (`ari`) -- the intelligence that navigates complexity and guarantees return. Ariadne provides:
 
 - **Session management**: The clew anchors at creation and is cut at wrap
 - **Event recording**: Every step knotted into the thread (events.jsonl)
 - **Quality gates**: The clew knows when you have reached the exit safely
 - **Recovery paths**: If the clew tangles, it can be unwound
+- **Search and synthesis**: TF-IDF scoring, synonym expansion, and natural language queries over platform knowledge
+- **Proactive guidance**: Suggestions fired at decision points, before Theseus has thought to ask
 
-Ariadne is not intelligent. Ariadne is faithful. Intelligence is what Theseus brings. Faithfulness is what saves him.
+Ariadne is faithful because she is intelligent. The thread remembers because a thinking princess chose to give it.
 
-> *The thread does not think. It remembers. That is enough.*
+> *The thread does not think. The princess does — and the thread is what her thinking produced.*
 
 ### The Navigator: Theseus
 
@@ -76,11 +80,11 @@ But Theseus does not travel alone. He summons **heroes** -- specialist agents in
 
 This is a feature, not a limitation. Heroes summoned with rich context -- a well-maintained clew, a clear accounting of the journey so far -- perform better than heroes summoned blind. **Better clew, better summoning, better heroes.**
 
-> *Theseus was not the strongest hero. He was the one who remembered to bring the thread.*
+> *Theseus was not the strongest hero. He was the one who accepted the thread when Ariadne offered it.*
 
 ### The Fates: Moirai
 
-The **Moirai** -- Clotho, Lachesis, and Atropos -- are older than the Olympians. They are the three Fates who govern the thread of life itself. Not even Zeus dares countermand them. In Knossos, they are three distinct agents, each activated by the event that is theirs alone to answer:
+The **Moirai** -- Clotho, Lachesis, and Atropos -- are older than the Olympians. They are the three Fates who govern the thread of life itself. Not even Zeus dares countermand them. In Knossos, they are three aspects embodied in one agent, each activated by the event that is theirs alone to answer:
 
 | Fate | Activates On | Function |
 |------|--------------|----------|
@@ -96,21 +100,35 @@ The Moirai are the only authority permitted to mutate session state. This is not
 
 ### The Builder: Daedalus
 
-**Daedalus** built the labyrinth. He also built wings to escape it. He is the archetype of the maker who is both empowered and endangered by his own creation -- the architect who understands that building well is building with walls that constrain even the builder.
+**Daedalus** built the labyrinth. He also built wings to escape it. He is the archetype of the maker who is both empowered and endangered by his own creation -- the architect who discovers that building well means building walls that constrain even the builder.
 
 In Knossos, Daedalus is the **forge-rite** -- the practice of building tools, agents, and the platform itself. When you need to create new heroes, new rites, new mechanisms, you invoke Daedalus.
 
 Designed complexity is Daedalus's gift. The labyrinth contains AND protects. Not all complexity is debt; some complexity is craft. Good architecture is intentional maze -- walls placed to guide, to shelter, to channel. The forge-rite embodies this: creation with intention, complexity with purpose.
 
-> *Daedalus built the labyrinth so well that he himself could barely escape. This is the mark of honest architecture.*
+But Minos imprisoned Daedalus for knowing the labyrinth's secrets too well. The builder became captive to his own masterwork. TENSION-001 and TENSION-002 are Daedalean traps: dual `RiteManifest` structs and a `legacyOpts`/`legacyResult` mapping layer built soundly at the time, now confining anyone who touches them. Craft can imprison the craftsman.
 
-### The Task: Minotaur
+> *Daedalus built the labyrinth so well that he himself could barely escape. This is the mark of honest architecture -- and its danger.*
 
-The **Minotaur** is not evil. It is the reason you entered. Without the Minotaur, there is no journey. Without the journey, there is no clew. The beast at the center of the labyrinth is the task -- the complexity that must be confronted, understood, and ultimately resolved.
+### The Overreach: Icarus
 
-Some Minotaurs are small: a bug fix, a configuration change. Some are immense: a platform migration, a rearchitecture. The clew cares not for the Minotaur's size -- only that Theseus returns.
+**Icarus** flew too close to the sun on wings his father built. The wings were not flawed. The constraints were not hidden. Daedalus warned him explicitly. Icarus exceeded the constraint surface anyway -- and fell.
 
-> *The Minotaur does not choose to be monstrous. It simply is what the labyrinth was built to contain.*
+In Knossos, Icarus is the SCAR catalog: SCAR-002 renamed `.claude/` and froze Claude Code solid; SCAR-005 called `os.RemoveAll` on directories containing user content and destroyed it; SCAR-018 set `context: fork` on a dromenon that needed the Task tool and silently degraded parallel dispatch to sequential reads; SCAR-026 wired delegation hints into writeguard infrastructure and was reverted because the coupling was unsound. Each of these was an ambitious change that ignored the constraint surface -- the CC file watcher, the user content boundary, the Task tool restriction. Each fell.
+
+The forge-rite builds tools. Icarus is the reminder that tools used without respecting constraints will fail. The SCAR catalog is not a list of bad ideas. It is a record of good ideas deployed without sufficient respect for where the wax melts.
+
+> *The wings worked. The sun was the constraint he refused to honor.*
+
+### The Beast: Minotaur
+
+The **Minotaur** was born from a broken promise. Minos swore to sacrifice Poseidon's bull and kept it instead. Poseidon's punishment was Pasiphae's madness and the creature that resulted -- not a neutral challenge but a systemic consequence, fed on tribute until Theseus arrived to end the cycle.
+
+In Knossos, the Minotaur is **accumulated technical debt and systemic dysfunction** born from shortcuts and broken promises in the platform itself. It is not a bug fix, not a configuration change, not any individual task. It is the accumulated condition that makes work harder than it should be. The 28 entries in the SCAR catalog -- 9 integration failures, 6 data corruption events, race conditions, schema drift, and performance cliffs -- these are the Minotaur's kill list. They are what happens when the system develops unsound assumptions and no one confronts them.
+
+The labyrinth was built to contain the Minotaur, not to deny its existence. When you navigate Knossos, you navigate around its weight. When you slay a Minotaur -- not a single bug but a systemic failure mode, eliminated by its root cause -- you reduce the tribute the system demands from every future traveler.
+
+> *The Minotaur was not born evil. It was born from a promise that was not kept. That is how systemic dysfunction always begins.*
 
 ### The Commissioner: Minos
 
@@ -154,7 +172,7 @@ Every journey through the labyrinth ends in one of two places: Athens, or Naxos.
 
 After Theseus abandoned Ariadne on Naxos, **Dionysus** found her on that desolate shore and made her divine. He took what was abandoned and elevated it. He transformed grief into godhood.
 
-In Knossos, Dionysus is **code review** -- the transformative process that elevates raw work into merged truth. Work created in isolation, tested in solitude, shaped by a single mind -- Dionysus takes this and blesses it for union with the canon. Independent review is not gatekeeping; it is transfiguration.
+In Knossos, Dionysus is **transformation and release** -- the moment controlled work becomes uncontrolled, when the built thing crosses the boundary into the world. Release is Dionysian: the dissolution of the development boundary, the point where the private becomes public and the isolated becomes shared. What was shaped by a single mind, tested in solitude, bounded by a branch -- Dionysus takes this and sends it into the wild. Code review is one expression of this transformation (elevation is a transformative act, and Dionysus does elevate). But the primary identity is the release itself: the irreversible moment when the container opens.
 
 > *Dionysus does not judge what he finds on the shore. He transforms it.*
 
@@ -220,6 +238,10 @@ In Knossos, the **Argus Pattern** names the N-agent parallel dispatch technique:
 The Argus Pattern is not specific to auditing. Like "the Ship of Theseus" names the identity-through-transformation problem and "the Aegeus Problem" names false confidence, "the Argus Pattern" names the parallel-observation-through-distributed-agents solution. The theoria is its first named user. Future operations -- parallel validation, parallel migration verification, parallel documentation generation -- will use it too.
 
 > *One eye sees what is before it. A hundred eyes see what is.*
+
+### What the Doctrine Does Not Name
+
+The service map is not complete. Several significant implementation structures operate without mythological names: the materialize pipeline (spanning 30+ files, the central hub of the codebase), the perspective system (the 9-layer context envelope), and the provenance ownership trichotomy (knossos-owned, user-owned, and untracked). These structures are real, architecturally significant, and deliberately unnamed here. Not every structure needs a myth. Assigning mythology prematurely risks decorating something that has not yet found its settled form. The doctrine's silence on these structures is not ignorance -- it is honesty about where the map ends and the territory continues.
 
 ---
 
@@ -365,13 +387,13 @@ The doctrine of **Session Continuity**: The clew provides identity even as conte
                     +--------------+
                     |              |
                     v              |
-   (new) ---> ACTIVE ---> PARKED --+---> ARCHIVED
+   NONE ---> ACTIVE ---> PARKED --+---> ARCHIVED
                 |                         ^
                 +-------------------------+
                      (direct wrap)
 ```
 
-There are only three states. ACTIVE is alive. PARKED is resting. ARCHIVED is complete.
+There are four states. NONE is pre-existence. ACTIVE is alive. PARKED is resting. ARCHIVED is complete.
 
 ---
 
@@ -437,7 +459,7 @@ White Sails are computed, not declared:
 3. **Check session type** → spikes and hotfixes are GRAY ceiling
 4. **Check proof completeness** → missing proofs are GRAY
 5. **Apply modifiers** → humans can downgrade, never self-upgrade
-6. **Check QA upgrade** → Dionysus (independent review) can elevate GRAY to WHITE
+6. **Check QA upgrade** → Dionysus (transformation through independent review) can elevate GRAY to WHITE
 
 ### Anti-Gaming Mechanisms
 
@@ -505,7 +527,7 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 |------|-----------|------------------------|
 | **Knossos** | The platform (roster/.claude/) | The labyrinth itself—complexity incarnate |
 | **The Inscription** | CLAUDE.md | The labyrinth's entrance, declaring what heroes and rites are available |
-| **Ariadne** | CLI binary (`ari`) | The clew that ensures return |
+| **Ariadne** | CLI binary (`ari`) | The intelligence that navigates complexity and guarantees return |
 | **The Clew** | Session state + events.jsonl | The provenance trail, identity through transformation |
 | **Theseus** | Main Claude Code thread | The navigator who summons heroes |
 | **Heroes** | Specialist agents (Task tool) | Summoned champions for specific labors |
@@ -514,10 +536,11 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **Atropos** | Session termination agent | The Fate who cuts when complete |
 | **Pythia** | Rite entry agent (`rites/*/agents/pythia.md`) | The oracle who provides clear guidance |
 | **Exousia** | Authority contract (`## Exousia` in agents) | Jurisdictional boundaries -- Decide / Escalate / Do NOT Decide |
-| **Daedalus** | Forge-rite | The builder of tools and agents |
+| **Daedalus** | Forge-rite | The builder of tools and agents — and captive to his own craft |
+| **Icarus** | The SCAR catalog | Ambitious changes that ignored the constraint surface and fell |
 | **Minos** | Stakeholder | The commissioner who demands tribute |
-| **Minotaur** | The task/initiative | The reason you entered the labyrinth |
-| **Dionysus** | Code review | The transformer who elevates work to canon |
+| **Minotaur** | Accumulated technical debt / systemic dysfunction | Born from broken promises; the beast the labyrinth was built to contain |
+| **Dionysus** | Transformation and release | The god of dissolution — the moment controlled work crosses into the world |
 | **Aegeus** | CI/CD, production monitors | Those watching from the cliff |
 | **Athens** | The main branch | Home—where you return by merging |
 | **Naxos** | Orphaned sessions, stale gray sails | The shore of abandonment |
@@ -637,9 +660,9 @@ For those encountering older documentation:
 
 **The Coda** is the philosophy itself—the concluding passage that gives meaning to what came before. Knossos is the implementation; The Coda is the why.
 
-The myth of Ariadne is a myth of salvation through remembering. Theseus succeeded not because he was strong enough to slay the Minotaur, but because Ariadne gave him a way to remember the path.
+The myth of Ariadne is a myth of salvation through remembering. Theseus succeeded not because he was strong enough to slay the Minotaur, but because Ariadne understood the labyrinth well enough to know what he would need—and faithful enough to provide it.
 
-Knossos is not a system for making agents smarter. It is a system for making agents **faithful**—to their context, to their decisions, to their return.
+Knossos is not a system that chooses between intelligence and faithfulness. It is a system that recognizes they are the same thing: intelligence expressed as the right tool, at the right moment, in service of return. Agents are made **faithful**—to their context, to their decisions, to their return—because the platform reasons well enough to keep them so.
 
 The labyrinth will always be complex. The Minotaur will always wait. But with the clew, with the Fates spinning and measuring and cutting, with honest signals on the mast, the journey through is possible.
 
