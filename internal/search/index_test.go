@@ -216,3 +216,107 @@ func TestBuildIntegration(t *testing.T) {
 	}
 	assert.True(t, found, "sync command should appear in results")
 }
+
+// TestSearchWithSynonymExpansion_Integration verifies end-to-end synonym expansion.
+func TestSearchWithSynonymExpansion_Integration(t *testing.T) {
+	// Build an index with manually populated entries and a synonym source.
+	idx := &SearchIndex{
+		entries: []SearchEntry{
+			{
+				Name:        "sre",
+				Domain:      DomainRite,
+				Summary:     "Site reliability engineering",
+				Description: "Manages reliability and operations",
+				Keywords:    []string{"reliability", "operations", "incident response"},
+				Action:      "/sre",
+			},
+			{
+				Name:        "hygiene",
+				Domain:      DomainRite,
+				Summary:     "Code quality and cleanup",
+				Description: "Refactoring and cleanup workflows",
+				Keywords:    []string{"cleanup", "lint", "code-quality"},
+				Action:      "/hygiene",
+			},
+			{
+				Name:        "releaser",
+				Domain:      DomainRite,
+				Summary:     "Release engineering",
+				Description: "Publishing and release workflows",
+				Keywords:    []string{"publish", "release", "versioning"},
+				Action:      "/releaser",
+			},
+		},
+		synonyms: NewStaticSynonymSource(),
+	}
+
+	// "deploy" should find SRE via synonym expansion.
+	results := idx.Search("deploy", SearchOptions{Limit: 10})
+	found := false
+	for _, r := range results {
+		if r.Name == "sre" {
+			found = true
+			assert.Equal(t, "keyword", r.MatchType)
+			assert.Greater(t, r.Score, 0)
+			break
+		}
+	}
+	assert.True(t, found, "deploy should find SRE rite via synonym expansion")
+
+	// "refactor" should find hygiene via synonym expansion.
+	results = idx.Search("refactor", SearchOptions{Limit: 10})
+	found = false
+	for _, r := range results {
+		if r.Name == "hygiene" {
+			found = true
+			assert.Equal(t, "keyword", r.MatchType)
+			break
+		}
+	}
+	assert.True(t, found, "refactor should find hygiene rite via synonym expansion")
+
+	// "ship" should find releaser via synonym expansion.
+	results = idx.Search("ship", SearchOptions{Limit: 10})
+	found = false
+	for _, r := range results {
+		if r.Name == "releaser" {
+			found = true
+			assert.Equal(t, "keyword", r.MatchType)
+			break
+		}
+	}
+	assert.True(t, found, "ship should find releaser rite via synonym expansion")
+
+	// Direct query should outscore expanded query.
+	directResults := idx.Search("sre", SearchOptions{Limit: 10})
+	expandedResults := idx.Search("deploy", SearchOptions{Limit: 10})
+
+	var directSREScore, expandedSREScore int
+	for _, r := range directResults {
+		if r.Name == "sre" {
+			directSREScore = r.Score
+		}
+	}
+	for _, r := range expandedResults {
+		if r.Name == "sre" {
+			expandedSREScore = r.Score
+		}
+	}
+	assert.Greater(t, directSREScore, expandedSREScore,
+		"direct 'sre' query (score=%d) should outscore expanded 'deploy' query (score=%d)",
+		directSREScore, expandedSREScore)
+}
+
+// TestSearchWithoutSynonyms_BackwardCompatible verifies nil synonym source works.
+func TestSearchWithoutSynonyms_BackwardCompatible(t *testing.T) {
+	idx := &SearchIndex{
+		entries: []SearchEntry{
+			{Name: "session", Domain: DomainConcept, Summary: "Session management"},
+		},
+		synonyms: nil,
+	}
+	results := idx.Search("session", SearchOptions{Limit: 5})
+	require.Len(t, results, 1)
+	assert.Equal(t, 1000, results[0].Score)
+	assert.Equal(t, "exact", results[0].MatchType)
+}

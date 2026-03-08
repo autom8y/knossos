@@ -106,9 +106,40 @@ func CollectRites(resolver *paths.Resolver) []SearchEntry {
 			Action:      "/" + r.Name,
 			Boosted:     r.Active,
 		}
+
+		// Attempt orchestrator enrichment (fail-open: missing orchestrator is fine).
+		orchPath := filepath.Join(r.Path, "orchestrator.yaml")
+		if data, err := os.ReadFile(orchPath); err == nil {
+			var orch orchestratorFile
+			if err := yaml.Unmarshal(data, &orch); err == nil {
+				enrichRiteEntry(&e, &orch)
+			}
+		}
+
 		entries = append(entries, e)
 	}
 	return entries
+}
+
+// enrichRiteEntry populates Keywords, Aliases, and separated Summary/Description
+// from orchestrator.yaml data.
+func enrichRiteEntry(e *SearchEntry, orch *orchestratorFile) {
+	// 1. Keywords from frontmatter description triggers/use-when.
+	if orch.Frontmatter.Description != "" {
+		e.Keywords = extractKeywords(orch.Frontmatter.Description)
+	}
+
+	// 2. Domain as alias (if non-empty and different from name).
+	domain := strings.TrimSpace(orch.Rite.Domain)
+	if domain != "" && !strings.EqualFold(domain, e.Name) {
+		e.Aliases = append(e.Aliases, domain)
+	}
+
+	// 3. Separate summary from description.
+	if orch.Frontmatter.Description != "" {
+		e.Summary = firstLine(orch.Frontmatter.Description)
+		e.Description = orch.Frontmatter.Description
+	}
 }
 
 // CollectAgents returns entries from .claude/agents/ directory.

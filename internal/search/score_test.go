@@ -110,14 +110,14 @@ func TestExtractKeywordsEmpty(t *testing.T) {
 
 func TestScoreExactMatch(t *testing.T) {
 	e := SearchEntry{Name: "session", Domain: DomainCommand, Summary: "Manage sessions"}
-	score, matchType := scoreEntry("session", e)
+	score, matchType := scoreEntry("session", e, nil)
 	assert.Equal(t, 1000, score)
 	assert.Equal(t, "exact", matchType)
 }
 
 func TestScoreExactMatchCaseInsensitive(t *testing.T) {
 	e := SearchEntry{Name: "session", Domain: DomainCommand}
-	score, matchType := scoreEntry("SESSION", e)
+	score, matchType := scoreEntry("SESSION", e, nil)
 	assert.Equal(t, 1000, score)
 	assert.Equal(t, "exact", matchType)
 }
@@ -128,21 +128,21 @@ func TestScoreExactMatchAlias(t *testing.T) {
 		Domain:  DomainCommand,
 		Aliases: []string{"sessions"},
 	}
-	score, matchType := scoreEntry("sessions", e)
+	score, matchType := scoreEntry("sessions", e, nil)
 	assert.Equal(t, 1000, score)
 	assert.Equal(t, "exact", matchType)
 }
 
 func TestScorePrefixMatch(t *testing.T) {
 	e := SearchEntry{Name: "session", Domain: DomainCommand, Summary: "Manage sessions"}
-	score, matchType := scoreEntry("sess", e)
+	score, matchType := scoreEntry("sess", e, nil)
 	assert.Equal(t, 500, score)
 	assert.Equal(t, "prefix", matchType)
 }
 
 func TestScorePrefixMatchCaseInsensitive(t *testing.T) {
 	e := SearchEntry{Name: "session", Domain: DomainCommand}
-	score, matchType := scoreEntry("SESS", e)
+	score, matchType := scoreEntry("SESS", e, nil)
 	assert.Equal(t, 500, score)
 	assert.Equal(t, "prefix", matchType)
 }
@@ -155,7 +155,7 @@ func TestScoreKeywordMatch(t *testing.T) {
 		Keywords: []string{"create"},
 	}
 	// "create" matches keyword (+150) and name word (+120) and summary (+100).
-	score, matchType := scoreEntry("create", e)
+	score, matchType := scoreEntry("create", e, nil)
 	assert.Equal(t, "keyword", matchType)
 	// At minimum keyword hit: 150 + 120 + 100 = 370, plus all-match bonus 100 = 470.
 	assert.Greater(t, score, 0)
@@ -171,8 +171,8 @@ func TestScoreKeywordAllMatchBonus(t *testing.T) {
 	}
 	// Single token "pipeline" → keyword match, no all-match bonus possible with 1 token.
 	// Two tokens "sync pipeline" both match → all-match bonus (+100) added.
-	score1, _ := scoreEntry("pipeline", e)
-	score2, _ := scoreEntry("sync pipeline", e)
+	score1, _ := scoreEntry("pipeline", e, nil)
+	score2, _ := scoreEntry("sync pipeline", e, nil)
 	// Two matching tokens should produce a higher score than one.
 	assert.Greater(t, score2, score1)
 }
@@ -180,7 +180,7 @@ func TestScoreKeywordAllMatchBonus(t *testing.T) {
 func TestScoreFuzzyMatch(t *testing.T) {
 	e := SearchEntry{Name: "session", Domain: DomainCommand}
 	// "sesion" is distance 1 from "session".
-	score, matchType := scoreEntry("sesion", e)
+	score, matchType := scoreEntry("sesion", e, nil)
 	assert.Equal(t, "fuzzy", matchType)
 	assert.Equal(t, 250, score) // 300 - 50*1
 }
@@ -188,7 +188,7 @@ func TestScoreFuzzyMatch(t *testing.T) {
 func TestScoreFuzzyMatchTooFar(t *testing.T) {
 	e := SearchEntry{Name: "rite", Domain: DomainCommand}
 	// "xyzabc" is far from "rite" — should not match.
-	score, matchType := scoreEntry("xyzabc", e)
+	score, matchType := scoreEntry("xyzabc", e, nil)
 	assert.Equal(t, 0, score)
 	assert.Equal(t, "none", matchType)
 }
@@ -197,8 +197,8 @@ func TestScoreContextBoost(t *testing.T) {
 	boosted := SearchEntry{Name: "session", Domain: DomainRite, Boosted: true}
 	plain := SearchEntry{Name: "session", Domain: DomainRite, Boosted: false}
 
-	scoreBoosted, _ := scoreEntry("session", boosted)
-	scorePlain, _ := scoreEntry("session", plain)
+	scoreBoosted, _ := scoreEntry("session", boosted, nil)
+	scorePlain, _ := scoreEntry("session", plain, nil)
 
 	assert.Equal(t, scorePlain+200, scoreBoosted)
 }
@@ -210,7 +210,82 @@ func TestScoreNoMatch(t *testing.T) {
 		Summary:     "A rite is a workflow context",
 		Description: "Rites define the active workflow",
 	}
-	score, matchType := scoreEntry("zygote", e)
+	score, matchType := scoreEntry("zygote", e, nil)
 	assert.Equal(t, 0, score)
 	assert.Equal(t, "none", matchType)
+}
+
+// --- scoreEntry with synonyms ---
+
+func TestScoreEntryWithSynonymExpansion(t *testing.T) {
+	// "deploy" should score >0 against an SRE-like rite via expansion.
+	e := SearchEntry{
+		Name:        "sre",
+		Domain:      DomainRite,
+		Summary:     "Site reliability engineering",
+		Description: "Manages reliability and operations",
+		Keywords:    []string{"reliability", "operations", "incident response"},
+	}
+	synonyms := NewStaticSynonymSource()
+
+	score, matchType := scoreEntry("deploy", e, synonyms)
+	assert.Greater(t, score, 0, "deploy should match SRE rite via synonym expansion")
+	assert.Equal(t, "keyword", matchType)
+}
+
+func TestScoreEntryOriginalOutscoresExpanded(t *testing.T) {
+	// Direct "sre" query should outscore "deploy" (which expands to include "sre").
+	e := SearchEntry{
+		Name:        "sre",
+		Domain:      DomainRite,
+		Summary:     "Site reliability engineering",
+		Description: "Manages reliability and operations",
+		Keywords:    []string{"reliability", "operations"},
+	}
+	synonyms := NewStaticSynonymSource()
+
+	directScore, _ := scoreEntry("sre", e, synonyms)
+	expandedScore, _ := scoreEntry("deploy", e, synonyms)
+
+	assert.Greater(t, directScore, expandedScore,
+		"direct query 'sre' (score=%d) should outscore expanded query 'deploy' (score=%d)",
+		directScore, expandedScore)
+}
+
+func TestScoreEntryNilSynonymsNoExpansion(t *testing.T) {
+	// nil synonym source should produce identical scores to pre-synonym behavior.
+	e := SearchEntry{
+		Name:        "session",
+		Domain:      DomainCommand,
+		Summary:     "Manage sessions",
+		Description: "Session lifecycle management",
+		Keywords:    []string{"lifecycle"},
+	}
+
+	scoreWithNil, matchTypeNil := scoreEntry("session", e, nil)
+	assert.Equal(t, 1000, scoreWithNil)
+	assert.Equal(t, "exact", matchTypeNil)
+}
+
+func TestScoreEntryExpandedTokensDontAffectExactMatch(t *testing.T) {
+	// "deploy" should NOT produce a Tier 1 match even if expansion includes the entry name.
+	// Create a synonym source where "deploy" expands to "myrite".
+	src := &StaticSynonymSource{
+		synonyms: map[string][]string{
+			"deploy": {"myrite"},
+		},
+	}
+	e := SearchEntry{
+		Name:   "myrite",
+		Domain: DomainRite,
+	}
+
+	score, matchType := scoreEntry("deploy", e, src)
+	// Should NOT be "exact" (Tier 1). Expanded tokens only affect Tier 3.
+	assert.NotEqual(t, "exact", matchType,
+		"expanded tokens should not create exact matches")
+	// But it should match via keyword expansion (name word match at reduced weight).
+	if score > 0 {
+		assert.Equal(t, "keyword", matchType)
+	}
 }

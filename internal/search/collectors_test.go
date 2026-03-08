@@ -283,3 +283,98 @@ routing:
 	assert.True(t, names["analyst"])
 	assert.True(t, names["engineer"])
 }
+
+// --- CollectRites enrichment ---
+
+func TestCollectRitesWithOrchestratorKeywords(t *testing.T) {
+	root := buildTestRoot(t)
+	riteDir := filepath.Join(root, ".knossos", "rites", "sre-rite")
+	require.NoError(t, os.MkdirAll(riteDir, 0755))
+	writeTestFile(t, filepath.Join(riteDir, "manifest.yaml"), "name: sre-rite\ndescription: SRE management")
+
+	orchContent := `rite:
+  name: sre-rite
+  domain: site reliability engineering
+frontmatter:
+  description: "Coordinates reliability. Triggers: coordinate, orchestrate, reliability"
+routing:
+  engineer: "Implementation needed"
+`
+	writeTestFile(t, filepath.Join(riteDir, "orchestrator.yaml"), orchContent)
+
+	resolver := paths.NewResolver(root)
+	entries := CollectRites(resolver)
+
+	require.Len(t, entries, 1)
+	assert.Contains(t, entries[0].Keywords, "coordinate")
+	assert.Contains(t, entries[0].Keywords, "orchestrate")
+	assert.Contains(t, entries[0].Keywords, "reliability")
+}
+
+func TestCollectRitesWithDomainAlias(t *testing.T) {
+	root := buildTestRoot(t)
+	riteDir := filepath.Join(root, ".knossos", "rites", "hygiene")
+	require.NoError(t, os.MkdirAll(riteDir, 0755))
+	writeTestFile(t, filepath.Join(riteDir, "manifest.yaml"), "name: hygiene\ndescription: Code quality")
+
+	orchContent := `rite:
+  name: hygiene
+  domain: code quality
+frontmatter:
+  description: "Triggers: lint, cleanup"
+`
+	writeTestFile(t, filepath.Join(riteDir, "orchestrator.yaml"), orchContent)
+
+	resolver := paths.NewResolver(root)
+	entries := CollectRites(resolver)
+
+	require.Len(t, entries, 1)
+	assert.Contains(t, entries[0].Aliases, "code quality", "domain should be added as alias")
+}
+
+func TestCollectRitesSeparatesSummaryDescription(t *testing.T) {
+	root := buildTestRoot(t)
+	riteDir := filepath.Join(root, ".knossos", "rites", "test-rite")
+	require.NoError(t, os.MkdirAll(riteDir, 0755))
+	writeTestFile(t, filepath.Join(riteDir, "manifest.yaml"), "name: test-rite\ndescription: A test rite")
+
+	// Use YAML literal block scalar (|) to preserve newlines in description.
+	orchContent := `rite:
+  name: test-rite
+  domain: testing
+frontmatter:
+  description: |
+    Coordinates testing phases.
+    Triggers: validate, verify
+    Use when: testing needed
+`
+	writeTestFile(t, filepath.Join(riteDir, "orchestrator.yaml"), orchContent)
+
+	resolver := paths.NewResolver(root)
+	entries := CollectRites(resolver)
+
+	require.Len(t, entries, 1)
+	// Summary should be first line only.
+	assert.Equal(t, "Coordinates testing phases.", entries[0].Summary)
+	// Description should be the full text.
+	assert.Contains(t, entries[0].Description, "Triggers: validate, verify")
+	assert.Contains(t, entries[0].Description, "Use when: testing needed")
+}
+
+func TestCollectRitesNoOrchestratorGraceful(t *testing.T) {
+	root := buildTestRoot(t)
+	riteDir := filepath.Join(root, ".knossos", "rites", "plain-rite")
+	require.NoError(t, os.MkdirAll(riteDir, 0755))
+	writeTestFile(t, filepath.Join(riteDir, "manifest.yaml"), "name: plain-rite\ndescription: A plain rite")
+	// No orchestrator.yaml — enrichment should be skipped gracefully.
+
+	resolver := paths.NewResolver(root)
+	entries := CollectRites(resolver)
+
+	require.Len(t, entries, 1)
+	assert.Equal(t, "plain-rite", entries[0].Name)
+	assert.Equal(t, "A plain rite", entries[0].Summary)
+	assert.Equal(t, "A plain rite", entries[0].Description)
+	assert.Empty(t, entries[0].Keywords, "no orchestrator means no keywords")
+	assert.Empty(t, entries[0].Aliases, "no orchestrator means no aliases")
+}

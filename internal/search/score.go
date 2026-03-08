@@ -124,7 +124,9 @@ func extractKeywords(description string) []string {
 
 // scoreEntry scores a single entry against a query.
 // Returns the score (higher is better) and a match-type label.
-func scoreEntry(query string, entry SearchEntry) (int, string) {
+// When synonyms is non-nil, query tokens are expanded and scored at reduced weight.
+// Expanded tokens only affect Tier 3 (keyword scoring), not Tier 1 or Tier 2.
+func scoreEntry(query string, entry SearchEntry, synonyms SynonymSource) (int, string) {
 	qLower := strings.ToLower(query)
 	nameLower := strings.ToLower(entry.Name)
 
@@ -207,6 +209,32 @@ func scoreEntry(query string, entry SearchEntry) (int, string) {
 
 			if !tokMatched {
 				allMatched = false
+			}
+		}
+
+		// Expanded-token scoring: synonyms scored at reduced weight.
+		// Expanded tokens do NOT affect allMatched or Tier 1/2.
+		if synonyms != nil {
+			for _, tok := range tokens {
+				expanded := expandSynonyms(tok, synonyms)
+				for _, exp := range expanded {
+					// Exact keyword match: +90 (150 * 0.6).
+					if entryKeywords[exp] {
+						keywordScore += int(150 * synonymWeightFactor)
+					}
+					// Exact word in entry name: +72 (120 * 0.6).
+					if nameWords[exp] {
+						keywordScore += int(120 * synonymWeightFactor)
+					}
+					// Contains in summary: +60 (100 * 0.6).
+					if strings.Contains(sumLower, exp) {
+						keywordScore += int(100 * synonymWeightFactor)
+					}
+					// Contains in description: +30 (50 * 0.6).
+					if strings.Contains(descLower, exp) {
+						keywordScore += int(50 * synonymWeightFactor)
+					}
+				}
 			}
 		}
 

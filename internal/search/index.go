@@ -10,7 +10,8 @@ import (
 
 // SearchIndex holds all indexed entries from all data sources.
 type SearchIndex struct {
-	entries []SearchEntry
+	entries  []SearchEntry
+	synonyms SynonymSource // nil = no expansion (backward compatible)
 }
 
 // Build creates a SearchIndex by collecting entries from all data sources.
@@ -46,7 +47,18 @@ func Build(root *cobra.Command, resolver *paths.Resolver) *SearchIndex {
 		deduped = append(deduped, e)
 	}
 
-	return &SearchIndex{entries: deduped}
+	// Construct synonym source: static always available, orchestrator when
+	// project context exists. Preserves invariant: ari ask works without a project.
+	var synonyms SynonymSource
+	static := NewStaticSynonymSource()
+	if hasProject {
+		orch := NewOrchestratorSynonymSource(resolver.RitesDir())
+		synonyms = NewCompositeSynonymSource(static, orch)
+	} else {
+		synonyms = static
+	}
+
+	return &SearchIndex{entries: deduped, synonyms: synonyms}
 }
 
 // Search finds entries matching the query, scored and ranked.
@@ -71,7 +83,7 @@ func (idx *SearchIndex) Search(query string, opts SearchOptions) []SearchResult 
 			continue
 		}
 
-		score, matchType := scoreEntry(query, e)
+		score, matchType := scoreEntry(query, e, idx.synonyms)
 		if score <= 0 {
 			continue
 		}
