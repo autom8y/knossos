@@ -14,13 +14,15 @@ import (
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/registry"
+	"github.com/autom8y/knossos/internal/suggest"
 )
 
 // subagentResult is the output of subagent hooks.
 // SubagentStart/SubagentStop are side-effect hooks (logging only) -- they cannot block.
 type subagentResult struct {
-	Recorded bool   `json:"recorded"`
-	Reason   string `json:"reason,omitempty"`
+	Recorded    bool                   `json:"recorded"`
+	Reason      string                 `json:"reason,omitempty"`
+	Suggestions []suggest.Suggestion   `json:"suggestions,omitempty"` // H5: next-step suggestions
 }
 
 // subagentPayload represents the relevant fields from the stdin JSON payload
@@ -202,7 +204,15 @@ func runSubagentStopCore(ctx *cmdContext, printer *output.Printer) error {
 		return outputSubagentResult(printer, false, "clew write failed")
 	}
 
-	return outputSubagentResult(printer, true, "")
+	// H5: Generate subagent completion suggestions (fail-open, <2ms pure function)
+	suggestInput := &suggest.SubagentInput{
+		AgentName: agentInfo.AgentName,
+		AgentType: agentInfo.AgentType,
+	}
+	suggestions := suggest.SubagentStopSuggestions(suggestInput)
+
+	result := subagentResult{Recorded: true, Suggestions: suggestions}
+	return printer.Print(result)
 }
 
 // outputSubagentResult outputs the subagent hook result as JSON.

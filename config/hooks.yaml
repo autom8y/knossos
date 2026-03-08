@@ -88,6 +88,14 @@ hooks:
     priority: 5
     description: "Tracks artifacts and commits via ari hook clew"
 
+  # H5: Phase-transition detection for proactive suggestions
+  - event: PostToolUse
+    command: "ari hook suggest --output json"
+    timeout: 5
+    async: true
+    priority: 85
+    description: "Detects phase transitions and surfaces contextual suggestions"
+
   - event: PostToolUse
     command: "ari hook budget --output json"
     timeout: 3

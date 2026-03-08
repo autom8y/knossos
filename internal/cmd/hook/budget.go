@@ -11,15 +11,17 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/registry"
+	"github.com/autom8y/knossos/internal/suggest"
 )
 
 // BudgetOutput represents the output of the budget hook.
 type BudgetOutput struct {
-	Count    int    `json:"count"`
-	Warn     int    `json:"warn_threshold,omitempty"`
-	Park     int    `json:"park_threshold,omitempty"`
-	Severity string `json:"severity,omitempty"` // "warn", "park", or empty
-	Message  string `json:"message,omitempty"`
+	Count       int                    `json:"count"`
+	Warn        int                    `json:"warn_threshold,omitempty"`
+	Park        int                    `json:"park_threshold,omitempty"`
+	Severity    string                 `json:"severity,omitempty"` // "warn", "park", or empty
+	Message     string                 `json:"message,omitempty"`
+	Suggestions []suggest.Suggestion   `json:"suggestions,omitempty"` // H5: budget-aware suggestions
 }
 
 // Text implements output.Textable for text output.
@@ -134,6 +136,18 @@ func runBudget(ctx *cmdContext) error {
 			// Write marker (best-effort)
 			_ = os.WriteFile(parkMarker, []byte("1"), 0644)
 			fmt.Fprintf(os.Stderr, "[cognitive-budget] Alert: %s\n", out.Message)
+		}
+	}
+
+	// H5: Generate budget suggestions on threshold crossings (fail-open, <1ms)
+	if out.Severity != "" {
+		suggestInput := &suggest.SessionInput{
+			ToolCount:     count,
+			WarnThreshold: warnThreshold,
+			ParkThreshold: parkThreshold,
+		}
+		if suggestions := suggest.BudgetWarningSuggestions(suggestInput); len(suggestions) > 0 {
+			out.Suggestions = suggestions
 		}
 	}
 

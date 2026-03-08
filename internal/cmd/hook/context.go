@@ -20,6 +20,7 @@ import (
 	"github.com/autom8y/knossos/internal/materialize/source"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
+	"github.com/autom8y/knossos/internal/suggest"
 )
 
 // gitCommandTimeout is the maximum time allowed for git subprocesses.
@@ -56,7 +57,8 @@ type ContextOutput struct {
 	BaseBranch      string            `json:"base_branch,omitempty"`
 	AvailableRites  []string          `json:"available_rites,omitempty"`
 	AvailableAgents []string          `json:"available_agents,omitempty"`
-	KnowStatus      string            `json:"know_status,omitempty"` // .know/ freshness summary line
+	KnowStatus      string                `json:"know_status,omitempty"`  // .know/ freshness summary line
+	Suggestions     []suggest.Suggestion  `json:"suggestions,omitempty"` // H5: proactive suggestions
 }
 
 // Text implements output.Textable for YAML frontmatter output.
@@ -169,6 +171,14 @@ func (c ContextOutput) Text() string {
 	if c.CompactState != "" {
 		b.WriteString("\n## Recovered State (from PreCompact checkpoint)\n")
 		b.WriteString(c.CompactState)
+	}
+
+	// H5: Suggestions section (post-frontmatter, like Throughline and CompactState)
+	if len(c.Suggestions) > 0 {
+		b.WriteString("\n## Suggestions\n")
+		for _, s := range c.Suggestions {
+			b.WriteString(fmt.Sprintf("- %s\n", s.Text))
+		}
 	}
 
 	return b.String()
@@ -321,6 +331,20 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	// Check .know/ status (best-effort, <100ms — just readdir + parse frontmatter)
 	if knowLine := knowStatus(projectDir, hookEnv.CWD); knowLine != "" {
 		result.KnowStatus = knowLine
+	}
+
+	// H5: Generate proactive suggestions (fail-open, advisory only)
+	suggestInput := &suggest.SessionInput{
+		SessionID:   sessCtx.SessionID,
+		Initiative:  sessCtx.Initiative,
+		Phase:       sessCtx.CurrentPhase,
+		Rite:        activeRite,
+		Complexity:  sessCtx.Complexity,
+		ParkSource:  sessCtx.ParkSource,
+		StrandCount: len(sessCtx.Strands),
+	}
+	if suggestions := suggest.SessionStartSuggestions(suggestInput); len(suggestions) > 0 {
+		result.Suggestions = suggestions
 	}
 
 	// Emit session_start event to clew log (best-effort, non-blocking)
