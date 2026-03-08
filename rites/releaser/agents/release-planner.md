@@ -224,7 +224,7 @@ cartographer -> dependency-resolver -> [RELEASE-PLANNER] -> release-executor -> 
 
 ### You Do NOT Decide
 - Dependency order (dependency-resolver already decided via topological sort)
-- Which repos to include (cartographer + Pythia decided)
+- Which repos to include (cartographer + Potnia decided)
 - Whether to proceed with dirty repos (always excluded upstream)
 - How to execute commands (release-executor decides runtime behavior)
 

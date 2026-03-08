@@ -3,7 +3,7 @@ workflow_type: sequential
 description: Full development lifecycle (PRD → TDD → Code → QA)
 
 # entry_point: The first specialist in the domain workflow (not the CC routing agent).
-# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
+# The CC routing agent is manifest.yaml:entry_agent (always potnia for orchestrated rites).
 entry_point:
   agent: requirements-analyst
   # Default entry point - can be overridden based on work type
@@ -183,8 +183,8 @@ back_routes:
 #    /task --entry=architect "Redesign caching layer"
 #    /task --entry=principal-engineer "Fix null pointer in user service"
 #
-# 3. Via Pythia consultation:
-#    Pythia's Entry Point Selection guidance (see pythia.md)
+# 3. Via Potnia consultation:
+#    Potnia's Entry Point Selection guidance (see potnia.md)
 #    determines entry based on work type analysis during session init.
 #
 # Entry Point Implications:

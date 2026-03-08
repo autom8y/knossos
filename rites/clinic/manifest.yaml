@@ -7,7 +7,7 @@ description: "Investigation lifecycle for production errors (Intake -> Examinati
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
 # This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
-entry_agent: pythia
+entry_agent: potnia
 
 phases:
   - name: intake
@@ -31,7 +31,7 @@ phases:
     description: Produce fix specifications and cross-rite handoff artifacts
 
 agents:
-  - name: pythia
+  - name: potnia
     role: Coordinates investigation phases, gates transitions, manages back-routes (loose-leash)
     archetype: orchestrator
 

@@ -214,7 +214,7 @@ func TestRunSnapshot_OrchestratorTextOutput(t *testing.T) {
 		clewcontract.NewTypedDecisionRecordedEvent("use CSS variables", "runtime perf", nil),
 	})
 
-	if err := runSnapshot(ctx, snapshotOptions{role: "orchestrator", agentName: "pythia"}); err != nil {
+	if err := runSnapshot(ctx, snapshotOptions{role: "orchestrator", agentName: "potnia"}); err != nil {
 		t.Fatalf("runSnapshot orchestrator returned error: %v", err)
 	}
 }
@@ -243,7 +243,7 @@ func TestRunSnapshot_JSONOutput(t *testing.T) {
 	jsonFormat := "json"
 	ctx.Output = &jsonFormat
 
-	if err := runSnapshot(ctx, snapshotOptions{role: "orchestrator", agentName: "pythia"}); err != nil {
+	if err := runSnapshot(ctx, snapshotOptions{role: "orchestrator", agentName: "potnia"}); err != nil {
 		t.Fatalf("runSnapshot JSON output returned error: %v", err)
 	}
 }
@@ -282,7 +282,7 @@ func TestRunSnapshot_JSONStructureViaLibrary(t *testing.T) {
 
 	snap, err := sess.GenerateSnapshot(sessCtx, eventsPath, sess.SnapshotConfig{
 		Role:      sess.RoleOrchestrator,
-		AgentName: "pythia",
+		AgentName: "potnia",
 	})
 	if err != nil {
 		t.Fatalf("GenerateSnapshot error: %v", err)

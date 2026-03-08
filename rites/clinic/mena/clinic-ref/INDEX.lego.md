@@ -32,7 +32,7 @@ All investigation artifacts live under `.sos/wip/ERRORS/{investigation-slug}/`.
 
 ## Session Resume
 
-On `/sos resume`, Pythia reads `index.yaml` status field:
+On `/sos resume`, Potnia reads `index.yaml` status field:
 
 | Status Field | Dispatch To |
 |--------------|-------------|
@@ -43,7 +43,7 @@ On `/sos resume`, Pythia reads `index.yaml` status field:
 | `complete` | Report to user: investigation finished |
 | `{phase}:{back_route}_round_{N}` | Agent for that phase, with back-route context |
 
-Multiple investigation directories → Pythia presents the list. Does not auto-select.
+Multiple investigation directories → Potnia presents the list. Does not auto-select.
 
 ## Investigation Slug Naming
 

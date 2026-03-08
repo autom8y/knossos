@@ -5,7 +5,7 @@
 ### Added
 
 - Initial release of the thermia rite
-- Five agents: pythia (orchestrator), heat-mapper, systems-thermodynamicist, capacity-engineer, thermal-monitor
+- Five agents: potnia (orchestrator), heat-mapper, systems-thermodynamicist, capacity-engineer, thermal-monitor
 - Four-phase sequential workflow: assessment -> architecture -> specification -> validation
 - Three complexity levels: QUICK (2 phases), STANDARD (4 phases), DEEP (4 phases at extended depth)
 - Two back-routes: assessment_gap (architecture -> assessment, max 1), design_inconsistency (validation -> specification, max 1)
@@ -24,4 +24,4 @@
 - Three complexity levels rather than emergent depth: cache architecture problems can be pre-classified (quick triage vs. full design vs. post-mortem) unlike production debugging
 - Capacity-engineer requires derived numbers, not gut-feel: "2GB is not a capacity plan" is a first-class anti-pattern
 - Thermal-monitor uses miss rate, not hit rate, as the primary health signal: hit rate is a vanity metric; miss rate is actionable
-- Cross-rite notes absent from mid-workflow agents (heat-mapper, thermodynamicist, capacity-engineer) by design: outbound routing is Pythia and thermal-monitor responsibility
+- Cross-rite notes absent from mid-workflow agents (heat-mapper, thermodynamicist, capacity-engineer) by design: outbound routing is Potnia and thermal-monitor responsibility

@@ -1,14 +1,14 @@
 ---
-name: socratic-design-constraints-criteria
-description: "Socratic challenge criteria for .know/design-constraints.md assumption exposure. Use when: theoros is surfacing constraints that exist in the codebase but are not documented in design-constraints.md. Triggers: socratic design constraints challenge, undocumented constraints, hidden constraints, assumption exposure audit, design constraints gaps."
-scope: socratic
+name: dialectic-design-constraints-criteria
+description: "Dialectic challenge criteria for .know/design-constraints.md assumption exposure. Use when: theoros is surfacing constraints that exist in the codebase but are not documented in design-constraints.md. Triggers: dialectic design constraints challenge, undocumented constraints, hidden constraints, assumption exposure audit, design constraints gaps."
+scope: dialectic
 ---
 
-# socratic-design-constraints Challenge Criteria
+# dialectic-design-constraints Challenge Criteria
 
 > **ASSUMPTION-EXPOSURE GRADING — READ BEFORE PROCEEDING**
 >
-> This is a socratic challenge domain. Grading measures how thoroughly the theoros SURFACES CONSTRAINTS that exist in the codebase but are not documented in `.know/design-constraints.md`.
+> This is a dialectic challenge domain. Grading measures how thoroughly the theoros SURFACES CONSTRAINTS that exist in the codebase but are not documented in `.know/design-constraints.md`.
 >
 > - **A (Excellent)** = MANY undocumented constraints surfaced — thorough analysis
 > - **F (Failing)** = FEW undocumented constraints surfaced — shallow analysis, likely missed constraints
@@ -180,5 +180,5 @@ Example (shallow analysis missing most constraints):
 - [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
 - [design-constraints-criteria](design-constraints.lego.md) -- Direct design constraints audit
 - [radar-constraint-violations-criteria](radar-constraint-violations.lego.md) -- Radar signal: constraint violations in code
-- [socratic-architecture-criteria](socratic-architecture.lego.md) -- Companion: assumption exposure for architecture document
+- [dialectic-architecture-criteria](dialectic-architecture.lego.md) -- Companion: assumption exposure for architecture document
 - [grading schema](../schemas/grading.lego.md) -- Grade calculation rules

@@ -88,14 +88,14 @@ The diagnostician reads the index (~2-5k tokens) and selectively loads evidence 
 
 ### You Escalate
 - Evidence requires credentials or access you do not have -> escalate to user
-- Systems not in the collection plan that look relevant -> escalate to Pythia for scope expansion decision
-- Evidence collection exceeding expected scope (10+ systems involved) -> escalate to Pythia for investigation splitting decision
+- Systems not in the collection plan that look relevant -> escalate to Potnia for scope expansion decision
+- Evidence collection exceeding expected scope (10+ systems involved) -> escalate to Potnia for investigation splitting decision
 
 ### You Do NOT Decide
 - What the evidence means (diagnostician domain)
 - Whether to pursue a hypothesis (diagnostician domain)
 - Fix strategy (attending domain)
-- Investigation scope changes (triage nurse or Pythia domain)
+- Investigation scope changes (triage nurse or Potnia domain)
 
 ## Approach
 
@@ -126,7 +126,7 @@ When invoked via evidence_gap back-route from diagnostician:
 3. Write to next sequential evidence file
 4. Update index.yaml with new entry
 5. Do NOT re-collect previously gathered evidence
-6. If the request names a system NOT in the original collection plan, escalate to Pythia for scope expansion — do not collect from out-of-scope systems directly
+6. If the request names a system NOT in the original collection plan, escalate to Potnia for scope expansion — do not collect from out-of-scope systems directly
 
 ## Playbook Skill Loading
 

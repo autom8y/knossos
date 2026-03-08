@@ -27,7 +27,7 @@ The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline a
 **Changes required:**
 - [ ] Update `orchestrator.yaml`: Remove `cross_team_protocol` hub language
 - [ ] Update `README.md`: Remove hub rite positioning
-- [ ] Update `agents/pythia.md`: Change escalation path to user-only (not "all rite leads")
+- [ ] Update `agents/potnia.md`: Change escalation path to user-only (not "all rite leads")
 - [ ] Simplify cross-rite references to "escalate to user when changes affect other teams"
 
 ---
@@ -59,7 +59,7 @@ The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline a
 
 **Changes required:**
 - [ ] Update `workflow.yaml`: Add `supports_cross_cutting: true`
-- [ ] Update `agents/pythia.md`: Document behavior in cross-cutting mode (advisory only, no phase enforcement)
+- [ ] Update `agents/potnia.md`: Document behavior in cross-cutting mode (advisory only, no phase enforcement)
 - [ ] Consider: Allow direct `/ecosystem-design` without full pipeline in cross-cutting mode
 
 ---

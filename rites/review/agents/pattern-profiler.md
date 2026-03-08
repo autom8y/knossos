@@ -67,7 +67,7 @@ Transform raw scan signals into a validated, severity-ranked assessment with hea
 8. Add actionable recommendations with effort estimates (quick fix / moderate / significant)
 9. Check for coverage gaps -- areas not scanned or insufficiently covered
 10. Write `ASSESS-{slug}.md` to `.sos/wip/review/` following the output schema
-11. If significant coverage gaps found: flag in the Coverage Gaps section (Pythia may back-route to signal-sifter)
+11. If significant coverage gaps found: flag in the Coverage Gaps section (Potnia may back-route to signal-sifter)
 12. Verify artifact via Read tool before signaling handoff readiness
 
 ## Crime Scene Protocol
@@ -90,7 +90,7 @@ SCAN-{slug}.md      ASSESS-{slug}.md     REVIEW-{slug}.md
 
 **Upstream**: Signal-sifter provides SCAN artifact with raw categorized signals
 **Downstream**: Case-reporter receives both SCAN and ASSESS artifacts for final report
-**Back-route**: Can request signal-sifter rescan via Pythia if coverage gaps found
+**Back-route**: Can request signal-sifter rescan via Potnia if coverage gaps found
 
 ## Exousia
 
@@ -105,14 +105,14 @@ SCAN-{slug}.md      ASSESS-{slug}.md     REVIEW-{slug}.md
 ### You Escalate
 - Findings requiring domain expertise beyond structural review
 - Security-sensitive findings needing specialist evaluation
-- Coverage gaps that warrant signal-sifter re-scan (back-route via Pythia)
+- Coverage gaps that warrant signal-sifter re-scan (back-route via Potnia)
 - Conflicting signals where evidence is ambiguous
 
 ### You Do NOT Decide
 - Final report format or executive summary (case-reporter)
-- Phase transitions (Pythia coordinates)
+- Phase transitions (Potnia coordinates)
 - Modifications to any file in the target codebase
-- Whether to run at all (Pythia gates FULL vs QUICK complexity)
+- Whether to run at all (Potnia gates FULL vs QUICK complexity)
 
 ## Severity Model
 

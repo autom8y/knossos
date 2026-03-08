@@ -323,14 +323,14 @@ Skill("pinakes")
 ```
 
 Look up available challenge domains for the requested domain:
-- Check if `advocatus-{domain}` exists in the registry (scope: adversarial).
-- Check if `socratic-{domain}` exists in the registry (scope: socratic).
-- If NEITHER exists: ERROR — "No challenge criteria available for domain `{domain}`. Available challenge domains: {list all advocatus- and socratic- domains from registry}."
+- Check if `adversarial-{domain}` exists in the registry (scope: adversarial).
+- Check if `dialectic-{domain}` exists in the registry (scope: dialectic).
+- If NEITHER exists: ERROR — "No challenge criteria available for domain `{domain}`. Available challenge domains: {list all adversarial- and dialectic- domains from registry}."
 
 For each that exists, read its criteria:
 ```
-Read(".claude/skills/pinakes/domains/advocatus-{domain}.md")   # if exists
-Read(".claude/skills/pinakes/domains/socratic-{domain}.md")    # if exists
+Read(".claude/skills/pinakes/domains/adversarial-{domain}.md")   # if exists
+Read(".claude/skills/pinakes/domains/dialectic-{domain}.md")    # if exists
 ```
 
 ### Challenge Dispatch
@@ -339,7 +339,7 @@ Dispatch ALL available theoros for this domain in a SINGLE response block (paral
 
 ```
 Task(subagent_type="theoros", prompt="
-## Challenge Mode: {advocatus|socratic}-{domain}
+## Challenge Mode: {adversarial|dialectic}-{domain}
 
 You are running an ADVERSARIAL CHALLENGE of a .know/ file. Your goal is to find evidence that CONTRADICTS claims in the challenged document.
 
@@ -401,7 +401,7 @@ After theoros agents return:
 ```
 ## Challenge Report: {domain} — {YYYY-MM-DD}
 
-Challenge modes run: {list of advocatus-/socratic- domains dispatched}
+Challenge modes run: {list of adversarial-/dialectic- domains dispatched}
 Contradictions found: {N} ({high_count} HIGH, {medium_count} MEDIUM, {low_count} LOW)
 Claims checked: {N}
 

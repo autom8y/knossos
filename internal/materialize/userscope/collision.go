@@ -55,7 +55,7 @@ func (c *CollisionChecker) CheckCollision(manifestKey string) (bool, string) {
 	if !c.manifestLoaded || len(c.riteEntries) == 0 {
 		return false, ""
 	}
-	// Exact match (e.g., agents/consultant.md)
+	// Exact match (e.g., agents/pythia.md)
 	if c.riteEntries[manifestKey] {
 		return true, "(from manifest)"
 	}

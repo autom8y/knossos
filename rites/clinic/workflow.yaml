@@ -10,7 +10,7 @@ description: Investigation lifecycle for production errors (Intake -> Examinatio
 # format, not workflow structure.
 
 # entry_point: The first specialist in the domain workflow (not the CC routing agent).
-# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
+# The CC routing agent is manifest.yaml:entry_agent (always potnia for orchestrated rites).
 entry_point:
   agent: triage-nurse
   artifact:
@@ -103,7 +103,7 @@ phases:
 # - Simple bug: 4 agent invocations, ~30k tokens, no back-routes
 # - Compound failure: 6-8 invocations, ~150k tokens, 1-2 back-routes
 #
-# Pythia does not select complexity. There is nothing to select.
+# Potnia does not select complexity. There is nothing to select.
 
 complexity_levels:
   - name: INVESTIGATION
@@ -117,11 +117,11 @@ complexity_levels:
 # returning to earlier phases when new information invalidates assumptions or
 # reveals gaps. These are expected workflow patterns, not failure modes.
 #
-# IMPORTANT: Pythia enforces a maximum of 3 iterations on the evidence_gap
+# IMPORTANT: Potnia enforces a maximum of 3 iterations on the evidence_gap
 # back-route per investigation. This is a hard limit. Rationale: if three
 # rounds of targeted evidence collection have not resolved the gap, the
 # investigation likely needs human domain expertise or scope redefinition,
-# not more automated evidence gathering. Pythia should escalate to the user
+# not more automated evidence gathering. Potnia should escalate to the user
 # after hitting the limit rather than allowing unbounded looping.
 #
 # The diagnosis_insufficient back-route has a limit of 2. If the diagnostician
@@ -131,7 +131,7 @@ back_routes:
   # Back-route 1: Evidence Gap (diagnosis -> examination)
   # Most common back-route. Expected in ~40% of non-trivial investigations.
   # The diagnostician identifies specific evidence needed that was not collected.
-  # Pythia routes the targeted request directly to pathologist -- does NOT
+  # Potnia routes the targeted request directly to pathologist -- does NOT
   # re-gate intake or re-scope the investigation.
   - source_phase: diagnosis
     trigger: "evidence_gap"
@@ -209,11 +209,11 @@ evidence_architecture:
 # How investigation state survives park/resume cycles.
 #
 # Evidence files persist on disk naturally. The index.yaml status field provides
-# the recovery signal. On /sos resume, Pythia reads index.yaml to determine where
+# the recovery signal. On /sos resume, Potnia reads index.yaml to determine where
 # the investigation left off, then dispatches to the appropriate agent.
 #
 # Resume logic:
-#   1. Pythia reads .sos/wip/ERRORS/{slug}/index.yaml
+#   1. Potnia reads .sos/wip/ERRORS/{slug}/index.yaml
 #   2. Check the `status` field:
 #      - status: intake      -> dispatch to triage-nurse
 #      - status: examination  -> dispatch to pathologist
@@ -223,17 +223,17 @@ evidence_architecture:
 #   3. The dispatched agent reads index.yaml and its own prior artifacts
 #      to reconstruct working context
 #   4. For mid-back-route resumes: if the status field includes a back-route
-#      marker (e.g., "examination:evidence_gap_round_2"), Pythia passes this
+#      marker (e.g., "examination:evidence_gap_round_2"), Potnia passes this
 #      context so the agent knows it is in a back-route iteration, not a
 #      fresh phase entry
 #
 # Key invariant: index.yaml is ALWAYS the source of truth for investigation
 # state. If the status field says "diagnosis" but no diagnosis.md exists, the
 # investigation is mid-phase (diagnostician was working but did not finish).
-# Pythia resumes at that phase.
+# Potnia resumes at that phase.
 #
 # Multiple investigations: If multiple investigation directories exist under
-# .sos/wip/ERRORS/, Pythia presents the list to the user and asks which
+# .sos/wip/ERRORS/, Potnia presents the list to the user and asks which
 # to resume. It does not auto-select.
 
 session_resume:
@@ -316,11 +316,11 @@ cross_rite_handoffs:
 # =============================================================================
 # How slash commands and entry patterns route to agents.
 #
-# /clinic          -> pythia (orchestrated investigation, full lifecycle)
-# SRE escalation   -> pythia (receives incident-commander context, same workflow)
+# /clinic          -> potnia (orchestrated investigation, full lifecycle)
+# SRE escalation   -> potnia (receives incident-commander context, same workflow)
 #
 # Agent roles for command mapping:
-# /clinic    -> triage-nurse (entry agent, via Pythia orchestration)
+# /clinic    -> triage-nurse (entry agent, via Potnia orchestration)
 # /build     -> not applicable (clinic does not implement fixes)
 # /qa        -> not applicable (clinic does not validate fixes)
 

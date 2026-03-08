@@ -213,7 +213,7 @@ When designing a new rite reveals:
 
 ## Staying Canonical
 
-When creating new rites, you MUST work with the Agent Curator to ensure the Consultant knowledge base is updated. New rites that aren't reflected in the Consultant's knowledge leave users unable to discover them via `/consult`.
+When creating new rites, you MUST work with the Agent Curator to ensure the Pythia knowledge base is updated. New rites that aren't reflected in the Pythia's knowledge leave users unable to discover them via `/consult`.
 
 **Required updates** (handled by Agent Curator at end of workflow):
 - ecosystem-map.md

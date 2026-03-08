@@ -304,7 +304,7 @@ Validates workflow YAML files against schema requirements including required fie
 ```
 workflow.yaml
     |
-    +-- Defines phase sequence for Pythia
+    +-- Defines phase sequence for Potnia
     |
     +-- Maps complexity to phase selection
     |

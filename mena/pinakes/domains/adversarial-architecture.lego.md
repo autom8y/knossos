@@ -1,14 +1,14 @@
 ---
-name: advocatus-architecture-criteria
-description: "Adversarial challenge criteria for .know/architecture.md accuracy. Use when: theoros is running advocatus diaboli challenge mode to find structural evidence that contradicts the documented architecture. Triggers: advocatus architecture challenge, challenge architecture, architecture accuracy, adversarial architecture audit."
+name: adversarial-architecture-criteria
+description: "Adversarial challenge criteria for .know/architecture.md accuracy. Use when: theoros is running adversarial challenge mode to find structural evidence that contradicts the documented architecture. Triggers: adversarial architecture challenge, challenge architecture, architecture accuracy, adversarial architecture audit."
 scope: adversarial
 ---
 
-# advocatus-architecture Challenge Criteria
+# adversarial-architecture Challenge Criteria
 
 > **INVERTED GRADING — READ BEFORE PROCEEDING**
 >
-> This is an adversarial (advocatus diaboli) domain. Grading is the OPPOSITE of a standard audit.
+> This is an adversarial domain. Grading is the OPPOSITE of a standard audit.
 >
 > - **A (Excellent)** = FEW contradictions found — the architecture document is ACCURATE
 > - **F (Failing)** = MANY contradictions found — the architecture document is INACCURATE
@@ -159,5 +159,5 @@ Example (architecture document with notable drift):
 - [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
 - [architecture-criteria](architecture.lego.md) -- Direct architecture compliance audit (confirmatory, not adversarial)
 - [radar-architecture-decay-criteria](radar-architecture-decay.lego.md) -- Radar signal for architectural decay
-- [socratic-architecture-criteria](socratic-architecture.lego.md) -- Companion: assumption exposure for architecture document
+- [dialectic-architecture-criteria](dialectic-architecture.lego.md) -- Companion: assumption exposure for architecture document
 - [grading schema](../schemas/grading.lego.md) -- Grade calculation rules

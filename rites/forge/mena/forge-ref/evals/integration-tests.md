@@ -8,7 +8,7 @@
 2. **Agent Invocation**: Can each agent be invoked?
 3. **Handoff Test**: Do agents hand off correctly?
 4. **Command Test**: Do rite commands work?
-5. **Consultant Test**: Is rite discoverable via /consult?
+5. **Pythia Test**: Is rite discoverable via /consult?
 
 ## 1. Swap Test
 
@@ -121,7 +121,7 @@ Test each mapped command:
 | Correct agent | Invokes expected agent |
 | Context preserved | Agent has necessary context |
 
-## 5. Consultant Discovery Test
+## 5. Pythia Discovery Test
 
 ### Test Queries
 
@@ -201,7 +201,7 @@ Result: {PASS|FAIL}
 |---------|------------|---------------|--------|
 | /{name} | {✓|✗} | {✓|✗} | {P|F} |
 
-## Consultant Discovery
+## Pythia Discovery
 - [ ] Listed in /consult --rite
 - [ ] Routing by domain works
 - [ ] Profile accessible

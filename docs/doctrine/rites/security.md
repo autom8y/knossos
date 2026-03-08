@@ -17,7 +17,7 @@ The security rite provides workflows for comprehensive security assessment inclu
 | **Name** | security |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The security rite provides workflows for comprehensive security assessment inclu
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates security initiative phases |
+| **potnia** | Coordinates security initiative phases |
 | **threat-modeler** | Models threats and identifies security risks and attack vectors |
 | **compliance-architect** | Maps compliance requirements and designs control frameworks |
 | **penetration-tester** | Executes penetration tests and documents vulnerabilities |

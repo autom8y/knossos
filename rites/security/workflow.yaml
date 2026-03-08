@@ -3,7 +3,7 @@ workflow_type: sequential
 description: Security assessment, compliance mapping, penetration testing, and review
 
 # entry_point: The first specialist in the domain workflow (not the CC routing agent).
-# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
+# The CC routing agent is manifest.yaml:entry_agent (always potnia for orchestrated rites).
 entry_point:
   # Default entry for standalone security workflows
   default:
@@ -27,7 +27,7 @@ external_consultation:
   enabled: true
   allowed_invokers:
     - rite: 10x-dev
-      agents: [architect, pythia]
+      agents: [architect, potnia]
     - rite: sre
       agents: [incident-commander]
 

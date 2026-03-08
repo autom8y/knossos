@@ -1,5 +1,5 @@
 # Orchestrator configuration for releaser
-# Used by generate-orchestrator.sh to produce pythia.md
+# Used by generate-orchestrator.sh to produce potnia.md
 
 rite:
   name: releaser

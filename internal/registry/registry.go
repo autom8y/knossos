@@ -35,9 +35,9 @@ const (
 	SkillAttributionGuard RefKey = "skill.attribution-guard"
 
 	// Agents
-	AgentPythia          RefKey = "agent.pythia"
+	AgentPotnia          RefKey = "agent.potnia"
 	AgentMoirai          RefKey = "agent.moirai"
-	AgentConsultant      RefKey = "agent.consultant"
+	AgentPythia          RefKey = "agent.pythia"
 	AgentContextEngineer RefKey = "agent.context-engineer"
 
 	// CLI commands
@@ -78,9 +78,9 @@ var entries = map[RefKey]RefEntry{
 		Value:    "conventions",
 		Recovery: "Commits use user-only attribution. Load skill conventions for policy details.",
 	},
-	AgentPythia: {
+	AgentPotnia: {
 		Category: CategoryAgent,
-		Value:    "pythia",
+		Value:    "potnia",
 		Recovery: "",
 	},
 	AgentMoirai: {
@@ -88,9 +88,9 @@ var entries = map[RefKey]RefEntry{
 		Value:    "moirai",
 		Recovery: `Task(moirai, "<operation>")`,
 	},
-	AgentConsultant: {
+	AgentPythia: {
 		Category: CategoryAgent,
-		Value:    "consultant",
+		Value:    "pythia",
 		Recovery: "",
 	},
 	AgentContextEngineer: {
@@ -123,9 +123,9 @@ var entries = map[RefKey]RefEntry{
 // throughlineKeys lists agents that participate in throughline (resume) protocol.
 // These agents maintain conversation history across workflow phases.
 var throughlineKeys = []RefKey{
-	AgentPythia,
+	AgentPotnia,
 	AgentMoirai,
-	AgentConsultant,
+	AgentPythia,
 	AgentContextEngineer,
 }
 
@@ -163,7 +163,7 @@ func TaskDelegation(agent RefKey, ops ...string) string {
 }
 
 // ThroughlineAgents returns a map of agent value strings that participate in
-// the throughline (resume) protocol. Keys are agent values (e.g. "pythia"),
+// the throughline (resume) protocol. Keys are agent values (e.g. "potnia"),
 // values are always true.
 func ThroughlineAgents() map[string]bool {
 	result := make(map[string]bool, len(throughlineKeys))

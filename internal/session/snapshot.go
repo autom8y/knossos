@@ -15,7 +15,7 @@ import (
 type SnapshotRole string
 
 const (
-	// RoleOrchestrator is for agents that coordinate workflows (pythia, moirai, etc.).
+	// RoleOrchestrator is for agents that coordinate workflows (potnia, moirai, etc.).
 	// Budget: last 10 timeline entries, all decisions, blockers.
 	RoleOrchestrator SnapshotRole = "orchestrator"
 

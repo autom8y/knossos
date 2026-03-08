@@ -9,13 +9,13 @@
 
 | Agent | Role Clarity | Instruction Precision | Constraint Completeness | Example Quality | Structure Adherence | Token Efficiency | Total | Priority |
 |-------|-------------|----------------------|------------------------|-----------------|--------------------|--------------------|-------|----------|
-| pythia | 4 | 4 | 5 | 4 | 4 | 3 | 24/30 | 5 |
+| potnia | 4 | 4 | 5 | 4 | 4 | 3 | 24/30 | 5 |
 | incident-commander | 4 | 4 | 4 | 4 | 4 | 3 | 23/30 | 4 |
 | observability-engineer | 4 | 4 | 4 | 4 | 4 | 3 | 23/30 | 3 |
 | chaos-engineer | 4 | 4 | 4 | 4 | 4 | 2 | 22/30 | 2 |
 | platform-engineer | 4 | 4 | 4 | 3 | 4 | 2 | 21/30 | 1 |
 
-**Priority Order** (lowest score first): platform-engineer, chaos-engineer, observability-engineer, incident-commander, pythia
+**Priority Order** (lowest score first): platform-engineer, chaos-engineer, observability-engineer, incident-commander, potnia
 
 ---
 
@@ -129,7 +129,7 @@
 
 ---
 
-### 5. pythia.md (Priority 5 - Least Critical)
+### 5. potnia.md (Priority 5 - Least Critical)
 
 **Current Line Count**: 295 lines (within target)
 
@@ -176,7 +176,7 @@
 2. **chaos-engineer.md** - High priority (reference material bloat)
 3. **observability-engineer.md** - Medium priority (educational content redundancy)
 4. **incident-commander.md** - Medium priority (inline templates)
-5. **pythia.md** - Lowest priority (already well-structured, minor redundancy)
+5. **potnia.md** - Lowest priority (already well-structured, minor redundancy)
 
 ---
 

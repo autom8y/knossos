@@ -96,7 +96,7 @@ Overall: {PASS | FAIL}
 /eval-agent architect --adversarial
 
 # Test global agent
-/eval-agent consultant
+/eval-agent pythia
 ```
 
 ## Reference

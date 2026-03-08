@@ -41,7 +41,7 @@ available_rites:
   - ecosystem
   - 10x-dev
 available_agents:
-  - pythia
+  - potnia
   - integration-engineer
 know_status: "Codebase knowledge: 5 domains (architecture: fresh, ...)"
 ---

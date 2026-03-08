@@ -1,24 +1,24 @@
-# Consultant Synchronization Pattern
+# Pythia Synchronization Pattern
 
-> Keep the Consultant agent canonical with all ecosystem changes
+> Keep the Pythia agent canonical with all ecosystem changes
 
 ## Why This Matters
 
-The Consultant agent (`/consult`) is the ecosystem's meta-navigator. Users rely on it for:
+The Pythia agent (`/consult`) is the ecosystem's meta-navigator. Users rely on it for:
 - Rite recommendations
 - Command guidance
 - Workflow playbooks
 - Ecosystem navigation
 
-**If the Consultant has stale data, users get wrong guidance.**
+**If Pythia has stale data, users get wrong guidance.**
 
 ---
 
 ## Knowledge Base Structure
 
-Consultant knowledge is maintained in rite mena directories and shared skills:
+Pythia knowledge is maintained in rite mena directories and shared skills:
 
-- `mena/navigation/consult/` -- Consultant dromena and reference
+- `mena/navigation/consult/` -- Pythia dromena and reference
 - `prompting` skill -- Invocation patterns
 - `10x-workflow` skill -- Phase transitions and quality gates
 - Rite manifests at `$KNOSSOS_HOME/rites/*/orchestrator.yaml`
@@ -191,7 +191,7 @@ ari sync --rite {rite-name} --dry-run
 
 ### Wrong agent count
 
-**Symptom**: Consultant says rite has N agents, but it has M
+**Symptom**: Pythia says rite has N agents, but it has M
 **Fix**: Update agent-reference.md and ecosystem-map.md
 
 ---
@@ -200,12 +200,12 @@ ari sync --rite {rite-name} --dry-run
 
 Future enhancement: Create a validation script that:
 1. Scans knossos for all rites
-2. Compares against Consultant knowledge
+2. Compares against Pythia knowledge
 3. Reports discrepancies
 4. Suggests updates
 
 ```bash
-# Future: $KNOSSOS_HOME/validate-consultant.sh
+# Future: $KNOSSOS_HOME/validate-pythia.sh
 # Would check all rites are reflected in knowledge base
 ```
 
@@ -215,4 +215,4 @@ Future enhancement: Create a validation script that:
 
 - [INDEX.lego.md](../INDEX.lego.md) - Rite development overview
 - [validation/validation.md](../validation/validation.md) - Validation checklist
-- [consult](../../../../mena/navigation/consult/INDEX.dro.md) - Consultant reference
+- [consult](../../../../mena/navigation/consult/INDEX.dro.md) - Pythia reference

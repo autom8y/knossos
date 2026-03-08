@@ -5,7 +5,7 @@
 ### Added
 
 - Initial release of the clinic rite
-- Five agents: pythia (orchestrator), triage-nurse, pathologist, diagnostician, attending
+- Five agents: potnia (orchestrator), triage-nurse, pathologist, diagnostician, attending
 - Four-phase sequential workflow: intake -> examination -> diagnosis -> treatment
 - Three back-routes: evidence_gap (max 3), diagnosis_insufficient (max 2), scope_expansion (max 1, user-confirmed)
 - Evidence architecture: `.sos/wip/ERRORS/{investigation-slug}/` with index.yaml as shared coordination artifact

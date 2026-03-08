@@ -607,14 +607,14 @@ func TestJSON_RiteInfoOutput_ValidJSON(t *testing.T) {
 		Source: "project",
 		Active: true,
 		Agents: []RiteAgentInfo{
-			{Name: "pythia", File: "pythia.md", Role: "orchestrator"},
+			{Name: "potnia", File: "potnia.md", Role: "orchestrator"},
 		},
 		Skills: []RiteSkillInfo{
 			{Ref: "conventions", Path: ".claude/skills/conventions", External: false},
 		},
 		Workflow: &RiteWorkflowInfo{
 			Type:       "orchestrated",
-			EntryPoint: "pythia",
+			EntryPoint: "potnia",
 			Phases:     []string{"planning", "implementation", "review"},
 		},
 		Budget: &RiteBudgetInfo{
@@ -756,7 +756,7 @@ func TestText_Smoke_NoPanic(t *testing.T) {
 		},
 		{
 			name:     "RiteStatusOutput",
-			textable: RiteStatusOutput{Rite: "eco", IsActive: true, Path: "p", Description: "d", WorkflowType: "orchestrated", EntryPoint: "pythia", ManifestValid: true, ClaudeMDSynced: true},
+			textable: RiteStatusOutput{Rite: "eco", IsActive: true, Path: "p", Description: "d", WorkflowType: "orchestrated", EntryPoint: "potnia", ManifestValid: true, ClaudeMDSynced: true},
 			wantNon:  true,
 		},
 		{
@@ -931,7 +931,7 @@ func TestTabular_Rows_MatchHeaders(t *testing.T) {
 			"PantheonOutput",
 			PantheonOutput{
 				Rite:   "eco",
-				Agents: []PantheonAgent{{Name: "pythia", Model: "opus", Description: "orchestrator"}},
+				Agents: []PantheonAgent{{Name: "potnia", Model: "opus", Description: "orchestrator"}},
 			},
 		},
 	}

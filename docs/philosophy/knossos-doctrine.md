@@ -92,16 +92,16 @@ Some Minotaurs are small (a bug fix). Some are immense (a platform migration). T
 
 The tribute? **Status reports and demos.** The periodic demonstration that proves the labyrinth is being navigated, that progress is made, that the Minotaur will eventually fall.
 
-### The Oracle: Pythia
+### The Oracle: Potnia
 
-Before every great journey, Greeks consulted the **Pythia** at Delphi. In Knossos, the Pythia is the **orchestrator**—the voice consulted before and during the journey.
+Before every great journey, Greeks consulted the **Potnia** at Delphi. In Knossos, the Potnia is the **orchestrator**—the voice consulted before and during the journey.
 
-Unlike the historical Pythia, our oracle speaks clearly. The Pythia provides:
+Unlike the historical Potnia, our oracle speaks clearly. The Potnia provides:
 - Work breakdown and phase planning
 - Specialist routing (which hero for which labor)
 - Checkpoint guidance (what to do next)
 
-When uncertain, `/consult` the Pythia.
+When uncertain, `/consult` the Potnia.
 
 ### The Watchers: Aegeus
 
@@ -117,9 +117,9 @@ The Aegeus problem is **false confidence**. Tests pass but edge cases lurk. Buil
 
 ### The Transformer: Dionysus
 
-After Theseus abandoned Ariadne on Naxos, **Dionysus** found her and made her divine. He transformed her abandonment into elevation.
+After Theseus abandoned Ariadne on Naxos, **Dionysus** found her on that desolate shore and made her divine. He took what was abandoned and elevated it. He transformed grief into godhood — the apotheosis on Naxos, where the raw became the refined and the mortal became immortal.
 
-In Knossos, Dionysus is **code review**—the transformative process that elevates raw work into merged truth. Dionysus takes what was created in isolation and blesses it for union with the canon.
+In Knossos, Dionysus is **transformation of the raw into the refined** -- the cross-session knowledge synthesizer that reads abandoned session data and distills it into permanent wisdom. The `ari land` pipeline IS the Dionysian apotheosis: raw session archives left on Naxos (abandoned, ephemeral, mortal) are transformed into landed knowledge (persistent, refined, enduring) at `.sos/land/`.
 
 ### The Shore of Abandonment: Naxos
 
@@ -136,15 +136,15 @@ Sessions left too long on Naxos accumulate. They represent unfinished business, 
 
 Heroes are not gods. They tire. They forget. They can only carry so much. This is the doctrine of **Mortal Limits**—the fundamental constraint that shapes all design.
 
-### Athena's Wisdom
+### Weight Economy
 
-**Athena**, goddess of wisdom, taught that victory comes not from strength but from knowing what to bring. In Knossos, this manifests as:
+Victory comes not from strength but from knowing what to bring — and what to leave behind. In Knossos, this manifests as:
 
 - **Rite selection**: Load the right practice for the journey
 - **Skill curation**: Not all knowledge helps; some adds weight
 - **Hero summoning**: Call specialists with focused context, not everything
 
-The wisdom is bidirectional: knowing what to bring AND what to leave. Well-tooled travelers navigate better. Travelers who bring too much collapse under the weight.
+The economy is bidirectional: knowing what to bring AND what to leave. Well-tooled travelers navigate better. Travelers who bring too much collapse under the weight.
 
 ### Why Less Is More
 
@@ -343,7 +343,7 @@ White Sails are computed, not declared:
 3. **Check session type** → spikes and hotfixes are GRAY ceiling
 4. **Check proof completeness** → missing proofs are GRAY
 5. **Apply modifiers** → humans can downgrade, never self-upgrade
-6. **Check QA upgrade** → Dionysus (independent review) can elevate GRAY to WHITE
+6. **Check QA upgrade** → Dionysus (transformation of the raw into the refined) can elevate GRAY to WHITE
 
 ### Anti-Gaming Mechanisms
 
@@ -418,16 +418,16 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **Clotho** | Session bootstrap agent | The Fate who spins the clew into existence |
 | **Lachesis** | State mutation agent | The Fate who measures and tracks |
 | **Atropos** | Session termination agent | The Fate who cuts when complete |
-| **Pythia** | Orchestrator | The oracle who provides clear guidance |
+| **Potnia** | Orchestrator | The oracle who provides clear guidance |
 | **Daedalus** | Forge-rite | The builder of tools and agents |
 | **Minos** | Stakeholder | The commissioner who demands tribute |
 | **Minotaur** | The task/initiative | The reason you entered the labyrinth |
-| **Dionysus** | Code review | The transformer who elevates work to canon |
+| **Dionysus** | Cross-session knowledge synthesis (`agents/dionysus.md`, `ari land`) | Transformation of the raw into the refined — abandoned session data becomes persistent wisdom |
 | **Aegeus** | CI/CD, production monitors | Those watching from the cliff |
 | **Athens** | The main branch | Home—where you return by merging |
 | **Naxos** | Orphaned sessions, stale gray sails | The shore of abandonment |
 | **White Sails** | Confidence signal | The honest signal of safe return |
-| **Athena's Wisdom** | Rite selection, context curation | Knowing what to bring (and what to leave) |
+| **Weight Economy** | Rite selection, context curation | Knowing what to bring (and what to leave) |
 | **Rites** | Practice bundles | Invokable ceremonies for specific domains |
 | **Mortal Limits** | Context budget | The finite capacity of heroes |
 | **Tribute** | Demos, status reports | The periodic offering to Minos |
@@ -533,7 +533,7 @@ This section documents known divergences between the doctrine and the current im
 | `Moirai` (3 agents) | `state-mate` (1 agent) | moirai.md created; split pending |
 | `Rite` | `team-pack` | Doctrine complete; rename pending |
 | `ACTIVE_RITE` | `ACTIVE_RITE` | COMPLETE |
-| `Pythia` | `orchestrator` | Name alignment pending |
+| `Potnia` | `orchestrator` | Name alignment pending |
 | `heroes` | `agents` | Mythology uses heroes; technical docs use agents |
 
 ### Concepts Documented but Not Fully Implemented
@@ -543,7 +543,7 @@ This section documents known divergences between the doctrine and the current im
 | Three separate Moirai | Pending | Event-driven activation not yet implemented |
 | The Inscription seeding | Partial | CLAUDE.md exists but dynamic seeding is basic |
 | Naxos cleanup | Not implemented | Orphaned session detection missing |
-| Dionysus integration | Partial | Code review exists but not mythologically named |
+| Dionysus integration | Implemented | Cross-session knowledge synthesis via `agents/dionysus.md` and `ari land` |
 
 ### Prioritized Alignment Work
 

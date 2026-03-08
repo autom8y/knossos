@@ -140,7 +140,7 @@ cartographer -> [DEPENDENCY-RESOLVER] -> release-planner -> release-executor -> 
 
 ### You Do NOT Decide
 - Release ordering strategy beyond topological sort (release-planner)
-- Which repos to publish (release-planner and Pythia)
+- Which repos to publish (release-planner and Potnia)
 - How to resolve version mismatches (release-executor handles bump mechanics)
 
 ## Handoff Criteria

@@ -11,15 +11,15 @@ func TestCollisionChecker_ExactMatch(t *testing.T) {
 	c := &CollisionChecker{
 		manifestLoaded: true,
 		riteEntries: map[string]bool{
-			"agents/consultant.md": true,
+			"agents/pythia.md": true,
 			"commands/go/":         true,
 			"skills/guidance/":     true,
 		},
 	}
 
-	collision, reason := c.CheckCollision("agents/consultant.md")
+	collision, reason := c.CheckCollision("agents/pythia.md")
 	if !collision {
-		t.Error("Expected exact match collision for agents/consultant.md")
+		t.Error("Expected exact match collision for agents/pythia.md")
 	}
 	if reason != "(from manifest)" {
 		t.Errorf("Expected reason '(from manifest)', got %q", reason)
@@ -70,14 +70,14 @@ func TestCollisionChecker_AgentExactMatch(t *testing.T) {
 	c := &CollisionChecker{
 		manifestLoaded: true,
 		riteEntries: map[string]bool{
-			"agents/consultant.md":      true,
+			"agents/pythia.md":      true,
 			"agents/context-engineer.md": true,
 		},
 	}
 
-	collision, _ := c.CheckCollision("agents/consultant.md")
+	collision, _ := c.CheckCollision("agents/pythia.md")
 	if !collision {
-		t.Error("Expected exact match collision for agents/consultant.md")
+		t.Error("Expected exact match collision for agents/pythia.md")
 	}
 
 	collision, _ = c.CheckCollision("agents/context-engineer.md")

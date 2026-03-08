@@ -1,6 +1,6 @@
 ---
 name: agent-catalog
-description: "Rite catalog templates, Consultant sync checklists, and versioning scheme for the Agent Curator. Use when: integrating a new rite, updating Consultant knowledge base, creating rite profiles, deprecating rites, recording versions. Triggers: catalog entry, rite profile, Consultant sync, versioning, deprecation, rite integration."
+description: "Rite catalog templates, Pythia sync checklists, and versioning scheme for the Agent Curator. Use when: integrating a new rite, updating Pythia knowledge base, creating rite profiles, deprecating rites, recording versions. Triggers: catalog entry, rite profile, Pythia sync, versioning, deprecation, rite integration."
 ---
 
 # Agent Catalog Artifacts
@@ -9,14 +9,14 @@ description: "Rite catalog templates, Consultant sync checklists, and versioning
 
 ## Purpose
 
-Provides the canonical rite profile template, step-by-step Consultant sync checklists for new/modified/deprecated rites, and the versioning scheme with changelog format.
+Provides the canonical rite profile template, step-by-step Pythia sync checklists for new/modified/deprecated rites, and the versioning scheme with changelog format.
 
 ## Contents
 
 | Resource | Purpose |
 |----------|---------|
 | [Rite Profile Template](#rite-profile-template) | Standard documentation format for rite profiles |
-| [Consultant Sync Checklist](#consultant-sync-checklist) | File-by-file update guide for new/modified/deprecated rites |
+| [Pythia Sync Checklist](#pythia-sync-checklist) | File-by-file update guide for new/modified/deprecated rites |
 | [Versioning Scheme](#versioning-scheme) | Version numbering and changelog format |
 
 ## Rite Profile Template
@@ -72,7 +72,7 @@ Provides the canonical rite profile template, step-by-step Consultant sync check
 - [{other-rite}]({link}) - {relationship}
 ```
 
-## Consultant Sync Checklist
+## Pythia Sync Checklist
 
 ### New Rite
 

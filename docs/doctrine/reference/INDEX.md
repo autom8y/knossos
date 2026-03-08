@@ -85,7 +85,7 @@ Authoritative mapping from Greek mythology to SOURCE implementation (not project
 **Covers:**
 - Core components (Knossos, Ariadne, The Clew, Theseus, Heroes)
 - The Moirai (Clotho, Lachesis, Atropos)
-- Supporting elements (Inscription, White Sails, Rites, Daedalus, Pythia)
+- Supporting elements (Inscription, White Sails, Rites, Daedalus, Potnia)
 - Destinations and states (Athens, Naxos, Dionysus, Minos, Minotaur)
 - SOURCE vs PROJECTION distinction (critical!)
 - Materialization flow

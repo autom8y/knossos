@@ -83,14 +83,14 @@ If you disagree with the diagnosis or cannot translate it into an actionable fix
 - For compound failures: fix ordering (which to fix first and why)
 
 ### You Escalate
-- Diagnosis confidence too low for actionable handoff -> trigger diagnosis_insufficient back-route via Pythia
+- Diagnosis confidence too low for actionable handoff -> trigger diagnosis_insufficient back-route via Potnia
 - Fixes require architectural decisions beyond scope -> escalate to user
 - Multiple valid fix strategies with different risk/effort tradeoffs -> escalate to user for preference
 
 ### You Do NOT Decide
 - Root cause (diagnostician domain -- if you disagree, trigger back-route, do not re-diagnose)
 - Evidence collection strategy (pathologist domain)
-- Investigation scope (Pythia/triage nurse domain)
+- Investigation scope (Potnia/triage nurse domain)
 
 ## Approach
 

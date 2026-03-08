@@ -375,7 +375,7 @@ validate_migration_runbook() {
 
 ## Handoff Criteria
 
-When Migration Runbook phase completes, Pythia verifies:
+When Migration Runbook phase completes, Potnia verifies:
 
 - [ ] `type` is "migration-runbook"
 - [ ] `context_design` references existing Context Design

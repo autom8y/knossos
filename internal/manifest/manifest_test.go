@@ -134,9 +134,9 @@ func TestValidateRiteManifest_Valid(t *testing.T) {
 		Path: "/test/rites/test-rite/manifest.yaml",
 		Content: map[string]any{
 			"name":        "test-rite",
-			"entry_agent": "pythia",
+			"entry_agent": "potnia",
 			"agents": []any{
-				map[string]any{"name": "pythia", "role": "orchestrator"},
+				map[string]any{"name": "potnia", "role": "orchestrator"},
 				map[string]any{"name": "builder", "role": "builds things"},
 			},
 		},
@@ -157,8 +157,8 @@ func TestValidateRiteManifest_MissingRequiredFields(t *testing.T) {
 		{
 			name: "missing name",
 			content: map[string]any{
-				"entry_agent": "pythia",
-				"agents":      []any{map[string]any{"name": "pythia"}},
+				"entry_agent": "potnia",
+				"agents":      []any{map[string]any{"name": "potnia"}},
 			},
 			wantWarnings: 1,
 			wantPaths:    []string{"$.name"},

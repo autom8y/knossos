@@ -7,7 +7,7 @@ description: "10x workflow coordination and agent routing. Use when: understandi
 
 ## Protocol Overview
 
-Specialist agents coordinated by Pythia through four phases:
+Specialist agents coordinated by Potnia through four phases:
 - **Early clarity** — Requirements and scope validated before implementation
 - **Right-sized effort** — Complexity calibrated to actual need
 - **Quality gates** — Issues caught before they propagate
@@ -21,7 +21,7 @@ Specialist agents coordinated by Pythia through four phases:
 | **Architect** | System design, technology selection | TDD, ADRs |
 | **Principal Engineer** | Implementation approach, code structure | Code, tests |
 | **QA/Adversary** | Test strategy, validation, release readiness | Test Plan |
-| **Pythia** | Session planning, quality gates, adaptive routing | (Coordinates) |
+| **Potnia** | Session planning, quality gates, adaptive routing | (Coordinates) |
 
 ## Routing Quick Reference
 

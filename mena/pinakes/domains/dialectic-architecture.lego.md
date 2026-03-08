@@ -1,14 +1,14 @@
 ---
-name: socratic-architecture-criteria
-description: "Socratic challenge criteria for .know/architecture.md assumption exposure. Use when: theoros is surfacing unstated assumptions in the architecture document. Triggers: socratic architecture challenge, architecture assumptions, hidden architecture constraints, assumption exposure audit."
-scope: socratic
+name: dialectic-architecture-criteria
+description: "Dialectic challenge criteria for .know/architecture.md assumption exposure. Use when: theoros is surfacing unstated assumptions in the architecture document. Triggers: dialectic architecture challenge, architecture assumptions, hidden architecture constraints, assumption exposure audit."
+scope: dialectic
 ---
 
-# socratic-architecture Challenge Criteria
+# dialectic-architecture Challenge Criteria
 
 > **ASSUMPTION-EXPOSURE GRADING — READ BEFORE PROCEEDING**
 >
-> This is a socratic challenge domain. Grading measures how thoroughly the theoros SURFACES HIDDEN ASSUMPTIONS in `.know/architecture.md`.
+> This is a dialectic challenge domain. Grading measures how thoroughly the theoros SURFACES HIDDEN ASSUMPTIONS in `.know/architecture.md`.
 >
 > - **A (Excellent)** = MANY well-categorized assumptions surfaced — thorough analysis
 > - **F (Failing)** = FEW assumptions surfaced — shallow analysis, likely missed assumptions
@@ -27,7 +27,7 @@ scope: socratic
 
 **What to do**: Read `.know/architecture.md` completely. For every architectural claim, ask: "What must be true for this claim to hold that the document does not explicitly state?" Surface those implicit truths as assumptions.
 
-**What NOT to do**: Do not evaluate whether the architecture is correct. Do not look for contradictions (that is the advocatus domain). Surface what is assumed but unsaid.
+**What NOT to do**: Do not evaluate whether the architecture is correct. Do not look for contradictions (that is the adversarial domain). Surface what is assumed but unsaid.
 
 **Challenge question**: "What assumptions does `.know/architecture.md` make without stating them?"
 
@@ -179,6 +179,6 @@ Example (shallow analysis missing most assumptions):
 
 - [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
 - [architecture-criteria](architecture.lego.md) -- Direct architecture compliance audit
-- [advocatus-architecture-criteria](advocatus-architecture.lego.md) -- Companion: contradiction finding for architecture document
-- [socratic-design-constraints-criteria](socratic-design-constraints.lego.md) -- Companion: assumption exposure for design-constraints document
+- [adversarial-architecture-criteria](adversarial-architecture.lego.md) -- Companion: contradiction finding for architecture document
+- [dialectic-design-constraints-criteria](dialectic-design-constraints.lego.md) -- Companion: assumption exposure for design-constraints document
 - [grading schema](../schemas/grading.lego.md) -- Grade calculation rules

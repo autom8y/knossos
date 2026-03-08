@@ -17,7 +17,7 @@ The ecosystem rite provides workflows for maintaining and evolving the Knossos p
 | **Name** | ecosystem |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 6 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The ecosystem rite provides workflows for maintaining and evolving the Knossos p
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates ecosystem infrastructure phases |
+| **potnia** | Coordinates ecosystem infrastructure phases |
 | **ecosystem-analyst** | Traces CEM/roster problems to root causes and produces gap analysis |
 | **context-architect** | Designs context solutions, schemas, and ecosystem patterns |
 | **integration-engineer** | Implements CEM and roster changes with integration tests |

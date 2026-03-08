@@ -22,7 +22,7 @@
 /clinic
 ```
 
-Pythia opens with triage-nurse to scope the investigation. Describe what you observed.
+Potnia opens with triage-nurse to scope the investigation. Describe what you observed.
 
 **SRE escalation**: If escalating from an incident war room, provide incident context directly. The triage-nurse accepts pre-gathered incident data as a head start.
 
@@ -30,7 +30,7 @@ Pythia opens with triage-nurse to scope the investigation. Describe what you obs
 
 | Agent | Model | Phase | Produces |
 |-------|-------|-------|----------|
-| **pythia** | sonnet | Orchestrator | Phase gates, back-route management |
+| **potnia** | sonnet | Orchestrator | Phase gates, back-route management |
 | **triage-nurse** | sonnet | Intake | intake-report.md, index.yaml |
 | **pathologist** | sonnet | Examination | E001.txt ... E{N}.txt evidence files |
 | **diagnostician** | opus | Diagnosis | diagnosis.md |
@@ -77,7 +77,7 @@ handoff-debt-triage.md <- attending (if systemic pattern found)
 
 ## Session Resume
 
-Park and continue investigations naturally. On `/sos resume`, Pythia reads `index.yaml` status field to resume at the correct phase.
+Park and continue investigations naturally. On `/sos resume`, Potnia reads `index.yaml` status field to resume at the correct phase.
 
 ## Cross-Rite Handoffs (Outbound)
 

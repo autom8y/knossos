@@ -43,7 +43,7 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"ActiveWorkflowFile", r.ActiveWorkflowFile(), "/tmp/testroot/.knossos/ACTIVE_WORKFLOW.yaml"},
 		{"KnossosManifestFile", r.KnossosManifestFile(), "/tmp/testroot/.knossos/KNOSSOS_MANIFEST.yaml"},
 		{"AgentsDir", r.AgentsDir(), "/tmp/testroot/.claude/agents"},
-		{"AgentFile", r.AgentFile("pythia.md"), "/tmp/testroot/.claude/agents/pythia.md"},
+		{"AgentFile", r.AgentFile("potnia.md"), "/tmp/testroot/.claude/agents/potnia.md"},
 		{"ClaudeMDFile", r.ClaudeMDFile(), "/tmp/testroot/.claude/CLAUDE.md"},
 		{"KnossosDir", r.KnossosDir(), "/tmp/testroot/.knossos"},
 		{"RitesDir", r.RitesDir(), "/tmp/testroot/.knossos/rites"},

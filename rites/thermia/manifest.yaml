@@ -7,7 +7,7 @@ description: "Cache architecture consultation lifecycle (Assessment -> Architect
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
 # This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
-entry_agent: pythia
+entry_agent: potnia
 
 phases:
   - name: assessment
@@ -33,7 +33,7 @@ phases:
     description: Observability design, alerting, runbooks, cross-architecture validation
 
 agents:
-  - name: pythia
+  - name: potnia
     role: Coordinates cache consultation phases, gates complexity, manages consultative flow
     archetype: orchestrator
 

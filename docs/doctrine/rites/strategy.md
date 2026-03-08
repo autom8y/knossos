@@ -17,7 +17,7 @@ The strategy rite provides workflows for strategic business decisions through ma
 | **Name** | strategy |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The strategy rite provides workflows for strategic business decisions through ma
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates strategic initiative phases |
+| **potnia** | Coordinates strategic initiative phases |
 | **market-researcher** | Researches markets and identifies customer segments |
 | **competitive-analyst** | Analyzes competitive landscape and identifies opportunities |
 | **business-model-analyst** | Builds financial models and analyzes unit economics |

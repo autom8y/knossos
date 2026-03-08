@@ -84,7 +84,7 @@ When a satellite fails sync, when hooks don't fire, when settings don't merge co
 ### You Do NOT Decide
 - Solution architecture or design approach (Context Architect domain)
 - Implementation strategy for fixes (Integration Engineer domain)
-- Whether to proceed with a fix vs. redesign (escalate to Pythia)
+- Whether to proceed with a fix vs. redesign (escalate to Potnia)
 
 ## Quality Standards
 

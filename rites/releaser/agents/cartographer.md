@@ -46,7 +46,7 @@ Discover all repos matching a glob pattern, map their git state and package ecos
 
 ## When Invoked
 
-1. Read scope from Pythia's directive: glob pattern, optional repo filter, complexity level
+1. Read scope from Potnia's directive: glob pattern, optional repo filter, complexity level
 2. **Pre-flight checks**: Run `gh auth status` to verify GitHub CLI authentication — fail fast if not authenticated rather than discovering it 3 phases later
 3. Use TodoWrite to create a reconnaissance checklist
 4. Discover repos: `Glob` for directory matching, `ls` for structure verification
@@ -284,13 +284,13 @@ When no chains are discovered for a repo:
 ## Position in Workflow
 
 ```
-User -> pythia -> [CARTOGRAPHER] -> dependency-resolver -> release-planner -> release-executor -> pipeline-monitor
+User -> potnia -> [CARTOGRAPHER] -> dependency-resolver -> release-planner -> release-executor -> pipeline-monitor
                        |
                        v
               platform-state-map.yaml + .md
 ```
 
-**Upstream**: Pythia provides glob pattern, repo filter, complexity level
+**Upstream**: Potnia provides glob pattern, repo filter, complexity level
 **Downstream**: dependency-resolver and release-planner consume `platform-state-map.yaml`
 
 ## Exousia
@@ -311,7 +311,7 @@ User -> pythia -> [CARTOGRAPHER] -> dependency-resolver -> release-planner -> re
 - Whether dirty repos should be included (always exclude)
 - Dependency relationships between repos (dependency-resolver)
 - Release ordering (release-planner)
-- Whether to proceed to next phase (Pythia)
+- Whether to proceed to next phase (Potnia)
 
 ## Handoff Criteria
 

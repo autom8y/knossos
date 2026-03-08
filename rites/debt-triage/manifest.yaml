@@ -7,7 +7,7 @@ description: Debt management lifecycle for collecting, assessing, and planning t
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
 # This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
-entry_agent: pythia
+entry_agent: potnia
 
 phases:
   - name: collection
@@ -26,7 +26,7 @@ phases:
     description: Plan debt paydown sprints with resource allocation
 
 agents:
-  - name: pythia
+  - name: potnia
     role: Coordinates debt assessment and planning phases
 
   - name: debt-collector

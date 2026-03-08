@@ -35,8 +35,8 @@
 - [ ] Skill directory exists: `rites/{rite-name}/mena/{rite-name}-ref/`
 - [ ] `ari sync --rite {rite-name}` completes without error
 
-### Consultant Knowledge Base (REQUIRED)
-- [ ] agent-curator completed Consultant catalog update
+### Pythia Knowledge Base (REQUIRED)
+- [ ] agent-curator completed Pythia catalog update
 - [ ] `ari rite --list` shows new rite
 
 ### Verification Commands
@@ -126,4 +126,4 @@ cat .claude/commands/{rite-name}.md | head -10
 - [ ] All checklist items verified
 - [ ] Verification commands pass
 - [ ] Rite tested with sample task
-- [ ] Consultant knowledge base synchronized
+- [ ] Pythia knowledge base synchronized

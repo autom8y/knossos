@@ -8,7 +8,7 @@
 
 ## Agents & Roles
 
-### Pythia
+### Potnia
 **Definition**: The coordinating agent that plans, delegates, coordinates, and verifies. Does not implement directly. Acts as a dispatcher routing work to specialist agents.
 
 **Core Responsibilities**:
@@ -18,7 +18,7 @@
 4. **Verify**: Confirm quality gates before phase transitions
 5. **Adapt**: Adjust plans based on discoveries
 
-**Key Principle**: Pythia's judgment determines agent routing, session ordering, and workflow adaptation. It should not be over-prescribed by Prompt 0.
+**Key Principle**: Potnia's judgment determines agent routing, session ordering, and workflow adaptation. It should not be over-prescribed by Prompt 0.
 
 ---
 

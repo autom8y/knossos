@@ -30,7 +30,7 @@ func setupAgentSync(t *testing.T, agentFiles map[string]string) (string, string)
 
 func TestSyncUserResource_AddsNewAgent(t *testing.T) {
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
-		"consultant.md": "# Consultant Agent\nPrompt content.\n",
+		"pythia.md": "# Pythia Agent\nPrompt content.\n",
 	})
 
 	manifest := &provenance.ProvenanceManifest{
@@ -49,19 +49,19 @@ func TestSyncUserResource_AddsNewAgent(t *testing.T) {
 	}
 
 	// Verify file was copied
-	targetPath := filepath.Join(userClaudeDir, "agents", "consultant.md")
+	targetPath := filepath.Join(userClaudeDir, "agents", "pythia.md")
 	got, err := os.ReadFile(targetPath)
 	if err != nil {
 		t.Fatalf("read target: %v", err)
 	}
-	if string(got) != "# Consultant Agent\nPrompt content.\n" {
+	if string(got) != "# Pythia Agent\nPrompt content.\n" {
 		t.Errorf("unexpected content: %q", got)
 	}
 
 	// Verify manifest entry
-	entry, exists := manifest.Entries["agents/consultant.md"]
+	entry, exists := manifest.Entries["agents/pythia.md"]
 	if !exists {
-		t.Fatal("expected manifest entry for agents/consultant.md")
+		t.Fatal("expected manifest entry for agents/pythia.md")
 	}
 	if entry.Owner != provenance.OwnerKnossos {
 		t.Errorf("expected owner knossos, got %s", entry.Owner)
@@ -257,12 +257,12 @@ func TestSyncUserResource_OverwritesDiverged(t *testing.T) {
 
 func TestSyncUserResource_CollisionSkipped(t *testing.T) {
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
-		"consultant.md": "# Consultant\n",
+		"pythia.md": "# Pythia\n",
 	})
 
 	checker := &CollisionChecker{
 		manifestLoaded: true,
-		riteEntries:    map[string]bool{"agents/consultant.md": true},
+		riteEntries:    map[string]bool{"agents/pythia.md": true},
 	}
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
@@ -279,7 +279,7 @@ func TestSyncUserResource_CollisionSkipped(t *testing.T) {
 	}
 
 	// File should NOT be copied
-	targetPath := filepath.Join(userClaudeDir, "agents", "consultant.md")
+	targetPath := filepath.Join(userClaudeDir, "agents", "pythia.md")
 	if _, err := os.Stat(targetPath); !os.IsNotExist(err) {
 		t.Error("colliding file should not be copied to target")
 	}
@@ -570,7 +570,7 @@ func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
-		"agents/consultant.md": &fstest.MapFile{Data: []byte("# Embedded Consultant\n")},
+		"agents/pythia.md": &fstest.MapFile{Data: []byte("# Embedded Pythia\n")},
 		"agents/architect.md":  &fstest.MapFile{Data: []byte("# Embedded Architect\n")},
 	}
 
@@ -593,11 +593,11 @@ func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
 	}
 
 	// Verify files written
-	got, err := os.ReadFile(filepath.Join(userClaudeDir, "agents", "consultant.md"))
+	got, err := os.ReadFile(filepath.Join(userClaudeDir, "agents", "pythia.md"))
 	if err != nil {
 		t.Fatalf("read target: %v", err)
 	}
-	if string(got) != "# Embedded Consultant\n" {
+	if string(got) != "# Embedded Pythia\n" {
 		t.Errorf("unexpected content: %q", got)
 	}
 }
@@ -695,12 +695,12 @@ func TestSyncUserResourceFromEmbedded_CollisionSkipped(t *testing.T) {
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
-		"agents/consultant.md": &fstest.MapFile{Data: []byte("# Consultant\n")},
+		"agents/pythia.md": &fstest.MapFile{Data: []byte("# Pythia\n")},
 	}
 
 	checker := &CollisionChecker{
 		manifestLoaded: true,
-		riteEntries:    map[string]bool{"agents/consultant.md": true},
+		riteEntries:    map[string]bool{"agents/pythia.md": true},
 	}
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
@@ -837,7 +837,7 @@ func TestSyncUserResource_FallsBackToEmbedded(t *testing.T) {
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
-		"agents/consultant.md": &fstest.MapFile{Data: []byte("# Embedded\n")},
+		"agents/pythia.md": &fstest.MapFile{Data: []byte("# Embedded\n")},
 	}
 
 	manifest := &provenance.ProvenanceManifest{

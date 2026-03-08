@@ -17,7 +17,7 @@ The R&D rite provides workflows for exploring emerging technologies and building
 | **Name** | rnd |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 6 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The R&D rite provides workflows for exploring emerging technologies and building
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates technology exploration phases |
+| **potnia** | Coordinates technology exploration phases |
 | **technology-scout** | Scouts emerging technologies and provides build vs buy analysis |
 | **integration-researcher** | Maps integration dependencies and assesses compatibility |
 | **prototype-engineer** | Builds proof-of-concept prototypes with deliberate shortcuts |

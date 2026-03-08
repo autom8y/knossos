@@ -7,7 +7,7 @@ description: Agent pantheon creation lifecycle (Design -> [Archaeology] -> Promp
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
 # This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
-entry_agent: pythia
+entry_agent: potnia
 
 phases:
   - name: design
@@ -49,7 +49,7 @@ phases:
     description: Evaluate and validate agent pantheon readiness
 
 agents:
-  - name: pythia
+  - name: potnia
     role: Coordinates agent pantheon creation phases
 
   - name: agent-designer

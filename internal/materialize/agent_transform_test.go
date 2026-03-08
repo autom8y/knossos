@@ -388,16 +388,16 @@ func TestTransformAgentContent_InvalidFrontmatter(t *testing.T) {
 func TestTransformAgentContent_ModelOverride(t *testing.T) {
 	// Agent has model: opus — override should force haiku
 	source := `---
-name: pythia
+name: potnia
 description: Orchestrator
 model: opus
 tools: Bash, Read
 ---
 
-# Pythia
+# Potnia
 `
 	result, err := transformAgentContent([]byte(source), &TransformContext{
-		AgentName:     "pythia",
+		AgentName:     "potnia",
 		ModelOverride: "haiku",
 	})
 	if err != nil {

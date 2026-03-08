@@ -317,7 +317,7 @@ validate_context_design() {
 
 ## Handoff Criteria
 
-When Context Design phase completes, Pythia verifies:
+When Context Design phase completes, Potnia verifies:
 
 - [ ] `type` is "context-design"
 - [ ] `status` is "ready-for-implementation"

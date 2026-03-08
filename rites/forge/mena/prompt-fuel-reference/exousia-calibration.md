@@ -41,7 +41,7 @@ Map EX-NN boundaries phrased as conditional actions ("MUST delegate", "MUST chec
 ```markdown
 ### You Escalate
 - Protected file mutations -> Moirai agent (per EX-06)
-- Architectural changes -> check ADRs first, escalate to Pythia if no guidance (per CK-06)
+- Architectural changes -> check ADRs first, escalate to Potnia if no guidance (per CK-06)
 ```
 
 ### All-Agent Overrides

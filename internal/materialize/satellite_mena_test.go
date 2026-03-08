@@ -264,7 +264,7 @@ func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
 	if err := os.MkdirAll(knossosCoreRite, 0755); err != nil {
 		t.Fatalf("mkdir core rite: %v", err)
 	}
-	coreManifestContent := "name: ecosystem\nversion: \"1.0.0\"\ndescription: Core rite\nentry_agent: pythia\nagents:\n  - name: pythia\n    role: Orchestrator\n"
+	coreManifestContent := "name: ecosystem\nversion: \"1.0.0\"\ndescription: Core rite\nentry_agent: potnia\nagents:\n  - name: potnia\n    role: Orchestrator\n"
 	if err := os.WriteFile(filepath.Join(knossosCoreRite, "manifest.yaml"), []byte(coreManifestContent), 0644); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}

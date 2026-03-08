@@ -17,7 +17,7 @@ The 10x-dev rite provides a complete workflow for feature implementation: PRD â†
 | **Name** | 10x-dev |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -34,7 +34,7 @@ The 10x-dev rite provides a complete workflow for feature implementation: PRD â†
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates development lifecycle phases and routes work to specialists |
+| **potnia** | Coordinates development lifecycle phases and routes work to specialists |
 | **requirements-analyst** | Gathers requirements and produces PRD artifacts |
 | **architect** | Creates technical design documents and architecture decisions |
 | **principal-engineer** | Implements code according to design specifications |

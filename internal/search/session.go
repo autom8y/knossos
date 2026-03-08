@@ -84,7 +84,7 @@ const (
 // This is a package-level var (not const) for test override per FR-11.
 var phaseBoostKeywords = map[string][]string{
 	"requirements": {
-		"requirements-analyst", "pythia", "prd", "requirements",
+		"requirements-analyst", "potnia", "prd", "requirements",
 		"gather", "scope", "acceptance",
 	},
 	"design": {

@@ -22,10 +22,10 @@ Two back-routes exist in thermia. Both are rare, not routine. Track iterations i
 
 **Protocol**:
 1. Systems-thermodynamicist produces a **targeted gap description**: which data paths are uncovered, why they are required (specific architectural decision blocked)
-2. Pythia routes heat-mapper to produce a **targeted supplement** to `thermal-assessment.md` — NOT a full redo
+2. Potnia routes heat-mapper to produce a **targeted supplement** to `thermal-assessment.md` — NOT a full redo
 3. Heat-mapper collects only the missing data and appends to the existing assessment
 4. Heat-mapper does NOT re-evaluate already-assessed paths
-5. Pythia re-routes to systems-thermodynamicist with the supplemented assessment
+5. Potnia re-routes to systems-thermodynamicist with the supplemented assessment
 
 **Iteration tracking**: `assessment_gap: N/1` in `throughline.rationale`
 
@@ -41,15 +41,15 @@ Two back-routes exist in thermia. Both are rare, not routine. Track iterations i
 
 **Protocol**:
 1. Thermal-monitor produces a **specific inconsistency description**: which failure mode is affected, what the conflict is between architecture and capacity spec
-2. Pythia routes capacity-engineer to **reconcile the specific inconsistency** — not a full re-spec
+2. Potnia routes capacity-engineer to **reconcile the specific inconsistency** — not a full re-spec
 3. Capacity-engineer adjusts only the conflicting elements and updates `capacity-specification.md`
-4. Pythia re-routes to thermal-monitor with the updated specification
+4. Potnia re-routes to thermal-monitor with the updated specification
 
 **Iteration tracking**: `design_inconsistency: N/1` in `throughline.rationale`
 
 **On limit (1 reached)**: Escalate to user. The specification has been revised once. Persistent inconsistency is an architecture-level trade-off that requires user input on acceptable risk.
 
-## Pythia throughline.rationale Format
+## Potnia throughline.rationale Format
 
 Include in every CONSULTATION_RESPONSE:
 

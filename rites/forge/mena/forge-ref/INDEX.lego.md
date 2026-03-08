@@ -29,7 +29,7 @@ description: |
 | **Workflow Engineer** | opus | workflow.yaml, commands |
 | **Platform Engineer** | sonnet | Rite catalog files, directory structure |
 | **Eval Specialist** | opus | eval-report.md, test results |
-| **Agent Curator** | sonnet | Catalog entry, Consultant sync |
+| **Agent Curator** | sonnet | Catalog entry, Pythia sync |
 
 ## Workflow
 

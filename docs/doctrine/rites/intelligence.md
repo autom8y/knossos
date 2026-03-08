@@ -17,7 +17,7 @@ The intelligence rite provides workflows for data-driven decision making through
 | **Name** | intelligence |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The intelligence rite provides workflows for data-driven decision making through
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates analytics and research initiative phases |
+| **potnia** | Coordinates analytics and research initiative phases |
 | **analytics-engineer** | Designs tracking plans and implements event instrumentation |
 | **user-researcher** | Conducts user research and extracts qualitative insights |
 | **experimentation-lead** | Designs experiments with proper statistical methodology |

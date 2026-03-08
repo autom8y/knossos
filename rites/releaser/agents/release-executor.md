@@ -237,7 +237,7 @@ cartographer -> dependency-resolver -> release-planner -> [RELEASE-EXECUTOR] -> 
                                                      execution-ledger.yaml + .md
 ```
 
-**Upstream**: Release-planner provides `release-plan.yaml` (or Pythia provides state map directly for PATCH)
+**Upstream**: Release-planner provides `release-plan.yaml` (or Potnia provides state map directly for PATCH)
 **Downstream**: Pipeline-monitor consumes `execution-ledger.yaml` to know which repos to monitor
 
 ## Exousia

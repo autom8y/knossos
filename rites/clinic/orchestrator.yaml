@@ -1,7 +1,7 @@
 # Orchestrator configuration for clinic
-# Used by generate-orchestrator.sh to produce pythia.md
+# Used by generate-orchestrator.sh to produce potnia.md
 #
-# Clinic Pythia operates in loose-leash mode: gates the 4 major phase
+# Clinic Potnia operates in loose-leash mode: gates the 4 major phase
 # transitions and manages back-routes, but does NOT micromanage agents'
 # internal loops (which commands pathologist runs, which methodology
 # diagnostician chooses, etc.).
@@ -56,7 +56,7 @@ handoff_criteria:
     - "Risk assessment included"
     - "Handoff artifact(s) produced for appropriate downstream rite(s)"
 
-# Loose-leash orchestration: Pythia gates these transitions but does NOT:
+# Loose-leash orchestration: Potnia gates these transitions but does NOT:
 # - Micromanage which commands pathologist runs
 # - Pre-classify investigation complexity
 # - Decide when enough evidence has been collected (pathologist decides)
@@ -64,7 +64,7 @@ handoff_criteria:
 # - Choose diagnostic methodology (diagnostician decides)
 orchestration_mode: loose-leash
 
-# Back-route management: Pythia's core differentiator for clinic.
+# Back-route management: Potnia's core differentiator for clinic.
 # These are expected workflow patterns, not failure modes.
 back_route_handling:
   evidence_gap:
@@ -83,7 +83,7 @@ back_route_handling:
 # Session resume protocol for park/resume.
 # See workflow.yaml session_resume section for full logic.
 resume_protocol: |
-  On /sos resume, Pythia reads index.yaml status field to determine current phase.
+  On /sos resume, Potnia reads index.yaml status field to determine current phase.
   Resume dispatches to the agent owning the current phase. The agent reads
   index.yaml and its own prior artifacts to reconstruct context.
 

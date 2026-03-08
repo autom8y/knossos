@@ -26,7 +26,7 @@ func TestCrossRiteAgents_NotMaterializedToProject(t *testing.T) {
 	crossRiteDir := filepath.Join(projectDir, "agents")
 	require.NoError(t, os.MkdirAll(crossRiteDir, 0755))
 	require.NoError(t, os.WriteFile(filepath.Join(crossRiteDir, "moirai.md"), []byte("# Moirai\n"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(crossRiteDir, "consultant.md"), []byte("# Consultant\n"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(crossRiteDir, "pythia.md"), []byte("# Pythia\n"), 0644))
 
 	// Materialize
 	resolver := paths.NewResolver(projectDir)
@@ -40,7 +40,7 @@ func TestCrossRiteAgents_NotMaterializedToProject(t *testing.T) {
 	// Verify cross-rite agents were NOT written to project level
 	assert.NoFileExists(t, filepath.Join(agentsDir, "moirai.md"),
 		"cross-rite agents should not be materialized to project .claude/agents/")
-	assert.NoFileExists(t, filepath.Join(agentsDir, "consultant.md"),
+	assert.NoFileExists(t, filepath.Join(agentsDir, "pythia.md"),
 		"cross-rite agents should not be materialized to project .claude/agents/")
 }
 
@@ -58,7 +58,7 @@ func TestCrossRiteAgents_OrphanedOnRiteSwitch(t *testing.T) {
 	// Simulate stale cross-rite agents left from a previous sync
 	require.NoError(t, os.MkdirAll(agentsDir, 0755))
 	require.NoError(t, os.WriteFile(filepath.Join(agentsDir, "moirai.md"), []byte("# Moirai\n"), 0644))
-	require.NoError(t, os.WriteFile(filepath.Join(agentsDir, "consultant.md"), []byte("# Consultant\n"), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(agentsDir, "pythia.md"), []byte("# Pythia\n"), 0644))
 
 	// Materialize with RemoveAll orphan strategy
 	resolver := paths.NewResolver(projectDir)
@@ -68,11 +68,11 @@ func TestCrossRiteAgents_OrphanedOnRiteSwitch(t *testing.T) {
 
 	// Stale cross-rite agents should be detected as orphans
 	assert.Contains(t, result.OrphansDetected, "moirai.md")
-	assert.Contains(t, result.OrphansDetected, "consultant.md")
+	assert.Contains(t, result.OrphansDetected, "pythia.md")
 
 	// And removed from project level
 	assert.NoFileExists(t, filepath.Join(agentsDir, "moirai.md"))
-	assert.NoFileExists(t, filepath.Join(agentsDir, "consultant.md"))
+	assert.NoFileExists(t, filepath.Join(agentsDir, "pythia.md"))
 
 	// Rite agent preserved
 	assert.FileExists(t, filepath.Join(agentsDir, "designer.md"))

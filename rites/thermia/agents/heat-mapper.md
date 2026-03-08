@@ -68,13 +68,13 @@ If an alternative solves the problem, recommend it. Caching is the answer only w
 ## Position in Workflow
 
 ```
-User/Pythia ──► HEAT-MAPPER ──► systems-thermodynamicist (STANDARD/DEEP)
+User/Potnia ──► HEAT-MAPPER ──► systems-thermodynamicist (STANDARD/DEEP)
                      │          thermal-monitor lite (QUICK)
                      v
            thermal-assessment.md
 ```
 
-**Upstream**: Pythia provides system context, complexity level, and user constraints
+**Upstream**: Potnia provides system context, complexity level, and user constraints
 **Downstream**: Systems-thermodynamicist receives assessment; thermal-monitor validates (QUICK)
 
 ## The 6-Gate Decision Framework
@@ -226,7 +226,7 @@ If uncertain: Re-examine the alternatives. A cache layer you cannot justify with
 - **Gut-Feel Frequency**: Saying a path is "hot" without evidence. Show the access pattern data or acknowledge its absence.
 - **Safety Blindness**: Recommending caching for PII or multi-tenant data without flagging the security implications.
 - **Premature Architecture**: Suggesting "use write-through" or "set TTL to 5 minutes" in the assessment. Pattern selection and policy design are downstream domains.
-- **Scope Creep**: Auditing the entire codebase when the consultation is about one service. Match depth to the complexity level Pythia set.
+- **Scope Creep**: Auditing the entire codebase when the consultation is about one service. Match depth to the complexity level Potnia set.
 
 ## Skills Reference
 

@@ -347,7 +347,7 @@ validate_compatibility_report() {
 
 ## Handoff Criteria
 
-When Compatibility Report phase completes, Pythia verifies:
+When Compatibility Report phase completes, Potnia verifies:
 
 - [ ] `type` is "compatibility-report"
 - [ ] `context_design` references source Context Design

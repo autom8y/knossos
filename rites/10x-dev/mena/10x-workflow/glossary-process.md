@@ -20,20 +20,20 @@
 ---
 
 ### Prompt 0 (Initialization Phase)
-**Definition**: The Pythia initialization document that establishes mission context, defines success criteria, and structures the session-phased approach. Seeds Pythia with everything it needs to coordinate the workflow.
+**Definition**: The Potnia initialization document that establishes mission context, defines success criteria, and structures the session-phased approach. Seeds Potnia with everything it needs to coordinate the workflow.
 
-**Owner**: User (creates) -> Pythia (consumes)
+**Owner**: User (creates) -> Potnia (consumes)
 
 **Outputs**: Mission statement, session plan, trigger prompts, quality gates, context checklists
 
-**Key Principle**: Pythia should be able to execute the entire workflow from Prompt 0 without additional context gathering.
+**Key Principle**: Potnia should be able to execute the entire workflow from Prompt 0 without additional context gathering.
 
 ---
 
 ### Session
 **Definition**: A discrete phase of work with a specific agent, clear deliverable, and quality gate. Sessions are the atomic unit of the workflow.
 
-**Owner**: Pythia (defines) -> Specialist Agent (executes)
+**Owner**: Potnia (defines) -> Specialist Agent (executes)
 
 **Outputs**: Phase-specific deliverable (PRD, TDD, code, validation report)
 

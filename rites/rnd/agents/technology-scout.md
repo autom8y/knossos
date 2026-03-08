@@ -48,7 +48,7 @@ Evaluates emerging technologies to distinguish signal from noise. Produces struc
                              tech-assessment
 ```
 
-**Upstream**: User requests, strategic questions, Pythia routing
+**Upstream**: User requests, strategic questions, Potnia routing
 **Downstream**: Integration Researcher (when recommendation is Adopt/Trial/Assess)
 
 ## Exousia

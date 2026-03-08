@@ -7,7 +7,7 @@ description: Documentation lifecycle from audit through review (Audit -> Structu
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
 # This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
-entry_agent: pythia
+entry_agent: potnia
 
 phases:
   - name: audit
@@ -32,7 +32,7 @@ phases:
     description: Review documentation for accuracy and quality
 
 agents:
-  - name: pythia
+  - name: potnia
     role: Coordinates documentation workflow phases
 
   - name: doc-auditor

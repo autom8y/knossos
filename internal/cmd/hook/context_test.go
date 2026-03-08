@@ -849,7 +849,7 @@ func TestContextOutput_Text_ShowsThroughlineIDs(t *testing.T) {
 		ExecutionMode: "orchestrated",
 		HasSession:    true,
 		ThroughlineIDs: map[string]string{
-			"pythia": "agent-pythia-abc",
+			"potnia": "agent-potnia-abc",
 			"moirai": "agent-moirai-def",
 		},
 	}
@@ -858,8 +858,8 @@ func TestContextOutput_Text_ShowsThroughlineIDs(t *testing.T) {
 	if !strings.Contains(text, "---\n\nThroughline Agents:") {
 		t.Errorf("Text() should contain 'Throughline Agents:' section after closing ---\nGot: %s", text)
 	}
-	if !strings.Contains(text, "pythia: agent-pythia-abc") {
-		t.Errorf("Text() should contain pythia ID\nGot: %s", text)
+	if !strings.Contains(text, "potnia: agent-potnia-abc") {
+		t.Errorf("Text() should contain potnia ID\nGot: %s", text)
 	}
 	if !strings.Contains(text, "moirai: agent-moirai-def") {
 		t.Errorf("Text() should contain moirai ID\nGot: %s", text)
@@ -904,7 +904,7 @@ current_phase: "implementation"
 	os.WriteFile(filepath.Join(tmpDir, ".knossos", "ACTIVE_RITE"), []byte("ecosystem"), 0644)
 
 	// Write .throughline-ids.json as if SubagentStart had fired
-	idData := `{"pythia":"agent-pythia-xyz","moirai":"agent-moirai-uvw"}`
+	idData := `{"potnia":"agent-potnia-xyz","moirai":"agent-moirai-uvw"}`
 	os.WriteFile(filepath.Join(sessionDir, ThroughlineIDsFile), []byte(idData), 0644)
 
 	testutil.SetupEnv(t, &testutil.HookEnv{
@@ -943,8 +943,8 @@ current_phase: "implementation"
 	if len(result.ThroughlineIDs) == 0 {
 		t.Error("Expected ThroughlineIDs to be populated")
 	}
-	if result.ThroughlineIDs["pythia"] != "agent-pythia-xyz" {
-		t.Errorf("pythia ID = %q, want %q", result.ThroughlineIDs["pythia"], "agent-pythia-xyz")
+	if result.ThroughlineIDs["potnia"] != "agent-potnia-xyz" {
+		t.Errorf("potnia ID = %q, want %q", result.ThroughlineIDs["potnia"], "agent-potnia-xyz")
 	}
 	if result.ThroughlineIDs["moirai"] != "agent-moirai-uvw" {
 		t.Errorf("moirai ID = %q, want %q", result.ThroughlineIDs["moirai"], "agent-moirai-uvw")

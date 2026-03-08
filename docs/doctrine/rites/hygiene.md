@@ -17,7 +17,7 @@ The hygiene rite provides workflows for maintaining code quality through systema
 | **Name** | hygiene |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The hygiene rite provides workflows for maintaining code quality through systema
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates code hygiene initiative phases |
+| **potnia** | Coordinates code hygiene initiative phases |
 | **code-smeller** | Detects code smells and quality issues across codebase |
 | **architect-enforcer** | Plans refactoring approach and enforces architecture standards |
 | **janitor** | Executes code cleanup and improvements |

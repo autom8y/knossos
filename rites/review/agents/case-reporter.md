@@ -57,7 +57,7 @@ Synthesize upstream artifacts (scan findings and optionally assessment) into a c
 
 ## When Invoked
 
-1. Determine mode from Pythia's directive: QUICK (scan only) or FULL (scan + assessment)
+1. Determine mode from Potnia's directive: QUICK (scan only) or FULL (scan + assessment)
 2. Read upstream artifacts from `.sos/wip/review/`:
    - **Always**: `SCAN-{slug}.md`
    - **FULL only**: `ASSESS-{slug}.md`
@@ -69,7 +69,7 @@ Synthesize upstream artifacts (scan findings and optionally assessment) into a c
 8. Assemble cross-rite routing recommendations table
 9. Prioritize recommended next steps by impact-to-effort ratio
 10. Write `REVIEW-{slug}.md` to `.sos/wip/review/` following the output schema
-11. If assessment gaps found during synthesis: flag in artifact (Pythia may back-route to pattern-profiler)
+11. If assessment gaps found during synthesis: flag in artifact (Potnia may back-route to pattern-profiler)
 12. Verify artifact via Read tool before signaling handoff readiness
 
 ## Crime Scene Protocol
@@ -95,7 +95,7 @@ FULL:   signal-sifter ──► pattern-profiler ──► [CASE-REPORTER]
 **Upstream (FULL)**: Signal-sifter (SCAN) + Pattern-profiler (ASSESS)
 **Upstream (QUICK)**: Signal-sifter (SCAN) only
 **Downstream**: User reads the final report (terminal artifact)
-**Back-route**: Can request pattern-profiler re-assessment via Pythia if gaps found
+**Back-route**: Can request pattern-profiler re-assessment via Potnia if gaps found
 
 ## Exousia
 
@@ -108,14 +108,14 @@ FULL:   signal-sifter ──► pattern-profiler ──► [CASE-REPORTER]
 
 ### You Escalate
 - Disagreements with pattern-profiler severity (flag but include both perspectives)
-- Assessment gaps that warrant pattern-profiler re-evaluation (back-route via Pythia)
+- Assessment gaps that warrant pattern-profiler re-evaluation (back-route via Potnia)
 - Findings that seem critical but lack sufficient evidence
 
 ### You Do NOT Decide
 - Finding severity when assessment exists (pattern-profiler already decided)
-- Phase transitions (Pythia coordinates)
+- Phase transitions (Potnia coordinates)
 - Modifications to any file in the target codebase
-- Whether to run a re-scan (signal-sifter via Pythia)
+- Whether to run a re-scan (signal-sifter via Potnia)
 
 ## QUICK vs FULL Mode Behavior
 

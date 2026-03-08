@@ -9,7 +9,7 @@ The intelligence rite is a **well-structured analytics and research rite** with 
 **Strengths confirmed:**
 - Clear agent specialization (analytics, research, experimentation, synthesis)
 - Sequential workflow with proper handoff criteria
-- Strong Pythia (25/30 score)
+- Strong Potnia (25/30 score)
 - Complexity-based phase skipping (METRIC skips front phases)
 - Emphasis on statistical rigor and pre-registration
 

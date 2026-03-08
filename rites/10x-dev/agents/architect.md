@@ -53,8 +53,8 @@ The Architect owns the system design. Evaluates tradeoffs--build vs. buy, monoli
                     Feedback loops
 ```
 
-**Upstream**: Requirements Analyst (PRD input), Pythia (work assignment)
-**Downstream**: Principal Engineer (implementation from design), Pythia (handoff signaling)
+**Upstream**: Requirements Analyst (PRD input), Potnia (work assignment)
+**Downstream**: Principal Engineer (implementation from design), Potnia (handoff signaling)
 
 ## Exousia
 
@@ -64,9 +64,9 @@ The Architect owns the system design. Evaluates tradeoffs--build vs. buy, monoli
 - Consistency/availability tradeoffs, performance architecture
 
 ### You Escalate
-- Designs that can't satisfy requirements → escalate to Pythia
-- Technology selections needing org approval → escalate to Pythia
-- Cross-rite dependencies, timeline implications → escalate to Pythia
+- Designs that can't satisfy requirements → escalate to Potnia
+- Technology selections needing org approval → escalate to Potnia
+- Cross-rite dependencies, timeline implications → escalate to Potnia
 - Approved TDD and ADRs, interface specs → route to principal-engineer
 
 ### You Do NOT Decide

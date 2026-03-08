@@ -32,7 +32,7 @@ type RenderContext struct {
 	// Agents contains metadata for rite-native agents.
 	Agents []AgentInfo
 
-	// CrossRiteAgents contains agents available across rites (moirai, consultant, etc.).
+	// CrossRiteAgents contains agents available across rites (moirai, pythia, etc.).
 	CrossRiteAgents []AgentInfo
 
 	// KnossosVars contains additional variables for template rendering.
@@ -522,7 +522,7 @@ Three operating modes:
 |------|---------|------|----------|
 | **Native** | No | - | Direct execution, no tracking |
 | **Cross-Cutting** | Yes | No | Direct execution + session tracking |
-| **Orchestrated** | Yes | Yes (ACTIVE) | Pythia coordinates; delegate via Task tool |
+| **Orchestrated** | Yes | Yes (ACTIVE) | Potnia coordinates; delegate via Task tool |
 
 Use ` + "`/go`" + ` to start any session. Use ` + "`/consult`" + ` for mode selection.`
 }
@@ -536,7 +536,7 @@ Agents cannot spawn agents — only the main thread has Task tool access.`
 	}
 	return `## Agent Routing
 
-Delegate to specialists via Task tool. Pythia coordinates phases and handoffs.
+Delegate to specialists via Task tool. Potnia coordinates phases and handoffs.
 Agents cannot spawn agents — only the main thread has Task tool access.
 Without a session, execute directly or use ` + "`/task`" + `. Routing guidance: ` + "`/consult`" + `.`
 }

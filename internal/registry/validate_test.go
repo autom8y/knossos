@@ -40,9 +40,9 @@ func TestValidateRiteReferences_ValidRite(t *testing.T) {
 
 	m := riteManifest{
 		Name:       "test-rite",
-		EntryAgent: "pythia",
+		EntryAgent: "potnia",
 		Agents: []manifestAgent{
-			{Name: "pythia"},
+			{Name: "potnia"},
 			{Name: "analyst"},
 		},
 		Legomena: []string{"conventions"},
@@ -51,7 +51,7 @@ func TestValidateRiteReferences_ValidRite(t *testing.T) {
 	writeManifest(t, dir, m)
 
 	// Create agent files.
-	writeFile(t, filepath.Join(dir, "agents", "pythia.md"))
+	writeFile(t, filepath.Join(dir, "agents", "potnia.md"))
 	writeFile(t, filepath.Join(dir, "agents", "analyst.md"))
 
 	// Create legomena (directory-based INDEX pattern).
@@ -77,14 +77,14 @@ func TestValidateRiteReferences_MissingAgentFile(t *testing.T) {
 	m := riteManifest{
 		Name: "test-rite",
 		Agents: []manifestAgent{
-			{Name: "pythia"},
+			{Name: "potnia"},
 			{Name: "ghost"}, // no file will be created
 		},
 	}
 	writeManifest(t, dir, m)
 
-	// Create only pythia, not ghost.
-	writeFile(t, filepath.Join(dir, "agents", "pythia.md"))
+	// Create only potnia, not ghost.
+	writeFile(t, filepath.Join(dir, "agents", "potnia.md"))
 
 	warnings, err := ValidateRiteReferences(dir, "", "")
 	if err != nil {

@@ -169,7 +169,7 @@ func TestResolveIdentity(t *testing.T) {
 	}{
 		{
 			name: "full identity",
-			frontmatter: `name: pythia
+			frontmatter: `name: potnia
 description: Orchestrates development lifecycle
 role: orchestrator
 type: orchestrator
@@ -178,7 +178,7 @@ color: blue
 schema_version: "1.0"
 maxTurns: 40`,
 			body:           "# System Prompt\n\nYou are the orchestrator.\n",
-			wantName:       "pythia",
+			wantName:       "potnia",
 			wantRole:       "orchestrator",
 			wantType:       "orchestrator",
 			wantModel:      "opus",

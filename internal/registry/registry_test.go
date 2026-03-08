@@ -11,9 +11,9 @@ func TestRegistryCompleteness(t *testing.T) {
 		SkillConventions,
 		SkillCommitBehavior,
 		SkillAttributionGuard,
-		AgentPythia,
+		AgentPotnia,
 		AgentMoirai,
-		AgentConsultant,
+		AgentPythia,
 		AgentContextEngineer,
 		CLISessionFieldSet,
 		CLISessionLog,
@@ -50,7 +50,7 @@ func TestRef_KnownKeys(t *testing.T) {
 	}{
 		{SkillConventions, "conventions"},
 		{SkillCommitBehavior, "commit:behavior"},
-		{AgentPythia, "pythia"},
+		{AgentPotnia, "potnia"},
 		{AgentMoirai, "moirai"},
 		{CLISessionWrap, "ari session wrap"},
 		{DromenaPark, "/park"},
@@ -75,9 +75,9 @@ func TestRecovery_WithHint(t *testing.T) {
 // TestRecovery_WithoutHint verifies Recovery returns "" for entries that
 // have no recovery hint.
 func TestRecovery_WithoutHint(t *testing.T) {
-	hint := Recovery(AgentPythia)
+	hint := Recovery(AgentPotnia)
 	if hint != "" {
-		t.Errorf("expected empty recovery hint for AgentPythia, got %q", hint)
+		t.Errorf("expected empty recovery hint for AgentPotnia, got %q", hint)
 	}
 }
 
@@ -132,11 +132,11 @@ func TestTaskDelegation_WithOps(t *testing.T) {
 	}
 }
 
-// TestTaskDelegation_OtherAgent verifies TaskDelegation works with AgentPythia.
+// TestTaskDelegation_OtherAgent verifies TaskDelegation works with AgentPotnia.
 func TestTaskDelegation_OtherAgent(t *testing.T) {
-	got := TaskDelegation(AgentPythia, "start-phase")
-	want := `Task(pythia, "<operation>") -- operations: start-phase`
+	got := TaskDelegation(AgentPotnia, "start-phase")
+	want := `Task(potnia, "<operation>") -- operations: start-phase`
 	if got != want {
-		t.Errorf("TaskDelegation(AgentPythia, start-phase) = %q, want %q", got, want)
+		t.Errorf("TaskDelegation(AgentPotnia, start-phase) = %q, want %q", got, want)
 	}
 }

@@ -35,10 +35,10 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 7. [ ] Create reference skill
 8. [ ] Run `ari sync --rite {rite-name}`
 9. [ ] Validate with ari sync --rite
-10. [ ] **Update Consultant knowledge base** (REQUIRED)
+10. [ ] **Update Pythia knowledge base** (REQUIRED)
 ```
 
-> **CRITICAL**: Step 10 ensures the Consultant agent stays canonical. The Consultant is the ecosystem's navigation system - if it has stale data, users will get wrong guidance.
+> **CRITICAL**: Step 10 ensures the Pythia agent stays canonical. The Pythia is the ecosystem's navigation system - if it has stale data, users will get wrong guidance.
 
 ---
 
@@ -137,11 +137,11 @@ Complete rite implementations:
 
 ---
 
-## Consultant Synchronization (REQUIRED)
+## Pythia Synchronization (REQUIRED)
 
-> **CRITICAL**: The Consultant agent is the ecosystem's navigation system. Stale data = wrong user guidance.
+> **CRITICAL**: The Pythia agent is the ecosystem's navigation system. Stale data = wrong user guidance.
 
-When creating or modifying rites, update the Consultant's knowledge base. See [patterns/consultant-sync.md](patterns/consultant-sync.md) for:
+When creating or modifying rites, update the Pythia's knowledge base. See [patterns/pythia-sync.md](patterns/pythia-sync.md) for:
 - Synchronization matrix (what files to update for each change type)
 - Step-by-step procedures for adding rites, agents, and playbooks
 - Verification commands

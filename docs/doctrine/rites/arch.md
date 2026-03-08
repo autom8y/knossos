@@ -17,7 +17,7 @@ The arch rite provides workflows for evaluating codebase architecture — topolo
 | **Name** | arch |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The arch rite provides workflows for evaluating codebase architecture — topolo
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates architecture assessment phases |
+| **potnia** | Coordinates architecture assessment phases |
 | **topology-cartographer** | Maps codebase structure, module boundaries, and package relationships |
 | **structure-evaluator** | Evaluates structural patterns, coupling, and cohesion |
 | **dependency-analyst** | Audits dependency graphs and identifies risks |

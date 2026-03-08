@@ -10,7 +10,7 @@
 
 ## All Terms by Domain
 
-**Agents**: Pythia, Requirements Analyst, Architect, Principal Engineer, QA/Adversary, PRD, TDD, ADR, Test Plan, Plan->Clarify->Execute, Session Trigger Prompt, Checkpoint
+**Agents**: Potnia, Requirements Analyst, Architect, Principal Engineer, QA/Adversary, PRD, TDD, ADR, Test Plan, Plan->Clarify->Execute, Session Trigger Prompt, Checkpoint
 
 **Process**: Prompt -1, Prompt 0, Session, Discovery Phase, Quality Gate, Handoff, Scope Creep, Spike, Complexity Level, Go/No-Go, Must/Should/Could, Blocking vs. Non-Blocking
 

@@ -17,7 +17,7 @@ The SRE rite provides workflows for maintaining production reliability through o
 | **Name** | sre |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The SRE rite provides workflows for maintaining production reliability through o
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates reliability engineering initiative phases |
+| **potnia** | Coordinates reliability engineering initiative phases |
 | **observability-engineer** | Designs observability strategy and establishes SLO/SLI baselines |
 | **incident-commander** | Coordinates reliability plans and creates incident runbooks |
 | **platform-engineer** | Implements infrastructure changes and reliability improvements |

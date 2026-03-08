@@ -5,13 +5,13 @@ description: Cache architecture consultation lifecycle (Assessment -> Architectu
 # =============================================================================
 # ENTRY POINT
 # =============================================================================
-# Pythia is the entry point. It reads the user's problem statement, determines
+# Potnia is the entry point. It reads the user's problem statement, determines
 # complexity (QUICK/STANDARD/DEEP), and routes to the first specialist.
-# Thermia is a single-entry rite -- all consultations begin with Pythia.
+# Thermia is a single-entry rite -- all consultations begin with Potnia.
 
 entry_point:
-  agent: pythia
-  # Pythia is the orchestrator entry point. It does not produce an artifact —
+  agent: potnia
+  # Potnia is the orchestrator entry point. It does not produce an artifact —
   # it reads the user's consultation request and routes to heat-mapper first.
   # The first artifact produced is thermal-assessment.md (by heat-mapper).
   first_specialist: heat-mapper
@@ -23,7 +23,7 @@ entry_point:
 # Four phases in the full chain. QUICK complexity skips architecture and
 # specification, routing directly from assessment to validation (lite).
 # STANDARD and DEEP execute all four phases -- the difference between them
-# is depth expectation communicated by Pythia, not structural.
+# is depth expectation communicated by Potnia, not structural.
 
 phases:
   # Phase 1: Assessment
@@ -70,7 +70,7 @@ phases:
 # =============================================================================
 # Three levels. QUICK is structurally different (2 phases). STANDARD and DEEP
 # are structurally identical (4 phases) -- the difference is depth expectation.
-# Pythia determines complexity from scope indicators in the user's request and
+# Potnia determines complexity from scope indicators in the user's request and
 # communicates depth to each specialist in its directives.
 #
 # Depth variance between STANDARD and DEEP:
@@ -78,8 +78,8 @@ phases:
 #   DEEP: Extended scope -- full existing-cache audit, multi-level hierarchy,
 #         full MRC reasoning + cost modeling, comprehensive runbooks
 #
-# Pythia communicates the depth expectation. The workflow engine treats
-# STANDARD and DEEP identically; agents self-regulate depth from Pythia's
+# Potnia communicates the depth expectation. The workflow engine treats
+# STANDARD and DEEP identically; agents self-regulate depth from Potnia's
 # directive.
 
 complexity_levels:
@@ -112,13 +112,13 @@ complexity_levels:
 #    be resolved by the thermal-monitor alone (e.g., a failure mode was designed
 #    but no capacity headroom exists to support it).
 #
-# Both require Pythia confirmation because they extend consultation scope.
+# Both require Potnia confirmation because they extend consultation scope.
 
 back_routes:
   # Back-route 1: Assessment Gap (architecture -> assessment)
   # The systems-thermodynamicist discovers data paths or access patterns not
   # covered in the thermal assessment that are needed for architecture decisions.
-  # Pythia routes heat-mapper to produce a targeted supplement, not a full redo.
+  # Potnia routes heat-mapper to produce a targeted supplement, not a full redo.
   - source_phase: architecture
     trigger: "assessment_gap"
     target_phase: assessment
@@ -198,11 +198,11 @@ back_routes:
 # =============================================================================
 # COMMAND MAPPING
 # =============================================================================
-# /thermia       -> pythia (orchestrated consultation, determines complexity)
+# /thermia       -> potnia (orchestrated consultation, determines complexity)
 # /heat-map      -> heat-mapper (direct assessment-only, no orchestration)
 # /cache-design  -> systems-thermodynamicist (direct architecture work)
 #
 # Agent roles for command mapping:
-# /thermia       -> pythia (entry agent, orchestrates full consultation)
+# /thermia       -> potnia (entry agent, orchestrates full consultation)
 # /heat-map      -> heat-mapper (assessment phase, quick-switch)
 # /cache-design  -> systems-thermodynamicist (architecture phase, quick-switch)

@@ -86,7 +86,7 @@ func TestExtractRefs_Deduplication(t *testing.T) {
 
 // TestExtractRefs_NoFalsePositives verifies that non-source paths are not extracted.
 func TestExtractRefs_NoFalsePositives(t *testing.T) {
-	body := "See https://github.com/foo/bar.go and rites/ecosystem/agents/pythia.md for context."
+	body := "See https://github.com/foo/bar.go and rites/ecosystem/agents/potnia.md for context."
 	refs := extractRefs(body)
 
 	files := refsOfType(refs, "file")

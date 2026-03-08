@@ -13,7 +13,7 @@ All 5 intelligence agents pass validation.
 | analytics-engineer | 200 | 300 | PASS |
 | experimentation-lead | 201 | 300 | PASS |
 | insights-analyst | 179 | 300 | PASS |
-| pythia | 187 | 300 | PASS |
+| potnia | 187 | 300 | PASS |
 | user-researcher | 157 | 300 | PASS |
 
 ## YAML Frontmatter Validation
@@ -23,12 +23,12 @@ All 5 intelligence agents pass validation.
 | analytics-engineer | PASS |
 | experimentation-lead | PASS |
 | insights-analyst | PASS |
-| pythia | PASS |
+| potnia | PASS |
 | user-researcher | PASS |
 
 ## Required Sections
 
-| Section | analytics-engineer | experimentation-lead | insights-analyst | pythia | user-researcher |
+| Section | analytics-engineer | experimentation-lead | insights-analyst | potnia | user-researcher |
 |---------|-------------------|---------------------|------------------|--------------|-----------------|
 | Core Responsibilities | PASS | PASS | PASS | PASS | PASS |
 | Position in Workflow | PASS | PASS | PASS | PASS | PASS |
@@ -37,7 +37,7 @@ All 5 intelligence agents pass validation.
 | Handoff Criteria | PASS | PASS | PASS | PASS | PASS |
 | Anti-Patterns | PASS | PASS | PASS | PASS | PASS |
 
-*Note: Pythia produces CONSULTATION_RESPONSE (documented in Consultation Protocol), not traditional artifacts, so "What You Produce" is intentionally replaced with protocol documentation.
+*Note: Potnia produces CONSULTATION_RESPONSE (documented in Consultation Protocol), not traditional artifacts, so "What You Produce" is intentionally replaced with protocol documentation.
 
 ## New Sections Added
 
@@ -56,7 +56,7 @@ Agent changes:
   + analytics-engineer.md (new)
   + experimentation-lead.md (new)
   + insights-analyst.md (new)
-  ~ pythia.md (modified in knossos)
+  ~ potnia.md (modified in knossos)
   + user-researcher.md (new)
 
 No changes made (--dry-run mode)
@@ -82,7 +82,7 @@ Status: **PASS** - All agents would be successfully installed.
 | **insights-analyst** | Added example with statistical evidence table, segment analysis, and confidence ratings; specific guidance on rating findings |
 | **experimentation-lead** | Added sample size calculation with formula; example experiment design; metric table with thresholds; stopping rules guidance |
 | **analytics-engineer** | Added event naming convention with examples; sample JSON payload; validation rules format |
-| **pythia** | Compressed from 293 to 187 lines; converted prose to tables; streamlined consultation protocol |
+| **potnia** | Compressed from 293 to 187 lines; converted prose to tables; streamlined consultation protocol |
 
 ## Conclusion
 

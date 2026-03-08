@@ -36,7 +36,7 @@ last_verified: 2026-02-26
 | **Session FSM** | Complete | ACTIVE/PARKED/ARCHIVED, formally verified (TLA+) |
 | **Naxos Detection** | Complete | Full orphan scanning with configurable thresholds |
 | **Inscription System** | Complete | Marker-based regeneration, backup/restore, section management |
-| **Terminology** | Complete | team→rite, roster→knossos, orchestrator→pythia all migrated |
+| **Terminology** | Complete | team→rite, roster→knossos, orchestrator→potnia all migrated |
 | **Rite Operations** | Complete | invoke/swap/release/pantheon operational across 14 rites |
 | **Moirai Authority** | Complete | Unified agent with skill-based routing (beneficial simplification) |
 | **Theoria/Pinakes** | Complete | Domain registry, theoros agent, `/theoria` dromena, synkrisis |
@@ -105,7 +105,7 @@ Three colors (WHITE/GRAY/BLACK). Five proof types. Complexity-aware thresholds (
 - **Memory** (17 agents): 3-tier seeding, 150-line soft cap, self-curating
 - **Skills** (68 agents): Frontmatter `skills:` field, ~3,500 token ceiling
 - **Hooks** (10 agents): `ari hook agent-guard`, triple-layer enforcement
-- **Resume** (ecosystem only): Throughline protocol for Pythia continuity
+- **Resume** (ecosystem only): Throughline protocol for Potnia continuity
 
 See [reference/agent-capabilities.md](../reference/agent-capabilities.md) for details.
 

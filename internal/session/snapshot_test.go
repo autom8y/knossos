@@ -92,7 +92,7 @@ func TestGenerateSnapshot_OrchestratorFull(t *testing.T) {
 
 	snap, err := GenerateSnapshot(ctx, eventsPath, SnapshotConfig{
 		Role:      RoleOrchestrator,
-		AgentName: "pythia",
+		AgentName: "potnia",
 	})
 	if err != nil {
 		t.Fatalf("GenerateSnapshot returned error: %v", err)
@@ -272,7 +272,7 @@ func TestRenderMarkdown_OrchestratorTemplate(t *testing.T) {
 		Initiative: "Add dark mode",
 		Rite:       "ecosystem",
 		Role:       RoleOrchestrator,
-		AgentName:  "pythia",
+		AgentName:  "potnia",
 		Timeline: []TimelineEntry{
 			{
 				Time:     time.Date(0, 1, 1, 14, 3, 0, 0, time.UTC),
@@ -462,7 +462,7 @@ func TestRenderJSON_OrchestratorFields(t *testing.T) {
 		Initiative: "Add dark mode",
 		Rite:       "ecosystem",
 		Role:       RoleOrchestrator,
-		AgentName:  "pythia",
+		AgentName:  "potnia",
 		Timeline: []TimelineEntry{
 			{
 				Time:     time.Date(0, 1, 1, 14, 3, 0, 0, time.UTC),

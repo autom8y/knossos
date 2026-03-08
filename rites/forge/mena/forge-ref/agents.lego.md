@@ -90,11 +90,11 @@ description: "Detailed agent profiles for The Forge rite. Use when: understandin
 **Purpose**: Finalizes integration and documentation.
 
 **Domain**:
-- Consultant knowledge sync
+- Pythia knowledge sync
 - Rite profile creation
 - Version recording
 - Documentation
 
-**Produces**: Catalog entry + Consultant sync
+**Produces**: Catalog entry + Pythia sync
 
 **Terminal**: Workflow completes here

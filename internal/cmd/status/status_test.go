@@ -28,7 +28,7 @@ func TestCollectClaude_Exists(t *testing.T) {
 	os.WriteFile(filepath.Join(root, ".knossos", "ACTIVE_RITE"), []byte("10x-dev\n"), 0644)
 
 	// Write some agent files
-	os.WriteFile(filepath.Join(root, ".claude", "agents", "pythia.md"), []byte("# agent"), 0644)
+	os.WriteFile(filepath.Join(root, ".claude", "agents", "potnia.md"), []byte("# agent"), 0644)
 	os.WriteFile(filepath.Join(root, ".claude", "agents", "architect.md"), []byte("# agent"), 0644)
 	os.WriteFile(filepath.Join(root, ".claude", "agents", "README.txt"), []byte("not an agent"), 0644) // should be excluded
 

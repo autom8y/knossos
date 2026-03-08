@@ -26,7 +26,7 @@ Evocative labels used throughout the codebase. Each maps to a concrete technical
 | **Theseus** | Claude Code agent — the navigator with amnesia (finite context window) |
 | **Minotaur** | The problem being solved — what Theseus is sent to defeat |
 | **Moirai** | Session lifecycle (Clotho=creation, Lachesis=measurement, Atropos=termination) |
-| **Pythia** | Intelligence/analytics rite — the oracle |
+| **Potnia** | Per-rite orchestrator — the mistress who coordinates phases |
 | **Daedalus** | The builder/architect archetype |
 | **Naxos** | Abandonment/parking — where Ariadne was left (session parking) |
 | **Athens** | Successful return — session wrap with WHITE sails |

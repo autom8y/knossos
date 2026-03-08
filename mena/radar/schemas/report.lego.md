@@ -194,7 +194,7 @@ Produced by `/radar --challenge {domain}`.
 # Challenge Report: {domain} — {YYYY-MM-DD}
 
 **Challenged File**: `.know/{domain}.md`
-**Challenge Modes Run**: {advocatus | socratic | both}
+**Challenge Modes Run**: {adversarial | dialectic | both}
 **Run Date**: {YYYY-MM-DD}
 
 ## Executive Summary
@@ -238,7 +238,7 @@ codebase evidence across {N} checked claims.
 
 ## Methodology
 
-- **Challenge modes**: {list of modes run: advocatus-{domain}, socratic-{domain}}
+- **Challenge modes**: {list of modes run: adversarial-{domain}, dialectic-{domain}}
 - **Source file**: `.know/{domain}.md` (generated: {generated_at date})
 - **Claims checked**: {N}
 - **Contradictions found**: {N}

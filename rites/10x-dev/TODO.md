@@ -14,7 +14,7 @@ The 10x-dev is a **production-ready, well-documented rite** implementing a 5-age
 - Four complexity levels (SCRIPT/MODULE/SERVICE/PLATFORM) with phase adaptation
 
 **Architecture validated:**
-- Pythia as stateless advisor (read-only) - correct design
+- Potnia as stateless advisor (read-only) - correct design
 - Acid tests as guidance, not enforcement - avoids checkbox theater
 - QA authority is advisory only - humans decide, QA documents risks
 
@@ -43,19 +43,19 @@ The 10x-dev is a **production-ready, well-documented rite** implementing a 5-age
 
 ---
 
-### P2: Flexible Entry Points via Pythia
+### P2: Flexible Entry Points via Potnia
 
 **Gap identified:** Workflow assumes PRD-first universally, but technical refactoring and performance optimization naturally start with TDD.
 
-**Solution:** Relax PRD-first requirement. Let Pythia decide entry point based on work type. This trusts Pythia's core competency.
+**Solution:** Relax PRD-first requirement. Let Potnia decide entry point based on work type. This trusts Potnia's core competency.
 
 **Changes required:**
-- [ ] Update `agents/pythia.md`: Add guidance for selecting entry agent based on work type
+- [ ] Update `agents/potnia.md`: Add guidance for selecting entry agent based on work type
 - [ ] Update `workflow.yaml`: Remove hard-coded `entry_point: requirements-analyst`, make dynamic
 - [ ] Update `skills/10x-workflow/SKILL.md`: Document entry point flexibility
 - [ ] Consider: Add `--entry` flag to `/sos start` for explicit override when user knows best entry
 
-**Entry point heuristics for Pythia:**
+**Entry point heuristics for Potnia:**
 | Work Type | Recommended Entry | Rationale |
 |-----------|------------------|-----------|
 | New feature | Requirements Analyst | User stories drive scope |

@@ -1,10 +1,10 @@
 ---
 domain: "scar-tissue"
-generated_at: "2026-03-06T21:00:00Z"
+generated_at: "2026-03-08T18:00:00Z"
 expires_after: "14d"
 source_scope: [".sos/archive/**"]
 generator: "dionysus"
-source_hash: "3053e84"
+source_hash: "dbf81b8"
 confidence: 0.85
 format_version: "1.0"
 sessions_synthesized: 37
@@ -21,9 +21,11 @@ last_session: "session-20260306-201337-8581513b"
 | session-20260302-150407-07b8e5be | SD-4: Entry-point conflict between manifest.yaml and workflow.yaml (9/15 rites) | Planned: WS5 entry-point semantics | rite-config |
 | session-20260302-150407-07b8e5be | SD-5: Ghost skill references in prose (14/15 rites) | Planned: WS6 ghost prose cleanup | mena-integrity |
 | session-20260302-150407-07b8e5be | SD-6: Oversized injected INDEX skills exceeding 40-line ceiling (9/15 rites) | Planned: WS7 progressive disclosure splits | context-budget |
-| session-20260303-163517-f43d2334 | GITHUB_TOKEN suppresses downstream workflow triggers | Root cause: GoReleaser uses GITHUB_TOKEN; GitHub silently drops release events. Fix options A-D identified. | ci-infrastructure |
+| session-20260303-163517-f43d2334 | GITHUB_TOKEN suppresses downstream workflow triggers | Root cause identified: GoReleaser uses GITHUB_TOKEN; GitHub silently drops release events. Fix options A-D identified. | ci-infrastructure |
 | session-20260304-154410-af90596d | GO-001/002/003: Three content rewriting bypass paths in materialization pipeline | Fixed: RewriteMenaContentPaths exported and wired into engine.go standalone + both userscope code paths | materialization |
 | session-20260304-154410-af90596d | 15 broken cross-reference links in mena session/operations/workflow | Fixed: session-common -> common, handoff-ref -> handoff, start-ref -> start naming corrections | mena-integrity |
+| session-20260304-154410-af90596d | AGENT-001: releaser-ref source-tree companion paths using absolute source paths | Fixed: replaced with relative sibling references | materialization |
+| session-20260304-001522-1c07b3bd | Pre-existing Go test failures complicating audit signoff | Noted: confirmed pre-dating this initiative, not introduced by framework agnosticism work | test-infrastructure |
 
 ## Rejected Alternatives
 
@@ -45,9 +47,10 @@ last_session: "session-20260306-201337-8581513b"
   - Session parking at requirements phase: 25/37 sessions never left requirements (68%), suggesting rapid-fire initiative creation with deferred execution
   - Duplicate initiative starts: session-20260302-151610-273eeb4a and session-20260302-151730-bffc2248 are the same initiative started 80 seconds apart
   - Cross-reference link rot: seen in session-20260304-154410-af90596d (15 broken links) and session-20260304-001522-1c07b3bd (75 findings across 3 vectors)
-  - Requirements-phase-only sessions dominating archive: pattern across 2026-03-02 sessions (13/18 parked at requirements) and 2026-03-06 sessions (5/6 parked at requirements)
+  - Requirements-phase-only sessions dominating archive: pattern across 2026-03-02 sessions (13/19 parked at requirements) and 2026-03-06 sessions (5/6 parked at requirements)
   - Phase skipping for spike/framing-driven work: session-20260303-132132-f3031827, session-20260303-135856-c525b918 both skipped requirements phase based on pre-existing spike artifacts
-  - Multi-phase embody sessions: session-20260305-191804-8e309d1f, session-20260306-084705-0f5ea0c7, session-20260306-092108-0c1f2ce9 (3 sessions for phases 1-3 of same feature, all parked at different phases)
+  - Multi-phase embody sessions: session-20260305-191804-8e309d1f, session-20260306-084705-0f5ea0c7, session-20260306-092108-0c1f2ce9 (3 sessions for phases 1-3 of same feature, each at different phases)
+  - Content path/materialization divergence: session-20260304-135616-f6f65e42 and session-20260304-154410-af90596d both addressed mena materialization correctness issues
 - **One-time**: Isolated friction events
   - GoReleaser GITHUB_TOKEN event suppression blocking CI pipeline: session-20260303-163517-f43d2334
   - Content rewriting bypass in materialization pipeline (3 code paths missed by initial TDD): session-20260304-154410-af90596d

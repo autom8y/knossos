@@ -7,7 +7,7 @@ description: Security assessment lifecycle for threat modeling, compliance, pene
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
 # This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
-entry_agent: pythia
+entry_agent: potnia
 
 phases:
   - name: threat-modeling
@@ -32,7 +32,7 @@ phases:
     description: Final security review and deployment approval
 
 agents:
-  - name: pythia
+  - name: potnia
     role: Coordinates security initiative phases
 
   - name: threat-modeler
@@ -75,6 +75,6 @@ external_consultation:
   enabled: true
   allowed_invokers:
     - rite: 10x-dev
-      agents: [architect, pythia]
+      agents: [architect, potnia]
     - rite: sre
       agents: [incident-commander]

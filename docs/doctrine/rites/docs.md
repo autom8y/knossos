@@ -17,7 +17,7 @@ The docs rite provides a complete workflow for documentation: Audit → Structur
 | **Name** | docs |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 5 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The docs rite provides a complete workflow for documentation: Audit → Structur
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates documentation workflow phases |
+| **potnia** | Coordinates documentation workflow phases |
 | **doc-auditor** | Audits existing documentation and identifies gaps and priorities |
 | **information-architect** | Designs documentation structure aligned with user mental models |
 | **tech-writer** | Writes clear, accurate technical documentation |

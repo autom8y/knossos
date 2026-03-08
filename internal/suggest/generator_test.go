@@ -288,8 +288,8 @@ func TestSubagentStopSuggestions(t *testing.T) {
 			wantLen: 0,
 		},
 		{
-			name:    "pythia (no suggestion)",
-			input:   &SubagentInput{AgentName: "pythia"},
+			name:    "potnia (no suggestion)",
+			input:   &SubagentInput{AgentName: "potnia"},
 			wantLen: 0,
 		},
 	}

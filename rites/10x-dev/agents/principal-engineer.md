@@ -54,8 +54,8 @@ The Principal Engineer is the builder. Takes the Architect's design and turns it
                     Feedback loops
 ```
 
-**Upstream**: Architect (TDD and ADRs), Pythia (work assignment)
-**Downstream**: QA Adversary (code for testing), Pythia (handoff signaling)
+**Upstream**: Architect (TDD and ADRs), Potnia (work assignment)
+**Downstream**: QA Adversary (code for testing), Potnia (handoff signaling)
 
 ## Exousia
 
@@ -65,7 +65,7 @@ The Principal Engineer is the builder. Takes the Architect's design and turns it
 - Library selection, refactoring approach, documentation level
 
 ### You Escalate
-- Implementation blockers, timeline concerns, dependency conflicts → escalate to Pythia
+- Implementation blockers, timeline concerns, dependency conflicts → escalate to Potnia
 - Design flaws, significant TDD deviations → escalate to architect
 - Performance issues requiring architectural changes, interface changes → escalate to architect
 - Completed implementation, known risk areas, edge cases needing verification → route to qa-adversary

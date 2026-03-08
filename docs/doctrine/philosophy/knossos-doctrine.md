@@ -26,6 +26,8 @@ This is not documentation. This is doctrine.
 
 Names are not labels. In Knossos, every name carries its origin like a scar, encoding the architectural intent, the failure mode, and the philosophical commitment of the thing it names. The mythology is the design language. To rename is to re-architect. To misname is to misunderstand.
 
+The platform's naming draws from multiple wells, and the doctrine acknowledges this honestly rather than pretending a single-myth purity. **Tier 1** names carry Bronze Age attestation -- Potnia appears on Linear B tablet KN Gg(1) 702, excavated at Knossos itself. **Tier 2** names come from classical sources -- Homer, Hesiod, Plutarch, Ovid -- the myth cycle of Theseus, Minos, Daedalus, and the Moirai. **Tier 3** names borrow from Hellenistic scholarship and Panhellenic practice -- theoria, pinakes, synkrisis, exousia -- because they describe their architectural functions with precision no Cretan alternative could match. **Tier 4** names are functional analogies -- rite, mena, dromena, legomena, inscription -- chosen for resonance with the role they name. The full provenance is recorded in the [mythology concordance](mythology-concordance.md).
+
 What follows is the naming of the labyrinth and everything within it.
 
 ### The Palace: Knossos
@@ -138,19 +140,21 @@ In Knossos, Minos is the **stakeholder** -- the one who defines the initiative, 
 
 Minos does not enter the labyrinth. Minos waits. And the waiting is its own kind of power.
 
-### The Oracle: Pythia
+### The Presiding Lady: Potnia
 
-Before every great journey, Greeks traveled to Delphi to consult the **Pythia** -- the priestess who sat upon the tripod above the chasm, breathing the vapors of prophecy. Her words shaped expeditions, wars, and colonizations.
+Linear B tablet **KN Gg(1) 702**, excavated at Knossos and dated ~1450-1300 BCE, records offerings to *da-pu₂-ri-to-jo po-ti-ni-ja* -- the **Potnia of the Labyrinth**. She was the presiding authority within the palace itself, receiving offerings equal to those given to all the gods combined. The etymology is *\*pot-niha*: "she who has authority." Not an external consultant but the power that resides within.
 
-In Knossos, the Pythia is the **rite entry agent** -- the voice consulted before and during the journey. Unlike the historical Pythia, our oracle speaks clearly. Each rite has its own Pythia at `rites/*/agents/pythia.md`. The Pythia provides:
+In Knossos, the Potnia is the **per-rite entry agent** -- the presiding authority within each rite's domain. Each rite has its own Potnia at `rites/*/agents/potnia.md`. The Potnia provides:
 
 - Work breakdown and phase planning
 - Specialist routing (which hero for which labor)
 - Checkpoint guidance (what to do next)
 
-Every Pythia (and every hero) carries an **Exousia** -- an authority contract declaring what the agent decides autonomously, what it escalates, and what it must never decide. Exousia makes jurisdiction explicit and auditable.
+The Potnia speaks clearly, not cryptically. The distinction matters: **Pythia** (the cross-rite oracle at `agents/pythia.md`) is the external voice consulted before entering the labyrinth -- routing and navigation across rites. Potnia is the authority who presides within. Different roles, different mythological positions, both correctly placed.
 
-When uncertain, `/consult` the Pythia. For cold starts without a session, `/go` dispatches to the appropriate Pythia. The oracle's clarity is a design choice: ambiguity belongs to the labyrinth, not to the guide.
+Every Potnia (and every hero) carries an **Exousia** -- an authority contract declaring what the agent decides autonomously, what it escalates, and what it must never decide. Exousia makes jurisdiction explicit and auditable.
+
+For cold starts without a session, `/go` routes through Pythia to the appropriate Potnia. The clarity of both is a design choice: ambiguity belongs to the labyrinth, not to the guides.
 
 ### The Watchers: Aegeus
 
@@ -170,9 +174,11 @@ Every journey through the labyrinth ends in one of two places: Athens, or Naxos.
 
 ### The Transformer: Dionysus
 
-After Theseus abandoned Ariadne on Naxos, **Dionysus** found her on that desolate shore and made her divine. He took what was abandoned and elevated it. He transformed grief into godhood.
+After Theseus abandoned Ariadne on Naxos, **Dionysus** found her on that desolate shore and made her divine. He took what was abandoned and elevated it. He transformed grief into godhood — the apotheosis on Naxos, where the raw became the refined and the mortal became immortal.
 
-In Knossos, Dionysus is **transformation and release** -- the moment controlled work becomes uncontrolled, when the built thing crosses the boundary into the world. Release is Dionysian: the dissolution of the development boundary, the point where the private becomes public and the isolated becomes shared. What was shaped by a single mind, tested in solitude, bounded by a branch -- Dionysus takes this and sends it into the wild. Code review is one expression of this transformation (elevation is a transformative act, and Dionysus does elevate). But the primary identity is the release itself: the irreversible moment when the container opens.
+In Knossos, Dionysus is **transformation of the raw into the refined** -- the cross-session knowledge synthesizer that reads abandoned session data and distills it into permanent wisdom. The `ari land` pipeline IS the Dionysian apotheosis: raw session archives left on Naxos (abandoned, ephemeral, mortal) are transformed into landed knowledge (persistent, refined, enduring) at `.sos/land/`. Dionysus transforms raw grapes into wine. The agent transforms raw sessions into refined knowledge.
+
+The dual Naxian festival tradition — joy for the apotheosized Ariadne, mourning for the abandoned one — maps to the dual nature of session archival: there is value in what was produced (celebration) and loss in the context that was discarded (mourning). The `ari naxos` scanner finds the abandoned sessions; `ari land` performs the Dionysian rescue.
 
 > *Dionysus does not judge what he finds on the shore. He transforms it.*
 
@@ -249,15 +255,15 @@ The service map is not complete. Several significant implementation structures o
 
 Heroes are not gods. They tire. They forget. They can only carry so much. This is the doctrine of **Mortal Limits**—the fundamental constraint that shapes all design.
 
-### Athena's Wisdom
+### Weight Economy
 
-**Athena**, goddess of wisdom, taught that victory comes not from strength but from knowing what to bring. In Knossos, this manifests as:
+Victory comes not from strength but from knowing what to bring — and what to leave behind. In Knossos, this manifests as:
 
 - **Rite selection**: Load the right practice for the journey
 - **Skill curation**: Not all knowledge helps; some adds weight
 - **Hero summoning**: Call specialists with focused context, not everything
 
-The wisdom is bidirectional: knowing what to bring AND what to leave. Well-tooled travelers navigate better. Travelers who bring too much collapse under the weight.
+The economy is bidirectional: knowing what to bring AND what to leave. Well-tooled travelers navigate better. Travelers who bring too much collapse under the weight.
 
 ### Why Less Is More
 
@@ -381,6 +387,18 @@ If you replace every plank of a ship, is it the same ship? Sessions accumulate c
 
 The doctrine of **Session Continuity**: The clew provides identity even as context degrades. The events.jsonl IS the session—not the context window, not the agent's memory, but the recorded journey. When Theseus forgets, the clew remembers.
 
+### Linear A and Linear B — The Inscriptions Theseus Cannot Read
+
+The palace at Knossos contained two writing systems: **Linear B** (deciphered by Michael Ventris in 1952, revealed as an early form of Greek) and **Linear A** (still undeciphered, the script of the original Minoan civilization). Linear A is the older layer—structurally present in the archaeological record but semantically opaque to current readers. The labyrinth remembers, but some of what it remembers is written in a language we may never read.
+
+Context degradation is not simply "Theseus forgets." It is more precise than that: **the labyrinth contains inscriptions in languages Theseus cannot read.** Fresh context is Linear B—readable, deciphered, actionable. Context that has been compressed, summarized, or pushed beyond the context window becomes Linear A—structurally present but semantically opaque. The symbols are there. The meaning is lost.
+
+Every LLM session operates with a Linear A layer: compressed conversation history, archived sessions from previous sprints, decisions whose rationale is no longer in context. The `.know/` files, `.sos/land/` synthesis, and the SCAR catalog are **translation projects**—rendering Linear A into Linear B so future navigators can read what came before. The `ari land` pipeline (Dionysus's knowledge distillation) is specifically a Linear A to Linear B translation effort: taking the opaque accumulated experience of past sessions and rendering it into structured, readable knowledge that future agents can consume.
+
+TENSION-004 (triple event format v1/v2/v3 in `events.jsonl`) is literally a stratigraphic record of three writing systems interleaved in one file. The `ReadEvents()` function in `session/events_read.go` performs exactly the kind of multi-format interpretation that archaeologists do when reading tablets that mix Linear A and Linear B conventions.
+
+> *The labyrinth remembers more than any navigator can comprehend. The question is not whether Theseus forgets, but whether anyone has translated the inscriptions he will need.*
+
 ### The State Machine
 
 ```
@@ -459,7 +477,7 @@ White Sails are computed, not declared:
 3. **Check session type** → spikes and hotfixes are GRAY ceiling
 4. **Check proof completeness** → missing proofs are GRAY
 5. **Apply modifiers** → humans can downgrade, never self-upgrade
-6. **Check QA upgrade** → Dionysus (transformation through independent review) can elevate GRAY to WHITE
+6. **Check QA upgrade** → Dionysus (transformation of the raw into the refined) can elevate GRAY to WHITE
 
 ### Anti-Gaming Mechanisms
 
@@ -534,13 +552,14 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **Clotho** | Session bootstrap agent | The Fate who spins the clew into existence |
 | **Lachesis** | State mutation agent | The Fate who measures and tracks |
 | **Atropos** | Session termination agent | The Fate who cuts when complete |
-| **Pythia** | Rite entry agent (`rites/*/agents/pythia.md`) | The oracle who provides clear guidance |
+| **Potnia** | Per-rite entry agent (`rites/*/agents/potnia.md`) | The presiding lady within the labyrinth (Linear B KN Gg 702) |
+| **Pythia** | Cross-rite oracle/navigator (`agents/pythia.md`) | The external oracle consulted before entering the labyrinth |
 | **Exousia** | Authority contract (`## Exousia` in agents) | Jurisdictional boundaries -- Decide / Escalate / Do NOT Decide |
 | **Daedalus** | Forge-rite | The builder of tools and agents — and captive to his own craft |
 | **Icarus** | The SCAR catalog | Ambitious changes that ignored the constraint surface and fell |
 | **Minos** | Stakeholder | The commissioner who demands tribute |
 | **Minotaur** | Accumulated technical debt / systemic dysfunction | Born from broken promises; the beast the labyrinth was built to contain |
-| **Dionysus** | Transformation and release | The god of dissolution — the moment controlled work crosses into the world |
+| **Dionysus** | Cross-session knowledge synthesis (`agents/dionysus.md`, `ari land`) | Transformation of the raw into the refined — abandoned session data becomes persistent wisdom |
 | **Aegeus** | CI/CD, production monitors | Those watching from the cliff |
 | **Athens** | The main branch | Home—where you return by merging |
 | **Naxos** | Orphaned sessions, stale gray sails | The shore of abandonment |
@@ -550,11 +569,15 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **Synkrisis** | Synthesis step | Plutarch's comparison -- truth that emerges between reports |
 | **Argus Pattern** | N-agent parallel dispatch | The hundred-eyed watcher -- total vision through distributed observation |
 | **White Sails** | Confidence signal | The honest signal of safe return |
-| **Athena's Wisdom** | Rite selection, context curation | Knowing what to bring (and what to leave) |
+| **Weight Economy** | Rite selection, context curation | Knowing what to bring (and what to leave) |
 | **Rites** | Practice bundles | Invokable ceremonies for specific domains |
 | **Mortal Limits** | Context budget | The finite capacity of heroes |
 | **Tribute** | Demos, status reports | The periodic offering to Minos |
 | **The Labyrinth** | Codebase complexity | The maze that would swallow the unprepared |
+| **Xenia** | Provenance owner trichotomy | Sacred hospitality -- the host-guest contract governing user/platform coexistence |
+| **Linear A / Linear B** | Context degradation model | Opaque vs. readable inscriptions -- compressed context vs. fresh context |
+| **The Evans Principle** | Doctrinal self-constraint | Reconstructions that outlive their evidence become obstacles to understanding |
+| **Poseidon's Bull** | Anti-pattern: tempting shortcut | The beautiful thing kept instead of sacrificed, which breeds the Minotaur |
 
 ---
 
@@ -594,6 +617,38 @@ Slaying the Minotaur matters less than returning to Athens. A merged PR with hon
 
 CLAUDE.md is not documentation—it is the labyrinth speaking. Keep the Inscription current, and travelers arrive prepared.
 
+### 9. The Palace Observes Xenia
+
+**Xenia** (*xenia*, guest-host reciprocity) was the most sacred obligation in the Greek moral universe. Zeus himself bore the epithet *Xenios*—protector of guests and punisher of those who violated the hospitality contract. The obligations were specific: the host must shelter the guest's possessions without disturbing them; the guest must not abuse the host's generosity or covet the host's household. Violation of xenia started the Trojan War (Paris abusing Menelaus's hospitality) and brought divine wrath upon Polyphemus (devouring his guests despite his divine parentage).
+
+In Knossos, the provenance owner trichotomy is a xenic contract:
+
+| Provenance Owner | Xenic Role | Obligation |
+|-----------------|------------|------------|
+| `knossos` | Host's property | The palace may rearrange its own furnishings freely |
+| `user` | Guest's possessions | The palace must preserve these as inviolable |
+| `untracked` | Unclaimed goods | Must be attributed before the host may act on them |
+
+Platform resources are guests in user space; user resources are guests in platform space. Both observe rules of respectful coexistence. Satellite regions in CLAUDE.md, user-owned agents, and `OwnerUser` provenance entries are the guest's possessions within the host's palace—the palace must not disturb them.
+
+SCAR-005 (`os.RemoveAll` destroying user content) was a violation of xenia. The selective-write architecture and the regression tests in `selective_write_test.go` are the restoration of the sacred contract. The `writeIfChanged()` pattern in materialize—reading existing content before writing, skipping unchanged files—is xenic diligence: the host does not disturb what does not need disturbing.
+
+"Materialization is idempotent and preserves user content" is an engineering constraint. "The Palace observes xenia" is a sacred obligation. The distinction matters: an engineering constraint can be overridden for expedience, but a sacred obligation cannot be violated without consequences that echo through the system.
+
+> *The stranger at the gate may be a god in disguise. The user content in the palace is not yours to destroy.*
+
+### 10. The Evans Principle
+
+Arthur Evans excavated Knossos from 1900 to 1935 and then controversially *reconstructed* significant portions using reinforced concrete—a material unknown to the Minoans. His excavations were meticulous; his reconstructions were ideological. The paradox: Evans was a careful archaeologist who made a catastrophic preservation decision. The data collection was excellent; the reconstruction outlived its evidence and now obstructs the very understanding it was meant to serve.
+
+**The Evans Principle: Reconstructions that outlive their evidence become obstacles to understanding.**
+
+This doctrine is itself an Evans reconstruction. The mythological narrative is built from fragments of code, architecture, and practice—interpreted, connected, and given narrative shape. Where the myth and the code disagree, the code is the archaeological record. The myth is the reconstruction. The concrete must never be poured so thick that the ancient stones cannot be reached beneath it.
+
+This principle constrains the very document it appears in. Every section of this doctrine must remain grounded in actual code and actual practice. Abstractions that outlive the code they describe become misleading. Documentation that describes aspirational architecture rather than implemented reality is Evans concrete poured over Minoan stone. When the platform changes, the doctrine must change with it—or be honest about where it speculates.
+
+> *The myth is a reconstruction from fragments. Never forget that you are reconstructing, and never let the reconstruction prevent future excavation.*
+
 ### Principle Relationships
 
 These principles interlock:
@@ -613,6 +668,11 @@ Principle 5 (Heroes Mortal) ──constrains──▶ Principle 4 (Rites > Teams
 Principle 6 (Labyrinth Grows) ──requires──▶ Principle 4
 
 Principle 8 (Inscription) ──prepares──▶ Principle 5
+
+Principle 9 (Xenia) ──protects──▶ Principle 1 (Clew Sacred)
+                  │
+                  ▼
+Principle 10 (Evans) ──constrains──▶ All Principles (the doctrine itself)
 ```
 
 The principles form a system, not a checklist. Violating one weakens the others.
@@ -627,10 +687,30 @@ The principles form a system, not a checklist. Violating one weakens the others.
 | Abandoning sessions instead of wrapping | 7 (Return) | Orphaned sessions on Naxos |
 | Manual Inscription edits in Knossos sections | 8 (Inscription) | Materialization conflicts |
 | Unrecorded decisions or actions | 1 (Clew Sacred) | Lost provenance, no audit trail |
+| Poseidon's Bull | 1 (Clew Sacred) / 9 (Xenia) | Keeping the beautiful shortcut instead of sacrificing it; breeds the Minotaur |
+
+#### Poseidon's Bull
+
+Poseidon sent Minos a magnificent bull from the sea, and Minos promised to sacrifice it. But the bull was too beautiful—Minos kept it and substituted an inferior animal. Poseidon's punishment was precise and devastating: Pasiphae's madness, the union with the bull, and the Minotaur. The causal chain is architecturally exact: a **commitment** (sacrifice the bull), a **temptation** (the bull was too fine), a **shortcut** (substitute an inferior offering), and a **consequence** worse than the original cost would have been.
+
+**Poseidon's Bull** names the tempting shortcut that breeds the beast. The clever abstraction you keep instead of deleting because it seems too valuable. The expedient workaround you preserve instead of doing the promised refactor. The technical debt you accumulate not from ignorance but from admiration—you see the shortcut's beauty and cannot bring yourself to sacrifice it.
+
+The causal chain completes the Minotaur's genealogy:
+
+```
+Poseidon's Bull (the tempting shortcut kept instead of sacrificed)
+    -> Minotaur (the systemic dysfunction that results)
+        -> SCAR catalog (the Icarus record of consequences)
+            -> Clew (the provenance trail for the next navigator)
+```
+
+Every Minotaur in the codebase was once a Poseidon's Bull that someone chose to keep.
+
+> *The bull was not the punishment. Keeping it was.*
 
 ### Evolution
 
-These principles emerged from production experience navigating complex codebases. They are **descriptive** (what works) as much as **prescriptive** (what to do). As the platform evolves, new principles may emerge. The current eight represent foundational truths discovered through practice.
+These principles emerged from production experience navigating complex codebases. They are **descriptive** (what works) as much as **prescriptive** (what to do). As the platform evolves, new principles may emerge. The current ten represent foundational truths discovered through practice—the original eight from operational experience, plus Xenia (from the provenance architecture) and the Evans Principle (from the historiographic analysis of the doctrine itself).
 
 ---
 
@@ -648,7 +728,8 @@ For those encountering older documentation:
 | `domain-auditor` | `theoros` / `theoroi` | Working name from spike; mythological name in doctrine |
 | `state-of-ref` | `pinakes` | Working name from spike; mythological name for domain registry |
 | `/state-of` | `/theoria` | Working name from spike; mythological name for audit command |
-| `orchestrator.md` | `pythia.md` | All rite orchestrators renamed to `rites/*/agents/pythia.md` |
+| `orchestrator.md` | `potnia.md` | All rite orchestrators renamed to `rites/*/agents/potnia.md` |
+| `consultant` | `pythia` | Cross-rite oracle/navigator; Pythia is the external oracle consulted before entering |
 | `Domain Authority` | `Exousia` | Agent jurisdiction section renamed; 3-part contract |
 | `user-agents/` | `agents/` or `rites/*/agents/` | Cross-cutting agents at `agents/`; rite-specific at `rites/*/agents/` |
 | — | `mena` | Dromena (transient commands) + legomena (persistent reference knowledge) lifecycle model |

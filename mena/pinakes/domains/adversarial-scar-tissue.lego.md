@@ -1,14 +1,14 @@
 ---
-name: advocatus-scar-tissue-criteria
-description: "Adversarial challenge criteria for .know/scar-tissue.md accuracy. Use when: theoros is running advocatus diaboli challenge mode to find undocumented scars or scars whose fixes have regressed. Triggers: advocatus scar-tissue challenge, challenge scar tissue, scar regression, undocumented scars, adversarial scar audit."
+name: adversarial-scar-tissue-criteria
+description: "Adversarial challenge criteria for .know/scar-tissue.md accuracy. Use when: theoros is running adversarial challenge mode to find undocumented scars or scars whose fixes have regressed. Triggers: adversarial scar-tissue challenge, challenge scar tissue, scar regression, undocumented scars, adversarial scar audit."
 scope: adversarial
 ---
 
-# advocatus-scar-tissue Challenge Criteria
+# adversarial-scar-tissue Challenge Criteria
 
 > **INVERTED GRADING — READ BEFORE PROCEEDING**
 >
-> This is an adversarial (advocatus diaboli) domain. Grading is the OPPOSITE of a standard audit.
+> This is an adversarial domain. Grading is the OPPOSITE of a standard audit.
 >
 > - **A (Excellent)** = FEW problems found — the scar-tissue document is ACCURATE and fixes are holding
 > - **F (Failing)** = MANY problems found — scars have regressed, or significant scars are undocumented

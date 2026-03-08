@@ -46,9 +46,9 @@ The builder—represented by the `forge-rite` for creating agents, tools, and pl
 - **Source**: `rites/forge/`
 
 ### Dionysus
-The transformer—code review process that elevates work from isolation to merged canon. Turns abandonment into elevation.
-- **Related**: Code Review, QA, Elevation
-- **Source**: Review workflows, White Sails QA upgrade
+The transformer—cross-session knowledge synthesizer that transforms raw session data into refined persistent knowledge. On Naxos, Dionysus found the abandoned Ariadne and made her divine; in Knossos, the `ari land` pipeline finds abandoned session data and distills it into permanent cross-session wisdom in `.sos/land/`.
+- **Related**: Land, Naxos, Knowledge Synthesis, Session Archives
+- **Source**: `agents/dionysus.md`, `ari land`
 
 ### Dromena
 Transient commands (`.dro.md` files materialized to `.claude/commands/`). Execute and exit. User-invoked actions. Part of the mena lifecycle model.
@@ -56,8 +56,8 @@ Transient commands (`.dro.md` files materialized to `.claude/commands/`). Execut
 - **Source**: `rites/*/mena/*.dro.md`
 
 ### Exousia
-Authority contract defining an agent's jurisdictional boundaries. Every agent declares three subsections: You Decide (autonomous authority), You Escalate (requires Pythia or user input), You Do NOT Decide (hard boundaries). Named from the Greek exousia (authority, jurisdiction).
-- **Related**: Pythia, Agent Contract, Jurisdiction
+Authority contract defining an agent's jurisdictional boundaries. Every agent declares three subsections: You Decide (autonomous authority), You Escalate (requires Potnia or user input), You Do NOT Decide (hard boundaries). Named from the Greek exousia (authority, jurisdiction).
+- **Related**: Potnia, Agent Contract, Jurisdiction
 - **Source**: `## Exousia` section in every agent `.md` file
 
 ### Heroes
@@ -66,8 +66,8 @@ Specialist agents invoked via Task tool for specific labors, defined in rite man
 - **Source**: `rites/[rite-name]/agents/`
 
 ### Inscription
-The `CLAUDE.md` file declaring available rites, agents, execution mode, and hooks. Words carved at the labyrinth entrance. Mentions Pythia for routing, Exousia for authority contracts, `/go` for cold-start entry, and the Fates for session lifecycle.
-- **Related**: CLAUDE.md, Knossos Sections, Pythia, Exousia, `/go`
+The `CLAUDE.md` file declaring available rites, agents, execution mode, and hooks. Words carved at the labyrinth entrance. Mentions Potnia for routing, Exousia for authority contracts, `/go` for cold-start entry, and the Fates for session lifecycle.
+- **Related**: CLAUDE.md, Knossos Sections, Potnia, Exousia, `/go`
 - **Source**: `knossos/templates/CLAUDE.md.tpl`
 
 ### Legomena
@@ -105,10 +105,17 @@ The domain registry legomena for audit operations. Catalogs audit targets, evalu
 - **Related**: Theoria, Theoroi, Legomena, Domain Registry
 - **Source**: `mena/pinakes/`
 
+### Potnia
+The Presiding Lady — per-rite entry agents providing work breakdown, specialist routing, and checkpoint guidance. Attested on Linear B tablet KN Gg(1) 702 as *da-pu₂-ri-to-jo po-ti-ni-ja* ("Potnia of the Labyrinth"), the presiding authority within the palace at Knossos (~1450-1300 BCE). Each rite has its own Potnia: the authority who presides within, not the external oracle consulted before entering.
+- **Provenance**: Tier 1 — Bronze Age Attestation (Linear B tablet KN Gg 702)
+- **Related**: Pythia, Orchestrator, Routing, Exousia
+- **Source**: `rites/*/agents/potnia.md` (each rite has its own)
+
 ### Pythia
-The Oracle—rite entry agents providing work breakdown, specialist routing, and checkpoint guidance. Speaks clearly, not cryptically. Each rite has its own Pythia.
-- **Related**: Orchestrator, Consultation, Routing, Exousia
-- **Source**: `rites/*/agents/pythia.md` (each rite has its own)
+The cross-rite oracle/navigator — consulted before entering the labyrinth for routing and navigation across rites. Named for the oracle at Delphi, where Greeks sought guidance before great undertakings. Pythia occupies the correct mythological position: the external oracle consulted before a journey, not the authority who presides within. Distinct from Potnia (per-rite presiding authority).
+- **Provenance**: Tier 2 — Classical Source (Herodotus, Pausanias)
+- **Related**: Potnia, Cross-Rite Navigation, Routing
+- **Source**: `agents/pythia.md`
 
 ### Synkrisis
 Comparative synthesis step following parallel domain evaluations. Weaves individual theoros reports into cross-domain patterns and the final "State of the {X}" attestation. Named for Plutarch's comparative analysis technique in the *Parallel Lives*.

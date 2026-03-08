@@ -36,11 +36,11 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **radar-convention-drift** | `domains/radar-convention-drift.lego.md` | radar | Samples files and checks adherence to documented conventions (error handling, naming, testing style) |
 | **radar-architecture-decay** | `domains/radar-architecture-decay.lego.md` | radar | Checks import graph against documented layer model for boundary violations and undocumented cross-cutting imports |
 | **radar-recurring-scars** | `domains/radar-recurring-scars.lego.md` | radar | Counts SCARs by category; flags categories with 3+ entries as systemic patterns |
-| **advocatus-conventions** | `domains/advocatus-conventions.lego.md` | adversarial | Finds code that contradicts documented conventions in .know/conventions.md |
-| **advocatus-architecture** | `domains/advocatus-architecture.lego.md` | adversarial | Finds structural evidence that contradicts documented architecture in .know/architecture.md |
-| **advocatus-scar-tissue** | `domains/advocatus-scar-tissue.lego.md` | adversarial | Finds undocumented scars or scars whose fixes have regressed |
-| **socratic-architecture** | `domains/socratic-architecture.lego.md` | socratic | Surfaces unstated assumptions in .know/architecture.md |
-| **socratic-design-constraints** | `domains/socratic-design-constraints.lego.md` | socratic | Surfaces constraints present in the code but missing from .know/design-constraints.md |
+| **adversarial-conventions** | `domains/adversarial-conventions.lego.md` | adversarial | Finds code that contradicts documented conventions in .know/conventions.md |
+| **adversarial-architecture** | `domains/adversarial-architecture.lego.md` | adversarial | Finds structural evidence that contradicts documented architecture in .know/architecture.md |
+| **adversarial-scar-tissue** | `domains/adversarial-scar-tissue.lego.md` | adversarial | Finds undocumented scars or scars whose fixes have regressed |
+| **dialectic-architecture** | `domains/dialectic-architecture.lego.md` | dialectic | Surfaces unstated assumptions in .know/architecture.md |
+| **dialectic-design-constraints** | `domains/dialectic-design-constraints.lego.md` | dialectic | Surfaces constraints present in the code but missing from .know/design-constraints.md |
 | **feature-census** | `domains/feature-census.lego.md` | feature | Feature enumeration: scans project sources to produce feature taxonomy with GENERATE/SKIP recommendations |
 | **feature-knowledge** | `domains/feature-knowledge.lego.md` | feature | Per-feature knowledge capture: purpose, conceptual model, implementation map, boundaries |
 | **release-platform-profile** | `domains/release-platform-profile.lego.md` | release | Cached stable platform state: repo ecosystems, pipeline chains, dependency topology, build configs |
@@ -55,8 +55,8 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | `process` | Development workflow (git, CI/CD, testing) |
 | `culture` | Team practices (docs, naming, conventions) |
 | `radar` | Cross-reference signals: reads .know/ files and detects gaps, drift, decay, and violations |
-| `adversarial` | Advocatus diaboli mode: actively searches for evidence that contradicts .know/ claims |
-| `socratic` | Socratic mode: surfaces unstated assumptions and undocumented constraints in .know/ files |
+| `adversarial` | Adversarial mode: actively searches for evidence that contradicts .know/ claims |
+| `dialectic` | Dialectic mode: surfaces unstated assumptions and undocumented constraints in .know/ files |
 | `feature` | Product/feature knowledge: what the project does, why features work the way they do, conceptual models |
 | `release` | Release engineering knowledge: platform profiles, dependency topologies, release history, CI patterns |
 
@@ -109,14 +109,14 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 - [radar-architecture-decay.lego.md](domains/radar-architecture-decay.lego.md) - Import boundary violations against documented layer model
 - [radar-recurring-scars.lego.md](domains/radar-recurring-scars.lego.md) - Scar categories with 3+ entries (systemic patterns)
 
-### Domain Criteria — Adversarial (advocatus diaboli)
-- [advocatus-conventions.lego.md](domains/advocatus-conventions.lego.md) - Find code contradicting documented conventions
-- [advocatus-architecture.lego.md](domains/advocatus-architecture.lego.md) - Find structural evidence contradicting documented architecture
-- [advocatus-scar-tissue.lego.md](domains/advocatus-scar-tissue.lego.md) - Find undocumented scars or regressed fixes
+### Domain Criteria — Adversarial
+- [adversarial-conventions.lego.md](domains/adversarial-conventions.lego.md) - Find code contradicting documented conventions
+- [adversarial-architecture.lego.md](domains/adversarial-architecture.lego.md) - Find structural evidence contradicting documented architecture
+- [adversarial-scar-tissue.lego.md](domains/adversarial-scar-tissue.lego.md) - Find undocumented scars or regressed fixes
 
-### Domain Criteria — Socratic
-- [socratic-architecture.lego.md](domains/socratic-architecture.lego.md) - Surface unstated assumptions in architecture documentation
-- [socratic-design-constraints.lego.md](domains/socratic-design-constraints.lego.md) - Surface undocumented constraints present in code
+### Domain Criteria — Dialectic
+- [dialectic-architecture.lego.md](domains/dialectic-architecture.lego.md) - Surface unstated assumptions in architecture documentation
+- [dialectic-design-constraints.lego.md](domains/dialectic-design-constraints.lego.md) - Surface undocumented constraints present in code
 
 ### Domain Criteria — Feature
 - [feature-census.lego.md](domains/feature-census.lego.md) - Feature enumeration census with GENERATE/SKIP recommendations

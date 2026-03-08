@@ -1,6 +1,6 @@
 ---
 name: forge-ref-troubleshooting
-description: "Troubleshooting guide for The Forge rite. Use when: ari sync fails, agent validation fails, Consultant can't find a rite, handoffs don't trigger. Triggers: ari sync error, forge troubleshoot, validation fails, handoff broken."
+description: "Troubleshooting guide for The Forge rite. Use when: ari sync fails, agent validation fails, Pythia can't find a rite, handoffs don't trigger. Triggers: ari sync error, forge troubleshoot, validation fails, handoff broken."
 ---
 
 # The Forge: Troubleshooting
@@ -21,7 +21,7 @@ Check:
 - No YAML syntax errors
 - Token count under budget
 
-## "Consultant can't find rite"
+## "Pythia can't find rite"
 
 Check:
 - `ecosystem-map.md` updated

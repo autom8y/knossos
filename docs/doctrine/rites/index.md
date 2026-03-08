@@ -14,19 +14,19 @@ A **rite** is a practice bundle that provides specialized workflows for differen
 
 | Rite | Form | Agents | Entry | Purpose |
 |------|------|--------|-------|---------|
-| [10x-dev](10x-dev.md) | Full | 5 | pythia | Full development lifecycle |
-| [arch](arch.md) | Full | 5 | pythia | Architecture assessment |
-| [docs](docs.md) | Full | 5 | pythia | Documentation workflow |
-| [forge](forge.md) | Meta | 7 | pythia | Rite creation |
-| [hygiene](hygiene.md) | Full | 5 | pythia | Code quality lifecycle |
-| [debt-triage](debt-triage.md) | Full | 4 | pythia | Technical debt management |
-| [security](security.md) | Full | 5 | pythia | Security assessment lifecycle |
-| [sre](sre.md) | Full | 5 | pythia | Reliability engineering |
-| [intelligence](intelligence.md) | Full | 5 | pythia | Product analytics |
-| [strategy](strategy.md) | Full | 5 | pythia | Business strategy |
-| [rnd](rnd.md) | Full | 6 | pythia | Technology exploration |
-| [ecosystem](ecosystem.md) | Full | 6 | pythia | Platform infrastructure |
-| [slop-chop](slop-chop.md) | Full | 6 | pythia | AI code quality gate |
+| [10x-dev](10x-dev.md) | Full | 5 | potnia | Full development lifecycle |
+| [arch](arch.md) | Full | 5 | potnia | Architecture assessment |
+| [docs](docs.md) | Full | 5 | potnia | Documentation workflow |
+| [forge](forge.md) | Meta | 7 | potnia | Rite creation |
+| [hygiene](hygiene.md) | Full | 5 | potnia | Code quality lifecycle |
+| [debt-triage](debt-triage.md) | Full | 4 | potnia | Technical debt management |
+| [security](security.md) | Full | 5 | potnia | Security assessment lifecycle |
+| [sre](sre.md) | Full | 5 | potnia | Reliability engineering |
+| [intelligence](intelligence.md) | Full | 5 | potnia | Product analytics |
+| [strategy](strategy.md) | Full | 5 | potnia | Business strategy |
+| [rnd](rnd.md) | Full | 6 | potnia | Technology exploration |
+| [ecosystem](ecosystem.md) | Full | 6 | potnia | Platform infrastructure |
+| [slop-chop](slop-chop.md) | Full | 6 | potnia | AI code quality gate |
 | [shared](shared.md) | Cross-rite | 1 | — | Cross-rite resources (theoros) |
 
 ---
@@ -181,7 +181,7 @@ Each rite is defined by a manifest at `rites/{rite-name}/manifest.yaml`:
 ```yaml
 name: example-rite
 form: full
-entry_agent: pythia
+entry_agent: potnia
 
 agents:
   - name: orchestrator

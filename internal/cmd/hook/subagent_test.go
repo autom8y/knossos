@@ -259,7 +259,7 @@ func TestParseSubagentInfo_ValidJSON(t *testing.T) {
 }
 
 func TestParseSubagentInfo_AgentIDFallback(t *testing.T) {
-	info := parseSubagentInfo(`{"agent_name":"pythia","id":"agent-fallback-id"}`)
+	info := parseSubagentInfo(`{"agent_name":"potnia","id":"agent-fallback-id"}`)
 	if info.AgentID != "agent-fallback-id" {
 		t.Errorf("AgentID = %q, want %q", info.AgentID, "agent-fallback-id")
 	}
@@ -280,7 +280,7 @@ func TestSubagentStart_PersistsThroughlineID(t *testing.T) {
 	os.MkdirAll(sessionDir, 0755)
 
 	pipeHookStdin(t, string(hook.EventSubagentStart), tmpDir,
-		`{"agent_name":"pythia","agent_type":"orchestrator","task_id":"task-001","agent_id":"agent-pythia-xyz"}`)
+		`{"agent_name":"potnia","agent_type":"orchestrator","task_id":"task-001","agent_id":"agent-potnia-xyz"}`)
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -311,7 +311,7 @@ func TestSubagentStart_PersistsThroughlineID(t *testing.T) {
 		t.Errorf("expected recorded=true, got reason: %s", result.Reason)
 	}
 
-	// Verify .throughline-ids.json was created with pythia's ID
+	// Verify .throughline-ids.json was created with potnia's ID
 	idFile := filepath.Join(sessionDir, ThroughlineIDsFile)
 	data, err := os.ReadFile(idFile)
 	if err != nil {
@@ -322,8 +322,8 @@ func TestSubagentStart_PersistsThroughlineID(t *testing.T) {
 	if err := json.Unmarshal(data, &ids); err != nil {
 		t.Fatalf("failed to parse .throughline-ids.json: %v", err)
 	}
-	if ids["pythia"] != "agent-pythia-xyz" {
-		t.Errorf("pythia ID = %q, want %q", ids["pythia"], "agent-pythia-xyz")
+	if ids["potnia"] != "agent-potnia-xyz" {
+		t.Errorf("potnia ID = %q, want %q", ids["potnia"], "agent-potnia-xyz")
 	}
 }
 
@@ -377,8 +377,8 @@ func TestSubagentStart_ThroughlineIDUpsert(t *testing.T) {
 	existingData, _ := json.Marshal(existingIDs)
 	os.WriteFile(filepath.Join(sessionDir, ThroughlineIDsFile), existingData, 0644)
 
-	// Add pythia entry via hook
-	if err := upsertThroughlineID(sessionDir, "pythia", "agent-pythia-new"); err != nil {
+	// Add potnia entry via hook
+	if err := upsertThroughlineID(sessionDir, "potnia", "agent-potnia-new"); err != nil {
 		t.Fatalf("upsertThroughlineID error: %v", err)
 	}
 
@@ -389,8 +389,8 @@ func TestSubagentStart_ThroughlineIDUpsert(t *testing.T) {
 	if ids["moirai"] != "agent-moirai-existing" {
 		t.Errorf("moirai entry was overwritten: %q", ids["moirai"])
 	}
-	if ids["pythia"] != "agent-pythia-new" {
-		t.Errorf("pythia ID = %q, want %q", ids["pythia"], "agent-pythia-new")
+	if ids["potnia"] != "agent-potnia-new" {
+		t.Errorf("potnia ID = %q, want %q", ids["potnia"], "agent-potnia-new")
 	}
 }
 
@@ -410,7 +410,7 @@ func TestSubagentStart_NoAgentIDSkipsPersistence(t *testing.T) {
 	os.MkdirAll(sessionDir, 0755)
 
 	pipeHookStdin(t, string(hook.EventSubagentStart), tmpDir,
-		`{"agent_name":"pythia","agent_type":"orchestrator"}`)
+		`{"agent_name":"potnia","agent_type":"orchestrator"}`)
 
 	outputFlag := "json"
 	verboseFlag := false

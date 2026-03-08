@@ -45,9 +45,9 @@
 |  +------------------------------------------------------------------+   |
 |  | PHASE 1: INITIALIZATION (Prompt 0)                                |   |
 |  | ---------------------------------                                 |   |
-|  | Owner: User creates -> Pythia consumes                              |   |
+|  | Owner: User creates -> Potnia consumes                              |   |
 |  | Purpose: Establish mission, structure sessions, define gates      |   |
-|  | Output: Pythia initialization document                             |   |
+|  | Output: Potnia initialization document                             |   |
 |  |                                                                    |   |
 |  | Contents:                                                         |   |
 |  | - Mission objective and success criteria                          |   |
@@ -61,7 +61,7 @@
 |  +------------------------------------------------------------------+   |
 |  | PHASE 2: ORCHESTRATED EXECUTION                                   |   |
 |  | --------------------------------                                  |   |
-|  | Owner: Pythia (coordinates) -> Specialists (execute)                |   |
+|  | Owner: Potnia (coordinates) -> Specialists (execute)                |   |
 |  | Purpose: Execute sessions, enforce quality gates, adapt          |   |
 |  |                                                                    |   |
 |  | +-------------+   +-------------+   +-------------+              |   |
@@ -72,7 +72,7 @@
 |  |        v                v                  v                      |   |
 |  |   [Quality Gate]   [Quality Gate]    [Quality Gate]              |   |
 |  |                                                                    |   |
-|  | Pythia Authority:                                                  |   |
+|  | Potnia Authority:                                                  |   |
 |  | - Adapt session order based on discoveries                        |   |
 |  | - Skip sessions when not needed                                   |   |
 |  | - Add sessions when scope grows                                   |   |
@@ -105,12 +105,12 @@
 | Responsibility | Description |
 |----------------|-------------|
 | **Creates Prompt -1** | Scopes initiative with AI assistance |
-| **Creates Prompt 0** | Initializes Pythia with mission context |
+| **Creates Prompt 0** | Initializes Potnia with mission context |
 | **Approves plans** | Confirms "Proceed with the plan" at each phase |
 | **Resolves blockers** | Provides decisions on open questions |
 | **Accepts delivery** | Confirms initiative meets success criteria |
 
-### Pythia (Coordinator)
+### Potnia (Coordinator)
 
 | Responsibility | Description |
 |----------------|-------------|
@@ -121,9 +121,9 @@
 | **Adapts** | Adjusts plan based on discoveries |
 | **Routes** | Directs work to appropriate specialist |
 
-**Critical**: Pythia does NOT implement. It coordinates.
+**Critical**: Potnia does NOT implement. It coordinates.
 
-**Also Critical**: Pythia cannot invoke specialists. It provides DIRECTIVES that the main thread executes via Task tool.
+**Also Critical**: Potnia cannot invoke specialists. It provides DIRECTIVES that the main thread executes via Task tool.
 
 ### Requirements Analyst (Specialist)
 
@@ -183,7 +183,7 @@
 
 Every session follows this 5-step pattern:
 
-### 1. PLAN (Pythia)
+### 1. PLAN (Potnia)
 
 ```
 [ ] Define session goal (one sentence)
@@ -194,7 +194,7 @@ Every session follows this 5-step pattern:
 [ ] Present plan to user
 ```
 
-### 2. CLARIFY (Pythia + User)
+### 2. CLARIFY (Potnia + User)
 
 ```
 [ ] Surface ambiguities or open questions
@@ -209,7 +209,7 @@ Every session follows this 5-step pattern:
 ### 3. EXECUTE (Specialist)
 
 ```
-[ ] Receive context from Pythia
+[ ] Receive context from Potnia
 [ ] Plan approach within domain authority
 [ ] Execute work
 [ ] Document decisions made
@@ -217,7 +217,7 @@ Every session follows this 5-step pattern:
 [ ] Report completion
 ```
 
-### 4. VERIFY (Pythia)
+### 4. VERIFY (Potnia)
 
 ```
 [ ] Check deliverables against quality gate
@@ -226,7 +226,7 @@ Every session follows this 5-step pattern:
 [ ] Document outcomes
 ```
 
-### 5. HANDOFF (Pythia)
+### 5. HANDOFF (Potnia)
 
 ```
 [ ] Summarize what was produced
@@ -240,7 +240,7 @@ Every session follows this 5-step pattern:
 
 ## Routing Guidelines
 
-Pythia decides agent routing. These are guidelines, not rules.
+Potnia decides agent routing. These are guidelines, not rules.
 
 ### Signal-Based Routing
 
@@ -254,7 +254,7 @@ Pythia decides agent routing. These are guidelines, not rules.
 
 ### Complexity-Based Patterns
 
-| Complexity | Typical Pattern | Pythia Judgment |
+| Complexity | Typical Pattern | Potnia Judgment |
 |------------|-----------------|----------------------|
 | **Script** | Engineer -> QA | May skip QA for trivial |
 | **Module** | Analyst -> Engineer -> QA | May skip Analyst if clear |
@@ -272,7 +272,7 @@ Routing is not always forward. Common back-routes:
 | Validation reveals requirement ambiguity | QA -> Analyst |
 | Edge case needs architectural decision | QA -> Architect |
 
-**Pythia Authority**: Recognize when back-routing is needed and execute without waiting to be told.
+**Potnia Authority**: Recognize when back-routing is needed and execute without waiting to be told.
 
 ---
 
@@ -280,7 +280,7 @@ Routing is not always forward. Common back-routes:
 
 ### Plan -> Clarify -> Execute
 
-**Mandatory for all significant work**. Pythia:
+**Mandatory for all significant work**. Potnia:
 1. Presents plan to user
 2. Surfaces ambiguities and gets input
 3. Executes only after "Proceed with the plan"
@@ -296,7 +296,7 @@ Each session begins with a trigger prompt containing:
 
 ### Checkpoints
 
-At phase boundaries, Pythia summarizes:
+At phase boundaries, Potnia summarizes:
 - What was accomplished
 - Decisions made
 - Scope changes (if any)
@@ -372,7 +372,7 @@ At phase boundaries, Pythia summarizes:
 
 ## Protocol Compliance
 
-### For Pythia
+### For Potnia
 
 ```
 [ ] I adapt plans based on discoveries, not rigidly follow Prompt 0
@@ -386,7 +386,7 @@ At phase boundaries, Pythia summarizes:
 
 ```
 [ ] I make decisions within my domain authority
-[ ] I flag decisions outside my authority to Pythia
+[ ] I flag decisions outside my authority to Potnia
 [ ] I produce artifacts that meet quality gate criteria
 [ ] I document significant decisions
 [ ] I report blockers and discoveries immediately

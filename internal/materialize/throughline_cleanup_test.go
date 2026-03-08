@@ -43,7 +43,7 @@ func TestCleanupThroughlineIDs_RiteSwitch(t *testing.T) {
 	require.NoError(t, os.MkdirAll(session1, 0755))
 	require.NoError(t, os.MkdirAll(session2, 0755))
 
-	ids := map[string]string{"pythia": "agent-123", "moirai": "agent-456"}
+	ids := map[string]string{"potnia": "agent-123", "moirai": "agent-456"}
 	idsJSON, _ := json.Marshal(ids)
 	require.NoError(t, os.WriteFile(filepath.Join(session1, ".throughline-ids.json"), idsJSON, 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(session2, ".throughline-ids.json"), idsJSON, 0644))
@@ -96,7 +96,7 @@ func TestCleanupThroughlineIDs_SameRiteNoCleanup(t *testing.T) {
 	require.NoError(t, os.MkdirAll(sessionDir, 0755))
 	require.NoError(t, os.WriteFile(
 		filepath.Join(sessionDir, ".throughline-ids.json"),
-		[]byte(`{"pythia":"agent-789"}`), 0644))
+		[]byte(`{"potnia":"agent-789"}`), 0644))
 
 	// Re-sync the SAME rite
 	m2 := NewMaterializer(resolver)
@@ -195,7 +195,7 @@ func TestCleanupThroughlineIDs_SkipsNonSessionDirs(t *testing.T) {
 	require.NoError(t, os.MkdirAll(realSession, 0755))
 	require.NoError(t, os.WriteFile(
 		filepath.Join(realSession, ".throughline-ids.json"),
-		[]byte(`{"pythia":"agent-abc"}`), 0644))
+		[]byte(`{"potnia":"agent-abc"}`), 0644))
 
 	// Switch to rite-y
 	m2 := NewMaterializer(resolver)
@@ -250,7 +250,7 @@ func TestCleanupThroughlineIDs_DryRunSkipsCleanup(t *testing.T) {
 	require.NoError(t, os.MkdirAll(sessionDir, 0755))
 	require.NoError(t, os.WriteFile(
 		filepath.Join(sessionDir, ".throughline-ids.json"),
-		[]byte(`{"pythia":"agent-dry"}`), 0644))
+		[]byte(`{"potnia":"agent-dry"}`), 0644))
 
 	// Switch with DryRun
 	m2 := NewMaterializer(resolver)

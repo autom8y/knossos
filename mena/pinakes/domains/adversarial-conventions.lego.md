@@ -1,14 +1,14 @@
 ---
-name: advocatus-conventions-criteria
-description: "Adversarial challenge criteria for .know/conventions.md accuracy. Use when: theoros is running advocatus diaboli challenge mode to find code that contradicts documented conventions. Triggers: advocatus conventions challenge, challenge conventions, conventions accuracy, adversarial conventions audit."
+name: adversarial-conventions-criteria
+description: "Adversarial challenge criteria for .know/conventions.md accuracy. Use when: theoros is running adversarial challenge mode to find code that contradicts documented conventions. Triggers: adversarial conventions challenge, challenge conventions, conventions accuracy, adversarial conventions audit."
 scope: adversarial
 ---
 
-# advocatus-conventions Challenge Criteria
+# adversarial-conventions Challenge Criteria
 
 > **INVERTED GRADING — READ BEFORE PROCEEDING**
 >
-> This is an adversarial (advocatus diaboli) domain. Grading is the OPPOSITE of a standard audit.
+> This is an adversarial domain. Grading is the OPPOSITE of a standard audit.
 >
 > - **A (Excellent)** = FEW contradictions found — the conventions document is ACCURATE
 > - **F (Failing)** = MANY contradictions found — the conventions document is INACCURATE

@@ -1,5 +1,5 @@
 ---
-name: pythia
+name: potnia
 description: |
   {{.Description}}
 type: orchestrator
@@ -31,9 +31,9 @@ contract:
 {{- end}}
 ---
 
-# Pythia
+# Potnia
 
-Pythia is the **consultative throughline** for {{.RiteName}} work. When consulted, this agent analyzes context, decides which specialist should act next, and returns structured guidance for the main agent to execute. Pythia does not execute work—it provides prompts and direction that the main agent uses to invoke specialists via Task tool.
+Potnia is the **consultative throughline** for {{.RiteName}} work. When consulted, this agent analyzes context, decides which specialist should act next, and returns structured guidance for the main agent to execute. Potnia does not execute work—it provides prompts and direction that the main agent uses to invoke specialists via Task tool.
 
 ## Consultation Role (CRITICAL)
 

@@ -427,7 +427,7 @@ Small body.
 	os.WriteFile(sessionContextPath, []byte(sessionContent), 0644)
 
 	// Pre-seed .throughline-ids.json
-	idData := `{"pythia":"agent-pythia-ck1","moirai":"agent-moirai-ck2"}`
+	idData := `{"potnia":"agent-potnia-ck1","moirai":"agent-moirai-ck2"}`
 	os.WriteFile(filepath.Join(sessionDir, ThroughlineIDsFile), []byte(idData), 0644)
 
 	os.Setenv("CLAUDE_HOOK_EVENT", string(hook.EventPreCompact))
@@ -469,8 +469,8 @@ Small body.
 	if !strings.Contains(content, "Throughline Agents") {
 		t.Error("checkpoint missing Throughline Agents section")
 	}
-	if !strings.Contains(content, "agent-pythia-ck1") {
-		t.Error("checkpoint missing pythia agent ID")
+	if !strings.Contains(content, "agent-potnia-ck1") {
+		t.Error("checkpoint missing potnia agent ID")
 	}
 	if !strings.Contains(content, "agent-moirai-ck2") {
 		t.Error("checkpoint missing moirai agent ID")

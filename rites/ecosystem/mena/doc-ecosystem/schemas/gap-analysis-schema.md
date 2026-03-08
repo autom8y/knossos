@@ -268,7 +268,7 @@ validate_gap_analysis() {
 
 ## Handoff Criteria
 
-When Gap Analysis phase completes, Pythia verifies:
+When Gap Analysis phase completes, Potnia verifies:
 
 - [ ] `type` is "gap-analysis"
 - [ ] `status` is "ready-for-design"

@@ -203,14 +203,14 @@ func TestRenderArchetype_10xDev(t *testing.T) {
 		name    string
 		content string
 	}{
-		{"frontmatter start", "---\nname: pythia"},
+		{"frontmatter start", "---\nname: potnia"},
 		{"description", "Routes development work through requirements"},
 		{"color", "color: blue"},
 		{"skills orchestrator-templates", "- orchestrator-templates"},
 		{"skills 10x-workflow", "- 10x-workflow"},
 		{"disallowedTools", "disallowedTools:"},
 		{"contract", "contract:"},
-		{"frontmatter end", "---\n\n# Pythia"},
+		{"frontmatter end", "---\n\n# Potnia"},
 
 		// Body sections in order
 		{"opening paragraph", "consultative throughline** for 10x-dev work"},
@@ -254,7 +254,7 @@ func TestRenderArchetype_10xDev(t *testing.T) {
 
 	// Verify section ordering (each section must appear after the previous)
 	orderedMarkers := []string{
-		"# Pythia",
+		"# Potnia",
 		"## Consultation Role (CRITICAL)",
 		"## Tool Access",
 		"## Consultation Protocol",
@@ -415,8 +415,8 @@ func TestRenderArchetype_FrontmatterDelimiters(t *testing.T) {
 	count := strings.Count(output, "\n---\n")
 	// The opening --- is at position 0 so it's "---\n" not "\n---\n"
 	// Count closing delimiter
-	if !strings.Contains(output, "\n---\n\n# Pythia") {
-		t.Error("frontmatter closing delimiter must be followed by # Pythia heading")
+	if !strings.Contains(output, "\n---\n\n# Potnia") {
+		t.Error("frontmatter closing delimiter must be followed by # Potnia heading")
 	}
 
 	// Verify no triple --- appears in the body (only in frontmatter)
@@ -479,9 +479,9 @@ func setupArchetypeRite(t *testing.T) (string, string) {
 		t.Fatalf("setup: %v", err)
 	}
 
-	// Also write a source file for pythia (should be SKIPPED because archetype takes precedence)
-	pythiaSource := "# This should not appear — archetype rendering takes precedence\n"
-	if err := os.WriteFile(filepath.Join(ritesDir, "agents", "pythia.md"), []byte(pythiaSource), 0644); err != nil {
+	// Also write a source file for potnia (should be SKIPPED because archetype takes precedence)
+	potniaSource := "# This should not appear — archetype rendering takes precedence\n"
+	if err := os.WriteFile(filepath.Join(ritesDir, "agents", "potnia.md"), []byte(potniaSource), 0644); err != nil {
 		t.Fatalf("setup: %v", err)
 	}
 
@@ -494,9 +494,9 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 	manifest := &RiteManifest{
 		Name:        "test-arch",
 		Description: "Test rite for archetype wiring",
-		EntryAgent:  "pythia",
+		EntryAgent:  "potnia",
 		Agents: []Agent{
-			{Name: "pythia", Role: "Coordinates workflow", Archetype: "orchestrator"},
+			{Name: "potnia", Role: "Coordinates workflow", Archetype: "orchestrator"},
 			{Name: "engineer", Role: "Implements code"},
 		},
 		ArchetypeData: map[string]map[string]any{
@@ -527,18 +527,18 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
 
-	// Verify pythia was rendered from archetype template
-	pythiaPath := filepath.Join(claudeDir, "agents", "pythia.md")
-	pythiaContent, err := os.ReadFile(pythiaPath)
+	// Verify potnia was rendered from archetype template
+	potniaPath := filepath.Join(claudeDir, "agents", "potnia.md")
+	potniaContent, err := os.ReadFile(potniaPath)
 	if err != nil {
-		t.Fatalf("expected pythia agent at %s: %v", pythiaPath, err)
+		t.Fatalf("expected potnia agent at %s: %v", potniaPath, err)
 	}
 
-	output := string(pythiaContent)
+	output := string(potniaContent)
 
 	// Must contain archetype-rendered content, NOT the source file content
 	if strings.Contains(output, "This should not appear") {
-		t.Error("pythia should be rendered from archetype, not copied from source file")
+		t.Error("potnia should be rendered from archetype, not copied from source file")
 	}
 
 	// Must contain template-rendered content
@@ -551,11 +551,11 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 		{"phase routing", "| engineer | Implementation needed |"},
 		{"handoff criteria", "| impl | - Code complete |"},
 		{"anti-patterns", "Test anti-pattern"},
-		{"heading", "# Pythia"},
+		{"heading", "# Potnia"},
 	}
 	for _, tc := range checks {
 		if !strings.Contains(output, tc.content) {
-			t.Errorf("archetype pythia missing %q: expected %q", tc.name, tc.content)
+			t.Errorf("archetype potnia missing %q: expected %q", tc.name, tc.content)
 		}
 	}
 }
@@ -566,9 +566,9 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 	manifest := &RiteManifest{
 		Name:        "test-arch",
 		Description: "Test rite",
-		EntryAgent:  "pythia",
+		EntryAgent:  "potnia",
 		Agents: []Agent{
-			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
+			{Name: "potnia", Role: "Coordinates", Archetype: "orchestrator"},
 			{Name: "engineer", Role: "Implements code"},
 		},
 		ArchetypeData: map[string]map[string]any{
@@ -623,9 +623,9 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 	manifest := &RiteManifest{
 		Name:        "test-arch",
 		Description: "Test rite",
-		EntryAgent:  "pythia",
+		EntryAgent:  "potnia",
 		Agents: []Agent{
-			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
+			{Name: "potnia", Role: "Coordinates", Archetype: "orchestrator"},
 		},
 		ArchetypeData: map[string]map[string]any{
 			"orchestrator": {
@@ -655,13 +655,13 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
 
-	pythiaPath := filepath.Join(claudeDir, "agents", "pythia.md")
-	pythiaContent, err := os.ReadFile(pythiaPath)
+	potniaPath := filepath.Join(claudeDir, "agents", "potnia.md")
+	potniaContent, err := os.ReadFile(potniaPath)
 	if err != nil {
-		t.Fatalf("expected pythia at %s: %v", pythiaPath, err)
+		t.Fatalf("expected potnia at %s: %v", potniaPath, err)
 	}
 
-	output := string(pythiaContent)
+	output := string(potniaContent)
 
 	// The archetype template outputs type: orchestrator in frontmatter.
 	// transformAgentContent strips knossos-only fields including "type".
@@ -670,7 +670,7 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 	}
 
 	// Name should be injected by transform pipeline
-	if !strings.Contains(output, "name: pythia") {
+	if !strings.Contains(output, "name: potnia") {
 		t.Errorf("transform pipeline should inject name:\n%s", output)
 	}
 }
@@ -763,9 +763,9 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 	manifest := &RiteManifest{
 		Name:        "test-arch",
 		Description: "Test rite",
-		EntryAgent:  "pythia",
+		EntryAgent:  "potnia",
 		Agents: []Agent{
-			{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"},
+			{Name: "potnia", Role: "Coordinates", Archetype: "orchestrator"},
 			{Name: "engineer", Role: "Implements"},
 		},
 		ArchetypeData: map[string]map[string]any{
@@ -801,15 +801,15 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 
 	// Check that archetype agent has provenance with "archetype" source type
 	entries := collector.Entries()
-	pythiaEntry, ok := entries["agents/pythia.md"]
+	potniaEntry, ok := entries["agents/potnia.md"]
 	if !ok {
-		t.Fatal("missing provenance entry for agents/pythia.md")
+		t.Fatal("missing provenance entry for agents/potnia.md")
 	}
-	if pythiaEntry.SourceType != "archetype" {
-		t.Errorf("pythia provenance source_type = %q, want %q", pythiaEntry.SourceType, "archetype")
+	if potniaEntry.SourceType != "archetype" {
+		t.Errorf("potnia provenance source_type = %q, want %q", potniaEntry.SourceType, "archetype")
 	}
-	if pythiaEntry.SourcePath != "knossos/archetypes/orchestrator.md.tpl" {
-		t.Errorf("pythia provenance source_path = %q, want %q", pythiaEntry.SourcePath, "knossos/archetypes/orchestrator.md.tpl")
+	if potniaEntry.SourcePath != "knossos/archetypes/orchestrator.md.tpl" {
+		t.Errorf("potnia provenance source_path = %q, want %q", potniaEntry.SourcePath, "knossos/archetypes/orchestrator.md.tpl")
 	}
 
 	// Check that source agent has provenance with "project" source type
@@ -852,7 +852,7 @@ func TestBuildOrchestratorData_ExtractsAllFields(t *testing.T) {
 		},
 	}
 
-	agent := Agent{Name: "pythia", Role: "Coordinates", Archetype: "orchestrator"}
+	agent := Agent{Name: "potnia", Role: "Coordinates", Archetype: "orchestrator"}
 	data := buildOrchestratorData(agent, manifest)
 
 	tests := []struct {
@@ -901,7 +901,7 @@ func TestBuildOrchestratorData_MissingArchetypeData(t *testing.T) {
 		Name:        "empty-rite",
 		Description: "No archetype data",
 	}
-	agent := Agent{Name: "pythia", Archetype: "orchestrator"}
+	agent := Agent{Name: "potnia", Archetype: "orchestrator"}
 	data := buildOrchestratorData(agent, manifest)
 
 	if data.RiteName != "empty-rite" {

@@ -4,7 +4,7 @@ workflow_type: sequential
 description: Agent pantheon creation lifecycle (Design → [Archaeology] → Prompts → Workflow → Platform → Catalog → Validation)
 
 # entry_point: The first specialist in the domain workflow (not the CC routing agent).
-# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
+# The CC routing agent is manifest.yaml:entry_agent (always potnia for orchestrated rites).
 entry_point:
   agent: agent-designer
   artifact:

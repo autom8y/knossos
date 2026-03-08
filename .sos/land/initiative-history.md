@@ -1,10 +1,10 @@
 ---
 domain: "initiative-history"
-generated_at: "2026-03-06T21:00:00Z"
+generated_at: "2026-03-08T18:00:00Z"
 expires_after: "14d"
 source_scope: [".sos/archive/**"]
 generator: "dionysus"
-source_hash: "3053e84"
+source_hash: "dbf81b8"
 confidence: 0.85
 format_version: "1.0"
 sessions_synthesized: 37
@@ -28,7 +28,7 @@ last_session: "session-20260306-201337-8581513b"
 | session-20260302-151610-273eeb4a | Canonical dotfile path remediation (.ledge/ and .sos/wip/) | MIGRATION | ecosystem | requirements | 1m | GRAY |
 | session-20260302-151730-bffc2248 | Canonical dotfile path remediation (duplicate) | MIGRATION | ecosystem | requirements | 1m | GRAY |
 | session-20260302-155911-b3ec77d4 | Debt Ledger Gap Closure (7 workstreams) | INITIATIVE | ecosystem | requirements | 11m | GRAY |
-| session-20260302-210626-4a7b9681 | sync-noise-remediation (4 workstreams) | MODULE | 10x-dev | requirements | 13m | GRAY |
+| session-20260302-210626-4a7b9681 | sync-noise-remediation (4 workstreams) | MODULE | 10x-dev | requirements | 12m | GRAY |
 | session-20260302-223308-10f40f3c | XDG Mena Staleness (swap getMenaDir resolution) | MODULE | ecosystem | requirements | 5m | GRAY |
 | session-20260302-223852-c7b44b21 | Knowledge Radar: Context Design + Artifact Engineering | MODULE | ecosystem | requirements | 21m | GRAY |
 | session-20260302-224914-750e269f | Spike: Tech Debt Assessment (Path Resolution Hierarchy) | PATCH | debt-triage | requirements | 0m | GRAY |
@@ -36,12 +36,12 @@ last_session: "session-20260306-201337-8581513b"
 | session-20260303-003107-55293519 | Comprehensive Debt Remediation (44 items, 6 waves) | SYSTEM | 10x-dev | design | 67m | GRAY |
 | session-20260303-114830-beb1bf03 | .know/feat Design and Implementation Sprint | MODULE | ecosystem | requirements | 2m | GRAY |
 | session-20260303-132132-f3031827 | .know/ Incremental Refresh (Phase 1) | MODULE | ecosystem | implementation | 24m | GRAY |
-| session-20260303-135856-c525b918 | Release Context Persistence (Phase 1.5) | SYSTEM | ecosystem | implementation | 22m | GRAY |
-| session-20260303-143357-851c7078 | AST-Based Semantic Diffing | MODULE | 10x-dev | validation | 20m | GRAY |
+| session-20260303-135856-c525b918 | Release Context Persistence (Phase 1.5) | SYSTEM | ecosystem | implementation | 21m | GRAY |
+| session-20260303-143357-851c7078 | AST-Based Semantic Diffing | MODULE | 10x-dev | validation | 19m | GRAY |
 | session-20260303-163517-f43d2334 | E2E Distribution Dispatch Investigation | PATCH | 10x-dev | implementation | 4m | GRAY |
 | session-20260304-001522-1c07b3bd | Framework Agnosticism Audit (eliminate ecosystem bleed) | SYSTEM | hygiene | audit | 55m | GRAY |
 | session-20260304-135616-f6f65e42 | Fix user-scope mena materialization divergence | PATCH | 10x-dev | implementation | 8m | GRAY |
-| session-20260304-154410-af90596d | Mena Content Path Hygiene: Full-Surface Materialization Correctness | SYSTEM | hygiene | validation | 63m | GRAY |
+| session-20260304-154410-af90596d | Mena Content Path Hygiene: Full-Surface Materialization Correctness | SYSTEM | hygiene | validation | 39m | GRAY |
 | session-20260305-172543-d0e8d2fc | knowledge-maturation-pipeline | MODULE | ecosystem | requirements | 12m | GRAY |
 | session-20260305-185110-545bd234 | dionysus-context-optimization | PATCH | ecosystem | requirements | 9m | GRAY |
 | session-20260305-190141-62071002 | dionysus-invocation-dromenon | PATCH | ecosystem | requirements | 4m | GRAY |
@@ -51,17 +51,17 @@ last_session: "session-20260306-201337-8581513b"
 | session-20260306-110952-e81c2ec3 | test claim poc | PATCH | releaser | requirements | 0m | GRAY |
 | session-20260306-152208-d302cc16 | Session Dromena Legacy Removal | MODULE | ecosystem | requirements | 24m | GRAY |
 | session-20260306-164058-a8e7e897 | Release hardening -- post legacy removal | PATCH | hygiene | requirements | 17m | GRAY |
-| session-20260306-201337-8581513b | Hygiene: printer bypasses + fmt.Errorf boundary cleanup | MODULE | hygiene | requirements | 1m | GRAY |
+| session-20260306-201337-8581513b | Hygiene: printer bypasses + fmt.Errorf boundary cleanup | MODULE | hygiene | requirements | 0m | GRAY |
 
 ## Complexity Distribution
 
 | Complexity | Count | Avg Duration | Typical Rite |
 |-----------|-------|-------------|-------------|
 | PATCH | 9 | 5m | ecosystem, 10x-dev, hygiene |
-| MODULE | 18 | 17m | ecosystem |
+| MODULE | 18 | 16m | ecosystem |
 | MIGRATION | 4 | 2m | ecosystem |
 | INITIATIVE | 3 | 39m | ecosystem, debt-triage |
-| SYSTEM | 3 | 62m | hygiene, ecosystem, 10x-dev |
+| SYSTEM | 4 | 46m | hygiene, ecosystem, 10x-dev |
 
 ## Rite Usage
 
@@ -72,6 +72,7 @@ last_session: "session-20260306-201337-8581513b"
 | hygiene | 4 | SYSTEM | requirements |
 | debt-triage | 3 | INITIATIVE | requirements |
 | releaser | 1 | PATCH | requirements |
+| unknown | 1 | PATCH | requirements |
 
 ## Initiative Timeline
 
@@ -105,15 +106,16 @@ last_session: "session-20260306-201337-8581513b"
 
 - session-20260302-123250-636200b5: Square Zero Debt Remediation -- 13 packages, 558 tests, commit cc3da2b
 - session-20260304-001522-1c07b3bd: Framework Agnosticism Audit -- 75 findings, 43 FIX-classified, 8 commits (bf772dc..c396c67)
-- session-20260304-154410-af90596d: Mena Content Path Hygiene -- 10 commits (136a880..996155c), 262 refs corrected
+- session-20260304-154410-af90596d: Mena Content Path Hygiene -- 10 commits (136a880..996155c), 262 refs corrected, 41 post-mortem findings
 
 ## Observations
 
 - 25/37 sessions (68%) parked at requirements, indicating rapid initiative creation with deferred execution
 - 3 sessions reached substantive completion with committed artifacts (636200b5, 1c07b3bd, af90596d)
 - ecosystem rite dominates at 22/37 sessions (59%)
-- SYSTEM complexity sessions have highest avg duration (62m) and are most likely to reach advanced phases
-- 6 new sessions added since last synthesis (2026-03-06): embody phases 2-3, test claim poc, session dromena legacy removal, release hardening, hygiene cleanup
-- hygiene rite usage increased from 2 to 4 sessions, indicating growing emphasis on code quality
-- releaser rite appeared for first time (test claim poc)
+- SYSTEM complexity sessions have highest avg duration (46m) and are most likely to reach advanced phases
 - Duplicate initiative pattern: session-20260302-151610-273eeb4a and session-20260302-151730-bffc2248 are the same initiative started 80 seconds apart
+- Multi-phase embody initiative spans 3 sessions (8e309d1f, 0f5ea0c7, 0c1f2ce9) across 2 days, each parked at different phases
+- hygiene rite usage at 4/37 sessions (11%), all on 2026-03-04 through 2026-03-06
+- releaser rite appeared for first time in session-20260306-110952-e81c2ec3 (test claim poc)
+- 2026-03-02 was the highest-volume day with 19 sessions

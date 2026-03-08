@@ -18,7 +18,7 @@ import (
 // materializeAgents copies rite-scoped agent files to .claude/agents/.
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
-// Cross-rite agents (consultant, moirai, etc.) are user-scope owned and NOT handled here.
+// Cross-rite agents (pythia, moirai, etc.) are user-scope owned and NOT handled here.
 func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride string) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
@@ -214,7 +214,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 }
 
 // NOTE: listCrossRiteAgents and materializeCrossRiteAgents were removed.
-// Cross-rite agents (consultant, moirai, context-engineer, theoros) are
+// Cross-rite agents (pythia, moirai, context-engineer, theoros) are
 // user-scope owned: synced from KNOSSOS_HOME/agents/ to ~/.claude/agents/
 // by user-scope sync. They are NOT copied to project .claude/agents/.
 
@@ -229,7 +229,7 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, r
 	}
 
 	// Build expected agent set from rite manifest only.
-	// Cross-rite agents (consultant, moirai, etc.) are user-scope owned — they
+	// Cross-rite agents (pythia, moirai, etc.) are user-scope owned — they
 	// live at ~/.claude/agents/ and are NOT expected at project level.
 	expectedAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {

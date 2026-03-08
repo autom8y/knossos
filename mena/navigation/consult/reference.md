@@ -438,7 +438,7 @@ Display all commands categorized by domain:
 
 ## Knowledge Sources
 
-The Consultant draws from structured knowledge base:
+Pythia draws from structured knowledge base:
 
 | Source | Purpose |
 |--------|---------|
@@ -657,9 +657,9 @@ A good `/consult` response:
 
 ## Notes
 
-### Consultant Agent
+### Pythia Agent
 
-The `/consult` command is powered by the **Consultant** agent. This agent:
+The `/consult` command is powered by the **Pythia** agent. This agent:
 - Persists across rite swaps
 - Has deep knowledge of all rites and workflows
 - Uses Claude Opus 4.5 for complex reasoning
@@ -686,7 +686,7 @@ Use `/consult` when:
 The `/consult` command:
 1. Loads context via SessionStart hook (automatic)
 2. Reads user arguments via `$ARGUMENTS` variable
-3. Uses Task tool with Consultant agent for reasoning
+3. Uses Task tool with Pythia agent for reasoning
 4. Returns structured guidance following 4-part format
 5. Does not modify state (read-only navigation)
 
@@ -706,4 +706,4 @@ This skill is kept in sync with:
 When ecosystem changes, update:
 1. This skill reference (`SKILL.md`)
 2. Rite mena directories and shared skills (source of truth)
-3. Consultant agent prompt (in agents directory)
+3. Pythia agent prompt (in agents directory)

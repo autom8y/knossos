@@ -17,7 +17,7 @@ The debt-triage rite provides workflows for collecting, assessing, and planning 
 | **Name** | debt-triage |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 4 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -34,7 +34,7 @@ The debt-triage rite provides workflows for collecting, assessing, and planning 
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates debt assessment and planning phases |
+| **potnia** | Coordinates debt assessment and planning phases |
 | **debt-collector** | Collects and inventories technical debt across the codebase |
 | **risk-assessor** | Assesses risk and impact of debt items for prioritization |
 | **sprint-planner** | Plans debt paydown sprints with timelines and resources |

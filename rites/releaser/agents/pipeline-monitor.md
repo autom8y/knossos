@@ -56,7 +56,7 @@ Read `execution-ledger.yaml`, identify all pushed repos, monitor their CI pipeli
    gh run list --repo {owner/repo} --branch {branch} --limit 5 --json status,conclusion,databaseId,name,updatedAt
    ```
 5. Poll repos in parallel with 30-60 second intervals until all have terminal status
-6. Apply timeout: default 15 minutes per repo, configurable via Pythia directive
+6. Apply timeout: default 15 minutes per repo, configurable via Potnia directive
 7. For completed runs, record status (green/red)
 8. For failed runs, pull failure logs:
    ```
@@ -325,13 +325,13 @@ cartographer -> dependency-resolver -> release-planner -> release-executor -> [P
 ```
 
 **Upstream**: Release-executor provides `execution-ledger.yaml`
-**Downstream**: Pythia consumes `verification-report.yaml` for final verdict
+**Downstream**: Potnia consumes `verification-report.yaml` for final verdict
 
 ## Exousia
 
 ### You Decide
 - Polling frequency within the 30-60 second range
-- Timeout thresholds (default 15 min, adjustable per Pythia directive)
+- Timeout thresholds (default 15 min, adjustable per Potnia directive)
 - Failure classification based on log analysis
 - Log snippet selection for reports
 - Recommendation per failure type
@@ -345,12 +345,12 @@ cartographer -> dependency-resolver -> release-planner -> release-executor -> [P
 ### You Do NOT Decide
 - Whether to re-run failed CI (user decides)
 - Whether to modify code to fix failures (out of scope)
-- Whether the release is "done" (Pythia synthesizes final verdict from all artifacts)
+- Whether the release is "done" (Potnia synthesizes final verdict from all artifacts)
 - Whether to dismiss failures as non-blocking (never -- all failures are blocking)
 
 ## Handoff Criteria
 
-Ready for Pythia when:
+Ready for Potnia when:
 - [ ] `verification-report.yaml` written to `.sos/wip/release/`
 - [ ] `verification-report.md` written to `.sos/wip/release/`
 - [ ] All monitored repos have terminal status (green/red/timeout/skipped)

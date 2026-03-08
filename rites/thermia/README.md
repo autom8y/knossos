@@ -23,15 +23,15 @@
 /thermia
 ```
 
-Pythia opens with heat-mapper to assess whether caching is actually warranted. Describe your system, access patterns, and what problem you're trying to solve.
+Potnia opens with heat-mapper to assess whether caching is actually warranted. Describe your system, access patterns, and what problem you're trying to solve.
 
-**Already certain you need caching?** Say so explicitly. Pythia will calibrate accordingly, but heat-mapper will still surface assumptions worth examining.
+**Already certain you need caching?** Say so explicitly. Potnia will calibrate accordingly, but heat-mapper will still surface assumptions worth examining.
 
 ## Agents
 
 | Agent | Model | Phase | Produces |
 |-------|-------|-------|----------|
-| **pythia** | opus | Orchestrator | Phase gates, complexity gating, consultative flow |
+| **potnia** | opus | Orchestrator | Phase gates, complexity gating, consultative flow |
 | **heat-mapper** | sonnet | Assessment | thermal-assessment.md |
 | **systems-thermodynamicist** | sonnet | Architecture | cache-architecture.md |
 | **capacity-engineer** | sonnet | Specification | capacity-specification.md |
@@ -53,7 +53,7 @@ architecture ──assessment_gap──> assessment         (max 1 iteration)
 validation ──design_inconsistency──> specification  (max 1 iteration)
 ```
 
-Back-routes trigger when an agent cannot proceed without information from an earlier phase. Pythia manages these; user confirmation is not required unless the max iteration limit is hit.
+Back-routes trigger when an agent cannot proceed without information from an earlier phase. Potnia manages these; user confirmation is not required unless the max iteration limit is hit.
 
 ## Complexity Levels
 
@@ -63,7 +63,7 @@ Back-routes trigger when an agent cannot proceed without information from an ear
 | **STANDARD** | New cache design or existing cache review | assessment, architecture, specification, validation |
 | **DEEP** | Post-mortem, production crisis, or full system redesign | assessment, architecture, specification, validation (extended depth) |
 
-Pythia determines complexity from your description. QUICK is for "should we cache this one thing?" STANDARD is for new or revised cache designs. DEEP is for post-mortems and crisis situations where the full analytical framework applies at maximum rigor.
+Potnia determines complexity from your description. QUICK is for "should we cache this one thing?" STANDARD is for new or revised cache designs. DEEP is for post-mortems and crisis situations where the full analytical framework applies at maximum rigor.
 
 ## Artifact Chain
 

@@ -7,7 +7,7 @@ description: "Multi-repo release orchestration (Reconnaissance -> Dependency Ana
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
 # This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
-entry_agent: pythia
+entry_agent: potnia
 
 phases:
   - name: reconnaissance
@@ -38,7 +38,7 @@ phases:
     description: Monitor CI pipelines, report green/red matrix, diagnose failures
 
 agents:
-  - name: pythia
+  - name: potnia
     role: Coordinates release phases, gates complexity, manages DAG-branch failure halting
 
   - name: cartographer

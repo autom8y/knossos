@@ -13,7 +13,7 @@ The hygiene rite is a **well-designed, recently optimized rite** (36% compressio
 - Boy scout rule is pragmatic, not scope creep
 - Clear separation from 10x-dev (behavior preservation vs feature building)
 - Clear separation from debt-triage (execution vs planning)
-- Proportional tool access (Pythia read-only, janitor full)
+- Proportional tool access (Potnia read-only, janitor full)
 
 **Architecture validated:**
 - SPOT complexity stays - trust user judgment, audit-lead catches mistakes

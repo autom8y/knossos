@@ -35,11 +35,11 @@ output) to capture all metadata including knossos-only fields stripped
 during materialization.
 
 Examples:
-  ari agent embody pythia                          # Default perspective
+  ari agent embody potnia                          # Default perspective
   ari agent embody principal-engineer --rite 10x-dev  # Specific rite
   ari agent embody qa-adversary --audit            # With audit overlay
-  ari agent embody pythia --simulate --simulate-prompt "read a file"
-  ari agent embody pythia -o json                  # JSON output`,
+  ari agent embody potnia --simulate --simulate-prompt "read a file"
+  ari agent embody potnia -o json                  # JSON output`,
 		Args: common.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runEmbody(ctx, opts, args[0])

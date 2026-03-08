@@ -11,7 +11,7 @@ inputs:
     default: repo
 
 # entry_point: The first specialist in the domain workflow (not the CC routing agent).
-# The CC routing agent is manifest.yaml:entry_agent (always pythia for orchestrated rites).
+# The CC routing agent is manifest.yaml:entry_agent (always potnia for orchestrated rites).
 entry_point:
   agent: topology-cartographer
   artifact:
@@ -72,7 +72,7 @@ commands:
 
 back_routes:
   # ADVISORY: These do not alter the sequential phase structure.
-  # Pythia reads these to decide when to recommend re-invocation of an earlier phase.
+  # Potnia reads these to decide when to recommend re-invocation of an earlier phase.
   - from: synthesis
     to: discovery
     trigger: "Incomplete topology-inventory: missing API surfaces or unscanned units"

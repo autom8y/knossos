@@ -17,7 +17,7 @@ The slop-chop rite provides workflows for identifying and remediating AI-generat
 | **Name** | slop-chop |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 6 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The slop-chop rite provides workflows for identifying and remediating AI-generat
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates slop-chop assessment phases |
+| **potnia** | Coordinates slop-chop assessment phases |
 | **hallucination-hunter** | Detects hallucinated APIs, imports, and non-existent references |
 | **logic-surgeon** | Identifies logic gaps, incomplete branches, and reasoning errors |
 | **cruft-cutter** | Finds and removes unnecessary code patterns (dead code, redundant checks) |

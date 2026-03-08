@@ -55,7 +55,7 @@ This rite specializes in:
 | **STANDARD** | New cache design, existing cache review | assessment -> architecture -> specification -> validation |
 | **DEEP** | Post-mortem, production crisis, full redesign | Same as STANDARD at extended depth |
 
-Pythia determines complexity from the user's problem statement.
+Potnia determines complexity from the user's problem statement.
 
 ## Workflow Phases
 

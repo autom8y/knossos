@@ -28,7 +28,7 @@ Agents with memory get a persistent auto-memory directory at `~/.claude/projects
 **Tiering:**
 | Tier | Seeding | Agents | Example |
 |------|---------|--------|---------|
-| Tier 1 | Content-rich MEMORY.md | 4 | Pythia orchestrators (deep workflow knowledge) |
+| Tier 1 | Content-rich MEMORY.md | 4 | Potnia orchestrators (deep workflow knowledge) |
 | Tier 2 | Structure-only MEMORY.md | 8 | Specialists with recurring patterns |
 | Tier 3 | No seed (self-populate) | 5 | Lower-frequency agents |
 
@@ -53,9 +53,9 @@ skills:
 **Design decisions:**
 - ~3,500 token ceiling for preloaded skills per agent
 - Aggressive preloading for agents without Skill tool access
-- Minimal preloading for high-turn agents (Pythia) to preserve context
+- Minimal preloading for high-turn agents (Potnia) to preserve context
 - Mixed dro/lego directories block skill resolution — 4 rites required directory splits as prerequisite
-- `forge-ref` (346 lines) is Pythia-only — specialists use Skill tool on-demand
+- `forge-ref` (346 lines) is Potnia-only — specialists use Skill tool on-demand
 
 **Coverage:** 68 of 75 agents have `skills:` frontmatter. Exceptions: 3 agents in rites without mena, and agents where no skills apply.
 
@@ -85,10 +85,10 @@ disallowedTools:
 
 ## Resume (Throughline Protocol)
 
-Ecosystem Pythia supports conversation continuity across multiple Task invocations within a single CC session:
+Ecosystem Potnia supports conversation continuity across multiple Task invocations within a single CC session:
 
 ```
-Task(pythia, "consultation prompt", resume: previousAgentId)
+Task(potnia, "consultation prompt", resume: previousAgentId)
 ```
 
 **How it works:**

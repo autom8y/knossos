@@ -17,7 +17,7 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 | **Name** | forge |
 | **Form** | Full (multi-agent workflow) |
 | **Agents** | 7 |
-| **Entry Agent** | pythia |
+| **Entry Agent** | potnia |
 
 ---
 
@@ -35,7 +35,7 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 
 | Agent | Role |
 |-------|------|
-| **pythia** | Coordinates rite creation phases |
+| **potnia** | Coordinates rite creation phases |
 | **agent-designer** | Designs rite concepts and agent role specifications |
 | **prompt-architect** | Creates agent prompt files and system instructions |
 | **workflow-engineer** | Configures workflow phases and transitions |
