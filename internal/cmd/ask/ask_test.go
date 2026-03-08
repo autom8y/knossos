@@ -3,6 +3,7 @@ package ask
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/stretchr/testify/assert"
@@ -199,4 +200,167 @@ func TestAskResultEntryJSONOmitsZeroScore(t *testing.T) {
 
 	_, hasScore := decoded["score"]
 	assert.False(t, hasScore, "score field should be omitted when zero")
+}
+
+// --- H4: Session Context Tests ---
+
+func TestAskOutput_WithSessionContext_JSON(t *testing.T) {
+	// TC-H4-01: JSON includes session_context when set (AC-4.1, SC-5)
+	out := AskOutput{
+		Query:   "what next?",
+		Results: []AskResultEntry{},
+		Total:   0,
+		Context: "Active rite: 10x-dev",
+		SessionContext: &AskSessionContext{
+			SessionID:  "session-20260308-143022-a1b2c3d4",
+			Phase:      "implementation",
+			Rite:       "10x-dev",
+			Complexity: "MODULE",
+			Initiative: "Ariadne Intelligence -- H4",
+		},
+	}
+
+	data, err := json.Marshal(out)
+	require.NoError(t, err)
+
+	var decoded map[string]any
+	require.NoError(t, json.Unmarshal(data, &decoded))
+
+	sc, ok := decoded["session_context"].(map[string]any)
+	require.True(t, ok, "session_context should be present")
+	assert.Equal(t, "session-20260308-143022-a1b2c3d4", sc["session_id"])
+	assert.Equal(t, "implementation", sc["phase"])
+	assert.Equal(t, "10x-dev", sc["rite"])
+	assert.Equal(t, "MODULE", sc["complexity"])
+	assert.Equal(t, "Ariadne Intelligence -- H4", sc["initiative"])
+}
+
+func TestAskOutput_WithoutSessionContext_JSON(t *testing.T) {
+	// TC-H4-02: JSON omits session_context when nil (AC-4.2, SC-4)
+	out := AskOutput{
+		Query:          "anything",
+		Results:        []AskResultEntry{},
+		Total:          0,
+		SessionContext: nil,
+	}
+
+	data, err := json.Marshal(out)
+	require.NoError(t, err)
+
+	var decoded map[string]any
+	require.NoError(t, json.Unmarshal(data, &decoded))
+
+	_, hasSC := decoded["session_context"]
+	assert.False(t, hasSC, "session_context should be omitted when nil")
+}
+
+func TestAskOutput_WithActivitySummary(t *testing.T) {
+	// TC-H4-03: activity_summary present when events exist (AC-4.3)
+	out := AskOutput{
+		Query:   "test",
+		Results: []AskResultEntry{},
+		Total:   0,
+		SessionContext: &AskSessionContext{
+			SessionID: "session-test",
+			Phase:     "implementation",
+			ActivitySummary: &AskActivitySummary{
+				FileChanges:  12,
+				AgentTasks:   3,
+				LastEventAge: "5m",
+			},
+		},
+	}
+
+	data, err := json.Marshal(out)
+	require.NoError(t, err)
+
+	var decoded map[string]any
+	require.NoError(t, json.Unmarshal(data, &decoded))
+
+	sc := decoded["session_context"].(map[string]any)
+	as, ok := sc["activity_summary"].(map[string]any)
+	require.True(t, ok, "activity_summary should be present")
+	assert.EqualValues(t, 12, as["file_changes"])
+	assert.EqualValues(t, 3, as["agent_tasks"])
+	assert.Equal(t, "5m", as["last_event_age"])
+}
+
+func TestAskOutput_ContextFieldPreserved(t *testing.T) {
+	// TC-H4-04: "Active rite:" string still present (AC-4.4)
+	out := AskOutput{
+		Query:   "test",
+		Results: []AskResultEntry{},
+		Total:   0,
+		Context: "Active rite: 10x-dev",
+		SessionContext: &AskSessionContext{
+			SessionID: "session-test",
+			Phase:     "implementation",
+		},
+	}
+
+	// Both context and session_context should be present.
+	data, err := json.Marshal(out)
+	require.NoError(t, err)
+
+	var decoded map[string]any
+	require.NoError(t, json.Unmarshal(data, &decoded))
+
+	assert.Equal(t, "Active rite: 10x-dev", decoded["context"])
+	_, hasSC := decoded["session_context"]
+	assert.True(t, hasSC, "both context and session_context should coexist")
+}
+
+func TestAskOutput_ActivitySummary_Omitempty(t *testing.T) {
+	// TC-H4-05: activity_summary omitted when nil
+	out := AskOutput{
+		Query:   "test",
+		Results: []AskResultEntry{},
+		Total:   0,
+		SessionContext: &AskSessionContext{
+			SessionID: "session-test",
+			Phase:     "validation",
+		},
+	}
+
+	data, err := json.Marshal(out)
+	require.NoError(t, err)
+
+	var decoded map[string]any
+	require.NoError(t, json.Unmarshal(data, &decoded))
+
+	sc := decoded["session_context"].(map[string]any)
+	_, hasAS := sc["activity_summary"]
+	assert.False(t, hasAS, "activity_summary should be omitted when nil")
+}
+
+// --- formatDuration Tests ---
+
+func TestFormatDuration(t *testing.T) {
+	tests := []struct {
+		name string
+		mins int
+		want string
+	}{
+		{"less than a minute", 0, "<1m"},
+		{"5 minutes", 5, "5m"},
+		{"30 minutes", 30, "30m"},
+		{"1 hour", 60, "1h"},
+		{"3 hours", 180, "3h"},
+		{"1 day", 1440, "1d"},
+		{"2 days", 2880, "2d"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := time.Duration(tt.mins) * time.Minute
+			got := formatDuration(d)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestFormatDuration_Negative(t *testing.T) {
+	// Negative durations should be treated as positive.
+	got := formatDuration(-5 * time.Minute)
+	assert.Equal(t, "5m", got)
 }

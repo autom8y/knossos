@@ -33,6 +33,7 @@ func Build(root *cobra.Command, resolver *paths.Resolver) *SearchIndex {
 		entries = append(entries, CollectAgents(resolver)...)
 		entries = append(entries, CollectDromena(resolver)...)
 		entries = append(entries, CollectRouting(resolver)...)
+		entries = append(entries, CollectParkedSessions(resolver)...)
 	}
 
 	// Deduplicate: same name+domain keeps first seen.
@@ -87,6 +88,9 @@ func (idx *SearchIndex) Search(query string, opts SearchOptions) []SearchResult 
 		if score <= 0 {
 			continue
 		}
+
+		// H4: Apply session score modifier (no-op when opts.Session is nil).
+		score += sessionScoreModifier(e, matchType, score, opts.Session)
 
 		results = append(results, SearchResult{
 			SearchEntry: e,

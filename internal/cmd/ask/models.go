@@ -10,10 +10,30 @@ import (
 // Implements output.Textable for human-readable output.
 // Serializes to JSON/YAML via struct tags for machine-readable output.
 type AskOutput struct {
-	Query   string           `json:"query"`
-	Results []AskResultEntry `json:"results"`
-	Total   int              `json:"total"`
-	Context string           `json:"context,omitempty"` // active rite info if available
+	Query          string           `json:"query"`
+	Results        []AskResultEntry `json:"results"`
+	Total          int              `json:"total"`
+	Context        string           `json:"context,omitempty"`         // active rite info if available
+	SessionContext *AskSessionContext `json:"session_context,omitempty"` // session state used for scoring
+}
+
+// AskSessionContext reports the session state used for scoring in AskOutput.
+// All fields use omitempty to ensure backward compatibility.
+type AskSessionContext struct {
+	SessionID       string              `json:"session_id,omitempty"`
+	Phase           string              `json:"phase,omitempty"`
+	Rite            string              `json:"rite,omitempty"`
+	Complexity      string              `json:"complexity,omitempty"`
+	Initiative      string              `json:"initiative,omitempty"`
+	ActivitySummary *AskActivitySummary `json:"activity_summary,omitempty"`
+}
+
+// AskActivitySummary reports aggregated event counts from the session's events.jsonl.
+// Omitted from output when no events were read.
+type AskActivitySummary struct {
+	FileChanges  int    `json:"file_changes,omitempty"`
+	AgentTasks   int    `json:"agent_tasks,omitempty"`
+	LastEventAge string `json:"last_event_age,omitempty"` // e.g., "2m", "1h"
 }
 
 // AskResultEntry represents a single search result.

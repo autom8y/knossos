@@ -11,6 +11,7 @@ const (
 	DomainAgent    Domain = "agent"
 	DomainDromena  Domain = "dromena"
 	DomainRouting  Domain = "routing"
+	DomainSession  Domain = "session"
 )
 
 // SearchEntry is a single indexed item from any data source.
@@ -34,8 +35,9 @@ type SearchResult struct {
 
 // SearchOptions controls search behavior.
 type SearchOptions struct {
-	Limit   int      // Max results (0 = default 5)
-	Domains []Domain // Filter to these domains; empty = all
+	Limit   int              // Max results (0 = default 5)
+	Domains []Domain         // Filter to these domains; empty = all
+	Session *SessionSignals  // Session context for scoring modifiers; nil = no session
 }
 
 // DefaultLimit is the default number of results returned.
