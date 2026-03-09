@@ -43,16 +43,24 @@ const (
 	SevLow      = "LOW"
 )
 
+// workflowCommands lists commands that must be model-invocable (no disable-model-invocation).
+// These are the pipeline commands that /one invokes autonomously during orchestrated sessions.
+var workflowCommands = map[string]bool{
+	"spike": true, "hotfix": true, "sprint": true, "task": true,
+	"build": true, "architect": true, "qa": true,
+	"pr": true, "code-review": true, "commit": true,
+}
+
 // expectedForkState defines the deliberate fork/inline classification for each dromena.
 //
 // Classification principle (context-isolation semantics):
 //
 //	true  = FORK: command produces artifacts, reports, or side effects. A summary
-//	        returning to the main conversation is sufficient. All tools (including
-//	        Task) work in forked context — fork is about context isolation, not
-//	        tool restriction.
+//	        returning to the main conversation is sufficient. Forked commands run
+//	        as subagents and CANNOT use the Task tool (SCAR-018). Commands that
+//	        dispatch subagents via Task must be INLINE.
 //	false = INLINE: command guides the ongoing conversation, manages session state,
-//	        or needs its behavioral context to persist after completion.
+//	        dispatches subagents via Task, or needs context to persist.
 var expectedForkState = map[string]bool{
 	// === INLINE (false): persistent context needed ===
 	// Session lifecycle — hook-injected context must persist
@@ -63,16 +71,19 @@ var expectedForkState = map[string]bool{
 	"build": false, "architect": false, "qa": false, "commit": false,
 	// Context management — shapes subsequent work
 	"frame": false, "one": false,
+	// Task-dispatching orchestrators — fork blocks Task tool (SCAR-018)
+	"know": false, "dion": false, "land": false, "radar": false,
+	"theoria": false, "spike": false, "release": false,
+	"consolidate": false, "eval-agent": false, "validate-rite": false,
+	"forge-rite": false, "new-rite": false,
+	"minus-1": false, "zero": false,
 
 	// === FORK (true): isolated execution, summary sufficient ===
-	// Artifact producers (knowledge, reports, PRs, reviews)
-	"pr": true, "code-review": true, "spike": true, "theoria": true,
-	"know": true, "dion": true, "land": true, "radar": true,
-	"research": true, "interview": true, "release": true,
-	"consolidate": true, "eval-agent": true, "validate-rite": true,
-	"forge-rite": true, "new-rite": true,
+	// Workflow pipeline commands — model-invocable, inline for /one autonomy
+	"pr": false, "code-review": false,
+	"research": true, "interview": true,
 	// CLI wrappers / one-shot actions
-	"minus-1": true, "zero": true, "rite": true, "sessions": true,
+	"rite": true, "sessions": true,
 	"worktree": true, "sync": true, "sync-debug": true, "ecosystem": true,
 	// Rite-switching (one-shot CLI wrappers)
 	"10x": true, "debt": true, "docs": true, "forge": true,
@@ -159,6 +170,8 @@ Checks agents, dromena (.dro.md), and legomena (.lego.md) for:
 - Required fields (name, description, etc.)
 - Agent archetype mismatches (maxTurns, type, color)
 - Dromena context:fork allowlist mismatches
+- Dromena context:fork + Task tool conflicts (SCAR-018)
+- Workflow commands must be model-invocable
 - Legomena missing Triggers keyword in description
 
 Examples:
@@ -581,6 +594,27 @@ func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
 			File: relPath, Severity: SevLow, Rule: "context-fork-unclassified",
 			Message: fmt.Sprintf("dromena %q not in fork/inline allowlist — classify in lint.go expectedForkState", name),
 		})
+	}
+
+	// SCAR-018: context:fork + Task tool conflict — forked commands cannot dispatch subagents
+	if hasFork {
+		allowedTools := strVal(fm, "allowed-tools")
+		if strings.Contains(allowedTools, "Task") {
+			report.Dromena = append(report.Dromena, Finding{
+				File: relPath, Severity: SevHigh, Rule: "fork-task-conflict",
+				Message: fmt.Sprintf("dromena %q has context: fork with Task in allowed-tools; forked commands run as subagents which cannot use Task (SCAR-018)", name),
+			})
+		}
+	}
+
+	// Workflow commands must be model-invocable for /one autonomous execution
+	if workflowCommands[name] {
+		if strVal(fm, "disable-model-invocation") == "true" {
+			report.Dromena = append(report.Dromena, Finding{
+				File: relPath, Severity: SevHigh, Rule: "workflow-not-model-invocable",
+				Message: fmt.Sprintf("workflow dromena %q has disable-model-invocation: true; workflow commands must be model-invocable for /one pipeline autonomy", name),
+			})
+		}
 	}
 
 	// @skill-name anti-pattern check

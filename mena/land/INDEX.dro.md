@@ -4,7 +4,6 @@ description: "Full land-to-know pipeline: synthesize cross-session knowledge via
 argument-hint: "[--domain=DOMAIN] [--force] [--skip-know] [--know-only]"
 allowed-tools: Bash, Read, Glob, Grep, Task, AskUserQuestion
 model: opus
-context: fork
 ---
 
 # /land -- Session Knowledge Landing Pipeline

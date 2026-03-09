@@ -438,49 +438,6 @@ func TestSCAR016_ShellScripts_NoUnprotectedArithmeticIncrement(t *testing.T) {
 			"See commit 1641792.")
 }
 
-// TestSCAR018_KnowDromenon_HasContextFork is an updated regression test for SCAR-018.
-//
-// History: SCAR-018 originally removed context: fork from /know based on the premise
-// that "forked slash commands cannot use the Task tool." Per CC documentation research
-// (2026-03-09), this premise is incorrect — context: fork provides context isolation
-// (summary returned to main conversation), and ALL tools including Task work identically
-// in forked context. Fork does not restrict tool access.
-//
-// The /know dromenon is a knowledge generator that produces .know/ files via theoros
-// dispatch. It should have context: fork because its value comes from artifact production
-// (isolated execution, summary sufficient) not from shaping the ongoing conversation.
-//
-// This test now verifies /know HAS context: fork, correcting the original SCAR-018
-// assertion. See commit 4d92db4 (original fix) and the context: fork reclassification.
-func TestSCAR018_KnowDromenon_HasContextFork(t *testing.T) {
-	repoRoot := repoRootFromThisFile(t)
-
-	knowPath := filepath.Join(repoRoot, "mena", "know", "INDEX.dro.md")
-	data, err := os.ReadFile(knowPath)
-	require.NoError(t, err, "/know dromenon must exist at mena/know/INDEX.dro.md")
-
-	content := string(data)
-	parts := strings.SplitN(content, "---", 3)
-	require.True(t, len(parts) >= 3, "/know dromenon must have frontmatter")
-	frontmatter := parts[1]
-
-	hasContextFork := false
-	for _, line := range strings.Split(frontmatter, "\n") {
-		trimmed := strings.TrimSpace(line)
-		if after, ok := strings.CutPrefix(trimmed, "context:"); ok {
-			if strings.TrimSpace(after) == "fork" {
-				hasContextFork = true
-			}
-		}
-	}
-
-	assert.True(t, hasContextFork,
-		"SCAR-018 (corrected): /know dromenon SHOULD have context: fork. "+
-			"Fork provides context isolation — the knowledge generation runs in an isolated "+
-			"subagent and returns a summary. All tools including Task work in forked context. "+
-			"The original SCAR-018 premise (fork breaks Task) was incorrect per CC documentation.")
-}
-
 // TestSCAR020_SessionDromena_ExplicitSessionIDPassing is a regression test for SCAR-020.
 //
 // Background: All session lifecycle dromena failed to pass session ID to CLI subprocess

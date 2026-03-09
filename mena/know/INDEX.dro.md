@@ -4,7 +4,6 @@ description: "Generate persistent codebase knowledge via theoros observation. Pr
 argument-hint: "[domain|--all|--scope=feature] [--force] [--expires=DURATION] [--census] [--feature=SLUG] [--root=PATH]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill
 model: opus
-context: fork
 ---
 
 # /know -- Codebase Knowledge Generator

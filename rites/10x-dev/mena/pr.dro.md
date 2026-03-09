@@ -4,7 +4,6 @@ name: pr
 argument-hint: "[title] [--base=BRANCH]"
 allowed-tools: Bash, Read, Glob, Grep
 model: sonnet
-context: fork
 ---
 
 ## Context

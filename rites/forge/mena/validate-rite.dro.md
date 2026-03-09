@@ -4,7 +4,6 @@ name: validate-rite
 argument-hint: "<rite-name> [--verbose]"
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
 model: opus
-context: fork
 ---
 
 ## Context

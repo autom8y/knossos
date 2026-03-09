@@ -4,7 +4,6 @@ description: Create a new rite through The Forge workflow (direct creation)
 argument-hint: "<rite-name> [--complexity=AGENT|MODULE|SYSTEM]"
 allowed-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
 model: opus
-context: fork
 ---
 
 ## Context

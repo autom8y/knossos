@@ -4,7 +4,6 @@ name: spike
 argument-hint: "<question> [--timebox=DURATION]"
 allowed-tools: Bash, Read, Write, Task, Glob, Grep, WebFetch, WebSearch
 model: opus
-context: fork
 ---
 
 ## Context

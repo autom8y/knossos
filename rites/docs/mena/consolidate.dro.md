@@ -4,7 +4,6 @@ name: consolidate
 argument-hint: "<category_dir> [--dry-run]"
 allowed-tools: Bash, Read, Write, Task, Glob, Grep, TodoWrite
 model: opus
-context: fork
 ---
 
 ## Context

@@ -4,8 +4,6 @@ description: Create pull request with comprehensive description
 argument-hint: "[title] [--base=BRANCH]"
 allowed-tools: Bash, Read, Glob, Grep
 model: sonnet
-disable-model-invocation: true
-context: fork
 ---
 
 ## Context

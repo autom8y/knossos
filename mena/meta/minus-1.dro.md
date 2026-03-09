@@ -4,7 +4,6 @@ description: Assess initiative readiness before Session 0 planning
 argument-hint: <initiative>
 model: opus
 disable-model-invocation: true
-context: fork
 allowed-tools: Task, Read
 ---
 

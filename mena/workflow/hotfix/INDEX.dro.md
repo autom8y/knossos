@@ -4,7 +4,6 @@ description: Rapid fix workflow for urgent issues
 argument-hint: "<issue-description> [--severity=LEVEL]"
 allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
-disable-model-invocation: true
 ---
 
 ## Context

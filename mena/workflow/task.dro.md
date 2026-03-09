@@ -4,7 +4,6 @@ description: Single task full lifecycle through rite workflow phases
 argument-hint: "<task-description> [--complexity=LEVEL]"
 allowed-tools: Bash, Read, Task, Glob, Grep
 model: opus
-disable-model-invocation: true
 ---
 
 ## Context

@@ -4,7 +4,6 @@ description: "Cross-reference .know/ files to surface codebase opportunities and
 argument-hint: "[--challenge <domain>] [--json] [--force]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill, AskUserQuestion
 model: opus
-context: fork
 ---
 
 # /radar -- Knowledge Radar

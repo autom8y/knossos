@@ -4,7 +4,6 @@ description: Initialize Orchestrator with 4-agent workflow plan
 argument-hint: <initiative>
 model: opus
 disable-model-invocation: true
-context: fork
 allowed-tools: Task, Read
 ---
 
