@@ -134,7 +134,7 @@ Each finding must follow this structure:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Reminder: for this domain, LOWER grades indicate MORE problems found (regressions, undocumented scars, stale locations).
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Reminder: for this domain, LOWER grades indicate MORE problems found (regressions, undocumented scars, stale locations).
 
 Example (well-maintained scar documentation with fixes in place):
 
@@ -154,8 +154,8 @@ Example (scar documentation with regressions and gaps):
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [scar-tissue-criteria](scar-tissue.lego.md) -- Direct scar-tissue audit (confirmatory, not adversarial)
-- [radar-unguarded-scars-criteria](radar-unguarded-scars.lego.md) -- Radar signal: scars lacking test coverage
-- [radar-recurring-scars-criteria](radar-recurring-scars.lego.md) -- Radar signal: systemic scar categories
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [scar-tissue-criteria](scar-tissue.md) -- Direct scar-tissue audit (confirmatory, not adversarial)
+- [radar-unguarded-scars-criteria](radar-unguarded-scars.md) -- Radar signal: scars lacking test coverage
+- [radar-recurring-scars-criteria](radar-recurring-scars.md) -- Radar signal: systemic scar categories
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

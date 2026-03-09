@@ -40,6 +40,6 @@ All artifacts land in `.sos/wip/thermia/`:
 
 | Topic | File |
 |-------|------|
-| 6-gate framework (frequency, cost, staleness, UX, safety, scale) | `six-gate.lego.md` |
-| Cache patterns, consistency models, failure modes | `patterns.lego.md` |
-| Back-route protocols (assessment_gap, design_inconsistency) | `back-routes.lego.md` |
+| 6-gate framework (frequency, cost, staleness, UX, safety, scale) | `six-gate.md` |
+| Cache patterns, consistency models, failure modes | `patterns.md` |
+| Back-route protocols (assessment_gap, design_inconsistency) | `back-routes.md` |

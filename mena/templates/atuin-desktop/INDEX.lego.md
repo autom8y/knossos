@@ -72,5 +72,5 @@ content: []             # Required: Array of blocks
 
 ## Cross-Skill Integration
 
-- [standards](../../guidance/standards/INDEX.lego.md) - YAML conventions, file organization
-- [documentation](../documentation/INDEX.lego.md) - PRD/TDD when runbooks are the deliverable
+- [standards](../../guidance/standards/INDEX.md) - YAML conventions, file organization
+- [documentation](../documentation/INDEX.md) - PRD/TDD when runbooks are the deliverable

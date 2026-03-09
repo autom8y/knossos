@@ -292,7 +292,15 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 	// block the wrap, since the session context is already ARCHIVED.
 
 	// 1. Advisory session lock (.locks/{id}.lock)
-	_ = lockMgr.ForceRelease(sessionID)
+	// Release the flock we hold, then remove the lock file directly.
+	// We skip ForceRelease here because it warns about "live" locks based
+	// on metadata age, but we know this is our own lock being cleaned up.
+	// The deferred Release() is a safe no-op after this (checks l.file == nil).
+	lockPath := sessionLock.Path()
+	_ = sessionLock.Release()
+	if lockPath != "" {
+		_ = os.Remove(lockPath)
+	}
 
 	// 2. Moirai lock (.moirai-lock in session dir)
 	// Must be removed before the archive move so it doesn't persist in the archive.

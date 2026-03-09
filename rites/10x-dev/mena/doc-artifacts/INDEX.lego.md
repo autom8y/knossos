@@ -21,7 +21,7 @@ Templates for the 10x development workflow artifacts.
 
 | Template | File | Includes |
 |----------|------|---------|
-| PRD | `prd-template.lego.md` | Full template + impact assessment examples |
-| TDD | `tdd-template.lego.md` | Full template with all sections |
-| ADR | `adr-template.lego.md` | Full template with alternatives format |
-| Test Case + Test Summary | `test-templates.lego.md` | Both test artifact templates |
+| PRD | `prd-template.md` | Full template + impact assessment examples |
+| TDD | `tdd-template.md` | Full template with all sections |
+| ADR | `adr-template.md` | Full template with alternatives format |
+| Test Case + Test Summary | `test-templates.md` | Both test artifact templates |

@@ -1,8 +1,10 @@
 ---
 description: Time-boxed research and exploration (no production code)
+name: spike
 argument-hint: "<question> [--timebox=DURATION]"
 allowed-tools: Bash, Read, Write, Task, Glob, Grep, WebFetch, WebSearch
 model: opus
+context: fork
 ---
 
 ## Context
@@ -62,4 +64,4 @@ Spike report at `.sos/wip/SPIKE-{slug}.md`:
 
 ## Reference
 
-Full documentation: `rites/10x-dev/mena/spike.dro.md` (self-contained)
+This command is self-contained.

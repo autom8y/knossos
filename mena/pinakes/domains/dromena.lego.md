@@ -87,7 +87,7 @@ rites/*/mena/**/*.dro.md
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Frontmatter: A (midpoint 95%) × 30% = 28.5
 - Description: B (midpoint 85%) × 25% = 21.25
 - Body Structure: B (midpoint 85%) × 25% = 21.25
@@ -96,6 +96,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) — Full audit system documentation
-- [legomena-criteria](legomena.lego.md) — Evaluation criteria for skills
-- [agents-criteria](agents.lego.md) — Evaluation criteria for agent prompts
+- [Pinakes INDEX](../INDEX.md) — Full audit system documentation
+- [legomena-criteria](legomena.md) — Evaluation criteria for skills
+- [agents-criteria](agents.md) — Evaluation criteria for agent prompts

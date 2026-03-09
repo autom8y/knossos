@@ -21,6 +21,7 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: orange
 maxTurns: 250
+maxTurns-override: true
 skills:
   - intelligence-ref
 memory: "project"

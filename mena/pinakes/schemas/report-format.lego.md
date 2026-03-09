@@ -151,7 +151,7 @@ The aggregate synthesis report produced by /theoria combining multiple domain as
 ## Methodology
 
 - **Domains evaluated**: {comma_separated_list}
-- **Grading scale**: A-F (see `pinakes/schemas/grading.lego.md`)
+- **Grading scale**: A-F (see `pinakes/schemas/grading.md`)
 - **Evaluation date**: {YYYY-MM-DD}
 - **Aggregation method**: {equal_weighting_or_custom_description}
 ```
@@ -163,7 +163,7 @@ The aggregate synthesis report produced by /theoria combining multiple domain as
 - Default: equal weighting across domains
 - Convert each domain letter to midpoint percentage (A=95, B=85, C=75, D=65, F=40)
 - Compute average, map back to letter grade
-- See `grading.lego.md` for detailed aggregation rules
+- See `grading.md` for detailed aggregation rules
 
 **Executive Summary:**
 
@@ -253,18 +253,18 @@ Do NOT use:
 
 ## Integration with Grading System
 
-This report format implements the grading system defined in `grading.lego.md`:
+This report format implements the grading system defined in `grading.md`:
 
 - **Grade display** follows canonical scale (A-F, no modifiers)
 - **Percentage calculations** use midpoint conversion for aggregation
 - **Domain aggregation** uses weighted average of criteria
 - **Synkrisis aggregation** uses average of domain percentages
 
-All grades in reports MUST be calculable using the rules in `grading.lego.md`.
+All grades in reports MUST be calculable using the rules in `grading.md`.
 
 ## Related
 
-- `grading.lego.md` — Canonical grading scale and aggregation rules
-- `../INDEX.lego.md` — Pinakes overview
+- `grading.md` — Canonical grading scale and aggregation rules
+- `../INDEX.md` — Pinakes overview
 - `../../../agents/theoros.md` — Agent that produces domain assessments
-- `../domains/*.lego.md` — Domain criteria definitions
+- `../domains/*.md` — Domain criteria definitions

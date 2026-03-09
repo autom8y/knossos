@@ -161,6 +161,6 @@ An F grade means "this needs work before it's acceptable," not "this is worthles
 
 ## Related
 
-- `report-format.lego.md` — Report structure using these grades
-- `../INDEX.lego.md` — Pinakes overview
+- `report-format.md` — Report structure using these grades
+- `../INDEX.md` — Pinakes overview
 - `../../../agents/theoros.md` — Agent that applies these rules

@@ -157,7 +157,7 @@ The theoros uses these rules to produce GENERATE vs SKIP recommendations:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Source Coverage: A (midpoint 95%) x 30% = 28.5
 - Feature Enumeration: B (midpoint 85%) x 30% = 25.5
 - Classification Quality: B (midpoint 85%) x 20% = 17.0
@@ -166,6 +166,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [feature-knowledge-criteria](feature-knowledge.lego.md) -- Per-feature knowledge capture (downstream consumer of this census)
-- [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture (complementary domain, same Language Detection pattern)
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [feature-knowledge-criteria](feature-knowledge.md) -- Per-feature knowledge capture (downstream consumer of this census)
+- [architecture-criteria](architecture.md) -- Codebase architecture knowledge capture (complementary domain, same Language Detection pattern)

@@ -21,6 +21,7 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: cyan
 maxTurns: 30
+maxTurns-override: true
 skills:
   - review-ref
 disallowedTools:

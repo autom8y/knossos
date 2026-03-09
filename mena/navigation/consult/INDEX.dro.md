@@ -123,7 +123,7 @@ Always structure responses as:
 ### Referencing prompting Skill
 
 When providing invocation patterns, retrieve patterns from:
-- `prompting/INDEX.lego.md` - Agent invocation quick reference
+- `prompting/INDEX.md` - Agent invocation quick reference
 - `prompting/patterns/discovery.md` - PRD creation, session initialization
 - `prompting/patterns/implementation.md` - TDD, coding, testing
 
@@ -132,7 +132,7 @@ When providing invocation patterns, retrieve patterns from:
 ### Referencing 10x-workflow Skill
 
 When explaining workflow journeys, retrieve context from:
-- `10x-workflow/INDEX.lego.md` - Agent routing, complexity calibration
+- `10x-workflow/INDEX.md` - Agent routing, complexity calibration
 - `10x-workflow/lifecycle.md` - Phase protocol (PLAN -> CLARIFY -> EXECUTE -> VERIFY -> HANDOFF)
 - `10x-workflow/quality-gates.md` - Gate criteria per phase
 

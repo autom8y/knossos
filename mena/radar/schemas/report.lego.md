@@ -74,7 +74,7 @@ and what the single most critical finding is.}
 
 {Opportunity entries in priority order: HIGH first, then MEDIUM, then LOW.
 Within each severity tier, order by confidence descending.
-Use the OPP-NNN format defined in opportunity.lego.md.}
+Use the OPP-NNN format defined in opportunity.md.}
 
 ### [OPP-001] ...
 
@@ -282,6 +282,6 @@ signal=`radar-unguarded-scars, radar-convention-drift`.
 
 ## Related
 
-- [opportunity.lego.md](opportunity.lego.md) — OPP-NNN entry format
+- [opportunity.md](opportunity.md) — OPP-NNN entry format
 - [/radar command](../../../commands/radar.md) — /radar dromenon
 - [report-format](../../pinakes/schemas/report-format.md) — Theoria report format (parallel system)

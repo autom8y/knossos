@@ -83,7 +83,7 @@ scope: radar
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 
 - Coverage: A (midpoint 95%) x 20% = 19.0
 - Expiry Calculation: B (midpoint 85%) x 50% = 42.5
@@ -92,6 +92,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [radar-confidence-gaps-criteria](radar-confidence-gaps.lego.md) -- Companion signal: low-confidence domains
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [radar-confidence-gaps-criteria](radar-confidence-gaps.md) -- Companion signal: low-confidence domains
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

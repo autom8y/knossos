@@ -61,7 +61,7 @@ One level: INVESTIGATION. All investigations run all four phases. Depth is emerg
 
 | Topic | File | When to Load |
 |-------|------|-------------|
-| index.yaml full schema, status values, evidence format | `index-schema.lego.md` | Writing or validating index.yaml |
-| Back-route protocols (evidence_gap, diagnosis_insufficient, scope_expansion) | `back-routes.lego.md` | Triggering or handling back-routes |
-| Cross-rite handoff formats (10x-dev, SRE, debt-triage) | `handoff-formats.lego.md` | Producing treatment handoff artifacts |
-| Agent anti-patterns | `anti-patterns.lego.md` | Reviewing agent behavior |
+| index.yaml full schema, status values, evidence format | `index-schema.md` | Writing or validating index.yaml |
+| Back-route protocols (evidence_gap, diagnosis_insufficient, scope_expansion) | `back-routes.md` | Triggering or handling back-routes |
+| Cross-rite handoff formats (10x-dev, SRE, debt-triage) | `handoff-formats.md` | Producing treatment handoff artifacts |
+| Agent anti-patterns | `anti-patterns.md` | Reviewing agent behavior |

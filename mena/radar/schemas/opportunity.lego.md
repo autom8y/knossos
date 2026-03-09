@@ -92,5 +92,5 @@ This prevents the report from listing the same package 4 times with 4 identical 
 
 ## Related
 
-- [report.lego.md](report.lego.md) — Full report format and output structure
-- [../INDEX.dro.md](../INDEX.dro.md) — /radar dromenon (produces these entries)
+- [report.md](report.md) — Full report format and output structure
+- [../INDEX.md](../INDEX.md) — /radar dromenon (produces these entries)

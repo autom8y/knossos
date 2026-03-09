@@ -4,6 +4,7 @@ description: "Cross-session knowledge synthesis from archived sessions via Diony
 argument-hint: "[--domain=DOMAIN] [--force]"
 allowed-tools: Bash, Read, Glob, Grep, Task, AskUserQuestion
 model: opus
+context: fork
 ---
 
 # /dion -- Cross-Session Knowledge Synthesis

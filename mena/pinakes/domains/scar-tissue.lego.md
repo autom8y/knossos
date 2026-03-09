@@ -135,7 +135,7 @@ Before beginning observation, identify the primary language(s) in the project:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Failure Catalog Completeness: A (midpoint 95%) x 30% = 28.5
 - Category Coverage: B (midpoint 85%) x 25% = 21.25
 - Fix-Location Mapping: B (midpoint 85%) x 20% = 17.0
@@ -145,6 +145,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture
-- [design-constraints-criteria](design-constraints.lego.md) -- Design constraints, load-bearing code, risk zone mapping
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [architecture-criteria](architecture.md) -- Codebase architecture knowledge capture
+- [design-constraints-criteria](design-constraints.md) -- Design constraints, load-bearing code, risk zone mapping

@@ -22,6 +22,7 @@ tools: Bash, Read, Write, Edit, Glob, Grep, TodoWrite
 model: sonnet
 color: orange
 maxTurns: 60
+maxTurns-override: true
 skills:
   - releaser-ref
   - commit-conventions

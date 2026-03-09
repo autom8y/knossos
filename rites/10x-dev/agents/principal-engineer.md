@@ -23,6 +23,7 @@ tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skil
 model: opus
 color: green
 maxTurns: 250
+maxTurns-override: true
 skills:
   - conventions
   - guidance/standards

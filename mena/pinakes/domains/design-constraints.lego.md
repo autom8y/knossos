@@ -158,7 +158,7 @@ Before beginning observation, identify the primary language(s) in the project:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Tension Catalog: A (midpoint 95%) x 27% = 25.65
 - Trade-off Docs: B (midpoint 85%) x 22% = 18.7
 - Abstraction Gaps: A (midpoint 95%) x 18% = 17.1
@@ -169,6 +169,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture
-- [scar-tissue-criteria](scar-tissue.lego.md) -- Scar tissue knowledge capture (failure history, regressions)
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [architecture-criteria](architecture.md) -- Codebase architecture knowledge capture
+- [scar-tissue-criteria](scar-tissue.md) -- Scar tissue knowledge capture (failure history, regressions)

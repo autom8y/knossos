@@ -4,6 +4,7 @@ description: Create a new rite with codebase archaeology (domain expertise extra
 argument-hint: "<rite-name> [--complexity=MODULE|SYSTEM] [--interview]"
 allowed-tools: Bash, Glob, Grep, Read, Write, Edit, Task, TodoWrite
 model: opus
+context: fork
 ---
 
 ## Context

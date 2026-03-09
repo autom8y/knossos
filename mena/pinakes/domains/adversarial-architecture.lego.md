@@ -136,7 +136,7 @@ Each finding must follow this structure:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Reminder: for this domain, LOWER grades indicate MORE contradictions found (less accurate documentation).
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Reminder: for this domain, LOWER grades indicate MORE contradictions found (less accurate documentation).
 
 Example (architecture document closely matching code):
 
@@ -156,8 +156,8 @@ Example (architecture document with notable drift):
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [architecture-criteria](architecture.lego.md) -- Direct architecture compliance audit (confirmatory, not adversarial)
-- [radar-architecture-decay-criteria](radar-architecture-decay.lego.md) -- Radar signal for architectural decay
-- [dialectic-architecture-criteria](dialectic-architecture.lego.md) -- Companion: assumption exposure for architecture document
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [architecture-criteria](architecture.md) -- Direct architecture compliance audit (confirmatory, not adversarial)
+- [radar-architecture-decay-criteria](radar-architecture-decay.md) -- Radar signal for architectural decay
+- [dialectic-architecture-criteria](dialectic-architecture.md) -- Companion: assumption exposure for architecture document
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

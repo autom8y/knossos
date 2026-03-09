@@ -56,10 +56,10 @@ Agent Designer → Prompt Architect → Workflow Engineer → Platform Engineer 
 
 | Topic | File | When to Load |
 |-------|------|-------------|
-| Agent profiles (full detail) | `agents.lego.md` | Understanding agent domains/handoffs |
-| Best practices | `best-practices.lego.md` | Designing rites, writing prompts |
-| Troubleshooting | `troubleshooting.lego.md` | Diagnosing sync/validation failures |
-| Architecture | `architecture.lego.md` | Understanding Forge structure and availability |
+| Agent profiles (full detail) | `agents.md` | Understanding agent domains/handoffs |
+| Best practices | `best-practices.md` | Designing rites, writing prompts |
+| Troubleshooting | `troubleshooting.md` | Diagnosing sync/validation failures |
+| Architecture | `architecture.md` | Understanding Forge structure and availability |
 
 ## Related Resources
 

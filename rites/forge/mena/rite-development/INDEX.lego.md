@@ -19,7 +19,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 | Workflow | `workflow.yaml` | Phases, complexity levels, entry point |
 | Agents | `agents/*.md` | Role, model, color, tools |
 | Command | `.claude/commands/{name}.md` | Quick-switch integration |
-| Skill | `rites/{name}/mena/{name}-ref/` | Reference documentation |
+| Skill | `{name}-ref/` (in rite mena) | Reference documentation |
 
 ---
 
@@ -54,7 +54,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 
 ### Model and Color Assignment
 
-See [agent-prompt-engineering](../agent-prompt-engineering/INDEX.lego.md#model-and-color-assignment) for model selection and color assignment guidance.
+See [agent-prompt-engineering](../agent-prompt-engineering/INDEX.md#model-and-color-assignment) for model selection and color assignment guidance.
 
 ### Workflow Phases
 

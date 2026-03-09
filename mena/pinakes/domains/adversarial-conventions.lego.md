@@ -134,7 +134,7 @@ Each finding must follow this structure:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Reminder: for this domain, LOWER grades indicate MORE contradictions found (less accurate documentation).
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Reminder: for this domain, LOWER grades indicate MORE contradictions found (less accurate documentation).
 
 Example (well-maintained conventions document):
 
@@ -154,7 +154,7 @@ Example (stale conventions document):
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [conventions-criteria](conventions.lego.md) -- Direct adherence audit (confirmatory, not adversarial)
-- [radar-convention-drift-criteria](radar-convention-drift.lego.md) -- Radar signal for convention drift
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [conventions-criteria](conventions.md) -- Direct adherence audit (confirmatory, not adversarial)
+- [radar-convention-drift-criteria](radar-convention-drift.md) -- Radar signal for convention drift
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

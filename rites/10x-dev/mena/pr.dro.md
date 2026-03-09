@@ -1,8 +1,10 @@
 ---
 description: Create pull request with comprehensive description
+name: pr
 argument-hint: "[title] [--base=BRANCH]"
 allowed-tools: Bash, Read, Glob, Grep
 model: sonnet
+context: fork
 ---
 
 ## Context
@@ -61,4 +63,4 @@ Create a GitHub pull request with auto-generated description. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `rites/10x-dev/mena/pr.dro.md` (self-contained)
+This command is self-contained.

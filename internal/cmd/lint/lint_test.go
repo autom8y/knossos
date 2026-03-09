@@ -154,7 +154,7 @@ func TestCheckSourcePathLeaks(t *testing.T) {
 
 	t.Run("rites/*/mena/ reference produces MEDIUM finding", func(t *testing.T) {
 		var findings []Finding
-		body := "Full documentation: `rites/strategy/mena/strategy-ref/INDEX.lego.md`"
+		body := "Full documentation: rites/strategy/mena/strategy-ref/INDEX.lego.md"
 		checkSourcePathLeaks(body, "test.md", &findings)
 		var hasRef bool
 		for _, f := range findings {

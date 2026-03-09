@@ -10,6 +10,7 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: red
 maxTurns: 60
+maxTurns-override: true
 skills:
   - slop-chop-ref
 disallowedTools:

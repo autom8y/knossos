@@ -22,7 +22,7 @@ Defines the canonical format for adding audit domains to the Pinakes. A domain i
 
 ### Step 2: Write Criteria File
 
-Create `mena/pinakes/domains/{domain}.lego.md`:
+Create `mena/pinakes/domains/{domain}.md`:
 
 ```markdown
 ---
@@ -57,7 +57,7 @@ What files/patterns this domain covers.
 
 ### Step 3: Register in the Pinakes INDEX
 
-Add a row to the Domain Registry table in `INDEX.lego.md`:
+Add a row to the Domain Registry table in `INDEX.md`:
 
 ```markdown
 | **{domain}** | `domains/{domain}.lego.md` | {scope} | {brief description} |
@@ -110,7 +110,7 @@ No +/- modifiers. Simple letter grades only.
 
 ## Example: Complete Domain Registration
 
-**Criteria file** (`domains/git-hygiene.lego.md`):
+**Criteria file** (`domains/git-hygiene.md`):
 
 ```markdown
 ---
@@ -161,6 +161,6 @@ Git history, commit messages, branch structure. Evaluate via `git log`, branch n
 
 ## Related
 
-- [INDEX.lego.md](INDEX.lego.md) - The domain registry (where to register)
-- [grading.lego.md](schemas/grading.lego.md) - Grading scale definitions
-- [report-format.lego.md](schemas/report-format.lego.md) - Audit report structure
+- [INDEX.md](INDEX.md) - The domain registry (where to register)
+- [grading.md](schemas/grading.md) - Grading scale definitions
+- [report-format.md](schemas/report-format.md) - Audit report structure

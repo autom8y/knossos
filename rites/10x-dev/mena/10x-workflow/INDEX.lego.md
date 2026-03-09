@@ -49,7 +49,7 @@ Every session follows **PLAN -> CLARIFY -> EXECUTE -> VERIFY -> HANDOFF**.
 
 | Topic | File | When to Load |
 |-------|------|-------------|
-| Entry point selection by work type | `entry-points.lego.md` | Deciding where to start |
+| Entry point selection by work type | `entry-points.md` | Deciding where to start |
 | Full session protocol with checklists | `lifecycle.md` | Running a session |
 | Detailed quality gate criteria | `quality-gates.md` | Validating phase transitions |
 | Glossary navigation | `glossary-index.md` | Looking up workflow terms |

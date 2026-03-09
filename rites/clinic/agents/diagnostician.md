@@ -23,6 +23,7 @@ tools: Bash, Glob, Grep, Read, Edit, Write, Skill
 model: opus
 color: cyan
 maxTurns: 50
+maxTurns-override: true
 skills:
   - clinic-ref
 write-guard: true

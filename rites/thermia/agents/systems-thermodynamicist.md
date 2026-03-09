@@ -24,6 +24,7 @@ tools: Read, Write, Glob, Grep, TodoWrite
 model: sonnet
 color: cyan
 maxTurns: 30
+maxTurns-override: true
 skills:
   - thermia-ref
 disallowedTools:

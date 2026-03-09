@@ -102,7 +102,7 @@ scope: radar
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 
 - Scar Location Extraction: A (midpoint 95%) x 25% = 23.75
 - Coverage Gap Extraction: B (midpoint 85%) x 25% = 21.25
@@ -112,8 +112,8 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [radar-recurring-scars-criteria](radar-recurring-scars.lego.md) -- Companion signal: systemic scar patterns
-- [scar-tissue-criteria](scar-tissue.lego.md) -- Direct codebase audit of scar documentation quality
-- [test-coverage-criteria](test-coverage.lego.md) -- Direct codebase audit of test coverage quality
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [radar-recurring-scars-criteria](radar-recurring-scars.md) -- Companion signal: systemic scar patterns
+- [scar-tissue-criteria](scar-tissue.md) -- Direct codebase audit of scar documentation quality
+- [test-coverage-criteria](test-coverage.md) -- Direct codebase audit of test coverage quality
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

@@ -107,7 +107,7 @@ scope: radar
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 
 - Layer Model Extraction: B (midpoint 85%) x 20% = 17.0
 - Import Graph Check Coverage: B (midpoint 85%) x 30% = 25.5
@@ -117,7 +117,7 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [architecture-criteria](architecture.lego.md) -- Direct codebase audit of architecture documentation completeness
-- [radar-constraint-violations-criteria](radar-constraint-violations.lego.md) -- Companion signal: constraint violations
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [architecture-criteria](architecture.md) -- Direct codebase audit of architecture documentation completeness
+- [radar-constraint-violations-criteria](radar-constraint-violations.md) -- Companion signal: constraint violations
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

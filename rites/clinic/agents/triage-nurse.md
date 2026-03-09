@@ -30,6 +30,7 @@ tools: Bash, Glob, Grep, Read, Edit, Write, Skill
 model: sonnet
 color: orange
 maxTurns: 30
+maxTurns-override: true
 skills:
   - clinic-ref
 write-guard: true

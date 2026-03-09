@@ -119,7 +119,7 @@ Before beginning observation, identify the primary language(s) in the project:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Purpose and Design Rationale: A (midpoint 95%) x 30% = 28.5
 - Conceptual Model: B (midpoint 85%) x 25% = 21.25
 - Implementation Map: B (midpoint 85%) x 25% = 21.25
@@ -128,8 +128,8 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [feature-census-criteria](feature-census.lego.md) -- Feature enumeration census (upstream producer of feature slugs)
-- [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture (complementary domain, same Language Detection pattern)
-- [scar-tissue-criteria](scar-tissue.lego.md) -- Scar tissue knowledge capture (failure mode evidence source)
-- [design-constraints-criteria](design-constraints.lego.md) -- Design constraint capture (boundary and tension evidence source)
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [feature-census-criteria](feature-census.md) -- Feature enumeration census (upstream producer of feature slugs)
+- [architecture-criteria](architecture.md) -- Codebase architecture knowledge capture (complementary domain, same Language Detection pattern)
+- [scar-tissue-criteria](scar-tissue.md) -- Scar tissue knowledge capture (failure mode evidence source)
+- [design-constraints-criteria](design-constraints.md) -- Design constraint capture (boundary and tension evidence source)

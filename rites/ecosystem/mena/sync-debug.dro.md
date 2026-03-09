@@ -1,8 +1,10 @@
 ---
 description: Diagnose sync issues and conflicts (Ecosystem Analyst with sync pipeline focus)
+name: sync-debug
 argument-hint: "[issue-description]"
 allowed-tools: Bash, Read, Grep, Glob
 model: opus
+context: fork
 ---
 
 ## Context

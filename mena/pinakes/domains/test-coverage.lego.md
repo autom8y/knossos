@@ -106,7 +106,7 @@ Before beginning observation, identify the primary language(s) in the project:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Coverage Gaps: B (midpoint 85%) x 40% = 34.0
 - Testing Conventions: A (midpoint 95%) x 30% = 28.5
 - Test Structure Summary: B (midpoint 85%) x 30% = 25.5
@@ -114,6 +114,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [architecture-criteria](architecture.lego.md) -- Codebase architecture knowledge capture
-- [conventions-criteria](conventions.lego.md) -- Codebase conventions knowledge capture
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [architecture-criteria](architecture.md) -- Codebase architecture knowledge capture
+- [conventions-criteria](conventions.md) -- Codebase conventions knowledge capture

@@ -1,8 +1,10 @@
 ---
 description: Consolidate documentation in a category into numbered artifacts
+name: consolidate
 argument-hint: "<category_dir> [--dry-run]"
 allowed-tools: Bash, Read, Write, Task, Glob, Grep, TodoWrite
 model: opus
+context: fork
 ---
 
 ## Context
@@ -90,7 +92,7 @@ This command orchestrates the ecosystem workflow for documentation consolidation
 /consolidate docs/design --dry-run
 
 # Consolidate rite mena documentation
-/consolidate rites/shared/mena/smell-detection
+/consolidate smell-detection
 ```
 
 ## Phase Transitions
@@ -124,5 +126,5 @@ If consolidation is interrupted:
 
 ## Reference
 
-Full workflow documentation: `rites/docs/mena/doc-consolidation/INDEX.lego.md`
+Full workflow documentation: `doc-consolidation`
 Agent details: `.claude/agents/potnia.md`

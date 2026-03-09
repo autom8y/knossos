@@ -30,6 +30,9 @@ var (
 	riteMenaPathPattern = regexp.MustCompile(`rites/[^/]+/mena/`)
 	// Source extensions (.lego.md or .dro.md) in body references.
 	sourceExtPattern = regexp.MustCompile(`\.(lego|dro)\.md`)
+	// Inline backtick content — stripped before pattern matching to avoid
+	// false positives on paths used as literal examples in prose.
+	inlineCodePattern = regexp.MustCompile("`[^`]+`")
 )
 
 // Severity levels for lint findings.
@@ -41,50 +44,41 @@ const (
 )
 
 // expectedForkState defines the deliberate fork/inline classification for each dromena.
-// true = should have context: fork (self-contained, artifact output, no conversation context needed)
-// false = should NOT have context: fork (interactive, contextual, or orchestrating)
+//
+// Classification principle (context-isolation semantics):
+//   true  = FORK: command produces artifacts, reports, or side effects. A summary
+//           returning to the main conversation is sufficient. All tools (including
+//           Task) work in forked context — fork is about context isolation, not
+//           tool restriction.
+//   false = INLINE: command guides the ongoing conversation, manages session state,
+//           or needs its behavioral context to persist after completion.
 var expectedForkState = map[string]bool{
-	// Inline: interactive, contextual, or orchestrating commands
-	"go":        false,
-	"start":     false,
-	"commit":    false,
-	"consult":   false,
-	"qa":        false,
-	"one":       false,
-	"task":      false,
-	"build":     false,
-	"architect": false,
-	"hotfix":    false,
-	"sprint":    false,
-	// Inline: session lifecycle (need hook-injected context)
-	"park":     false,
-	"continue": false,
-	"wrap":     false,
-	"handoff":  false,
-	"fray":     false,
-	// Fork: self-contained CLI wrappers and one-shot actions
-	"pr":          true,
-	"code-review": true,
-	"spike":       true,
-	"minus-1":     true,
-	"zero":        true,
-	"rite":        true,
-	"sessions":    true,
-	"worktree":    true,
-	"sync":        true,
-	"theoria":     true,
-	"ecosystem":   true,
-	// Fork: rite-switching commands (one-shot CLI wrappers)
-	"10x":          true,
-	"debt":         true,
-	"docs":         true,
-	"forge":        true,
-	"hygiene":      true,
-	"intelligence": true,
-	"rnd":          true,
-	"security":     true,
-	"sre":          true,
-	"strategy":     true,
+	// === INLINE (false): persistent context needed ===
+	// Session lifecycle — hook-injected context must persist
+	"go": false, "start": false, "park": false, "continue": false,
+	"wrap": false, "handoff": false, "fray": false, "sos": false,
+	// Interactive orchestration — guide ongoing conversation
+	"consult": false, "task": false, "sprint": false, "hotfix": false,
+	"build": false, "architect": false, "qa": false, "commit": false,
+	// Context management — shapes subsequent work
+	"frame": false, "one": false,
+
+	// === FORK (true): isolated execution, summary sufficient ===
+	// Artifact producers (knowledge, reports, PRs, reviews)
+	"pr": true, "code-review": true, "spike": true, "theoria": true,
+	"know": true, "dion": true, "land": true, "radar": true,
+	"research": true, "interview": true, "release": true,
+	"consolidate": true, "eval-agent": true, "validate-rite": true,
+	"forge-rite": true, "new-rite": true,
+	// CLI wrappers / one-shot actions
+	"minus-1": true, "zero": true, "rite": true, "sessions": true,
+	"worktree": true, "sync": true, "sync-debug": true, "ecosystem": true,
+	// Rite-switching (one-shot CLI wrappers)
+	"10x": true, "debt": true, "docs": true, "forge": true,
+	"hygiene": true, "intelligence": true, "rnd": true,
+	"security": true, "sre": true, "strategy": true,
+	"arch": true, "slop-chop": true, "clinic": true,
+	"releaser": true, "review": true, "thermia": true,
 }
 
 // Finding is a single lint issue.
@@ -234,7 +228,8 @@ type agentFrontmatter struct {
 	Tools       frontmatter.FlexibleStringSlice `yaml:"tools"`
 	Model       string                          `yaml:"model"`
 	Color       string                          `yaml:"color"`
-	MaxTurns    int                             `yaml:"maxTurns"`
+	MaxTurns         int                             `yaml:"maxTurns"`
+	MaxTurnsOverride bool                            `yaml:"maxTurns-override"`
 }
 
 var archetypeMaxTurns = map[string]int{
@@ -342,8 +337,11 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 	}
 
 	// maxTurns archetype check — generous tolerance for orchestrators
-	// which need 20-40 turns for multi-phase coordination
-	if fm.Type != "" && fm.MaxTurns > 0 {
+	// which need 20-40 turns for multi-phase coordination.
+	// Agents with maxTurns-override: true have intentional deviations.
+	if fm.MaxTurnsOverride {
+		// Intentional deviation acknowledged — skip check
+	} else if fm.Type != "" && fm.MaxTurns > 0 {
 		if expected, ok := archetypeMaxTurns[fm.Type]; ok {
 			deviation := fm.MaxTurns - expected
 			if deviation < 0 {
@@ -441,13 +439,18 @@ func lintDromenFile(_, relPath string, data []byte, report *LintReport) {
 	// context:fork allowlist check — enforce deliberate fork/inline classification
 	name := strVal(fm, "name")
 	hasFork := strVal(fm, "context") == "fork"
+	isRiteScoped := strings.HasPrefix(relPath, "rites/")
 	if expected, known := expectedForkState[name]; known {
 		if expected && !hasFork {
 			report.Dromena = append(report.Dromena, Finding{
 				File: relPath, Severity: SevMedium, Rule: "context-fork-expected",
 				Message: fmt.Sprintf("dromena %q should have context: fork (self-contained command)", name),
 			})
-		} else if !expected && hasFork {
+		} else if !expected && hasFork && !isRiteScoped {
+			// Only flag for global-scope dromena. Rite-scoped overrides (e.g.,
+			// 10x-dev/architect-ref with fork vs global /architect without)
+			// are intentional — the rite version is a self-contained reference
+			// command, not the global interactive version.
 			report.Dromena = append(report.Dromena, Finding{
 				File: relPath, Severity: SevMedium, Rule: "context-fork-unexpected",
 				Message: fmt.Sprintf("dromena %q should NOT have context: fork (interactive/contextual command)", name),
@@ -631,8 +634,16 @@ func lintSessionArtifactsInSharedMena(projectRoot string, report *LintReport) {
 		}
 
 		_ = filepath.WalkDir(menaDir, func(path string, d os.DirEntry, walkErr error) error {
-			if walkErr != nil || d.IsDir() {
+			if walkErr != nil {
 				return walkErr
+			}
+			if d.IsDir() {
+				// Skip examples/ directories — they legitimately contain session_id
+				// in template/example artifacts (not real session data).
+				if d.Name() == "examples" {
+					return filepath.SkipDir
+				}
+				return nil
 			}
 			if !strings.HasSuffix(path, ".md") {
 				return nil
@@ -680,6 +691,9 @@ var skillAtExclusions = map[string]bool{
 	"product-lead":  true,
 	"platform-team": true,
 	"skill-name":    true, // appears in anti-pattern documentation
+	"deprecated":    true, // JSDoc @deprecated
+	"pytest":        true, // Python @pytest.mark
+	"acme":          true, // npm @acme/sdk example
 }
 
 // checkSkillAtRefs scans body content for @skill-name references and appends findings.
@@ -730,16 +744,22 @@ func checkSourcePathLeaks(body, relPath string, findings *[]Finding) {
 		}
 
 		// Pattern 2: rites/*/mena/ in links or documentation (MEDIUM)
-		// Only check outside code blocks to avoid false positives in examples
-		if !inCodeBlock && riteMenaPathPattern.MatchString(line) && !readSourcePathPattern.MatchString(line) {
+		// Only check outside code blocks and inline backticks to avoid false positives
+		stripped := inlineCodePattern.ReplaceAllString(line, "")
+		if !inCodeBlock && riteMenaPathPattern.MatchString(stripped) && !readSourcePathPattern.MatchString(stripped) {
 			refLeaks++
 		}
 
 		// Pattern 3: .lego.md or .dro.md extensions in references (LOW)
 		// Only in markdown link syntax or backtick paths, not in prose about the extension
-		if !inCodeBlock && sourceExtPattern.MatchString(line) {
-			// Exclude lines that discuss extensions conceptually
-			if !strings.Contains(lower, "extension") && !strings.Contains(lower, "suffix") && !strings.Contains(lower, "infix") {
+		if !inCodeBlock && sourceExtPattern.MatchString(stripped) {
+			// Exclude lines that discuss extensions conceptually (naming conventions,
+			// audit criteria documenting what extensions mean, classification instructions).
+			// Also exclude pinakes domain criteria files — these document source conventions
+			// and legitimately reference .dro.md/.lego.md as domain vocabulary.
+			if !strings.Contains(lower, "extension") && !strings.Contains(lower, "suffix") && !strings.Contains(lower, "infix") &&
+				!strings.Contains(lower, "convention") && !strings.Contains(lower, " use .dro") && !strings.Contains(lower, " use .lego") &&
+				!strings.Contains(lower, "classify by extension") && !strings.Contains(relPath, "pinakes/domains/mena-structure") {
 				extLeaks++
 			}
 		}

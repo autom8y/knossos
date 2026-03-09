@@ -4,6 +4,7 @@ description: "Cross-reference .know/ files to surface codebase opportunities and
 argument-hint: "[--challenge <domain>] [--json] [--force]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill, AskUserQuestion
 model: opus
+context: fork
 ---
 
 # /radar -- Knowledge Radar
@@ -179,7 +180,7 @@ When multiple signals flag the same package or file:
 5. Combine all evidence items from all contributing signals.
 6. Write one Suggested Action addressing all signals together.
 
-Reference the deduplication rules in `radar/schemas/report.lego.md` for exact behavior.
+Reference the deduplication rules in `radar/schemas/report.md` for exact behavior.
 
 ### 3c. Prioritize
 
@@ -204,7 +205,7 @@ This prose is optional and should only be generated when 3+ signals converge on 
 
 ### 4a. Build the report
 
-Assemble the full report following the `.know/radar.md` body template in `radar/schemas/report.lego.md`:
+Assemble the full report following the `.know/radar.md` body template in `radar/schemas/report.md`:
 
 ```
 # Knowledge Radar — {YYYY-MM-DD}
@@ -229,7 +230,7 @@ Assemble the full report following the `.know/radar.md` body template in `radar/
 - **Run date**: {YYYY-MM-DD}
 ```
 
-Build frontmatter following `radar/schemas/report.lego.md`:
+Build frontmatter following `radar/schemas/report.md`:
 
 ```yaml
 ---
@@ -296,7 +297,7 @@ Archive: `.ledge/reviews/RADAR-{YYYY-MM-DD}.md`
 
 ### 4e. If --json flag
 
-After the display summary, emit JSON to stdout using the shape defined in `radar/schemas/report.lego.md`. Do NOT write JSON to disk.
+After the display summary, emit JSON to stdout using the shape defined in `radar/schemas/report.md`. Do NOT write JSON to disk.
 
 ---
 
@@ -386,7 +387,7 @@ If no contradictions found: output `NO CONTRADICTIONS FOUND` with explanation. S
 After theoros agents return:
 
 1. Parse all `CHALLENGE FINDING:` blocks.
-2. Assemble the challenge report following the template in `radar/schemas/report.lego.md`.
+2. Assemble the challenge report following the template in `radar/schemas/report.md`.
 3. Write the report:
    ```
    Write(".ledge/reviews/CHALLENGE-{domain}-{YYYY-MM-DD}.md", challenge_report_content)

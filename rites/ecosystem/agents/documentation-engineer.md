@@ -25,6 +25,7 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: blue
 maxTurns: 250
+maxTurns-override: true
 skills:
   - ecosystem-ref
   - guidance/file-verification

@@ -104,7 +104,7 @@ scope: radar
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 
 - Convention Extraction: A (midpoint 95%) x 20% = 19.0
 - Sample Selection: B (midpoint 85%) x 15% = 12.75
@@ -114,7 +114,7 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [conventions-criteria](conventions.lego.md) -- Direct codebase audit of convention compliance (exhaustive)
-- [radar-architecture-decay-criteria](radar-architecture-decay.lego.md) -- Companion signal: structural violations
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [conventions-criteria](conventions.md) -- Direct codebase audit of convention compliance (exhaustive)
+- [radar-architecture-decay-criteria](radar-architecture-decay.md) -- Companion signal: structural violations
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

@@ -112,5 +112,5 @@ run: docker run {{APP}}:latest
 
 ## Cross-Skill Integration
 
-- [standards](../../guidance/standards/INDEX.lego.md) - Repository structure, where just/ directory goes
-- [documentation](../documentation/INDEX.lego.md) - Document task runner decisions in TDD/ADRs
+- [standards](../../guidance/standards/INDEX.md) - Repository structure, where just/ directory goes
+- [documentation](../documentation/INDEX.md) - Document task runner decisions in TDD/ADRs

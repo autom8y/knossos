@@ -157,7 +157,7 @@ Each assumption finding must follow this structure:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Reminder: for this domain, HIGHER grades indicate MORE assumptions surfaced (more thorough analysis).
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Reminder: for this domain, HIGHER grades indicate MORE assumptions surfaced (more thorough analysis).
 
 Example (thorough analysis surfacing many assumptions):
 
@@ -177,8 +177,8 @@ Example (shallow analysis missing most assumptions):
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [architecture-criteria](architecture.lego.md) -- Direct architecture compliance audit
-- [adversarial-architecture-criteria](adversarial-architecture.lego.md) -- Companion: contradiction finding for architecture document
-- [dialectic-design-constraints-criteria](dialectic-design-constraints.lego.md) -- Companion: assumption exposure for design-constraints document
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [architecture-criteria](architecture.md) -- Direct architecture compliance audit
+- [adversarial-architecture-criteria](adversarial-architecture.md) -- Companion: contradiction finding for architecture document
+- [dialectic-design-constraints-criteria](dialectic-design-constraints.md) -- Companion: assumption exposure for design-constraints document
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

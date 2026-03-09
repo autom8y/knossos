@@ -72,5 +72,5 @@ Each schema includes a bash validation function in `artifact-validator.sh`. Retu
 
 ## Related Skills
 
-- [documentation](../documentation/INDEX.lego.md) - Documentation standards routing
-- [prompting](../../guidance/prompting/INDEX.lego.md) - Agent invocation patterns
+- [documentation](../documentation/INDEX.md) - Documentation standards routing
+- [prompting](../../guidance/prompting/INDEX.md) - Agent invocation patterns

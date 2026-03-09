@@ -31,6 +31,7 @@ tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: sonnet
 color: orange
 maxTurns: 250
+maxTurns-override: true
 skills:
   - guidance/standards
   - guidance/file-verification

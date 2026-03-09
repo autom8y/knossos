@@ -51,7 +51,7 @@ description: "Code conventions, tech stack, and tool selection. Use when: writin
 
 ## Cross-Skill Integration
 
-- [prompting](../prompting/INDEX.lego.md) - Implementation prompts reference these
-- [justfile](../../templates/justfile/INDEX.lego.md) - Task automation patterns and recipes
+- [prompting](../prompting/INDEX.md) - Implementation prompts reference these
+- [justfile](../../templates/justfile/INDEX.md) - Task automation patterns and recipes
 - `claude-md-architecture` - Content placement for CLAUDE.md (available with ecosystem)
 - Team workflows - Principal Engineer role enforces these standards during implementation

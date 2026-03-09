@@ -438,22 +438,23 @@ func TestSCAR016_ShellScripts_NoUnprotectedArithmeticIncrement(t *testing.T) {
 			"See commit 1641792.")
 }
 
-// TestSCAR018_KnowDromenon_NoContextFork is a regression test for SCAR-018.
+// TestSCAR018_KnowDromenon_HasContextFork is an updated regression test for SCAR-018.
 //
-// Background: The /know dromenon had context: fork set. Forked slash commands run as
-// subagents which cannot use the Task tool. The command silently fell back to in-context
-// observation instead of dispatching theoros subagents via the Argus Pattern.
-// Fix: removed context: fork from /know (commit 4d92db4).
+// History: SCAR-018 originally removed context: fork from /know based on the premise
+// that "forked slash commands cannot use the Task tool." Per CC documentation research
+// (2026-03-09), this premise is incorrect — context: fork provides context isolation
+// (summary returned to main conversation), and ALL tools including Task work identically
+// in forked context. Fork does not restrict tool access.
 //
-// This test verifies the /know dromenon does not have context: fork, guarding the
-// specific fix. Additionally, it checks all dromena in the shared rites directory
-// for the anti-pattern (Task + context: fork). Other directories may have intentional
-// uses of context: fork with Task (e.g., spike with disable-model-invocation: true).
-func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
+// The /know dromenon is a knowledge generator that produces .know/ files via theoros
+// dispatch. It should have context: fork because its value comes from artifact production
+// (isolated execution, summary sufficient) not from shaping the ongoing conversation.
+//
+// This test now verifies /know HAS context: fork, correcting the original SCAR-018
+// assertion. See commit 4d92db4 (original fix) and the context: fork reclassification.
+func TestSCAR018_KnowDromenon_HasContextFork(t *testing.T) {
 	repoRoot := repoRootFromThisFile(t)
 
-	// Primary assertion: the specific /know dromenon that triggered SCAR-018.
-	// /know was relocated from rites/shared/mena/ to platform mena/ (mena placement remediation).
 	knowPath := filepath.Join(repoRoot, "mena", "know", "INDEX.dro.md")
 	data, err := os.ReadFile(knowPath)
 	require.NoError(t, err, "/know dromenon must exist at mena/know/INDEX.dro.md")
@@ -463,70 +464,21 @@ func TestSCAR018_KnowDromenon_NoContextFork(t *testing.T) {
 	require.True(t, len(parts) >= 3, "/know dromenon must have frontmatter")
 	frontmatter := parts[1]
 
+	hasContextFork := false
 	for _, line := range strings.Split(frontmatter, "\n") {
 		trimmed := strings.TrimSpace(line)
 		if after, ok := strings.CutPrefix(trimmed, "context:"); ok {
-			value := strings.TrimSpace(after)
-			assert.NotEqual(t, "fork", value,
-				"SCAR-018 regression: /know dromenon must NOT have context: fork. "+
-					"Forked slash commands cannot use Task tool, which /know requires for "+
-					"theoros dispatch via the Argus Pattern. See commit 4d92db4.")
+			if strings.TrimSpace(after) == "fork" {
+				hasContextFork = true
+			}
 		}
 	}
 
-	// Secondary assertion: check all platform and shared dromena for the anti-pattern.
-	// Platform dromena are the highest-risk location because they apply to all scopes.
-	var violations []string
-	menaDirs := []string{
-		filepath.Join(repoRoot, "mena"),
-		filepath.Join(repoRoot, "rites", "shared", "mena"),
-	}
-	for _, menaDir := range menaDirs {
-		_ = filepath.WalkDir(menaDir, func(path string, d os.DirEntry, walkErr error) error {
-		if walkErr != nil || d.IsDir() || d.Name() != "INDEX.dro.md" {
-			return nil
-		}
-		fileData, readErr := os.ReadFile(path)
-		if readErr != nil {
-			return nil
-		}
-		fileContent := string(fileData)
-		fileParts := strings.SplitN(fileContent, "---", 3)
-		if len(fileParts) < 3 {
-			return nil
-		}
-		fm := fileParts[1]
-
-		hasTask := false
-		hasContextFork := false
-		hasDisableModelInvocation := false
-		for _, fmLine := range strings.Split(fm, "\n") {
-			trimmedLine := strings.TrimSpace(fmLine)
-			if strings.HasPrefix(trimmedLine, "allowed-tools:") && strings.Contains(trimmedLine, "Task") {
-				hasTask = true
-			}
-			if after, ok := strings.CutPrefix(trimmedLine, "context:"); ok {
-				val := strings.TrimSpace(after)
-				if val == "fork" {
-					hasContextFork = true
-				}
-			}
-			if strings.HasPrefix(trimmedLine, "disable-model-invocation:") && strings.Contains(trimmedLine, "true") {
-				hasDisableModelInvocation = true
-			}
-		}
-		// Dromena with disable-model-invocation: true intentionally fork
-		// without needing Task for agent dispatch (e.g., /spike).
-		if hasTask && hasContextFork && !hasDisableModelInvocation {
-			relPath, _ := filepath.Rel(repoRoot, path)
-			violations = append(violations, relPath)
-		}
-		return nil
-	})
-	}
-
-	assert.Empty(t, violations,
-		"SCAR-018 regression: platform/shared dromena with Task in allowed-tools must not have context: fork")
+	assert.True(t, hasContextFork,
+		"SCAR-018 (corrected): /know dromenon SHOULD have context: fork. "+
+			"Fork provides context isolation — the knowledge generation runs in an isolated "+
+			"subagent and returns a summary. All tools including Task work in forked context. "+
+			"The original SCAR-018 premise (fork breaks Task) was incorrect per CC documentation.")
 }
 
 // TestSCAR020_SessionDromena_ExplicitSessionIDPassing is a regression test for SCAR-020.

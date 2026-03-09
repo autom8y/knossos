@@ -24,6 +24,7 @@ tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: pink
 maxTurns: 30
+maxTurns-override: true
 skills:
   - thermia-ref
 disallowedTools:

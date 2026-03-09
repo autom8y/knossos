@@ -25,6 +25,7 @@ tools: Bash, Glob, Grep, Read, Write
 model: opus
 color: yellow
 maxTurns: 250
+maxTurns-override: true
 skills:
   - codebase-archaeology
 contract:

@@ -100,7 +100,7 @@ scope: radar
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 
 - Scar Inventory Completeness: A (midpoint 95%) x 30% = 28.5
 - Category Count Accuracy: A (midpoint 95%) x 40% = 38.0
@@ -110,7 +110,7 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [radar-unguarded-scars-criteria](radar-unguarded-scars.lego.md) -- Companion signal: scars in untested code
-- [scar-tissue-criteria](scar-tissue.lego.md) -- Direct codebase audit of scar documentation quality
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [radar-unguarded-scars-criteria](radar-unguarded-scars.md) -- Companion signal: scars in untested code
+- [scar-tissue-criteria](scar-tissue.md) -- Direct codebase audit of scar documentation quality
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

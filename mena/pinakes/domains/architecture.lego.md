@@ -136,7 +136,7 @@ Before beginning observation, identify the primary language(s) in the project:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Package Structure: A (midpoint 95%) x 30% = 28.5
 - Layer Boundaries: B (midpoint 85%) x 25% = 21.25
 - Entry Points: A (midpoint 95%) x 20% = 19.0
@@ -146,6 +146,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [agents-criteria](agents.lego.md) -- Evaluation criteria for agent prompts
-- [dromena-criteria](dromena.lego.md) -- Evaluation criteria for slash commands
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [agents-criteria](agents.md) -- Evaluation criteria for agent prompts
+- [dromena-criteria](dromena.md) -- Evaluation criteria for slash commands

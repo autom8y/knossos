@@ -39,17 +39,17 @@ rites/*/mena/**/*.lego.md
 
 ### Criterion 2: Frontmatter Completeness (weight: 20%)
 
-**What to evaluate**: Required fields are `name` and `description`. File name must follow convention: `{name}.lego.md` or `{category}/{name}.lego.md`.
+**What to evaluate**: Required fields are `name` and `description`. File name must follow convention: `{name}.md` or `{category}/{name}.md`.
 
 | Grade | Threshold | Evidence Required |
 |-------|-----------|-------------------|
-| A | 90-100% | All skills have `name` + `description`. File names match `{name}.lego.md` pattern or use category subdirectories correctly. |
+| A | 90-100% | All skills have `name` + `description`. File names match `{name}.md` pattern or use category subdirectories correctly. |
 | B | 80-89% | 95%+ have required fields. File naming is mostly consistent with minor deviations. |
-| C | 70-79% | 90-94% have required fields. Some file naming inconsistencies (missing `.lego.md` suffix). |
+| C | 70-79% | 90-94% have required fields. Some file naming inconsistencies (missing `.md` suffix). |
 | D | 60-69% | 85-89% have required fields. Frequent file naming issues. |
-| F | < 60% | More than 15% missing `name` or `description`. File naming is chaotic or doesn't use `.lego.md` convention. |
+| F | < 60% | More than 15% missing `name` or `description`. File naming is chaotic or doesn't use `.md` convention. |
 
-**Evidence collection**: Use Glob to find all `.claude/skills/**/*.md` files. Read frontmatter. Check for `name` and `description`. Verify file path matches `{name}.lego.md` or `{category}/{name}.lego.md`. Calculate compliance percentage.
+**Evidence collection**: Use Glob to find all `.claude/skills/**/*.md` files. Read frontmatter. Check for `name` and `description`. Verify file path matches `{name}.md` or `{category}/{name}.md`. Calculate compliance percentage.
 
 ---
 
@@ -87,7 +87,7 @@ rites/*/mena/**/*.lego.md
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - Description Precision: A (midpoint 95%) × 35% = 33.25
 - Frontmatter Completeness: A (midpoint 95%) × 20% = 19.0
 - Progressive Disclosure: B (midpoint 85%) × 25% = 21.25
@@ -96,6 +96,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) — Full audit system documentation
-- [dromena-criteria](dromena.lego.md) — Evaluation criteria for slash commands
-- [agents-criteria](agents.lego.md) — Evaluation criteria for agent prompts
+- [Pinakes INDEX](../INDEX.md) — Full audit system documentation
+- [dromena-criteria](dromena.md) — Evaluation criteria for slash commands
+- [agents-criteria](agents.md) — Evaluation criteria for agent prompts

@@ -92,4 +92,4 @@ Quick-switch commands are derived from rite names:
 
 ## Reference
 
-Full documentation: `mena/navigation/rite.dro.md` (self-contained)
+Full documentation: `mena/navigation/rite.md` (self-contained)

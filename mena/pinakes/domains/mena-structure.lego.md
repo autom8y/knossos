@@ -39,7 +39,7 @@ No bare `.md` files in mena directories (except companion files in subdirectorie
 
 ### Criterion 2: INDEX File Structure (weight: 25%)
 
-**What to evaluate**: Multi-file mena entries (directories) must have an INDEX file (INDEX.lego.md or INDEX.dro.md) as the entry point. INDEX files should provide overview, link to companion files, and enable progressive disclosure. Single-file mena entries don't need INDEX.
+**What to evaluate**: Multi-file mena entries (directories) must have an INDEX file (INDEX.md) as the entry point. INDEX files should provide overview, link to companion files, and enable progressive disclosure. Single-file mena entries don't need INDEX.
 
 | Grade | Threshold | Evidence Required |
 |-------|-----------|-------------------|
@@ -49,7 +49,7 @@ No bare `.md` files in mena directories (except companion files in subdirectorie
 | D | 60-69% | 75-84% multi-file directories have INDEX files. INDEX files often incomplete or missing links. |
 | F | < 60% | Many multi-file directories lack INDEX files. No clear entry point pattern. |
 
-**Evidence collection**: Use Glob to find all mena directories (not files). For each directory, check for INDEX.lego.md or INDEX.dro.md. Read INDEX files and verify they contain links to companion files in the same directory. Count directories missing INDEX files.
+**Evidence collection**: Use Glob to find all mena directories (not files). For each directory, check for INDEX.md. Read INDEX files and verify they contain links to companion files in the same directory. Count directories missing INDEX files.
 
 ---
 
@@ -87,7 +87,7 @@ No bare `.md` files in mena directories (except companion files in subdirectorie
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Example:
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Example:
 - File Naming: A (midpoint 95%) x 30% = 28.5
 - INDEX Structure: B (midpoint 85%) x 25% = 21.25
 - Manifest Registration: B (midpoint 85%) x 25% = 21.25
@@ -96,6 +96,6 @@ Final grade is weighted average of all criteria midpoint scores (see `schemas/gr
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) - Full audit system documentation
-- [dromena-criteria](dromena.lego.md) - Evaluation criteria for slash commands
-- [legomena-criteria](legomena.lego.md) - Evaluation criteria for skills
+- [Pinakes INDEX](../INDEX.md) - Full audit system documentation
+- [dromena-criteria](dromena.md) - Evaluation criteria for slash commands
+- [legomena-criteria](legomena.md) - Evaluation criteria for skills

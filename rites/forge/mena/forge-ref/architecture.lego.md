@@ -28,5 +28,5 @@ The Forge is a standard knossos rite. Activate it with `ari sync --rite forge`.
 | Forge agents (source) | `$KNOSSOS_HOME/rites/forge/agents/` |
 | Forge agents (projected) | `.claude/agents/` (when forge rite is active) |
 | Forge commands | `.claude/commands/` |
-| Patterns | `rites/forge/mena/forge-ref/patterns/` |
-| Evals | `rites/forge/mena/forge-ref/evals/` |
+| Patterns | `patterns/` |
+| Evals | `evals/` |

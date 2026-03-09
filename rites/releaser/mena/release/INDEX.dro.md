@@ -4,6 +4,7 @@ description: "Orchestrate a multi-repo release from reconnaissance through deplo
 argument-hint: "<glob-or-repos> [--complexity=PATCH|RELEASE|PLATFORM] [--dry-run]"
 allowed-tools: Bash, Read, Write, Glob, Grep, Task, Skill, AskUserQuestion, TodoWrite
 model: opus
+context: fork
 ---
 
 # /release - Orchestrated Release Workflow

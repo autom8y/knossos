@@ -44,3 +44,5 @@ For detailed reference, agents should Read the relevant companion:
 | Ecosystem Detection | `ecosystem-detection.md` |
 | Failure Halting Protocol | `failure-halting.md` |
 | Cross-Rite Routing | `cross-rite-routing.md` |
+| Cartographer Reference | `cartographer-reference.lego.md` |
+| Pipeline Monitoring | `pipeline-monitoring.lego.md` |

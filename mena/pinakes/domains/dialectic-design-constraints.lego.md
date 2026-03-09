@@ -157,7 +157,7 @@ Each undocumented constraint must follow this structure:
 
 ## Grading Calculation
 
-Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.lego.md`). Reminder: for this domain, HIGHER grades indicate MORE undocumented constraints surfaced (more thorough analysis).
+Final grade is weighted average of all criteria midpoint scores (see `schemas/grading.md`). Reminder: for this domain, HIGHER grades indicate MORE undocumented constraints surfaced (more thorough analysis).
 
 Example (thorough analysis surfacing many undocumented constraints):
 
@@ -177,8 +177,8 @@ Example (shallow analysis missing most constraints):
 
 ## Related
 
-- [Pinakes INDEX](../INDEX.lego.md) -- Full audit system documentation
-- [design-constraints-criteria](design-constraints.lego.md) -- Direct design constraints audit
-- [radar-constraint-violations-criteria](radar-constraint-violations.lego.md) -- Radar signal: constraint violations in code
-- [dialectic-architecture-criteria](dialectic-architecture.lego.md) -- Companion: assumption exposure for architecture document
-- [grading schema](../schemas/grading.lego.md) -- Grade calculation rules
+- [Pinakes INDEX](../INDEX.md) -- Full audit system documentation
+- [design-constraints-criteria](design-constraints.md) -- Direct design constraints audit
+- [radar-constraint-violations-criteria](radar-constraint-violations.md) -- Radar signal: constraint violations in code
+- [dialectic-architecture-criteria](dialectic-architecture.md) -- Companion: assumption exposure for architecture document
+- [grading schema](../schemas/grading.md) -- Grade calculation rules

@@ -1,8 +1,10 @@
 ---
 description: Test a single agent in isolation
+name: eval-agent
 argument-hint: "<agent-name> [--rite=<rite-name>] [--adversarial]"
 allowed-tools: Bash, Glob, Grep, Read, Task, TodoWrite
 model: opus
+context: fork
 ---
 
 ## Context

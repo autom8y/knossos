@@ -21,6 +21,7 @@ tools: Read, Write, Glob, Grep, TodoWrite
 model: sonnet
 color: orange
 maxTurns: 25
+maxTurns-override: true
 skills:
   - releaser-ref
 memory: "project"

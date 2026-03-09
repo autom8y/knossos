@@ -21,6 +21,7 @@ tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
 color: cyan
 maxTurns: 250
+maxTurns-override: true
 skills:
   - sre-catalog
   - guidance/standards

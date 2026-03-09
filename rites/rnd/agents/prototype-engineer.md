@@ -21,6 +21,7 @@ tools: Bash, Glob, Grep, Read, Edit, Write, NotebookEdit, TodoWrite, Skill
 model: sonnet
 color: green
 maxTurns: 250
+maxTurns-override: true
 skills:
   - rnd-ref
   - conventions
