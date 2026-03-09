@@ -43,7 +43,7 @@ func (rc *RiteContext) ToMarkdown() string {
 
 	// Write context rows
 	for _, row := range rc.ContextRows {
-		b.WriteString(fmt.Sprintf("| **%s** | %s |\n", row.Key, row.Value))
+		fmt.Fprintf(&b, "| **%s** | %s |\n", row.Key, row.Value)
 	}
 
 	return b.String()

@@ -198,7 +198,7 @@ func generateToolAccessTable(agent *ParsedAgent) string {
 	buf.WriteString("| Tool | When to Use |\n")
 	buf.WriteString("|------|-------------|\n")
 	for _, tool := range agent.Frontmatter.Tools {
-		buf.WriteString(fmt.Sprintf("| **%s** | *Use for %s operations* |\n", tool, strings.ToLower(tool)))
+		fmt.Fprintf(&buf, "| **%s** | *Use for %s operations* |\n", tool, strings.ToLower(tool))
 	}
 
 	return buf.String()

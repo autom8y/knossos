@@ -1,8 +1,8 @@
 package inscription
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 	"time"
 
@@ -144,8 +144,8 @@ func (s SyncOutput) Text() string {
 	var b strings.Builder
 
 	if s.Success {
-		b.WriteString(fmt.Sprintf("Synced CLAUDE.md (v%s)\n", s.InscriptionVersion))
-		b.WriteString(fmt.Sprintf("Regions updated: %d\n", len(s.RegionsSynced)))
+		fmt.Fprintf(&b, "Synced CLAUDE.md (v%s)\n", s.InscriptionVersion)
+		fmt.Fprintf(&b, "Regions updated: %d\n", len(s.RegionsSynced))
 
 		if len(s.RegionsSynced) > 0 {
 			b.WriteString("  - ")
@@ -154,21 +154,21 @@ func (s SyncOutput) Text() string {
 		}
 
 		if len(s.Conflicts) > 0 {
-			b.WriteString(fmt.Sprintf("\nConflicts: %d\n", len(s.Conflicts)))
+			fmt.Fprintf(&b, "\nConflicts: %d\n", len(s.Conflicts))
 			for _, c := range s.Conflicts {
 				icon := "!"
 				if c.Preserved {
 					icon = "~"
 				}
-				b.WriteString(fmt.Sprintf("  %s %s: %s\n", icon, c.Region, c.Message))
+				fmt.Fprintf(&b, "  %s %s: %s\n", icon, c.Region, c.Message)
 			}
 		}
 
 		if s.BackupPath != "" {
-			b.WriteString(fmt.Sprintf("\nBackup: %s\n", s.BackupPath))
+			fmt.Fprintf(&b, "\nBackup: %s\n", s.BackupPath)
 		}
 
-		b.WriteString(fmt.Sprintf("Duration: %s\n", s.Duration))
+		fmt.Fprintf(&b, "Duration: %s\n", s.Duration)
 	} else {
 		b.WriteString("Sync failed\n")
 	}
@@ -192,30 +192,30 @@ func (s SyncPreviewOutput) Text() string {
 
 	b.WriteString("=== DRY RUN (no changes made) ===\n\n")
 
-	b.WriteString(fmt.Sprintf("Current version: %s -> New version: %s\n\n", s.CurrentVersion, s.NewVersion))
+	fmt.Fprintf(&b, "Current version: %s -> New version: %s\n\n", s.CurrentVersion, s.NewVersion)
 
 	if len(s.WouldSync) > 0 {
-		b.WriteString(fmt.Sprintf("Would sync %d regions:\n", len(s.WouldSync)))
+		fmt.Fprintf(&b, "Would sync %d regions:\n", len(s.WouldSync))
 		for _, r := range s.WouldSync {
-			b.WriteString(fmt.Sprintf("  + %s\n", r))
+			fmt.Fprintf(&b, "  + %s\n", r)
 		}
 	}
 
 	if len(s.WouldPreserve) > 0 {
-		b.WriteString(fmt.Sprintf("\nWould preserve %d regions:\n", len(s.WouldPreserve)))
+		fmt.Fprintf(&b, "\nWould preserve %d regions:\n", len(s.WouldPreserve))
 		for _, r := range s.WouldPreserve {
-			b.WriteString(fmt.Sprintf("  ~ %s\n", r))
+			fmt.Fprintf(&b, "  ~ %s\n", r)
 		}
 	}
 
 	if len(s.Conflicts) > 0 {
-		b.WriteString(fmt.Sprintf("\nConflicts detected: %d\n", len(s.Conflicts)))
+		fmt.Fprintf(&b, "\nConflicts detected: %d\n", len(s.Conflicts))
 		for _, c := range s.Conflicts {
 			action := "overwrite"
 			if c.Preserved {
 				action = "preserve"
 			}
-			b.WriteString(fmt.Sprintf("  ! %s: %s (will %s)\n", c.Region, c.Message, action))
+			fmt.Fprintf(&b, "  ! %s: %s (will %s)\n", c.Region, c.Message, action)
 		}
 	}
 

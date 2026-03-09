@@ -62,24 +62,24 @@ func (l RiteListOutput) Text() string {
 		return "No rites found"
 	}
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Total: %d rites (* = active)\n", l.Total))
+	fmt.Fprintf(&b, "Total: %d rites (* = active)\n", l.Total)
 	return b.String()
 }
 
 // RiteInfoOutput represents detailed rite information.
 type RiteInfoOutput struct {
-	Name            string               `json:"name"`
-	DisplayName     string               `json:"display_name,omitempty"`
-	Description     string               `json:"description,omitempty"`
-	Form            string               `json:"form"`
-	Path            string               `json:"path"`
-	Source          string               `json:"source"`
-	Active          bool                 `json:"active"`
-	Agents          []RiteAgentInfo      `json:"agents,omitempty"`
-	Skills          []RiteSkillInfo      `json:"skills,omitempty"`
-	Workflow        *RiteWorkflowInfo    `json:"workflow,omitempty"`
-	Budget          *RiteBudgetInfo      `json:"budget,omitempty"`
-	SchemaVersion   string               `json:"schema_version"`
+	Name          string            `json:"name"`
+	DisplayName   string            `json:"display_name,omitempty"`
+	Description   string            `json:"description,omitempty"`
+	Form          string            `json:"form"`
+	Path          string            `json:"path"`
+	Source        string            `json:"source"`
+	Active        bool              `json:"active"`
+	Agents        []RiteAgentInfo   `json:"agents,omitempty"`
+	Skills        []RiteSkillInfo   `json:"skills,omitempty"`
+	Workflow      *RiteWorkflowInfo `json:"workflow,omitempty"`
+	Budget        *RiteBudgetInfo   `json:"budget,omitempty"`
+	SchemaVersion string            `json:"schema_version"`
 }
 
 // RiteAgentInfo represents agent information.
@@ -120,58 +120,58 @@ func (r RiteInfoOutput) Text() string {
 	if r.Active {
 		activeLabel = " (ACTIVE)"
 	}
-	b.WriteString(fmt.Sprintf("Rite: %s%s\n", r.Name, activeLabel))
+	fmt.Fprintf(&b, "Rite: %s%s\n", r.Name, activeLabel)
 	if r.DisplayName != "" && r.DisplayName != r.Name {
-		b.WriteString(fmt.Sprintf("Display Name: %s\n", r.DisplayName))
+		fmt.Fprintf(&b, "Display Name: %s\n", r.DisplayName)
 	}
-	b.WriteString(fmt.Sprintf("Form: %s\n", r.Form))
-	b.WriteString(fmt.Sprintf("Path: %s\n", r.Path))
-	b.WriteString(fmt.Sprintf("Source: %s\n", r.Source))
+	fmt.Fprintf(&b, "Form: %s\n", r.Form)
+	fmt.Fprintf(&b, "Path: %s\n", r.Path)
+	fmt.Fprintf(&b, "Source: %s\n", r.Source)
 	if r.Description != "" {
-		b.WriteString(fmt.Sprintf("Description: %s\n", r.Description))
+		fmt.Fprintf(&b, "Description: %s\n", r.Description)
 	}
 	b.WriteString("\n")
 
 	if len(r.Agents) > 0 {
-		b.WriteString(fmt.Sprintf("Agents (%d):\n", len(r.Agents)))
+		fmt.Fprintf(&b, "Agents (%d):\n", len(r.Agents))
 		for _, agent := range r.Agents {
 			role := agent.Role
 			if role == "" {
 				role = "(no role specified)"
 			}
-			b.WriteString(fmt.Sprintf("  %-20s %s\n", agent.Name, role))
+			fmt.Fprintf(&b, "  %-20s %s\n", agent.Name, role)
 		}
 		b.WriteString("\n")
 	}
 
 	if len(r.Skills) > 0 {
-		b.WriteString(fmt.Sprintf("Skills (%d):\n", len(r.Skills)))
+		fmt.Fprintf(&b, "Skills (%d):\n", len(r.Skills))
 		for _, skill := range r.Skills {
 			source := "local"
 			if skill.External {
 				source = "external"
 			}
-			b.WriteString(fmt.Sprintf("  %-20s (%s)\n", skill.Ref, source))
+			fmt.Fprintf(&b, "  %-20s (%s)\n", skill.Ref, source)
 		}
 		b.WriteString("\n")
 	}
 
 	if r.Workflow != nil {
-		b.WriteString(fmt.Sprintf("Workflow: %s\n", r.Workflow.Type))
-		b.WriteString(fmt.Sprintf("Entry Point: %s\n", r.Workflow.EntryPoint))
+		fmt.Fprintf(&b, "Workflow: %s\n", r.Workflow.Type)
+		fmt.Fprintf(&b, "Entry Point: %s\n", r.Workflow.EntryPoint)
 		if len(r.Workflow.Phases) > 0 {
-			b.WriteString(fmt.Sprintf("Phases: %s\n", strings.Join(r.Workflow.Phases, " -> ")))
+			fmt.Fprintf(&b, "Phases: %s\n", strings.Join(r.Workflow.Phases, " -> "))
 		}
 		b.WriteString("\n")
 	}
 
 	if r.Budget != nil {
 		b.WriteString("Budget:\n")
-		b.WriteString(fmt.Sprintf("  Estimated Tokens: %d\n", r.Budget.EstimatedTokens))
-		b.WriteString(fmt.Sprintf("  Agents Cost: %d\n", r.Budget.AgentsCost))
-		b.WriteString(fmt.Sprintf("  Skills Cost: %d\n", r.Budget.SkillsCost))
+		fmt.Fprintf(&b, "  Estimated Tokens: %d\n", r.Budget.EstimatedTokens)
+		fmt.Fprintf(&b, "  Agents Cost: %d\n", r.Budget.AgentsCost)
+		fmt.Fprintf(&b, "  Skills Cost: %d\n", r.Budget.SkillsCost)
 		if r.Budget.WorkflowCost > 0 {
-			b.WriteString(fmt.Sprintf("  Workflow Cost: %d\n", r.Budget.WorkflowCost))
+			fmt.Fprintf(&b, "  Workflow Cost: %d\n", r.Budget.WorkflowCost)
 		}
 	}
 
@@ -180,13 +180,13 @@ func (r RiteInfoOutput) Text() string {
 
 // RiteCurrentOutput represents the current rite and invocations.
 type RiteCurrentOutput struct {
-	ActiveRite       string                  `json:"active_rite"`
-	NativeAgents     []string                `json:"native_agents,omitempty"`
-	NativeSkills     []string                `json:"native_skills,omitempty"`
-	Invocations      []InvocationOutput      `json:"invocations,omitempty"`
-	BorrowedAgents   []string                `json:"borrowed_agents,omitempty"`
-	BorrowedSkills   []string                `json:"borrowed_skills,omitempty"`
-	Budget           CurrentBudgetOutput     `json:"budget"`
+	ActiveRite     string              `json:"active_rite"`
+	NativeAgents   []string            `json:"native_agents,omitempty"`
+	NativeSkills   []string            `json:"native_skills,omitempty"`
+	Invocations    []InvocationOutput  `json:"invocations,omitempty"`
+	BorrowedAgents []string            `json:"borrowed_agents,omitempty"`
+	BorrowedSkills []string            `json:"borrowed_skills,omitempty"`
+	Budget         CurrentBudgetOutput `json:"budget"`
 }
 
 // InvocationOutput represents an active invocation.
@@ -217,35 +217,35 @@ func (c RiteCurrentOutput) Text() string {
 		return b.String()
 	}
 
-	b.WriteString(fmt.Sprintf("Active Rite: %s\n\n", c.ActiveRite))
+	fmt.Fprintf(&b, "Active Rite: %s\n\n", c.ActiveRite)
 
 	b.WriteString("Native Components:\n")
 	if len(c.NativeAgents) > 0 {
-		b.WriteString(fmt.Sprintf("  Agents: %s\n", strings.Join(c.NativeAgents, ", ")))
+		fmt.Fprintf(&b, "  Agents: %s\n", strings.Join(c.NativeAgents, ", "))
 	}
 	if len(c.NativeSkills) > 0 {
-		b.WriteString(fmt.Sprintf("  Skills: %s\n", strings.Join(c.NativeSkills, ", ")))
+		fmt.Fprintf(&b, "  Skills: %s\n", strings.Join(c.NativeSkills, ", "))
 	}
 	b.WriteString("\n")
 
 	if len(c.Invocations) > 0 {
 		b.WriteString("Borrowed Components:\n")
 		for _, inv := range c.Invocations {
-			b.WriteString(fmt.Sprintf("  From %s (%s):\n", inv.RiteName, inv.ID))
+			fmt.Fprintf(&b, "  From %s (%s):\n", inv.RiteName, inv.ID)
 			if len(inv.Skills) > 0 {
-				b.WriteString(fmt.Sprintf("    Skills: %s\n", strings.Join(inv.Skills, ", ")))
+				fmt.Fprintf(&b, "    Skills: %s\n", strings.Join(inv.Skills, ", "))
 			}
 			if len(inv.Agents) > 0 {
-				b.WriteString(fmt.Sprintf("    Agents: %s\n", strings.Join(inv.Agents, ", ")))
+				fmt.Fprintf(&b, "    Agents: %s\n", strings.Join(inv.Agents, ", "))
 			}
 		}
 		b.WriteString("\n")
 	}
 
-	b.WriteString(fmt.Sprintf("Total Context Budget: ~%d tokens\n", c.Budget.TotalTokens))
-	b.WriteString(fmt.Sprintf("  Native: %d tokens\n", c.Budget.NativeTokens))
-	b.WriteString(fmt.Sprintf("  Borrowed: %d tokens\n", c.Budget.BorrowedTokens))
-	b.WriteString(fmt.Sprintf("  Limit: %d tokens (%.1f%% used)\n", c.Budget.BudgetLimit, c.Budget.UsagePercent))
+	fmt.Fprintf(&b, "Total Context Budget: ~%d tokens\n", c.Budget.TotalTokens)
+	fmt.Fprintf(&b, "  Native: %d tokens\n", c.Budget.NativeTokens)
+	fmt.Fprintf(&b, "  Borrowed: %d tokens\n", c.Budget.BorrowedTokens)
+	fmt.Fprintf(&b, "  Limit: %d tokens (%.1f%% used)\n", c.Budget.BudgetLimit, c.Budget.UsagePercent)
 
 	return b.String()
 }
@@ -267,17 +267,17 @@ func (r RiteInvokeOutput) Text() string {
 	if r.DryRun {
 		var b strings.Builder
 		b.WriteString("[DRY RUN]\n")
-		b.WriteString(fmt.Sprintf("Would invoke: %s\n", r.InvokedRite))
+		fmt.Fprintf(&b, "Would invoke: %s\n", r.InvokedRite)
 		if r.Component != "" {
-			b.WriteString(fmt.Sprintf("Component: %s\n", r.Component))
+			fmt.Fprintf(&b, "Component: %s\n", r.Component)
 		}
 		if len(r.BorrowedSkills) > 0 {
-			b.WriteString(fmt.Sprintf("Would borrow skills: %s\n", strings.Join(r.BorrowedSkills, ", ")))
+			fmt.Fprintf(&b, "Would borrow skills: %s\n", strings.Join(r.BorrowedSkills, ", "))
 		}
 		if len(r.BorrowedAgents) > 0 {
-			b.WriteString(fmt.Sprintf("Would borrow agents: %s\n", strings.Join(r.BorrowedAgents, ", ")))
+			fmt.Fprintf(&b, "Would borrow agents: %s\n", strings.Join(r.BorrowedAgents, ", "))
 		}
-		b.WriteString(fmt.Sprintf("Estimated tokens: %d\n", r.EstimatedTokens))
+		fmt.Fprintf(&b, "Estimated tokens: %d\n", r.EstimatedTokens)
 		return b.String()
 	}
 	// Silent on success for mutations
@@ -300,9 +300,9 @@ func (r RiteReleaseOutput) Text() string {
 	if r.DryRun {
 		var b strings.Builder
 		b.WriteString("[DRY RUN]\n")
-		b.WriteString(fmt.Sprintf("Would release: %s\n", strings.Join(r.ReleasedRites, ", ")))
-		b.WriteString(fmt.Sprintf("Invocations: %d\n", r.InvocationCount))
-		b.WriteString(fmt.Sprintf("Tokens freed: %d\n", r.TokensFreed))
+		fmt.Fprintf(&b, "Would release: %s\n", strings.Join(r.ReleasedRites, ", "))
+		fmt.Fprintf(&b, "Invocations: %d\n", r.InvocationCount)
+		fmt.Fprintf(&b, "Tokens freed: %d\n", r.TokensFreed)
 		return b.String()
 	}
 	// Silent on success for mutations
@@ -422,26 +422,26 @@ func (s RiteStatusOutput) Text() string {
 	if s.IsActive {
 		activeLabel = " (ACTIVE)"
 	}
-	b.WriteString(fmt.Sprintf("Rite: %s%s\n", s.Rite, activeLabel))
-	b.WriteString(fmt.Sprintf("Path: %s\n", s.Path))
-	b.WriteString(fmt.Sprintf("Description: %s\n", s.Description))
-	b.WriteString(fmt.Sprintf("Workflow: %s\n", s.WorkflowType))
+	fmt.Fprintf(&b, "Rite: %s%s\n", s.Rite, activeLabel)
+	fmt.Fprintf(&b, "Path: %s\n", s.Path)
+	fmt.Fprintf(&b, "Description: %s\n", s.Description)
+	fmt.Fprintf(&b, "Workflow: %s\n", s.WorkflowType)
 	b.WriteString("\n")
 
-	b.WriteString(fmt.Sprintf("Agents (%d):\n", len(s.Agents)))
+	fmt.Fprintf(&b, "Agents (%d):\n", len(s.Agents))
 	for _, agent := range s.Agents {
 		installed := "[not installed]"
 		if agent.Installed {
 			installed = "[installed]"
 		}
-		b.WriteString(fmt.Sprintf("  %-20s %-45s %s\n", agent.Name, agent.Role, installed))
+		fmt.Fprintf(&b, "  %-20s %-45s %s\n", agent.Name, agent.Role, installed)
 	}
 	b.WriteString("\n")
 
 	if len(s.Phases) > 0 {
-		b.WriteString(fmt.Sprintf("Phases: %s\n", strings.Join(s.Phases, " -> ")))
+		fmt.Fprintf(&b, "Phases: %s\n", strings.Join(s.Phases, " -> "))
 	}
-	b.WriteString(fmt.Sprintf("Entry Point: %s\n", s.EntryPoint))
+	fmt.Fprintf(&b, "Entry Point: %s\n", s.EntryPoint)
 	b.WriteString("\n")
 
 	// Status summary
@@ -459,7 +459,7 @@ func (s RiteStatusOutput) Text() string {
 		status = "WARNING"
 		details = append(details, "CLAUDE.md out of sync")
 	}
-	b.WriteString(fmt.Sprintf("Status: %s (%s)\n", status, strings.Join(details, ", ")))
+	fmt.Fprintf(&b, "Status: %s (%s)\n", status, strings.Join(details, ", "))
 
 	return b.String()
 }
@@ -549,13 +549,13 @@ func (s RiteSwitchDryRunOutput) Rows() [][]string {
 func (s RiteSwitchDryRunOutput) Text() string {
 	var b strings.Builder
 	b.WriteString("[DRY RUN]\n")
-	b.WriteString(fmt.Sprintf("Would switch to: %s\n", s.WouldSwitchTo))
-	b.WriteString(fmt.Sprintf("Current rite: %s\n", s.CurrentRite))
-	b.WriteString(fmt.Sprintf("Would install: %s\n", strings.Join(s.WouldInstall, ", ")))
+	fmt.Fprintf(&b, "Would switch to: %s\n", s.WouldSwitchTo)
+	fmt.Fprintf(&b, "Current rite: %s\n", s.CurrentRite)
+	fmt.Fprintf(&b, "Would install: %s\n", strings.Join(s.WouldInstall, ", "))
 	if len(s.OrphansDetected) > 0 {
-		b.WriteString(fmt.Sprintf("Orphans detected: %s\n", strings.Join(s.OrphansDetected, ", ")))
+		fmt.Fprintf(&b, "Orphans detected: %s\n", strings.Join(s.OrphansDetected, ", "))
 		if s.OrphanStrategyRequired {
-			b.WriteString(fmt.Sprintf("Suggested flags: %s\n", strings.Join(s.SuggestedFlags, ", ")))
+			fmt.Fprintf(&b, "Suggested flags: %s\n", strings.Join(s.SuggestedFlags, ", "))
 		}
 	}
 	return b.String()
@@ -627,7 +627,7 @@ func truncateDescription(s string) string {
 // Text implements Textable for PantheonOutput.
 func (p PantheonOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Rite: %s (%d agents)\n", p.Rite, p.Count))
+	fmt.Fprintf(&b, "Rite: %s (%d agents)\n", p.Rite, p.Count)
 	return b.String()
 }
 
@@ -672,7 +672,7 @@ func (v RiteValidateOutput) Rows() [][]string {
 // Text implements Textable for RiteValidateOutput.
 func (v RiteValidateOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Validating rite: %s\n\n", v.Rite))
+	fmt.Fprintf(&b, "Validating rite: %s\n\n", v.Rite)
 
 	for _, check := range v.Checks {
 		status := "[PASS]"
@@ -682,7 +682,7 @@ func (v RiteValidateOutput) Text() string {
 		case "warn":
 			status = "[WARN]"
 		}
-		b.WriteString(fmt.Sprintf("%s %-18s %s\n", status, check.Check, check.Message))
+		fmt.Fprintf(&b, "%s %-18s %s\n", status, check.Check, check.Message)
 	}
 
 	b.WriteString("\n")
@@ -690,7 +690,7 @@ func (v RiteValidateOutput) Text() string {
 	if !v.Valid {
 		result = "INVALID"
 	}
-	b.WriteString(fmt.Sprintf("Result: %s (%d errors, %d warnings)\n", result, v.Errors, v.Warnings))
+	fmt.Fprintf(&b, "Result: %s (%d errors, %d warnings)\n", result, v.Errors, v.Warnings)
 
 	return b.String()
 }

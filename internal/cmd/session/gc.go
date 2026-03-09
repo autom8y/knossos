@@ -82,9 +82,9 @@ func (g gcOutput) Text() string {
 		return b.String()
 	}
 
-	b.WriteString(fmt.Sprintf("Found %d stale parked session(s) (parked > %s):\n\n", g.StaleCount, g.Threshold))
+	fmt.Fprintf(&b, "Found %d stale parked session(s) (parked > %s):\n\n", g.StaleCount, g.Threshold)
 	for i, s := range g.Sessions {
-		b.WriteString(fmt.Sprintf("  %d. %s  (parked %s ago)\n", i+1, s.ID, s.ParkedAge))
+		fmt.Fprintf(&b, "  %d. %s  (parked %s ago)\n", i+1, s.ID, s.ParkedAge)
 	}
 	b.WriteString("\n")
 
@@ -98,7 +98,7 @@ func (g gcOutput) Text() string {
 		return b.String()
 	}
 
-	b.WriteString(fmt.Sprintf("\nArchived %d/%d session(s).\n", g.Archived, g.Total))
+	fmt.Fprintf(&b, "\nArchived %d/%d session(s).\n", g.Archived, g.Total)
 	return b.String()
 }
 

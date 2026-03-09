@@ -21,10 +21,10 @@ const SuggestPhaseCacheFile = ".suggest-phase-cache"
 
 // SuggestOutput represents the output of the suggest hook.
 type SuggestOutput struct {
-	Detected    bool                   `json:"detected"`
-	Transition  string                 `json:"transition,omitempty"` // e.g., "design -> implementation"
-	Suggestions []suggest.Suggestion   `json:"suggestions,omitempty"`
-	Message     string                 `json:"message,omitempty"`
+	Detected    bool                 `json:"detected"`
+	Transition  string               `json:"transition,omitempty"` // e.g., "design -> implementation"
+	Suggestions []suggest.Suggestion `json:"suggestions,omitempty"`
+	Message     string               `json:"message,omitempty"`
 }
 
 // Text implements output.Textable for text output.
@@ -36,9 +36,9 @@ func (s SuggestOutput) Text() string {
 		return "no phase transition detected"
 	}
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Phase transition: %s\n", s.Transition))
+	fmt.Fprintf(&b, "Phase transition: %s\n", s.Transition)
 	for _, sg := range s.Suggestions {
-		b.WriteString(fmt.Sprintf("- %s\n", sg.Text))
+		fmt.Fprintf(&b, "- %s\n", sg.Text)
 	}
 	return b.String()
 }

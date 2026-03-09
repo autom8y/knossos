@@ -319,32 +319,32 @@ type HandoffStatusOutput struct {
 // Text implements output.Textable for HandoffStatusOutput.
 func (h HandoffStatusOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Session: %s\n", h.SessionID))
-	b.WriteString(fmt.Sprintf("Status: %s\n", h.SessionStatus))
-	b.WriteString(fmt.Sprintf("Initiative: %s\n", h.Initiative))
-	b.WriteString(fmt.Sprintf("Rite: %s\n", h.ActiveRite))
+	fmt.Fprintf(&b, "Session: %s\n", h.SessionID)
+	fmt.Fprintf(&b, "Status: %s\n", h.SessionStatus)
+	fmt.Fprintf(&b, "Initiative: %s\n", h.Initiative)
+	fmt.Fprintf(&b, "Rite: %s\n", h.ActiveRite)
 	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("Current Phase: %s\n", h.CurrentPhase))
-	b.WriteString(fmt.Sprintf("Current Agent: %s\n", h.CurrentAgent))
-	b.WriteString(fmt.Sprintf("Handoff Count: %d\n", h.HandoffCount))
+	fmt.Fprintf(&b, "Current Phase: %s\n", h.CurrentPhase)
+	fmt.Fprintf(&b, "Current Agent: %s\n", h.CurrentAgent)
+	fmt.Fprintf(&b, "Handoff Count: %d\n", h.HandoffCount)
 	b.WriteString("\n")
 
 	if h.LastHandoff != nil {
 		b.WriteString("Last Handoff:\n")
-		b.WriteString(fmt.Sprintf("  Time: %s\n", h.LastHandoff.Timestamp))
+		fmt.Fprintf(&b, "  Time: %s\n", h.LastHandoff.Timestamp)
 		if h.LastHandoff.FromAgent != "" {
-			b.WriteString(fmt.Sprintf("  From: %s\n", h.LastHandoff.FromAgent))
+			fmt.Fprintf(&b, "  From: %s\n", h.LastHandoff.FromAgent)
 		}
 		if h.LastHandoff.ToAgent != "" {
-			b.WriteString(fmt.Sprintf("  To: %s\n", h.LastHandoff.ToAgent))
+			fmt.Fprintf(&b, "  To: %s\n", h.LastHandoff.ToAgent)
 		}
 		if h.LastHandoff.ArtifactID != "" {
-			b.WriteString(fmt.Sprintf("  Artifact: %s\n", h.LastHandoff.ArtifactID))
+			fmt.Fprintf(&b, "  Artifact: %s\n", h.LastHandoff.ArtifactID)
 		}
 		b.WriteString("\n")
 	}
 
-	b.WriteString(fmt.Sprintf("Next Expected: %s\n", h.NextExpectedHandoff))
+	fmt.Fprintf(&b, "Next Expected: %s\n", h.NextExpectedHandoff)
 
 	return b.String()
 }

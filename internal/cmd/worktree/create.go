@@ -35,13 +35,13 @@ type CreateOutput struct {
 // Text implements output.Textable for CreateOutput.
 func (c CreateOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Created worktree: %s\n", c.WorktreeID))
-	b.WriteString(fmt.Sprintf("  Name: %s\n", c.Name))
-	b.WriteString(fmt.Sprintf("  Path: %s\n", c.Path))
+	fmt.Fprintf(&b, "Created worktree: %s\n", c.WorktreeID)
+	fmt.Fprintf(&b, "  Name: %s\n", c.Name)
+	fmt.Fprintf(&b, "  Path: %s\n", c.Path)
 	if c.Rite != "" && c.Rite != "none" {
-		b.WriteString(fmt.Sprintf("  Rite: %s\n", c.Rite))
+		fmt.Fprintf(&b, "  Rite: %s\n", c.Rite)
 	}
-	b.WriteString(fmt.Sprintf("\nTo start working: cd %s && claude\n", c.Path))
+	fmt.Fprintf(&b, "\nTo start working: cd %s && claude\n", c.Path)
 	return b.String()
 }
 
@@ -114,4 +114,3 @@ func runCreate(ctx *cmdContext, name string, opts createOptions) error {
 
 	return printer.Print(result)
 }
-

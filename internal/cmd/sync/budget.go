@@ -75,15 +75,15 @@ func budgetText(claudeDir string) (string, error) {
 	var b strings.Builder
 	b.WriteString("\nContext Budget Report\n")
 	b.WriteString(strings.Repeat("=", 50) + "\n")
-	b.WriteString(fmt.Sprintf("Total tokens in %s: %s\n\n",
-		filepath.Base(claudeDir), formatNum(report.TotalTokens)))
+	fmt.Fprintf(&b, "Total tokens in %s: %s\n\n",
+		filepath.Base(claudeDir), formatNum(report.TotalTokens))
 
 	// Category breakdown
 	b.WriteString("By category:\n")
 	for _, cat := range []string{"CLAUDE.md", "agents", "skills", "commands", "rules", "settings", "workflow"} {
 		if tokens, ok := report.Categories[cat]; ok && tokens > 0 {
 			pct := float64(tokens) / float64(report.TotalTokens) * 100
-			b.WriteString(fmt.Sprintf("  %-15s %6s tokens  (%4.1f%%)\n", cat, formatNum(tokens), pct))
+			fmt.Fprintf(&b, "  %-15s %6s tokens  (%4.1f%%)\n", cat, formatNum(tokens), pct)
 		}
 	}
 
@@ -91,7 +91,7 @@ func budgetText(claudeDir string) (string, error) {
 	if len(report.Sections) > 0 {
 		b.WriteString("\nCLAUDE.md sections:\n")
 		for _, s := range report.Sections {
-			b.WriteString(fmt.Sprintf("  %-25s %6s tokens\n", s.Name, formatNum(s.Tokens)))
+			fmt.Fprintf(&b, "  %-25s %6s tokens\n", s.Name, formatNum(s.Tokens))
 		}
 	}
 
@@ -100,14 +100,14 @@ func budgetText(claudeDir string) (string, error) {
 	limit := min(len(report.Files), 10)
 	for i := range limit {
 		f := report.Files[i]
-		b.WriteString(fmt.Sprintf("  %-40s %6s tokens\n", f.Path, formatNum(f.Tokens)))
+		fmt.Fprintf(&b, "  %-40s %6s tokens\n", f.Path, formatNum(f.Tokens))
 	}
 
 	// Warnings
 	if len(report.Warnings) > 0 {
 		b.WriteString("\nWarnings:\n")
 		for _, w := range report.Warnings {
-			b.WriteString(fmt.Sprintf("  - %s\n", w))
+			fmt.Fprintf(&b, "  - %s\n", w)
 		}
 	}
 

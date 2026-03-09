@@ -28,17 +28,17 @@ type SwitchOutput struct {
 // Text implements output.Textable for SwitchOutput.
 func (s SwitchOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Switched to worktree: %s\n", s.WorktreeID))
-	b.WriteString(fmt.Sprintf("  Name: %s\n", s.Name))
-	b.WriteString(fmt.Sprintf("  Path: %s\n", s.Path))
+	fmt.Fprintf(&b, "Switched to worktree: %s\n", s.WorktreeID)
+	fmt.Fprintf(&b, "  Name: %s\n", s.Name)
+	fmt.Fprintf(&b, "  Path: %s\n", s.Path)
 	if s.Rite != "" && s.Rite != "none" {
-		b.WriteString(fmt.Sprintf("  Rite: %s", s.Rite))
+		fmt.Fprintf(&b, "  Rite: %s", s.Rite)
 		if s.RiteUpdated {
 			b.WriteString(" (updated)")
 		}
 		b.WriteString("\n")
 	}
-	b.WriteString(fmt.Sprintf("\nTo navigate: cd %s\n", s.Path))
+	fmt.Fprintf(&b, "\nTo navigate: cd %s\n", s.Path)
 	return b.String()
 }
 

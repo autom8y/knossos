@@ -113,23 +113,23 @@ func (o embodyOutput) Text() string {
 	doc := o.doc
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("\n=== Perspective: %s (%s) ===\n", doc.Agent, doc.Rite))
+	fmt.Fprintf(&b, "\n=== Perspective: %s (%s) ===\n", doc.Agent, doc.Rite)
 
 	// L1 Identity
 	if env, ok := doc.Layers["L1"]; ok {
 		b.WriteString("\n> Identity\n")
 		if id, ok := env.Data.(*perspective.IdentityData); ok {
-			b.WriteString(fmt.Sprintf("  Name: %s\n", id.Name))
+			fmt.Fprintf(&b, "  Name: %s\n", id.Name)
 			if id.Role != "" {
-				b.WriteString(fmt.Sprintf("  Role: %s\n", id.Role))
+				fmt.Fprintf(&b, "  Role: %s\n", id.Role)
 			}
 			if id.Type != "" {
-				b.WriteString(fmt.Sprintf("  Type: %s\n", id.Type))
+				fmt.Fprintf(&b, "  Type: %s\n", id.Type)
 			}
 			if id.Model != "" {
-				b.WriteString(fmt.Sprintf("  Model: %s\n", id.Model))
+				fmt.Fprintf(&b, "  Model: %s\n", id.Model)
 			}
-			b.WriteString(fmt.Sprintf("  System Prompt: %d lines\n", id.SystemPromptLines))
+			fmt.Fprintf(&b, "  System Prompt: %d lines\n", id.SystemPromptLines)
 		}
 		writeStatusLine(&b, env)
 	}
@@ -138,19 +138,19 @@ func (o embodyOutput) Text() string {
 	if env, ok := doc.Layers["L2"]; ok {
 		b.WriteString("\n> Perception\n")
 		if perc, ok := env.Data.(*perspective.PerceptionData); ok {
-			b.WriteString(fmt.Sprintf("  Explicit Skills: %d\n", len(perc.ExplicitSkills)))
+			fmt.Fprintf(&b, "  Explicit Skills: %d\n", len(perc.ExplicitSkills))
 			if len(perc.ExplicitSkills) > 0 {
-				b.WriteString(fmt.Sprintf("    %s\n", truncateList(perc.ExplicitSkills, 5)))
+				fmt.Fprintf(&b, "    %s\n", truncateList(perc.ExplicitSkills, 5))
 			}
-			b.WriteString(fmt.Sprintf("  Policy Injected: %d\n", len(perc.PolicyInjectedSkills)))
-			b.WriteString(fmt.Sprintf("  Policy Referenced: %d\n", len(perc.PolicyReferencedSkills)))
-			b.WriteString(fmt.Sprintf("  On-Demand: %d\n", len(perc.OnDemandSkills)))
+			fmt.Fprintf(&b, "  Policy Injected: %d\n", len(perc.PolicyInjectedSkills))
+			fmt.Fprintf(&b, "  Policy Referenced: %d\n", len(perc.PolicyReferencedSkills))
+			fmt.Fprintf(&b, "  On-Demand: %d\n", len(perc.OnDemandSkills))
 			skillTool := "available"
 			if !perc.SkillToolAvailable {
 				skillTool = "DISALLOWED"
 			}
-			b.WriteString(fmt.Sprintf("  Skill Tool: %s\n", skillTool))
-			b.WriteString(fmt.Sprintf("  Totals: %d preloaded, %d reachable\n", perc.TotalPreloaded, perc.TotalReachable))
+			fmt.Fprintf(&b, "  Skill Tool: %s\n", skillTool)
+			fmt.Fprintf(&b, "  Totals: %d preloaded, %d reachable\n", perc.TotalPreloaded, perc.TotalReachable)
 		}
 		writeStatusLine(&b, env)
 	}
@@ -161,7 +161,7 @@ func (o embodyOutput) Text() string {
 		if cap, ok := env.Data.(*perspective.CapabilityData); ok {
 			if len(cap.Tools) > 0 {
 				toolSummary := truncateList(cap.CCNativeTools, 5)
-				b.WriteString(fmt.Sprintf("  Tools: %s (%d total)\n", toolSummary, len(cap.Tools)))
+				fmt.Fprintf(&b, "  Tools: %s (%d total)\n", toolSummary, len(cap.Tools))
 			} else {
 				b.WriteString("  Tools: none\n")
 			}
@@ -174,7 +174,7 @@ func (o embodyOutput) Text() string {
 					}
 					names = append(names, fmt.Sprintf("%s (%s)", m.Reference, wired))
 				}
-				b.WriteString(fmt.Sprintf("  MCP: %s\n", strings.Join(names, ", ")))
+				fmt.Fprintf(&b, "  MCP: %s\n", strings.Join(names, ", "))
 			} else {
 				b.WriteString("  MCP: none\n")
 			}
@@ -182,7 +182,7 @@ func (o embodyOutput) Text() string {
 				b.WriteString("  Tools Source: manifest agent_defaults\n")
 			}
 			if len(cap.Hooks) > 0 {
-				b.WriteString(fmt.Sprintf("  Hooks: %d declared\n", len(cap.Hooks)))
+				fmt.Fprintf(&b, "  Hooks: %d declared\n", len(cap.Hooks))
 			}
 		}
 		writeStatusLine(&b, env)
@@ -193,13 +193,13 @@ func (o embodyOutput) Text() string {
 		b.WriteString("\n> Constraint\n")
 		if con, ok := env.Data.(*perspective.ConstraintData); ok {
 			if len(con.DisallowedTools) > 0 {
-				b.WriteString(fmt.Sprintf("  Disallowed: %s (%d tools)\n",
-					truncateList(con.DisallowedTools, 5), len(con.DisallowedTools)))
+				fmt.Fprintf(&b, "  Disallowed: %s (%d tools)\n",
+					truncateList(con.DisallowedTools, 5), len(con.DisallowedTools))
 			} else {
 				b.WriteString("  Disallowed: none\n")
 			}
 			if con.WriteGuard != nil && con.WriteGuard.Enabled {
-				b.WriteString(fmt.Sprintf("  Write Guard: enabled (%d paths)\n", len(con.WriteGuard.AllowPaths)))
+				fmt.Fprintf(&b, "  Write Guard: enabled (%d paths)\n", len(con.WriteGuard.AllowPaths))
 			} else {
 				b.WriteString("  Write Guard: disabled\n")
 			}
@@ -214,7 +214,7 @@ func (o embodyOutput) Text() string {
 				if len(con.BehavioralContract.MustProduce) > 0 {
 					parts = append(parts, fmt.Sprintf("%d must_produce", len(con.BehavioralContract.MustProduce)))
 				}
-				b.WriteString(fmt.Sprintf("  Contract: %s\n", strings.Join(parts, ", ")))
+				fmt.Fprintf(&b, "  Contract: %s\n", strings.Join(parts, ", "))
 			} else {
 				b.WriteString("  Contract: none\n")
 			}
@@ -227,7 +227,7 @@ func (o embodyOutput) Text() string {
 		b.WriteString("\n> Memory\n")
 		if mem, ok := env.Data.(*perspective.MemoryData); ok {
 			if mem.Enabled {
-				b.WriteString(fmt.Sprintf("  Scope: %s\n", mem.Scope))
+				fmt.Fprintf(&b, "  Scope: %s\n", mem.Scope)
 			} else {
 				b.WriteString("  Scope: disabled\n")
 			}
@@ -237,7 +237,7 @@ func (o embodyOutput) Text() string {
 					if mem.SeedFile.LineCount != nil {
 						lines = *mem.SeedFile.LineCount
 					}
-					b.WriteString(fmt.Sprintf("  Seed: exists (%d lines)\n", lines))
+					fmt.Fprintf(&b, "  Seed: exists (%d lines)\n", lines)
 				} else {
 					b.WriteString("  Seed: not found\n")
 				}
@@ -248,7 +248,7 @@ func (o embodyOutput) Text() string {
 					if !mem.RuntimeMemory.ContentAccessible {
 						accessible = "not found"
 					}
-					b.WriteString(fmt.Sprintf("  Runtime: %s\n", accessible))
+					fmt.Fprintf(&b, "  Runtime: %s\n", accessible)
 				} else {
 					b.WriteString("  Runtime: OPAQUE (CC path hash)\n")
 				}
@@ -262,18 +262,18 @@ func (o embodyOutput) Text() string {
 		b.WriteString("\n> Position\n")
 		if pos, ok := env.Data.(*perspective.PositionData); ok {
 			if pos.InWorkflow {
-				b.WriteString(fmt.Sprintf("  Phase: %s (%d/%d)\n", pos.WorkflowPhase, pos.PhaseIndex+1, pos.TotalPhases))
+				fmt.Fprintf(&b, "  Phase: %s (%d/%d)\n", pos.WorkflowPhase, pos.PhaseIndex+1, pos.TotalPhases)
 				if pos.PhasePredecessor != "" {
-					b.WriteString(fmt.Sprintf("  Predecessor: %s\n", pos.PhasePredecessor))
+					fmt.Fprintf(&b, "  Predecessor: %s\n", pos.PhasePredecessor)
 				}
 				if pos.PhaseSuccessor != "" {
-					b.WriteString(fmt.Sprintf("  Successor: %s\n", pos.PhaseSuccessor))
+					fmt.Fprintf(&b, "  Successor: %s\n", pos.PhaseSuccessor)
 				}
 				if pos.PhaseCondition != "" {
-					b.WriteString(fmt.Sprintf("  Condition: %s\n", pos.PhaseCondition))
+					fmt.Fprintf(&b, "  Condition: %s\n", pos.PhaseCondition)
 				}
 				if pos.PhaseProduces != "" {
-					b.WriteString(fmt.Sprintf("  Produces: %s\n", pos.PhaseProduces))
+					fmt.Fprintf(&b, "  Produces: %s\n", pos.PhaseProduces)
 				}
 			} else {
 				b.WriteString("  Phase: not in workflow\n")
@@ -285,13 +285,13 @@ func (o embodyOutput) Text() string {
 				b.WriteString("  Entry Agent: yes (manifest)\n")
 			}
 			if len(pos.BackRoutes) > 0 {
-				b.WriteString(fmt.Sprintf("  Back Routes: %d targeting this agent\n", len(pos.BackRoutes)))
+				fmt.Fprintf(&b, "  Back Routes: %d targeting this agent\n", len(pos.BackRoutes))
 			}
 			if len(pos.ComplexityGates) > 0 {
-				b.WriteString(fmt.Sprintf("  Complexity Gates: %s\n", strings.Join(pos.ComplexityGates, ", ")))
+				fmt.Fprintf(&b, "  Complexity Gates: %s\n", strings.Join(pos.ComplexityGates, ", "))
 			}
 			if len(pos.HandoffCriteria) > 0 {
-				b.WriteString(fmt.Sprintf("  Handoff Criteria: %d items\n", len(pos.HandoffCriteria)))
+				fmt.Fprintf(&b, "  Handoff Criteria: %d items\n", len(pos.HandoffCriteria))
 			}
 		}
 		writeStatusLine(&b, env)
@@ -302,27 +302,27 @@ func (o embodyOutput) Text() string {
 		b.WriteString("\n> Surface\n")
 		if surf, ok := env.Data.(*perspective.SurfaceData); ok {
 			if len(surf.DromenaOwned) > 0 {
-				b.WriteString(fmt.Sprintf("  Dromena: %s\n", strings.Join(surf.DromenaOwned, ", ")))
+				fmt.Fprintf(&b, "  Dromena: %s\n", strings.Join(surf.DromenaOwned, ", "))
 			} else {
 				b.WriteString("  Dromena: none\n")
 			}
 			if len(surf.LegomenaAvailable) > 0 {
-				b.WriteString(fmt.Sprintf("  Legomena: %s\n", truncateList(surf.LegomenaAvailable, 5)))
+				fmt.Fprintf(&b, "  Legomena: %s\n", truncateList(surf.LegomenaAvailable, 5))
 			} else {
 				b.WriteString("  Legomena: none\n")
 			}
 			if len(surf.ArtifactTypes) > 0 {
-				b.WriteString(fmt.Sprintf("  Artifacts: %s\n", strings.Join(surf.ArtifactTypes, ", ")))
+				fmt.Fprintf(&b, "  Artifacts: %s\n", strings.Join(surf.ArtifactTypes, ", "))
 			}
 			if len(surf.Commands) > 0 {
 				var cmdNames []string
 				for _, c := range surf.Commands {
 					cmdNames = append(cmdNames, c.Name)
 				}
-				b.WriteString(fmt.Sprintf("  Commands: %s\n", strings.Join(cmdNames, ", ")))
+				fmt.Fprintf(&b, "  Commands: %s\n", strings.Join(cmdNames, ", "))
 			}
 			if len(surf.ContractMustProduce) > 0 {
-				b.WriteString(fmt.Sprintf("  Must Produce: %s\n", strings.Join(surf.ContractMustProduce, ", ")))
+				fmt.Fprintf(&b, "  Must Produce: %s\n", strings.Join(surf.ContractMustProduce, ", "))
 			}
 		}
 		writeStatusLine(&b, env)
@@ -333,25 +333,25 @@ func (o embodyOutput) Text() string {
 		b.WriteString("\n> Horizon (negative space)\n")
 		if hor, ok := env.Data.(*perspective.HorizonData); ok {
 			if len(hor.ToolsNotAvailable) > 0 {
-				b.WriteString(fmt.Sprintf("  Tools Not Available: %s (%d tools)\n",
-					truncateList(hor.ToolsNotAvailable, 5), len(hor.ToolsNotAvailable)))
+				fmt.Fprintf(&b, "  Tools Not Available: %s (%d tools)\n",
+					truncateList(hor.ToolsNotAvailable, 5), len(hor.ToolsNotAvailable))
 			}
 			if len(hor.DisallowedOverlap) > 0 {
-				b.WriteString(fmt.Sprintf("  Disallowed Overlap: %s\n", strings.Join(hor.DisallowedOverlap, ", ")))
+				fmt.Fprintf(&b, "  Disallowed Overlap: %s\n", strings.Join(hor.DisallowedOverlap, ", "))
 			}
 			if len(hor.SkillsUnreachable) > 0 {
-				b.WriteString(fmt.Sprintf("  Skills Unreachable: %s (%d skills)\n",
-					truncateList(hor.SkillsUnreachable, 5), len(hor.SkillsUnreachable)))
+				fmt.Fprintf(&b, "  Skills Unreachable: %s (%d skills)\n",
+					truncateList(hor.SkillsUnreachable, 5), len(hor.SkillsUnreachable))
 			}
 			if len(hor.PhasesNotIn) > 0 {
-				b.WriteString(fmt.Sprintf("  Phases Not In: %s (%d phases)\n",
-					truncateList(hor.PhasesNotIn, 5), len(hor.PhasesNotIn)))
+				fmt.Fprintf(&b, "  Phases Not In: %s (%d phases)\n",
+					truncateList(hor.PhasesNotIn, 5), len(hor.PhasesNotIn))
 			}
 			if len(hor.MemoryBlindSpots) > 0 {
-				b.WriteString(fmt.Sprintf("  Memory Blind Spots: %s\n", strings.Join(hor.MemoryBlindSpots, ", ")))
+				fmt.Fprintf(&b, "  Memory Blind Spots: %s\n", strings.Join(hor.MemoryBlindSpots, ", "))
 			}
 			if len(hor.SurfaceGaps) > 0 {
-				b.WriteString(fmt.Sprintf("  Surface Gaps: %s\n", strings.Join(hor.SurfaceGaps, ", ")))
+				fmt.Fprintf(&b, "  Surface Gaps: %s\n", strings.Join(hor.SurfaceGaps, ", "))
 			}
 			// If everything is empty, note it
 			if len(hor.ToolsNotAvailable) == 0 && len(hor.SkillsUnreachable) == 0 &&
@@ -367,14 +367,14 @@ func (o embodyOutput) Text() string {
 		b.WriteString("\n> Provenance\n")
 		if prov, ok := env.Data.(*perspective.ProvenanceData); ok {
 			if prov.Owner != "" {
-				b.WriteString(fmt.Sprintf("  Owner: %s\n", prov.Owner))
+				fmt.Fprintf(&b, "  Owner: %s\n", prov.Owner)
 				diverged := "no"
 				if prov.Diverged {
 					diverged = "YES"
 				}
-				b.WriteString(fmt.Sprintf("  Diverged: %s\n", diverged))
+				fmt.Fprintf(&b, "  Diverged: %s\n", diverged)
 				if !prov.LastSynced.IsZero() {
-					b.WriteString(fmt.Sprintf("  Last Sync: %s\n", prov.LastSynced.Format(time.RFC3339)))
+					fmt.Fprintf(&b, "  Last Sync: %s\n", prov.LastSynced.Format(time.RFC3339))
 				}
 			} else {
 				b.WriteString("  No provenance entry found\n")
@@ -384,11 +384,11 @@ func (o embodyOutput) Text() string {
 	}
 
 	// Assembly metadata
-	b.WriteString(fmt.Sprintf("\nAssembly: %d resolved, %d degraded, %d failed (%dms)\n",
+	fmt.Fprintf(&b, "\nAssembly: %d resolved, %d degraded, %d failed (%dms)\n",
 		doc.AssemblyMetadata.LayersResolved,
 		doc.AssemblyMetadata.LayersDegraded,
 		doc.AssemblyMetadata.LayersFailed,
-		doc.AssemblyMetadata.ResolutionTimeMs))
+		doc.AssemblyMetadata.ResolutionTimeMs)
 
 	// Audit overlay
 	if doc.AuditOverlay != nil {
@@ -406,48 +406,48 @@ func (o embodyOutput) Text() string {
 			case perspective.SeverityInfo:
 				prefix = "  "
 			}
-			b.WriteString(fmt.Sprintf("%s%s [%s] %s\n", prefix, f.Severity, f.ID, f.Title))
-			b.WriteString(fmt.Sprintf("  Layers: %s | %s\n", strings.Join(f.LayersAffected, ", "), f.Description))
+			fmt.Fprintf(&b, "%s%s [%s] %s\n", prefix, f.Severity, f.ID, f.Title)
+			fmt.Fprintf(&b, "  Layers: %s | %s\n", strings.Join(f.LayersAffected, ", "), f.Description)
 			if f.Evidence != "" {
-				b.WriteString(fmt.Sprintf("  Evidence: %s\n", f.Evidence))
+				fmt.Fprintf(&b, "  Evidence: %s\n", f.Evidence)
 			}
 		}
 		s := doc.AuditOverlay.SeveritySummary
-		b.WriteString(fmt.Sprintf("\nSummary: %d CRITICAL, %d WARNING, %d INFO\n",
-			s.Critical, s.Warning, s.Info))
+		fmt.Fprintf(&b, "\nSummary: %d CRITICAL, %d WARNING, %d INFO\n",
+			s.Critical, s.Warning, s.Info)
 	}
 
 	// Simulate overlay
 	if doc.SimulateOverlay != nil {
 		b.WriteString("\n=== Simulate ===\n")
 		sim := doc.SimulateOverlay
-		b.WriteString(fmt.Sprintf("Prompt: %q\n", sim.Prompt))
+		fmt.Fprintf(&b, "Prompt: %q\n", sim.Prompt)
 		if len(sim.ToolMatches) > 0 {
-			b.WriteString(fmt.Sprintf("\nTool Matches: %d\n", len(sim.ToolMatches)))
+			fmt.Fprintf(&b, "\nTool Matches: %d\n", len(sim.ToolMatches))
 			for _, m := range sim.ToolMatches {
-				b.WriteString(fmt.Sprintf("  %s (%s, %s relevance)\n", m.Name, m.MatchType, m.Relevance))
+				fmt.Fprintf(&b, "  %s (%s, %s relevance)\n", m.Name, m.MatchType, m.Relevance)
 			}
 		}
 		if len(sim.SkillMatches) > 0 {
-			b.WriteString(fmt.Sprintf("\nSkill Matches: %d\n", len(sim.SkillMatches)))
+			fmt.Fprintf(&b, "\nSkill Matches: %d\n", len(sim.SkillMatches))
 			for _, m := range sim.SkillMatches {
-				b.WriteString(fmt.Sprintf("  %s (%s, %s relevance)\n", m.Name, m.MatchType, m.Relevance))
+				fmt.Fprintf(&b, "  %s (%s, %s relevance)\n", m.Name, m.MatchType, m.Relevance)
 			}
 		}
 		if len(sim.ConstraintHits) > 0 {
-			b.WriteString(fmt.Sprintf("\nConstraint Hits: %d\n", len(sim.ConstraintHits)))
+			fmt.Fprintf(&b, "\nConstraint Hits: %d\n", len(sim.ConstraintHits))
 			for _, m := range sim.ConstraintHits {
-				b.WriteString(fmt.Sprintf("  %s (%s relevance)\n", m.Name, m.Relevance))
+				fmt.Fprintf(&b, "  %s (%s relevance)\n", m.Name, m.Relevance)
 			}
 		}
 		if len(sim.CanAttempt) > 0 {
-			b.WriteString(fmt.Sprintf("\nCan Attempt: %s\n", strings.Join(sim.CanAttempt, ", ")))
+			fmt.Fprintf(&b, "\nCan Attempt: %s\n", strings.Join(sim.CanAttempt, ", "))
 		}
 		if len(sim.CannotAttempt) > 0 {
-			b.WriteString(fmt.Sprintf("Cannot Attempt: %s\n", strings.Join(sim.CannotAttempt, ", ")))
+			fmt.Fprintf(&b, "Cannot Attempt: %s\n", strings.Join(sim.CannotAttempt, ", "))
 		}
 		if len(sim.HandoffNeeded) > 0 {
-			b.WriteString(fmt.Sprintf("Handoff Needed: %s\n", strings.Join(sim.HandoffNeeded, ", ")))
+			fmt.Fprintf(&b, "Handoff Needed: %s\n", strings.Join(sim.HandoffNeeded, ", "))
 		}
 	}
 

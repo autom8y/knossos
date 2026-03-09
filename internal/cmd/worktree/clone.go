@@ -18,32 +18,32 @@ type cloneOptions struct {
 
 // CloneOutput represents the output of worktree clone.
 type CloneOutput struct {
-	Success        bool   `json:"success"`
-	WorktreeID     string `json:"worktree_id"`
-	Name           string `json:"name"`
-	Path           string `json:"path"`
-	Rite           string `json:"rite"`
-	SourceID       string `json:"source_id"`
-	SourceName     string `json:"source_name"`
-	CreatedAt      string `json:"created_at"`
-	SessionCopied  bool   `json:"session_copied"`
-	Instructions   string `json:"instructions"`
+	Success       bool   `json:"success"`
+	WorktreeID    string `json:"worktree_id"`
+	Name          string `json:"name"`
+	Path          string `json:"path"`
+	Rite          string `json:"rite"`
+	SourceID      string `json:"source_id"`
+	SourceName    string `json:"source_name"`
+	CreatedAt     string `json:"created_at"`
+	SessionCopied bool   `json:"session_copied"`
+	Instructions  string `json:"instructions"`
 }
 
 // Text implements output.Textable for CloneOutput.
 func (c CloneOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Cloned worktree: %s\n", c.WorktreeID))
-	b.WriteString(fmt.Sprintf("  Name: %s\n", c.Name))
-	b.WriteString(fmt.Sprintf("  Path: %s\n", c.Path))
-	b.WriteString(fmt.Sprintf("  Source: %s (%s)\n", c.SourceName, c.SourceID))
+	fmt.Fprintf(&b, "Cloned worktree: %s\n", c.WorktreeID)
+	fmt.Fprintf(&b, "  Name: %s\n", c.Name)
+	fmt.Fprintf(&b, "  Path: %s\n", c.Path)
+	fmt.Fprintf(&b, "  Source: %s (%s)\n", c.SourceName, c.SourceID)
 	if c.Rite != "" && c.Rite != "none" {
-		b.WriteString(fmt.Sprintf("  Rite: %s\n", c.Rite))
+		fmt.Fprintf(&b, "  Rite: %s\n", c.Rite)
 	}
 	if c.SessionCopied {
 		b.WriteString("  Session context: copied\n")
 	}
-	b.WriteString(fmt.Sprintf("\nTo start working: cd %s && claude\n", c.Path))
+	fmt.Fprintf(&b, "\nTo start working: cd %s && claude\n", c.Path)
 	return b.String()
 }
 

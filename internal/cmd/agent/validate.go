@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"os"
 	"path/filepath"
 	"strings"
@@ -213,35 +213,35 @@ func (v agentValidateOutput) Text() string {
 	for _, entry := range v.Agents {
 		switch entry.Status {
 		case "pass":
-			b.WriteString(fmt.Sprintf("PASS  %s\n", entry.Path))
+			fmt.Fprintf(&b, "PASS  %s\n", entry.Path)
 		case "warn":
-			b.WriteString(fmt.Sprintf("WARN  %s\n", entry.Path))
+			fmt.Fprintf(&b, "WARN  %s\n", entry.Path)
 		case "fail":
-			b.WriteString(fmt.Sprintf("FAIL  %s\n", entry.Path))
+			fmt.Fprintf(&b, "FAIL  %s\n", entry.Path)
 		}
 
 		for _, issue := range entry.Issues {
 			if issue.Field != "" {
-				b.WriteString(fmt.Sprintf("  ERROR: %s: %s\n", issue.Field, issue.Message))
+				fmt.Fprintf(&b, "  ERROR: %s: %s\n", issue.Field, issue.Message)
 			} else {
-				b.WriteString(fmt.Sprintf("  ERROR: %s\n", issue.Message))
+				fmt.Fprintf(&b, "  ERROR: %s\n", issue.Message)
 			}
 			if issue.Value != nil {
-				b.WriteString(fmt.Sprintf("         value: %v\n", issue.Value))
+				fmt.Fprintf(&b, "         value: %v\n", issue.Value)
 			}
 		}
 
 		for _, warning := range entry.Warnings {
-			b.WriteString(fmt.Sprintf("  WARN: %s\n", warning))
+			fmt.Fprintf(&b, "  WARN: %s\n", warning)
 		}
 	}
 
 	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("Summary: %d agents validated\n", v.TotalScanned))
-	b.WriteString(fmt.Sprintf("  Valid: %d\n", v.Valid))
-	b.WriteString(fmt.Sprintf("  Errors: %d\n", v.Errors))
+	fmt.Fprintf(&b, "Summary: %d agents validated\n", v.TotalScanned)
+	fmt.Fprintf(&b, "  Valid: %d\n", v.Valid)
+	fmt.Fprintf(&b, "  Errors: %d\n", v.Errors)
 	if v.Warnings > 0 {
-		b.WriteString(fmt.Sprintf("  Warnings: %d\n", v.Warnings))
+		fmt.Fprintf(&b, "  Warnings: %d\n", v.Warnings)
 	}
 
 	return b.String()

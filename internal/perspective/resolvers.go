@@ -118,12 +118,13 @@ func resolveCapability(ctx *ParseContext) *LayerEnvelope {
 	var ccNative, unknown []string
 	var mcpTools []MCPToolRef
 	for _, tool := range resolvedTools {
-		if knownCCTools[tool] {
+		switch {
+		case knownCCTools[tool]:
 			ccNative = append(ccNative, tool)
-		} else if strings.HasPrefix(tool, "mcp:") {
+		case strings.HasPrefix(tool, "mcp:"):
 			ref := parseMCPToolRef(tool, ctx.RiteManifest)
 			mcpTools = append(mcpTools, ref)
-		} else {
+		default:
 			unknown = append(unknown, tool)
 		}
 	}

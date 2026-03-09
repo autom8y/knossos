@@ -36,15 +36,15 @@ func (m ManifestShowOutput) Text() string {
 	}
 
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Manifest: %s\n", m.Path))
-	b.WriteString(fmt.Sprintf("Format: %s\n", strings.ToUpper(m.Format)))
+	fmt.Fprintf(&b, "Manifest: %s\n", m.Path)
+	fmt.Fprintf(&b, "Format: %s\n", strings.ToUpper(m.Format))
 
 	if m.Schema != nil {
 		valid := "valid"
 		if !m.Schema.Valid {
 			valid = "invalid"
 		}
-		b.WriteString(fmt.Sprintf("Schema: %s v%s (%s)\n", m.Schema.Type, m.Schema.Version, valid))
+		fmt.Fprintf(&b, "Schema: %s v%s (%s)\n", m.Schema.Type, m.Schema.Version, valid)
 	}
 
 	b.WriteString("\n")
@@ -53,10 +53,10 @@ func (m ManifestShowOutput) Text() string {
 	if m.Content != nil {
 		if project, ok := m.Content["project"].(map[string]any); ok {
 			if name, ok := project["name"].(string); ok {
-				b.WriteString(fmt.Sprintf("Project: %s\n", name))
+				fmt.Fprintf(&b, "Project: %s\n", name)
 			}
 			if desc, ok := project["description"].(string); ok {
-				b.WriteString(fmt.Sprintf("Description: %s\n", desc))
+				fmt.Fprintf(&b, "Description: %s\n", desc)
 			}
 		}
 
@@ -65,21 +65,21 @@ func (m ManifestShowOutput) Text() string {
 		if teams, ok := m.Content["teams"].(map[string]any); ok {
 			b.WriteString("Rites:\n")
 			if def, ok := teams["default"].(string); ok {
-				b.WriteString(fmt.Sprintf("  Default: %s\n", def))
+				fmt.Fprintf(&b, "  Default: %s\n", def)
 			}
 			if avail, ok := teams["available"].([]any); ok {
 				names := make([]string, len(avail))
 				for i, v := range avail {
 					names[i] = fmt.Sprintf("%v", v)
 				}
-				b.WriteString(fmt.Sprintf("  Available: %s\n", strings.Join(names, ", ")))
+				fmt.Fprintf(&b, "  Available: %s\n", strings.Join(names, ", "))
 			}
 		}
 
 		if paths, ok := m.Content["paths"].(map[string]any); ok {
 			b.WriteString("\nPaths:\n")
 			for key, val := range paths {
-				b.WriteString(fmt.Sprintf("  %s: %v\n", cases.Title(language.English).String(key), val))
+				fmt.Fprintf(&b, "  %s: %v\n", cases.Title(language.English).String(key), val)
 			}
 		}
 	}
@@ -106,22 +106,22 @@ type ManifestValidationIssue struct {
 // Text implements Textable for ManifestValidateOutput.
 func (v ManifestValidateOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Validating: %s\n", v.Path))
-	b.WriteString(fmt.Sprintf("Schema: %s\n\n", v.Schema))
+	fmt.Fprintf(&b, "Validating: %s\n", v.Path)
+	fmt.Fprintf(&b, "Schema: %s\n\n", v.Schema)
 
 	for _, issue := range v.Issues {
-		b.WriteString(fmt.Sprintf("[ERROR] %s: %s\n", issue.Path, issue.Message))
+		fmt.Fprintf(&b, "[ERROR] %s: %s\n", issue.Path, issue.Message)
 	}
 
 	for _, warn := range v.Warnings {
-		b.WriteString(fmt.Sprintf("[WARN]  %s: %s\n", warn.Path, warn.Message))
+		fmt.Fprintf(&b, "[WARN]  %s: %s\n", warn.Path, warn.Message)
 	}
 
 	result := "VALID"
 	if !v.Valid {
 		result = "INVALID"
 	}
-	b.WriteString(fmt.Sprintf("\nResult: %s (%d errors, %d warnings)\n", result, len(v.Issues), len(v.Warnings)))
+	fmt.Fprintf(&b, "\nResult: %s (%d errors, %d warnings)\n", result, len(v.Issues), len(v.Warnings))
 
 	return b.String()
 }
@@ -156,22 +156,22 @@ func (d ManifestDiffOutput) Text() string {
 	}
 
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("--- %s\n", d.Base))
-	b.WriteString(fmt.Sprintf("+++ %s\n\n", d.Compare))
+	fmt.Fprintf(&b, "--- %s\n", d.Base)
+	fmt.Fprintf(&b, "+++ %s\n\n", d.Compare)
 
 	for _, c := range d.Changes {
 		switch c.Type {
 		case "added":
-			b.WriteString(fmt.Sprintf("+ %s: %v\n", c.Path, c.NewValue))
+			fmt.Fprintf(&b, "+ %s: %v\n", c.Path, c.NewValue)
 		case "removed":
-			b.WriteString(fmt.Sprintf("- %s: %v\n", c.Path, c.OldValue))
+			fmt.Fprintf(&b, "- %s: %v\n", c.Path, c.OldValue)
 		case "modified":
-			b.WriteString(fmt.Sprintf("~ %s: %v -> %v\n", c.Path, c.OldValue, c.NewValue))
+			fmt.Fprintf(&b, "~ %s: %v -> %v\n", c.Path, c.OldValue, c.NewValue)
 		}
 	}
 
-	b.WriteString(fmt.Sprintf("\n%d additions, %d modifications, %d deletions\n",
-		d.Additions, d.Modifications, d.Deletions))
+	fmt.Fprintf(&b, "\n%d additions, %d modifications, %d deletions\n",
+		d.Additions, d.Modifications, d.Deletions)
 
 	return b.String()
 }
@@ -208,19 +208,19 @@ type ManifestMergeChanges struct {
 func (m ManifestMergeOutput) Text() string {
 	var b strings.Builder
 	b.WriteString("Merging manifests...\n")
-	b.WriteString(fmt.Sprintf("  Base: %s\n", m.Base))
-	b.WriteString(fmt.Sprintf("  Ours: %s\n", m.Ours))
-	b.WriteString(fmt.Sprintf("  Theirs: %s\n", m.Theirs))
-	b.WriteString(fmt.Sprintf("  Strategy: %s\n\n", m.Strategy))
+	fmt.Fprintf(&b, "  Base: %s\n", m.Base)
+	fmt.Fprintf(&b, "  Ours: %s\n", m.Ours)
+	fmt.Fprintf(&b, "  Theirs: %s\n", m.Theirs)
+	fmt.Fprintf(&b, "  Strategy: %s\n\n", m.Strategy)
 
 	if m.Changes != nil {
 		if len(m.Changes.FromOurs) > 0 || len(m.Changes.FromTheirs) > 0 {
 			b.WriteString("Changes:\n")
 			for _, path := range m.Changes.FromOurs {
-				b.WriteString(fmt.Sprintf("  [OURS]   %s\n", path))
+				fmt.Fprintf(&b, "  [OURS]   %s\n", path)
 			}
 			for _, path := range m.Changes.FromTheirs {
-				b.WriteString(fmt.Sprintf("  [THEIRS] %s\n", path))
+				fmt.Fprintf(&b, "  [THEIRS] %s\n", path)
 			}
 			b.WriteString("\n")
 		}
@@ -229,18 +229,18 @@ func (m ManifestMergeOutput) Text() string {
 	if m.HasConflicts {
 		b.WriteString("Conflicts:\n")
 		for _, c := range m.Conflicts {
-			b.WriteString(fmt.Sprintf("  %s:\n", c.Path))
-			b.WriteString(fmt.Sprintf("    Base:   %v\n", c.BaseValue))
-			b.WriteString(fmt.Sprintf("    Ours:   %v\n", c.OursValue))
-			b.WriteString(fmt.Sprintf("    Theirs: %v\n", c.TheirsValue))
+			fmt.Fprintf(&b, "  %s:\n", c.Path)
+			fmt.Fprintf(&b, "    Base:   %v\n", c.BaseValue)
+			fmt.Fprintf(&b, "    Ours:   %v\n", c.OursValue)
+			fmt.Fprintf(&b, "    Theirs: %v\n", c.TheirsValue)
 		}
-		b.WriteString(fmt.Sprintf("\nResult: CONFLICTS (%d conflicts)\n", len(m.Conflicts)))
+		fmt.Fprintf(&b, "\nResult: CONFLICTS (%d conflicts)\n", len(m.Conflicts))
 	} else {
 		b.WriteString("Result: MERGED (no conflicts)\n")
 	}
 
 	if m.OutputPath != "" {
-		b.WriteString(fmt.Sprintf("Output: %s\n", m.OutputPath))
+		fmt.Fprintf(&b, "Output: %s\n", m.OutputPath)
 	}
 
 	return b.String()

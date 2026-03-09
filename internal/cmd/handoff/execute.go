@@ -2,8 +2,8 @@
 package handoff
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 	"time"
 
@@ -203,10 +203,10 @@ func (h HandoffExecuteOutput) Text() string {
 	if h.DryRun {
 		b.WriteString("[DRY RUN] ")
 	}
-	b.WriteString(fmt.Sprintf("Handoff executed: %s -> %s\n", h.ArtifactID, h.ToAgent))
-	b.WriteString(fmt.Sprintf("Session: %s\n", h.SessionID))
-	b.WriteString(fmt.Sprintf("Target Phase: %s\n", h.TargetPhase))
-	b.WriteString(fmt.Sprintf("Status: %s\n", h.Status))
+	fmt.Fprintf(&b, "Handoff executed: %s -> %s\n", h.ArtifactID, h.ToAgent)
+	fmt.Fprintf(&b, "Session: %s\n", h.SessionID)
+	fmt.Fprintf(&b, "Target Phase: %s\n", h.TargetPhase)
+	fmt.Fprintf(&b, "Status: %s\n", h.Status)
 	return b.String()
 }
 

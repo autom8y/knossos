@@ -1,8 +1,8 @@
 package agent
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,18 +37,18 @@ func (u agentUpdateOutput) Text() string {
 	for _, entry := range u.Entries {
 		switch entry.Status {
 		case "updated":
-			b.WriteString(fmt.Sprintf("UPDATED  %s (%d sections regenerated)\n", entry.Path, entry.Sections))
+			fmt.Fprintf(&b, "UPDATED  %s (%d sections regenerated)\n", entry.Path, entry.Sections)
 		case "would_update":
-			b.WriteString(fmt.Sprintf("WOULD UPDATE %s (%d sections would change)\n", entry.Path, entry.Sections))
+			fmt.Fprintf(&b, "WOULD UPDATE %s (%d sections would change)\n", entry.Path, entry.Sections)
 		case "skipped":
-			b.WriteString(fmt.Sprintf("SKIPPED  %s (%s)\n", entry.Path, entry.Reason))
+			fmt.Fprintf(&b, "SKIPPED  %s (%s)\n", entry.Path, entry.Reason)
 		case "error":
-			b.WriteString(fmt.Sprintf("ERROR    %s: %s\n", entry.Path, entry.Error))
+			fmt.Fprintf(&b, "ERROR    %s: %s\n", entry.Path, entry.Error)
 		}
 	}
 
-	b.WriteString(fmt.Sprintf("\nSummary: %d updated, %d skipped, %d errors\n",
-		u.Updated, u.Skipped, u.Errors))
+	fmt.Fprintf(&b, "\nSummary: %d updated, %d skipped, %d errors\n",
+		u.Updated, u.Skipped, u.Errors)
 	return b.String()
 }
 

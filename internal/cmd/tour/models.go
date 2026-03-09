@@ -91,9 +91,9 @@ func (t TourOutput) Text() string {
 		b.WriteString("  (not found)\n")
 	} else {
 		c := t.Directories.Claude
-		b.WriteString(fmt.Sprintf("  agents/        %d agents\n", c.Agents.Count))
-		b.WriteString(fmt.Sprintf("  commands/      %d commands\n", c.Commands.Count))
-		b.WriteString(fmt.Sprintf("  skills/        %d skills\n", c.Skills.Count))
+		fmt.Fprintf(&b, "  agents/        %d agents\n", c.Agents.Count)
+		fmt.Fprintf(&b, "  commands/      %d commands\n", c.Commands.Count)
+		fmt.Fprintf(&b, "  skills/        %d skills\n", c.Skills.Count)
 		if c.SettingsJSON {
 			b.WriteString("  settings.json  present\n")
 		} else {
@@ -105,7 +105,7 @@ func (t TourOutput) Text() string {
 			b.WriteString("  CLAUDE.md      missing\n")
 		}
 		if c.ActiveRite != "" {
-			b.WriteString(fmt.Sprintf("  ACTIVE_RITE    %s\n", c.ActiveRite))
+			fmt.Fprintf(&b, "  ACTIVE_RITE    %s\n", c.ActiveRite)
 		} else {
 			b.WriteString("  ACTIVE_RITE    (none)\n")
 		}
@@ -118,13 +118,13 @@ func (t TourOutput) Text() string {
 	} else {
 		k := t.Directories.Knossos
 		if k.Rites.Count > 0 && len(k.Rites.Items) > 0 {
-			b.WriteString(fmt.Sprintf("  rites/         %d rites (%s)\n",
-				k.Rites.Count, strings.Join(k.Rites.Items, ", ")))
+			fmt.Fprintf(&b, "  rites/         %d rites (%s)\n",
+				k.Rites.Count, strings.Join(k.Rites.Items, ", "))
 		} else {
-			b.WriteString(fmt.Sprintf("  rites/         %d rites\n", k.Rites.Count))
+			fmt.Fprintf(&b, "  rites/         %d rites\n", k.Rites.Count)
 		}
 		if k.Templates.Count > 0 {
-			b.WriteString(fmt.Sprintf("  templates/     %d files\n", k.Templates.Count))
+			fmt.Fprintf(&b, "  templates/     %d files\n", k.Templates.Count)
 		}
 	}
 
@@ -135,10 +135,10 @@ func (t TourOutput) Text() string {
 	} else {
 		kn := t.Directories.Know
 		if kn.Domains.Count > 0 && len(kn.Domains.Items) > 0 {
-			b.WriteString(fmt.Sprintf("  %d domain files (%s)\n",
-				kn.Domains.Count, strings.Join(kn.Domains.Items, ", ")))
+			fmt.Fprintf(&b, "  %d domain files (%s)\n",
+				kn.Domains.Count, strings.Join(kn.Domains.Items, ", "))
 		} else {
-			b.WriteString(fmt.Sprintf("  %d domain files\n", kn.Domains.Count))
+			fmt.Fprintf(&b, "  %d domain files\n", kn.Domains.Count)
 		}
 	}
 
@@ -148,10 +148,10 @@ func (t TourOutput) Text() string {
 		b.WriteString("  (not found)\n")
 	} else {
 		l := t.Directories.Ledge
-		b.WriteString(fmt.Sprintf("  decisions/     %s\n", pluralizeFile(l.Decisions.Count)))
-		b.WriteString(fmt.Sprintf("  specs/         %s\n", pluralizeFile(l.Specs.Count)))
-		b.WriteString(fmt.Sprintf("  reviews/       %s\n", pluralizeFile(l.Reviews.Count)))
-		b.WriteString(fmt.Sprintf("  spikes/        %s\n", pluralizeFile(l.Spikes.Count)))
+		fmt.Fprintf(&b, "  decisions/     %s\n", pluralizeFile(l.Decisions.Count))
+		fmt.Fprintf(&b, "  specs/         %s\n", pluralizeFile(l.Specs.Count))
+		fmt.Fprintf(&b, "  reviews/       %s\n", pluralizeFile(l.Reviews.Count))
+		fmt.Fprintf(&b, "  spikes/        %s\n", pluralizeFile(l.Spikes.Count))
 	}
 
 	// .sos/
@@ -160,9 +160,9 @@ func (t TourOutput) Text() string {
 		b.WriteString("  (not found)\n")
 	} else {
 		s := t.Directories.SOS
-		b.WriteString(fmt.Sprintf("  sessions/      %d sessions (%d active, %d parked)\n",
-			s.Sessions.Count, s.Sessions.Active, s.Sessions.Parked))
-		b.WriteString(fmt.Sprintf("  archive/       %d archived\n", s.Archive.Count))
+		fmt.Fprintf(&b, "  sessions/      %d sessions (%d active, %d parked)\n",
+			s.Sessions.Count, s.Sessions.Active, s.Sessions.Parked)
+		fmt.Fprintf(&b, "  archive/       %d archived\n", s.Archive.Count)
 	}
 
 	return b.String()

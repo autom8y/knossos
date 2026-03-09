@@ -121,7 +121,7 @@ func TestTailReadEvents_Normal(t *testing.T) {
 	eventsPath := filepath.Join(dir, "events.jsonl")
 
 	var lines []string
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		evt := map[string]any{
 			"ts":      "2026-03-08T14:30:22.000Z",
 			"type":    "tool.file_change",
@@ -165,7 +165,7 @@ func TestTailReadEvents_LargeFile(t *testing.T) {
 
 	// Create a file larger than tailBufferSize.
 	var lines []string
-	for i := 0; i < 200; i++ {
+	for range 200 {
 		evt := map[string]any{
 			"ts":      "2026-03-08T14:30:22.000Z",
 			"type":    "tool.file_change",
@@ -226,7 +226,7 @@ func TestTailReadEvents_ConfigurableLineCap(t *testing.T) {
 	eventsPath := filepath.Join(dir, "events.jsonl")
 
 	var lines []string
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		evt := map[string]any{
 			"ts":   "2026-03-08T14:30:22.000Z",
 			"type": "tool.file_change",
@@ -544,9 +544,9 @@ func TestSessionScoreModifier_PhaseAndComplexity(t *testing.T) {
 	}
 	// A routing entry with implementation keyword AND orchestration keyword.
 	entry := SearchEntry{
-		Name:    "build-orchestration",
-		Domain:  DomainRouting,
-		Summary: "Build orchestration pipeline",
+		Name:     "build-orchestration",
+		Domain:   DomainRouting,
+		Summary:  "Build orchestration pipeline",
 		Keywords: []string{"build", "orchestration"},
 	}
 

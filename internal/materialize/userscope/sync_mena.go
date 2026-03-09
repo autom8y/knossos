@@ -101,7 +101,7 @@ func (s *syncer) syncUserMena(
 	}
 
 	// Phase 2b: Sync resolved standalone files
-	readFile := func(path string) ([]byte, error) { return os.ReadFile(path) }
+	readFile := os.ReadFile
 	for _, sf := range resolution.Standalones {
 		if err := syncMenaStandalone(
 			sf, commandsDir, skillsDir, "mena",

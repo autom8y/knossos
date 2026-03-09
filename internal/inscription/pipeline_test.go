@@ -797,13 +797,14 @@ func TestBuildRenderContext_IsKnossosProject(t *testing.T) {
 
 			pipeline := NewPipeline(tmpDir)
 
-			if tt.name == "satellite project (templates outside project root)" {
+			switch {
+			case tt.name == "satellite project (templates outside project root)":
 				// Set template dir to an external location
 				extDir := t.TempDir()
 				pipeline.TemplateDir = filepath.Join(extDir, "templates")
-			} else if tt.templateDir != "" {
+			case tt.templateDir != "":
 				pipeline.TemplateDir = filepath.Join(tmpDir, tt.templateDir)
-			} else {
+			default:
 				pipeline.TemplateDir = ""
 			}
 

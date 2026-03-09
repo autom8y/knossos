@@ -70,14 +70,14 @@ func (o TriageOutput) Text() string {
 	b.WriteString(strings.Repeat("=", 50) + "\n\n")
 
 	// Summary
-	b.WriteString(fmt.Sprintf("Scanned:  %d sessions\n", o.TotalScanned))
-	b.WriteString(fmt.Sprintf("Triaged:  %d orphaned\n", o.TotalTriaged))
+	fmt.Fprintf(&b, "Scanned:  %d sessions\n", o.TotalScanned)
+	fmt.Fprintf(&b, "Triaged:  %d orphaned\n", o.TotalTriaged)
 
 	if o.TotalTriaged > 0 {
 		b.WriteString("\nBy Severity:\n")
 		for _, sev := range []Severity{SeverityCritical, SeverityHigh, SeverityMedium, SeverityLow} {
 			if count := o.BySeverity[sev]; count > 0 {
-				b.WriteString(fmt.Sprintf("  %s %s: %d\n", severitySymbol(sev), sev, count))
+				fmt.Fprintf(&b, "  %s %s: %d\n", severitySymbol(sev), sev, count)
 			}
 		}
 	}
@@ -94,15 +94,15 @@ func (o TriageOutput) Text() string {
 	b.WriteString(strings.Repeat("-", 50) + "\n")
 
 	for _, e := range o.Entries {
-		b.WriteString(fmt.Sprintf("\n%s [%s] %s\n", severitySymbol(e.Severity), e.Severity, e.SessionID))
-		b.WriteString(fmt.Sprintf("  Status:   %s\n", e.Status))
+		fmt.Fprintf(&b, "\n%s [%s] %s\n", severitySymbol(e.Severity), e.Severity, e.SessionID)
+		fmt.Fprintf(&b, "  Status:   %s\n", e.Status)
 		if e.Initiative != "" {
-			b.WriteString(fmt.Sprintf("  Goal:     %s\n", truncate(e.Initiative, 50)))
+			fmt.Fprintf(&b, "  Goal:     %s\n", truncate(e.Initiative, 50))
 		}
-		b.WriteString(fmt.Sprintf("  Reason:   %s\n", e.Reason.Description()))
-		b.WriteString(fmt.Sprintf("  Inactive: %s\n", FormatDuration(e.InactiveFor)))
+		fmt.Fprintf(&b, "  Reason:   %s\n", e.Reason.Description())
+		fmt.Fprintf(&b, "  Inactive: %s\n", FormatDuration(e.InactiveFor))
 		if e.Actionable {
-			b.WriteString(fmt.Sprintf("  Action:   %s\n", e.SuggestedAction.Description()))
+			fmt.Fprintf(&b, "  Action:   %s\n", e.SuggestedAction.Description())
 		}
 	}
 

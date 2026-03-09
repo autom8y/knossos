@@ -85,8 +85,8 @@ func (o ScanOutput) Text() string {
 	b.WriteString(strings.Repeat("=", 50) + "\n\n")
 
 	// Summary
-	b.WriteString(fmt.Sprintf("Scanned: %d sessions\n", o.TotalScanned))
-	b.WriteString(fmt.Sprintf("Orphaned: %d sessions\n", o.TotalOrphaned))
+	fmt.Fprintf(&b, "Scanned: %d sessions\n", o.TotalScanned)
+	fmt.Fprintf(&b, "Orphaned: %d sessions\n", o.TotalOrphaned)
 	b.WriteString("\n")
 
 	if o.TotalOrphaned == 0 {
@@ -97,16 +97,16 @@ func (o ScanOutput) Text() string {
 	// Breakdown by reason
 	b.WriteString("By Reason:\n")
 	if o.ByReason.Inactive > 0 {
-		b.WriteString(fmt.Sprintf("  %s Inactive (>%s): %d\n",
-			reasonSymbol(ReasonInactive), o.Config.InactiveThreshold, o.ByReason.Inactive))
+		fmt.Fprintf(&b, "  %s Inactive (>%s): %d\n",
+			reasonSymbol(ReasonInactive), o.Config.InactiveThreshold, o.ByReason.Inactive)
 	}
 	if o.ByReason.StaleSails > 0 {
-		b.WriteString(fmt.Sprintf("  %s Stale Sails (>%s): %d\n",
-			reasonSymbol(ReasonStaleSails), o.Config.StaleSailsThreshold, o.ByReason.StaleSails))
+		fmt.Fprintf(&b, "  %s Stale Sails (>%s): %d\n",
+			reasonSymbol(ReasonStaleSails), o.Config.StaleSailsThreshold, o.ByReason.StaleSails)
 	}
 	if o.ByReason.IncompleteWrap > 0 {
-		b.WriteString(fmt.Sprintf("  %s Incomplete Wrap: %d\n",
-			reasonSymbol(ReasonIncompleteWrap), o.ByReason.IncompleteWrap))
+		fmt.Fprintf(&b, "  %s Incomplete Wrap: %d\n",
+			reasonSymbol(ReasonIncompleteWrap), o.ByReason.IncompleteWrap)
 	}
 	b.WriteString("\n")
 
@@ -115,15 +115,15 @@ func (o ScanOutput) Text() string {
 	b.WriteString(strings.Repeat("-", 50) + "\n")
 
 	for _, s := range o.OrphanedSessions {
-		b.WriteString(fmt.Sprintf("\n%s %s\n", reasonSymbol(s.Reason), s.SessionID))
-		b.WriteString(fmt.Sprintf("  Status: %s\n", s.Status))
-		b.WriteString(fmt.Sprintf("  Initiative: %s\n", truncate(s.Initiative, 40)))
-		b.WriteString(fmt.Sprintf("  Reason: %s\n", s.Reason.Description()))
-		b.WriteString(fmt.Sprintf("  Inactive: %s\n", FormatDuration(s.InactiveFor)))
+		fmt.Fprintf(&b, "\n%s %s\n", reasonSymbol(s.Reason), s.SessionID)
+		fmt.Fprintf(&b, "  Status: %s\n", s.Status)
+		fmt.Fprintf(&b, "  Initiative: %s\n", truncate(s.Initiative, 40))
+		fmt.Fprintf(&b, "  Reason: %s\n", s.Reason.Description())
+		fmt.Fprintf(&b, "  Inactive: %s\n", FormatDuration(s.InactiveFor))
 		if s.AdditionalInfo != "" {
-			b.WriteString(fmt.Sprintf("  Info: %s\n", s.AdditionalInfo))
+			fmt.Fprintf(&b, "  Info: %s\n", s.AdditionalInfo)
 		}
-		b.WriteString(fmt.Sprintf("  Suggested: %s\n", s.SuggestedAction.Description()))
+		fmt.Fprintf(&b, "  Suggested: %s\n", s.SuggestedAction.Description())
 	}
 
 	// Footer with actions hint

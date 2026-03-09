@@ -1,8 +1,8 @@
 package inscription
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -80,13 +80,13 @@ func (v ValidateOutput) Text() string {
 	}
 
 	if v.SchemaVersion != "" {
-		b.WriteString(fmt.Sprintf("Schema version: %s\n", v.SchemaVersion))
+		fmt.Fprintf(&b, "Schema version: %s\n", v.SchemaVersion)
 	}
 
-	b.WriteString(fmt.Sprintf("Regions defined: %d\n", v.RegionCount))
+	fmt.Fprintf(&b, "Regions defined: %d\n", v.RegionCount)
 
 	if len(v.Issues) > 0 {
-		b.WriteString(fmt.Sprintf("\nIssues (%d):\n", len(v.Issues)))
+		fmt.Fprintf(&b, "\nIssues (%d):\n", len(v.Issues))
 		for _, issue := range v.Issues {
 			icon := "!"
 			switch issue.Severity {
@@ -99,9 +99,9 @@ func (v ValidateOutput) Text() string {
 			}
 
 			if issue.Region != "" {
-				b.WriteString(fmt.Sprintf("  %s [%s] %s: %s\n", icon, issue.Severity, issue.Region, issue.Message))
+				fmt.Fprintf(&b, "  %s [%s] %s: %s\n", icon, issue.Severity, issue.Region, issue.Message)
 			} else {
-				b.WriteString(fmt.Sprintf("  %s [%s] %s\n", icon, issue.Severity, issue.Message))
+				fmt.Fprintf(&b, "  %s [%s] %s\n", icon, issue.Severity, issue.Message)
 			}
 		}
 	}

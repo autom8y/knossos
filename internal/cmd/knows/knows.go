@@ -27,9 +27,9 @@ type DeltaOutput struct {
 func (d DeltaOutput) Text() string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("Domain:     %s\n", d.Domain))
-	b.WriteString(fmt.Sprintf("Mode:       %s\n", d.Mode))
-	b.WriteString(fmt.Sprintf("ForceFull:  %v\n", d.ForceFull))
+	fmt.Fprintf(&b, "Domain:     %s\n", d.Domain)
+	fmt.Fprintf(&b, "Mode:       %s\n", d.Mode)
+	fmt.Fprintf(&b, "ForceFull:  %v\n", d.ForceFull)
 
 	if d.Manifest == nil {
 		b.WriteString("Manifest:   (none)\n")
@@ -38,13 +38,13 @@ func (d DeltaOutput) Text() string {
 
 	m := d.Manifest
 	changedCount := len(m.NewFiles) + len(m.ModifiedFiles) + len(m.DeletedFiles) + len(m.RenamedFiles)
-	b.WriteString(fmt.Sprintf("Manifest:   %s..%s\n", m.FromHash, m.ToHash))
-	b.WriteString(fmt.Sprintf("  New:      %d\n", len(m.NewFiles)))
-	b.WriteString(fmt.Sprintf("  Modified: %d\n", len(m.ModifiedFiles)))
-	b.WriteString(fmt.Sprintf("  Deleted:  %d\n", len(m.DeletedFiles)))
-	b.WriteString(fmt.Sprintf("  Renamed:  %d\n", len(m.RenamedFiles)))
-	b.WriteString(fmt.Sprintf("  Total:    %d files changed\n", changedCount))
-	b.WriteString(fmt.Sprintf("  Delta:    %d lines (ratio %.2f)\n", m.DeltaLines, m.DeltaRatio))
+	fmt.Fprintf(&b, "Manifest:   %s..%s\n", m.FromHash, m.ToHash)
+	fmt.Fprintf(&b, "  New:      %d\n", len(m.NewFiles))
+	fmt.Fprintf(&b, "  Modified: %d\n", len(m.ModifiedFiles))
+	fmt.Fprintf(&b, "  Deleted:  %d\n", len(m.DeletedFiles))
+	fmt.Fprintf(&b, "  Renamed:  %d\n", len(m.RenamedFiles))
+	fmt.Fprintf(&b, "  Total:    %d files changed\n", changedCount)
+	fmt.Fprintf(&b, "  Delta:    %d lines (ratio %.2f)\n", m.DeltaLines, m.DeltaRatio)
 
 	if m.CommitLog != "" {
 		b.WriteString("CommitLog:\n")
@@ -53,35 +53,35 @@ func (d DeltaOutput) Text() string {
 			lines = lines[:10]
 		}
 		for _, line := range lines {
-			b.WriteString(fmt.Sprintf("  %s\n", line))
+			fmt.Fprintf(&b, "  %s\n", line)
 		}
 		if logLines := strings.Count(m.CommitLog, "\n") + 1; logLines > 10 {
-			b.WriteString(fmt.Sprintf("  ... (%d more commits)\n", logLines-10))
+			fmt.Fprintf(&b, "  ... (%d more commits)\n", logLines-10)
 		}
 	}
 
 	if len(m.NewFiles) > 0 {
 		b.WriteString("New files:\n")
 		for _, f := range m.NewFiles {
-			b.WriteString(fmt.Sprintf("  + %s\n", f))
+			fmt.Fprintf(&b, "  + %s\n", f)
 		}
 	}
 	if len(m.ModifiedFiles) > 0 {
 		b.WriteString("Modified files:\n")
 		for _, f := range m.ModifiedFiles {
-			b.WriteString(fmt.Sprintf("  ~ %s\n", f))
+			fmt.Fprintf(&b, "  ~ %s\n", f)
 		}
 	}
 	if len(m.DeletedFiles) > 0 {
 		b.WriteString("Deleted files:\n")
 		for _, f := range m.DeletedFiles {
-			b.WriteString(fmt.Sprintf("  - %s\n", f))
+			fmt.Fprintf(&b, "  - %s\n", f)
 		}
 	}
 	if len(m.RenamedFiles) > 0 {
 		b.WriteString("Renamed files:\n")
 		for _, rf := range m.RenamedFiles {
-			b.WriteString(fmt.Sprintf("  %s -> %s\n", rf.OldPath, rf.NewPath))
+			fmt.Fprintf(&b, "  %s -> %s\n", rf.OldPath, rf.NewPath)
 		}
 	}
 
@@ -97,8 +97,8 @@ type DeltaAllOutput struct {
 func (da DeltaAllOutput) Text() string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("%-20s %-14s %-10s %-14s %s\n",
-		"Domain", "Mode", "ForceFull", "Files Changed", "Delta Lines"))
+	fmt.Fprintf(&b, "%-20s %-14s %-10s %-14s %s\n",
+		"Domain", "Mode", "ForceFull", "Files Changed", "Delta Lines")
 	b.WriteString(strings.Repeat("-", 70) + "\n")
 
 	for _, d := range da.Domains {
@@ -109,8 +109,8 @@ func (da DeltaAllOutput) Text() string {
 				len(d.Manifest.DeletedFiles) + len(d.Manifest.RenamedFiles)
 			deltaLines = d.Manifest.DeltaLines
 		}
-		b.WriteString(fmt.Sprintf("%-20s %-14s %-10v %-14d %d\n",
-			d.Domain, d.Mode, d.ForceFull, filesChanged, deltaLines))
+		fmt.Fprintf(&b, "%-20s %-14s %-10v %-14d %d\n",
+			d.Domain, d.Mode, d.ForceFull, filesChanged, deltaLines)
 	}
 
 	return b.String()
@@ -143,7 +143,7 @@ func (v ValidateOutput) Text() string {
 	var b strings.Builder
 
 	// Header table.
-	b.WriteString(fmt.Sprintf("%-20s %-12s %-8s %s\n", "Domain", "Total Refs", "Broken", "Status"))
+	fmt.Fprintf(&b, "%-20s %-12s %-8s %s\n", "Domain", "Total Refs", "Broken", "Status")
 	b.WriteString(strings.Repeat("-", 54) + "\n")
 
 	for _, r := range v.Reports {
@@ -151,7 +151,7 @@ func (v ValidateOutput) Text() string {
 		if r.BrokenCount > 0 {
 			status = "BROKEN"
 		}
-		b.WriteString(fmt.Sprintf("%-20s %-12d %-8d %s\n", r.Domain, r.TotalRefs, r.BrokenCount, status))
+		fmt.Fprintf(&b, "%-20s %-12d %-8d %s\n", r.Domain, r.TotalRefs, r.BrokenCount, status)
 	}
 
 	// Broken reference details.
@@ -169,9 +169,9 @@ func (v ValidateOutput) Text() string {
 			if r.BrokenCount == 0 {
 				continue
 			}
-			b.WriteString(fmt.Sprintf("  %s:\n", r.Domain))
+			fmt.Fprintf(&b, "  %s:\n", r.Domain)
 			for _, br := range r.Broken {
-				b.WriteString(fmt.Sprintf("    [%s] %s -- %s\n", br.Type, br.Ref, br.Error))
+				fmt.Fprintf(&b, "    [%s] %s -- %s\n", br.Type, br.Ref, br.Error)
 			}
 		}
 	}
@@ -221,8 +221,8 @@ func (k KnowsOutput) Text() string {
 
 	var b strings.Builder
 	// Header row
-	b.WriteString(fmt.Sprintf("%-16s %-20s %-12s %-30s %-10s %-10s\n",
-		"Domain", "Generated", "Expires", "Status", "Source", "Confidence"))
+	fmt.Fprintf(&b, "%-16s %-20s %-12s %-30s %-10s %-10s\n",
+		"Domain", "Generated", "Expires", "Status", "Source", "Confidence")
 	b.WriteString(strings.Repeat("-", 102) + "\n")
 
 	for _, d := range k.Domains {
@@ -237,8 +237,8 @@ func (k KnowsOutput) Text() string {
 		if len(srcHash) > 7 {
 			srcHash = srcHash[:7]
 		}
-		b.WriteString(fmt.Sprintf("%-16s %-20s %-12s %-30s %-10s %.2f\n",
-			d.Domain, generated, d.Expires, status, srcHash, d.Confidence))
+		fmt.Fprintf(&b, "%-16s %-20s %-12s %-30s %-10s %.2f\n",
+			d.Domain, generated, d.Expires, status, srcHash, d.Confidence)
 	}
 
 	return b.String()
@@ -685,22 +685,22 @@ func runSemanticDiff(printer *output.Printer, startDir, projectDir string, args 
 type DiscoverOutput struct {
 	Boundaries []know.ServiceBoundary `json:"boundaries"`
 	Total      int                    `json:"total"`
-	WithKnow   int                   `json:"with_know"`
+	WithKnow   int                    `json:"with_know"`
 }
 
 // Text implements output.Textable for human-readable discover output.
 func (d DiscoverOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("%-40s %-15s %-10s %s\n", "Path", "Marker", "Type", ".know/"))
+	fmt.Fprintf(&b, "%-40s %-15s %-10s %s\n", "Path", "Marker", "Type", ".know/")
 	b.WriteString(strings.Repeat("-", 72) + "\n")
 	for _, sb := range d.Boundaries {
 		knowLabel := "no"
 		if sb.HasKnow {
 			knowLabel = "yes"
 		}
-		b.WriteString(fmt.Sprintf("%-40s %-15s %-10s %s\n", sb.Path, sb.MarkerFile, sb.MarkerType, knowLabel))
+		fmt.Fprintf(&b, "%-40s %-15s %-10s %s\n", sb.Path, sb.MarkerFile, sb.MarkerType, knowLabel)
 	}
-	b.WriteString(fmt.Sprintf("\n%d service boundaries found (%d with .know/)\n", d.Total, d.WithKnow))
+	fmt.Fprintf(&b, "\n%d service boundaries found (%d with .know/)\n", d.Total, d.WithKnow)
 	return b.String()
 }
 

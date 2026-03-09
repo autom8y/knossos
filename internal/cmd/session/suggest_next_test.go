@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -138,13 +139,7 @@ func TestSuggestNext_MatchingInitiative(t *testing.T) {
 	if !strings.Contains(out.SuggestedAction, criticalID) {
 		t.Errorf("SuggestedAction %q does not contain %q", out.SuggestedAction, criticalID)
 	}
-	found := false
-	for _, id := range out.RelatedOrphans {
-		if id == criticalID {
-			found = true
-			break
-		}
-	}
+	found := slices.Contains(out.RelatedOrphans, criticalID)
 	if !found {
 		t.Errorf("RelatedOrphans %v does not include %q", out.RelatedOrphans, criticalID)
 	}
@@ -190,7 +185,7 @@ func captureSuggestNext(t *testing.T, ctx *cmdContext) SuggestNextOutput {
 	// Redirect printer output to buf by temporarily replacing the context output.
 	// We do this by creating a fresh printer — the printer in runSuggestNext
 	// reads ctx.Output, so we can override it by mutating the flag pointer.
-	captureCtx.SessionContext.BaseContext.Output = &outFmt
+	captureCtx.Output = &outFmt
 
 	// Use a pipe-backed approach: create a temp file to capture stdout.
 	tmpFile := filepath.Join(t.TempDir(), "out.json")

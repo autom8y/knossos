@@ -1,8 +1,8 @@
 package artifact
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -27,15 +27,15 @@ func (l listOutput) Text() string {
 
 	// Header
 	header := strings.ToUpper(l.Dimension)
-	b.WriteString(fmt.Sprintf("%-30s %s\n", header, "COUNT"))
+	fmt.Fprintf(&b, "%-30s %s\n", header, "COUNT")
 	b.WriteString(strings.Repeat("-", 40) + "\n")
 
 	// Rows
 	for key, count := range l.Counts {
-		b.WriteString(fmt.Sprintf("%-30s %d\n", key, count))
+		fmt.Fprintf(&b, "%-30s %d\n", key, count)
 	}
 
-	b.WriteString(fmt.Sprintf("\nTotal: %d artifacts\n", l.Total))
+	fmt.Fprintf(&b, "\nTotal: %d artifacts\n", l.Total)
 
 	return b.String()
 }

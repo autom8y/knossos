@@ -87,17 +87,17 @@ func (h HealthDashboard) Text() string {
 		b.WriteString("  (not found)\n")
 	} else {
 		if h.Claude.ActiveRite != "" {
-			b.WriteString(fmt.Sprintf("  Active Rite:  %s\n", h.Claude.ActiveRite))
+			fmt.Fprintf(&b, "  Active Rite:  %s\n", h.Claude.ActiveRite)
 		} else {
 			b.WriteString("  Active Rite:  (none)\n")
 		}
-		b.WriteString(fmt.Sprintf("  Agents:       %d\n", h.Claude.AgentCount))
+		fmt.Fprintf(&b, "  Agents:       %d\n", h.Claude.AgentCount)
 		if h.Claude.LastSync != "" {
 			sync := h.Claude.LastSync
 			if h.Claude.LastSyncAge != "" {
 				sync += " (" + h.Claude.LastSyncAge + ")"
 			}
-			b.WriteString(fmt.Sprintf("  Last Sync:    %s\n", sync))
+			fmt.Fprintf(&b, "  Last Sync:    %s\n", sync)
 		} else {
 			b.WriteString("  Last Sync:    (no provenance manifest)\n")
 		}
@@ -111,9 +111,9 @@ func (h HealthDashboard) Text() string {
 		if h.Knossos.SatelliteRiteCount == 0 {
 			b.WriteString("  Satellite Rites: 0\n")
 		} else {
-			b.WriteString(fmt.Sprintf("  Satellite Rites: %d (%s)\n",
+			fmt.Fprintf(&b, "  Satellite Rites: %d (%s)\n",
 				h.Knossos.SatelliteRiteCount,
-				strings.Join(h.Knossos.SatelliteRites, ", ")))
+				strings.Join(h.Knossos.SatelliteRites, ", "))
 		}
 	}
 
@@ -125,8 +125,8 @@ func (h HealthDashboard) Text() string {
 	case h.Know.DomainCount == 0:
 		b.WriteString("  Domains: 0\n")
 	default:
-		b.WriteString(fmt.Sprintf("  Domains: %d (%d fresh, %d stale)\n",
-			h.Know.DomainCount, h.Know.FreshCount, h.Know.StaleCount))
+		fmt.Fprintf(&b, "  Domains: %d (%d fresh, %d stale)\n",
+			h.Know.DomainCount, h.Know.FreshCount, h.Know.StaleCount)
 		for _, d := range h.Know.Domains {
 			freshLabel := "fresh"
 			expiresLabel := "expires"
@@ -134,8 +134,8 @@ func (h HealthDashboard) Text() string {
 				freshLabel = "STALE"
 				expiresLabel = "expired"
 			}
-			b.WriteString(fmt.Sprintf("    %-20s %-8s %s %s\n",
-				d.Domain, freshLabel, expiresLabel, d.Expires))
+			fmt.Fprintf(&b, "    %-20s %-8s %s %s\n",
+				d.Domain, freshLabel, expiresLabel, d.Expires)
 		}
 	}
 
@@ -144,9 +144,9 @@ func (h HealthDashboard) Text() string {
 	if !h.Ledge.Exists {
 		b.WriteString("  (not found)\n")
 	} else {
-		b.WriteString(fmt.Sprintf("  Decisions: %d  Specs: %d  Reviews: %d  Spikes: %d\n",
+		fmt.Fprintf(&b, "  Decisions: %d  Specs: %d  Reviews: %d  Spikes: %d\n",
 			h.Ledge.DecisionCount, h.Ledge.SpecCount,
-			h.Ledge.ReviewCount, h.Ledge.SpikeCount))
+			h.Ledge.ReviewCount, h.Ledge.SpikeCount)
 	}
 
 	// .sos/
@@ -154,11 +154,11 @@ func (h HealthDashboard) Text() string {
 	if !h.SOS.Exists {
 		b.WriteString("  (not found)\n")
 	} else {
-		b.WriteString(fmt.Sprintf("  Sessions: %d (%d active, %d parked, %d archived)\n",
+		fmt.Fprintf(&b, "  Sessions: %d (%d active, %d parked, %d archived)\n",
 			h.SOS.TotalCount, h.SOS.ActiveCount,
-			h.SOS.ParkedCount, h.SOS.ArchivedCount))
+			h.SOS.ParkedCount, h.SOS.ArchivedCount)
 		if h.SOS.CurrentSession != "" {
-			b.WriteString(fmt.Sprintf("  Current: %s\n", h.SOS.CurrentSession))
+			fmt.Fprintf(&b, "  Current: %s\n", h.SOS.CurrentSession)
 		}
 	}
 
@@ -166,7 +166,7 @@ func (h HealthDashboard) Text() string {
 	if len(h.Errors) > 0 {
 		b.WriteString("\nErrors:\n")
 		for _, e := range h.Errors {
-			b.WriteString(fmt.Sprintf("  - %s\n", e))
+			fmt.Fprintf(&b, "  - %s\n", e)
 		}
 	}
 

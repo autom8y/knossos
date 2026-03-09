@@ -1,8 +1,8 @@
 package artifact
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -12,9 +12,9 @@ import (
 
 // queryOutput is the structured output for ari artifact query.
 type queryOutput struct {
-	Entries []artifact.Entry `json:"entries"`
-	Count   int              `json:"count"`
-	Total   int              `json:"total"`
+	Entries []artifact.Entry     `json:"entries"`
+	Count   int                  `json:"count"`
+	Total   int                  `json:"total"`
 	Filter  artifact.QueryFilter `json:"filter"`
 }
 
@@ -27,7 +27,7 @@ func (q queryOutput) Text() string {
 	var b strings.Builder
 
 	// Header
-	b.WriteString(fmt.Sprintf("%-25s %-12s %-16s %-20s %s\n", "ARTIFACT ID", "TYPE", "PHASE", "SPECIALIST", "SESSION"))
+	fmt.Fprintf(&b, "%-25s %-12s %-16s %-20s %s\n", "ARTIFACT ID", "TYPE", "PHASE", "SPECIALIST", "SESSION")
 	b.WriteString(strings.Repeat("-", 120) + "\n")
 
 	// Rows
@@ -36,18 +36,17 @@ func (q queryOutput) Text() string {
 		if len(sessionShort) > 30 {
 			sessionShort = sessionShort[:27] + "..."
 		}
-		b.WriteString(fmt.Sprintf("%-25s %-12s %-16s %-20s %s\n",
+		fmt.Fprintf(&b, "%-25s %-12s %-16s %-20s %s\n",
 			entry.ArtifactID,
 			entry.ArtifactType,
 			entry.Phase,
 			entry.Specialist,
-			sessionShort,
-		))
+			sessionShort)
 	}
 
-	b.WriteString(fmt.Sprintf("\nTotal: %d artifact(s)", q.Total))
+	fmt.Fprintf(&b, "\nTotal: %d artifact(s)", q.Total)
 	if len(q.Entries) < q.Total {
-		b.WriteString(fmt.Sprintf(" (showing %d)", len(q.Entries)))
+		fmt.Fprintf(&b, " (showing %d)", len(q.Entries))
 	}
 	b.WriteString("\n")
 

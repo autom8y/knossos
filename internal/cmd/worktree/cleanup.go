@@ -1,8 +1,8 @@
 package worktree
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 	"time"
 
@@ -35,7 +35,7 @@ func (c CleanupOutput) Text() string {
 		b.WriteString("DRY RUN - no changes made\n\n")
 	}
 
-	b.WriteString(fmt.Sprintf("Worktrees older than: %s\n\n", c.OlderThan))
+	fmt.Fprintf(&b, "Worktrees older than: %s\n\n", c.OlderThan)
 
 	if len(c.Removed) > 0 {
 		if c.DryRun {
@@ -44,7 +44,7 @@ func (c CleanupOutput) Text() string {
 			b.WriteString("Removed:\n")
 		}
 		for _, id := range c.Removed {
-			b.WriteString(fmt.Sprintf("  - %s\n", id))
+			fmt.Fprintf(&b, "  - %s\n", id)
 		}
 	}
 
@@ -53,9 +53,9 @@ func (c CleanupOutput) Text() string {
 		for _, id := range c.Skipped {
 			reason := c.SkipReasons[id]
 			if reason != "" {
-				b.WriteString(fmt.Sprintf("  - %s (%s)\n", id, reason))
+				fmt.Fprintf(&b, "  - %s (%s)\n", id, reason)
 			} else {
-				b.WriteString(fmt.Sprintf("  - %s\n", id))
+				fmt.Fprintf(&b, "  - %s\n", id)
 			}
 		}
 	}

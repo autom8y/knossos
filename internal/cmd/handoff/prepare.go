@@ -2,8 +2,8 @@
 package handoff
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"slices"
 	"strings"
 	"time"
@@ -303,21 +303,21 @@ type HandoffPrepareOutput struct {
 // Text implements output.Textable for HandoffPrepareOutput.
 func (h HandoffPrepareOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Handoff prepared: %s -> %s\n", h.FromAgent, h.ToAgent))
-	b.WriteString(fmt.Sprintf("Session: %s\n", h.SessionID))
-	b.WriteString(fmt.Sprintf("Status: %s\n", h.Status))
+	fmt.Fprintf(&b, "Handoff prepared: %s -> %s\n", h.FromAgent, h.ToAgent)
+	fmt.Fprintf(&b, "Session: %s\n", h.SessionID)
+	fmt.Fprintf(&b, "Status: %s\n", h.Status)
 
 	if len(h.Warnings) > 0 {
 		b.WriteString("\nWarnings:\n")
 		for _, w := range h.Warnings {
-			b.WriteString(fmt.Sprintf("  - %s\n", w))
+			fmt.Fprintf(&b, "  - %s\n", w)
 		}
 	}
 
 	if len(h.ValidationErrors) > 0 {
 		b.WriteString("\nValidation Errors:\n")
 		for _, e := range h.ValidationErrors {
-			b.WriteString(fmt.Sprintf("  - %s\n", e))
+			fmt.Fprintf(&b, "  - %s\n", e)
 		}
 	}
 

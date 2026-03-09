@@ -153,24 +153,24 @@ func (g *gateOutput) Text() string {
 	b.WriteString("\n")
 
 	// Color information
-	b.WriteString(fmt.Sprintf("Color:        %s\n", g.Color))
+	fmt.Fprintf(&b, "Color:        %s\n", g.Color)
 	if g.ComputedBase != "" && g.ComputedBase != g.Color {
-		b.WriteString(fmt.Sprintf("Computed:     %s (before modifiers)\n", g.ComputedBase))
+		fmt.Fprintf(&b, "Computed:     %s (before modifiers)\n", g.ComputedBase)
 	}
 
 	// Session info
 	if g.SessionID != "" {
-		b.WriteString(fmt.Sprintf("Session:      %s\n", g.SessionID))
+		fmt.Fprintf(&b, "Session:      %s\n", g.SessionID)
 	}
 
 	// File path
-	b.WriteString(fmt.Sprintf("File:         %s\n", g.FilePath))
+	fmt.Fprintf(&b, "File:         %s\n", g.FilePath)
 
 	// Reasons
 	if len(g.Reasons) > 0 {
 		b.WriteString("\nReasons:\n")
 		for _, reason := range g.Reasons {
-			b.WriteString(fmt.Sprintf("  - %s\n", reason))
+			fmt.Fprintf(&b, "  - %s\n", reason)
 		}
 	}
 
@@ -178,7 +178,7 @@ func (g *gateOutput) Text() string {
 	if len(g.OpenQuestions) > 0 {
 		b.WriteString("\nOpen Questions:\n")
 		for _, q := range g.OpenQuestions {
-			b.WriteString(fmt.Sprintf("  - %s\n", q))
+			fmt.Fprintf(&b, "  - %s\n", q)
 		}
 	}
 
@@ -190,7 +190,7 @@ func (g *gateOutput) Text() string {
 			if v.Severity == "warning" {
 				severityLabel = "WARN"
 			}
-			b.WriteString(fmt.Sprintf("  [%s] %s: %s\n", severityLabel, v.Type, v.Description))
+			fmt.Fprintf(&b, "  [%s] %s: %s\n", severityLabel, v.Type, v.Description)
 		}
 	}
 

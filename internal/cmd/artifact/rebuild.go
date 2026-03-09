@@ -1,8 +1,8 @@
 package artifact
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 	"time"
 
@@ -21,9 +21,9 @@ type rebuildOutput struct {
 func (r rebuildOutput) Text() string {
 	var b strings.Builder
 	b.WriteString("\nRebuilt project registry:\n")
-	b.WriteString(fmt.Sprintf("  Sessions scanned: %d\n", r.SessionsScanned))
-	b.WriteString(fmt.Sprintf("  Artifacts indexed: %d\n", r.ArtifactsIndexed))
-	b.WriteString(fmt.Sprintf("  Time: %dms\n", r.RebuildTimeMs))
+	fmt.Fprintf(&b, "  Sessions scanned: %d\n", r.SessionsScanned)
+	fmt.Fprintf(&b, "  Artifacts indexed: %d\n", r.ArtifactsIndexed)
+	fmt.Fprintf(&b, "  Time: %dms\n", r.RebuildTimeMs)
 	return b.String()
 }
 

@@ -37,46 +37,46 @@ type StatusOutput struct {
 func (s StatusOutput) Text() string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("Worktree: %s\n", s.WorktreeID))
-	b.WriteString(fmt.Sprintf("  Name: %s\n", s.Name))
-	b.WriteString(fmt.Sprintf("  Path: %s\n", s.Path))
+	fmt.Fprintf(&b, "Worktree: %s\n", s.WorktreeID)
+	fmt.Fprintf(&b, "  Name: %s\n", s.Name)
+	fmt.Fprintf(&b, "  Path: %s\n", s.Path)
 
 	if s.Rite != "" && s.Rite != "none" {
-		b.WriteString(fmt.Sprintf("  Rite: %s\n", s.Rite))
+		fmt.Fprintf(&b, "  Rite: %s\n", s.Rite)
 	}
 
 	if s.Branch != "" {
-		b.WriteString(fmt.Sprintf("  Branch: %s\n", s.Branch))
+		fmt.Fprintf(&b, "  Branch: %s\n", s.Branch)
 	} else {
 		b.WriteString("  Branch: (detached)\n")
 	}
 
-	b.WriteString(fmt.Sprintf("  Base: %s\n", s.BaseBranch))
-	b.WriteString(fmt.Sprintf("  Age: %s\n", s.Age))
+	fmt.Fprintf(&b, "  Base: %s\n", s.BaseBranch)
+	fmt.Fprintf(&b, "  Age: %s\n", s.Age)
 
 	// Git status
 	b.WriteString("\n")
 	if s.IsDirty || s.HasUntracked {
 		b.WriteString("Git Status: dirty\n")
 		if s.ChangedFiles > 0 {
-			b.WriteString(fmt.Sprintf("  Modified files: %d\n", s.ChangedFiles))
+			fmt.Fprintf(&b, "  Modified files: %d\n", s.ChangedFiles)
 		}
 		if s.UntrackedCount > 0 {
-			b.WriteString(fmt.Sprintf("  Untracked files: %d\n", s.UntrackedCount))
+			fmt.Fprintf(&b, "  Untracked files: %d\n", s.UntrackedCount)
 		}
 	} else {
 		b.WriteString("Git Status: clean\n")
 	}
 
 	if s.CommitsAhead > 0 || s.CommitsBehind > 0 {
-		b.WriteString(fmt.Sprintf("  Ahead: %d, Behind: %d (vs %s)\n", s.CommitsAhead, s.CommitsBehind, s.BaseBranch))
+		fmt.Fprintf(&b, "  Ahead: %d, Behind: %d (vs %s)\n", s.CommitsAhead, s.CommitsBehind, s.BaseBranch)
 	}
 
 	// Session status
 	b.WriteString("\n")
-	b.WriteString(fmt.Sprintf("Session: %s\n", s.SessionStatus))
+	fmt.Fprintf(&b, "Session: %s\n", s.SessionStatus)
 	if s.CurrentSession != "" {
-		b.WriteString(fmt.Sprintf("  ID: %s\n", s.CurrentSession))
+		fmt.Fprintf(&b, "  ID: %s\n", s.CurrentSession)
 	}
 
 	return b.String()

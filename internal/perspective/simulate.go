@@ -83,11 +83,12 @@ func RunSimulate(doc *PerspectiveDocument, prompt string) *SimulateOverlay {
 	// Classify tool matches as can/cannot attempt
 	for _, match := range toolMatchSet {
 		overlay.ToolMatches = append(overlay.ToolMatches, match)
-		if disallowedSet[match.Name] {
+		switch {
+		case disallowedSet[match.Name]:
 			overlay.CannotAttempt = append(overlay.CannotAttempt, match.Name+" (disallowed)")
-		} else if toolSet[match.Name] {
+		case toolSet[match.Name]:
 			overlay.CanAttempt = append(overlay.CanAttempt, match.Name)
-		} else {
+		default:
 			overlay.CannotAttempt = append(overlay.CannotAttempt, match.Name+" (not in tools)")
 		}
 	}
@@ -170,7 +171,7 @@ func RunSimulate(doc *PerspectiveDocument, prompt string) *SimulateOverlay {
 func tokenize(prompt string) []string {
 	// Split on whitespace and common punctuation
 	words := strings.FieldsFunc(strings.ToLower(prompt), func(r rune) bool {
-		return !((r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' || r == '_')
+		return (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '-' && r != '_'
 	})
 	// Deduplicate
 	seen := make(map[string]bool, len(words))

@@ -17,49 +17,49 @@ type syncOptions struct {
 
 // SyncOutput represents the output of worktree sync.
 type SyncOutput struct {
-	Success     bool     `json:"success"`
-	WorktreeID  string   `json:"worktree_id"`
-	Name        string   `json:"name"`
-	BaseBranch  string   `json:"base_branch"`
-	Ahead       int      `json:"ahead"`
-	Behind      int      `json:"behind"`
-	Diverged    bool     `json:"diverged"`
-	UpToDate    bool     `json:"up_to_date"`
-	Pulled      bool     `json:"pulled"`
-	PullError   string   `json:"pull_error,omitempty"`
-	Conflicts   []string `json:"conflicts,omitempty"`
-	Message     string   `json:"message"`
+	Success    bool     `json:"success"`
+	WorktreeID string   `json:"worktree_id"`
+	Name       string   `json:"name"`
+	BaseBranch string   `json:"base_branch"`
+	Ahead      int      `json:"ahead"`
+	Behind     int      `json:"behind"`
+	Diverged   bool     `json:"diverged"`
+	UpToDate   bool     `json:"up_to_date"`
+	Pulled     bool     `json:"pulled"`
+	PullError  string   `json:"pull_error,omitempty"`
+	Conflicts  []string `json:"conflicts,omitempty"`
+	Message    string   `json:"message"`
 }
 
 // Text implements output.Textable for SyncOutput.
 func (s SyncOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Worktree: %s (%s)\n", s.Name, s.WorktreeID))
-	b.WriteString(fmt.Sprintf("Base branch: %s\n\n", s.BaseBranch))
+	fmt.Fprintf(&b, "Worktree: %s (%s)\n", s.Name, s.WorktreeID)
+	fmt.Fprintf(&b, "Base branch: %s\n\n", s.BaseBranch)
 
 	switch {
 	case s.UpToDate:
 		b.WriteString("Status: Up to date\n")
 	case s.Diverged:
-		b.WriteString(fmt.Sprintf("Status: Diverged (+%d/-%d)\n", s.Ahead, s.Behind))
+		fmt.Fprintf(&b, "Status: Diverged (+%d/-%d)\n", s.Ahead, s.Behind)
 		b.WriteString("  Your branch and upstream have diverged.\n")
 		b.WriteString("  Consider rebasing or merging upstream changes.\n")
 	case s.Ahead > 0:
-		b.WriteString(fmt.Sprintf("Status: Ahead by %d commit(s)\n", s.Ahead))
+		fmt.Fprintf(&b, "Status: Ahead by %d commit(s)\n", s.Ahead)
 	case s.Behind > 0:
-		b.WriteString(fmt.Sprintf("Status: Behind by %d commit(s)\n", s.Behind))
+		fmt.Fprintf(&b, "Status: Behind by %d commit(s)\n", s.Behind)
 	}
 
 	if s.Pulled {
 		b.WriteString("\nPull: Successful\n")
 	} else if s.PullError != "" {
-		b.WriteString(fmt.Sprintf("\nPull: Failed - %s\n", s.PullError))
+		fmt.Fprintf(&b, "\nPull: Failed - %s\n", s.PullError)
 	}
 
 	if len(s.Conflicts) > 0 {
-		b.WriteString(fmt.Sprintf("\nConflicts (%d):\n", len(s.Conflicts)))
+		fmt.Fprintf(&b, "\nConflicts (%d):\n", len(s.Conflicts))
 		for _, conflict := range s.Conflicts {
-			b.WriteString(fmt.Sprintf("  - %s\n", conflict))
+			fmt.Fprintf(&b, "  - %s\n", conflict)
 		}
 		b.WriteString("\nResolve conflicts and commit to complete the merge.\n")
 	}

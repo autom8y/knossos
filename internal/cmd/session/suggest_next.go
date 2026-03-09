@@ -29,21 +29,21 @@ func (s SuggestNextOutput) Text() string {
 
 	if !s.HasTriage {
 		b.WriteString("No triage data available.\n")
-		b.WriteString(fmt.Sprintf("Suggested: %s\n", s.SuggestedAction))
-		b.WriteString(fmt.Sprintf("Rationale: %s\n", s.Rationale))
+		fmt.Fprintf(&b, "Suggested: %s\n", s.SuggestedAction)
+		fmt.Fprintf(&b, "Rationale: %s\n", s.Rationale)
 		return b.String()
 	}
 
-	b.WriteString(fmt.Sprintf("Orphaned sessions: %d total (%d CRITICAL, %d HIGH)\n",
-		s.TotalOrphans, s.CriticalOrphans, s.HighOrphans))
+	fmt.Fprintf(&b, "Orphaned sessions: %d total (%d CRITICAL, %d HIGH)\n",
+		s.TotalOrphans, s.CriticalOrphans, s.HighOrphans)
 
 	if len(s.RelatedOrphans) > 0 {
-		b.WriteString(fmt.Sprintf("Related to current initiative: %s\n",
-			strings.Join(s.RelatedOrphans, ", ")))
+		fmt.Fprintf(&b, "Related to current initiative: %s\n",
+			strings.Join(s.RelatedOrphans, ", "))
 	}
 
-	b.WriteString(fmt.Sprintf("Suggested: %s\n", s.SuggestedAction))
-	b.WriteString(fmt.Sprintf("Rationale: %s\n", s.Rationale))
+	fmt.Fprintf(&b, "Suggested: %s\n", s.SuggestedAction)
+	fmt.Fprintf(&b, "Rationale: %s\n", s.Rationale)
 
 	return b.String()
 }

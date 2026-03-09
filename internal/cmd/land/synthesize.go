@@ -1,8 +1,8 @@
 package land
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"os"
 	"path/filepath"
 	"slices"
@@ -77,10 +77,10 @@ type sessionSummary struct {
 
 // landFileSummary describes an existing .sos/land/{domain}.md file.
 type landFileSummary struct {
-	Domain            string `json:"domain"`
-	Path              string `json:"path"`
-	GeneratedAt       string `json:"generated_at,omitempty"`
-	SessionsSynthesized int  `json:"sessions_synthesized,omitempty"`
+	Domain              string `json:"domain"`
+	Path                string `json:"path"`
+	GeneratedAt         string `json:"generated_at,omitempty"`
+	SessionsSynthesized int    `json:"sessions_synthesized,omitempty"`
 }
 
 // synthesizeOutput holds the full inventory for JSON output.
@@ -210,18 +210,18 @@ func runSynthesize(ctx *cmdContext, domain string) error {
 
 	// Build summary message for text mode.
 	var msgBuilder strings.Builder
-	msgBuilder.WriteString(fmt.Sprintf("%d session(s) available for synthesis\n", len(sessions)))
-	msgBuilder.WriteString(fmt.Sprintf("Domain:   %s\n", effectiveDomain))
-	msgBuilder.WriteString(fmt.Sprintf("Archive:  %s\n", archiveDir))
-	msgBuilder.WriteString(fmt.Sprintf("Land dir: %s\n", landDir))
+	fmt.Fprintf(&msgBuilder, "%d session(s) available for synthesis\n", len(sessions))
+	fmt.Fprintf(&msgBuilder, "Domain:   %s\n", effectiveDomain)
+	fmt.Fprintf(&msgBuilder, "Archive:  %s\n", archiveDir)
+	fmt.Fprintf(&msgBuilder, "Land dir: %s\n", landDir)
 	if len(existing) > 0 {
 		msgBuilder.WriteString("\nExisting land files:\n")
 		for _, lf := range existing {
-			msgBuilder.WriteString(fmt.Sprintf("  %s.md", lf.Domain))
+			fmt.Fprintf(&msgBuilder, "  %s.md", lf.Domain)
 			if lf.GeneratedAt != "" {
-				msgBuilder.WriteString(fmt.Sprintf(" (generated: %s", lf.GeneratedAt))
+				fmt.Fprintf(&msgBuilder, " (generated: %s", lf.GeneratedAt)
 				if lf.SessionsSynthesized > 0 {
-					msgBuilder.WriteString(fmt.Sprintf(", sessions: %d", lf.SessionsSynthesized))
+					fmt.Fprintf(&msgBuilder, ", sessions: %d", lf.SessionsSynthesized)
 				}
 				msgBuilder.WriteString(")")
 			}

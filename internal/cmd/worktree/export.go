@@ -26,10 +26,10 @@ type ExportOutput struct {
 // Text implements output.Textable for ExportOutput.
 func (e ExportOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Exported worktree: %s (%s)\n", e.Name, e.WorktreeID))
-	b.WriteString(fmt.Sprintf("  Archive: %s\n", e.ArchivePath))
-	b.WriteString(fmt.Sprintf("  Size: %s\n", formatSize(e.ArchiveSize)))
-	b.WriteString(fmt.Sprintf("\nTo import: ari worktree import %s\n", e.ArchivePath))
+	fmt.Fprintf(&b, "Exported worktree: %s (%s)\n", e.Name, e.WorktreeID)
+	fmt.Fprintf(&b, "  Archive: %s\n", e.ArchivePath)
+	fmt.Fprintf(&b, "  Size: %s\n", formatSize(e.ArchiveSize))
+	fmt.Fprintf(&b, "\nTo import: ari worktree import %s\n", e.ArchivePath)
 	return b.String()
 }
 

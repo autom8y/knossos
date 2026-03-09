@@ -27,15 +27,15 @@ type ImportOutput struct {
 // Text implements output.Textable for ImportOutput.
 func (i ImportOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Imported worktree: %s\n", i.WorktreeID))
-	b.WriteString(fmt.Sprintf("  Name: %s\n", i.Name))
-	b.WriteString(fmt.Sprintf("  Path: %s\n", i.Path))
+	fmt.Fprintf(&b, "Imported worktree: %s\n", i.WorktreeID)
+	fmt.Fprintf(&b, "  Name: %s\n", i.Name)
+	fmt.Fprintf(&b, "  Path: %s\n", i.Path)
 	if i.Rite != "" && i.Rite != "none" {
-		b.WriteString(fmt.Sprintf("  Rite: %s\n", i.Rite))
+		fmt.Fprintf(&b, "  Rite: %s\n", i.Rite)
 	}
-	b.WriteString(fmt.Sprintf("  From archive: %s\n", i.FromArchive))
-	b.WriteString(fmt.Sprintf("  Original ID: %s\n", i.OriginalID))
-	b.WriteString(fmt.Sprintf("\nTo start working: cd %s && claude\n", i.Path))
+	fmt.Fprintf(&b, "  From archive: %s\n", i.FromArchive)
+	fmt.Fprintf(&b, "  Original ID: %s\n", i.OriginalID)
+	fmt.Fprintf(&b, "\nTo start working: cd %s && claude\n", i.Path)
 	return b.String()
 }
 

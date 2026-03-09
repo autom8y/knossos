@@ -254,10 +254,10 @@ func (h HandoffHistoryOutput) Text() string {
 	}
 
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Handoff History for %s\n", h.SessionID))
-	b.WriteString(fmt.Sprintf("Total entries: %d", h.Total))
+	fmt.Fprintf(&b, "Handoff History for %s\n", h.SessionID)
+	fmt.Fprintf(&b, "Total entries: %d", h.Total)
 	if h.Showing > 0 && h.Showing < h.Total {
-		b.WriteString(fmt.Sprintf(" (showing last %d)", h.Showing))
+		fmt.Fprintf(&b, " (showing last %d)", h.Showing)
 	}
 	b.WriteString("\n\n")
 

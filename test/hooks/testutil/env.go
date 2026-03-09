@@ -47,7 +47,9 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 
 	// Set CLAUDE_PROJECT_DIR (the one env var CC still sends)
 	if env.ProjectDir != "" {
-		os.Setenv("CLAUDE_PROJECT_DIR", env.ProjectDir)
+		if err := os.Setenv("CLAUDE_PROJECT_DIR", env.ProjectDir); err != nil {
+			t.Fatalf("SetupEnv: os.Setenv: %v", err)
+		}
 	}
 
 	// Build payload as a map so we can handle non-JSON ToolInput/ToolResult
@@ -84,8 +86,8 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 		t.Fatalf("SetupEnv: os.Pipe: %v", err)
 	}
 	go func() {
-		w.Write(data)
-		w.Close()
+		_, _ = w.Write(data)
+		_ = w.Close()
 	}()
 	os.Stdin = r
 
@@ -100,9 +102,9 @@ func SetupEnv(t *testing.T, env *HookEnv) *EnvSetup {
 func (s *EnvSetup) Restore() {
 	os.Stdin = s.originalStdin
 	if s.hadPD {
-		os.Setenv("CLAUDE_PROJECT_DIR", s.originalPD)
+		_ = os.Setenv("CLAUDE_PROJECT_DIR", s.originalPD)
 	} else {
-		os.Unsetenv("CLAUDE_PROJECT_DIR")
+		_ = os.Unsetenv("CLAUDE_PROJECT_DIR")
 	}
 }
 
@@ -112,7 +114,7 @@ func (s *EnvSetup) SetVar(key, value string) {
 		s.t.Fatalf("SetVar: os.Setenv(%q): %v", key, err)
 	}
 	s.t.Cleanup(func() {
-		os.Unsetenv(key)
+		_ = os.Unsetenv(key)
 	})
 }
 

@@ -73,21 +73,21 @@ func (a ArtifactOutput) Text() string {
 	var b strings.Builder
 
 	if a.Valid {
-		b.WriteString(fmt.Sprintf("VALID: %s\n", a.FilePath))
+		fmt.Fprintf(&b, "VALID: %s\n", a.FilePath)
 		if a.ArtifactType != "" {
-			b.WriteString(fmt.Sprintf("  Type: %s\n", a.ArtifactType))
+			fmt.Fprintf(&b, "  Type: %s\n", a.ArtifactType)
 		}
 	} else {
-		b.WriteString(fmt.Sprintf("INVALID: %s\n", a.FilePath))
+		fmt.Fprintf(&b, "INVALID: %s\n", a.FilePath)
 		if a.ArtifactType != "" {
-			b.WriteString(fmt.Sprintf("  Type: %s\n", a.ArtifactType))
+			fmt.Fprintf(&b, "  Type: %s\n", a.ArtifactType)
 		}
 		b.WriteString("  Issues:\n")
 		for _, issue := range a.Issues {
 			if issue.Field != "" {
-				b.WriteString(fmt.Sprintf("    - [%s] %s\n", issue.Field, issue.Message))
+				fmt.Fprintf(&b, "    - [%s] %s\n", issue.Field, issue.Message)
 			} else {
-				b.WriteString(fmt.Sprintf("    - %s\n", issue.Message))
+				fmt.Fprintf(&b, "    - %s\n", issue.Message)
 			}
 		}
 	}
@@ -208,19 +208,19 @@ func (h HandoffOutput) Text() string {
 	var b strings.Builder
 
 	if h.Passed {
-		b.WriteString(fmt.Sprintf("PASSED: %s handoff for %s\n", h.Phase, h.ArtifactType))
+		fmt.Fprintf(&b, "PASSED: %s handoff for %s\n", h.Phase, h.ArtifactType)
 		if h.FilePath != "" {
-			b.WriteString(fmt.Sprintf("  File: %s\n", h.FilePath))
+			fmt.Fprintf(&b, "  File: %s\n", h.FilePath)
 		}
 	} else {
-		b.WriteString(fmt.Sprintf("FAILED: %s handoff for %s\n", h.Phase, h.ArtifactType))
+		fmt.Fprintf(&b, "FAILED: %s handoff for %s\n", h.Phase, h.ArtifactType)
 		if h.FilePath != "" {
-			b.WriteString(fmt.Sprintf("  File: %s\n", h.FilePath))
+			fmt.Fprintf(&b, "  File: %s\n", h.FilePath)
 		}
 		if len(h.BlockingFailed) > 0 {
 			b.WriteString("  Blocking failures:\n")
 			for _, cr := range h.BlockingFailed {
-				b.WriteString(fmt.Sprintf("    - [%s] %s\n", cr.Criterion.Field, cr.Message))
+				fmt.Fprintf(&b, "    - [%s] %s\n", cr.Criterion.Field, cr.Message)
 			}
 		}
 	}
@@ -228,7 +228,7 @@ func (h HandoffOutput) Text() string {
 	if len(h.Warnings) > 0 {
 		b.WriteString("  Warnings:\n")
 		for _, cr := range h.Warnings {
-			b.WriteString(fmt.Sprintf("    - [%s] %s\n", cr.Criterion.Field, cr.Message))
+			fmt.Fprintf(&b, "    - [%s] %s\n", cr.Criterion.Field, cr.Message)
 		}
 	}
 
@@ -251,9 +251,9 @@ func (p PhaseCriteriaOutput) Text() string {
 	var b strings.Builder
 	b.WriteString("Phases with handoff criteria:\n")
 	for _, info := range p.Phases {
-		b.WriteString(fmt.Sprintf("  %s:\n", info.Phase))
+		fmt.Fprintf(&b, "  %s:\n", info.Phase)
 		for _, at := range info.ArtifactTypes {
-			b.WriteString(fmt.Sprintf("    - %s\n", at))
+			fmt.Fprintf(&b, "    - %s\n", at)
 		}
 	}
 	return b.String()
@@ -270,19 +270,19 @@ type CriteriaDetailOutput struct {
 // Text implements output.Textable for CriteriaDetailOutput.
 func (c CriteriaDetailOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Handoff criteria for %s/%s:\n", c.Phase, c.ArtifactType))
+	fmt.Fprintf(&b, "Handoff criteria for %s/%s:\n", c.Phase, c.ArtifactType)
 
 	if len(c.Blocking) > 0 {
 		b.WriteString("  Blocking:\n")
 		for _, cr := range c.Blocking {
-			b.WriteString(fmt.Sprintf("    - %s: %s\n", cr.Field, cr.Message))
+			fmt.Fprintf(&b, "    - %s: %s\n", cr.Field, cr.Message)
 		}
 	}
 
 	if len(c.NonBlocking) > 0 {
 		b.WriteString("  Non-blocking:\n")
 		for _, cr := range c.NonBlocking {
-			b.WriteString(fmt.Sprintf("    - %s: %s\n", cr.Field, cr.Message))
+			fmt.Fprintf(&b, "    - %s: %s\n", cr.Field, cr.Message)
 		}
 	}
 
@@ -462,15 +462,15 @@ func (s SchemaOutput) Text() string {
 	var b strings.Builder
 
 	if s.Valid {
-		b.WriteString(fmt.Sprintf("VALID: %s (schema: %s)\n", s.FilePath, s.SchemaName))
+		fmt.Fprintf(&b, "VALID: %s (schema: %s)\n", s.FilePath, s.SchemaName)
 	} else {
-		b.WriteString(fmt.Sprintf("INVALID: %s (schema: %s)\n", s.FilePath, s.SchemaName))
+		fmt.Fprintf(&b, "INVALID: %s (schema: %s)\n", s.FilePath, s.SchemaName)
 		b.WriteString("  Issues:\n")
 		for _, issue := range s.Issues {
 			if issue.Field != "" {
-				b.WriteString(fmt.Sprintf("    - [%s] %s\n", issue.Field, issue.Message))
+				fmt.Fprintf(&b, "    - [%s] %s\n", issue.Field, issue.Message)
 			} else {
-				b.WriteString(fmt.Sprintf("    - %s\n", issue.Message))
+				fmt.Fprintf(&b, "    - %s\n", issue.Message)
 			}
 		}
 	}

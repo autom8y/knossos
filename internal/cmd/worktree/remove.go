@@ -15,15 +15,15 @@ type removeOptions struct {
 
 // RemoveOutput represents the output of worktree remove.
 type RemoveOutput struct {
-	Success    bool   `json:"success"`
-	Removed    string `json:"removed"`
-	WasForced  bool   `json:"was_forced,omitempty"`
+	Success   bool   `json:"success"`
+	Removed   string `json:"removed"`
+	WasForced bool   `json:"was_forced,omitempty"`
 }
 
 // Text implements output.Textable for RemoveOutput.
 func (r RemoveOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Removed worktree: %s\n", r.Removed))
+	fmt.Fprintf(&b, "Removed worktree: %s\n", r.Removed)
 	if r.WasForced {
 		b.WriteString("  (forced removal)\n")
 	}

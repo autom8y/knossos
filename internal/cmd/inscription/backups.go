@@ -1,8 +1,8 @@
 package inscription
 
 import (
-	"github.com/autom8y/knossos/internal/cmd/common"
 	"fmt"
+	"github.com/autom8y/knossos/internal/cmd/common"
 	"strings"
 	"time"
 
@@ -89,14 +89,14 @@ func (b BackupsListOutput) Text() string {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Available backups (%d):\n\n", b.Total))
+	fmt.Fprintf(&sb, "Available backups (%d):\n\n", b.Total)
 
 	for i, backup := range b.Backups {
 		marker := "  "
 		if i == 0 {
 			marker = "* " // Most recent
 		}
-		sb.WriteString(fmt.Sprintf("%s%s  %s\n", marker, backup.Timestamp.Format("2006-01-02 15:04:05"), backup.Name))
+		fmt.Fprintf(&sb, "%s%s  %s\n", marker, backup.Timestamp.Format("2006-01-02 15:04:05"), backup.Name)
 	}
 
 	sb.WriteString("\n* = most recent (used by 'ari inscription rollback')\n")

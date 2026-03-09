@@ -246,14 +246,14 @@ func (s StatusOutput) Text() string {
 		return "No active session"
 	}
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Session: %s\n", s.SessionID))
-	b.WriteString(fmt.Sprintf("Status: %s\n", s.Status))
-	b.WriteString(fmt.Sprintf("Initiative: %s\n", s.Initiative))
-	b.WriteString(fmt.Sprintf("Phase: %s\n", s.CurrentPhase))
-	b.WriteString(fmt.Sprintf("Rite: %s\n", s.ActiveRite))
-	b.WriteString(fmt.Sprintf("Mode: %s\n", s.ExecutionMode))
+	fmt.Fprintf(&b, "Session: %s\n", s.SessionID)
+	fmt.Fprintf(&b, "Status: %s\n", s.Status)
+	fmt.Fprintf(&b, "Initiative: %s\n", s.Initiative)
+	fmt.Fprintf(&b, "Phase: %s\n", s.CurrentPhase)
+	fmt.Fprintf(&b, "Rite: %s\n", s.ActiveRite)
+	fmt.Fprintf(&b, "Mode: %s\n", s.ExecutionMode)
 	if s.GitBranch != "" {
-		b.WriteString(fmt.Sprintf("Branch: %s (%d changes)\n", s.GitBranch, s.GitChanges))
+		fmt.Fprintf(&b, "Branch: %s (%d changes)\n", s.GitBranch, s.GitChanges)
 	}
 	// Display sails info
 	if s.SailsColor != "" {
@@ -283,10 +283,10 @@ type CreateOutput struct {
 // Text implements Textable for CreateOutput.
 func (c CreateOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Created session: %s\n", c.SessionID))
-	b.WriteString(fmt.Sprintf("Initiative: %s\n", c.Initiative))
-	b.WriteString(fmt.Sprintf("Complexity: %s\n", c.Complexity))
-	b.WriteString(fmt.Sprintf("Rite: %s\n", c.Rite))
+	fmt.Fprintf(&b, "Created session: %s\n", c.SessionID)
+	fmt.Fprintf(&b, "Initiative: %s\n", c.Initiative)
+	fmt.Fprintf(&b, "Complexity: %s\n", c.Complexity)
+	fmt.Fprintf(&b, "Rite: %s\n", c.Rite)
 	return b.String()
 }
 
@@ -309,13 +309,13 @@ type SeedCreateOutput struct {
 // Text implements Textable for SeedCreateOutput.
 func (s SeedCreateOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Seeded session: %s\n", s.SessionID))
-	b.WriteString(fmt.Sprintf("Status: %s\n", s.Status))
-	b.WriteString(fmt.Sprintf("Initiative: %s\n", s.Initiative))
-	b.WriteString(fmt.Sprintf("Complexity: %s\n", s.Complexity))
-	b.WriteString(fmt.Sprintf("Rite: %s\n", s.Rite))
-	b.WriteString(fmt.Sprintf("Seeded to: %s\n", s.SeededTo))
-	b.WriteString(fmt.Sprintf("Park reason: %s\n", s.ParkReason))
+	fmt.Fprintf(&b, "Seeded session: %s\n", s.SessionID)
+	fmt.Fprintf(&b, "Status: %s\n", s.Status)
+	fmt.Fprintf(&b, "Initiative: %s\n", s.Initiative)
+	fmt.Fprintf(&b, "Complexity: %s\n", s.Complexity)
+	fmt.Fprintf(&b, "Rite: %s\n", s.Rite)
+	fmt.Fprintf(&b, "Seeded to: %s\n", s.SeededTo)
+	fmt.Fprintf(&b, "Park reason: %s\n", s.ParkReason)
 	return b.String()
 }
 
@@ -405,13 +405,13 @@ func (t TransitionOutput) Text() string {
 	}
 
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Session %s archived\n", t.SessionID))
+	fmt.Fprintf(&b, "Session %s archived\n", t.SessionID)
 
 	// Display sails color with appropriate formatting
 	if t.SailsColor != "" {
-		b.WriteString(fmt.Sprintf("Sails: %s", t.SailsColor))
+		fmt.Fprintf(&b, "Sails: %s", t.SailsColor)
 		if t.SailsBase != "" && t.SailsBase != t.SailsColor {
-			b.WriteString(fmt.Sprintf(" (base: %s)", t.SailsBase))
+			fmt.Fprintf(&b, " (base: %s)", t.SailsBase)
 		}
 		b.WriteString("\n")
 
@@ -423,7 +423,7 @@ func (t TransitionOutput) Text() string {
 			if len(t.SailsReasons) > 0 {
 				b.WriteString("Reasons:\n")
 				for _, reason := range t.SailsReasons {
-					b.WriteString(fmt.Sprintf("  - %s\n", reason))
+					fmt.Fprintf(&b, "  - %s\n", reason)
 				}
 			}
 		case "GRAY":
@@ -436,7 +436,7 @@ func (t TransitionOutput) Text() string {
 	}
 
 	if t.Archived && t.ArchivePath != "" {
-		b.WriteString(fmt.Sprintf("Archived to: %s\n", t.ArchivePath))
+		fmt.Fprintf(&b, "Archived to: %s\n", t.ArchivePath)
 	}
 
 	return b.String()
@@ -557,11 +557,11 @@ type FrayOutput struct {
 // Text implements Textable for FrayOutput.
 func (f FrayOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Frayed session: %s -> %s\n", f.ParentID, f.ChildID))
-	b.WriteString(fmt.Sprintf("Fray point: %s\n", f.FrayPoint))
-	b.WriteString(fmt.Sprintf("Status: %s\n", f.Status))
+	fmt.Fprintf(&b, "Frayed session: %s -> %s\n", f.ParentID, f.ChildID)
+	fmt.Fprintf(&b, "Fray point: %s\n", f.FrayPoint)
+	fmt.Fprintf(&b, "Status: %s\n", f.Status)
 	if f.WorktreePath != "" {
-		b.WriteString(fmt.Sprintf("Worktree: %s\n", f.WorktreePath))
+		fmt.Fprintf(&b, "Worktree: %s\n", f.WorktreePath)
 	}
 	return b.String()
 }
@@ -631,31 +631,31 @@ func (s SyncResultOutput) Text() string {
 	if s.DryRun {
 		b.WriteString("[DRY RUN] ")
 	}
-	b.WriteString(fmt.Sprintf("Sync: %s\n", s.Status))
+	fmt.Fprintf(&b, "Sync: %s\n", s.Status)
 
 	if s.Rite != nil {
-		b.WriteString(fmt.Sprintf("  Rite: %s", s.Rite.Status))
+		fmt.Fprintf(&b, "  Rite: %s", s.Rite.Status)
 		if s.Rite.RiteName != "" {
-			b.WriteString(fmt.Sprintf(" (%s)", s.Rite.RiteName))
+			fmt.Fprintf(&b, " (%s)", s.Rite.RiteName)
 		}
 		b.WriteString("\n")
 		if s.Rite.Error != "" {
 			if s.Rite.Status == "skipped" {
-				b.WriteString(fmt.Sprintf("    Reason: %s\n", s.Rite.Error))
+				fmt.Fprintf(&b, "    Reason: %s\n", s.Rite.Error)
 			} else {
-				b.WriteString(fmt.Sprintf("  Error: %s\n", s.Rite.Error))
+				fmt.Fprintf(&b, "  Error: %s\n", s.Rite.Error)
 			}
 		}
 		if len(s.Rite.OrphansDetected) > 0 {
 			if s.Rite.RiteSwitched && s.Rite.OrphanAction == "removed" {
-				b.WriteString(fmt.Sprintf("  Agents: %d replaced (rite switch: %s -> %s)\n",
-					len(s.Rite.OrphansDetected), s.Rite.PreviousRite, s.Rite.RiteName))
+				fmt.Fprintf(&b, "  Agents: %d replaced (rite switch: %s -> %s)\n",
+					len(s.Rite.OrphansDetected), s.Rite.PreviousRite, s.Rite.RiteName)
 			} else {
-				b.WriteString(fmt.Sprintf("  Orphans: %d detected (%s)\n", len(s.Rite.OrphansDetected), s.Rite.OrphanAction))
+				fmt.Fprintf(&b, "  Orphans: %d detected (%s)\n", len(s.Rite.OrphansDetected), s.Rite.OrphanAction)
 			}
 		}
 		if s.Rite.SoftMode {
-			b.WriteString(fmt.Sprintf("  Soft mode: deferred %s\n", strings.Join(s.Rite.DeferredStages, ", ")))
+			fmt.Fprintf(&b, "  Soft mode: deferred %s\n", strings.Join(s.Rite.DeferredStages, ", "))
 		}
 		if s.Rite.ElCheapoMode {
 			b.WriteString("  El-cheapo mode: all agents using haiku\n")
@@ -663,25 +663,25 @@ func (s SyncResultOutput) Text() string {
 	}
 
 	if s.Org != nil {
-		b.WriteString(fmt.Sprintf("  Org: %s", s.Org.Status))
+		fmt.Fprintf(&b, "  Org: %s", s.Org.Status)
 		if s.Org.OrgName != "" {
-			b.WriteString(fmt.Sprintf(" (%s)", s.Org.OrgName))
+			fmt.Fprintf(&b, " (%s)", s.Org.OrgName)
 		}
 		if s.Org.Agents > 0 || s.Org.Mena > 0 {
-			b.WriteString(fmt.Sprintf(" [agents:%d, mena:%d]", s.Org.Agents, s.Org.Mena))
+			fmt.Fprintf(&b, " [agents:%d, mena:%d]", s.Org.Agents, s.Org.Mena)
 		}
 		b.WriteString("\n")
 		if s.Org.Error != "" {
 			if s.Org.Status == "skipped" {
-				b.WriteString(fmt.Sprintf("    Reason: %s\n", s.Org.Error))
+				fmt.Fprintf(&b, "    Reason: %s\n", s.Org.Error)
 			} else {
-				b.WriteString(fmt.Sprintf("  Error: %s\n", s.Org.Error))
+				fmt.Fprintf(&b, "  Error: %s\n", s.Org.Error)
 			}
 		}
 	}
 
 	if s.User != nil {
-		b.WriteString(fmt.Sprintf("  User: %s\n", s.User.Status))
+		fmt.Fprintf(&b, "  User: %s\n", s.User.Status)
 	}
 
 	return b.String()
@@ -707,7 +707,7 @@ func (t TimelineOutput) Text() string {
 	var b strings.Builder
 
 	if t.SessionID != "" {
-		b.WriteString(fmt.Sprintf("Timeline for %s:\n", t.SessionID))
+		fmt.Fprintf(&b, "Timeline for %s:\n", t.SessionID)
 	}
 
 	if len(t.Entries) == 0 {
@@ -716,7 +716,7 @@ func (t TimelineOutput) Text() string {
 	}
 
 	for _, e := range t.Entries {
-		b.WriteString(fmt.Sprintf("- %s | %-8s | %s\n", e.Time, e.Category, e.Summary))
+		fmt.Fprintf(&b, "- %s | %-8s | %s\n", e.Time, e.Category, e.Summary)
 	}
 
 	return b.String()
@@ -764,14 +764,14 @@ type FieldAllOutput struct {
 // Text implements Textable for FieldAllOutput.
 func (f FieldAllOutput) Text() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("session_id: %s\n", f.SessionID))
-	b.WriteString(fmt.Sprintf("status: %s\n", f.Status))
-	b.WriteString(fmt.Sprintf("initiative: %s\n", f.Initiative))
-	b.WriteString(fmt.Sprintf("complexity: %s\n", f.Complexity))
-	b.WriteString(fmt.Sprintf("current_phase: %s\n", f.CurrentPhase))
-	b.WriteString(fmt.Sprintf("active_rite: %s\n", f.ActiveRite))
-	b.WriteString(fmt.Sprintf("schema_version: %s\n", f.SchemaVersion))
-	b.WriteString(fmt.Sprintf("created_at: %s\n", f.CreatedAt))
+	fmt.Fprintf(&b, "session_id: %s\n", f.SessionID)
+	fmt.Fprintf(&b, "status: %s\n", f.Status)
+	fmt.Fprintf(&b, "initiative: %s\n", f.Initiative)
+	fmt.Fprintf(&b, "complexity: %s\n", f.Complexity)
+	fmt.Fprintf(&b, "current_phase: %s\n", f.CurrentPhase)
+	fmt.Fprintf(&b, "active_rite: %s\n", f.ActiveRite)
+	fmt.Fprintf(&b, "schema_version: %s\n", f.SchemaVersion)
+	fmt.Fprintf(&b, "created_at: %s\n", f.CreatedAt)
 	return b.String()
 }
 
@@ -802,19 +802,19 @@ type QueryStrand struct {
 // the same field layout regardless of whether they read from hook injection or
 // an on-demand pull.
 type QueryOutput struct {
-	SessionID     string       `json:"session_id,omitempty"`
-	Status        string       `json:"status,omitempty"`
-	Initiative    string       `json:"initiative,omitempty"`
-	Complexity    string       `json:"complexity,omitempty"`
-	ActiveRite    string       `json:"active_rite,omitempty"`
-	ExecutionMode string       `json:"execution_mode,omitempty"`
-	CurrentPhase  string       `json:"current_phase,omitempty"`
-	FrayedFrom    string       `json:"frayed_from,omitempty"`
-	FrameRef      string       `json:"frame_ref,omitempty"`
-	ParkSource    string       `json:"park_source,omitempty"`
-	ClaimedBy     string       `json:"claimed_by,omitempty"`
+	SessionID     string        `json:"session_id,omitempty"`
+	Status        string        `json:"status,omitempty"`
+	Initiative    string        `json:"initiative,omitempty"`
+	Complexity    string        `json:"complexity,omitempty"`
+	ActiveRite    string        `json:"active_rite,omitempty"`
+	ExecutionMode string        `json:"execution_mode,omitempty"`
+	CurrentPhase  string        `json:"current_phase,omitempty"`
+	FrayedFrom    string        `json:"frayed_from,omitempty"`
+	FrameRef      string        `json:"frame_ref,omitempty"`
+	ParkSource    string        `json:"park_source,omitempty"`
+	ClaimedBy     string        `json:"claimed_by,omitempty"`
 	Strands       []QueryStrand `json:"strands,omitempty"`
-	HasSession    bool         `json:"has_session"`
+	HasSession    bool          `json:"has_session"`
 }
 
 // Text implements Textable for QueryOutput.
@@ -833,43 +833,43 @@ func (q QueryOutput) Text() string {
 	}
 
 	// Required fields
-	b.WriteString(fmt.Sprintf("session_id: %s\n", q.SessionID))
-	b.WriteString(fmt.Sprintf("status: %s\n", q.Status))
-	b.WriteString(fmt.Sprintf("initiative: %q\n", q.Initiative))
-	b.WriteString(fmt.Sprintf("active_rite: %s\n", q.ActiveRite))
-	b.WriteString(fmt.Sprintf("execution_mode: %s\n", q.ExecutionMode))
+	fmt.Fprintf(&b, "session_id: %s\n", q.SessionID)
+	fmt.Fprintf(&b, "status: %s\n", q.Status)
+	fmt.Fprintf(&b, "initiative: %q\n", q.Initiative)
+	fmt.Fprintf(&b, "active_rite: %s\n", q.ActiveRite)
+	fmt.Fprintf(&b, "execution_mode: %s\n", q.ExecutionMode)
 
 	// Optional scalar fields (omitempty)
 	if q.CurrentPhase != "" {
-		b.WriteString(fmt.Sprintf("current_phase: %s\n", q.CurrentPhase))
+		fmt.Fprintf(&b, "current_phase: %s\n", q.CurrentPhase)
 	}
 	if q.Complexity != "" {
-		b.WriteString(fmt.Sprintf("complexity: %s\n", q.Complexity))
+		fmt.Fprintf(&b, "complexity: %s\n", q.Complexity)
 	}
 	if q.FrayedFrom != "" {
-		b.WriteString(fmt.Sprintf("frayed_from: %s\n", q.FrayedFrom))
+		fmt.Fprintf(&b, "frayed_from: %s\n", q.FrayedFrom)
 	}
 	if q.FrameRef != "" {
-		b.WriteString(fmt.Sprintf("frame_ref: %s\n", q.FrameRef))
+		fmt.Fprintf(&b, "frame_ref: %s\n", q.FrameRef)
 	}
 	if q.ParkSource != "" {
-		b.WriteString(fmt.Sprintf("park_source: %s\n", q.ParkSource))
+		fmt.Fprintf(&b, "park_source: %s\n", q.ParkSource)
 	}
 	if q.ClaimedBy != "" {
-		b.WriteString(fmt.Sprintf("claimed_by: %s\n", q.ClaimedBy))
+		fmt.Fprintf(&b, "claimed_by: %s\n", q.ClaimedBy)
 	}
 
 	// Strands rendered as YAML list (omitempty)
 	if len(q.Strands) > 0 {
 		b.WriteString("strands:\n")
 		for _, s := range q.Strands {
-			b.WriteString(fmt.Sprintf("  - session_id: %s\n", s.SessionID))
-			b.WriteString(fmt.Sprintf("    status: %s\n", s.Status))
+			fmt.Fprintf(&b, "  - session_id: %s\n", s.SessionID)
+			fmt.Fprintf(&b, "    status: %s\n", s.Status)
 			if s.FrameRef != "" {
-				b.WriteString(fmt.Sprintf("    frame_ref: %s\n", s.FrameRef))
+				fmt.Fprintf(&b, "    frame_ref: %s\n", s.FrameRef)
 			}
 			if s.LandedAt != "" {
-				b.WriteString(fmt.Sprintf("    landed_at: %q\n", s.LandedAt))
+				fmt.Fprintf(&b, "    landed_at: %q\n", s.LandedAt)
 			}
 		}
 	}

@@ -21,12 +21,12 @@ const TriageArtifactFile = "NAXOS_TRIAGE.md"
 // It captures the summary fields so ReadTriageSummary can extract the
 // summary_line without parsing the full JSON or markdown table.
 type triageFrontmatter struct {
-	SchemaVersion string          `yaml:"schema_version"`
-	TriagedAt     string          `yaml:"triaged_at"`
-	TotalScanned  int             `yaml:"total_scanned"`
-	TotalTriaged  int             `yaml:"total_triaged"`
-	SummaryLine   string          `yaml:"summary_line"`
-	BySeverity    map[string]int  `yaml:"by_severity"`
+	SchemaVersion string         `yaml:"schema_version"`
+	TriagedAt     string         `yaml:"triaged_at"`
+	TotalScanned  int            `yaml:"total_scanned"`
+	TotalTriaged  int            `yaml:"total_triaged"`
+	SummaryLine   string         `yaml:"summary_line"`
+	BySeverity    map[string]int `yaml:"by_severity"`
 }
 
 // WriteTriageArtifact writes a NAXOS_TRIAGE.md artifact to sessionsDir.
@@ -155,14 +155,13 @@ func formatArtifact(result *TriageResult) ([]byte, error) {
 		if len(sessionID) > 35 {
 			sessionID = sessionID[:32] + "..."
 		}
-		buf.WriteString(fmt.Sprintf("| %d | %s | %s | %s | %s | %s |\n",
+		fmt.Fprintf(&buf, "| %d | %s | %s | %s | %s | %s |\n",
 			i+1,
 			sessionID,
 			entry.Severity,
 			entry.Reason,
 			FormatDuration(entry.InactiveFor),
-			entry.SuggestedAction,
-		))
+			entry.SuggestedAction)
 	}
 
 	return buf.Bytes(), nil
@@ -182,18 +181,18 @@ func parseArtifact(data []byte) (triageFrontmatter, []TriageEntry, error) {
 		return fm, nil, fmt.Errorf("missing frontmatter delimiter")
 	}
 	rest := content[4:]
-	endIdx := strings.Index(rest, "\n---\n")
-	if endIdx < 0 {
+	before, after, ok := strings.Cut(rest, "\n---\n")
+	if !ok {
 		return fm, nil, fmt.Errorf("unclosed frontmatter block")
 	}
-	fmBlock := rest[:endIdx]
+	fmBlock := before
 
 	if err := yaml.Unmarshal([]byte(fmBlock), &fm); err != nil {
 		return fm, nil, fmt.Errorf("unmarshal frontmatter: %w", err)
 	}
 
 	// Parse table rows from the body.
-	body := rest[endIdx+5:] // skip "\n---\n"
+	body := after // skip "\n---\n"
 	lines := strings.Split(body, "\n")
 
 	var entries []TriageEntry
@@ -236,12 +235,10 @@ func parseTableRow(line string) (TriageEntry, bool) {
 		return TriageEntry{}, false
 	}
 
-	trim := func(s string) string { return strings.TrimSpace(s) }
-
-	sessionID := trim(cols[1])
-	severity := Severity(trim(cols[2]))
-	reason := OrphanReason(trim(cols[3]))
-	suggestedAction := SuggestedAction(trim(cols[5]))
+	sessionID := strings.TrimSpace(cols[1])
+	severity := Severity(strings.TrimSpace(cols[2]))
+	reason := OrphanReason(strings.TrimSpace(cols[3]))
+	suggestedAction := SuggestedAction(strings.TrimSpace(cols[5]))
 
 	return TriageEntry{
 		OrphanedSession: OrphanedSession{

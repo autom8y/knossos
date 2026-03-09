@@ -10,10 +10,10 @@ import (
 // Implements output.Textable for human-readable output.
 // Serializes to JSON/YAML via struct tags for machine-readable output.
 type AskOutput struct {
-	Query          string           `json:"query"`
-	Results        []AskResultEntry `json:"results"`
-	Total          int              `json:"total"`
-	Context        string           `json:"context,omitempty"`         // active rite info if available
+	Query          string             `json:"query"`
+	Results        []AskResultEntry   `json:"results"`
+	Total          int                `json:"total"`
+	Context        string             `json:"context,omitempty"`         // active rite info if available
 	SessionContext *AskSessionContext `json:"session_context,omitempty"` // session state used for scoring
 }
 
@@ -50,12 +50,12 @@ type AskResultEntry struct {
 func (a AskOutput) Text() string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("Query: %q\n", a.Query))
+	fmt.Fprintf(&b, "Query: %q\n", a.Query)
 
 	if len(a.Results) == 0 {
 		b.WriteString("\nNo matches found.\n")
 		if a.Context != "" {
-			b.WriteString(fmt.Sprintf("\n%s\n", a.Context))
+			fmt.Fprintf(&b, "\n%s\n", a.Context)
 		}
 		b.WriteString("\nSuggestions:\n")
 		b.WriteString("  - Try broader terms (e.g. \"release\" instead of \"publish package\")\n")
@@ -66,23 +66,23 @@ func (a AskOutput) Text() string {
 
 	b.WriteString("\n")
 	for _, r := range a.Results {
-		b.WriteString(fmt.Sprintf("  %d. %s [%s]\n", r.Rank, r.Name, r.Domain))
-		b.WriteString(fmt.Sprintf("     %s\n", r.Summary))
+		fmt.Fprintf(&b, "  %d. %s [%s]\n", r.Rank, r.Name, r.Domain)
+		fmt.Fprintf(&b, "     %s\n", r.Summary)
 		if r.Action != "" {
-			b.WriteString(fmt.Sprintf("     Try: %s\n", r.Action))
+			fmt.Fprintf(&b, "     Try: %s\n", r.Action)
 		}
 		b.WriteString("\n")
 	}
 
 	if a.Context != "" {
-		b.WriteString(fmt.Sprintf("%s\n", a.Context))
+		fmt.Fprintf(&b, "%s\n", a.Context)
 	}
 
 	plural := "results"
 	if a.Total == 1 {
 		plural = "result"
 	}
-	b.WriteString(fmt.Sprintf("%d %s found\n", a.Total, plural))
+	fmt.Fprintf(&b, "%d %s found\n", a.Total, plural)
 
 	return b.String()
 }

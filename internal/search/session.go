@@ -3,6 +3,7 @@ package search
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,9 +17,9 @@ import (
 // Nil SessionSignals means no active session (no-op for all modifiers).
 type SessionSignals struct {
 	SessionID  string
-	Phase      string           // e.g., "requirements", "design", "implementation", "validation"
-	Rite       string           // active rite from session
-	Complexity string           // "TASK", "MODULE", "INITIATIVE"
+	Phase      string // e.g., "requirements", "design", "implementation", "validation"
+	Rite       string // active rite from session
+	Complexity string // "TASK", "MODULE", "INITIATIVE"
 	Initiative string
 	Activity   *ActivitySummary // nil if events.jsonl missing or empty
 }
@@ -175,7 +176,7 @@ func TailReadEvents(eventsPath string, lineCap int) *ActivitySummary {
 
 	buf := make([]byte, readSize)
 	n, err := io.ReadFull(f, buf)
-	if err != nil && err != io.ErrUnexpectedEOF {
+	if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
 		return nil
 	}
 	buf = buf[:n]
@@ -450,10 +451,10 @@ func CollectParkedSessions(resolver *paths.Resolver) []SearchEntry {
 		kw = append(kw, ctx.ActiveRite, "parked", "deferred")
 
 		entries = append(entries, SearchEntry{
-			Name:    entryName,
-			Domain:  DomainSession,
-			Summary: summary,
-			Action:  "ari session resume --session-id=" + ctx.SessionID,
+			Name:     entryName,
+			Domain:   DomainSession,
+			Summary:  summary,
+			Action:   "ari session resume --session-id=" + ctx.SessionID,
 			Keywords: kw,
 		})
 	}

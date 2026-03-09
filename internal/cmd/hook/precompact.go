@@ -151,21 +151,21 @@ func writeCompactCheckpoint(sessionDir string) error {
 	content.WriteString("|-------|-------|\n")
 
 	if sessCtx.SessionID != "" {
-		content.WriteString(fmt.Sprintf("| session_id | %s |\n", sessCtx.SessionID))
+		fmt.Fprintf(&content, "| session_id | %s |\n", sessCtx.SessionID)
 	}
 	if sessCtx.Initiative != "" {
-		content.WriteString(fmt.Sprintf("| initiative | %s |\n", sessCtx.Initiative))
+		fmt.Fprintf(&content, "| initiative | %s |\n", sessCtx.Initiative)
 	}
 	if sessCtx.Complexity != "" {
-		content.WriteString(fmt.Sprintf("| complexity | %s |\n", sessCtx.Complexity))
+		fmt.Fprintf(&content, "| complexity | %s |\n", sessCtx.Complexity)
 	}
 	if sessCtx.ActiveRite != "" {
-		content.WriteString(fmt.Sprintf("| active_rite | %s |\n", sessCtx.ActiveRite))
+		fmt.Fprintf(&content, "| active_rite | %s |\n", sessCtx.ActiveRite)
 	}
 	if sessCtx.CurrentPhase != "" {
-		content.WriteString(fmt.Sprintf("| current_phase | %s |\n", sessCtx.CurrentPhase))
+		fmt.Fprintf(&content, "| current_phase | %s |\n", sessCtx.CurrentPhase)
 	}
-	content.WriteString(fmt.Sprintf("| status | %s |\n", sessCtx.Status))
+	fmt.Fprintf(&content, "| status | %s |\n", sessCtx.Status)
 
 	// Include throughline agent IDs so they survive compaction.
 	// readThroughlineIDs returns nil when no file exists — safe to skip.
@@ -174,7 +174,7 @@ func writeCompactCheckpoint(sessionDir string) error {
 		content.WriteString("| Agent | ID |\n")
 		content.WriteString("|-------|----|\n")
 		for name, id := range ids {
-			content.WriteString(fmt.Sprintf("| %s | %s |\n", name, id))
+			fmt.Fprintf(&content, "| %s | %s |\n", name, id)
 		}
 	}
 

@@ -38,29 +38,29 @@ type StrandOutput struct {
 
 // ContextOutput represents the output of the context hook.
 type ContextOutput struct {
-	SessionID       string            `json:"session_id,omitempty"`
-	CCSessionID     string            `json:"cc_session_id,omitempty"` // CC's own session ID (for claim)
-	FrayedFrom      string            `json:"frayed_from,omitempty"`
-	FrameRef        string            `json:"frame_ref,omitempty"`
-	ParkSource      string            `json:"park_source,omitempty"`
-	Complexity      string            `json:"complexity,omitempty"`   // S2 field widening
-	Strands         []StrandOutput    `json:"strands,omitempty"`      // S2 field widening
-	ClaimedBy       string            `json:"claimed_by,omitempty"`   // S2 field widening
-	Status          string            `json:"status,omitempty"`
-	Initiative      string            `json:"initiative,omitempty"`
-	Rite            string            `json:"rite,omitempty"`
-	CurrentPhase    string            `json:"current_phase,omitempty"`
-	ExecutionMode   string            `json:"execution_mode,omitempty"`
-	HasSession      bool              `json:"has_session"`
-	CompactState    string            `json:"compact_state,omitempty"`   // Rehydrated from COMPACT_STATE.md if present
-	ThroughlineIDs  map[string]string `json:"throughline_ids,omitempty"` // Active throughline agent IDs
-	GitBranch       string            `json:"git_branch,omitempty"`
-	BaseBranch      string            `json:"base_branch,omitempty"`
-	AvailableRites  []string          `json:"available_rites,omitempty"`
-	AvailableAgents []string          `json:"available_agents,omitempty"`
-	KnowStatus      string                `json:"know_status,omitempty"`   // .know/ freshness summary line
-	NaxosSummary    string                `json:"naxos_summary,omitempty"` // Naxos triage summary line
-	Suggestions     []suggest.Suggestion  `json:"suggestions,omitempty"`   // H5: proactive suggestions
+	SessionID       string               `json:"session_id,omitempty"`
+	CCSessionID     string               `json:"cc_session_id,omitempty"` // CC's own session ID (for claim)
+	FrayedFrom      string               `json:"frayed_from,omitempty"`
+	FrameRef        string               `json:"frame_ref,omitempty"`
+	ParkSource      string               `json:"park_source,omitempty"`
+	Complexity      string               `json:"complexity,omitempty"` // S2 field widening
+	Strands         []StrandOutput       `json:"strands,omitempty"`    // S2 field widening
+	ClaimedBy       string               `json:"claimed_by,omitempty"` // S2 field widening
+	Status          string               `json:"status,omitempty"`
+	Initiative      string               `json:"initiative,omitempty"`
+	Rite            string               `json:"rite,omitempty"`
+	CurrentPhase    string               `json:"current_phase,omitempty"`
+	ExecutionMode   string               `json:"execution_mode,omitempty"`
+	HasSession      bool                 `json:"has_session"`
+	CompactState    string               `json:"compact_state,omitempty"`   // Rehydrated from COMPACT_STATE.md if present
+	ThroughlineIDs  map[string]string    `json:"throughline_ids,omitempty"` // Active throughline agent IDs
+	GitBranch       string               `json:"git_branch,omitempty"`
+	BaseBranch      string               `json:"base_branch,omitempty"`
+	AvailableRites  []string             `json:"available_rites,omitempty"`
+	AvailableAgents []string             `json:"available_agents,omitempty"`
+	KnowStatus      string               `json:"know_status,omitempty"`   // .know/ freshness summary line
+	NaxosSummary    string               `json:"naxos_summary,omitempty"` // Naxos triage summary line
+	Suggestions     []suggest.Suggestion `json:"suggestions,omitempty"`   // H5: proactive suggestions
 }
 
 // Text implements output.Textable for YAML frontmatter output.
@@ -77,59 +77,59 @@ func (c ContextOutput) Text() string {
 		// No-session path: emit minimal frontmatter
 		b.WriteString("has_session: false\n")
 		if c.CCSessionID != "" {
-			b.WriteString(fmt.Sprintf("cc_session_id: %q\n", c.CCSessionID))
+			fmt.Fprintf(&b, "cc_session_id: %q\n", c.CCSessionID)
 		}
 		b.WriteString("---\n")
 		return b.String()
 	}
 
 	// Required fields (always present when has_session=true)
-	b.WriteString(fmt.Sprintf("session_id: %s\n", c.SessionID))
+	fmt.Fprintf(&b, "session_id: %s\n", c.SessionID)
 	if c.CCSessionID != "" {
-		b.WriteString(fmt.Sprintf("cc_session_id: %q\n", c.CCSessionID))
+		fmt.Fprintf(&b, "cc_session_id: %q\n", c.CCSessionID)
 	}
-	b.WriteString(fmt.Sprintf("status: %s\n", c.Status))
-	b.WriteString(fmt.Sprintf("initiative: %q\n", c.Initiative))
-	b.WriteString(fmt.Sprintf("active_rite: %s\n", c.Rite))
-	b.WriteString(fmt.Sprintf("execution_mode: %s\n", c.ExecutionMode))
+	fmt.Fprintf(&b, "status: %s\n", c.Status)
+	fmt.Fprintf(&b, "initiative: %q\n", c.Initiative)
+	fmt.Fprintf(&b, "active_rite: %s\n", c.Rite)
+	fmt.Fprintf(&b, "execution_mode: %s\n", c.ExecutionMode)
 
 	// Optional scalar fields (omitempty)
 	if c.CurrentPhase != "" {
-		b.WriteString(fmt.Sprintf("current_phase: %s\n", c.CurrentPhase))
+		fmt.Fprintf(&b, "current_phase: %s\n", c.CurrentPhase)
 	}
 	if c.GitBranch != "" {
-		b.WriteString(fmt.Sprintf("git_branch: %s\n", c.GitBranch))
+		fmt.Fprintf(&b, "git_branch: %s\n", c.GitBranch)
 	}
 	if c.BaseBranch != "" {
-		b.WriteString(fmt.Sprintf("base_branch: %s\n", c.BaseBranch))
+		fmt.Fprintf(&b, "base_branch: %s\n", c.BaseBranch)
 	}
 	if c.FrayedFrom != "" {
-		b.WriteString(fmt.Sprintf("frayed_from: %s\n", c.FrayedFrom))
+		fmt.Fprintf(&b, "frayed_from: %s\n", c.FrayedFrom)
 	}
 	if c.FrameRef != "" {
-		b.WriteString(fmt.Sprintf("frame_ref: %s\n", c.FrameRef))
+		fmt.Fprintf(&b, "frame_ref: %s\n", c.FrameRef)
 	}
 	if c.ParkSource != "" {
-		b.WriteString(fmt.Sprintf("park_source: %s\n", c.ParkSource))
+		fmt.Fprintf(&b, "park_source: %s\n", c.ParkSource)
 	}
 
 	// S2 fields: complexity, claimed_by, strands
 	if c.Complexity != "" {
-		b.WriteString(fmt.Sprintf("complexity: %s\n", c.Complexity))
+		fmt.Fprintf(&b, "complexity: %s\n", c.Complexity)
 	}
 	if c.ClaimedBy != "" {
-		b.WriteString(fmt.Sprintf("claimed_by: %s\n", c.ClaimedBy))
+		fmt.Fprintf(&b, "claimed_by: %s\n", c.ClaimedBy)
 	}
 	if len(c.Strands) > 0 {
 		b.WriteString("strands:\n")
 		for _, s := range c.Strands {
-			b.WriteString(fmt.Sprintf("  - session_id: %s\n", s.SessionID))
-			b.WriteString(fmt.Sprintf("    status: %s\n", s.Status))
+			fmt.Fprintf(&b, "  - session_id: %s\n", s.SessionID)
+			fmt.Fprintf(&b, "    status: %s\n", s.Status)
 			if s.FrameRef != "" {
-				b.WriteString(fmt.Sprintf("    frame_ref: %s\n", s.FrameRef))
+				fmt.Fprintf(&b, "    frame_ref: %s\n", s.FrameRef)
 			}
 			if s.LandedAt != "" {
-				b.WriteString(fmt.Sprintf("    landed_at: %q\n", s.LandedAt))
+				fmt.Fprintf(&b, "    landed_at: %q\n", s.LandedAt)
 			}
 		}
 	}
@@ -138,24 +138,24 @@ func (c ContextOutput) Text() string {
 	if len(c.AvailableRites) > 0 {
 		b.WriteString("available_rites:\n")
 		for _, r := range c.AvailableRites {
-			b.WriteString(fmt.Sprintf("  - %s\n", r))
+			fmt.Fprintf(&b, "  - %s\n", r)
 		}
 	}
 	if len(c.AvailableAgents) > 0 {
 		b.WriteString("available_agents:\n")
 		for _, a := range c.AvailableAgents {
-			b.WriteString(fmt.Sprintf("  - %s\n", a))
+			fmt.Fprintf(&b, "  - %s\n", a)
 		}
 	}
 
 	// know_status moves into frontmatter (single-line, no escaping needed)
 	if c.KnowStatus != "" {
-		b.WriteString(fmt.Sprintf("know_status: %q\n", c.KnowStatus))
+		fmt.Fprintf(&b, "know_status: %q\n", c.KnowStatus)
 	}
 
 	// naxos_summary: one-line triage result from NAXOS_TRIAGE.md (single-line, no escaping needed)
 	if c.NaxosSummary != "" {
-		b.WriteString(fmt.Sprintf("naxos_summary: %q\n", c.NaxosSummary))
+		fmt.Fprintf(&b, "naxos_summary: %q\n", c.NaxosSummary)
 	}
 
 	// Closing delimiter
@@ -172,7 +172,7 @@ func (c ContextOutput) Text() string {
 		}
 		slices.Sort(keys)
 		for _, k := range keys {
-			b.WriteString(fmt.Sprintf("  %s: %s\n", k, c.ThroughlineIDs[k]))
+			fmt.Fprintf(&b, "  %s: %s\n", k, c.ThroughlineIDs[k])
 		}
 	}
 	if c.CompactState != "" {
@@ -184,13 +184,12 @@ func (c ContextOutput) Text() string {
 	if len(c.Suggestions) > 0 {
 		b.WriteString("\n## Suggestions\n")
 		for _, s := range c.Suggestions {
-			b.WriteString(fmt.Sprintf("- %s\n", s.Text))
+			fmt.Fprintf(&b, "- %s\n", s.Text)
 		}
 	}
 
 	return b.String()
 }
-
 
 // convertStrands converts session.Strand slice to StrandOutput slice for hook output.
 // Returns nil when input is nil or empty (omitempty will suppress the field).
@@ -543,11 +542,12 @@ func knowStatus(projectDir, cwd string) string {
 	for _, d := range domains {
 		status := "fresh"
 		if !d.Fresh {
-			if d.DependencyStale {
+			switch {
+			case d.DependencyStale:
 				status = "STALE (dep)"
-			} else if d.LandChanged {
+			case d.LandChanged:
 				status = "STALE (land)"
-			} else {
+			default:
 				status = "STALE"
 			}
 			hasStale = true
@@ -566,4 +566,3 @@ func knowStatus(projectDir, cwd string) string {
 	}
 	return summary
 }
-

@@ -33,14 +33,14 @@ type ConceptOutput struct {
 func (c ConceptOutput) Text() string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("=== %s ===\n", c.DisplayName))
+	fmt.Fprintf(&b, "=== %s ===\n", c.DisplayName)
 	b.WriteString("\n")
 	b.WriteString(c.Description)
 	b.WriteString("\n")
 
 	if len(c.SeeAlso) > 0 {
 		b.WriteString("\n")
-		b.WriteString(fmt.Sprintf("See also: %s\n", strings.Join(c.SeeAlso, ", ")))
+		fmt.Fprintf(&b, "See also: %s\n", strings.Join(c.SeeAlso, ", "))
 	}
 
 	if c.ProjectContext != "" {

@@ -1118,7 +1118,7 @@ func TestAdversarial_LargeFile(t *testing.T) {
 	b.WriteString("package foo\n\n")
 	const numFuncs = 500
 	for i := range numFuncs {
-		b.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
+		fmt.Fprintf(&b, "func Func%d() { _ = %d }\n\n", i, i)
 	}
 	src := []byte(b.String())
 	decls, err := extractDeclarations(src, "large.go")
@@ -1138,21 +1138,21 @@ func TestAdversarial_LargeFileDiffPerformance(t *testing.T) {
 	newB.WriteString("package foo\n\n")
 	const numFuncs = 500
 	for i := range numFuncs {
-		oldB.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
+		fmt.Fprintf(&oldB, "func Func%d() { _ = %d }\n\n", i, i)
 		switch {
 		case i%3 == 0:
 			// Modify every 3rd function
-			newB.WriteString(fmt.Sprintf("func Func%d() { _ = %d + 1 }\n\n", i, i))
+			fmt.Fprintf(&newB, "func Func%d() { _ = %d + 1 }\n\n", i, i)
 		case i%5 == 0:
 			// Delete every 5th function (by not including it)
 			continue
 		default:
-			newB.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
+			fmt.Fprintf(&newB, "func Func%d() { _ = %d }\n\n", i, i)
 		}
 	}
 	// Add some new functions
 	for i := numFuncs; i < numFuncs+50; i++ {
-		newB.WriteString(fmt.Sprintf("func Func%d() { _ = %d }\n\n", i, i))
+		fmt.Fprintf(&newB, "func Func%d() { _ = %d }\n\n", i, i)
 	}
 
 	diff, err := ComputeFileDiff([]byte(oldB.String()), []byte(newB.String()), "large.go")

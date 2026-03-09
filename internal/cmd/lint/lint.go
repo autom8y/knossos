@@ -46,12 +46,13 @@ const (
 // expectedForkState defines the deliberate fork/inline classification for each dromena.
 //
 // Classification principle (context-isolation semantics):
-//   true  = FORK: command produces artifacts, reports, or side effects. A summary
-//           returning to the main conversation is sufficient. All tools (including
-//           Task) work in forked context — fork is about context isolation, not
-//           tool restriction.
-//   false = INLINE: command guides the ongoing conversation, manages session state,
-//           or needs its behavioral context to persist after completion.
+//
+//	true  = FORK: command produces artifacts, reports, or side effects. A summary
+//	        returning to the main conversation is sufficient. All tools (including
+//	        Task) work in forked context — fork is about context isolation, not
+//	        tool restriction.
+//	false = INLINE: command guides the ongoing conversation, manages session state,
+//	        or needs its behavioral context to persist after completion.
 var expectedForkState = map[string]bool{
 	// === INLINE (false): persistent context needed ===
 	// Session lifecycle — hook-injected context must persist
@@ -112,10 +113,10 @@ func (r LintReport) Text() string {
 		if len(findings) == 0 {
 			return
 		}
-		b.WriteString(fmt.Sprintf("\n%s\n", name))
+		fmt.Fprintf(&b, "\n%s\n", name)
 		b.WriteString(strings.Repeat("-", len(name)) + "\n")
 		for _, f := range findings {
-			b.WriteString(fmt.Sprintf("  [%s] %s: %s (%s)\n", f.Severity, f.File, f.Message, f.Rule))
+			fmt.Fprintf(&b, "  [%s] %s: %s (%s)\n", f.Severity, f.File, f.Message, f.Rule)
 		}
 	}
 
@@ -126,8 +127,8 @@ func (r LintReport) Text() string {
 	printSection("Dromena", r.Dromena)
 	printSection("Legomena", r.Legomena)
 
-	b.WriteString(fmt.Sprintf("\nSummary: %d issues (%d critical, %d high, %d medium, %d low) across %d files\n",
-		r.Summary.Total, r.Summary.Critical, r.Summary.High, r.Summary.Medium, r.Summary.Low, r.Summary.Files))
+	fmt.Fprintf(&b, "\nSummary: %d issues (%d critical, %d high, %d medium, %d low) across %d files\n",
+		r.Summary.Total, r.Summary.Critical, r.Summary.High, r.Summary.Medium, r.Summary.Low, r.Summary.Files)
 
 	return b.String()
 }
@@ -222,12 +223,12 @@ func runLint(ctx *cmdContext, scope string) error {
 // --- Agent linting ---
 
 type agentFrontmatter struct {
-	Name        string                          `yaml:"name"`
-	Description string                          `yaml:"description"`
-	Type        string                          `yaml:"type"`
-	Tools       frontmatter.FlexibleStringSlice `yaml:"tools"`
-	Model       string                          `yaml:"model"`
-	Color       string                          `yaml:"color"`
+	Name             string                          `yaml:"name"`
+	Description      string                          `yaml:"description"`
+	Type             string                          `yaml:"type"`
+	Tools            frontmatter.FlexibleStringSlice `yaml:"tools"`
+	Model            string                          `yaml:"model"`
+	Color            string                          `yaml:"color"`
 	MaxTurns         int                             `yaml:"maxTurns"`
 	MaxTurnsOverride bool                            `yaml:"maxTurns-override"`
 	Domain           string                          `yaml:"domain"`
@@ -252,79 +253,79 @@ var approvedAgentNames = map[string]string{
 	"theoros": "tier-3", // Panhellenic practice (Herodotus, Thucydides)
 
 	// Functional: non-mythological descriptive names
-	"analytics-engineer":      "functional",
-	"agent-curator":           "functional",
-	"agent-designer":          "functional",
-	"architect":               "functional",
-	"architect-enforcer":      "functional",
-	"attending":               "functional",
-	"audit-lead":              "functional",
-	"business-model-analyst":  "functional",
-	"capacity-engineer":       "functional",
-	"cartographer":            "functional",
-	"case-reporter":           "functional",
-	"chaos-engineer":          "functional",
-	"code-smeller":            "functional",
-	"compatibility-tester":    "functional",
-	"compliance-architect":    "functional",
-	"competitive-analyst":     "functional",
-	"context-architect":       "functional",
-	"context-engineer":        "functional",
-	"cruft-cutter":            "functional",
-	"debt-collector":          "functional",
-	"dependency-analyst":      "functional",
-	"dependency-resolver":     "functional",
-	"diagnostician":           "functional",
-	"doc-auditor":             "functional",
-	"doc-reviewer":            "functional",
-	"documentation-engineer":  "functional",
-	"domain-forensics":        "functional",
-	"ecosystem-analyst":       "functional",
-	"eval-specialist":         "functional",
-	"experimentation-lead":    "functional",
-	"gate-keeper":             "functional",
-	"hallucination-hunter":    "functional",
-	"heat-mapper":             "functional",
-	"incident-commander":      "functional",
-	"information-architect":   "functional",
-	"insights-analyst":        "functional",
-	"integration-engineer":    "functional",
-	"integration-researcher":  "functional",
-	"janitor":                 "functional",
-	"logic-surgeon":           "functional",
-	"market-researcher":       "functional",
-	"moonshot-architect":      "functional",
-	"observability-engineer":  "functional",
-	"pathologist":             "functional",
-	"pattern-profiler":        "functional",
-	"penetration-tester":      "functional",
-	"pipeline-monitor":        "functional",
-	"platform-engineer":       "functional",
-	"principal-engineer":      "functional",
-	"prompt-architect":        "functional",
-	"prototype-engineer":      "functional",
-	"qa-adversary":            "functional",
-	"release-executor":        "functional",
-	"release-planner":         "functional",
-	"remedy-smith":            "functional",
-	"remediation-planner":     "functional",
-	"requirements-analyst":    "functional",
-	"risk-assessor":           "functional",
-	"roadmap-strategist":      "functional",
-	"security-reviewer":       "functional",
-	"signal-sifter":           "functional",
-	"sprint-planner":          "functional",
-	"structure-evaluator":     "functional",
+	"analytics-engineer":       "functional",
+	"agent-curator":            "functional",
+	"agent-designer":           "functional",
+	"architect":                "functional",
+	"architect-enforcer":       "functional",
+	"attending":                "functional",
+	"audit-lead":               "functional",
+	"business-model-analyst":   "functional",
+	"capacity-engineer":        "functional",
+	"cartographer":             "functional",
+	"case-reporter":            "functional",
+	"chaos-engineer":           "functional",
+	"code-smeller":             "functional",
+	"compatibility-tester":     "functional",
+	"compliance-architect":     "functional",
+	"competitive-analyst":      "functional",
+	"context-architect":        "functional",
+	"context-engineer":         "functional",
+	"cruft-cutter":             "functional",
+	"debt-collector":           "functional",
+	"dependency-analyst":       "functional",
+	"dependency-resolver":      "functional",
+	"diagnostician":            "functional",
+	"doc-auditor":              "functional",
+	"doc-reviewer":             "functional",
+	"documentation-engineer":   "functional",
+	"domain-forensics":         "functional",
+	"ecosystem-analyst":        "functional",
+	"eval-specialist":          "functional",
+	"experimentation-lead":     "functional",
+	"gate-keeper":              "functional",
+	"hallucination-hunter":     "functional",
+	"heat-mapper":              "functional",
+	"incident-commander":       "functional",
+	"information-architect":    "functional",
+	"insights-analyst":         "functional",
+	"integration-engineer":     "functional",
+	"integration-researcher":   "functional",
+	"janitor":                  "functional",
+	"logic-surgeon":            "functional",
+	"market-researcher":        "functional",
+	"moonshot-architect":       "functional",
+	"observability-engineer":   "functional",
+	"pathologist":              "functional",
+	"pattern-profiler":         "functional",
+	"penetration-tester":       "functional",
+	"pipeline-monitor":         "functional",
+	"platform-engineer":        "functional",
+	"principal-engineer":       "functional",
+	"prompt-architect":         "functional",
+	"prototype-engineer":       "functional",
+	"qa-adversary":             "functional",
+	"release-executor":         "functional",
+	"release-planner":          "functional",
+	"remedy-smith":             "functional",
+	"remediation-planner":      "functional",
+	"requirements-analyst":     "functional",
+	"risk-assessor":            "functional",
+	"roadmap-strategist":       "functional",
+	"security-reviewer":        "functional",
+	"signal-sifter":            "functional",
+	"sprint-planner":           "functional",
+	"structure-evaluator":      "functional",
 	"systems-thermodynamicist": "functional",
-	"tech-transfer":           "functional",
-	"tech-writer":             "functional",
-	"technology-scout":        "functional",
-	"thermal-monitor":         "functional",
-	"threat-modeler":          "functional",
-	"topology-cartographer":   "functional",
-	"triage-nurse":            "functional",
-	"user-researcher":         "functional",
-	"workflow-engineer":       "functional",
+	"tech-transfer":            "functional",
+	"tech-writer":              "functional",
+	"technology-scout":         "functional",
+	"thermal-monitor":          "functional",
+	"threat-modeler":           "functional",
+	"topology-cartographer":    "functional",
+	"triage-nurse":             "functional",
+	"user-researcher":          "functional",
+	"workflow-engineer":        "functional",
 }
 
 var archetypeMaxTurns = map[string]int{

@@ -65,10 +65,10 @@ func (o listOutput) Text() string {
 	currentCat := ""
 	for _, e := range o.Entries {
 		if e.Category != currentCat {
-			b.WriteString(fmt.Sprintf("\n  %s/\n", e.Category))
+			fmt.Fprintf(&b, "\n  %s/\n", e.Category)
 			currentCat = e.Category
 		}
-		b.WriteString(fmt.Sprintf("    %s\n", e.Name))
+		fmt.Fprintf(&b, "    %s\n", e.Name)
 	}
 
 	return b.String()
