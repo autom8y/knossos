@@ -6,7 +6,7 @@ description: |
   Use when: cleaning up abandoned sessions, triaging stale sessions,
   assessing session hygiene. Triggers: orphan, triage, cleanup, stale, hygiene.
 model: sonnet
-color: amber
+color: orange
 maxTurns: 20
 tools: Read, Write, Bash, Glob, Grep
 disallowedTools:

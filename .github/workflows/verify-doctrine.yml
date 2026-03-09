@@ -24,12 +24,11 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-          cache-dependency-path: ariadne/go.sum
+          cache-dependency-path: go.sum
 
       - name: Build Ariadne CLI
-        working-directory: ariadne
         run: |
-          CGO_ENABLED=0 go build -o ari ./cmd/ari/main.go
+          CGO_ENABLED=0 go build -o ari ./cmd/ari
           echo "$PWD" >> $GITHUB_PATH
 
       - name: Verify doctrine documentation
