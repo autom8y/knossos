@@ -1,11 +1,11 @@
 ---
 domain: release/platform-profile
-generated_at: "2026-03-07T11:18:30Z"
+generated_at: "2026-03-09T13:38:04Z"
 expires_after: "30d"
 source_scope:
   - "./.know/release/"
 generator: cartographer
-source_hash: "2b4a43c"
+source_hash: "a81ea97"
 confidence: 0.85
 format_version: "1.0"
 update_mode: "full"
@@ -72,9 +72,9 @@ Terminal stage: e2e-distribution.yml (has health check)
 | e2e-distribution.yml | release_published, workflow_dispatch | deploy |
 | validate-orchestrators.yml | pull_request, push, workflow_dispatch | ci |
 | verify-doctrine.yml | push, pull_request, workflow_dispatch | ci |
-| verify-formal-specs.yml | pull_request, push, workflow_dispatch | ci |
 
 ## Known Issues
 
-- None. Full pipeline chain verified green as of v0.6.1 (2026-03-07).
-- 3 pre-existing informational workflow failures (non-blocking): ariadne-tests (golangci-lint schema), verify-doctrine (missing ariadne/ dir), verify-formal-specs (logs unavailable).
+- None. Full pipeline chain verified green as of v0.7.1 (2026-03-09).
+- 2 pre-existing informational workflow failures (non-blocking): ariadne-tests (golangci-lint schema), verify-doctrine (missing ariadne/ dir).
+- verify-formal-specs.yml was removed (no longer present as of v0.7.1).

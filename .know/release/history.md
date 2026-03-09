@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-07T11:18:30Z"
+generated_at: "2026-03-09T13:38:04Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "2b4a43c"
+source_hash: "a81ea97"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -173,3 +173,49 @@ max_incremental_cycles: 0
 - Total chain: 147s (below historical baseline ~150-190s)
 - Cached release knowledge accelerated cartographer reconnaissance
 - Single fix commit: CLI help tooling and error UX remediation
+
+### v0.7.0 — 2026-03-09
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-09 |
+| Version | v0.6.1 -> v0.7.0 (minor) |
+| Commits | 17 (7 feat, 3 fix, 1 refactor, 2 docs, 1 chore, 2 merge, 1 other) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 27e1cc7 |
+| Commit SHA | 27e1cc7 |
+| release.yml | GREEN (106s, run 22854404982) |
+| e2e-distribution.yml | GREEN (53s, run 22854468043) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Fifteenth consecutive PASS verdict (v0.3.2 → ... → v0.6.1 → v0.7.0)
+- Total chain: ~159s (within historical baseline)
+- Headline features: ari ask NL query command, session-aware routing, Naxos session hygiene closed-loop, Forge Pythia consultation protocol, naming provenance lint rules, proactive intelligence hooks
+
+### v0.7.1 — 2026-03-09
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-09 |
+| Version | v0.7.0 -> v0.7.1 (patch) |
+| Commits | 4 (1 fix, 1 refactor, 2 ci) |
+| Complexity | PATCH |
+| Tag SHA | 24e6a7463ac84ac664cc3d9a6555cbabdc3c3eff |
+| Commit SHA | a81ea97 |
+| release.yml | GREEN (106s, run 22856008272) |
+| e2e-distribution.yml | GREEN (56s, run 22856075627) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (commit 02217a07, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~17s (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Sixteenth consecutive PASS verdict (v0.3.2 → ... → v0.7.0 → v0.7.1)
+- Total chain: ~162s (within historical baseline ~150-190s)
+- Cached release knowledge accelerated cartographer reconnaissance
+- All fix/refactor/ci: 530 golangci-lint findings resolved, stale CI configs fixed, SCAR-018 enforcement
+- verify-formal-specs.yml removed from repo (reduces known non-blocking failures from 3 to 2)
