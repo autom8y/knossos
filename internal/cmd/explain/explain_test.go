@@ -12,15 +12,15 @@ import (
 // --- Concept Loading Tests ---
 
 func TestAllConceptsLoaded(t *testing.T) {
-	// TC-E01: All 13 concepts loaded
-	assert.Equal(t, 13, len(registry))
+	// TC-E01: All 16 concepts loaded
+	assert.Equal(t, 16, len(registry))
 }
 
 func TestSortedNamesCorrect(t *testing.T) {
 	// TC-E02: Sorted names correct
 	expected := []string{
-		"agent", "dromena", "inscription", "knossos", "know", "ledge",
-		"legomena", "mena", "rite", "sails", "session", "sos", "tribute",
+		"agent", "dromena", "evans-principle", "inscription", "knossos", "know", "ledge",
+		"legomena", "mena", "potnia", "rite", "sails", "session", "sos", "tribute", "xenia",
 	}
 	assert.Equal(t, expected, sortedNames)
 }
@@ -53,6 +53,7 @@ func TestLookupExactMatch(t *testing.T) {
 	concepts := []string{
 		"rite", "session", "agent", "mena", "dromena", "legomena",
 		"inscription", "tribute", "sails", "know", "ledge", "sos", "knossos",
+		"evans-principle", "potnia", "xenia",
 	}
 	for _, name := range concepts {
 		t.Run(name, func(t *testing.T) {
@@ -97,6 +98,10 @@ func TestLookupAliases(t *testing.T) {
 		{"TC-E24: agents -> agent", "agents", "agent"},
 		{"TC-E25: skills -> legomena", "skills", "legomena"},
 		{"TC-E26: commands -> dromena", "commands", "dromena"},
+		{"TC-E54: evans -> evans-principle", "evans", "evans-principle"},
+		{"TC-E55: hospitality -> xenia", "hospitality", "xenia"},
+		{"TC-E56: coordinator -> potnia", "coordinator", "potnia"},
+		{"TC-E57: potnia-theron -> potnia", "potnia-theron", "potnia"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -288,8 +293,8 @@ func TestConceptListOutputImplementsTabular(t *testing.T) {
 
 // --- Embedded File Inventory Tests ---
 
-func TestEmbeddedFSContains13Files(t *testing.T) {
-	// TC-E52: Embedded FS contains exactly 13 files
+func TestEmbeddedFSContains16Files(t *testing.T) {
+	// TC-E52: Embedded FS contains exactly 16 files
 	entries, err := fs.ReadDir(conceptFS, "concepts")
 	require.NoError(t, err)
 
@@ -299,15 +304,15 @@ func TestEmbeddedFSContains13Files(t *testing.T) {
 			mdCount++
 		}
 	}
-	assert.Equal(t, 13, mdCount)
+	assert.Equal(t, 16, mdCount)
 }
 
 func TestAllExpectedFilenamesPresent(t *testing.T) {
 	// TC-E53: All expected filenames present
 	expectedFiles := []string{
-		"agent.md", "dromena.md", "inscription.md", "knossos.md",
-		"know.md", "ledge.md", "legomena.md", "mena.md",
-		"rite.md", "sails.md", "session.md", "sos.md", "tribute.md",
+		"agent.md", "dromena.md", "evans-principle.md", "inscription.md", "knossos.md",
+		"know.md", "ledge.md", "legomena.md", "mena.md", "potnia.md",
+		"rite.md", "sails.md", "session.md", "sos.md", "tribute.md", "xenia.md",
 	}
 
 	entries, err := fs.ReadDir(conceptFS, "concepts")

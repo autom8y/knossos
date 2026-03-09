@@ -230,6 +230,101 @@ type agentFrontmatter struct {
 	Color       string                          `yaml:"color"`
 	MaxTurns         int                             `yaml:"maxTurns"`
 	MaxTurnsOverride bool                            `yaml:"maxTurns-override"`
+	Domain           string                          `yaml:"domain"`
+}
+
+// approvedAgentNames is the naming provenance registry. All agent names must
+// be registered here. Values indicate tier classification:
+//   - "tier-1": Linear B attested (Bronze Age archaeological evidence)
+//   - "tier-2": Classical Greek (Homer, Hesiod, Herodotus, etc.)
+//   - "tier-3": Hellenistic/Scholarly (Panhellenic practice, Alexandrian scholarship)
+//   - "functional": Non-mythological descriptive name
+var approvedAgentNames = map[string]string{
+	// Tier 1: Linear B attested
+	"potnia": "tier-1", // KN Gg 702: da-pu₂-ri-to-jo po-ti-ni-ja
+
+	// Tier 2: Classical Greek
+	"dionysus": "tier-2", // Homer, Hesiod, Euripides
+	"moirai":   "tier-2", // Hesiod Theogony, Plato Republic
+	"pythia":   "tier-2", // Herodotus, Pausanias (Delphic oracle)
+
+	// Tier 3: Hellenistic/Scholarly
+	"theoros": "tier-3", // Panhellenic practice (Herodotus, Thucydides)
+
+	// Functional: non-mythological descriptive names
+	"analytics-engineer":      "functional",
+	"agent-curator":           "functional",
+	"agent-designer":          "functional",
+	"architect":               "functional",
+	"architect-enforcer":      "functional",
+	"attending":               "functional",
+	"audit-lead":              "functional",
+	"business-model-analyst":  "functional",
+	"capacity-engineer":       "functional",
+	"cartographer":            "functional",
+	"case-reporter":           "functional",
+	"chaos-engineer":          "functional",
+	"code-smeller":            "functional",
+	"compatibility-tester":    "functional",
+	"compliance-architect":    "functional",
+	"competitive-analyst":     "functional",
+	"context-architect":       "functional",
+	"context-engineer":        "functional",
+	"cruft-cutter":            "functional",
+	"debt-collector":          "functional",
+	"dependency-analyst":      "functional",
+	"dependency-resolver":     "functional",
+	"diagnostician":           "functional",
+	"doc-auditor":             "functional",
+	"doc-reviewer":            "functional",
+	"documentation-engineer":  "functional",
+	"domain-forensics":        "functional",
+	"ecosystem-analyst":       "functional",
+	"eval-specialist":         "functional",
+	"experimentation-lead":    "functional",
+	"gate-keeper":             "functional",
+	"hallucination-hunter":    "functional",
+	"heat-mapper":             "functional",
+	"incident-commander":      "functional",
+	"information-architect":   "functional",
+	"insights-analyst":        "functional",
+	"integration-engineer":    "functional",
+	"integration-researcher":  "functional",
+	"janitor":                 "functional",
+	"logic-surgeon":           "functional",
+	"market-researcher":       "functional",
+	"moonshot-architect":      "functional",
+	"observability-engineer":  "functional",
+	"pathologist":             "functional",
+	"pattern-profiler":        "functional",
+	"penetration-tester":      "functional",
+	"pipeline-monitor":        "functional",
+	"platform-engineer":       "functional",
+	"principal-engineer":      "functional",
+	"prompt-architect":        "functional",
+	"prototype-engineer":      "functional",
+	"qa-adversary":            "functional",
+	"release-executor":        "functional",
+	"release-planner":         "functional",
+	"remedy-smith":            "functional",
+	"remediation-planner":     "functional",
+	"requirements-analyst":    "functional",
+	"risk-assessor":           "functional",
+	"roadmap-strategist":      "functional",
+	"security-reviewer":       "functional",
+	"signal-sifter":           "functional",
+	"sprint-planner":          "functional",
+	"structure-evaluator":     "functional",
+	"systems-thermodynamicist": "functional",
+	"tech-transfer":           "functional",
+	"tech-writer":             "functional",
+	"technology-scout":        "functional",
+	"thermal-monitor":         "functional",
+	"threat-modeler":          "functional",
+	"topology-cartographer":   "functional",
+	"triage-nurse":            "functional",
+	"user-researcher":         "functional",
+	"workflow-engineer":       "functional",
 }
 
 var archetypeMaxTurns = map[string]int{
@@ -391,6 +486,30 @@ func lintAgentFile(path, relPath string, report *LintReport) {
 
 	// @skill-name anti-pattern check (body content only)
 	checkSkillAtRefs(string(body), relPath, &report.Agents)
+
+	// Naming provenance check — all agent names must be registered
+	if fm.Name != "" {
+		if _, ok := approvedAgentNames[fm.Name]; !ok {
+			report.Agents = append(report.Agents, Finding{
+				File: relPath, Severity: SevLow, Rule: "naming-provenance",
+				Message: fmt.Sprintf("agent name %q is not in the approved naming registry — register in lint.go approvedAgentNames", fm.Name),
+			})
+		}
+	}
+
+	// Domain-jurisdiction check — orchestrator domain must match rite directory
+	if fm.Domain != "" && fm.Type == "orchestrator" && strings.HasPrefix(relPath, "rites/") {
+		parts := strings.SplitN(relPath, "/", 4) // rites/{rite}/agents/{file}
+		if len(parts) >= 2 {
+			riteName := parts[1]
+			if fm.Domain != riteName {
+				report.Agents = append(report.Agents, Finding{
+					File: relPath, Severity: SevMedium, Rule: "domain-jurisdiction",
+					Message: fmt.Sprintf("orchestrator domain %q does not match rite directory %q", fm.Domain, riteName),
+				})
+			}
+		}
+	}
 }
 
 // --- Dromena linting ---

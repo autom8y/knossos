@@ -76,8 +76,8 @@ func TestCollectCommandsEmpty(t *testing.T) {
 
 func TestCollectConcepts(t *testing.T) {
 	entries := CollectConcepts()
-	// The explain package embeds exactly 13 concepts.
-	assert.Len(t, entries, 13)
+	// The explain package embeds exactly 16 concepts.
+	assert.Len(t, entries, 16)
 }
 
 func TestCollectConceptsDomain(t *testing.T) {

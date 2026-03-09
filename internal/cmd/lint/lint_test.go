@@ -261,6 +261,135 @@ func TestLintSessionArtifactsInSharedMena(t *testing.T) {
 	}
 }
 
+// --- Naming provenance tests ---
+
+func TestNamingProvenance_RegisteredName(t *testing.T) {
+	report := &LintReport{}
+	content := "---\nname: potnia\ndescription: Per-rite coordinator.\ntype: orchestrator\n---\n# Potnia\n"
+	lintAgentFile("", "rites/ecosystem/agents/potnia.md", report)
+	_ = content // content used below
+
+	// Use lintAgentFile with a real temp file
+	projectRoot := t.TempDir()
+	agentDir := filepath.Join(projectRoot, "rites", "ecosystem", "agents")
+	if err := os.MkdirAll(agentDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(agentDir, "potnia.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	report = &LintReport{}
+	lintAgentFile(filepath.Join(agentDir, "potnia.md"), "rites/ecosystem/agents/potnia.md", report)
+
+	for _, f := range report.Agents {
+		if f.Rule == "naming-provenance" {
+			t.Errorf("registered name 'potnia' should not produce naming-provenance finding, got: %s", f.Message)
+		}
+	}
+}
+
+func TestNamingProvenance_UnregisteredName(t *testing.T) {
+	projectRoot := t.TempDir()
+	agentDir := filepath.Join(projectRoot, "rites", "test", "agents")
+	if err := os.MkdirAll(agentDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "---\nname: unknown-agent-xyz\ndescription: Test agent.\ntype: specialist\n---\n# Unknown\n"
+	if err := os.WriteFile(filepath.Join(agentDir, "unknown.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	report := &LintReport{}
+	lintAgentFile(filepath.Join(agentDir, "unknown.md"), "rites/test/agents/unknown.md", report)
+
+	found := false
+	for _, f := range report.Agents {
+		if f.Rule == "naming-provenance" {
+			found = true
+			if f.Severity != SevLow {
+				t.Errorf("expected LOW severity, got %s", f.Severity)
+			}
+		}
+	}
+	if !found {
+		t.Error("unregistered name should produce naming-provenance finding")
+	}
+}
+
+// --- Domain-jurisdiction tests ---
+
+func TestDomainJurisdiction_MatchingDomain(t *testing.T) {
+	projectRoot := t.TempDir()
+	agentDir := filepath.Join(projectRoot, "rites", "ecosystem", "agents")
+	if err := os.MkdirAll(agentDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "---\nname: potnia\ndescription: Coordinator.\ntype: orchestrator\ndomain: ecosystem\n---\n# Potnia\n"
+	if err := os.WriteFile(filepath.Join(agentDir, "potnia.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	report := &LintReport{}
+	lintAgentFile(filepath.Join(agentDir, "potnia.md"), "rites/ecosystem/agents/potnia.md", report)
+
+	for _, f := range report.Agents {
+		if f.Rule == "domain-jurisdiction" {
+			t.Errorf("matching domain should not produce finding, got: %s", f.Message)
+		}
+	}
+}
+
+func TestDomainJurisdiction_MismatchedDomain(t *testing.T) {
+	projectRoot := t.TempDir()
+	agentDir := filepath.Join(projectRoot, "rites", "ecosystem", "agents")
+	if err := os.MkdirAll(agentDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "---\nname: potnia\ndescription: Coordinator.\ntype: orchestrator\ndomain: security\n---\n# Potnia\n"
+	if err := os.WriteFile(filepath.Join(agentDir, "potnia.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	report := &LintReport{}
+	lintAgentFile(filepath.Join(agentDir, "potnia.md"), "rites/ecosystem/agents/potnia.md", report)
+
+	found := false
+	for _, f := range report.Agents {
+		if f.Rule == "domain-jurisdiction" {
+			found = true
+			if f.Severity != SevMedium {
+				t.Errorf("expected MEDIUM severity, got %s", f.Severity)
+			}
+		}
+	}
+	if !found {
+		t.Error("mismatched domain should produce domain-jurisdiction finding")
+	}
+}
+
+func TestDomainJurisdiction_NonOrchestrator(t *testing.T) {
+	projectRoot := t.TempDir()
+	agentDir := filepath.Join(projectRoot, "rites", "ecosystem", "agents")
+	if err := os.MkdirAll(agentDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	// Specialist with domain field — should NOT trigger domain-jurisdiction
+	content := "---\nname: context-architect\ndescription: Designs things.\ntype: specialist\ndomain: security\n---\n# Architect\n"
+	if err := os.WriteFile(filepath.Join(agentDir, "test.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	report := &LintReport{}
+	lintAgentFile(filepath.Join(agentDir, "test.md"), "rites/ecosystem/agents/test.md", report)
+
+	for _, f := range report.Agents {
+		if f.Rule == "domain-jurisdiction" {
+			t.Errorf("non-orchestrator should not trigger domain-jurisdiction, got: %s", f.Message)
+		}
+	}
+}
+
 func TestLintSessionArtifactsInSharedMena_NoSharedDir(t *testing.T) {
 	projectRoot := t.TempDir()
 	// No rites/shared/mena/ directory exists

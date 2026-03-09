@@ -583,7 +583,8 @@ func outputBlock(printer *output.Printer, filePath string) error {
 			HookEventName:            "PreToolUse",
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Use Moirai for " + contextType + " mutations",
-			AdditionalContext:        "To mutate " + contextType + ", delegate via: " + moiraiOp + ". Moirai is the session lifecycle agent that handles all *_CONTEXT.md mutations with proper locking and validation.",
+			AdditionalContext: "To mutate " + contextType + ", delegate via: " + moiraiOp + ". Moirai is the session lifecycle agent that handles all *_CONTEXT.md mutations with proper locking and validation. " +
+				"(Evans Principle: reconstructions that outlive their evidence become obstacles to understanding — see 'ari explain evans-principle'.)",
 		},
 	}
 	return printer.Print(result)
