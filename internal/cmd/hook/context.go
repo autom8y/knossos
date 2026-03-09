@@ -18,6 +18,7 @@ import (
 	"github.com/autom8y/knossos/internal/hook/clewcontract"
 	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/materialize/source"
+	"github.com/autom8y/knossos/internal/naxos"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/internal/suggest"
@@ -57,8 +58,9 @@ type ContextOutput struct {
 	BaseBranch      string            `json:"base_branch,omitempty"`
 	AvailableRites  []string          `json:"available_rites,omitempty"`
 	AvailableAgents []string          `json:"available_agents,omitempty"`
-	KnowStatus      string                `json:"know_status,omitempty"`  // .know/ freshness summary line
-	Suggestions     []suggest.Suggestion  `json:"suggestions,omitempty"` // H5: proactive suggestions
+	KnowStatus      string                `json:"know_status,omitempty"`   // .know/ freshness summary line
+	NaxosSummary    string                `json:"naxos_summary,omitempty"` // Naxos triage summary line
+	Suggestions     []suggest.Suggestion  `json:"suggestions,omitempty"`   // H5: proactive suggestions
 }
 
 // Text implements output.Textable for YAML frontmatter output.
@@ -149,6 +151,11 @@ func (c ContextOutput) Text() string {
 	// know_status moves into frontmatter (single-line, no escaping needed)
 	if c.KnowStatus != "" {
 		b.WriteString(fmt.Sprintf("know_status: %q\n", c.KnowStatus))
+	}
+
+	// naxos_summary: one-line triage result from NAXOS_TRIAGE.md (single-line, no escaping needed)
+	if c.NaxosSummary != "" {
+		b.WriteString(fmt.Sprintf("naxos_summary: %q\n", c.NaxosSummary))
 	}
 
 	// Closing delimiter
@@ -333,6 +340,12 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 		result.KnowStatus = knowLine
 	}
 
+	// Naxos: inject triage summary line (fast path, <5ms — frontmatter only)
+	sessionsDir := resolver.SessionsDir()
+	if summary := naxos.ReadTriageSummary(sessionsDir); summary != "" {
+		result.NaxosSummary = summary
+	}
+
 	// H5: Generate proactive suggestions (fail-open, advisory only)
 	suggestInput := &suggest.SessionInput{
 		SessionID:   sessCtx.SessionID,
@@ -345,6 +358,21 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	}
 	if suggestions := suggest.SessionStartSuggestions(suggestInput); len(suggestions) > 0 {
 		result.Suggestions = suggestions
+	}
+
+	// Naxos suggestions are lower priority than session-start suggestions; append after.
+	// Only add if there is room under the per-event cap (2).
+	if naxosInput := buildNaxosInput(sessionsDir); naxosInput != nil {
+		const maxSuggestions = 2
+		if len(result.Suggestions) < maxSuggestions {
+			naxosSuggestions := suggest.OrphanHygieneSuggestions(naxosInput)
+			for _, s := range naxosSuggestions {
+				if len(result.Suggestions) >= maxSuggestions {
+					break
+				}
+				result.Suggestions = append(result.Suggestions, s)
+			}
+		}
 	}
 
 	// Emit session_start event to clew log (best-effort, non-blocking)
@@ -450,6 +478,44 @@ func emitSessionStartEvent(sessionDir, sessionID, initiative, complexity, rite s
 		printer.VerboseLog("warn", "failed to emit session_start event",
 			map[string]any{"error": flushErr.Error()})
 	}
+}
+
+// buildNaxosInput reads the NAXOS_TRIAGE.md artifact from sessionsDir and converts it
+// into a suggest.NaxosInput. Returns nil on any error (fail-open: missing artifact is normal).
+func buildNaxosInput(sessionsDir string) *suggest.NaxosInput {
+	result, err := naxos.ReadTriageArtifact(sessionsDir)
+	if err != nil {
+		// Artifact absent or malformed — normal case on fresh projects.
+		return nil
+	}
+	if result.TotalTriaged == 0 {
+		return nil
+	}
+
+	// Convert map[naxos.Severity]int → map[string]int for the suggest layer.
+	bySeverity := make(map[string]int, len(result.BySeverity))
+	for sev, count := range result.BySeverity {
+		bySeverity[string(sev)] = count
+	}
+
+	input := &suggest.NaxosInput{
+		TotalTriaged: result.TotalTriaged,
+		BySeverity:   bySeverity,
+	}
+
+	// Surface the top entry (first after priority sort) as a summary hint.
+	if len(result.Entries) > 0 {
+		top := result.Entries[0]
+		input.TopEntry = &suggest.TriageEntrySummary{
+			SessionID:   top.SessionID,
+			Severity:    string(top.Severity),
+			Reason:      string(top.Reason),
+			Action:      string(top.SuggestedAction),
+			InactiveFor: naxos.FormatDuration(top.InactiveFor),
+		}
+	}
+
+	return input
 }
 
 // knowStatus checks .know/ domain freshness and returns a one-line summary string.

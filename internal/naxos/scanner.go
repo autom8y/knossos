@@ -289,16 +289,18 @@ type StaleSession struct {
 	Age time.Duration
 }
 
-// ScanStaleSessions scans the sessions directory for parked sessions
-// that have been inactive longer than the given threshold.
-// Returns only PARKED sessions past the threshold; skips the excludeID session.
-func ScanStaleSessions(sessionsDir string, threshold time.Duration, excludeID string) []StaleSession {
+// ScanStale scans the sessions directory for parked sessions that have been
+// inactive longer than the given threshold. Returns only PARKED sessions past
+// the threshold; skips the excludeID session (typically the currently active
+// session so it is not reported as stale during a wrap operation).
+func (s *Scanner) ScanStale(threshold time.Duration, excludeID string) []StaleSession {
+	sessionsDir := s.resolver.SessionsDir()
 	entries, err := os.ReadDir(sessionsDir)
 	if err != nil {
 		return nil
 	}
 
-	now := time.Now().UTC()
+	now := s.now().UTC()
 	var stale []StaleSession
 
 	for _, entry := range entries {
@@ -335,4 +337,19 @@ func ScanStaleSessions(sessionsDir string, threshold time.Duration, excludeID st
 	}
 
 	return stale
+}
+
+// ScanStaleSessions scans the sessions directory for parked sessions
+// that have been inactive longer than the given threshold.
+// Returns only PARKED sessions past the threshold; skips the excludeID session.
+//
+// Deprecated: Use Scanner.ScanStale instead. This function is retained for
+// backward compatibility and delegates to a temporary Scanner.
+func ScanStaleSessions(sessionsDir string, threshold time.Duration, excludeID string) []StaleSession {
+	// Build a minimal resolver pointing at the parent of sessionsDir.
+	// sessionsDir is typically <projectRoot>/.sos/sessions, so walk up two levels.
+	projectRoot := filepath.Dir(filepath.Dir(sessionsDir))
+	resolver := paths.NewResolver(projectRoot)
+	scanner := NewScanner(resolver, DefaultConfig())
+	return scanner.ScanStale(threshold, excludeID)
 }

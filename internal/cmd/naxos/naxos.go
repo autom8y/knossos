@@ -48,6 +48,7 @@ Examples:
 
 	// Add subcommands
 	cmd.AddCommand(newScanCmd(ctx))
+	cmd.AddCommand(newTriageCmd(ctx))
 
 	// Naxos commands require project context
 	common.SetNeedsProject(cmd, true, true)

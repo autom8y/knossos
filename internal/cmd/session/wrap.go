@@ -376,7 +376,8 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 
 	// Scan for stale parked sessions after successful wrap
 	staleThreshold := staleSessionThreshold()
-	staleSessions := naxos.ScanStaleSessions(resolver.SessionsDir(), staleThreshold, sessionID)
+	staleScanner := naxos.NewScanner(resolver, naxos.DefaultConfig())
+	staleSessions := staleScanner.ScanStale(staleThreshold, sessionID)
 	if len(staleSessions) > 0 {
 		fmt.Fprintf(os.Stderr, "\n---\n")
 		fmt.Fprintf(os.Stderr, "Hint: %d stale parked session(s) found:\n", len(staleSessions))

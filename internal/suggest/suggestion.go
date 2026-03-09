@@ -11,6 +11,7 @@ const (
 	KindPhaseTransition  Kind = "phase_transition"
 	KindBudgetWarning    Kind = "budget_warning"
 	KindSubagentComplete Kind = "subagent_complete"
+	KindOrphanHygiene    Kind = "orphan_hygiene"
 )
 
 // Suggestion is a single proactive recommendation.
@@ -50,4 +51,22 @@ type PhaseTransitionInput struct {
 	CurrentPhase  string
 	Rite          string
 	Complexity    string
+}
+
+// NaxosInput holds state for generating Naxos-related suggestions.
+// Populated from a triage artifact; nil fields produce no suggestions (fail-open).
+type NaxosInput struct {
+	TotalTriaged int
+	BySeverity   map[string]int
+	TopEntry     *TriageEntrySummary
+}
+
+// TriageEntrySummary is a minimal triage entry for the suggest engine.
+// It carries only the fields needed to compose suggestion text.
+type TriageEntrySummary struct {
+	SessionID   string
+	Severity    string
+	Reason      string
+	Action      string
+	InactiveFor string
 }

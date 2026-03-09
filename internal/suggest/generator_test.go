@@ -416,6 +416,132 @@ func TestBudgetWarningSuggestions(t *testing.T) {
 	}
 }
 
+func TestOrphanHygieneSuggestions(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     *NaxosInput
+		wantLen   int
+		wantKind  Kind
+		wantTexts []string
+	}{
+		{
+			name:    "nil input",
+			input:   nil,
+			wantLen: 0,
+		},
+		{
+			name:    "no orphans (zero total triaged)",
+			input:   &NaxosInput{TotalTriaged: 0},
+			wantLen: 0,
+		},
+		{
+			name: "critical orphans",
+			input: &NaxosInput{
+				TotalTriaged: 2,
+				BySeverity:   map[string]int{"CRITICAL": 2},
+			},
+			wantLen:   1,
+			wantKind:  KindOrphanHygiene,
+			wantTexts: []string{"2 critical orphaned sessions", "/naxos"},
+		},
+		{
+			name: "single critical orphan (singular word)",
+			input: &NaxosInput{
+				TotalTriaged: 1,
+				BySeverity:   map[string]int{"CRITICAL": 1},
+			},
+			wantLen:   1,
+			wantKind:  KindOrphanHygiene,
+			wantTexts: []string{"1 critical orphaned session", "/naxos"},
+		},
+		{
+			name: "high priority orphans only",
+			input: &NaxosInput{
+				TotalTriaged: 3,
+				BySeverity:   map[string]int{"HIGH": 3},
+			},
+			wantLen:   1,
+			wantKind:  KindOrphanHygiene,
+			wantTexts: []string{"3 high-priority orphaned sessions", "/naxos"},
+		},
+		{
+			name: "single high orphan (singular word)",
+			input: &NaxosInput{
+				TotalTriaged: 1,
+				BySeverity:   map[string]int{"HIGH": 1},
+			},
+			wantLen:   1,
+			wantKind:  KindOrphanHygiene,
+			wantTexts: []string{"1 high-priority orphaned session", "/naxos"},
+		},
+		{
+			name: "critical plus high respects max cap",
+			input: &NaxosInput{
+				TotalTriaged: 5,
+				BySeverity:   map[string]int{"CRITICAL": 2, "HIGH": 3},
+			},
+			// Both fit: cap is 2 and we have CRITICAL (1 suggestion) + HIGH (1 suggestion) = 2
+			wantLen:  2,
+			wantKind: KindOrphanHygiene,
+			wantTexts: []string{
+				"critical orphaned sessions",
+				"high-priority orphaned sessions",
+			},
+		},
+		{
+			name: "medium only produces no suggestion",
+			input: &NaxosInput{
+				TotalTriaged: 4,
+				BySeverity:   map[string]int{"MEDIUM": 4},
+			},
+			wantLen: 0,
+		},
+		{
+			name: "low only produces no suggestion",
+			input: &NaxosInput{
+				TotalTriaged: 1,
+				BySeverity:   map[string]int{"LOW": 1},
+			},
+			wantLen: 0,
+		},
+		{
+			name: "empty by_severity map with total_triaged non-zero produces no suggestion",
+			input: &NaxosInput{
+				TotalTriaged: 2,
+				BySeverity:   map[string]int{},
+			},
+			wantLen: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := OrphanHygieneSuggestions(tt.input)
+			if len(got) != tt.wantLen {
+				t.Errorf("len = %d, want %d; suggestions: %+v", len(got), tt.wantLen, got)
+				return
+			}
+			if tt.wantLen > 0 && tt.wantKind != "" {
+				if got[0].Kind != tt.wantKind {
+					t.Errorf("Kind = %q, want %q", got[0].Kind, tt.wantKind)
+				}
+			}
+			for _, substr := range tt.wantTexts {
+				found := false
+				for _, s := range got {
+					if contains(s.Text, substr) || contains(s.Action, substr) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("expected substring %q in suggestions, got: %+v", substr, got)
+				}
+			}
+		})
+	}
+}
+
 // contains is a test helper that checks if s contains substr.
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(substr) == 0 ||

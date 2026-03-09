@@ -115,7 +115,8 @@ func runGc(ctx *cmdContext, opts gcOptions) error {
 	}
 
 	// Discover stale PARKED sessions
-	staleSessions := naxos.ScanStaleSessions(resolver.SessionsDir(), threshold, "")
+	scanner := naxos.NewScanner(resolver, naxos.DefaultConfig())
+	staleSessions := scanner.ScanStale(threshold, "")
 	if len(staleSessions) == 0 {
 		return printer.Print(gcOutput{StaleCount: 0})
 	}

@@ -140,6 +140,52 @@ func SubagentStopSuggestions(input *SubagentInput) []Suggestion {
 	}}
 }
 
+// OrphanHygieneSuggestions generates suggestions based on Naxos triage state.
+// Returns nil when input is nil, TotalTriaged is 0, or no actionable severity is present.
+// Naxos suggestions are lower priority than session-start suggestions; callers should
+// append these after other suggestions and respect the overall cap.
+func OrphanHygieneSuggestions(input *NaxosInput) []Suggestion {
+	if input == nil || input.TotalTriaged == 0 {
+		return nil
+	}
+
+	var suggestions []Suggestion
+
+	// CRITICAL orphans have the highest urgency — surface first.
+	if n := input.BySeverity["CRITICAL"]; n > 0 {
+		sessionWord := "session"
+		if n != 1 {
+			sessionWord = "sessions"
+		}
+		suggestions = append(suggestions, Suggestion{
+			Kind:   KindOrphanHygiene,
+			Text:   fmt.Sprintf("%d critical orphaned %s need attention. Run /naxos to triage.", n, sessionWord),
+			Action: "/naxos",
+			Reason: fmt.Sprintf("%d CRITICAL orphaned sessions found in triage artifact", n),
+		})
+	}
+
+	// HIGH orphans are surfaced if there is room under the cap.
+	if n := input.BySeverity["HIGH"]; n > 0 && len(suggestions) < maxSuggestionsPerEvent {
+		sessionWord := "session"
+		if n != 1 {
+			sessionWord = "sessions"
+		}
+		suggestions = append(suggestions, Suggestion{
+			Kind:   KindOrphanHygiene,
+			Text:   fmt.Sprintf("%d high-priority orphaned %s. Consider /naxos.", n, sessionWord),
+			Action: "/naxos",
+			Reason: fmt.Sprintf("%d HIGH orphaned sessions found in triage artifact", n),
+		})
+	}
+
+	if len(suggestions) > maxSuggestionsPerEvent {
+		suggestions = suggestions[:maxSuggestionsPerEvent]
+	}
+
+	return suggestions
+}
+
 // BudgetWarningSuggestions generates suggestions when budget thresholds are crossed.
 // Returns nil when count is below all thresholds.
 func BudgetWarningSuggestions(input *SessionInput) []Suggestion {

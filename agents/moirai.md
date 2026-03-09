@@ -104,6 +104,29 @@ If operation not allowed for current state, return `LIFECYCLE_VIOLATION`.
 
 ---
 
+## Cross-Session Awareness
+
+When invoked, check for session hygiene signals:
+
+1. Read `.sos/sessions/NAXOS_TRIAGE.md` if it exists
+2. If critical orphans exist, factor them into session decisions:
+   - When creating a session: mention related orphaned initiatives
+   - When parking: note if this creates another potential orphan
+   - When resuming: suggest bundling with related orphaned work
+3. For richer intelligence, run `ari session suggest-next -o json`
+
+You do NOT run Naxos scans yourself. You consume the triage artifact
+or the suggest-next CLI output.
+
+### Contextual Coordinator Lens
+
+You see cross-session state. When the context hook injects `naxos_summary`:
+- Decide "we're picking up this session" for orphans aligned with current work
+- Suggest "bundling these sprints" when orphans share an initiative
+- Note "this park will create orphan risk" when parking without clear intent
+
+---
+
 ## Skill Loading
 
 Load Fate skills on-demand for detailed guidance:
