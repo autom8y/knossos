@@ -1,89 +1,67 @@
 ---
 domain: "scar-tissue"
-generated_at: "2026-03-08T18:00:00Z"
+generated_at: "2026-03-09T10:15:06Z"
 expires_after: "14d"
 source_scope: [".sos/archive/**"]
 generator: "dionysus"
-source_hash: "dbf81b8"
+source_hash: "2849e0b"
 confidence: 0.85
 format_version: "1.0"
-sessions_synthesized: 37
-last_session: "session-20260306-201337-8581513b"
+sessions_synthesized: 39
+last_session: "session-20260309-000328-ead5f874"
 ---
 
 ## Blocker Catalog
 
 | Session | Blocker | Resolution | Domain |
 |---------|---------|-----------|--------|
-| session-20260302-150407-07b8e5be | SD-1: @skill-name anti-pattern in orchestrator.yaml + pythia.md (12/15 rites) | Planned: WS1 platform code fix in generateSkillsReference() | agent-regeneration |
-| session-20260302-150407-07b8e5be | SD-2: Pythia duplicate sections (12/15 rites) | Planned: WS3 pythia regeneration | agent-regeneration |
-| session-20260302-150407-07b8e5be | SD-3: Catalog model contradictions (8/15 rites) | Planned: WS4 ground truth sync | agent-config |
-| session-20260302-150407-07b8e5be | SD-4: Entry-point conflict between manifest.yaml and workflow.yaml (9/15 rites) | Planned: WS5 entry-point semantics | rite-config |
-| session-20260302-150407-07b8e5be | SD-5: Ghost skill references in prose (14/15 rites) | Planned: WS6 ghost prose cleanup | mena-integrity |
-| session-20260302-150407-07b8e5be | SD-6: Oversized injected INDEX skills exceeding 40-line ceiling (9/15 rites) | Planned: WS7 progressive disclosure splits | context-budget |
-| session-20260303-163517-f43d2334 | GITHUB_TOKEN suppresses downstream workflow triggers | Root cause identified: GoReleaser uses GITHUB_TOKEN; GitHub silently drops release events. Fix options A-D identified. | ci-infrastructure |
-| session-20260304-154410-af90596d | GO-001/002/003: Three content rewriting bypass paths in materialization pipeline | Fixed: RewriteMenaContentPaths exported and wired into engine.go standalone + both userscope code paths | materialization |
-| session-20260304-154410-af90596d | 15 broken cross-reference links in mena session/operations/workflow | Fixed: session-common -> common, handoff-ref -> handoff, start-ref -> start naming corrections | mena-integrity |
-| session-20260304-154410-af90596d | AGENT-001: releaser-ref source-tree companion paths using absolute source paths | Fixed: replaced with relative sibling references | materialization |
-| session-20260304-001522-1c07b3bd | Pre-existing Go test failures complicating audit signoff | Noted: confirmed pre-dating this initiative, not introduced by framework agnosticism work | test-infrastructure |
+| session-20260303-163517-f43d2334 | GoReleaser uses GITHUB_TOKEN which GitHub suppresses from triggering downstream workflows | Options: swap for PAT, GitHub App token, explicit workflow_dispatch chain, or workflow_run trigger | ci-infrastructure |
+| session-20260304-001522-1c07b3bd | Pre-existing Go test failures present during framework agnosticism audit | Confirmed pre-dating the initiative; not caused by audit work | test-infrastructure |
+| session-20260302-114829-b2f806a3 | Paused debt audit to run deep spike on org-level best practices root cause analysis | Parked session, pivoted to spike | planning |
+| session-20260302-122533-2820b8a1 | Parking Sprint 3 to start Square Zero Debt Remediation initiative | Scope shift to higher-priority initiative | planning |
 
 ## Rejected Alternatives
 
 | Session | Decision | Rejected | Rationale |
 |---------|---------|----------|-----------|
-| session-20260303-003107-55293519 | Skip PRD phase; use debt audit artifacts as requirements | Full PRD generation | Debt audit LEDGER + RISK-REPORT + SPRINT-PLAN already serve as comprehensive requirements |
-| session-20260303-132132-f3031827 | Skip requirements + design phases | Standard phase flow | Spike + framing documents provide comprehensive coverage (Pythia assessment) |
-| session-20260303-135856-c525b918 | Skip requirements + design phases | Standard phase flow | Spike + framing provide architecture, schemas, workstream decomposition, risk register, success criteria |
-| session-20260303-163517-f43d2334 | Option A: swap GITHUB_TOKEN for PAT (recommended if HOMEBREW_TAP_TOKEN has contents:write) | Option B: GitHub App token (high setup effort) | Effort disproportionate to fix scope |
-| session-20260303-163517-f43d2334 | Option D: workflow_run trigger (recommended if no PAT available) | Option C: explicit workflow_dispatch chain (requires PAT) | Avoid PAT requirement if possible |
-| session-20260304-001522-1c07b3bd | .ledge/ is canonical artifact path | docs/ as artifact path | 12 workflow.yaml used docs/ while platform mena used .ledge/; unified to .ledge/ |
-| session-20260304-001522-1c07b3bd | Distribution infra accepted as org-specific (INTENTIONAL) | Remove all org-specific CI references | goreleaser, homebrew tap, GitHub Actions CI are legitimately org-specific |
-| session-20260304-001522-1c07b3bd | .claude/ writes only via ari sync | Direct .claude/ writes by agents | Protect materialization integrity |
-| session-20260304-154410-af90596d | Option C documentary fencing (fence blocks exempt content from rewriting) | Option A: whitelist specific files; Option B: regex-based content detection | Fencing is explicit, maintainable, and preserves intent without fragile heuristics |
+| session-20260303-163517-f43d2334 | Option A (swap GITHUB_TOKEN for PAT) or Option D (workflow_run trigger) | Option B (GitHub App token): high setup effort; Option C (explicit workflow_dispatch chain): requires PAT | Effort vs. complexity tradeoff; A requires PAT scope check, D is zero-PAT |
+| session-20260304-001522-1c07b3bd | .ledge/ as canonical artifact path | docs/ as artifact path | Platform mena uses .ledge/; docs/ was ecosystem bleed from workflow.yaml files |
+| session-20260304-001522-1c07b3bd | .claude/ writes only via ari sync | Direct .claude/ writes from agents | Framework agnosticism requires binary to not assume specific ecosystem |
+| session-20260303-003107-55293519 | PRD phase skipped for debt remediation | Writing a fresh PRD | Debt audit artifacts (LEDGER, RISK-REPORT, SPRINT-PLAN) already serve as requirements |
+| session-20260303-132132-f3031827 | Requirements phase skipped for .know/ incremental refresh | Formal requirements phase | Spike + framing documents provide comprehensive coverage |
+| session-20260303-135856-c525b918 | Requirements + design phase skipped for release context persistence | Formal requirements and design phases | Spike + framing documents provide comprehensive coverage including architecture, schemas, workstream decomposition |
+| session-20260304-154410-af90596d | Option C documentary fencing for educational .lego.md/.dro.md refs | Rewriting educational references (would corrupt documentation) | Educational references should be preserved verbatim in code fences |
 
 ## Friction Signals
 
 - **Recurring**: Patterns across 2+ sessions
-  - Session parking at requirements phase: 25/37 sessions never left requirements (68%), suggesting rapid-fire initiative creation with deferred execution
-  - Duplicate initiative starts: session-20260302-151610-273eeb4a and session-20260302-151730-bffc2248 are the same initiative started 80 seconds apart
-  - Cross-reference link rot: seen in session-20260304-154410-af90596d (15 broken links) and session-20260304-001522-1c07b3bd (75 findings across 3 vectors)
-  - Requirements-phase-only sessions dominating archive: pattern across 2026-03-02 sessions (13/19 parked at requirements) and 2026-03-06 sessions (5/6 parked at requirements)
-  - Phase skipping for spike/framing-driven work: session-20260303-132132-f3031827, session-20260303-135856-c525b918 both skipped requirements phase based on pre-existing spike artifacts
-  - Multi-phase embody sessions: session-20260305-191804-8e309d1f, session-20260306-084705-0f5ea0c7, session-20260306-092108-0c1f2ce9 (3 sessions for phases 1-3 of same feature, each at different phases)
-  - Content path/materialization divergence: session-20260304-135616-f6f65e42 and session-20260304-154410-af90596d both addressed mena materialization correctness issues
+  - Session parking at requirements phase: 28/39 sessions never progressed past requirements, seen across all rites
+  - Duplicate/retry sessions for same initiative: session-20260302-151610-273eeb4a and session-20260302-151730-bffc2248 (canonical dotfile path remediation started twice within 1 minute)
+  - Auto-parked on Stop: frequent auto-parking pattern, seen in 20+ sessions
+  - GITHUB_TOKEN suppression: documented in session-20260303-163517-f43d2334, broader pattern of CI infrastructure friction
+  - Framework agnosticism bleed: 75 findings in session-20260304-001522-1c07b3bd indicating systemic ecosystem coupling in distributed binary
+
 - **One-time**: Isolated friction events
-  - GoReleaser GITHUB_TOKEN event suppression blocking CI pipeline: session-20260303-163517-f43d2334
-  - Content rewriting bypass in materialization pipeline (3 code paths missed by initial TDD): session-20260304-154410-af90596d
-  - Pre-existing Go test failures complicating audit signoff: session-20260304-001522-1c07b3bd
+  - Pre-existing Go test failures during hygiene audit: session-20260304-001522-1c07b3bd
+  - V2 (artifact path bleed) is systemic — all 12 workflow.yaml use docs/ while platform mena uses .ledge/: session-20260304-001522-1c07b3bd
+  - Forge artifact glossary internally contradictory: session-20260304-001522-1c07b3bd
 
 ## Quality Friction (Sails Analysis)
 
 | Sails Color | Sessions | Common Failure Proofs |
 |------------|---------|---------------------|
-| GRAY | 37 | All proofs UNKNOWN across all sessions (log files not found) |
+| GRAY | 39 | All proofs UNKNOWN (no CI proof infrastructure captured) |
 | WHITE | 0 | N/A |
 | BLACK | 0 | N/A |
 
-- 0/37 sessions have any proof status other than UNKNOWN
-- Universal GRAY is caused by absence of CI log integration, not by test failures
-- Sessions with manual test verification (confirmed green via go test ./...): session-20260302-123250-636200b5, session-20260304-154410-af90596d
-
 ## Deferred Work
 
-- Phase 2 Context Quality Remediation (8 workstreams, 21-30h estimated): session-20260302-150407-07b8e5be, parked at requirements
-- Comprehensive Debt Remediation (44 items, 90-153h estimated): session-20260303-003107-55293519, parked at design
-- Canonical dotfile path remediation: session-20260302-151610-273eeb4a, not seen in subsequent sessions
-- XDG Mena Staleness: session-20260302-223308-10f40f3c, not seen in subsequent sessions
-- Knowledge Radar: session-20260302-223852-c7b44b21, not seen in subsequent sessions
-- Org tier sprints 1-3: session-20260302-121512-f4f4f4a6, session-20260302-121832-e059c280, session-20260302-122533-2820b8a1 -- all parked at requirements
-- sync-noise-remediation: session-20260302-210626-4a7b9681, not seen in subsequent sessions
-- Releaser rite improvements (two sessions): session-20260302-122213-1e802b37, session-20260302-131246-b6788294, both parked
-- .know/ Incremental Refresh: session-20260303-132132-f3031827, parked at implementation
-- Release Context Persistence: session-20260303-135856-c525b918, parked at implementation
-- P4 low-priority findings from content path hygiene: session-20260304-154410-af90596d (deferred as boy-scout fixes)
-- E2E Distribution Dispatch fix implementation: session-20260303-163517-f43d2334, investigation complete but fix not applied
-- embody phase 2 workflow awareness: session-20260306-084705-0f5ea0c7, parked at requirements
-- embody phase 3 L8 horizon: session-20260306-092108-0c1f2ce9, parked at requirements
-- Session Dromena Legacy Removal: session-20260306-152208-d302cc16, parked at requirements
-- Release hardening post legacy removal: session-20260306-164058-a8e7e897, parked at requirements
-- Hygiene printer bypasses + fmt.Errorf cleanup: session-20260306-201337-8581513b, parked at requirements
+- Resume cross-rite: deferred in CC Agent Capability Uplift, needs empirical evidence from ecosystem usage
+- arch-ref skill creation: deferred, arch rite has no reference skill
+- ADR-0028: deferred, needs empirical evidence from pilot and rollout
+- WS-5 (optional) in mena materialization divergence fix: unify user-scope walkers via fs.FS interface, deferred in session-20260304-135616-f6f65e42
+- Wave 3 (Userscope Deep) in debt remediation: last priority, highest risk, deferred in session-20260303-003107-55293519
+- WS-4 (documentation of GITHUB_TOKEN suppression): deferred in session-20260303-163517-f43d2334
+- Phase 2 Context Quality Remediation: 8 workstreams across 15 rites, session-20260302-150407-07b8e5be parked at requirements with detailed multi-session plan
+- knowledge-maturation-pipeline: session-20260305-172543-d0e8d2fc parked at requirements
+- Comprehensive Debt Remediation 44 items: session-20260303-003107-55293519 parked at design phase, Waves 1-4 pending execution

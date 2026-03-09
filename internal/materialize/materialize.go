@@ -631,7 +631,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		}
 		if riteName == "" && previousRite == "" {
 			if opts.Scope == ScopeRite {
-				return nil, errors.New(errors.CodeUsageError, "no ACTIVE_RITE found, specify --rite")
+				return nil, fmt.Errorf("no ACTIVE_RITE found, specify --rite")
 			}
 			// scope=all with no rite: run minimal
 			return m.syncRiteScopeMinimal(opts)
