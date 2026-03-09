@@ -22,7 +22,7 @@ land_hash: "a360816ba21cf78956942c0c663b046fa7fe9b1c84ca51202a1143da710d45c3"
 
 ## Failure Catalog
 
-28 SCAR entries cataloged with regression tests, defensive guards, and cross-validated against `/Users/tomtenuta/Code/knossos/internal/materialize/scar_regression_test.go`, `/Users/tomtenuta/Code/knossos/internal/materialize/source/source_test.go`, `/Users/tomtenuta/Code/knossos/internal/agent/regenerate_test.go`, `/Users/tomtenuta/Code/knossos/internal/materialize/mena/content_rewrite_test.go`, and git history through commit `dbf81b8`. Three additional post-catalog items (GO-001/002/003 content rewriting bypasses) documented but not yet formally numbered. Three CI/shell scars (LOCK-001, LOCK-003, STATE-001) documented from legacy shell era.
+29 SCAR entries cataloged with regression tests, defensive guards, and cross-validated against `/Users/tomtenuta/Code/knossos/internal/materialize/scar_regression_test.go`, `/Users/tomtenuta/Code/knossos/internal/materialize/source/source_test.go`, `/Users/tomtenuta/Code/knossos/internal/agent/regenerate_test.go`, `/Users/tomtenuta/Code/knossos/internal/materialize/mena/content_rewrite_test.go`, and git history through commit `dbf81b8`. Three additional post-catalog items (GO-001/002/003 content rewriting bypasses) documented but not yet formally numbered. Three CI/shell scars (LOCK-001, LOCK-003, STATE-001) documented from legacy shell era.
 
 ### SCAR-001: TOCTOU Race in Stale Lock Reclamation
 
@@ -239,6 +239,23 @@ land_hash: "a360816ba21cf78956942c0c663b046fa7fe9b1c84ca51202a1143da710d45c3"
 **Defensive pattern**: Shared mena is for permanent platform knowledge only. Session artifacts belong in `.sos/wip/`. MEMORY.md Golden Rule: "NEVER add session artifacts to rites/shared/mena/."
 **Regression tests**: `TestSCAR027_SharedMena_NoSessionArtifacts` in `/Users/tomtenuta/Code/knossos/internal/materialize/scar_regression_test.go`
 
+### SCAR-028: MCP Servers Written to Wrong CC Config File
+
+**Category**: integration_failure (silent)
+**What failed**: `materializeSettingsWithManifest()` writes `mcp_servers` from rite manifests into `.claude/settings.local.json` under the `mcpServers` key. CC does NOT read MCP server definitions from this file. CC reads MCPs from three sources: `~/.claude.json` (user-global), `~/.mcp.json` (user-global), and `.mcp.json` (project root). MCP servers declared in rite manifests are materialized correctly but into a dead-letter location — they are never connected.
+**Evidence**: `go-semantic` appeared connected despite being in `settings.local.json`, but was actually loaded from `~/.mcp.json`. `duckdb` and `github` in `settings.local.json` with no entry in `~/.mcp.json` or `.mcp.json` — neither connects. Confirmed via `ListMcpResourcesTool` returning "Server 'duckdb' not found".
+**Affected rites**: All rites with `mcp_servers` in manifest.yaml: `ecosystem` (go-semantic, terraform), `10x-dev` (github), `data-analyst` (duckdb). Only work if the user ALSO manually configures the server in `~/.mcp.json` or `~/.claude.json`.
+**Fix location**: `/Users/tomtenuta/Code/knossos/internal/materialize/materialize_settings.go` — `mergeMCPServers` must also (or instead) write to `.mcp.json` at project root.
+**Defensive pattern**: MCP server materialization target must be `.mcp.json` (project root), not `.claude/settings.local.json`. Union merge semantics preserved. Provenance tracking for `.mcp.json`.
+**Regression tests**: NEEDED — `TestSCAR028_MCPServers_WrittenToMcpJson` verifying `.mcp.json` is created/updated and CC can discover the tools.
+**CC config file reference**:
+- `~/.claude.json` → user-global MCPs (read by CC)
+- `~/.mcp.json` → user-global MCPs (read by CC)
+- `.mcp.json` → project-level MCPs (read by CC)
+- `.claude/settings.json` → team settings, hooks, permissions (NOT MCPs)
+- `.claude/settings.local.json` → personal settings overrides (NOT MCPs)
+- `~/.claude/settings.local.json` → user-global permissions, `enableAllProjectMcpServers`, `enabledMcpjsonServers`
+
 ### GO-001/002/003: Three Content Rewriting Bypass Paths (Unnumbered)
 
 **Category**: data_corruption (pipeline bypass)
@@ -253,7 +270,7 @@ land_hash: "a360816ba21cf78956942c0c663b046fa7fe9b1c84ca51202a1143da710d45c3"
 
 | Category | Count | SCAR IDs |
 |----------|-------|----------|
-| Integration failure | 9 | SCAR-002, SCAR-006, SCAR-009, SCAR-012, SCAR-013, SCAR-018, SCAR-020, SCAR-021, SCAR-024 |
+| Integration failure | 10 | SCAR-002, SCAR-006, SCAR-009, SCAR-012, SCAR-013, SCAR-018, SCAR-020, SCAR-021, SCAR-024, SCAR-028 |
 | Data corruption | 6 | SCAR-004, SCAR-005, SCAR-015, SCAR-022, SCAR-025, GO-001/002/003 |
 | Configuration drift | 5 | SCAR-008, SCAR-011, SCAR-017, SCAR-019, SCAR-023 |
 | Schema evolution | 3 | SCAR-007, SCAR-014, SCAR-016 |
@@ -302,6 +319,7 @@ All 28 fix locations verified against current filesystem at HEAD (`dbf81b8`).
 | SCAR-025 | `internal/materialize/mena.go` (3 os.Stat call sites) | Verified |
 | SCAR-026 | `internal/cmd/hook/writeguard.go:outputBlock()` (additionalContext absent) | Verified |
 | SCAR-027 | `internal/cmd/lint/lint.go:621` | Verified |
+| SCAR-028 | `internal/materialize/materialize_settings.go` (writes to `settings.local.json` instead of `.mcp.json`) | **OPEN** |
 | GO-001/002/003 | `mena/engine.go:144`, `mena/walker.go:83`, `userscope/sync_mena.go:303,353`, `mena/content_rewrite.go:50` | Verified |
 
 **Compound fixes (multiple locations)**: SCAR-004 (2 load sites), SCAR-010 (6 files), SCAR-012 (2 files), SCAR-015 (4 shell scripts), SCAR-016 (all .sh files), SCAR-020 (2 dromena files), GO-001/002/003 (4 locations).
@@ -371,6 +389,7 @@ All 28 fix locations verified against current filesystem at HEAD (`dbf81b8`).
 | SCAR-025 | principal-engineer | Always `os.Stat` before checksum comparison in sync |
 | SCAR-026 | context-architect | Writeguard must not include delegation hints — belongs in agent prompts |
 | SCAR-027 | context-architect, principal-engineer | Shared mena = permanent knowledge; session artifacts in `.sos/wip/` |
+| SCAR-028 | principal-engineer, context-architect | MCP servers must write to `.mcp.json`, not `settings.local.json` |
 | GO-001/002/003 | principal-engineer | `RewriteMenaContentPaths` must be called in ALL mena copy paths |
 
 ---

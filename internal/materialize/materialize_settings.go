@@ -17,10 +17,9 @@ import (
 )
 
 // materializeSettingsWithManifest generates or updates settings.local.json.
-// If manifest has MCP servers, merges them into existing settings.
 // Loads hooks.yaml and merges hook registrations into settings.
-// If no manifest or no MCP servers, creates minimal settings if needed.
-func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifest *RiteManifest, collector provenance.Collector) error {
+// MCP servers are NOT written here — see materializeMcpJson (SCAR-028).
+func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *RiteManifest, collector provenance.Collector) error {
 	settingsPath := filepath.Join(claudeDir, "settings.local.json")
 
 	// Load existing settings or create empty map
@@ -37,10 +36,9 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 		existingSettings["hooks"] = make(map[string]any)
 	}
 
-	// If manifest has MCP servers, merge them
-	if manifest != nil && len(manifest.MCPServers) > 0 {
-		existingSettings = mergeMCPServers(existingSettings, manifest.MCPServers)
-	}
+	// SCAR-028 cleanup: remove stale mcpServers from settings.local.json.
+	// MCP servers are now written to .mcp.json (see materializeMcpJson).
+	delete(existingSettings, "mcpServers")
 
 	// Write settings (only if content changed, to avoid triggering Claude Code file watcher)
 	err = saveSettings(settingsPath, existingSettings)
@@ -52,6 +50,48 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, manifes
 	hash, err := checksum.File(settingsPath)
 	if err == nil && hash != "" {
 		collector.Record("settings.local.json", provenance.NewKnossosEntry(
+			provenance.ScopeRite,
+			"(generated)",
+			"template",
+			hash,
+		))
+	}
+
+	return nil
+}
+
+// materializeMcpJson writes MCP server declarations from the rite manifest
+// to .mcp.json at project root. CC reads MCP servers from this file, NOT
+// from settings.local.json (SCAR-028).
+//
+// Uses union merge semantics: rite servers are added/updated; existing
+// satellite servers not in the manifest are preserved.
+func (m *Materializer) materializeMcpJson(projectRoot string, manifest *RiteManifest, collector provenance.Collector) error {
+	if manifest == nil || len(manifest.MCPServers) == 0 {
+		return nil
+	}
+
+	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
+
+	// Load existing .mcp.json or create empty wrapper
+	existing, err := loadExistingSettings(mcpJsonPath)
+	if err != nil {
+		return err
+	}
+
+	// Merge rite MCP servers into the mcpServers key (union merge)
+	existing = mergeMCPServers(existing, manifest.MCPServers)
+
+	// Write (only if content changed)
+	err = saveSettings(mcpJsonPath, existing)
+	if err != nil {
+		return err
+	}
+
+	// Record provenance
+	hash, err := checksum.File(mcpJsonPath)
+	if err == nil && hash != "" {
+		collector.Record(".mcp.json", provenance.NewKnossosEntry(
 			provenance.ScopeRite,
 			"(generated)",
 			"template",

@@ -34,18 +34,49 @@ func TestMaterializeSettingsWithManifest_NoMCPServers(t *testing.T) {
 	// Should have hooks
 	assert.NotNil(t, settings["hooks"])
 
-	// Should NOT have mcpServers (not needed if manifest has none)
-	// Actually, we DO add it because mergeMCPServers always ensures it exists
-	// But it should be empty
-	if mcpServers, ok := settings["mcpServers"].(map[string]any); ok {
-		assert.Empty(t, mcpServers)
-	}
+	// SCAR-028: mcpServers must NOT be in settings.local.json
+	assert.Nil(t, settings["mcpServers"], "mcpServers must not be in settings.local.json (SCAR-028)")
 }
 
-// TestMaterializeSettingsWithManifest_WithMCPServers tests that MCP servers
-// from manifest are written to settings.local.json.
-func TestMaterializeSettingsWithManifest_WithMCPServers(t *testing.T) {
+// TestMaterializeSettingsWithManifest_StaleMcpServersRemoved tests that
+// stale mcpServers in settings.local.json are cleaned up (SCAR-028).
+func TestMaterializeSettingsWithManifest_StaleMcpServersRemoved(t *testing.T) {
 	tempDir := t.TempDir()
+	settingsPath := filepath.Join(tempDir, "settings.local.json")
+
+	// Create existing settings WITH stale mcpServers (from before SCAR-028 fix)
+	existingSettings := map[string]any{
+		"hooks": map[string]any{},
+		"mcpServers": map[string]any{
+			"github": map[string]any{
+				"command": "npx",
+				"args":    []string{"-y", "@modelcontextprotocol/server-github"},
+			},
+		},
+	}
+
+	data, err := json.MarshalIndent(existingSettings, "", "  ")
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(settingsPath, data, 0644))
+
+	manifest := &RiteManifest{Name: "test-rite"}
+	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	require.NoError(t, err)
+
+	// Verify mcpServers was removed
+	data, err = os.ReadFile(settingsPath)
+	require.NoError(t, err)
+
+	var settings map[string]any
+	require.NoError(t, json.Unmarshal(data, &settings))
+	assert.Nil(t, settings["mcpServers"], "stale mcpServers must be removed from settings.local.json (SCAR-028)")
+	assert.NotNil(t, settings["hooks"], "hooks must be preserved")
+}
+
+// TestMaterializeMcpJson_WritesToProjectRoot tests that MCP servers from
+// the rite manifest are written to .mcp.json at project root (SCAR-028).
+func TestMaterializeMcpJson_WritesToProjectRoot(t *testing.T) {
+	projectRoot := t.TempDir()
 	manifest := &RiteManifest{
 		Name: "test-rite",
 		MCPServers: []MCPServer{
@@ -65,21 +96,19 @@ func TestMaterializeSettingsWithManifest_WithMCPServers(t *testing.T) {
 		},
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
-	// Verify settings file was created
-	settingsPath := filepath.Join(tempDir, "settings.local.json")
-	data, err := os.ReadFile(settingsPath)
+	// Verify .mcp.json was created
+	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
+	data, err := os.ReadFile(mcpJsonPath)
 	require.NoError(t, err)
 
-	var settings map[string]any
-	require.NoError(t, json.Unmarshal(data, &settings))
+	var mcpFile map[string]any
+	require.NoError(t, json.Unmarshal(data, &mcpFile))
 
-	// Check mcpServers structure
-	assert.NotNil(t, settings["mcpServers"])
-	mcpServers, ok := settings["mcpServers"].(map[string]any)
-	require.True(t, ok)
+	mcpServers, ok := mcpFile["mcpServers"].(map[string]any)
+	require.True(t, ok, "mcpServers key must exist in .mcp.json")
 
 	// Check github server
 	assert.Contains(t, mcpServers, "github")
@@ -99,81 +128,99 @@ func TestMaterializeSettingsWithManifest_WithMCPServers(t *testing.T) {
 	assert.Equal(t, "npx", terraformServer["command"])
 }
 
-// TestMaterializeSettingsWithManifest_PreservesExisting tests that existing
-// satellite-owned MCP servers are preserved when merging rite manifest servers.
-func TestMaterializeSettingsWithManifest_PreservesExisting(t *testing.T) {
-	tempDir := t.TempDir()
-	settingsPath := filepath.Join(tempDir, "settings.local.json")
+// TestMaterializeMcpJson_PreservesExistingSatelliteServers tests union merge:
+// rite servers are added, satellite servers in .mcp.json are preserved.
+func TestMaterializeMcpJson_PreservesExistingSatelliteServers(t *testing.T) {
+	projectRoot := t.TempDir()
+	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
 
-	// Create existing settings with satellite-owned server
-	existingSettings := map[string]any{
-		"hooks": map[string]any{},
+	// Create existing .mcp.json with a user-owned satellite server
+	existing := map[string]any{
 		"mcpServers": map[string]any{
-			"custom-satellite-server": map[string]any{
-				"command": "custom-cmd",
-				"args":    []string{"--custom"},
+			"my-custom-server": map[string]any{
+				"command": "my-server-binary",
+				"args":    []any{"--port", "8080"},
 			},
 		},
 	}
-
-	data, err := json.MarshalIndent(existingSettings, "", "  ")
+	data, err := json.MarshalIndent(existing, "", "  ")
 	require.NoError(t, err)
-	require.NoError(t, os.WriteFile(settingsPath, data, 0644))
+	require.NoError(t, os.WriteFile(mcpJsonPath, data, 0644))
 
-	// Now materialize with manifest containing different servers
+	// Materialize rite MCP servers
 	manifest := &RiteManifest{
 		Name: "test-rite",
 		MCPServers: []MCPServer{
-			{
-				Name:    "github",
-				Command: "npx",
-				Args:    []string{"-y", "@modelcontextprotocol/server-github"},
-			},
+			{Name: "duckdb", Command: "uvx", Args: []string{"mcp-server-motherduck"}},
 		},
 	}
 
-	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
 	// Verify both servers exist
-	data, err = os.ReadFile(settingsPath)
+	data, err = os.ReadFile(mcpJsonPath)
 	require.NoError(t, err)
 
-	var settings map[string]any
-	require.NoError(t, json.Unmarshal(data, &settings))
+	var mcpFile map[string]any
+	require.NoError(t, json.Unmarshal(data, &mcpFile))
 
-	mcpServers, ok := settings["mcpServers"].(map[string]any)
+	mcpServers, ok := mcpFile["mcpServers"].(map[string]any)
 	require.True(t, ok)
 
-	// Both servers should be present
-	assert.Contains(t, mcpServers, "custom-satellite-server")
-	assert.Contains(t, mcpServers, "github")
+	assert.Contains(t, mcpServers, "my-custom-server", "satellite server must be preserved")
+	assert.Contains(t, mcpServers, "duckdb", "rite server must be added")
 
-	// Custom satellite server should be unchanged
-	customServer, ok := mcpServers["custom-satellite-server"].(map[string]any)
+	// Satellite server should be unchanged
+	customServer, ok := mcpServers["my-custom-server"].(map[string]any)
 	require.True(t, ok)
-	assert.Equal(t, "custom-cmd", customServer["command"])
+	assert.Equal(t, "my-server-binary", customServer["command"])
 }
 
-// TestMaterializeSettingsWithManifest_UpdatesRiteOwnedServer tests that
-// if a rite manifest server is updated, the settings reflect the update.
-func TestMaterializeSettingsWithManifest_UpdatesRiteOwnedServer(t *testing.T) {
-	tempDir := t.TempDir()
-	settingsPath := filepath.Join(tempDir, "settings.local.json")
+// TestMaterializeMcpJson_NilManifest tests that nil manifest is a no-op.
+func TestMaterializeMcpJson_NilManifest(t *testing.T) {
+	projectRoot := t.TempDir()
 
-	// Create existing settings with old github config
-	existingSettings := map[string]any{
-		"hooks": map[string]any{},
+	err := (&Materializer{}).materializeMcpJson(projectRoot, nil, provenance.NullCollector{})
+	require.NoError(t, err)
+
+	// .mcp.json should NOT be created
+	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
+	_, err = os.Stat(mcpJsonPath)
+	assert.True(t, os.IsNotExist(err), ".mcp.json must not be created when manifest is nil")
+}
+
+// TestMaterializeMcpJson_EmptyMCPServers tests that empty MCP servers list is a no-op.
+func TestMaterializeMcpJson_EmptyMCPServers(t *testing.T) {
+	projectRoot := t.TempDir()
+	manifest := &RiteManifest{Name: "test-rite"}
+
+	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
+	require.NoError(t, err)
+
+	// .mcp.json should NOT be created
+	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
+	_, err = os.Stat(mcpJsonPath)
+	assert.True(t, os.IsNotExist(err), ".mcp.json must not be created when no MCP servers declared")
+}
+
+// TestMaterializeMcpJson_UpdatesExistingRiteServer tests that rite-owned
+// servers are updated when the manifest changes.
+func TestMaterializeMcpJson_UpdatesExistingRiteServer(t *testing.T) {
+	projectRoot := t.TempDir()
+	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
+
+	// Create existing .mcp.json with old github config
+	existing := map[string]any{
 		"mcpServers": map[string]any{
 			"github": map[string]any{
 				"command": "old-command",
 			},
 		},
 	}
-
-	data, err := json.MarshalIndent(existingSettings, "", "  ")
+	data, err := json.MarshalIndent(existing, "", "  ")
 	require.NoError(t, err)
-	require.NoError(t, os.WriteFile(settingsPath, data, 0644))
+	require.NoError(t, os.WriteFile(mcpJsonPath, data, 0644))
 
 	// Materialize with updated github config
 	manifest := &RiteManifest{
@@ -183,44 +230,42 @@ func TestMaterializeSettingsWithManifest_UpdatesRiteOwnedServer(t *testing.T) {
 				Name:    "github",
 				Command: "npx",
 				Args:    []string{"-y", "@modelcontextprotocol/server-github"},
-				Env: map[string]string{
-					"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}",
-				},
 			},
 		},
 	}
 
-	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
-	// Verify github server was updated
-	data, err = os.ReadFile(settingsPath)
+	data, err = os.ReadFile(mcpJsonPath)
 	require.NoError(t, err)
 
-	var settings map[string]any
-	require.NoError(t, json.Unmarshal(data, &settings))
+	var mcpFile map[string]any
+	require.NoError(t, json.Unmarshal(data, &mcpFile))
 
-	mcpServers, ok := settings["mcpServers"].(map[string]any)
+	mcpServers, ok := mcpFile["mcpServers"].(map[string]any)
 	require.True(t, ok)
 
 	githubServer, ok := mcpServers["github"].(map[string]any)
 	require.True(t, ok)
-
-	// Should have new config
 	assert.Equal(t, "npx", githubServer["command"])
 	assert.Equal(t, []any{"-y", "@modelcontextprotocol/server-github"}, githubServer["args"])
-	assert.NotNil(t, githubServer["env"])
 }
 
-// TestMaterializeSettingsWithManifest_NilManifest tests that passing nil manifest
-// creates minimal settings without error.
-func TestMaterializeSettingsWithManifest_NilManifest(t *testing.T) {
+// TestSCAR028_MCPServers_NotInSettingsLocalJson is a SCAR regression test
+// verifying that MCP servers are never written to settings.local.json.
+func TestSCAR028_MCPServers_NotInSettingsLocalJson(t *testing.T) {
 	tempDir := t.TempDir()
+	manifest := &RiteManifest{
+		Name: "test-rite",
+		MCPServers: []MCPServer{
+			{Name: "duckdb", Command: "uvx", Args: []string{"mcp-server-motherduck"}},
+		},
+	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, nil, provenance.NullCollector{})
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
 	require.NoError(t, err)
 
-	// Verify settings file was created with hooks
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
 	data, err := os.ReadFile(settingsPath)
 	require.NoError(t, err)
@@ -228,5 +273,6 @@ func TestMaterializeSettingsWithManifest_NilManifest(t *testing.T) {
 	var settings map[string]any
 	require.NoError(t, json.Unmarshal(data, &settings))
 
-	assert.NotNil(t, settings["hooks"])
+	assert.Nil(t, settings["mcpServers"],
+		"SCAR-028: mcpServers must NEVER be in settings.local.json — CC reads from .mcp.json")
 }

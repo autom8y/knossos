@@ -470,10 +470,18 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 	result.LegacyBackupPath = legacyBackupPath
 
-	// 8. Generate or update settings.local.json with MCP servers from manifest
+	// 8. Generate or update settings.local.json (hooks only; MCP servers moved to .mcp.json per SCAR-028)
 	if !opts.Soft {
 		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
+		}
+	}
+
+	// 8.1. Write MCP servers to .mcp.json at project root (SCAR-028)
+	if !opts.Soft {
+		projectRoot := filepath.Dir(claudeDir)
+		if err := m.materializeMcpJson(projectRoot, manifest, collector); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize .mcp.json", err)
 		}
 	}
 
