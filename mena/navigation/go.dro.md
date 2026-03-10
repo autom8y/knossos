@@ -34,6 +34,9 @@ cat .knossos/ACTIVE_RITE 2>/dev/null || echo "none"
 
 # 4. WIP artifacts
 ls .sos/wip/ 2>/dev/null
+
+# 5. Procession status (if session has procession block)
+ari procession status --output json 2>/dev/null
 ```
 
 Also read the session context table injected by the SessionStart hook (already in your context above).
@@ -65,7 +68,17 @@ Session: {session_id}
 next: {hint}
 ```
 
-Resolve the `next:` hint: read `.knossos/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase`, check its `next` field. If `next` names a phase → `/handoff {that_phase_agent}`. If `next: null` (terminal) → `/sos wrap` or `/commit && /pr`. If the user provided `$ARGUMENTS`, use their intent as the hint instead.
+If `ari procession status` returned data (procession is active), append a procession line:
+```
+Rite:        {active_rite}
+Phase:       {current_phase}
+Session:     {session_id}
+Procession:  {type} — station {current_station} ({completed_count+1}/{total_stations})
+
+next: {hint based on station goal or phase}
+```
+
+Resolve the `next:` hint: read `.knossos/ACTIVE_WORKFLOW.yaml`, find the phase matching `current_phase`, check its `next` field. If `next` names a phase → `/handoff {that_phase_agent}`. If `next: null` (terminal) → `/sos wrap` or `/commit && /pr`. If the user provided `$ARGUMENTS`, use their intent as the hint instead. If a procession is active and the station work appears complete, hint `ari procession proceed`.
 
 **RESUME_PARKED** (single parked session):
 ```
@@ -123,6 +136,16 @@ Sprint Progress:
 - [ ] Next task
 
 Suggested next action: {inferred from phase and sprint state}
+```
+
+If a procession is active (`ari procession status` returned data), add a procession block:
+
+```
+Procession: {type}
+  Completed: {completed_station_1} ({rite}) → {completed_station_2} ({rite})
+  Current:   {current_station} ({current_rite})
+  Next:      {next_station} ({next_rite})
+  Progress:  {completed_count}/{total_stations} stations
 ```
 
 Read the session's `SESSION_CONTEXT.md` and any `SPRINT_CONTEXT.md` to populate sprint progress. If sprint data is not available, show the phase and initiative without a task list.
