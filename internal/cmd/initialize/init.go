@@ -25,6 +25,10 @@ import (
 // cmdContext holds shared state for the init command.
 type cmdContext struct {
 	common.BaseContext
+	// WorkDir overrides os.Getwd() for determining the project directory.
+	// When empty, os.Getwd() is used (production path). Tests inject a
+	// temporary directory here to avoid os.Chdir (which blocks t.Parallel).
+	WorkDir string
 }
 
 // initOutput represents the JSON output structure for ari init.
@@ -127,10 +131,16 @@ Examples:
 func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Command) error {
 	printer := ctx.GetPrinter(output.FormatText)
 
-	// Determine project directory: use cwd unless --project-dir was explicitly set.
-	projectDir, err := os.Getwd()
-	if err != nil {
-		return common.PrintAndReturn(printer, fmt.Errorf("failed to get current directory: %w", err))
+	// Determine project directory: use injected WorkDir, cwd, or --project-dir.
+	var projectDir string
+	if ctx.WorkDir != "" {
+		projectDir = ctx.WorkDir
+	} else {
+		var err error
+		projectDir, err = os.Getwd()
+		if err != nil {
+			return common.PrintAndReturn(printer, fmt.Errorf("failed to get current directory: %w", err))
+		}
 	}
 
 	// Only check explicit --project-dir when running through cobra (cmd is non-nil).
@@ -245,7 +255,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		"project_dir": projectDir,
 	})
 
-	_, err = mat.MaterializeMinimal(materialize.Options{})
+	_, err := mat.MaterializeMinimal(materialize.Options{})
 	if err != nil {
 		return common.PrintAndReturn(printer, err)
 	}
@@ -266,6 +276,13 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 // binary version.
 const xdgVersionSentinel = ".ari-version"
 
+// extractOpts provides optional overrides for extractEmbeddedMenaToXDG.
+// All fields are optional; zero values fall through to production defaults.
+type extractOpts struct {
+	xdgDataDir string // Override config.XDGDataDir()
+	version    string // Override common.BuildVersion()
+}
+
 // extractEmbeddedMenaToXDG extracts platform mena from the embedded FS to the
 // XDG data directory. This is the hybrid distribution model: binary embeds mena,
 // first init extracts to XDG cache so subsequent syncs read from filesystem.
@@ -276,9 +293,23 @@ const xdgVersionSentinel = ".ari-version"
 // but the directory already exists), the XDG mena directory is wiped and
 // re-extracted from the embedded FS so the installed-user copy stays current
 // across binary upgrades.
-func extractEmbeddedMenaToXDG(embMena fs.FS) {
-	currentVersion := common.BuildVersion()
-	xdgMena := filepath.Join(config.XDGDataDir(), "mena")
+//
+// The optional opts parameter allows tests to inject xdgDataDir and version
+// without mutating global state (enabling t.Parallel).
+func extractEmbeddedMenaToXDG(embMena fs.FS, opts ...extractOpts) {
+	var o extractOpts
+	if len(opts) > 0 {
+		o = opts[0]
+	}
+	currentVersion := o.version
+	if currentVersion == "" {
+		currentVersion = common.BuildVersion()
+	}
+	dataDir := o.xdgDataDir
+	if dataDir == "" {
+		dataDir = config.XDGDataDir()
+	}
+	xdgMena := filepath.Join(dataDir, "mena")
 	sentinelPath := filepath.Join(xdgMena, xdgVersionSentinel)
 
 	if _, err := os.Stat(xdgMena); err == nil {

@@ -11,6 +11,7 @@ import (
 )
 
 func TestInit_FreshDirectory(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	// Set up context pointing to the temp directory.
@@ -22,21 +23,11 @@ func TestInit_FreshDirectory(t *testing.T) {
 			Verbose:    &verbose,
 			ProjectDir: &dir,
 		},
+		WorkDir: dir,
 	}
 
 	// Run init with no rite (minimal scaffold).
-	// We need to simulate running from the temp dir since runInit uses os.Getwd().
-	// Instead, we directly call the materializer logic the same way.
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(origDir)
-
-	err = runInit(ctx, "", "", false, nil)
+	err := runInit(ctx, "", "", false, nil)
 	if err != nil {
 		t.Fatalf("runInit() returned error: %v", err)
 	}
@@ -78,6 +69,7 @@ func TestInit_FreshDirectory(t *testing.T) {
 }
 
 func TestInit_WithRite(t *testing.T) {
+	// Not parallel: mutates global embedded assets via common.SetEmbeddedAssets.
 	dir := t.TempDir()
 
 	// Create a synthetic embedded rites FS with a test rite.
@@ -121,18 +113,10 @@ dependencies:
 			Verbose:    &verbose,
 			ProjectDir: &dir,
 		},
+		WorkDir: dir,
 	}
 
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(origDir)
-
-	err = runInit(ctx, "test-rite", "", false, nil)
+	err := runInit(ctx, "test-rite", "", false, nil)
 	if err != nil {
 		t.Fatalf("runInit() with rite returned error: %v", err)
 	}
@@ -183,6 +167,7 @@ dependencies:
 }
 
 func TestInit_AlreadyInitialized(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	// Pre-create .knossos/ with a valid KNOSSOS_MANIFEST.yaml to simulate existing init.
@@ -211,19 +196,11 @@ section_order:
 			Verbose:    &verbose,
 			ProjectDir: &dir,
 		},
+		WorkDir: dir,
 	}
-
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(origDir)
 
 	// Running without --force should succeed (exit 0) without modifying anything.
-	err = runInit(ctx, "", "", false, nil)
+	err := runInit(ctx, "", "", false, nil)
 	if err != nil {
 		t.Fatalf("runInit() should succeed for already initialized, got error: %v", err)
 	}
@@ -239,6 +216,7 @@ section_order:
 }
 
 func TestInit_Force(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	// Pre-create .knossos/ with a valid KNOSSOS_MANIFEST.yaml.
@@ -271,19 +249,11 @@ section_order:
 			Verbose:    &verbose,
 			ProjectDir: &dir,
 		},
+		WorkDir: dir,
 	}
-
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(origDir)
 
 	// Running with --force should reinitialize.
-	err = runInit(ctx, "", "", true, nil)
+	err := runInit(ctx, "", "", true, nil)
 	if err != nil {
 		t.Fatalf("runInit() with --force returned error: %v", err)
 	}
@@ -302,6 +272,7 @@ section_order:
 }
 
 func TestInit_NonKnossosClaudeDir(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	// Pre-create .claude/ without KNOSSOS_MANIFEST.yaml (non-Knossos project).
@@ -322,19 +293,11 @@ func TestInit_NonKnossosClaudeDir(t *testing.T) {
 			Verbose:    &verbose,
 			ProjectDir: &dir,
 		},
+		WorkDir: dir,
 	}
-
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(dir); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(origDir)
 
 	// Should error without --force.
-	err = runInit(ctx, "", "", false, nil)
+	err := runInit(ctx, "", "", false, nil)
 	if err == nil {
 		t.Fatal("runInit() should error for non-Knossos .claude/ without --force")
 	}
@@ -347,6 +310,7 @@ func TestInit_NonKnossosClaudeDir(t *testing.T) {
 }
 
 func TestInit_NeedsProjectFalse(t *testing.T) {
+	t.Parallel()
 	outputFlag := "text"
 	verbose := false
 	projectDir := ""
@@ -358,6 +322,7 @@ func TestInit_NeedsProjectFalse(t *testing.T) {
 }
 
 func TestInit_LedgeIdempotent(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	// Run scaffoldProjectDirs twice — should not error or overwrite.
@@ -380,27 +345,26 @@ func makeTestMenaFS() fstest.MapFS {
 	}
 }
 
-// withXDGDataDir redirects config.XDGDataDir to a temp directory by setting
-// XDG_DATA_HOME, then restores the original value on cleanup.
-func withXDGDataDir(t *testing.T) string {
+// testXDGDataDir creates a temp directory suitable for use as an XDG data dir
+// and returns both the base "knossos" dir (to pass to extractEmbeddedMenaToXDG)
+// and the expected mena subdirectory path.
+func testXDGDataDir(t *testing.T) (knossosDir string, xdgMena string) {
 	t.Helper()
 	xdgBase := t.TempDir()
-	t.Setenv("XDG_DATA_HOME", xdgBase)
-	// config.XDGDataDir() reads XDG_DATA_HOME directly (no caching), so
-	// the env var is sufficient -- no reset needed.
-	return filepath.Join(xdgBase, "knossos", "mena")
+	knossosDir = filepath.Join(xdgBase, "knossos")
+	xdgMena = filepath.Join(knossosDir, "mena")
+	return knossosDir, xdgMena
 }
 
 // TestExtractEmbeddedMenaToXDG_FreshExtraction verifies that when neither the
 // XDG mena directory nor the sentinel exist, extraction runs and the sentinel
 // is written with the current version.
 func TestExtractEmbeddedMenaToXDG_FreshExtraction(t *testing.T) {
-	xdgMena := withXDGDataDir(t)
-	common.SetBuildVersion("v1.0.0")
-	defer common.SetBuildVersion("dev")
+	t.Parallel()
+	knossosDir, xdgMena := testXDGDataDir(t)
 
 	embMena := makeTestMenaFS()
-	extractEmbeddedMenaToXDG(embMena)
+	extractEmbeddedMenaToXDG(embMena, extractOpts{xdgDataDir: knossosDir, version: "v1.0.0"})
 
 	// Directory must exist.
 	if _, err := os.Stat(xdgMena); os.IsNotExist(err) {
@@ -427,9 +391,8 @@ func TestExtractEmbeddedMenaToXDG_FreshExtraction(t *testing.T) {
 // TestExtractEmbeddedMenaToXDG_VersionMatch verifies that when the sentinel
 // matches the current version, extraction is skipped (idempotent).
 func TestExtractEmbeddedMenaToXDG_VersionMatch(t *testing.T) {
-	xdgMena := withXDGDataDir(t)
-	common.SetBuildVersion("v1.0.0")
-	defer common.SetBuildVersion("dev")
+	t.Parallel()
+	knossosDir, xdgMena := testXDGDataDir(t)
 
 	// Pre-create directory with sentinel matching current version.
 	if err := os.MkdirAll(xdgMena, 0755); err != nil {
@@ -446,7 +409,7 @@ func TestExtractEmbeddedMenaToXDG_VersionMatch(t *testing.T) {
 	}
 
 	embMena := makeTestMenaFS()
-	extractEmbeddedMenaToXDG(embMena)
+	extractEmbeddedMenaToXDG(embMena, extractOpts{xdgDataDir: knossosDir, version: "v1.0.0"})
 
 	// Marker file must still exist (extraction was skipped).
 	data, err := os.ReadFile(markerPath)
@@ -471,9 +434,8 @@ func TestExtractEmbeddedMenaToXDG_VersionMatch(t *testing.T) {
 // records a different version, the XDG mena directory is wiped and re-extracted,
 // and the sentinel is updated to the current version.
 func TestExtractEmbeddedMenaToXDG_VersionMismatch(t *testing.T) {
-	xdgMena := withXDGDataDir(t)
-	common.SetBuildVersion("v2.0.0")
-	defer common.SetBuildVersion("dev")
+	t.Parallel()
+	knossosDir, xdgMena := testXDGDataDir(t)
 
 	// Pre-create directory with sentinel for old version.
 	if err := os.MkdirAll(xdgMena, 0755); err != nil {
@@ -490,7 +452,7 @@ func TestExtractEmbeddedMenaToXDG_VersionMismatch(t *testing.T) {
 	}
 
 	embMena := makeTestMenaFS()
-	extractEmbeddedMenaToXDG(embMena)
+	extractEmbeddedMenaToXDG(embMena, extractOpts{xdgDataDir: knossosDir, version: "v2.0.0"})
 
 	// Stale file must be gone (directory was wiped).
 	if _, err := os.Stat(stalePath); err == nil {
@@ -517,9 +479,8 @@ func TestExtractEmbeddedMenaToXDG_VersionMismatch(t *testing.T) {
 // XDG mena directory exists but has no version sentinel (legacy state), extraction
 // is treated as stale and re-runs.
 func TestExtractEmbeddedMenaToXDG_DirectoryExistsNoSentinel(t *testing.T) {
-	xdgMena := withXDGDataDir(t)
-	common.SetBuildVersion("v1.0.0")
-	defer common.SetBuildVersion("dev")
+	t.Parallel()
+	knossosDir, xdgMena := testXDGDataDir(t)
 
 	// Pre-create directory with content but NO sentinel.
 	if err := os.MkdirAll(xdgMena, 0755); err != nil {
@@ -531,7 +492,7 @@ func TestExtractEmbeddedMenaToXDG_DirectoryExistsNoSentinel(t *testing.T) {
 	}
 
 	embMena := makeTestMenaFS()
-	extractEmbeddedMenaToXDG(embMena)
+	extractEmbeddedMenaToXDG(embMena, extractOpts{xdgDataDir: knossosDir, version: "v1.0.0"})
 
 	// Legacy file must be gone (directory was wiped and re-extracted).
 	if _, err := os.Stat(stalePath); err == nil {
@@ -556,6 +517,7 @@ func TestExtractEmbeddedMenaToXDG_DirectoryExistsNoSentinel(t *testing.T) {
 }
 
 func TestWriteProjectGitignore_NewFile(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	writeProjectGitignore(dir)
@@ -575,6 +537,7 @@ func TestWriteProjectGitignore_NewFile(t *testing.T) {
 }
 
 func TestWriteProjectGitignore_AppendToExisting(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	// Pre-create .gitignore with user content.
@@ -607,6 +570,7 @@ func TestWriteProjectGitignore_AppendToExisting(t *testing.T) {
 }
 
 func TestWriteProjectGitignore_ReplaceExistingBlock(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	// Pre-create .gitignore with stale Knossos block surrounded by user content.
@@ -645,6 +609,7 @@ func TestWriteProjectGitignore_ReplaceExistingBlock(t *testing.T) {
 }
 
 func TestWriteProjectGitignore_Idempotent(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 
 	writeProjectGitignore(dir)

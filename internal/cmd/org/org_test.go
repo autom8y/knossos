@@ -7,6 +7,7 @@ import (
 )
 
 func TestValidOrgName(t *testing.T) {
+	t.Parallel()
 	valid := []string{"autom8y", "my-team", "org-123", "ab"}
 	for _, name := range valid {
 		if !validOrgName.MatchString(name) {
@@ -23,8 +24,8 @@ func TestValidOrgName(t *testing.T) {
 }
 
 func TestRunInit(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
-	t.Setenv("XDG_DATA_HOME", tmpDir)
 
 	ctx := &cmdContext{}
 
@@ -81,6 +82,7 @@ func TestRunInit(t *testing.T) {
 }
 
 func TestRunSet(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create a fake config dir
@@ -106,6 +108,7 @@ func TestRunSet(t *testing.T) {
 }
 
 func TestRunList_EmptyOrgsDir(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgsDir := filepath.Join(tmpDir, "knossos", "orgs")
 
@@ -117,6 +120,7 @@ func TestRunList_EmptyOrgsDir(t *testing.T) {
 }
 
 func TestRunList_WithOrgs(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgsDir := filepath.Join(tmpDir, "knossos", "orgs")
 
