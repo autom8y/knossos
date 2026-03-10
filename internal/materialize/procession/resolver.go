@@ -4,6 +4,7 @@
 package procession
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -67,6 +68,22 @@ func ResolveProcessions(projectRoot string, embeddedFS fs.FS) ([]ResolvedProcess
 		result = append(result, rp)
 	}
 	return result, nil
+}
+
+// ResolveTemplate finds a single procession template by name through the
+// cascading resolution chain. Returns the highest-priority match, or an
+// error if no template with that name is found.
+func ResolveTemplate(name, projectRoot string, embeddedFS fs.FS) (*ResolvedProcession, error) {
+	resolved, err := ResolveProcessions(projectRoot, embeddedFS)
+	if err != nil {
+		return nil, err
+	}
+	for i := range resolved {
+		if resolved[i].Name == name {
+			return &resolved[i], nil
+		}
+	}
+	return nil, fmt.Errorf("procession template %q not found in any resolution tier", name)
 }
 
 // collectFromDisk scans a directory for *.yaml procession templates.

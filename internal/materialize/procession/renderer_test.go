@@ -3,6 +3,7 @@ package procession
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/config"
@@ -45,6 +46,92 @@ func isolateHome(t *testing.T) {
 	t.Setenv("KNOSSOS_HOME", t.TempDir())
 	t.Cleanup(config.ResetKnossosHome)
 }
+
+// --- ResolveTemplate tests ---
+
+func TestResolveTemplate_Found(t *testing.T) {
+	isolateHome(t)
+	projectDir := t.TempDir()
+	writeTestTemplate(t, projectDir, "my-workflow", "security")
+
+	rp, err := ResolveTemplate("my-workflow", projectDir, nil)
+	if err != nil {
+		t.Fatalf("ResolveTemplate: %v", err)
+	}
+	if rp.Name != "my-workflow" {
+		t.Errorf("Name = %q, want %q", rp.Name, "my-workflow")
+	}
+	if rp.Source != "project" {
+		t.Errorf("Source = %q, want %q", rp.Source, "project")
+	}
+	if rp.Template == nil {
+		t.Fatal("Template is nil")
+	}
+	if len(rp.Template.Stations) != 2 {
+		t.Errorf("Stations = %d, want 2", len(rp.Template.Stations))
+	}
+}
+
+func TestResolveTemplate_NotFound(t *testing.T) {
+	isolateHome(t)
+	projectDir := t.TempDir()
+
+	_, err := ResolveTemplate("nonexistent", projectDir, nil)
+	if err == nil {
+		t.Fatal("expected error for missing template, got nil")
+	}
+	if !strings.Contains(err.Error(), "nonexistent") {
+		t.Errorf("error should mention template name, got: %v", err)
+	}
+}
+
+func TestResolveTemplate_ProjectShadowsPlatform(t *testing.T) {
+	isolateHome(t)
+
+	// Write template at platform tier
+	platformDir := t.TempDir()
+	t.Setenv("KNOSSOS_HOME", platformDir)
+	config.ResetKnossosHome()
+	writeTestTemplate(t, platformDir, "my-workflow", "platform-rite")
+
+	// Write template at project tier (higher priority)
+	projectDir := t.TempDir()
+	writeTestTemplate(t, projectDir, "my-workflow", "project-rite")
+
+	rp, err := ResolveTemplate("my-workflow", projectDir, nil)
+	if err != nil {
+		t.Fatalf("ResolveTemplate: %v", err)
+	}
+	if rp.Source != "project" {
+		t.Errorf("Source = %q, want %q (project should shadow platform)", rp.Source, "project")
+	}
+	if rp.Template.Stations[0].Rite != "project-rite" {
+		t.Errorf("Rite = %q, want %q", rp.Template.Stations[0].Rite, "project-rite")
+	}
+}
+
+func TestResolveTemplate_PlatformFallback(t *testing.T) {
+	isolateHome(t)
+
+	// Write template at platform tier only
+	platformDir := t.TempDir()
+	t.Setenv("KNOSSOS_HOME", platformDir)
+	config.ResetKnossosHome()
+	writeTestTemplate(t, platformDir, "platform-only", "security")
+
+	// Empty project dir (no templates)
+	projectDir := t.TempDir()
+
+	rp, err := ResolveTemplate("platform-only", projectDir, nil)
+	if err != nil {
+		t.Fatalf("ResolveTemplate: %v", err)
+	}
+	if rp.Source != "platform" {
+		t.Errorf("Source = %q, want %q", rp.Source, "platform")
+	}
+}
+
+// --- RenderToDir tests ---
 
 func TestRenderToDir_MatchingRite(t *testing.T) {
 	isolateHome(t)

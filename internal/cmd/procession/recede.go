@@ -3,15 +3,14 @@ package procession
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/procession"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -103,13 +102,12 @@ func runRecede(ctx *cmdContext, opts recedeOptions) error {
 
 	p := sessCtx.Procession
 
-	// Load template for validation
-	projectDir := resolver.ProjectRoot()
-	templatePath := filepath.Join(projectDir, "processions", p.Type+".yaml")
-	tmpl, err := procession.LoadTemplate(templatePath)
+	// Resolve template through the 5-tier resolution chain
+	rp, err := procmena.ResolveTemplate(p.Type, resolver.ProjectRoot(), common.EmbeddedProcessions())
 	if err != nil {
-		return common.PrintAndReturn(printer, err)
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeFileNotFound, "template resolution failed", err))
 	}
+	tmpl := rp.Template
 
 	// Validate --to station exists in template
 	targetStn := tmpl.GetStation(opts.to)

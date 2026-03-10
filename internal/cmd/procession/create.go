@@ -12,8 +12,8 @@ import (
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/errors"
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/output"
-	"github.com/autom8y/knossos/internal/procession"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -31,9 +31,10 @@ func newCreateCmd(ctx *cmdContext) *cobra.Command {
 		Short: "Start a new procession from a template",
 		Long: `Start a new cross-rite coordinated workflow from a named template.
 
-Loads the template from {project-dir}/processions/{name}.yaml, creates the
-artifact directory, and stores the procession state in the active session
-context. The procession ID is generated as {template-name}-{YYYY-MM-DD}.
+Resolves the template through the 5-tier resolution chain (project > user >
+org > platform > embedded), creates the artifact directory, and stores the
+procession state in the active session context. The procession ID is generated
+as {template-name}-{YYYY-MM-DD}.
 
 Examples:
   ari procession create --template=security-remediation`,
@@ -107,13 +108,13 @@ func runCreate(ctx *cmdContext, opts createOptions) error {
 				sessCtx.Procession.ID)))
 	}
 
-	// Load template from disk: {projectDir}/processions/{name}.yaml
+	// Resolve template through the 5-tier resolution chain
 	projectDir := resolver.ProjectRoot()
-	templatePath := filepath.Join(projectDir, "processions", opts.templateName+".yaml")
-	tmpl, err := procession.LoadTemplate(templatePath)
+	rp, err := procmena.ResolveTemplate(opts.templateName, projectDir, common.EmbeddedProcessions())
 	if err != nil {
-		return common.PrintAndReturn(printer, err)
+		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeFileNotFound, "template resolution failed", err))
 	}
+	tmpl := rp.Template
 
 	// Generate procession ID: {template-name}-{YYYY-MM-DD}
 	today := time.Now().UTC().Format("2006-01-02")
