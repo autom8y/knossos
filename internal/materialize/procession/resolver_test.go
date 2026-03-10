@@ -7,17 +7,6 @@ import (
 	"testing/fstest"
 )
 
-// isolateEnv prevents the resolver from finding platform-level processions
-// via KNOSSOS_HOME or XDG_DATA_HOME during testing.
-func isolateEnv(t *testing.T) {
-	t.Helper()
-	for _, env := range []string{"KNOSSOS_HOME", "XDG_DATA_HOME"} {
-		orig := os.Getenv(env)
-		t.Setenv(env, t.TempDir())
-		_ = orig
-	}
-}
-
 const validTemplate = `name: test-procession
 description: "A test procession"
 stations:
@@ -47,11 +36,11 @@ artifact_dir: .sos/wip/another-procession/
 `
 
 func TestResolveProcessions_EmptyDir(t *testing.T) {
-	isolateEnv(t)
 	dir := t.TempDir()
-	os.MkdirAll(filepath.Join(dir, "processions"), 0o755)
+	procDir := filepath.Join(dir, "processions")
+	os.MkdirAll(procDir, 0o755)
 
-	results, err := ResolveProcessions(dir, nil)
+	results, err := ResolveProcessionsWithDirs(procDir, "", "", "", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -61,13 +50,12 @@ func TestResolveProcessions_EmptyDir(t *testing.T) {
 }
 
 func TestResolveProcessions_ProjectLevel(t *testing.T) {
-	isolateEnv(t)
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
 	os.WriteFile(filepath.Join(procDir, "test-procession.yaml"), []byte(validTemplate), 0o644)
 
-	results, err := ResolveProcessions(dir, nil)
+	results, err := ResolveProcessionsWithDirs(procDir, "", "", "", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -83,12 +71,11 @@ func TestResolveProcessions_ProjectLevel(t *testing.T) {
 }
 
 func TestResolveProcessions_EmbeddedFallback(t *testing.T) {
-	isolateEnv(t)
 	embFS := fstest.MapFS{
 		"processions/test-procession.yaml": &fstest.MapFile{Data: []byte(validTemplate)},
 	}
 
-	results, err := ResolveProcessions("", embFS)
+	results, err := ResolveProcessionsWithDirs("", "", "", "", embFS)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -101,7 +88,6 @@ func TestResolveProcessions_EmbeddedFallback(t *testing.T) {
 }
 
 func TestResolveProcessions_ProjectShadowsEmbedded(t *testing.T) {
-	isolateEnv(t)
 	// Embedded has test-procession
 	embFS := fstest.MapFS{
 		"processions/test-procession.yaml": &fstest.MapFile{Data: []byte(validTemplate)},
@@ -113,7 +99,7 @@ func TestResolveProcessions_ProjectShadowsEmbedded(t *testing.T) {
 	os.MkdirAll(procDir, 0o755)
 	os.WriteFile(filepath.Join(procDir, "test-procession.yaml"), []byte(validTemplate), 0o644)
 
-	results, err := ResolveProcessions(dir, embFS)
+	results, err := ResolveProcessionsWithDirs(procDir, "", "", "", embFS)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -126,14 +112,13 @@ func TestResolveProcessions_ProjectShadowsEmbedded(t *testing.T) {
 }
 
 func TestResolveProcessions_MultipleTemplates(t *testing.T) {
-	isolateEnv(t)
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
 	os.WriteFile(filepath.Join(procDir, "test-procession.yaml"), []byte(validTemplate), 0o644)
 	os.WriteFile(filepath.Join(procDir, "another-procession.yaml"), []byte(anotherTemplate), 0o644)
 
-	results, err := ResolveProcessions(dir, nil)
+	results, err := ResolveProcessionsWithDirs(procDir, "", "", "", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -151,7 +136,6 @@ func TestResolveProcessions_MultipleTemplates(t *testing.T) {
 }
 
 func TestResolveProcessions_InvalidTemplateSkipped(t *testing.T) {
-	isolateEnv(t)
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
@@ -160,7 +144,7 @@ func TestResolveProcessions_InvalidTemplateSkipped(t *testing.T) {
 	// Invalid template (missing required fields)
 	os.WriteFile(filepath.Join(procDir, "bad.yaml"), []byte("name: bad\n"), 0o644)
 
-	results, err := ResolveProcessions(dir, nil)
+	results, err := ResolveProcessionsWithDirs(procDir, "", "", "", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -173,13 +157,12 @@ func TestResolveProcessions_InvalidTemplateSkipped(t *testing.T) {
 }
 
 func TestResolveProcessions_GitkeepIgnored(t *testing.T) {
-	isolateEnv(t)
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
 	os.WriteFile(filepath.Join(procDir, ".gitkeep"), []byte(""), 0o644)
 
-	results, err := ResolveProcessions(dir, nil)
+	results, err := ResolveProcessionsWithDirs(procDir, "", "", "", nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

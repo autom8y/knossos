@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/autom8y/knossos/internal/checksum"
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
@@ -127,6 +126,7 @@ func recoverUserResource(
 	resourceType SyncResource,
 	sourceDir string,
 	targetDir string,
+	knossosHome string,
 	manifest *provenance.ProvenanceManifest,
 	nested bool,
 	opts SyncOptions,
@@ -213,7 +213,7 @@ func recoverUserResource(
 		if tgtErr != nil {
 			slog.Warn("checksum failed, treating as changed", "path", path, "error", tgtErr)
 		}
-		sourceRelPath, _ := filepath.Rel(config.KnossosHome(), sourcePath)
+		sourceRelPath, _ := filepath.Rel(knossosHome, sourcePath)
 
 		if !opts.DryRun {
 			if srcErr == nil && tgtErr == nil && sourceChecksum == targetChecksum {

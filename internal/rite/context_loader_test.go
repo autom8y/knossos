@@ -148,7 +148,7 @@ func TestRiteContext_HasRows(t *testing.T) {
 
 func TestContextLoader_Load_FromYAML(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	ctx, err := loader.Load("valid-rite")
 	if err != nil {
@@ -184,7 +184,7 @@ func TestContextLoader_Load_FromYAML(t *testing.T) {
 
 func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	ctx, err := loader.Load("minimal-rite")
 	if err != nil {
@@ -207,7 +207,7 @@ func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
 
 func TestContextLoader_Load_RiteNotFound(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	_, err := loader.Load("non-existent-rite")
 	if err == nil {
@@ -217,7 +217,7 @@ func TestContextLoader_Load_RiteNotFound(t *testing.T) {
 
 func TestContextLoader_Load_EmptyRiteName(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	_, err := loader.Load("")
 	if err == nil {
@@ -244,7 +244,7 @@ context_rows:
 		t.Fatalf("failed to write malformed YAML: %v", err)
 	}
 
-	loader := NewContextLoaderWithPaths(tmpDir, "")
+	loader := NewContextLoaderWithPaths(tmpDir, "", "", "")
 
 	_, err := loader.Load("bad-rite")
 	if err == nil {
@@ -254,7 +254,7 @@ context_rows:
 
 func TestContextLoader_Caching(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	// First load
 	ctx1, err := loader.Load("valid-rite")
@@ -297,7 +297,7 @@ func TestContextLoader_Caching(t *testing.T) {
 
 func TestContextLoader_InvalidateAll(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	// Load multiple rites
 	_, _ = loader.Load("valid-rite")
@@ -320,7 +320,7 @@ func TestContextLoader_InvalidateAll(t *testing.T) {
 
 func TestContextLoader_HasContextFile(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	// valid-rite has context.yaml
 	if !loader.HasContextFile("valid-rite") {
@@ -340,7 +340,7 @@ func TestContextLoader_HasContextFile(t *testing.T) {
 
 func TestContextLoader_GetContextPath(t *testing.T) {
 	ritesDir := getTestDataPath(t)
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	path := loader.GetContextPath("valid-rite")
 	expectedSuffix := filepath.Join("valid-rite", "context.yaml")
@@ -389,7 +389,7 @@ context_rows:
 		t.Fatalf("failed to write user context: %v", err)
 	}
 
-	loader := NewContextLoaderWithPaths(projectDir, userDir)
+	loader := NewContextLoaderWithPaths(projectDir, userDir, "", "")
 
 	ctx, err := loader.Load(riteName)
 	if err != nil {
@@ -411,7 +411,7 @@ func TestContextLoader_SaveContext(t *testing.T) {
 		t.Fatalf("failed to create rite dir: %v", err)
 	}
 
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	ctx := NewRiteContext("save-rite")
 	ctx.DisplayName = "Save Test Rite"
@@ -445,7 +445,7 @@ func TestContextLoader_SaveContext(t *testing.T) {
 
 func TestContextLoader_SaveContext_InvalidContext(t *testing.T) {
 	ritesDir := t.TempDir()
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	// Context without required fields
 	ctx := &RiteContext{}
@@ -457,7 +457,7 @@ func TestContextLoader_SaveContext_InvalidContext(t *testing.T) {
 
 func TestContextLoader_SaveContext_RiteNotFound(t *testing.T) {
 	ritesDir := t.TempDir()
-	loader := NewContextLoaderWithPaths(ritesDir, "")
+	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
 	ctx := NewRiteContext("non-existent-rite")
 

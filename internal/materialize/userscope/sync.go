@@ -21,16 +21,22 @@ type syncer struct {
 	embeddedAgents fs.FS
 	embeddedMena   fs.FS
 	embeddedRites  fs.FS
+	knossosHome    string
 }
 
 // SyncUserScope is the primary entry point for user-scope sync.
 // It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to ~/.claude/ directories.
 func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
+	knossosHome := params.KnossosHome
+	if knossosHome == "" {
+		knossosHome = config.KnossosHome()
+	}
 	s := &syncer{
 		resolver:       params.Resolver,
 		embeddedAgents: params.EmbeddedAgents,
 		embeddedMena:   params.EmbeddedMena,
 		embeddedRites:  params.EmbeddedRites,
+		knossosHome:    knossosHome,
 	}
 	return s.syncUserScope(params.Opts)
 }
@@ -50,7 +56,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	}
 
 	// Resolve KNOSSOS_HOME
-	knossosHome := config.KnossosHome()
+	knossosHome := s.knossosHome
 	if knossosHome == "" && s.embeddedAgents == nil && s.embeddedMena == nil {
 		return nil, ErrKnossosHomeNotSet()
 	}
@@ -231,6 +237,7 @@ func (s *syncer) syncUserResource(
 				resourceType,
 				sourceDir,
 				targetDir,
+				knossosHome,
 				manifest,
 				nested,
 				opts,

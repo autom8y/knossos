@@ -40,9 +40,21 @@ const ariHookPrefix = "ari hook"
 // Returns nil if no hooks.yaml is found (graceful).
 // For fresh projects, "ari init" bootstraps config/hooks.yaml from embedded bytes.
 func LoadHooksConfig(projectRoot string) *HooksConfig {
-	candidates := []string{
-		// Knossos platform level
-		config.KnossosHome() + "/config/hooks.yaml",
+	return LoadHooksConfigWithPaths(config.KnossosHome(), projectRoot)
+}
+
+// LoadHooksConfigWithPaths finds and parses hooks.yaml using explicit paths.
+// This is the DI-capable variant that avoids reading config globals.
+// Resolution order:
+//  1. config/hooks.yaml in knossosHome
+//  2. config/hooks.yaml in projectRoot (for self-hosting and satellites)
+//
+// Returns nil if no hooks.yaml is found (graceful).
+func LoadHooksConfigWithPaths(knossosHome, projectRoot string) *HooksConfig {
+	var candidates []string
+	// Knossos platform level
+	if knossosHome != "" {
+		candidates = append(candidates, knossosHome+"/config/hooks.yaml")
 	}
 	// Project-level (for self-hosting and satellites bootstrapped by ari init)
 	if projectRoot != "" {

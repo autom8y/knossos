@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/autom8y/knossos/internal/config"
 )
 
 // extractHookCommand extracts the command from the first hook handler in a matcher group.
@@ -404,12 +402,7 @@ hooks:
 		t.Fatal(err)
 	}
 
-	// Override knossosHome to point at tmpDir via env var
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", tmpDir)
-	t.Cleanup(config.ResetKnossosHome)
-
-	cfg := LoadHooksConfig(tmpDir)
+	cfg := LoadHooksConfigWithPaths(tmpDir, tmpDir)
 	if cfg == nil {
 		t.Fatal("Expected hooks config, got nil")
 	}
@@ -439,11 +432,7 @@ hooks:
 `
 	os.WriteFile(filepath.Join(hooksDir, "hooks.yaml"), []byte(hooksYAML), 0644)
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", tmpDir)
-	t.Cleanup(config.ResetKnossosHome)
-
-	cfg := LoadHooksConfig(tmpDir)
+	cfg := LoadHooksConfigWithPaths(tmpDir, tmpDir)
 	if cfg != nil {
 		t.Error("Expected nil for v1 schema, got config")
 	}
@@ -451,11 +440,8 @@ hooks:
 
 func TestLoadHooksConfig_NoFile(t *testing.T) {
 	tmpDir := t.TempDir()
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", tmpDir)
-	t.Cleanup(config.ResetKnossosHome)
 
-	cfg := LoadHooksConfig(tmpDir)
+	cfg := LoadHooksConfigWithPaths(tmpDir, tmpDir)
 	if cfg != nil {
 		t.Error("Expected nil when no hooks.yaml exists")
 	}

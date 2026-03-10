@@ -5,8 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 	"testing/fstest"
-
-	"github.com/autom8y/knossos/internal/config"
 )
 
 func TestSourceResolver_EmbeddedFallback(t *testing.T) {
@@ -20,12 +18,7 @@ func TestSourceResolver_EmbeddedFallback(t *testing.T) {
 		},
 	}
 
-	// Point all filesystem sources at nonexistent paths
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Cleanup(config.ResetKnossosHome)
-
-	resolver := NewSourceResolver("/nonexistent-project")
+	resolver := NewSourceResolverWithPaths("/nonexistent-project", "", "", "")
 	resolver.WithEmbeddedFS(fsys)
 
 	// Should find rite in embedded FS when filesystem sources don't exist
@@ -63,11 +56,7 @@ func TestSourceResolver_FilesystemOverridesEmbedded(t *testing.T) {
 		},
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Cleanup(config.ResetKnossosHome)
-
-	resolver := NewSourceResolver(tmpDir)
+	resolver := NewSourceResolverWithPaths(tmpDir, "", "", "")
 	resolver.WithEmbeddedFS(fsys)
 
 	resolved, err := resolver.ResolveRite("test-rite", "")
@@ -88,11 +77,7 @@ func TestSourceResolver_EmbeddedNotFoundReturnsError(t *testing.T) {
 		},
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Cleanup(config.ResetKnossosHome)
-
-	resolver := NewSourceResolver("/nonexistent-project")
+	resolver := NewSourceResolverWithPaths("/nonexistent-project", "", "", "")
 	resolver.WithEmbeddedFS(fsys)
 
 	_, err := resolver.ResolveRite("missing-rite", "")
@@ -102,11 +87,7 @@ func TestSourceResolver_EmbeddedNotFoundReturnsError(t *testing.T) {
 }
 
 func TestSourceResolver_NoEmbeddedFS(t *testing.T) {
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Cleanup(config.ResetKnossosHome)
-
-	resolver := NewSourceResolver("/nonexistent-project")
+	resolver := NewSourceResolverWithPaths("/nonexistent-project", "", "", "")
 	// No embedded FS set
 
 	_, err := resolver.ResolveRite("any-rite", "")
@@ -125,12 +106,7 @@ func TestSourceResolver_ListIncludesEmbedded(t *testing.T) {
 		},
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
-	t.Cleanup(config.ResetKnossosHome)
-
-	resolver := NewSourceResolver("/nonexistent-project")
+	resolver := NewSourceResolverWithPaths("/nonexistent-project", "", "", "")
 	resolver.WithEmbeddedFS(fsys)
 
 	rites, err := resolver.ListAvailableRites()
@@ -164,12 +140,7 @@ func TestSourceResolver_ListShadowsEmbedded(t *testing.T) {
 		},
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
-	t.Cleanup(config.ResetKnossosHome)
-
-	resolver := NewSourceResolver(tmpDir)
+	resolver := NewSourceResolverWithPaths(tmpDir, "", "", "")
 	resolver.WithEmbeddedFS(fsys)
 
 	rites, err := resolver.ListAvailableRites()
@@ -199,11 +170,7 @@ func TestSourceResolver_EmbeddedCaching(t *testing.T) {
 		},
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Cleanup(config.ResetKnossosHome)
-
-	resolver := NewSourceResolver("/nonexistent-project")
+	resolver := NewSourceResolverWithPaths("/nonexistent-project", "", "", "")
 	resolver.WithEmbeddedFS(fsys)
 
 	// First resolution
@@ -268,11 +235,6 @@ func TestSourceResolver_OrgTierResolvesRite(t *testing.T) {
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 	createOrgRite(t, orgDir, "org-rite")
-
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Setenv("KNOSSOS_ORG", "")
-	t.Cleanup(config.ResetKnossosHome)
 
 	resolver := &SourceResolver{
 		projectRoot:     "/nonexistent-project",
@@ -521,18 +483,13 @@ func TestSourceResolver_CacheOrgAware(t *testing.T) {
 
 func TestSourceResolver_EmptyOrgSkipped(t *testing.T) {
 	// When no org is configured, orgRitesDir is empty — should be skipped
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Setenv("KNOSSOS_ORG", "")
-	t.Cleanup(config.ResetKnossosHome)
-
 	fsys := fstest.MapFS{
 		"rites/fallback-rite/manifest.yaml": &fstest.MapFile{
 			Data: []byte("name: fallback-rite\nversion: 1.0\n"),
 		},
 	}
 
-	resolver := NewSourceResolver("/nonexistent-project")
+	resolver := NewSourceResolverWithPaths("/nonexistent-project", "", "", "")
 	resolver.WithEmbeddedFS(fsys)
 
 	resolved, err := resolver.ResolveRite("fallback-rite", "")

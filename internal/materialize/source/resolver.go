@@ -11,6 +11,7 @@ import (
 	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/resolution"
 )
 
 // SourceResolver resolves rite sources with configurable fallback chain.
@@ -90,16 +91,13 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 		r.mu.RUnlock()
 	}
 
-	var result *ResolvedRite
-	var checkedPaths []string
-
-	// 1. Explicit source (--source flag)
+	// 1. Explicit source (--source flag) — SourceResolver-owned, not in Chain
 	if explicitSource != "" {
 		source, err := r.parseExplicitSource(explicitSource)
 		if err != nil {
 			return nil, err
 		}
-		result, err = r.checkSource(riteName, source)
+		result, err := r.checkSource(riteName, source)
 		if err != nil {
 			return nil, errors.NewWithDetails(errors.CodeRiteNotFound,
 				fmt.Sprintf("rite '%s' not found in explicit source: %s", riteName, explicitSource),
@@ -111,72 +109,19 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 		return result, nil // Don't cache explicit source resolutions
 	}
 
-	// 2. Project rites
-	if r.projectRitesDir != "" {
-		source := RiteSource{
-			Type:        SourceProject,
-			Path:        r.projectRitesDir,
-			Description: "project rites directory",
+	// 2-6. Resolution chain: project > user > org > platform > embedded
+	chain := r.riteChain()
+	item, err := chain.Resolve(riteName, manifestValidator)
+	if err != nil {
+		// Build checked paths from chain tiers for diagnostic detail
+		checkedPaths := make([]string, 0, len(chain.Tiers()))
+		for _, tier := range chain.Tiers() {
+			if tier.FS != nil {
+				checkedPaths = append(checkedPaths, "embedded://"+tier.Dir+"/"+riteName)
+			} else {
+				checkedPaths = append(checkedPaths, filepath.Join(tier.Dir, riteName))
+			}
 		}
-		if res, err := r.checkSource(riteName, source); err == nil {
-			result = res
-		} else {
-			checkedPaths = append(checkedPaths, source.Path)
-		}
-	}
-
-	// 3. User rites
-	if result == nil && r.userRitesDir != "" {
-		source := RiteSource{
-			Type:        SourceUser,
-			Path:        r.userRitesDir,
-			Description: "user-level rites",
-		}
-		if res, err := r.checkSource(riteName, source); err == nil {
-			result = res
-		} else {
-			checkedPaths = append(checkedPaths, source.Path)
-		}
-	}
-
-	// 4. Org rites
-	if result == nil && r.orgRitesDir != "" {
-		source := RiteSource{
-			Type:        SourceOrg,
-			Path:        r.orgRitesDir,
-			Description: "org-level rites",
-		}
-		if res, err := r.checkSource(riteName, source); err == nil {
-			result = res
-		} else {
-			checkedPaths = append(checkedPaths, source.Path)
-		}
-	}
-
-	// 5. Knossos platform
-	if result == nil && r.knossosHome != "" {
-		source := RiteSource{
-			Type:        SourceKnossos,
-			Path:        filepath.Join(r.knossosHome, "rites"),
-			Description: fmt.Sprintf("Knossos platform at %s", r.knossosHome),
-		}
-		if res, err := r.checkSource(riteName, source); err == nil {
-			result = res
-		} else {
-			checkedPaths = append(checkedPaths, source.Path)
-		}
-	}
-
-	// 6. Embedded rites (compiled-in fallback)
-	if result == nil && r.EmbeddedFS != nil {
-		if res, err := r.checkEmbeddedSource(riteName); err == nil {
-			result = res
-		} else {
-			checkedPaths = append(checkedPaths, "embedded://rites/"+riteName)
-		}
-	}
-
-	if result == nil {
 		return nil, errors.NewWithDetails(errors.CodeRiteNotFound,
 			fmt.Sprintf("rite '%s' not found in any source", riteName),
 			map[string]any{
@@ -185,6 +130,8 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 				"hint":          "Use --source to specify explicit path, or ensure KNOSSOS_HOME is set",
 			})
 	}
+
+	result := r.toResolvedRite(riteName, item)
 
 	// Cache result
 	r.mu.Lock()
@@ -268,6 +215,7 @@ func (r *SourceResolver) parseExplicitSource(source string) (RiteSource, error) 
 }
 
 // checkSource checks if a rite exists in a source location.
+// Used for explicit source resolution (--source flag) which is outside the Chain.
 func (r *SourceResolver) checkSource(riteName string, source RiteSource) (*ResolvedRite, error) {
 	ritePath := filepath.Join(source.Path, riteName)
 	manifestPath := filepath.Join(ritePath, "manifest.yaml")
@@ -277,121 +225,136 @@ func (r *SourceResolver) checkSource(riteName string, source RiteSource) (*Resol
 		return nil, err
 	}
 
-	// Determine templates directory based on source type
-	var templatesDir string
-	switch source.Type {
-	case SourceKnossos:
-		// Knossos templates are in knossos/templates/ subdirectory
-		templatesDir = filepath.Join(filepath.Dir(source.Path), "knossos", "templates")
-	case SourceProject:
-		templatesDir = filepath.Join(r.projectRoot, "templates")
-		// For knossos platform self-hosting: templates live at knossos/templates/
-		// rather than the standard templates/ location. Detect via sections/ marker.
-		if _, err := os.Stat(filepath.Join(templatesDir, "sections")); err != nil {
-			alt := filepath.Join(r.projectRoot, "knossos", "templates")
-			if _, err := os.Stat(filepath.Join(alt, "sections")); err == nil {
-				templatesDir = alt
-			}
-		}
-	case SourceExplicit:
-		// Check if templates dir exists alongside rites dir
-		templatesDir = filepath.Join(filepath.Dir(source.Path), "templates")
-		if _, err := os.Stat(templatesDir); err != nil {
-			templatesDir = "" // No templates available
-		}
-	case SourceUser:
-		templatesDir = "" // User rites don't have templates
-	case SourceOrg:
-		templatesDir = "" // Org rites don't carry templates (use embedded)
-	}
-
 	return &ResolvedRite{
 		Name:         riteName,
 		Source:       source,
 		RitePath:     ritePath,
 		ManifestPath: manifestPath,
-		TemplatesDir: templatesDir,
+		TemplatesDir: r.resolveTemplatesDir(source),
 	}, nil
 }
 
+// resolveTemplatesDir determines the templates directory for a given source.
+func (r *SourceResolver) resolveTemplatesDir(source RiteSource) string {
+	switch source.Type {
+	case SourceKnossos:
+		// Knossos templates are in knossos/templates/ subdirectory
+		return filepath.Join(filepath.Dir(source.Path), "knossos", "templates")
+	case SourceProject:
+		templatesDir := filepath.Join(r.projectRoot, "templates")
+		// For knossos platform self-hosting: templates live at knossos/templates/
+		// rather than the standard templates/ location. Detect via sections/ marker.
+		if _, err := os.Stat(filepath.Join(templatesDir, "sections")); err != nil {
+			alt := filepath.Join(r.projectRoot, "knossos", "templates")
+			if _, err := os.Stat(filepath.Join(alt, "sections")); err == nil {
+				return alt
+			}
+		}
+		return templatesDir
+	case SourceExplicit:
+		// Check if templates dir exists alongside rites dir
+		templatesDir := filepath.Join(filepath.Dir(source.Path), "templates")
+		if _, err := os.Stat(templatesDir); err != nil {
+			return "" // No templates available
+		}
+		return templatesDir
+	case SourceEmbedded:
+		return "knossos/templates"
+	case SourceUser, SourceOrg:
+		return "" // User/org rites don't carry templates
+	default:
+		return ""
+	}
+}
+
 // ListAvailableRites returns all rites available from all configured sources.
-// Higher-priority sources shadow lower-priority ones (project > user > org > knossos).
+// Higher-priority sources shadow lower-priority ones (project > user > org > platform > embedded).
+// Delegates to resolution.RiteChain for multi-tier enumeration with shadowing.
 func (r *SourceResolver) ListAvailableRites() ([]ResolvedRite, error) {
-	var result []ResolvedRite
-	seen := make(map[string]bool)
-
-	// Collect from all sources in priority order
-	sources := []RiteSource{
-		{Type: SourceProject, Path: r.projectRitesDir},
-		{Type: SourceUser, Path: r.userRitesDir},
-		{Type: SourceOrg, Path: r.orgRitesDir},
-		{Type: SourceKnossos, Path: filepath.Join(r.knossosHome, "rites")},
+	items, err := r.riteChain().ResolveAll(manifestValidator)
+	if err != nil {
+		return nil, err
 	}
 
-	for _, source := range sources {
-		if source.Path == "" {
-			continue
-		}
-
-		entries, err := os.ReadDir(source.Path)
-		if err != nil {
-			continue // Skip if directory doesn't exist
-		}
-
-		for _, entry := range entries {
-			if !entry.IsDir() {
-				continue
-			}
-
-			riteName := entry.Name()
-			if seen[riteName] {
-				continue // Already found in higher-priority source
-			}
-
-			if resolved, err := r.checkSource(riteName, source); err == nil {
-				result = append(result, *resolved)
-				seen[riteName] = true
-			}
-		}
-	}
-
-	// 6. Embedded rites (lowest priority)
-	if r.EmbeddedFS != nil {
-		entries, err := fs.ReadDir(r.EmbeddedFS, "rites")
-		if err == nil {
-			for _, entry := range entries {
-				if !entry.IsDir() || seen[entry.Name()] {
-					continue
-				}
-				if resolved, err := r.checkEmbeddedSource(entry.Name()); err == nil {
-					result = append(result, *resolved)
-					seen[entry.Name()] = true
-				}
-			}
-		}
+	result := make([]ResolvedRite, 0, len(items))
+	for _, item := range items {
+		resolved := r.toResolvedRite(item.Name, &item)
+		result = append(result, *resolved)
 	}
 
 	return result, nil
 }
 
-// checkEmbeddedSource checks if a rite exists in the embedded filesystem.
-func (r *SourceResolver) checkEmbeddedSource(riteName string) (*ResolvedRite, error) {
-	manifestPath := "rites/" + riteName + "/manifest.yaml"
-	if _, err := fs.Stat(r.EmbeddedFS, manifestPath); err != nil {
-		return nil, err
+// riteChain builds the resolution chain from the current resolver paths.
+// Called on demand (cheap: just allocates a small struct with a tier slice).
+func (r *SourceResolver) riteChain() *resolution.Chain {
+	platformRitesDir := ""
+	if r.knossosHome != "" {
+		platformRitesDir = filepath.Join(r.knossosHome, "rites")
+	}
+	return resolution.RiteChain(
+		r.projectRitesDir,
+		r.userRitesDir,
+		r.orgRitesDir,
+		platformRitesDir,
+		r.EmbeddedFS,
+	)
+}
+
+// manifestValidator checks that a resolution item is a valid rite (has manifest.yaml).
+func manifestValidator(item resolution.ResolvedItem) bool {
+	if item.Fsys != nil {
+		_, err := fs.Stat(item.Fsys, filepath.Join(item.Path, "manifest.yaml"))
+		return err == nil
+	}
+	_, err := os.Stat(filepath.Join(item.Path, "manifest.yaml"))
+	return err == nil
+}
+
+// toResolvedRite converts a resolution.ResolvedItem into a ResolvedRite,
+// enriching it with source type mapping and templates directory resolution.
+func (r *SourceResolver) toResolvedRite(riteName string, item *resolution.ResolvedItem) *ResolvedRite {
+	// Handle embedded FS tier
+	if item.Fsys != nil {
+		return &ResolvedRite{
+			Name: riteName,
+			Source: RiteSource{
+				Type:        SourceEmbedded,
+				Path:        "embedded://rites/" + riteName,
+				Description: "compiled-in rite definition",
+			},
+			RitePath:     item.Path,
+			ManifestPath: item.Path + "/manifest.yaml",
+			TemplatesDir: "knossos/templates",
+		}
 	}
 
+	// Map tier label to source
+	source := r.tierToSource(item.Source)
 	return &ResolvedRite{
-		Name: riteName,
-		Source: RiteSource{
-			Type:        SourceEmbedded,
-			Path:        "embedded://rites/" + riteName,
-			Description: "compiled-in rite definition",
-		},
-		RitePath:     "rites/" + riteName,
-		ManifestPath: manifestPath,
-		TemplatesDir: "knossos/templates",
-	}, nil
+		Name:         riteName,
+		Source:       source,
+		RitePath:     item.Path,
+		ManifestPath: filepath.Join(item.Path, "manifest.yaml"),
+		TemplatesDir: r.resolveTemplatesDir(source),
+	}
+}
+
+// tierToSource maps a resolution chain tier label to a RiteSource.
+func (r *SourceResolver) tierToSource(tierLabel string) RiteSource {
+	switch tierLabel {
+	case "project":
+		return RiteSource{Type: SourceProject, Path: r.projectRitesDir, Description: "project rites directory"}
+	case "user":
+		return RiteSource{Type: SourceUser, Path: r.userRitesDir, Description: "user-level rites"}
+	case "org":
+		return RiteSource{Type: SourceOrg, Path: r.orgRitesDir, Description: "org-level rites"}
+	case "platform":
+		return RiteSource{Type: SourceKnossos, Path: filepath.Join(r.knossosHome, "rites"),
+			Description: fmt.Sprintf("Knossos platform at %s", r.knossosHome)}
+	default:
+		return RiteSource{Type: SourceExplicit, Path: "", Description: "unknown source"}
+	}
 }
 
 // ClearCache clears the resolution cache.

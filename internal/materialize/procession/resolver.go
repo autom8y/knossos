@@ -6,13 +6,13 @@ package procession
 import (
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/procession"
+	"github.com/autom8y/knossos/internal/resolution"
 )
 
 // ResolvedProcession represents a procession template discovered through
@@ -54,43 +54,39 @@ func ResolveProcessions(projectRoot string, embeddedFS fs.FS) ([]ResolvedProcess
 // tier directory paths. Empty directories are skipped. This enables test
 // injection without global state mutation.
 //
-// Resolution order (lowest to highest priority):
-//  1. Embedded FS (compiled-in fallback)
-//  2. Platform (platformDir)
+// Delegates to resolution.ProcessionChain for multi-tier resolution.
+// Resolution order (highest to lowest priority):
+//  1. Project (projectDir)
+//  2. User (userDir)
 //  3. Org (orgDir)
-//  4. User (userDir)
-//  5. Project (projectDir)
+//  4. Platform (platformDir)
+//  5. Embedded FS (compiled-in fallback)
 func ResolveProcessionsWithDirs(projectDir, userDir, orgDir, platformDir string, embeddedFS fs.FS) ([]ResolvedProcession, error) {
-	resolved := make(map[string]ResolvedProcession)
-
-	// 1. Embedded fallback (lowest priority)
-	if embeddedFS != nil {
-		collectFromFS(embeddedFS, "processions", "embedded", resolved)
+	chain := resolution.ProcessionChain(projectDir, userDir, orgDir, platformDir, embeddedFS)
+	items, err := chain.ResolveAll(yamlFileValidator)
+	if err != nil {
+		return nil, err
 	}
 
-	// 2. Platform
-	if platformDir != "" {
-		collectFromDisk(platformDir, "platform", resolved)
+	// Load templates from resolved items. Chain.ResolveAll already
+	// shadows by entry name (higher-priority tiers overwrite); we
+	// re-key by template name for the rare case where filenames
+	// differ across tiers but template names collide.
+	byName := make(map[string]ResolvedProcession, len(items))
+	for _, item := range items {
+		tmpl, err := loadProcessionTemplate(item)
+		if err != nil {
+			continue // Invalid template — skip silently
+		}
+		byName[tmpl.Name] = ResolvedProcession{
+			Name:     tmpl.Name,
+			Source:   item.Source,
+			Template: tmpl,
+		}
 	}
 
-	// 3. Org
-	if orgDir != "" {
-		collectFromDisk(orgDir, "org", resolved)
-	}
-
-	// 4. User
-	if userDir != "" {
-		collectFromDisk(userDir, "user", resolved)
-	}
-
-	// 5. Project (highest priority)
-	if projectDir != "" {
-		collectFromDisk(projectDir, "project", resolved)
-	}
-
-	// Convert map to sorted slice
-	result := make([]ResolvedProcession, 0, len(resolved))
-	for _, rp := range resolved {
+	result := make([]ResolvedProcession, 0, len(byName))
+	for _, rp := range byName {
 		result = append(result, rp)
 	}
 	return result, nil
@@ -112,57 +108,16 @@ func ResolveTemplate(name, projectRoot string, embeddedFS fs.FS) (*ResolvedProce
 	return nil, fmt.Errorf("procession template %q not found in any resolution tier", name)
 }
 
-// collectFromDisk scans a directory for *.yaml procession templates.
-// Invalid templates are silently skipped (logged at call site if needed).
-func collectFromDisk(dir, source string, resolved map[string]ResolvedProcession) {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return // Directory doesn't exist or unreadable — skip
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
-			continue
-		}
-		if entry.Name() == ".gitkeep" {
-			continue
-		}
-
-		tmpl, err := procession.LoadTemplate(filepath.Join(dir, entry.Name()))
-		if err != nil {
-			continue // Invalid template — skip silently
-		}
-
-		resolved[tmpl.Name] = ResolvedProcession{
-			Name:     tmpl.Name,
-			Source:   source,
-			Template: tmpl,
-		}
-	}
+// yamlFileValidator filters resolution chain entries to valid YAML files.
+func yamlFileValidator(item resolution.ResolvedItem) bool {
+	return strings.HasSuffix(item.Name, ".yaml") && item.Name != ".gitkeep"
 }
 
-// collectFromFS scans an fs.FS for *.yaml procession templates.
-func collectFromFS(fsys fs.FS, dir, source string, resolved map[string]ResolvedProcession) {
-	entries, err := fs.ReadDir(fsys, dir)
-	if err != nil {
-		return // Directory doesn't exist in FS — skip
+// loadProcessionTemplate loads a procession template from a resolved item.
+// Handles both disk tiers (Fsys == nil) and embedded FS tiers.
+func loadProcessionTemplate(item resolution.ResolvedItem) (*procession.Template, error) {
+	if item.Fsys != nil {
+		return procession.LoadTemplateFromFS(item.Fsys, item.Path)
 	}
-
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".yaml") {
-			continue
-		}
-
-		path := dir + "/" + entry.Name()
-		tmpl, err := procession.LoadTemplateFromFS(fsys, path)
-		if err != nil {
-			continue // Invalid template — skip silently
-		}
-
-		resolved[tmpl.Name] = ResolvedProcession{
-			Name:     tmpl.Name,
-			Source:   source,
-			Template: tmpl,
-		}
-	}
+	return procession.LoadTemplate(item.Path)
 }

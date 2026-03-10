@@ -9,6 +9,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
 )
@@ -17,9 +18,12 @@ import (
 const ContextFileName = "context.yaml"
 
 // ContextLoader handles loading and caching of rite context files.
+// Resolution order (highest priority first): user > project > org > platform.
 type ContextLoader struct {
-	ritesDir string
-	userDir  string
+	ritesDir    string // project rites directory
+	userDir     string // user rites directory (highest priority)
+	orgDir      string // org rites directory
+	platformDir string // platform rites directory (lowest priority)
 
 	mu    sync.RWMutex
 	cache map[string]*RiteContext
@@ -28,18 +32,24 @@ type ContextLoader struct {
 // NewContextLoader creates a new context loader using the paths resolver.
 func NewContextLoader(resolver *paths.Resolver) *ContextLoader {
 	return &ContextLoader{
-		ritesDir: resolver.RitesDir(),
-		userDir:  paths.UserRitesDir(),
-		cache:    make(map[string]*RiteContext),
+		ritesDir:    resolver.RitesDir(),
+		userDir:     paths.UserRitesDir(),
+		orgDir:      paths.OrgRitesDir(config.ActiveOrg()),
+		platformDir: PlatformRitesDir(),
+		cache:       make(map[string]*RiteContext),
 	}
 }
 
 // NewContextLoaderWithPaths creates a context loader with explicit paths.
-func NewContextLoaderWithPaths(ritesDir, userDir string) *ContextLoader {
+// Resolution order (highest priority first): user > project > org > platform.
+// Empty directory strings are silently skipped during resolution.
+func NewContextLoaderWithPaths(ritesDir, userDir, orgDir, platformDir string) *ContextLoader {
 	return &ContextLoader{
-		ritesDir: ritesDir,
-		userDir:  userDir,
-		cache:    make(map[string]*RiteContext),
+		ritesDir:    ritesDir,
+		userDir:     userDir,
+		orgDir:      orgDir,
+		platformDir: platformDir,
+		cache:       make(map[string]*RiteContext),
 	}
 }
 
@@ -75,19 +85,23 @@ func (cl *ContextLoader) Load(riteName string) (*RiteContext, error) {
 	return ctx, nil
 }
 
-// loadFromFiles attempts to load context from YAML files or fallback to orchestrator.
-func (cl *ContextLoader) loadFromFiles(riteName string) (*RiteContext, error) {
-	// Try user rites directory first (higher priority)
-	if cl.userDir != "" {
-		contextPath := filepath.Join(cl.userDir, riteName, ContextFileName)
-		if ctx, err := cl.loadFromYAML(contextPath); err == nil {
-			return ctx, nil
+// contextDirs returns the search directories in priority order (user > project > org > platform).
+// Empty directories are skipped.
+func (cl *ContextLoader) contextDirs() []string {
+	var dirs []string
+	for _, d := range []string{cl.userDir, cl.ritesDir, cl.orgDir, cl.platformDir} {
+		if d != "" {
+			dirs = append(dirs, d)
 		}
 	}
+	return dirs
+}
 
-	// Try project rites directory
-	if cl.ritesDir != "" {
-		contextPath := filepath.Join(cl.ritesDir, riteName, ContextFileName)
+// loadFromFiles attempts to load context from YAML files or fallback to orchestrator.
+// Resolution order: user > project > org > platform.
+func (cl *ContextLoader) loadFromFiles(riteName string) (*RiteContext, error) {
+	for _, dir := range cl.contextDirs() {
+		contextPath := filepath.Join(dir, riteName, ContextFileName)
 		if ctx, err := cl.loadFromYAML(contextPath); err == nil {
 			return ctx, nil
 		}
@@ -119,30 +133,19 @@ func (cl *ContextLoader) loadFromYAML(path string) (*RiteContext, error) {
 
 // generateFromOrchestrator creates a RiteContext from an orchestrator.yaml file.
 // This provides backward compatibility when no context.yaml exists.
+// Searches all tiers in priority order: user > project > org > platform.
 func (cl *ContextLoader) generateFromOrchestrator(riteName string) (*RiteContext, error) {
-	// Try to find orchestrator.yaml
+	// Try to find orchestrator.yaml across all tiers
 	var orchestratorPath string
-	var found bool
-
-	// Check user rites
-	if cl.userDir != "" {
-		path := filepath.Join(cl.userDir, riteName, "orchestrator.yaml")
+	for _, dir := range cl.contextDirs() {
+		path := filepath.Join(dir, riteName, "orchestrator.yaml")
 		if _, err := os.Stat(path); err == nil {
 			orchestratorPath = path
-			found = true
+			break
 		}
 	}
 
-	// Check project rites
-	if !found && cl.ritesDir != "" {
-		path := filepath.Join(cl.ritesDir, riteName, "orchestrator.yaml")
-		if _, err := os.Stat(path); err == nil {
-			orchestratorPath = path
-			found = true
-		}
-	}
-
-	if !found {
+	if orchestratorPath == "" {
 		return nil, errors.ErrRiteNotFound(riteName)
 	}
 
@@ -228,17 +231,8 @@ func (cl *ContextLoader) IsCached(riteName string) bool {
 // GetContextPath returns the path where context.yaml would be for a rite.
 // Returns the first path that exists, or the project path if none exists.
 func (cl *ContextLoader) GetContextPath(riteName string) string {
-	// Check user rites first
-	if cl.userDir != "" {
-		path := filepath.Join(cl.userDir, riteName, ContextFileName)
-		if _, err := os.Stat(path); err == nil {
-			return path
-		}
-	}
-
-	// Check project rites
-	if cl.ritesDir != "" {
-		path := filepath.Join(cl.ritesDir, riteName, ContextFileName)
+	for _, dir := range cl.contextDirs() {
+		path := filepath.Join(dir, riteName, ContextFileName)
 		if _, err := os.Stat(path); err == nil {
 			return path
 		}
@@ -250,17 +244,8 @@ func (cl *ContextLoader) GetContextPath(riteName string) string {
 
 // HasContextFile checks if a rite has a context.yaml file.
 func (cl *ContextLoader) HasContextFile(riteName string) bool {
-	// Check user rites first
-	if cl.userDir != "" {
-		path := filepath.Join(cl.userDir, riteName, ContextFileName)
-		if _, err := os.Stat(path); err == nil {
-			return true
-		}
-	}
-
-	// Check project rites
-	if cl.ritesDir != "" {
-		path := filepath.Join(cl.ritesDir, riteName, ContextFileName)
+	for _, dir := range cl.contextDirs() {
+		path := filepath.Join(dir, riteName, ContextFileName)
 		if _, err := os.Stat(path); err == nil {
 			return true
 		}
