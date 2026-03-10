@@ -7,6 +7,7 @@ import (
 )
 
 func TestMergeAgentDefaults(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		defaults map[string]any
@@ -318,6 +319,7 @@ func TestMergeAgentDefaults(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := MergeAgentDefaults(tt.defaults, tt.agentFM)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MergeAgentDefaults() =\n  %v\nwant:\n  %v", got, tt.want)
@@ -327,6 +329,7 @@ func TestMergeAgentDefaults(t *testing.T) {
 }
 
 func TestMergeAgentDefaults_DoesNotMutateInputs(t *testing.T) {
+	t.Parallel()
 	defaults := map[string]any{
 		"model":  "sonnet",
 		"skills": []any{"base-skill"},
@@ -352,7 +355,9 @@ func TestMergeAgentDefaults_DoesNotMutateInputs(t *testing.T) {
 }
 
 func TestTransformAgentContent_WithAgentDefaults(t *testing.T) {
+	t.Parallel()
 	t.Run("defaults merged before stripping", func(t *testing.T) {
+		t.Parallel()
 		source := `---
 description: Test agent
 ---
@@ -397,6 +402,7 @@ description: Test agent
 	})
 
 	t.Run("agent values override defaults", func(t *testing.T) {
+		t.Parallel()
 		source := `---
 description: Test agent
 model: opus
@@ -426,6 +432,7 @@ maxTurns: 40
 	})
 
 	t.Run("skills: agent wins over defaults (scalar semantics)", func(t *testing.T) {
+		t.Parallel()
 		source := `---
 description: Test agent
 skills:
@@ -455,6 +462,7 @@ skills:
 	})
 
 	t.Run("write-guard from defaults works with hook resolution", func(t *testing.T) {
+		t.Parallel()
 		source := `---
 description: Test agent
 write-guard: true

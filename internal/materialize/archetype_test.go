@@ -177,6 +177,7 @@ Each specialist receives ALL prior artifacts. Include paths in every specialist 
 }
 
 func TestRenderArchetype_TemplateParsesWithoutError(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	tplPath := filepath.Join(root, "knossos", "archetypes", "orchestrator.md.tpl")
 	content, err := os.ReadFile(tplPath)
@@ -192,6 +193,7 @@ func TestRenderArchetype_TemplateParsesWithoutError(t *testing.T) {
 }
 
 func TestRenderArchetype_10xDev(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	result, err := RenderArchetype(root, "orchestrator.md.tpl", tenxDevData())
 	if err != nil {
@@ -292,6 +294,7 @@ func TestRenderArchetype_10xDev(t *testing.T) {
 }
 
 func TestRenderArchetype_Forge(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	result, err := RenderArchetype(root, "orchestrator.md.tpl", forgeData())
 	if err != nil {
@@ -329,6 +332,7 @@ func TestRenderArchetype_Forge(t *testing.T) {
 }
 
 func TestRenderArchetype_SlopChop(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	result, err := RenderArchetype(root, "orchestrator.md.tpl", slopChopData())
 	if err != nil {
@@ -360,6 +364,7 @@ func TestRenderArchetype_SlopChop(t *testing.T) {
 }
 
 func TestRenderArchetype_DefaultContractMustNot(t *testing.T) {
+	t.Parallel()
 	// When ContractMustNot is nil/empty, the template should use defaults
 	root := projectRoot(t)
 	data := tenxDevData()
@@ -379,6 +384,7 @@ func TestRenderArchetype_DefaultContractMustNot(t *testing.T) {
 }
 
 func TestRenderArchetype_MissingTemplate(t *testing.T) {
+	t.Parallel()
 	// Use a template name that doesn't exist anywhere (not just a bad projectRoot).
 	_, err := RenderArchetype("/nonexistent", "nonexistent-archetype.md.tpl", tenxDevData())
 	if err == nil {
@@ -390,6 +396,7 @@ func TestRenderArchetype_MissingTemplate(t *testing.T) {
 }
 
 func TestRenderArchetypeFromString_InvalidTemplate(t *testing.T) {
+	t.Parallel()
 	_, err := RenderArchetypeFromString("{{.Broken", "bad.tpl", tenxDevData())
 	if err == nil {
 		t.Fatal("expected error for invalid template syntax, got nil")
@@ -400,6 +407,7 @@ func TestRenderArchetypeFromString_InvalidTemplate(t *testing.T) {
 }
 
 func TestRenderArchetype_FrontmatterDelimiters(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	result, err := RenderArchetype(root, "orchestrator.md.tpl", tenxDevData())
 	if err != nil {
@@ -430,6 +438,7 @@ func TestRenderArchetype_FrontmatterDelimiters(t *testing.T) {
 }
 
 func TestRenderArchetype_SkillsYAMLList(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	result, err := RenderArchetype(root, "orchestrator.md.tpl", tenxDevData())
 	if err != nil {
@@ -491,6 +500,7 @@ func setupArchetypeRite(t *testing.T) (string, string) {
 }
 
 func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
+	t.Parallel()
 	projectDir, claudeDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
@@ -563,6 +573,7 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 }
 
 func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
+	t.Parallel()
 	projectDir, claudeDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
@@ -620,6 +631,7 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 }
 
 func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
+	t.Parallel()
 	projectDir, claudeDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
@@ -678,6 +690,7 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 }
 
 func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
+	t.Parallel()
 	// When no agents have archetype set, behavior is identical to before.
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
@@ -726,6 +739,7 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 }
 
 func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 
@@ -760,6 +774,7 @@ func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 }
 
 func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
+	t.Parallel()
 	projectDir, claudeDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
@@ -825,6 +840,7 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 }
 
 func TestBuildOrchestratorData_ExtractsAllFields(t *testing.T) {
+	t.Parallel()
 	manifest := &RiteManifest{
 		Name:        "test-rite",
 		Description: "Test description",
@@ -899,6 +915,7 @@ func TestBuildOrchestratorData_ExtractsAllFields(t *testing.T) {
 }
 
 func TestBuildOrchestratorData_MissingArchetypeData(t *testing.T) {
+	t.Parallel()
 	manifest := &RiteManifest{
 		Name:        "empty-rite",
 		Description: "No archetype data",
@@ -918,6 +935,7 @@ func TestBuildOrchestratorData_MissingArchetypeData(t *testing.T) {
 }
 
 func TestRenderArchetypeAgent_UnknownArchetype(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	agent := Agent{Name: "test", Archetype: "unknown-type"}
 	manifest := &RiteManifest{Name: "test"}
@@ -949,6 +967,7 @@ func securityRemediationTemplate() *procession.Template {
 }
 
 func TestRenderArchetype_ProcessionWorkflow(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	data := procmena.BuildWorkflowData(securityRemediationTemplate())
 
@@ -990,6 +1009,7 @@ func TestRenderArchetype_ProcessionWorkflow(t *testing.T) {
 }
 
 func TestRenderArchetype_ProcessionRef(t *testing.T) {
+	t.Parallel()
 	root := projectRoot(t)
 	data := procmena.BuildWorkflowData(securityRemediationTemplate())
 

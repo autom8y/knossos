@@ -11,6 +11,7 @@ var testDefaults = &WriteGuardDefaults{
 }
 
 func TestTransformAgentContent_OptIn(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: cruft-cutter
 description: Detects temporal debt
@@ -51,6 +52,7 @@ Body content here.
 }
 
 func TestTransformAgentContent_ExtraPaths(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: risk-assessor
 description: Scores debt by risk
@@ -86,6 +88,7 @@ write-guard:
 }
 
 func TestTransformAgentContent_OptOut(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: some-agent
 description: An agent that opts out
@@ -118,6 +121,7 @@ write-guard: false
 }
 
 func TestTransformAgentContent_NoWriteGuard(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: integration-engineer
 description: Implements changes
@@ -158,6 +162,7 @@ tools: Bash, Read, Write, Edit
 }
 
 func TestTransformAgentContent_BodyPreservation(t *testing.T) {
+	t.Parallel()
 	body := `# Cruft Cutter
 
 The fat trimmer. Detects code that was correct at time-of-write.
@@ -184,6 +189,7 @@ The fat trimmer. Detects code that was correct at time-of-write.
 }
 
 func TestTransformAgentContent_ExistingHooksMerge(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: test-agent
 description: Agent with existing hooks
@@ -223,6 +229,7 @@ hooks:
 }
 
 func TestTransformAgentContent_UnknownFieldsSurvive(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: test-agent
 description: Agent with custom fields
@@ -248,6 +255,7 @@ write-guard: true
 }
 
 func TestTransformAgentContent_StripKnossosFields(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: test-agent
 description: Agent with knossos metadata
@@ -302,6 +310,7 @@ aliases:
 }
 
 func TestTransformAgentContent_NameInjection(t *testing.T) {
+	t.Parallel()
 	// Source has NO name field — name should be injected from agentName param
 	source := `---
 description: Agent without explicit name
@@ -327,6 +336,7 @@ tools: Bash
 }
 
 func TestTransformAgentContent_NameOverride(t *testing.T) {
+	t.Parallel()
 	// Source has a name field that differs from agentName — agentName wins (filename is source of truth)
 	source := `---
 name: old-name
@@ -351,6 +361,7 @@ description: Agent with mismatched name
 }
 
 func TestTransformAgentContent_NilDefaults(t *testing.T) {
+	t.Parallel()
 	source := `---
 name: test-agent
 write-guard: true
@@ -374,6 +385,7 @@ write-guard: true
 }
 
 func TestTransformAgentContent_InvalidFrontmatter(t *testing.T) {
+	t.Parallel()
 	// No frontmatter delimiters — should pass through unchanged
 	source := "# Just a markdown file\n\nNo frontmatter here.\n"
 	result, err := transformAgentContent([]byte(source), &TransformContext{AgentName: "test", WriteGuardDefaults: testDefaults})
@@ -386,6 +398,7 @@ func TestTransformAgentContent_InvalidFrontmatter(t *testing.T) {
 }
 
 func TestTransformAgentContent_ModelOverride(t *testing.T) {
+	t.Parallel()
 	// Agent has model: opus — override should force haiku
 	source := `---
 name: potnia
@@ -415,6 +428,7 @@ tools: Bash, Read
 }
 
 func TestTransformAgentContent_ModelOverrideNoExistingModel(t *testing.T) {
+	t.Parallel()
 	// Agent has no model field — override should inject one
 	source := `---
 name: worker
@@ -440,6 +454,7 @@ tools: Bash
 }
 
 func TestTransformAgentContent_NoModelOverride(t *testing.T) {
+	t.Parallel()
 	// Empty ModelOverride should leave original model unchanged
 	source := `---
 name: specialist

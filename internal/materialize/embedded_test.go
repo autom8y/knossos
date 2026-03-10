@@ -13,6 +13,7 @@ import (
 )
 
 func TestCopyDirFromFS(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"foo.md":     &fstest.MapFile{Data: []byte("# Foo\n")},
 		"bar.md":     &fstest.MapFile{Data: []byte("# Bar\n")},
@@ -47,6 +48,7 @@ func TestCopyDirFromFS(t *testing.T) {
 }
 
 func TestCopyDirFromFS_EmptyFS(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{}
 	dst := t.TempDir()
 	if err := copyDirFromFS(fsys, dst); err != nil {
@@ -55,6 +57,7 @@ func TestCopyDirFromFS_EmptyFS(t *testing.T) {
 }
 
 func TestCopyDirFromFS_SubFS(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"agents/one.md": &fstest.MapFile{Data: []byte("# One\n")},
 		"agents/two.md": &fstest.MapFile{Data: []byte("# Two\n")},
@@ -84,6 +87,7 @@ func TestCopyDirFromFS_SubFS(t *testing.T) {
 }
 
 func TestLoadRiteManifest_FromEmbedded(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"rites/test-rite/manifest.yaml": &fstest.MapFile{
 			Data: []byte("name: test-rite\nversion: 1.0\nagents:\n  - name: agent-one\n    role: tester\n"),
@@ -123,6 +127,7 @@ func TestLoadRiteManifest_FromEmbedded(t *testing.T) {
 }
 
 func TestLoadRiteManifest_FilesystemFallback(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	riteDir := filepath.Join(tmpDir, "rites", "fs-rite")
 	os.MkdirAll(riteDir, 0755)
@@ -144,6 +149,7 @@ func TestLoadRiteManifest_FilesystemFallback(t *testing.T) {
 }
 
 func TestMaterializeAgents_FromEmbedded(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"rites/test-rite/manifest.yaml": &fstest.MapFile{
 			Data: []byte("name: test-rite\nversion: 1.0\nagents:\n  - name: agent-one\n    role: tester\n"),
@@ -191,6 +197,7 @@ func TestMaterializeAgents_FromEmbedded(t *testing.T) {
 }
 
 func TestMaterializeMena_FromEmbedded(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"rites/test-rite/manifest.yaml": &fstest.MapFile{
 			Data: []byte("name: test-rite\nversion: 1.0\ndependencies:\n  - shared\n"),
@@ -247,6 +254,7 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 // is NOT injected into foreign projects -- even when KNOSSOS_HOME resolves to a real
 // directory containing mena files.
 func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
+	t.Parallel()
 	// Create a fake "platform" mena dir (simulating ~/Code/knossos/mena/)
 	// that contains a platform-only command not in the embedded rite.
 	platformMenaDir := t.TempDir()

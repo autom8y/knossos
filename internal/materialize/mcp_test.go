@@ -7,6 +7,7 @@ import (
 )
 
 func TestRiteManifest_MCPServerNames(t *testing.T) {
+	t.Parallel()
 	manifest := &RiteManifest{
 		MCPServers: []MCPServer{
 			{Name: "github"},
@@ -20,6 +21,7 @@ func TestRiteManifest_MCPServerNames(t *testing.T) {
 }
 
 func TestRiteManifest_MCPServerNames_Empty(t *testing.T) {
+	t.Parallel()
 	manifest := &RiteManifest{}
 
 	names := manifest.MCPServerNames()

@@ -11,6 +11,7 @@ import (
 )
 
 func TestClearInvocationState_RemovesFile(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
@@ -32,6 +33,7 @@ func TestClearInvocationState_RemovesFile(t *testing.T) {
 }
 
 func TestClearInvocationState_NoFile(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))

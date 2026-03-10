@@ -17,6 +17,7 @@ import (
 // install could shadow the developer's working knossos checkout. This regression
 // test ensures KnossosHome wins over XDG when both are present.
 func TestGetMenaDir_ResolutionOrder_KnossosHomeBeforeXDG(t *testing.T) {
+	t.Parallel()
 	// Create a KnossosHome directory with a mena/ subdirectory.
 	knossosHome := t.TempDir()
 	knossosMenaDir := filepath.Join(knossosHome, "mena")
@@ -52,6 +53,7 @@ func TestGetMenaDir_ResolutionOrder_KnossosHomeBeforeXDG(t *testing.T) {
 // project-level mena directory (.knossos/mena/) wins over KnossosHome when both
 // exist. Project level is the highest-priority filesystem tier.
 func TestGetMenaDir_ResolutionOrder_ProjectOverridesKnossosHome(t *testing.T) {
+	t.Parallel()
 	// Create a KnossosHome directory with a mena/ subdirectory.
 	knossosHome := t.TempDir()
 	knossosMenaDir := filepath.Join(knossosHome, "mena")
@@ -82,6 +84,7 @@ func TestGetMenaDir_ResolutionOrder_ProjectOverridesKnossosHome(t *testing.T) {
 // TestGetMenaDir_ResolutionOrder_XDGFallbackWhenNoKnossosHome verifies that getMenaDir()
 // falls back to XDG data dir when KnossosHome has no mena/ directory.
 func TestGetMenaDir_ResolutionOrder_XDGFallbackWhenNoKnossosHome(t *testing.T) {
+	t.Parallel()
 	// KnossosHome exists but has NO mena/ subdirectory.
 	knossosHome := t.TempDir()
 
@@ -111,6 +114,7 @@ func TestGetMenaDir_ResolutionOrder_XDGFallbackWhenNoKnossosHome(t *testing.T) {
 // TestGetMenaDir_ResolutionOrder_EmptyWhenNoneExist verifies that getMenaDir()
 // returns "" when neither project-level, KnossosHome, nor XDG mena directories exist.
 func TestGetMenaDir_ResolutionOrder_EmptyWhenNoneExist(t *testing.T) {
+	t.Parallel()
 	// All temp dirs exist as roots but none have a mena/ subdirectory.
 	knossosHome := t.TempDir()
 	xdgDataHome := t.TempDir()

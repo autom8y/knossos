@@ -6,6 +6,7 @@ import (
 )
 
 func TestResolveHookDefaults(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		shared *HookDefaults
@@ -117,6 +118,7 @@ func TestResolveHookDefaults(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := ResolveHookDefaults(tt.shared, tt.rite)
 			if tt.want == nil {
 				if got != nil {
@@ -138,6 +140,7 @@ func TestResolveHookDefaults(t *testing.T) {
 }
 
 func TestResolveWriteGuard(t *testing.T) {
+	t.Parallel()
 	defaults := &WriteGuardDefaults{
 		AllowPaths: []string{".ledge/", ".know/"},
 		Timeout:    3,
@@ -212,6 +215,7 @@ func TestResolveWriteGuard(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := ResolveWriteGuard(tt.defaults, tt.agentName, tt.agentWG)
 			if tt.want == nil {
 				if got != nil {
@@ -236,7 +240,9 @@ func TestResolveWriteGuard(t *testing.T) {
 }
 
 func TestGenerateWriteGuardHooks(t *testing.T) {
+	t.Parallel()
 	t.Run("nil input returns nil", func(t *testing.T) {
+		t.Parallel()
 		got := GenerateWriteGuardHooks(nil)
 		if got != nil {
 			t.Errorf("GenerateWriteGuardHooks(nil) = %v, want nil", got)
@@ -244,6 +250,7 @@ func TestGenerateWriteGuardHooks(t *testing.T) {
 	})
 
 	t.Run("generates correct CC-compatible structure", func(t *testing.T) {
+		t.Parallel()
 		resolved := &ResolvedWriteGuard{
 			AllowPaths: []string{".ledge/", ".know/", "docs/ecosystem/"},
 			Timeout:    3,
@@ -299,6 +306,7 @@ func TestGenerateWriteGuardHooks(t *testing.T) {
 }
 
 func TestDedup(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name  string
 		input []string
@@ -310,6 +318,7 @@ func TestDedup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := dedup(tt.input)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("dedup(%v) = %v, want %v", tt.input, got, tt.want)

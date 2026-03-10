@@ -15,6 +15,7 @@ import (
 // TestMaterializeSettingsWithManifest_NoMCPServers tests that settings are created
 // with minimal content when manifest has no MCP servers.
 func TestMaterializeSettingsWithManifest_NoMCPServers(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	manifest := &RiteManifest{
 		Name: "test-rite",
@@ -41,6 +42,7 @@ func TestMaterializeSettingsWithManifest_NoMCPServers(t *testing.T) {
 // TestMaterializeSettingsWithManifest_StaleMcpServersRemoved tests that
 // stale mcpServers in settings.local.json are cleaned up (SCAR-028).
 func TestMaterializeSettingsWithManifest_StaleMcpServersRemoved(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
 
@@ -76,6 +78,7 @@ func TestMaterializeSettingsWithManifest_StaleMcpServersRemoved(t *testing.T) {
 // TestMaterializeMcpJson_WritesToProjectRoot tests that MCP servers from
 // the rite manifest are written to .mcp.json at project root (SCAR-028).
 func TestMaterializeMcpJson_WritesToProjectRoot(t *testing.T) {
+	t.Parallel()
 	projectRoot := t.TempDir()
 	manifest := &RiteManifest{
 		Name: "test-rite",
@@ -131,6 +134,7 @@ func TestMaterializeMcpJson_WritesToProjectRoot(t *testing.T) {
 // TestMaterializeMcpJson_PreservesExistingSatelliteServers tests union merge:
 // rite servers are added, satellite servers in .mcp.json are preserved.
 func TestMaterializeMcpJson_PreservesExistingSatelliteServers(t *testing.T) {
+	t.Parallel()
 	projectRoot := t.TempDir()
 	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
 
@@ -179,6 +183,7 @@ func TestMaterializeMcpJson_PreservesExistingSatelliteServers(t *testing.T) {
 
 // TestMaterializeMcpJson_NilManifest tests that nil manifest is a no-op.
 func TestMaterializeMcpJson_NilManifest(t *testing.T) {
+	t.Parallel()
 	projectRoot := t.TempDir()
 
 	err := (&Materializer{}).materializeMcpJson(projectRoot, nil, provenance.NullCollector{})
@@ -192,6 +197,7 @@ func TestMaterializeMcpJson_NilManifest(t *testing.T) {
 
 // TestMaterializeMcpJson_EmptyMCPServers tests that empty MCP servers list is a no-op.
 func TestMaterializeMcpJson_EmptyMCPServers(t *testing.T) {
+	t.Parallel()
 	projectRoot := t.TempDir()
 	manifest := &RiteManifest{Name: "test-rite"}
 
@@ -207,6 +213,7 @@ func TestMaterializeMcpJson_EmptyMCPServers(t *testing.T) {
 // TestMaterializeMcpJson_UpdatesExistingRiteServer tests that rite-owned
 // servers are updated when the manifest changes.
 func TestMaterializeMcpJson_UpdatesExistingRiteServer(t *testing.T) {
+	t.Parallel()
 	projectRoot := t.TempDir()
 	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
 
@@ -255,6 +262,7 @@ func TestMaterializeMcpJson_UpdatesExistingRiteServer(t *testing.T) {
 // TestSCAR028_MCPServers_NotInSettingsLocalJson is a SCAR regression test
 // verifying that MCP servers are never written to settings.local.json.
 func TestSCAR028_MCPServers_NotInSettingsLocalJson(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	manifest := &RiteManifest{
 		Name: "test-rite",
