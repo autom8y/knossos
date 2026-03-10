@@ -13,12 +13,19 @@ type RenderFunc func(projectRoot, templateName string, data any) ([]byte, error)
 // RenderToDir resolves all procession templates and renders their dromena
 // (commands) and legomena (skills) into tmpDir.
 //
-// For each template, it creates:
-//   - {tmpDir}/{name}/INDEX.dro.md  (procession-workflow archetype)
-//   - {tmpDir}/{name}-ref/INDEX.lego.md (procession-ref archetype)
+// The currentRite parameter controls dromena projection:
+//   - Non-empty: only render dromena when template's entry rite matches currentRite
+//   - Empty: render legomena only (minimal/cross-cutting mode with no active rite)
 //
-// Returns the number of templates rendered.
-func RenderToDir(projectRoot string, tmpDir string, render RenderFunc) (int, error) {
+// Legomena (skills) are always rendered regardless of currentRite — skills are
+// universal reference material loaded on-demand via Skill().
+//
+// For each template, it creates (when applicable):
+//   - {tmpDir}/{name}/INDEX.dro.md  (procession-workflow archetype, rite-filtered)
+//   - {tmpDir}/{name}-ref/INDEX.lego.md (procession-ref archetype, always)
+//
+// Returns the number of templates where any artifact was rendered.
+func RenderToDir(projectRoot string, tmpDir string, render RenderFunc, currentRite string) (int, error) {
 	resolved, err := ResolveProcessions(projectRoot, nil)
 	if err != nil {
 		return 0, err
@@ -27,22 +34,30 @@ func RenderToDir(projectRoot string, tmpDir string, render RenderFunc) (int, err
 	count := 0
 	for _, rp := range resolved {
 		data := BuildWorkflowData(rp.Template)
+		rendered := false
 
-		// Render dromena (command)
-		droDir := filepath.Join(tmpDir, rp.Name)
-		if err := os.MkdirAll(droDir, 0o755); err != nil {
-			return count, err
+		// Render dromena (command) only when rite matches
+		entryRite := ""
+		if len(rp.Template.Stations) > 0 {
+			entryRite = rp.Template.Stations[0].Rite
+		}
+		if currentRite != "" && entryRite == currentRite {
+			droDir := filepath.Join(tmpDir, rp.Name)
+			if err := os.MkdirAll(droDir, 0o755); err != nil {
+				return count, err
+			}
+
+			droContent, err := render(projectRoot, "procession-workflow.md.tpl", data)
+			if err != nil {
+				return count, err
+			}
+			if err := os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), droContent, 0o644); err != nil {
+				return count, err
+			}
+			rendered = true
 		}
 
-		droContent, err := render(projectRoot, "procession-workflow.md.tpl", data)
-		if err != nil {
-			return count, err
-		}
-		if err := os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), droContent, 0o644); err != nil {
-			return count, err
-		}
-
-		// Render legomena (skill)
+		// Render legomena (skill) — always, regardless of rite
 		legoDir := filepath.Join(tmpDir, rp.Name+"-ref")
 		if err := os.MkdirAll(legoDir, 0o755); err != nil {
 			return count, err
@@ -55,8 +70,11 @@ func RenderToDir(projectRoot string, tmpDir string, render RenderFunc) (int, err
 		if err := os.WriteFile(filepath.Join(legoDir, "INDEX.lego.md"), legoContent, 0o644); err != nil {
 			return count, err
 		}
+		rendered = true
 
-		count++
+		if rendered {
+			count++
+		}
 	}
 
 	return count, nil

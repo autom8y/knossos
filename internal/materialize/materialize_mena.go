@@ -38,9 +38,10 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	}
 
 	// 1.5. Procession-generated mena (between platform and shared)
-	// Each procession template (e.g., security-remediation.yaml) generates a named
-	// dromena and per-procession skill. Available in all rites.
-	if procDir, err := m.renderProcessionMena(); err == nil && procDir != "" {
+	// Each procession template generates a named dromena (rite-filtered) and
+	// per-procession skill (universal). Dromena only projected when current rite
+	// matches the template's entry rite.
+	if procDir, err := m.renderProcessionMena(manifest.Name); err == nil && procDir != "" {
 		sources = append(sources, MenaSource{Path: procDir})
 	}
 
@@ -141,8 +142,8 @@ func (m *Materializer) materializeMinimalMena(claudeDir string, collector proven
 		sources = append(sources, MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
 	}
 
-	// 1.5. Procession-generated mena (available in minimal/cross-cutting mode too)
-	if procDir, err := m.renderProcessionMena(); err == nil && procDir != "" {
+	// 1.5. Procession-generated mena (legomena only in minimal mode — no active rite)
+	if procDir, err := m.renderProcessionMena(""); err == nil && procDir != "" {
 		sources = append(sources, MenaSource{Path: procDir})
 	}
 
@@ -177,8 +178,13 @@ func (m *Materializer) materializeMinimalMena(claudeDir string, collector proven
 // dromena and legomena into a deterministic directory for mena projection.
 // Uses .knossos/procession-mena/ to ensure provenance source paths are stable
 // across syncs (idempotency invariant).
+//
+// currentRite controls dromena filtering:
+//   - Non-empty: only render dromena for templates whose entry rite matches
+//   - Empty: render legomena only (minimal/cross-cutting mode)
+//
 // Returns empty string if no templates found or rendering fails (fail-open).
-func (m *Materializer) renderProcessionMena() (string, error) {
+func (m *Materializer) renderProcessionMena(currentRite string) (string, error) {
 	procDir := filepath.Join(m.resolver.KnossosDir(), "procession-mena")
 
 	// Clean any prior render to avoid stale entries
@@ -189,7 +195,7 @@ func (m *Materializer) renderProcessionMena() (string, error) {
 	}
 
 	projectRoot := m.resolver.ProjectRoot()
-	count, err := procmena.RenderToDir(projectRoot, procDir, RenderArchetype)
+	count, err := procmena.RenderToDir(projectRoot, procDir, RenderArchetype, currentRite)
 	if err != nil {
 		os.RemoveAll(procDir)
 		return "", err
