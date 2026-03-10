@@ -51,11 +51,14 @@ func defaultContractMustNot() []string {
 // renderArchetypeAgent constructs archetype-specific data from the manifest and
 // renders the corresponding template. Currently only the "orchestrator" archetype
 // is supported; unknown archetypes return an error.
-func renderArchetypeAgent(projectRoot string, agent Agent, manifest *RiteManifest) ([]byte, error) {
+//
+// The render callback controls template resolution. Production callers pass
+// Materializer.renderArchetypeResolved (DI-aware); tests may pass RenderArchetype.
+func renderArchetypeAgent(projectRoot string, agent Agent, manifest *RiteManifest, render func(string, string, any) ([]byte, error)) ([]byte, error) {
 	switch agent.Archetype {
 	case "orchestrator":
 		data := buildOrchestratorData(agent, manifest)
-		return RenderArchetype(projectRoot, "orchestrator.md.tpl", data)
+		return render(projectRoot, "orchestrator.md.tpl", data)
 	default:
 		return nil, fmt.Errorf("unknown archetype: %s", agent.Archetype)
 	}
@@ -160,6 +163,43 @@ func RenderArchetype(projectRoot, templateName string, data any) ([]byte, error)
 
 	// 3. Try XDG data dir (installed user case)
 	xdgPath := filepath.Join(config.XDGDataDir(), "archetypes", templateName)
+	if tplContent, err := os.ReadFile(xdgPath); err == nil {
+		return RenderArchetypeFromString(string(tplContent), templateName, data)
+	}
+
+	return nil, fmt.Errorf("archetype template %s not found in project, KnossosHome, or XDG data dir", templateName)
+}
+
+// renderArchetypeResolved loads a template using Materializer path fields.
+// Uses m.knossosHome and m.xdgDataDir with fallback to source resolver / config globals.
+// This avoids direct config.KnossosHome() calls in the materialize pipeline.
+func (m *Materializer) renderArchetypeResolved(projectRoot, templateName string, data any) ([]byte, error) {
+	relPath := filepath.Join("knossos", "archetypes", templateName)
+
+	// 1. Try project root (knossos-on-knossos case)
+	tplPath := filepath.Join(projectRoot, relPath)
+	if tplContent, err := os.ReadFile(tplPath); err == nil {
+		return RenderArchetypeFromString(string(tplContent), templateName, data)
+	}
+
+	// 2. Try KnossosHome (prefer struct field, fall back to source resolver)
+	knossosHome := m.knossosHome
+	if knossosHome == "" {
+		knossosHome = m.sourceResolver.KnossosHome()
+	}
+	if knossosHome != "" {
+		tplPath = filepath.Join(knossosHome, relPath)
+		if tplContent, err := os.ReadFile(tplPath); err == nil {
+			return RenderArchetypeFromString(string(tplContent), templateName, data)
+		}
+	}
+
+	// 3. Try XDG data dir (prefer struct field, fall back to config)
+	xdgDataDir := m.xdgDataDir
+	if xdgDataDir == "" {
+		xdgDataDir = config.XDGDataDir()
+	}
+	xdgPath := filepath.Join(xdgDataDir, "archetypes", templateName)
 	if tplContent, err := os.ReadFile(xdgPath); err == nil {
 		return RenderArchetypeFromString(string(tplContent), templateName, data)
 	}

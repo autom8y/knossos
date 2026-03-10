@@ -6,6 +6,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/config"
 	procmena "github.com/autom8y/knossos/internal/materialize/procession"
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
@@ -195,7 +196,35 @@ func (m *Materializer) renderProcessionMena(currentRite string) (string, error) 
 	}
 
 	projectRoot := m.resolver.ProjectRoot()
-	count, err := procmena.RenderToDir(projectRoot, procDir, RenderArchetype, currentRite, m.embeddedProcessions)
+
+	// Resolve procession templates using explicit paths (DI seam).
+	// Avoids config.KnossosHome() and config.ActiveOrg() calls in the pipeline.
+	knossosHome := m.knossosHome
+	if knossosHome == "" {
+		knossosHome = m.sourceResolver.KnossosHome()
+	}
+	platformDir := ""
+	if knossosHome != "" {
+		platformDir = filepath.Join(knossosHome, "processions")
+	}
+	orgDir := ""
+	if activeOrg := m.sourceResolver.ActiveOrg(); activeOrg != "" {
+		orgDir = filepath.Join(paths.OrgDataDir(activeOrg), "processions")
+	}
+	userDir := filepath.Join(paths.DataDir(), "processions")
+	projectDir := filepath.Join(projectRoot, "processions")
+
+	resolved, err := procmena.ResolveProcessionsWithDirs(projectDir, userDir, orgDir, platformDir, m.embeddedProcessions)
+	if err != nil {
+		os.RemoveAll(procDir)
+		return "", err
+	}
+
+	// Closure captures Materializer path fields for archetype rendering,
+	// avoiding config singleton reads inside the render callback.
+	renderFn := m.renderArchetypeResolved
+
+	count, err := procmena.RenderToDirWithProcessions(projectRoot, procDir, renderFn, currentRite, resolved)
 	if err != nil {
 		os.RemoveAll(procDir)
 		return "", err

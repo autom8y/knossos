@@ -49,7 +49,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		}
 		archetypeAgents[agent.Name+".md"] = true
 
-		content, err := renderArchetypeAgent(m.resolver.ProjectRoot(), agent, manifest)
+		content, err := renderArchetypeAgent(m.resolver.ProjectRoot(), agent, manifest, m.renderArchetypeResolved)
 		if err != nil {
 			return fmt.Errorf("archetype render failed for %s: %w", agent.Name, err)
 		}

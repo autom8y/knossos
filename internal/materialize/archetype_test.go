@@ -922,7 +922,7 @@ func TestRenderArchetypeAgent_UnknownArchetype(t *testing.T) {
 	agent := Agent{Name: "test", Archetype: "unknown-type"}
 	manifest := &RiteManifest{Name: "test"}
 
-	_, err := renderArchetypeAgent(root, agent, manifest)
+	_, err := renderArchetypeAgent(root, agent, manifest, RenderArchetype)
 	if err == nil {
 		t.Fatal("expected error for unknown archetype")
 	}
