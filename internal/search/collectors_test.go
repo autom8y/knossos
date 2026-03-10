@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -377,4 +378,95 @@ func TestCollectRitesNoOrchestratorGraceful(t *testing.T) {
 	assert.Equal(t, "A plain rite", entries[0].Description)
 	assert.Empty(t, entries[0].Keywords, "no orchestrator means no keywords")
 	assert.Empty(t, entries[0].Aliases, "no orchestrator means no aliases")
+}
+
+// --- CollectProcessions ---
+
+// isolateProcessionHome overrides KNOSSOS_HOME to prevent picking up real templates.
+func isolateProcessionHome(t *testing.T) {
+	t.Helper()
+	config.ResetKnossosHome()
+	t.Setenv("KNOSSOS_HOME", t.TempDir())
+	t.Cleanup(config.ResetKnossosHome)
+}
+
+func writeProcessionTemplate(t *testing.T, root, name, description string, stations int) {
+	t.Helper()
+	dir := filepath.Join(root, "processions")
+	require.NoError(t, os.MkdirAll(dir, 0755))
+
+	content := "name: " + name + "\ndescription: \"" + description + "\"\nstations:\n"
+	rites := []string{"security", "debt-triage", "10x-dev", "hygiene", "security"}
+	for i := 0; i < stations; i++ {
+		r := rites[i%len(rites)]
+		content += "  - name: station-" + string(rune('a'+i)) + "\n"
+		content += "    rite: " + r + "\n"
+		content += "    goal: \"Goal " + string(rune('a'+i)) + "\"\n"
+		content += "    produces: [artifact-" + string(rune('a'+i)) + "]\n"
+	}
+	content += "artifact_dir: .sos/wip/" + name + "/\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, name+".yaml"), []byte(content), 0644))
+}
+
+func TestCollectProcessions_NilResolver(t *testing.T) {
+	entries := CollectProcessions(nil)
+	assert.Nil(t, entries)
+}
+
+func TestCollectProcessions_NoTemplates(t *testing.T) {
+	isolateProcessionHome(t)
+	root := buildTestRoot(t)
+	resolver := paths.NewResolver(root)
+	entries := CollectProcessions(resolver)
+	assert.Empty(t, entries)
+}
+
+func TestCollectProcessions_SingleTemplate(t *testing.T) {
+	isolateProcessionHome(t)
+	root := buildTestRoot(t)
+	writeProcessionTemplate(t, root, "sec-rem", "Security remediation lifecycle", 5)
+
+	resolver := paths.NewResolver(root)
+	entries := CollectProcessions(resolver)
+
+	require.Len(t, entries, 1)
+	assert.Equal(t, "sec-rem", entries[0].Name)
+	assert.Equal(t, DomainProcession, entries[0].Domain)
+	assert.Equal(t, "Security remediation lifecycle", entries[0].Summary)
+	assert.Equal(t, "/sec-rem", entries[0].Action)
+	assert.True(t, entries[0].Boosted, "5-station template should be boosted (>2)")
+
+	// Keywords should include station names, rite names, and fixed terms
+	assert.Contains(t, entries[0].Keywords, "station-a")
+	assert.Contains(t, entries[0].Keywords, "security")
+	assert.Contains(t, entries[0].Keywords, "procession")
+	assert.Contains(t, entries[0].Keywords, "cross-rite")
+	assert.Contains(t, entries[0].Keywords, "workflow")
+}
+
+func TestCollectProcessions_NotBoostedWhenFewStations(t *testing.T) {
+	isolateProcessionHome(t)
+	root := buildTestRoot(t)
+	writeProcessionTemplate(t, root, "small", "Two station workflow", 2)
+
+	resolver := paths.NewResolver(root)
+	entries := CollectProcessions(resolver)
+
+	require.Len(t, entries, 1)
+	assert.False(t, entries[0].Boosted, "2-station template should not be boosted")
+}
+
+func TestCollectProcessions_MultipleTemplates(t *testing.T) {
+	isolateProcessionHome(t)
+	root := buildTestRoot(t)
+	writeProcessionTemplate(t, root, "workflow-a", "First workflow", 3)
+	writeProcessionTemplate(t, root, "workflow-b", "Second workflow", 2)
+
+	resolver := paths.NewResolver(root)
+	entries := CollectProcessions(resolver)
+
+	require.Len(t, entries, 2)
+	names := []string{entries[0].Name, entries[1].Name}
+	assert.Contains(t, names, "workflow-a")
+	assert.Contains(t, names, "workflow-b")
 }

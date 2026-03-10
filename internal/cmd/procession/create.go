@@ -14,6 +14,7 @@ import (
 	"github.com/autom8y/knossos/internal/errors"
 	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/rite"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -51,13 +52,14 @@ Examples:
 
 // createOutput represents the output of procession create.
 type createOutput struct {
-	ProcessionID   string `json:"procession_id"`
-	Type           string `json:"type"`
-	CurrentStation string `json:"current_station"`
-	CurrentRite    string `json:"current_rite"`
-	NextStation    string `json:"next_station,omitempty"`
-	NextRite       string `json:"next_rite,omitempty"`
-	ArtifactDir    string `json:"artifact_dir"`
+	ProcessionID   string   `json:"procession_id"`
+	Type           string   `json:"type"`
+	CurrentStation string   `json:"current_station"`
+	CurrentRite    string   `json:"current_rite"`
+	NextStation    string   `json:"next_station,omitempty"`
+	NextRite       string   `json:"next_rite,omitempty"`
+	ArtifactDir    string   `json:"artifact_dir"`
+	Warnings       []string `json:"warnings,omitempty"`
 }
 
 // Text implements output.Textable for createOutput.
@@ -72,6 +74,9 @@ func (o createOutput) Text() string {
 		b.WriteString("Next station:       (final)\n")
 	}
 	fmt.Fprintf(&b, "Artifact dir:       %s\n", o.ArtifactDir)
+	for _, w := range o.Warnings {
+		fmt.Fprintf(&b, "Warning:            %s\n", w)
+	}
 	return b.String()
 }
 
@@ -115,6 +120,22 @@ func runCreate(ctx *cmdContext, opts createOptions) error {
 		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeFileNotFound, "template resolution failed", err))
 	}
 	tmpl := rp.Template
+
+	// Check if referenced rites are discoverable (non-blocking warning)
+	var warnings []string
+	discovery := rite.NewDiscovery(resolver)
+	seen := make(map[string]bool)
+	for _, stn := range tmpl.Stations {
+		for _, r := range []string{stn.Rite, stn.AltRite} {
+			if r == "" || seen[r] {
+				continue
+			}
+			seen[r] = true
+			if !discovery.Exists(r) {
+				warnings = append(warnings, fmt.Sprintf("rite %q (station %s) not found in rite discovery; may fail at transition time", r, stn.Name))
+			}
+		}
+	}
 
 	// Generate procession ID: {template-name}-{YYYY-MM-DD}
 	today := time.Now().UTC().Format("2006-01-02")
@@ -162,5 +183,6 @@ func runCreate(ctx *cmdContext, opts createOptions) error {
 		NextStation:    nextStationName,
 		NextRite:       nextRite,
 		ArtifactDir:    tmpl.ArtifactDir,
+		Warnings:       warnings,
 	})
 }

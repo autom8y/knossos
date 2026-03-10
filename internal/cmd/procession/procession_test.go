@@ -67,6 +67,25 @@ created_at: "2026-03-10T10:00:00Z"
 func writeSessionWithProcession(t *testing.T, ctxPath string, proc *session.Procession) {
 	t.Helper()
 
+	// Handle nil procession (post-completion state)
+	if proc == nil {
+		content := `---
+schema_version: "2.3"
+session_id: ` + filepath.Base(filepath.Dir(ctxPath)) + `
+status: ACTIVE
+initiative: Test initiative
+complexity: MODULE
+active_rite: security
+current_phase: requirements
+created_at: "2026-03-10T10:00:00Z"
+---
+`
+		if err := os.WriteFile(ctxPath, []byte(content), 0644); err != nil {
+			t.Fatalf("write session context: %v", err)
+		}
+		return
+	}
+
 	// Build completed_stations YAML block
 	completedBlock := ""
 	if len(proc.CompletedStations) > 0 {
@@ -547,6 +566,23 @@ func TestRecede_ForwardStation(t *testing.T) {
 	err := runRecede(ctx, opts)
 	if err == nil {
 		t.Error("expected error when receding to a station after current, got nil")
+	}
+}
+
+// TestRecede_NoProcession verifies recede fails cleanly when no procession is active.
+// This covers the post-completion case: P2 auto-nils Procession on final proceed,
+// so recede on a completed procession hits the nil guard.
+func TestRecede_NoProcession(t *testing.T) {
+	projectDir, sessionID, ctxPath := testEnv(t)
+	writeTemplate(t, projectDir)
+	// Write session without procession (simulates post-completion state)
+	writeSessionWithProcession(t, ctxPath, nil)
+
+	ctx := newTestCtx(projectDir, sessionID)
+	opts := recedeOptions{to: "audit"}
+	err := runRecede(ctx, opts)
+	if err == nil {
+		t.Fatal("expected error for recede without procession, got nil")
 	}
 }
 
