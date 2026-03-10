@@ -65,12 +65,12 @@ Terminates the procession entirely.
 
 ## Orchestrator Behavior During a Procession
 
-When a procession is active, the orchestrator (Pythia) reads the `procession:` block from session context and adjusts behavior:
+When a procession is active, the rite orchestrator (Potnia, invoked via the procession dromena) reads the `procession:` block from session context and adjusts behavior:
 
 - **Station awareness**: Reads `current_station` to understand scope
 - **Incoming context**: Reads the handoff artifact from the previous station at `{artifact_dir}/HANDOFF-{previous}-to-{current}.md`
 - **Acceptance criteria**: The handoff artifact's frontmatter `acceptance_criteria` define directional goals for this station
-- **Station goal**: Comes from the procession template (provided by user or Pythia)
+- **Station goal**: Comes from the procession template (provided in the dromena's Station Map)
 - **Completion protocol**:
   1. Write `HANDOFF-{current}-to-{next}.md` with schema-valid frontmatter and self-contained body
   2. Signal Moirai to run `ari procession proceed`
