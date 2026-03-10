@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/procession"
 )
 
 // stubRender is a minimal RenderFunc for testing.
@@ -39,24 +39,34 @@ artifact_dir: .sos/wip/` + name + `/
 	}
 }
 
-// isolateHome overrides KNOSSOS_HOME to prevent picking up real templates.
-func isolateHome(t *testing.T) {
-	t.Helper()
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", t.TempDir())
-	t.Cleanup(config.ResetKnossosHome)
+// makeTestProcession creates a ResolvedProcession for rendering tests.
+// This avoids filesystem setup and global state mutation.
+func makeTestProcession(name, entryRite string) ResolvedProcession {
+	return ResolvedProcession{
+		Name:   name,
+		Source: "project",
+		Template: &procession.Template{
+			Name:        name,
+			Description: "Test template",
+			Stations: []procession.Station{
+				{Name: "start", Rite: entryRite, Goal: "Start", Produces: []string{"artifact"}},
+				{Name: "finish", Rite: "other", Goal: "Finish", Produces: []string{"result"}},
+			},
+			ArtifactDir: ".sos/wip/" + name + "/",
+		},
+	}
 }
 
 // --- ResolveTemplate tests ---
 
 func TestResolveTemplate_Found(t *testing.T) {
-	isolateHome(t)
 	projectDir := t.TempDir()
 	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
-	rp, err := ResolveTemplate("my-workflow", projectDir, nil)
+	procDir := filepath.Join(projectDir, "processions")
+	rp, err := ResolveTemplateWithDirs("my-workflow", procDir, "", "", "", nil)
 	if err != nil {
-		t.Fatalf("ResolveTemplate: %v", err)
+		t.Fatalf("ResolveTemplateWithDirs: %v", err)
 	}
 	if rp.Name != "my-workflow" {
 		t.Errorf("Name = %q, want %q", rp.Name, "my-workflow")
@@ -73,10 +83,10 @@ func TestResolveTemplate_Found(t *testing.T) {
 }
 
 func TestResolveTemplate_NotFound(t *testing.T) {
-	isolateHome(t)
 	projectDir := t.TempDir()
 
-	_, err := ResolveTemplate("nonexistent", projectDir, nil)
+	procDir := filepath.Join(projectDir, "processions")
+	_, err := ResolveTemplateWithDirs("nonexistent", procDir, "", "", "", nil)
 	if err == nil {
 		t.Fatal("expected error for missing template, got nil")
 	}
@@ -86,21 +96,19 @@ func TestResolveTemplate_NotFound(t *testing.T) {
 }
 
 func TestResolveTemplate_ProjectShadowsPlatform(t *testing.T) {
-	isolateHome(t)
-
 	// Write template at platform tier
 	platformDir := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", platformDir)
-	config.ResetKnossosHome()
 	writeTestTemplate(t, platformDir, "my-workflow", "platform-rite")
 
 	// Write template at project tier (higher priority)
 	projectDir := t.TempDir()
 	writeTestTemplate(t, projectDir, "my-workflow", "project-rite")
 
-	rp, err := ResolveTemplate("my-workflow", projectDir, nil)
+	projectProcDir := filepath.Join(projectDir, "processions")
+	platformProcDir := filepath.Join(platformDir, "processions")
+	rp, err := ResolveTemplateWithDirs("my-workflow", projectProcDir, "", "", platformProcDir, nil)
 	if err != nil {
-		t.Fatalf("ResolveTemplate: %v", err)
+		t.Fatalf("ResolveTemplateWithDirs: %v", err)
 	}
 	if rp.Source != "project" {
 		t.Errorf("Source = %q, want %q (project should shadow platform)", rp.Source, "project")
@@ -111,20 +119,18 @@ func TestResolveTemplate_ProjectShadowsPlatform(t *testing.T) {
 }
 
 func TestResolveTemplate_PlatformFallback(t *testing.T) {
-	isolateHome(t)
-
 	// Write template at platform tier only
 	platformDir := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", platformDir)
-	config.ResetKnossosHome()
 	writeTestTemplate(t, platformDir, "platform-only", "security")
 
 	// Empty project dir (no templates)
 	projectDir := t.TempDir()
 
-	rp, err := ResolveTemplate("platform-only", projectDir, nil)
+	projectProcDir := filepath.Join(projectDir, "processions")
+	platformProcDir := filepath.Join(platformDir, "processions")
+	rp, err := ResolveTemplateWithDirs("platform-only", projectProcDir, "", "", platformProcDir, nil)
 	if err != nil {
-		t.Fatalf("ResolveTemplate: %v", err)
+		t.Fatalf("ResolveTemplateWithDirs: %v", err)
 	}
 	if rp.Source != "platform" {
 		t.Errorf("Source = %q, want %q", rp.Source, "platform")
@@ -134,14 +140,14 @@ func TestResolveTemplate_PlatformFallback(t *testing.T) {
 // --- RenderToDir tests ---
 
 func TestRenderToDir_MatchingRite(t *testing.T) {
-	isolateHome(t)
-	projectDir := t.TempDir()
 	tmpDir := t.TempDir()
-	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "security", nil)
+	processions := []ResolvedProcession{
+		makeTestProcession("my-workflow", "security"),
+	}
+	count, err := RenderToDirWithProcessions("", tmpDir, stubRender, "security", processions)
 	if err != nil {
-		t.Fatalf("RenderToDir: %v", err)
+		t.Fatalf("RenderToDirWithProcessions: %v", err)
 	}
 	if count != 1 {
 		t.Errorf("count = %d, want 1", count)
@@ -160,14 +166,14 @@ func TestRenderToDir_MatchingRite(t *testing.T) {
 }
 
 func TestRenderToDir_NonMatchingRite(t *testing.T) {
-	isolateHome(t)
-	projectDir := t.TempDir()
 	tmpDir := t.TempDir()
-	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "docs", nil)
+	processions := []ResolvedProcession{
+		makeTestProcession("my-workflow", "security"),
+	}
+	count, err := RenderToDirWithProcessions("", tmpDir, stubRender, "docs", processions)
 	if err != nil {
-		t.Fatalf("RenderToDir: %v", err)
+		t.Fatalf("RenderToDirWithProcessions: %v", err)
 	}
 	if count != 1 {
 		t.Errorf("count = %d, want 1 (legomena still counts)", count)
@@ -187,14 +193,14 @@ func TestRenderToDir_NonMatchingRite(t *testing.T) {
 }
 
 func TestRenderToDir_EmptyRite(t *testing.T) {
-	isolateHome(t)
-	projectDir := t.TempDir()
 	tmpDir := t.TempDir()
-	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "", nil)
+	processions := []ResolvedProcession{
+		makeTestProcession("my-workflow", "security"),
+	}
+	count, err := RenderToDirWithProcessions("", tmpDir, stubRender, "", processions)
 	if err != nil {
-		t.Fatalf("RenderToDir: %v", err)
+		t.Fatalf("RenderToDirWithProcessions: %v", err)
 	}
 	if count != 1 {
 		t.Errorf("count = %d, want 1", count)
@@ -214,15 +220,15 @@ func TestRenderToDir_EmptyRite(t *testing.T) {
 }
 
 func TestRenderToDir_MultipleTemplates(t *testing.T) {
-	isolateHome(t)
-	projectDir := t.TempDir()
 	tmpDir := t.TempDir()
-	writeTestTemplate(t, projectDir, "sec-workflow", "security")
-	writeTestTemplate(t, projectDir, "doc-workflow", "docs")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "security", nil)
+	processions := []ResolvedProcession{
+		makeTestProcession("sec-workflow", "security"),
+		makeTestProcession("doc-workflow", "docs"),
+	}
+	count, err := RenderToDirWithProcessions("", tmpDir, stubRender, "security", processions)
 	if err != nil {
-		t.Fatalf("RenderToDir: %v", err)
+		t.Fatalf("RenderToDirWithProcessions: %v", err)
 	}
 	if count != 2 {
 		t.Errorf("count = %d, want 2 (both templates render legomena)", count)

@@ -92,11 +92,10 @@ func ResolveProcessionsWithDirs(projectDir, userDir, orgDir, platformDir string,
 	return result, nil
 }
 
-// ResolveTemplate finds a single procession template by name through the
-// cascading resolution chain. Returns the highest-priority match, or an
-// error if no template with that name is found.
-func ResolveTemplate(name, projectRoot string, embeddedFS fs.FS) (*ResolvedProcession, error) {
-	resolved, err := ResolveProcessions(projectRoot, embeddedFS)
+// ResolveTemplateWithDirs finds a single procession template by name using explicit
+// tier directory paths. This enables test injection without global state mutation.
+func ResolveTemplateWithDirs(name, projectDir, userDir, orgDir, platformDir string, embeddedFS fs.FS) (*ResolvedProcession, error) {
+	resolved, err := ResolveProcessionsWithDirs(projectDir, userDir, orgDir, platformDir, embeddedFS)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +105,26 @@ func ResolveTemplate(name, projectRoot string, embeddedFS fs.FS) (*ResolvedProce
 		}
 	}
 	return nil, fmt.Errorf("procession template %q not found in any resolution tier", name)
+}
+
+// ResolveTemplate finds a single procession template by name through the
+// cascading resolution chain. Returns the highest-priority match, or an
+// error if no template with that name is found.
+func ResolveTemplate(name, projectRoot string, embeddedFS fs.FS) (*ResolvedProcession, error) {
+	platformDir := ""
+	if knossosHome := config.KnossosHome(); knossosHome != "" {
+		platformDir = filepath.Join(knossosHome, "processions")
+	}
+	orgDir := ""
+	if orgName := config.ActiveOrg(); orgName != "" {
+		orgDir = filepath.Join(paths.OrgDataDir(orgName), "processions")
+	}
+	userDir := filepath.Join(paths.DataDir(), "processions")
+	projectDir := ""
+	if projectRoot != "" {
+		projectDir = filepath.Join(projectRoot, "processions")
+	}
+	return ResolveTemplateWithDirs(name, projectDir, userDir, orgDir, platformDir, embeddedFS)
 }
 
 // yamlFileValidator filters resolution chain entries to valid YAML files.

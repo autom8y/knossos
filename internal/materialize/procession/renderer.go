@@ -11,8 +11,8 @@ import (
 // materialize/procession.
 type RenderFunc func(projectRoot, templateName string, data any) ([]byte, error)
 
-// RenderToDir resolves all procession templates and renders their dromena
-// (commands) and legomena (skills) into tmpDir.
+// RenderToDirWithProcessions renders pre-resolved procession templates into tmpDir.
+// This enables test injection without global config access.
 //
 // The currentRite parameter controls dromena projection:
 //   - Non-empty: only render dromena when template's entry rite matches currentRite
@@ -20,20 +20,9 @@ type RenderFunc func(projectRoot, templateName string, data any) ([]byte, error)
 //
 // Legomena (skills) are always rendered regardless of currentRite — skills are
 // universal reference material loaded on-demand via Skill().
-//
-// For each template, it creates (when applicable):
-//   - {tmpDir}/{name}/INDEX.dro.md  (procession-workflow archetype, rite-filtered)
-//   - {tmpDir}/{name}-ref/INDEX.lego.md (procession-ref archetype, always)
-//
-// Returns the number of templates where any artifact was rendered.
-func RenderToDir(projectRoot string, tmpDir string, render RenderFunc, currentRite string, embeddedFS fs.FS) (int, error) {
-	resolved, err := ResolveProcessions(projectRoot, embeddedFS)
-	if err != nil {
-		return 0, err
-	}
-
+func RenderToDirWithProcessions(projectRoot string, tmpDir string, render RenderFunc, currentRite string, processions []ResolvedProcession) (int, error) {
 	count := 0
-	for _, rp := range resolved {
+	for _, rp := range processions {
 		data := BuildWorkflowData(rp.Template)
 		rendered := false
 
@@ -79,4 +68,27 @@ func RenderToDir(projectRoot string, tmpDir string, render RenderFunc, currentRi
 	}
 
 	return count, nil
+}
+
+// RenderToDir resolves all procession templates and renders their dromena
+// (commands) and legomena (skills) into tmpDir.
+//
+// The currentRite parameter controls dromena projection:
+//   - Non-empty: only render dromena when template's entry rite matches currentRite
+//   - Empty: render legomena only (minimal/cross-cutting mode with no active rite)
+//
+// Legomena (skills) are always rendered regardless of currentRite — skills are
+// universal reference material loaded on-demand via Skill().
+//
+// For each template, it creates (when applicable):
+//   - {tmpDir}/{name}/INDEX.dro.md  (procession-workflow archetype, rite-filtered)
+//   - {tmpDir}/{name}-ref/INDEX.lego.md (procession-ref archetype, always)
+//
+// Returns the number of templates where any artifact was rendered.
+func RenderToDir(projectRoot string, tmpDir string, render RenderFunc, currentRite string, embeddedFS fs.FS) (int, error) {
+	resolved, err := ResolveProcessions(projectRoot, embeddedFS)
+	if err != nil {
+		return 0, err
+	}
+	return RenderToDirWithProcessions(projectRoot, tmpDir, render, currentRite, resolved)
 }
