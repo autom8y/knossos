@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -352,6 +353,9 @@ func TestProceed_AdvanceOneStation(t *testing.T) {
 		ArtifactDir:    ".sos/wip/security-remediation/",
 	})
 
+	// Write a valid handoff artifact for validation
+	writeValidHandoff(t, projectDir, ".sos/wip/sr/HANDOFF-audit-to-assess.md")
+
 	ctx := newTestCtx(projectDir, sessionID)
 	opts := proceedOptions{artifacts: ".sos/wip/sr/HANDOFF-audit-to-assess.md"}
 
@@ -601,5 +605,356 @@ func TestAbandon_NoProcession(t *testing.T) {
 	err := runAbandon(ctx)
 	if err == nil {
 		t.Error("expected error when no procession active, got nil")
+	}
+}
+
+// ---- list tests ----
+
+// isolateKnossosHome overrides KNOSSOS_HOME to an empty temp dir
+// so list tests don't pick up real platform templates.
+func isolateKnossosHome(t *testing.T) {
+	t.Helper()
+	config.ResetKnossosHome()
+	t.Setenv("KNOSSOS_HOME", t.TempDir())
+	t.Cleanup(config.ResetKnossosHome)
+}
+
+// writeTemplate2 writes a second procession template for multi-template tests.
+func writeTemplate2(t *testing.T, projectDir string) {
+	t.Helper()
+	dir := filepath.Join(projectDir, "processions")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatalf("MkdirAll processions/: %v", err)
+	}
+	content := `name: doc-consolidation
+description: "Documentation consolidation lifecycle: audit, plan, execute"
+stations:
+  - name: audit
+    rite: docs
+    goal: "Audit existing documentation"
+    produces: [doc-audit]
+  - name: plan
+    rite: docs
+    goal: "Plan consolidation"
+    produces: [consolidation-plan]
+  - name: execute
+    rite: docs
+    goal: "Execute consolidation plan"
+    produces: [consolidated-docs]
+artifact_dir: .sos/wip/doc-consolidation/
+`
+	if err := os.WriteFile(filepath.Join(dir, "doc-consolidation.yaml"), []byte(content), 0644); err != nil {
+		t.Fatalf("write template2: %v", err)
+	}
+}
+
+// TestList_WithTemplate verifies list returns a single template with correct fields.
+func TestList_WithTemplate(t *testing.T) {
+	isolateKnossosHome(t)
+	projectDir, sessionID, _ := testEnv(t)
+	writeTemplate(t, projectDir)
+
+	ctx := newTestCtx(projectDir, sessionID)
+	var out string
+	var runErr error
+	out = captureOutput(func() {
+		runErr = runList(ctx)
+	})
+	if runErr != nil {
+		t.Fatalf("runList failed: %v", runErr)
+	}
+
+	var result listOutput
+	if err := json.Unmarshal([]byte(out), &result); err != nil {
+		t.Fatalf("failed to parse JSON output: %v\noutput: %q", err, out)
+	}
+
+	if result.Total != 1 {
+		t.Fatalf("total = %d, want 1", result.Total)
+	}
+
+	tmpl := result.Templates[0]
+	if tmpl.Name != "security-remediation" {
+		t.Errorf("name = %q, want security-remediation", tmpl.Name)
+	}
+	if tmpl.StationCount != 5 {
+		t.Errorf("station_count = %d, want 5", tmpl.StationCount)
+	}
+	if tmpl.EntryRite != "security" {
+		t.Errorf("entry_rite = %q, want security", tmpl.EntryRite)
+	}
+	if tmpl.Source != "project" {
+		t.Errorf("source = %q, want project", tmpl.Source)
+	}
+	expectedStations := []string{"audit", "assess", "plan", "remediate", "validate"}
+	if len(tmpl.Stations) != len(expectedStations) {
+		t.Errorf("stations = %v, want %v", tmpl.Stations, expectedStations)
+	} else {
+		for i, s := range tmpl.Stations {
+			if s != expectedStations[i] {
+				t.Errorf("station[%d] = %q, want %q", i, s, expectedStations[i])
+			}
+		}
+	}
+	if tmpl.Description == "" {
+		t.Error("description should not be empty")
+	}
+}
+
+// TestList_EmptyDir verifies list returns empty results when no templates exist.
+func TestList_EmptyDir(t *testing.T) {
+	isolateKnossosHome(t)
+	projectDir, sessionID, _ := testEnv(t)
+	// Do NOT write any templates
+
+	ctx := newTestCtx(projectDir, sessionID)
+	var out string
+	var runErr error
+	out = captureOutput(func() {
+		runErr = runList(ctx)
+	})
+	if runErr != nil {
+		t.Fatalf("runList failed: %v", runErr)
+	}
+
+	var result listOutput
+	if err := json.Unmarshal([]byte(out), &result); err != nil {
+		t.Fatalf("failed to parse JSON output: %v\noutput: %q", err, out)
+	}
+
+	if result.Total != 0 {
+		t.Errorf("total = %d, want 0", result.Total)
+	}
+	if len(result.Templates) != 0 {
+		t.Errorf("templates = %v, want empty", result.Templates)
+	}
+}
+
+// TestList_MultipleTemplates verifies list returns multiple templates sorted by name.
+func TestList_MultipleTemplates(t *testing.T) {
+	isolateKnossosHome(t)
+	projectDir, sessionID, _ := testEnv(t)
+	writeTemplate(t, projectDir)
+	writeTemplate2(t, projectDir)
+
+	ctx := newTestCtx(projectDir, sessionID)
+	var out string
+	var runErr error
+	out = captureOutput(func() {
+		runErr = runList(ctx)
+	})
+	if runErr != nil {
+		t.Fatalf("runList failed: %v", runErr)
+	}
+
+	var result listOutput
+	if err := json.Unmarshal([]byte(out), &result); err != nil {
+		t.Fatalf("failed to parse JSON output: %v\noutput: %q", err, out)
+	}
+
+	if result.Total != 2 {
+		t.Fatalf("total = %d, want 2", result.Total)
+	}
+
+	// Should be sorted alphabetically
+	if result.Templates[0].Name != "doc-consolidation" {
+		t.Errorf("templates[0].name = %q, want doc-consolidation", result.Templates[0].Name)
+	}
+	if result.Templates[1].Name != "security-remediation" {
+		t.Errorf("templates[1].name = %q, want security-remediation", result.Templates[1].Name)
+	}
+
+	// Verify second template fields
+	docConsolidation := result.Templates[0]
+	if docConsolidation.StationCount != 3 {
+		t.Errorf("doc-consolidation station_count = %d, want 3", docConsolidation.StationCount)
+	}
+	if docConsolidation.EntryRite != "docs" {
+		t.Errorf("doc-consolidation entry_rite = %q, want docs", docConsolidation.EntryRite)
+	}
+}
+
+// TestList_InvalidTemplateSkipped verifies that invalid templates are silently skipped.
+func TestList_InvalidTemplateSkipped(t *testing.T) {
+	isolateKnossosHome(t)
+	projectDir, sessionID, _ := testEnv(t)
+	writeTemplate(t, projectDir) // Valid template
+
+	// Write an invalid YAML file
+	dir := filepath.Join(projectDir, "processions")
+	invalidContent := `this is not valid: [procession yaml
+  broken: {{{`
+	if err := os.WriteFile(filepath.Join(dir, "broken.yaml"), []byte(invalidContent), 0644); err != nil {
+		t.Fatalf("write invalid template: %v", err)
+	}
+
+	ctx := newTestCtx(projectDir, sessionID)
+	var out string
+	var runErr error
+	out = captureOutput(func() {
+		runErr = runList(ctx)
+	})
+	if runErr != nil {
+		t.Fatalf("runList failed: %v", runErr)
+	}
+
+	var result listOutput
+	if err := json.Unmarshal([]byte(out), &result); err != nil {
+		t.Fatalf("failed to parse JSON output: %v\noutput: %q", err, out)
+	}
+
+	// Only the valid template should appear
+	if result.Total != 1 {
+		t.Fatalf("total = %d, want 1 (invalid template should be skipped)", result.Total)
+	}
+	if result.Templates[0].Name != "security-remediation" {
+		t.Errorf("name = %q, want security-remediation", result.Templates[0].Name)
+	}
+}
+
+// ---- validation tests (proceed with --skip-validation and handoff validation) ----
+
+// writeValidHandoff writes a valid handoff artifact markdown file.
+func writeValidHandoff(t *testing.T, dir, name string) string {
+	t.Helper()
+	content := `---
+type: handoff
+procession_id: security-remediation-2026-03-10
+source_station: audit
+source_rite: security
+target_station: assess
+target_rite: debt-triage
+produced_at: "2026-03-10T10:00:00Z"
+artifacts:
+  - type: threat-model
+    path: .sos/wip/sr/threat-model.md
+---
+
+# Handoff: audit → assess
+
+Summary of audit findings.
+`
+	path := filepath.Join(dir, name)
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatalf("write handoff: %v", err)
+	}
+	return path
+}
+
+// writeInvalidHandoff writes a handoff artifact missing required fields.
+func writeInvalidHandoff(t *testing.T, dir, name string) string {
+	t.Helper()
+	content := `---
+type: not-a-handoff
+source_station: audit
+---
+
+# Bad handoff
+`
+	path := filepath.Join(dir, name)
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatalf("write invalid handoff: %v", err)
+	}
+	return path
+}
+
+// TestProceed_ValidationRejectsInvalid verifies proceed fails with invalid handoff artifact.
+func TestProceed_ValidationRejectsInvalid(t *testing.T) {
+	projectDir, sessionID, ctxPath := testEnv(t)
+	writeTemplate(t, projectDir)
+	writeSessionWithProcession(t, ctxPath, &session.Procession{
+		ID:             "security-remediation-2026-03-10",
+		Type:           "security-remediation",
+		CurrentStation: "audit",
+		NextStation:    "assess",
+		NextRite:       "debt-triage",
+		ArtifactDir:    ".sos/wip/security-remediation/",
+	})
+
+	// Write an invalid handoff artifact
+	handoffPath := writeInvalidHandoff(t, projectDir, ".sos/wip/sr/HANDOFF-bad.md")
+	// Make path relative to project
+	relPath, _ := filepath.Rel(projectDir, handoffPath)
+
+	ctx := newTestCtx(projectDir, sessionID)
+	opts := proceedOptions{artifacts: relPath}
+
+	err := runProceed(ctx, opts)
+	if err == nil {
+		t.Error("expected validation error for invalid handoff, got nil")
+	}
+}
+
+// TestProceed_ValidationAcceptsValid verifies proceed succeeds with valid handoff artifact.
+func TestProceed_ValidationAcceptsValid(t *testing.T) {
+	projectDir, sessionID, ctxPath := testEnv(t)
+	writeTemplate(t, projectDir)
+	writeSessionWithProcession(t, ctxPath, &session.Procession{
+		ID:             "security-remediation-2026-03-10",
+		Type:           "security-remediation",
+		CurrentStation: "audit",
+		NextStation:    "assess",
+		NextRite:       "debt-triage",
+		ArtifactDir:    ".sos/wip/security-remediation/",
+	})
+
+	// Write a valid handoff artifact
+	handoffPath := writeValidHandoff(t, projectDir, ".sos/wip/sr/HANDOFF-audit-to-assess.md")
+	relPath, _ := filepath.Rel(projectDir, handoffPath)
+
+	ctx := newTestCtx(projectDir, sessionID)
+	opts := proceedOptions{artifacts: relPath}
+
+	var out string
+	var runErr error
+	out = captureOutput(func() {
+		runErr = runProceed(ctx, opts)
+	})
+	if runErr != nil {
+		t.Fatalf("runProceed with valid handoff failed: %v", runErr)
+	}
+
+	var result map[string]any
+	if err := json.Unmarshal([]byte(out), &result); err != nil {
+		t.Fatalf("failed to parse JSON output: %v\noutput: %q", err, out)
+	}
+
+	if result["completed_station"] != "audit" {
+		t.Errorf("completed_station = %v, want audit", result["completed_station"])
+	}
+}
+
+// TestProceed_SkipValidation verifies --skip-validation bypasses validation.
+func TestProceed_SkipValidation(t *testing.T) {
+	projectDir, sessionID, ctxPath := testEnv(t)
+	writeTemplate(t, projectDir)
+	writeSessionWithProcession(t, ctxPath, &session.Procession{
+		ID:             "security-remediation-2026-03-10",
+		Type:           "security-remediation",
+		CurrentStation: "audit",
+		NextStation:    "assess",
+		NextRite:       "debt-triage",
+		ArtifactDir:    ".sos/wip/security-remediation/",
+	})
+
+	// Write an invalid handoff artifact
+	handoffPath := writeInvalidHandoff(t, projectDir, ".sos/wip/sr/HANDOFF-bad.md")
+	relPath, _ := filepath.Rel(projectDir, handoffPath)
+
+	ctx := newTestCtx(projectDir, sessionID)
+	opts := proceedOptions{artifacts: relPath, skipValidation: true}
+
+	var runErr error
+	captureOutput(func() {
+		runErr = runProceed(ctx, opts)
+	})
+	if runErr != nil {
+		t.Fatalf("runProceed with --skip-validation should succeed, got: %v", runErr)
 	}
 }

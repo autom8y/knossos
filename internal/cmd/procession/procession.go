@@ -34,6 +34,7 @@ work across multiple rites. Each procession lives within a session and tracks
 progress through an ordered sequence of rite-scoped stations.
 
 Commands:
+  list     - List available procession templates
   create   - Start a new procession from a template
   status   - Show current procession state
   proceed  - Advance to the next station
@@ -49,6 +50,7 @@ Examples:
 	}
 
 	// Add subcommands
+	cmd.AddCommand(newListCmd(ctx))
 	cmd.AddCommand(newCreateCmd(ctx))
 	cmd.AddCommand(newStatusCmd(ctx))
 	cmd.AddCommand(newProceedCmd(ctx))

@@ -3,6 +3,7 @@ package procession
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -14,11 +15,13 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/procession"
 	"github.com/autom8y/knossos/internal/session"
+	"github.com/autom8y/knossos/internal/validation"
 )
 
 // proceedOptions holds options for the proceed command.
 type proceedOptions struct {
-	artifacts string // comma-separated list of artifact paths
+	artifacts      string // comma-separated list of artifact paths
+	skipValidation bool   // skip handoff artifact frontmatter validation
 }
 
 // newProceedCmd creates the procession proceed subcommand.
@@ -46,6 +49,8 @@ Examples:
 
 	cmd.Flags().StringVar(&opts.artifacts, "artifacts", "",
 		"Comma-separated artifact paths produced during this station")
+	cmd.Flags().BoolVar(&opts.skipValidation, "skip-validation", false,
+		"Skip handoff artifact frontmatter validation")
 
 	return cmd
 }
@@ -139,6 +144,36 @@ func runProceed(ctx *cmdContext, opts proceedOptions) error {
 		for _, a := range strings.Split(opts.artifacts, ",") {
 			if trimmed := strings.TrimSpace(a); trimmed != "" {
 				artifacts = append(artifacts, trimmed)
+			}
+		}
+	}
+
+	// Validate handoff artifact frontmatter (unless skipped)
+	if len(artifacts) > 0 && !opts.skipValidation {
+		projectDir := resolver.ProjectRoot()
+		for _, artifactPath := range artifacts {
+			absPath := artifactPath
+			if !filepath.IsAbs(absPath) {
+				absPath = filepath.Join(projectDir, absPath)
+			}
+
+			content, err := os.ReadFile(absPath)
+			if err != nil {
+				return common.PrintAndReturn(printer, errors.Wrap(errors.CodeFileNotFound,
+					fmt.Sprintf("cannot read artifact: %s", artifactPath), err))
+			}
+
+			frontmatter, err := validation.ParseYAMLFrontmatter(content)
+			if err != nil {
+				// File has no frontmatter — skip validation for this file
+				continue
+			}
+
+			issues := validation.ValidateProcessionHandoffFields(frontmatter)
+			if len(issues) > 0 {
+				return common.PrintAndReturn(printer, errors.NewWithDetails(errors.CodeSchemaInvalid,
+					fmt.Sprintf("handoff artifact validation failed for %s", artifactPath),
+					map[string]any{"issues": issues}))
 			}
 		}
 	}
