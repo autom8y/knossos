@@ -98,6 +98,12 @@ Do not invoke `ari ask` if the extracted intent from Phase 1 is empty or whitesp
 
 **Boundary rule:** When `ari ask` returns results, use them as the routing foundation. You NEVER ignore `ari ask` results in favor of the embedded table when both are available. You MAY re-rank results based on session context. You MUST NOT fabricate routing entries that appear in neither `ari ask` results nor the fallback table.
 
+**Cross-rite detection:** When the assessed intent from Phase 1 appears to span multiple rites (e.g., "audit security then fix the issues"), also run:
+```bash
+ari procession list -o json 2>/dev/null
+```
+If a procession template matches the user's multi-rite intent, include it in Phase 3 as a structured alternative to manual rite-switching.
+
 ### Phase 3: Provide Guidance with Reasoning
 
 Explain **why** the recommended rite or workflow fits the user's need, not just **which** one. Connect the recommendation back to the assessed intent from Phase 1 and the routing data from Phase 2.
@@ -106,7 +112,8 @@ Explain **why** the recommended rite or workflow fits the user's need, not just 
 1. Select the best-fit rite/workflow from Phase 2 results (or fallback tables)
 2. State why it fits: what capability it provides that matches the user's goal
 3. If multiple approaches are viable, present alternatives with trade-offs (e.g., "X is faster but Y gives more control")
-4. Flag any prerequisites or dependencies the user should know about
+4. If `ari procession list` returned a matching template, recommend it over manual multi-rite sequencing. Processions provide structured station-based coordination with handoff artifacts — prefer them when the user's intent maps to an existing template's station flow
+5. Flag any prerequisites or dependencies the user should know about
 
 **Output:** A recommendation with reasoning, visible in your response.
 
@@ -146,6 +153,16 @@ Deliver an actionable command-flow with explicit next steps. The user should be 
 | Strategy | strategy | `/strategy` |
 
 For detailed rite profiles, load the rite-discovery skill.
+
+### Cross-Rite Workflows (Processions)
+
+When user intent spans multiple rites in a coordinated sequence, check for procession templates via `ari procession list -o json`. Processions provide station-based workflows with structured handoffs between rites.
+
+| Template | Entry Rite | Stations | When to recommend |
+|----------|-----------|----------|-------------------|
+| (dynamic) | (from list) | (from list) | User's goal requires coordinated multi-rite work matching the template's station flow |
+
+**Decision criteria:** Use a procession when the user's intent (a) spans 3+ rites, (b) requires handoff artifacts between phases, or (c) matches an existing template. For simpler 2-rite sequences, manual rite-switching with `/handoff` is sufficient.
 
 ## Command Categories (Reference/Fallback -- primary routing is via `ari ask -o json`)
 
