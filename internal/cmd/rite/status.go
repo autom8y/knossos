@@ -64,11 +64,11 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 		return err
 	}
 
-	// Load workflow for phase info
+	// Load workflow for phase info (non-fatal: rite status should work even if workflow is missing)
 	workflowPath := filepath.Join(t.Path, "workflow.yaml")
 	workflow, err := ritelib.LoadWorkflow(workflowPath)
 	if err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to load workflow", err)
+		workflow = nil
 	}
 
 	// Load rite manifest for canonical agent list
@@ -78,7 +78,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 	var agents []output.AgentStatus
 	if manifestErr == nil && len(manifest.Agents) > 0 {
 		agents = buildAgentStatusFromManifest(manifest, resolver)
-	} else {
+	} else if workflow != nil {
 		agents = buildAgentStatusList(t, workflow, resolver)
 	}
 
@@ -108,7 +108,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 		Description:    t.Description,
 		WorkflowType:   t.WorkflowType,
 		Agents:         agents,
-		Phases:         workflow.PhaseNames(),
+		Phases:         workflowPhaseNames(workflow),
 		EntryPoint:     t.EntryPoint,
 		Orphans:        orphans,
 		ManifestValid:  manifestValid,
@@ -176,4 +176,12 @@ func buildAgentStatusList(t *ritelib.Rite, workflow *ritelib.Workflow, resolver 
 	}
 
 	return agents
+}
+
+// workflowPhaseNames returns phase names from a workflow, or nil if workflow is nil.
+func workflowPhaseNames(w *ritelib.Workflow) []string {
+	if w == nil {
+		return nil
+	}
+	return w.PhaseNames()
 }

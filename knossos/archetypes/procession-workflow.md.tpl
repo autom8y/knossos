@@ -27,6 +27,8 @@ $ARGUMENTS
 
 ### Phase 0 -- Pre-Flight
 
+**CRITICAL**: All state detection uses the hook-injected YAML frontmatter above. Do NOT run `ari session status`, `ari rite status`, or other CLI commands to detect state — the frontmatter is the authoritative source and is always present.
+
 Classify the current state by reading the hook-injected YAML frontmatter above:
 
 **Case A: No session active** (`has_session: false`)
