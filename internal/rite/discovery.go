@@ -35,13 +35,17 @@ type Discovery struct {
 	activeRite string
 }
 
-// PlatformRitesDir returns the platform-level rites directory ($KNOSSOS_HOME/rites/).
-func PlatformRitesDir() string {
-	home := config.KnossosHome()
-	if home == "" {
+// PlatformRitesDirIn returns the platform-level rites directory for the given knossos home.
+func PlatformRitesDirIn(knossosHome string) string {
+	if knossosHome == "" {
 		return ""
 	}
-	return filepath.Join(home, "rites")
+	return filepath.Join(knossosHome, "rites")
+}
+
+// PlatformRitesDir returns the platform-level rites directory ($KNOSSOS_HOME/rites/).
+func PlatformRitesDir() string {
+	return PlatformRitesDirIn(config.KnossosHome())
 }
 
 // NewDiscovery creates a new rite discovery instance.
