@@ -12,6 +12,7 @@ color: red
 maxTurns: 40
 skills:
   - orchestrator-templates
+  - procession-ref
   - slop-chop-ref
 disallowedTools:
   - Bash

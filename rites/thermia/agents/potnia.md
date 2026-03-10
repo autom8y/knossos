@@ -31,6 +31,7 @@ color: orange
 maxTurns: 40
 skills:
   - orchestrator-templates
+  - procession-ref
   - thermia-ref
 disallowedTools:
   - Bash

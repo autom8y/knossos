@@ -9,6 +9,7 @@ color: blue
 maxTurns: 40
 skills:
   - orchestrator-templates
+  - procession-ref
   - 10x-workflow
 disallowedTools:
   - Bash

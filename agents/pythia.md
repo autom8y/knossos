@@ -37,6 +37,8 @@ description: |
   </example>
 type: meta
 tools: Bash, Glob, Grep, Read, WebSearch
+skills:
+  - procession-ref
 model: opus
 maxTurns: 75
 color: cyan

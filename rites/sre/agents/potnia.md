@@ -9,6 +9,7 @@ color: orange
 maxTurns: 40
 skills:
   - orchestrator-templates
+  - procession-ref
   - sre-catalog
   - doc-sre
 disallowedTools:

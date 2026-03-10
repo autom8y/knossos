@@ -9,6 +9,7 @@ color: purple
 maxTurns: 40
 skills:
   - orchestrator-templates
+  - procession-ref
   - rnd-ref
   - cross-rite-handoff
   - doc-rnd

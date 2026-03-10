@@ -24,6 +24,7 @@ color: orange
 maxTurns: 40
 skills:
   - orchestrator-templates
+  - procession-ref
   - releaser-ref
 memory: "project"
 disallowedTools:

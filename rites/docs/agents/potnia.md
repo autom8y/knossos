@@ -9,6 +9,7 @@ color: green
 maxTurns: 40
 skills:
   - orchestrator-templates
+  - procession-ref
   - doc-consolidation
   - doc-reviews
 disallowedTools:
