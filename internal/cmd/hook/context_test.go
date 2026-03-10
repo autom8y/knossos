@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
-	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/materialize/source"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/test/hooks/testutil"
@@ -699,17 +699,6 @@ func TestListAvailableAgents_NonexistentDir(t *testing.T) {
 }
 
 func TestRunContext_WithActiveSession_IncludesRitesAndAgents(t *testing.T) {
-	// Isolate KNOSSOS_HOME so SourceResolver only sees project-local rites.
-	// Without this, the SourceResolver picks up rites from the developer's
-	// KNOSSOS_HOME and the count assertion becomes environment-dependent.
-	isolatedHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", isolatedHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
-	// Also isolate HOME to avoid picking up user rites from ~/.claude/rites/.
-	t.Setenv("HOME", isolatedHome)
-
 	tmpDir := t.TempDir()
 	sessionID := "session-20260208-100000-abcdef01"
 
@@ -760,6 +749,10 @@ current_phase: "implementation"
 
 	outputFlag := "json"
 	verboseFlag := false
+	// Inject a source resolver scoped to only the project dir — no platform/user/org tiers.
+	// This replaces the isolateKnossosHome anti-pattern with constructor injection.
+	srcResolver := source.NewSourceResolverWithPaths(tmpDir, "", "", "")
+
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -769,6 +762,7 @@ current_phase: "implementation"
 			},
 			SessionID: nil,
 		},
+		sourceResolver: srcResolver,
 	}
 
 	err := runContextCore(ctx, printer)
@@ -782,8 +776,7 @@ current_phase: "implementation"
 	}
 
 	// Verify that the two project-local rites are included.
-	// SourceResolver also checks user and knossos sources, but both are
-	// pointed at the isolated empty temp dir, so exactly 2 rites appear.
+	// Source resolver is scoped to project only, so exactly 2 rites appear.
 	if len(result.AvailableRites) != 2 {
 		t.Errorf("AvailableRites length = %d, want 2: %v", len(result.AvailableRites), result.AvailableRites)
 	}

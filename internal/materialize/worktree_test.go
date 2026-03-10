@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 	worktreefixture "github.com/autom8y/knossos/test/worktree/testutil"
 )
@@ -79,20 +78,14 @@ func TestGetMainWorktreeDir_FromMainWorktree(t *testing.T) {
 // `ari sync` is run from a linked worktree (no ACTIVE_RITE present), it
 // inherits the rite from the main worktree's .knossos/ACTIVE_RITE.
 func TestSyncRiteScope_InWorktree_InheritsRite(t *testing.T) {
-	// Isolate KNOSSOS_HOME to prevent rite resolution from picking up the
-	// developer's actual knossos installation.
+	// Use an isolated dir for knossos home so only test rites are visible.
 	isolatedHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", isolatedHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
 
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	// The main worktree already has .knossos/ACTIVE_RITE = "test-rite" (set by fixture).
-	// Create a minimal rite in KNOSSOS_HOME/rites/ so the SourceResolver (which
-	// uses the worktree as projectRoot) can find it via the knossos tier.
-	// Putting it in mainDir/.knossos/rites/ would not be found because the
-	// resolver's project root is the worktree, not the main worktree.
+	// Create a minimal rite in the isolated home's rites/ dir so the SourceResolver
+	// can find it via the knossos tier.
 	riteDir := filepath.Join(isolatedHome, "rites", "test-rite")
 	if err := os.MkdirAll(filepath.Join(riteDir, "agents"), 0755); err != nil {
 		t.Fatalf("failed to create rite agents dir: %v", err)
@@ -117,7 +110,9 @@ hooks: []
 
 	// The worktree has no .claude/ at all — ensureProjectDirs() will create it.
 	worktreeResolver := paths.NewResolver(fix.WorktreeDir)
-	m := NewMaterializer(worktreeResolver)
+	// Inject source resolver scoped to project + isolated knossos home only.
+	sr := NewSourceResolverWithPaths(fix.WorktreeDir, "", "", isolatedHome)
+	m := NewMaterializer(worktreeResolver).WithSourceResolver(sr)
 
 	// Run rite-scope sync with no --rite flag (simulates running `ari sync` in worktree).
 	result, err := m.Sync(SyncOptions{Scope: ScopeRite})
@@ -150,11 +145,7 @@ hooks: []
 // that when neither the worktree nor the main worktree has an ACTIVE_RITE, sync
 // falls through to minimal mode.
 func TestSyncRiteScope_InWorktree_NoMainRite_FallsToMinimal(t *testing.T) {
-	// Isolate KNOSSOS_HOME.
 	isolatedHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", isolatedHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
 
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
@@ -166,7 +157,8 @@ func TestSyncRiteScope_InWorktree_NoMainRite_FallsToMinimal(t *testing.T) {
 
 	// The worktree has no .knossos/ and the main has no ACTIVE_RITE.
 	worktreeResolver := paths.NewResolver(fix.WorktreeDir)
-	m := NewMaterializer(worktreeResolver)
+	sr := NewSourceResolverWithPaths(fix.WorktreeDir, "", "", isolatedHome)
+	m := NewMaterializer(worktreeResolver).WithSourceResolver(sr)
 
 	// scope=all: should fall through to minimal, not return an error.
 	result, err := m.Sync(SyncOptions{Scope: ScopeAll})

@@ -127,6 +127,13 @@ func NewMaterializerWithSource(resolver *paths.Resolver, source string) *Materia
 	}
 }
 
+// WithSourceResolver replaces the materializer's source resolver.
+// Enables test injection without global state mutation. Returns the receiver.
+func (m *Materializer) WithSourceResolver(sr *SourceResolver) *Materializer {
+	m.sourceResolver = sr
+	return m
+}
+
 // WithEmbeddedFS sets the embedded rites filesystem on both the materializer's
 // source resolver and stores it for rite content access. Returns the receiver.
 func (m *Materializer) WithEmbeddedFS(fsys fs.FS) *Materializer {

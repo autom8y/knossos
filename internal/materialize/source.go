@@ -26,8 +26,9 @@ const (
 	SourceEmbedded = source.SourceEmbedded
 )
 
-// Re-export constructor.
+// Re-export constructors.
 var NewSourceResolver = source.NewSourceResolver
+var NewSourceResolverWithPaths = source.NewSourceResolverWithPaths
 
 // UserResourcePaths contains resolved source/target paths for user-scope resources.
 // Kept in core because it references SyncResource from sync_types.go.

@@ -79,7 +79,11 @@ func runList(ctx *cmdContext) error {
 	projectRoot := resolver.ProjectRoot()
 	embeddedFS := common.EmbeddedProcessions()
 
-	resolved, err := procmena.ResolveProcessions(projectRoot, embeddedFS)
+	resolveFn := procmena.ResolveProcessions
+	if ctx.resolveFunc != nil {
+		resolveFn = ctx.resolveFunc
+	}
+	resolved, err := resolveFn(projectRoot, embeddedFS)
 	if err != nil {
 		return common.PrintAndReturn(printer, errors.Wrap(errors.CodeGeneralError, "failed to resolve procession templates", err))
 	}

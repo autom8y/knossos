@@ -28,6 +28,7 @@ type SourceResolver struct {
 }
 
 // NewSourceResolver creates a new source resolver for the given project root.
+// Tier paths are read from global config. For explicit paths, use NewSourceResolverWithPaths.
 func NewSourceResolver(projectRoot string) *SourceResolver {
 	return &SourceResolver{
 		projectRoot:     projectRoot,
@@ -35,6 +36,20 @@ func NewSourceResolver(projectRoot string) *SourceResolver {
 		userRitesDir:    paths.UserRitesDir(),
 		orgRitesDir:     paths.OrgRitesDir(config.ActiveOrg()),
 		knossosHome:     config.KnossosHome(),
+		resolved:        make(map[string]*ResolvedRite),
+	}
+}
+
+// NewSourceResolverWithPaths creates a source resolver with explicit tier paths.
+// Empty strings are accepted and cause the corresponding tier to be skipped during
+// resolution. This enables test injection without global state mutation.
+func NewSourceResolverWithPaths(projectRoot, userRitesDir, orgRitesDir, knossosHome string) *SourceResolver {
+	return &SourceResolver{
+		projectRoot:     projectRoot,
+		projectRitesDir: filepath.Join(projectRoot, ".knossos", "rites"),
+		userRitesDir:    userRitesDir,
+		orgRitesDir:     orgRitesDir,
+		knossosHome:     knossosHome,
 		resolved:        make(map[string]*ResolvedRite),
 	}
 }

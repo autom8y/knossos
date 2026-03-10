@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
-	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/materialize/source"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/test/hooks/testutil"
 	worktreefixture "github.com/autom8y/knossos/test/worktree/testutil"
@@ -24,17 +24,10 @@ import (
 // KNOSSOS_HOME to a temp dir that contains a test rite, verifying that
 // AvailableRites is non-empty despite the worktree having no local rites.
 func TestContextHook_InWorktree_ReportsRites(t *testing.T) {
-	// Isolate KNOSSOS_HOME: point it at a temp dir containing one test rite.
+	// Use an isolated dir for knossos home with one test rite.
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
 
-	// Also isolate HOME to avoid user rites from ~/.claude/rites/ contaminating
-	// the count assertion.
-	t.Setenv("HOME", knossosHome)
-
-	// Create a rite in KNOSSOS_HOME/rites/ so SourceResolver can discover it.
+	// Create a rite in the isolated knossos home so SourceResolver can discover it.
 	kRiteDir := filepath.Join(knossosHome, "rites", "platform-rite")
 	if err := os.MkdirAll(kRiteDir, 0755); err != nil {
 		t.Fatalf("failed to create KNOSSOS_HOME rite dir: %v", err)
@@ -89,6 +82,9 @@ current_phase: "implementation"
 
 	outputFlag := "json"
 	verboseFlag := false
+	// Inject source resolver scoped to project + isolated knossos home only.
+	srcResolver := source.NewSourceResolverWithPaths(worktreeDir, "", "", knossosHome)
+
 	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
@@ -98,6 +94,7 @@ current_phase: "implementation"
 			},
 			SessionID: nil,
 		},
+		sourceResolver: srcResolver,
 	}
 
 	if err := runContextCore(ctx, printer); err != nil {

@@ -3,13 +3,14 @@ package procession
 import (
 	"encoding/json"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
-	"github.com/autom8y/knossos/internal/config"
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -175,10 +176,10 @@ artifact_dir: .sos/wip/security-remediation/
 }
 
 // newTestCtx builds a cmdContext pointing at projectDir with the given sessionID.
-func newTestCtx(projectDir, sessionID string) *cmdContext {
+func newTestCtx(projectDir, sessionID string, opts ...ProcessionResolveFunc) *cmdContext {
 	outputFormat := "json"
 	verbose := false
-	return &cmdContext{
+	ctx := &cmdContext{
 		SessionContext: common.SessionContext{
 			BaseContext: common.BaseContext{
 				Output:     &outputFormat,
@@ -188,6 +189,10 @@ func newTestCtx(projectDir, sessionID string) *cmdContext {
 			SessionID: &sessionID,
 		},
 	}
+	if len(opts) > 0 {
+		ctx.resolveFunc = opts[0]
+	}
+	return ctx
 }
 
 // captureOutput captures stdout while running f.
@@ -646,13 +651,17 @@ func TestAbandon_NoProcession(t *testing.T) {
 
 // ---- list tests ----
 
-// isolateKnossosHome overrides KNOSSOS_HOME to an empty temp dir
-// so list tests don't pick up real platform templates.
-func isolateKnossosHome(t *testing.T) {
-	t.Helper()
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", t.TempDir())
-	t.Cleanup(config.ResetKnossosHome)
+// projectOnlyResolver returns a ProcessionResolveFunc that only scans
+// the project's processions/ directory, with no platform/user/org tiers.
+// This replaces the isolateKnossosHome anti-pattern with constructor injection.
+func projectOnlyResolver() ProcessionResolveFunc {
+	return func(projectRoot string, embeddedFS fs.FS) ([]procmena.ResolvedProcession, error) {
+		projectDir := ""
+		if projectRoot != "" {
+			projectDir = filepath.Join(projectRoot, "processions")
+		}
+		return procmena.ResolveProcessionsWithDirs(projectDir, "", "", "", embeddedFS)
+	}
 }
 
 // writeTemplate2 writes a second procession template for multi-template tests.
@@ -686,11 +695,10 @@ artifact_dir: .sos/wip/doc-consolidation/
 
 // TestList_WithTemplate verifies list returns a single template with correct fields.
 func TestList_WithTemplate(t *testing.T) {
-	isolateKnossosHome(t)
 	projectDir, sessionID, _ := testEnv(t)
 	writeTemplate(t, projectDir)
 
-	ctx := newTestCtx(projectDir, sessionID)
+	ctx := newTestCtx(projectDir, sessionID, projectOnlyResolver())
 	var out string
 	var runErr error
 	out = captureOutput(func() {
@@ -739,11 +747,10 @@ func TestList_WithTemplate(t *testing.T) {
 
 // TestList_EmptyDir verifies list returns empty results when no templates exist.
 func TestList_EmptyDir(t *testing.T) {
-	isolateKnossosHome(t)
 	projectDir, sessionID, _ := testEnv(t)
 	// Do NOT write any templates
 
-	ctx := newTestCtx(projectDir, sessionID)
+	ctx := newTestCtx(projectDir, sessionID, projectOnlyResolver())
 	var out string
 	var runErr error
 	out = captureOutput(func() {
@@ -768,12 +775,11 @@ func TestList_EmptyDir(t *testing.T) {
 
 // TestList_MultipleTemplates verifies list returns multiple templates sorted by name.
 func TestList_MultipleTemplates(t *testing.T) {
-	isolateKnossosHome(t)
 	projectDir, sessionID, _ := testEnv(t)
 	writeTemplate(t, projectDir)
 	writeTemplate2(t, projectDir)
 
-	ctx := newTestCtx(projectDir, sessionID)
+	ctx := newTestCtx(projectDir, sessionID, projectOnlyResolver())
 	var out string
 	var runErr error
 	out = captureOutput(func() {
@@ -812,7 +818,6 @@ func TestList_MultipleTemplates(t *testing.T) {
 
 // TestList_InvalidTemplateSkipped verifies that invalid templates are silently skipped.
 func TestList_InvalidTemplateSkipped(t *testing.T) {
-	isolateKnossosHome(t)
 	projectDir, sessionID, _ := testEnv(t)
 	writeTemplate(t, projectDir) // Valid template
 
@@ -824,7 +829,7 @@ func TestList_InvalidTemplateSkipped(t *testing.T) {
 		t.Fatalf("write invalid template: %v", err)
 	}
 
-	ctx := newTestCtx(projectDir, sessionID)
+	ctx := newTestCtx(projectDir, sessionID, projectOnlyResolver())
 	var out string
 	var runErr error
 	out = captureOutput(func() {

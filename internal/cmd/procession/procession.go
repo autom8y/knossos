@@ -2,15 +2,25 @@
 package procession
 
 import (
+	"io/fs"
+
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/output"
 )
+
+// ProcessionResolveFunc resolves procession templates. Defaults to
+// procmena.ResolveProcessions; tests inject a scoped variant.
+type ProcessionResolveFunc func(projectRoot string, embeddedFS fs.FS) ([]procmena.ResolvedProcession, error)
 
 // cmdContext holds shared state for procession commands.
 type cmdContext struct {
 	common.SessionContext
+	// resolveFunc overrides procession resolution for testing.
+	// When nil, defaults to procmena.ResolveProcessions.
+	resolveFunc ProcessionResolveFunc
 }
 
 // NewProcessionCmd creates the procession command group.

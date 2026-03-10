@@ -11,6 +11,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/hook"
+	"github.com/autom8y/knossos/internal/materialize/source"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
@@ -27,6 +28,9 @@ const (
 type cmdContext struct {
 	common.SessionContext
 	timeout time.Duration
+	// sourceResolver overrides rite resolution for testing.
+	// When nil, defaults to source.NewSourceResolver in runContextCore.
+	sourceResolver *source.SourceResolver
 }
 
 // NewHookCmd creates the hook command group.

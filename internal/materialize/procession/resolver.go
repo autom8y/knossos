@@ -24,8 +24,8 @@ type ResolvedProcession struct {
 }
 
 // ResolveProcessions discovers procession templates through a cascading
-// resolution chain. Higher-priority tiers shadow lower-priority ones
-// by template name.
+// resolution chain using global config for tier paths. Higher-priority
+// tiers shadow lower-priority ones by template name.
 //
 // Resolution order (lowest to highest priority):
 //  1. Embedded FS (compiled-in fallback)
@@ -34,7 +34,33 @@ type ResolvedProcession struct {
 //  4. User (~/.local/share/knossos/processions/)
 //  5. Project ({projectRoot}/processions/)
 func ResolveProcessions(projectRoot string, embeddedFS fs.FS) ([]ResolvedProcession, error) {
-	// Map of name → resolved template (later tiers override earlier).
+	platformDir := ""
+	if knossosHome := config.KnossosHome(); knossosHome != "" {
+		platformDir = filepath.Join(knossosHome, "processions")
+	}
+	orgDir := ""
+	if orgName := config.ActiveOrg(); orgName != "" {
+		orgDir = filepath.Join(paths.OrgDataDir(orgName), "processions")
+	}
+	userDir := filepath.Join(paths.DataDir(), "processions")
+	projectDir := ""
+	if projectRoot != "" {
+		projectDir = filepath.Join(projectRoot, "processions")
+	}
+	return ResolveProcessionsWithDirs(projectDir, userDir, orgDir, platformDir, embeddedFS)
+}
+
+// ResolveProcessionsWithDirs discovers procession templates using explicit
+// tier directory paths. Empty directories are skipped. This enables test
+// injection without global state mutation.
+//
+// Resolution order (lowest to highest priority):
+//  1. Embedded FS (compiled-in fallback)
+//  2. Platform (platformDir)
+//  3. Org (orgDir)
+//  4. User (userDir)
+//  5. Project (projectDir)
+func ResolveProcessionsWithDirs(projectDir, userDir, orgDir, platformDir string, embeddedFS fs.FS) ([]ResolvedProcession, error) {
 	resolved := make(map[string]ResolvedProcession)
 
 	// 1. Embedded fallback (lowest priority)
@@ -42,24 +68,24 @@ func ResolveProcessions(projectRoot string, embeddedFS fs.FS) ([]ResolvedProcess
 		collectFromFS(embeddedFS, "processions", "embedded", resolved)
 	}
 
-	// 2. Platform ($KNOSSOS_HOME/processions/)
-	if knossosHome := config.KnossosHome(); knossosHome != "" {
-		collectFromDisk(filepath.Join(knossosHome, "processions"), "platform", resolved)
+	// 2. Platform
+	if platformDir != "" {
+		collectFromDisk(platformDir, "platform", resolved)
 	}
 
-	// 3. Org ($XDG_DATA_HOME/knossos/orgs/{org}/processions/)
-	if orgName := config.ActiveOrg(); orgName != "" {
-		orgDir := filepath.Join(paths.OrgDataDir(orgName), "processions")
+	// 3. Org
+	if orgDir != "" {
 		collectFromDisk(orgDir, "org", resolved)
 	}
 
-	// 4. User (~/.local/share/knossos/processions/)
-	userDir := filepath.Join(paths.DataDir(), "processions")
-	collectFromDisk(userDir, "user", resolved)
+	// 4. User
+	if userDir != "" {
+		collectFromDisk(userDir, "user", resolved)
+	}
 
 	// 5. Project (highest priority)
-	if projectRoot != "" {
-		collectFromDisk(filepath.Join(projectRoot, "processions"), "project", resolved)
+	if projectDir != "" {
+		collectFromDisk(projectDir, "project", resolved)
 	}
 
 	// Convert map to sorted slice

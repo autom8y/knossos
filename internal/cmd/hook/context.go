@@ -313,7 +313,10 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 	// Gather rite context using the 4-tier SourceResolver (project > user > knossos >
 	// embedded). The old listAvailableRites() only read .knossos/rites/ which is
 	// empty in most projects — rites come from KNOSSOS_HOME/rites/ or embedded.
-	srcResolver := source.NewSourceResolver(projectDir)
+	srcResolver := ctx.sourceResolver
+	if srcResolver == nil {
+		srcResolver = source.NewSourceResolver(projectDir)
+	}
 	if embRites := common.EmbeddedRites(); embRites != nil {
 		srcResolver.WithEmbeddedFS(embRites)
 	}
