@@ -56,7 +56,7 @@ Classify the current state by reading the hook-injected YAML frontmatter above:
 **Case C: Active procession of DIFFERENT type**
 - Display: "Session has an active `{other_type}` procession. Abandon it first (`ari procession abandon`) or start a new session."
 
-**Case D: Session active but no procession**
+**Case D: Session active but no procession** (includes post-completion — completed processions are auto-removed)
 - Create the procession:
   ```bash
   ari procession create --template={{.Name}}
@@ -64,12 +64,9 @@ Classify the current state by reading the hook-injected YAML frontmatter above:
 - If current rite is NOT `{{.FirstRite}}`, sync and tell user to restart CC.
 - Otherwise proceed to Execution.
 
-**Case E: Procession complete** (no `next_station` in frontmatter)
-- Display completion summary with all completed stations and artifacts.
-
 ### Status Display
 
-When showing procession status (used in Cases B, E, and on request):
+When showing procession status (used in Case B and on request):
 
 ```
 Procession: {{.Name}} ({procession_id})

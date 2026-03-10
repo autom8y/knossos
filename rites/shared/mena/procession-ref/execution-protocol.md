@@ -177,15 +177,17 @@ Potnia signals station work is done. Proceed to Phase 3.
      STOP.
 
 5. **If final station** (no next station):
+   The `proceed` command automatically removes the procession from session state.
    Display procession completion summary:
    ```
    Procession {procession_name} COMPLETE
 
    Completed stations:
-   {list all completed stations with timestamps}
+   {list all completed stations from proceed output}
 
    Artifacts: {artifact_dir}
    ```
+   The session continues without the procession block. Run the procession dromena again to start a new instance.
 
 ## Loop Handling
 

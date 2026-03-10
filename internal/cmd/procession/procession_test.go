@@ -442,13 +442,13 @@ func TestProceed_FinalStation(t *testing.T) {
 		t.Errorf("complete = %v, want true", result["complete"])
 	}
 
-	// Procession block should remain in context
+	// Procession block should be removed from session context on completion
 	sessCtx, err := session.LoadContext(ctxPath)
 	if err != nil {
 		t.Fatalf("LoadContext: %v", err)
 	}
-	if sessCtx.Procession == nil {
-		t.Fatal("Procession should remain in context after final station (complete=true)")
+	if sessCtx.Procession != nil {
+		t.Fatal("Procession should be nil after final station completion")
 	}
 }
 

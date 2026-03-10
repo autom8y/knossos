@@ -194,10 +194,9 @@ func runProceed(ctx *cmdContext, opts proceedOptions) error {
 	complete := nextStationName == ""
 
 	if complete {
-		// Final station: clear next fields; procession remains in context
-		p.CurrentStation = ""
-		p.NextStation = ""
-		p.NextRite = ""
+		// Final station: remove procession from session context entirely.
+		// The completed_stations log is captured in the output below.
+		sessCtx.Procession = nil
 	} else {
 		// Advance current to what was next
 		p.CurrentStation = nextStationName

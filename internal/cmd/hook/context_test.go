@@ -129,6 +129,76 @@ func TestContextOutput_Text(t *testing.T) {
 				"current_phase:",
 			},
 		},
+		{
+			name: "with active procession",
+			output: ContextOutput{
+				SessionID:     "session-004",
+				Status:        "ACTIVE",
+				ExecutionMode: "orchestrated",
+				HasSession:    true,
+				Procession: &session.Procession{
+					ID:             "security-remediation-2026-03-10",
+					Type:           "security-remediation",
+					CurrentStation: "assess",
+					CompletedStations: []session.CompletedStation{
+						{Station: "audit", Rite: "security", CompletedAt: "2026-03-10T12:00:00Z"},
+					},
+					NextStation: "plan",
+					NextRite:    "debt-triage",
+					ArtifactDir: ".sos/wip/security-remediation/",
+				},
+			},
+			contains: []string{
+				"procession:\n",
+				"  id: security-remediation-2026-03-10\n",
+				"  type: security-remediation\n",
+				"  current_station: assess\n",
+				"  completed_stations:\n",
+				"    - station: audit\n",
+				"      rite: security\n",
+				"      completed_at: \"2026-03-10T12:00:00Z\"\n",
+				"  next_station: plan\n",
+				"  next_rite: debt-triage\n",
+				"  artifact_dir: .sos/wip/security-remediation/\n",
+			},
+		},
+		{
+			name: "procession without completed stations or next",
+			output: ContextOutput{
+				SessionID:     "session-005",
+				Status:        "ACTIVE",
+				ExecutionMode: "orchestrated",
+				HasSession:    true,
+				Procession: &session.Procession{
+					ID:             "sec-rem-2026-03-10",
+					Type:           "security-remediation",
+					CurrentStation: "audit",
+					ArtifactDir:    ".sos/wip/sec/",
+				},
+			},
+			contains: []string{
+				"procession:\n",
+				"  id: sec-rem-2026-03-10\n",
+				"  current_station: audit\n",
+			},
+			absent: []string{
+				"completed_stations:",
+				"next_station:",
+				"next_rite:",
+			},
+		},
+		{
+			name: "nil procession omitted",
+			output: ContextOutput{
+				SessionID:     "session-006",
+				Status:        "ACTIVE",
+				ExecutionMode: "cross-cutting",
+				HasSession:    true,
+			},
+			absent: []string{
+				"procession:",
+			},
+		},
 	}
 
 	for _, tt := range tests {

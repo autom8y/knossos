@@ -6,7 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/procession"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
@@ -926,5 +928,95 @@ func TestRenderArchetypeAgent_UnknownArchetype(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "unknown archetype: unknown-type") {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+// securityRemediationTemplate returns a procession template matching
+// the real processions/security-remediation.yaml for rendering tests.
+func securityRemediationTemplate() *procession.Template {
+	return &procession.Template{
+		Name:        "security-remediation",
+		Description: "Security findings lifecycle: audit, assess, plan, remediate, validate",
+		ArtifactDir: ".sos/wip/security-remediation/",
+		Stations: []procession.Station{
+			{Name: "audit", Rite: "security", Goal: "Discover and catalog security findings", Produces: []string{"SECURITY-AUDIT.md"}},
+			{Name: "assess", Rite: "debt-triage", Goal: "Score and prioritize findings", Produces: []string{"RISK-MATRIX.md"}},
+			{Name: "plan", Rite: "debt-triage", Goal: "Create remediation roadmap", Produces: []string{"SPRINT-PACKAGE.md"}},
+			{Name: "remediate", Rite: "10x-dev", Goal: "Implement fixes", Produces: []string{"CHANGELOG.md"}, AltRite: "hygiene"},
+			{Name: "validate", Rite: "security", Goal: "Verify fixes", Produces: []string{"VALIDATION-REPORT.md"}},
+		},
+	}
+}
+
+func TestRenderArchetype_ProcessionWorkflow(t *testing.T) {
+	root := projectRoot(t)
+	data := procmena.BuildWorkflowData(securityRemediationTemplate())
+
+	result, err := RenderArchetype(root, "procession-workflow.md.tpl", data)
+	if err != nil {
+		t.Fatalf("RenderArchetype(procession-workflow) error = %v", err)
+	}
+
+	output := string(result)
+
+	// Verify frontmatter
+	checks := []string{
+		"name: security-remediation",
+		"allowed-tools:",
+		"model: opus",
+		// Body sections
+		"# /security-remediation -- Cross-Rite Procession Workflow",
+		"## Station Map",
+		"| 1 | audit | security |",
+		"| 5 | validate | security |",
+		"## Pre-computed Context",
+		"## Behavior",
+		"### Phase 0 -- Pre-Flight",
+		"Case A: No session active",
+		"Case B: Active procession of type `security-remediation`",
+		"Case C: Active procession of DIFFERENT type",
+		"Case D: Session active but no procession",
+		"### Execution",
+		`Skill("security-remediation-ref")`,
+		`Skill("procession-ref")`,
+		"## Anti-Patterns",
+	}
+
+	for _, want := range checks {
+		if !strings.Contains(output, want) {
+			t.Errorf("procession-workflow output missing: %q", want)
+		}
+	}
+}
+
+func TestRenderArchetype_ProcessionRef(t *testing.T) {
+	root := projectRoot(t)
+	data := procmena.BuildWorkflowData(securityRemediationTemplate())
+
+	result, err := RenderArchetype(root, "procession-ref.md.tpl", data)
+	if err != nil {
+		t.Fatalf("RenderArchetype(procession-ref) error = %v", err)
+	}
+
+	output := string(result)
+
+	checks := []string{
+		"name: security-remediation-ref",
+		"# security-remediation Procession Reference",
+		"## Station Map",
+		"| 1 | audit | security |",
+		"## Station Goals",
+		"**audit** (security)",
+		"**remediate** (10x-dev, alt: hygiene)",
+		"## Workflow",
+		"Total stations**: 5",
+		"## CLI Commands",
+		"ari procession proceed",
+	}
+
+	for _, want := range checks {
+		if !strings.Contains(output, want) {
+			t.Errorf("procession-ref output missing: %q", want)
+		}
 	}
 }
