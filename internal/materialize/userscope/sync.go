@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/checksum"
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
@@ -22,21 +21,23 @@ type syncer struct {
 	embeddedMena   fs.FS
 	embeddedRites  fs.FS
 	knossosHome    string
+	userClaudeDir  string
 }
 
 // SyncUserScope is the primary entry point for user-scope sync.
 // It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to ~/.claude/ directories.
 func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
-	knossosHome := params.KnossosHome
-	if knossosHome == "" {
-		knossosHome = config.KnossosHome()
+	userClaudeDir := params.UserClaudeDir
+	if userClaudeDir == "" {
+		userClaudeDir = paths.UserClaudeDir()
 	}
 	s := &syncer{
 		resolver:       params.Resolver,
 		embeddedAgents: params.EmbeddedAgents,
 		embeddedMena:   params.EmbeddedMena,
 		embeddedRites:  params.EmbeddedRites,
-		knossosHome:    knossosHome,
+		knossosHome:    params.KnossosHome,
+		userClaudeDir:  userClaudeDir,
 	}
 	return s.syncUserScope(params.Opts)
 }
@@ -62,7 +63,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	}
 
 	// Resolve user ~/.claude/ directory
-	userClaudeDir := paths.UserClaudeDir()
+	userClaudeDir := s.userClaudeDir
 
 	// Load or bootstrap USER_PROVENANCE_MANIFEST.yaml
 	manifestPath := provenance.UserManifestPath(userClaudeDir)

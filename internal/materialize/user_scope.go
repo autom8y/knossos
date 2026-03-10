@@ -13,6 +13,7 @@ func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error)
 		EmbeddedMena:   m.embeddedMena,
 		EmbeddedRites:  m.sourceResolver.EmbeddedFS,
 		KnossosHome:    m.sourceResolver.KnossosHome(),
+		UserClaudeDir:  m.userClaudeDir,
 		Opts: userscope.SyncOptions{
 			Resource:          opts.Resource,
 			DryRun:            opts.DryRun,

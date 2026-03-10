@@ -17,6 +17,7 @@ type SyncUserScopeParams struct {
 	EmbeddedMena   fs.FS           // fallback mena source (platform mena/)
 	EmbeddedRites  fs.FS           // fallback rites source (for rites/shared/mena/)
 	KnossosHome    string          // explicit KNOSSOS_HOME path; falls back to config if empty
+	UserClaudeDir  string          // explicit ~/.claude path; falls back to paths.UserClaudeDir() if empty
 	Opts           SyncOptions     // sync configuration
 }
 

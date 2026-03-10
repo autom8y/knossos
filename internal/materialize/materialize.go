@@ -99,9 +99,10 @@ type Materializer struct {
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
 	claudeDirOverride string // If set, materialize to this directory instead of .claude/
-	embeddedAgents      fs.FS // Embedded cross-rite agents (fallback for user scope)
-	embeddedMena        fs.FS // Embedded platform mena (fallback for user scope)
-	embeddedProcessions fs.FS // Embedded procession templates (fallback for resolution)
+	embeddedAgents      fs.FS   // Embedded cross-rite agents (fallback for user scope)
+	embeddedMena        fs.FS   // Embedded platform mena (fallback for user scope)
+	embeddedProcessions fs.FS   // Embedded procession templates (fallback for resolution)
+	userClaudeDir       string  // If set, user-scope sync writes here instead of paths.UserClaudeDir()
 }
 
 // NewMaterializer creates a new materializer with default source resolution.
@@ -124,6 +125,16 @@ func NewMaterializerWithSource(resolver *paths.Resolver, source string) *Materia
 		sourceResolver: NewSourceResolver(projectRoot),
 		explicitSource: source,
 		templatesDir:   filepath.Join(projectRoot, "templates"),
+	}
+}
+
+// NewMaterializerWithSourceResolver creates a materializer with an explicit source resolver.
+// This enables test injection of tier paths without global state mutation.
+func NewMaterializerWithSourceResolver(resolver *paths.Resolver, sr *SourceResolver) *Materializer {
+	return &Materializer{
+		resolver:       resolver,
+		sourceResolver: sr,
+		templatesDir:   filepath.Join(resolver.ProjectRoot(), "templates"),
 	}
 }
 
