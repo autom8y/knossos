@@ -61,6 +61,7 @@ type ContextOutput struct {
 	KnowStatus      string               `json:"know_status,omitempty"`   // .know/ freshness summary line
 	NaxosSummary    string               `json:"naxos_summary,omitempty"` // Naxos triage summary line
 	Suggestions     []suggest.Suggestion `json:"suggestions,omitempty"`   // H5: proactive suggestions
+	Procession      *session.Procession  `json:"procession,omitempty"`   // Active procession state
 }
 
 // Text implements output.Textable for YAML frontmatter output.
@@ -131,6 +132,31 @@ func (c ContextOutput) Text() string {
 			if s.LandedAt != "" {
 				fmt.Fprintf(&b, "    landed_at: %q\n", s.LandedAt)
 			}
+		}
+	}
+
+	// Procession state (cross-rite workflow)
+	if c.Procession != nil {
+		b.WriteString("procession:\n")
+		fmt.Fprintf(&b, "  id: %s\n", c.Procession.ID)
+		fmt.Fprintf(&b, "  type: %s\n", c.Procession.Type)
+		fmt.Fprintf(&b, "  current_station: %s\n", c.Procession.CurrentStation)
+		if len(c.Procession.CompletedStations) > 0 {
+			b.WriteString("  completed_stations:\n")
+			for _, cs := range c.Procession.CompletedStations {
+				fmt.Fprintf(&b, "    - station: %s\n", cs.Station)
+				fmt.Fprintf(&b, "      rite: %s\n", cs.Rite)
+				fmt.Fprintf(&b, "      completed_at: %q\n", cs.CompletedAt)
+			}
+		}
+		if c.Procession.NextStation != "" {
+			fmt.Fprintf(&b, "  next_station: %s\n", c.Procession.NextStation)
+		}
+		if c.Procession.NextRite != "" {
+			fmt.Fprintf(&b, "  next_rite: %s\n", c.Procession.NextRite)
+		}
+		if c.Procession.ArtifactDir != "" {
+			fmt.Fprintf(&b, "  artifact_dir: %s\n", c.Procession.ArtifactDir)
 		}
 	}
 
@@ -319,6 +345,11 @@ func runContextCore(ctx *cmdContext, printer *output.Printer) error {
 		BaseBranch:      baseBranch,
 		AvailableRites:  availableRites,
 		AvailableAgents: availableAgents,
+	}
+
+	// Include procession state if active
+	if sessCtx.Procession != nil {
+		result.Procession = sessCtx.Procession
 	}
 
 	// Rehydrate from COMPACT_STATE.md if present (written by PreCompact hook)

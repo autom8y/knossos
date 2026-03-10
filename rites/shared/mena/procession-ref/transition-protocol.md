@@ -89,7 +89,7 @@ When completing a station and preparing to proceed:
    - Frontmatter: all required fields per the handoff schema
    - Body: self-contained summary of findings, guidance for next station, open questions
 3. **Validate**: Ensure frontmatter passes schema validation (the proceed operation will check)
-4. **Signal transition**: Use `/procession proceed` or delegate to Moirai
+4. **Signal transition**: Use the named procession command (e.g., `/security-remediation`) or delegate to Moirai
 5. **Inform user**: Display the next rite and the sync command
 
 The handoff body must be self-contained -- the target station's agents may have no prior context about this procession's history.

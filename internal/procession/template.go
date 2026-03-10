@@ -162,6 +162,28 @@ func LoadTemplate(path string) (*Template, error) {
 	return &t, nil
 }
 
+// LoadTemplateFromFS reads and parses a procession template from an arbitrary fs.FS.
+// Unlike LoadEmbeddedTemplate, it accepts a full path within the FS rather than
+// constructing one from a name. Used by the resolver for multi-tier resolution.
+func LoadTemplateFromFS(fsys fs.FS, path string) (*Template, error) {
+	data, err := fs.ReadFile(fsys, path)
+	if err != nil {
+		return nil, errors.New(errors.CodeFileNotFound,
+			fmt.Sprintf("procession template not found in FS: %s", path))
+	}
+
+	var t Template
+	if err := yaml.Unmarshal(data, &t); err != nil {
+		return nil, errors.Wrap(errors.CodeSchemaInvalid,
+			fmt.Sprintf("invalid YAML in procession template: %s", path), err)
+	}
+
+	if err := t.Validate(); err != nil {
+		return nil, err
+	}
+	return &t, nil
+}
+
 // LoadEmbeddedTemplate reads and parses a procession template from an fs.FS
 // (typically an embed.FS declared by the caller with //go:embed processions/).
 // The name parameter is the template name without path prefix or extension;

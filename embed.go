@@ -38,3 +38,9 @@ var EmbeddedAgents embed.FS
 //
 //go:embed mena
 var EmbeddedMena embed.FS
+
+// EmbeddedProcessions contains procession template definitions from processions/.
+// Used for cross-rite coordinated workflow generation during ari sync.
+//
+//go:embed processions
+var EmbeddedProcessions embed.FS

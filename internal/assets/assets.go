@@ -3,12 +3,13 @@ package assets
 import "io/fs"
 
 var (
-	embeddedRites     fs.FS
-	embeddedTemplates fs.FS
-	embeddedHooksYAML []byte
-	embeddedAgents    fs.FS
-	embeddedMena      fs.FS
-	buildVersion      string
+	embeddedRites       fs.FS
+	embeddedTemplates   fs.FS
+	embeddedHooksYAML   []byte
+	embeddedAgents      fs.FS
+	embeddedMena        fs.FS
+	embeddedProcessions fs.FS
+	buildVersion        string
 )
 
 func SetEmbedded(rites, templates fs.FS, hooksYAML []byte) {
@@ -35,8 +36,11 @@ func BuildVersion() string {
 	return buildVersion
 }
 
-func Rites() fs.FS      { return embeddedRites }
-func Templates() fs.FS  { return embeddedTemplates }
-func HooksYAML() []byte { return embeddedHooksYAML }
-func Agents() fs.FS     { return embeddedAgents }
-func Mena() fs.FS       { return embeddedMena }
+func SetProcessions(processions fs.FS) { embeddedProcessions = processions }
+
+func Rites() fs.FS       { return embeddedRites }
+func Templates() fs.FS   { return embeddedTemplates }
+func HooksYAML() []byte  { return embeddedHooksYAML }
+func Agents() fs.FS      { return embeddedAgents }
+func Mena() fs.FS        { return embeddedMena }
+func Processions() fs.FS { return embeddedProcessions }

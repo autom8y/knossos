@@ -34,6 +34,15 @@ func EmbeddedAgents() fs.FS { return assets.Agents() }
 // EmbeddedMena returns the embedded mena filesystem, or nil if not set.
 func EmbeddedMena() fs.FS { return assets.Mena() }
 
+// SetEmbeddedProcessions stores embedded procession templates
+// for cross-rite workflow generation during ari sync.
+func SetEmbeddedProcessions(processions fs.FS) {
+	assets.SetProcessions(processions)
+}
+
+// EmbeddedProcessions returns the embedded processions filesystem, or nil if not set.
+func EmbeddedProcessions() fs.FS { return assets.Processions() }
+
 // SetBuildVersion stores the binary version string for use during XDG extraction.
 // Called from main after root.SetVersion so the version is available when
 // extractEmbeddedMenaToXDG runs during "ari init".

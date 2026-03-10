@@ -24,6 +24,7 @@ func main() {
 	common.SetBuildVersion(version)
 	common.SetEmbeddedAssets(knossos.EmbeddedRites, knossos.EmbeddedTemplates, knossos.EmbeddedHooksYAML)
 	common.SetEmbeddedUserAssets(knossos.EmbeddedAgents, knossos.EmbeddedMena)
+	common.SetEmbeddedProcessions(knossos.EmbeddedProcessions)
 	if err := root.Execute(); err != nil {
 		if !errors.IsHandled(err) {
 			// Error was not already printed by a command — print it format-aware

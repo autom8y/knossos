@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/autom8y/knossos/internal/config"
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
@@ -34,6 +35,13 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		// This is the expected path for users who installed via `go install`
 		// and don't have the knossos source tree.
 		sources = append(sources, MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
+	}
+
+	// 1.5. Procession-generated mena (between platform and shared)
+	// Each procession template (e.g., security-remediation.yaml) generates a named
+	// dromena and per-procession skill. Available in all rites.
+	if procDir, err := m.renderProcessionMena(); err == nil && procDir != "" {
+		sources = append(sources, MenaSource{Path: procDir})
 	}
 
 	if isEmbedded {
@@ -133,6 +141,11 @@ func (m *Materializer) materializeMinimalMena(claudeDir string, collector proven
 		sources = append(sources, MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
 	}
 
+	// 1.5. Procession-generated mena (available in minimal/cross-cutting mode too)
+	if procDir, err := m.renderProcessionMena(); err == nil && procDir != "" {
+		sources = append(sources, MenaSource{Path: procDir})
+	}
+
 	// 2. Shared rite mena — core cross-rite features (/know, /radar, etc.)
 	if m.sourceResolver.EmbeddedFS != nil {
 		sources = append(sources, MenaSource{Fsys: m.sourceResolver.EmbeddedFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
@@ -158,6 +171,35 @@ func (m *Materializer) materializeMinimalMena(claudeDir string, collector proven
 
 	_, err := SyncMena(sources, opts)
 	return err
+}
+
+// renderProcessionMena resolves procession templates and renders their
+// dromena and legomena into a deterministic directory for mena projection.
+// Uses .knossos/procession-mena/ to ensure provenance source paths are stable
+// across syncs (idempotency invariant).
+// Returns empty string if no templates found or rendering fails (fail-open).
+func (m *Materializer) renderProcessionMena() (string, error) {
+	procDir := filepath.Join(m.resolver.KnossosDir(), "procession-mena")
+
+	// Clean any prior render to avoid stale entries
+	os.RemoveAll(procDir)
+
+	if err := os.MkdirAll(procDir, 0o755); err != nil {
+		return "", err
+	}
+
+	projectRoot := m.resolver.ProjectRoot()
+	count, err := procmena.RenderToDir(projectRoot, procDir, RenderArchetype)
+	if err != nil {
+		os.RemoveAll(procDir)
+		return "", err
+	}
+	if count == 0 {
+		os.RemoveAll(procDir)
+		return "", nil
+	}
+
+	return procDir, nil
 }
 
 // getMenaDir returns the mena directory path.

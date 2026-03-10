@@ -29,7 +29,25 @@ create -> station 1 (work) -> proceed -> station 2 (work) -> ... -> final statio
 - [handoff-schema.md](handoff-schema.md) -- Required YAML frontmatter fields for handoff artifacts
 - [transition-protocol.md](transition-protocol.md) -- Proceed, recede, and abandon operation semantics
 
+## CLI Commands
+
+State-mutating operations are invoked by Moirai or by the named procession command (e.g., `/security-remediation`).
+
+| Command | Description | Mutates State |
+|---------|-------------|---------------|
+| `ari procession create --template=<name>` | Initialize from template | Yes |
+| `ari procession status` | Show current state | No |
+| `ari procession proceed [--artifacts=path]` | Advance to next station | Yes |
+| `ari procession recede --to=<station>` | Roll back to previous station | Yes |
+| `ari procession abandon` | Terminate procession | Yes |
+
+## Named Commands
+
+Each procession template generates a named command during `ari sync`:
+- `security-remediation.yaml` → `/security-remediation`
+- The command handles full lifecycle: startup, station orchestration, transitions
+
 ## Related
 
 - `cross-rite-handoff` skill -- General cross-rite handoff schema (non-procession)
-- `/procession` command -- CLI interface for managing processions
+- Per-procession skills (e.g., `security-remediation-ref`) -- Template-specific station data
