@@ -13,6 +13,7 @@ import (
 
 // TestStripMenaExtension verifies all extension stripping cases.
 func TestStripMenaExtension(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		input    string
@@ -34,6 +35,7 @@ func TestStripMenaExtension(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := StripMenaExtension(tt.input)
 			if got != tt.expected {
 				t.Errorf("StripMenaExtension(%q) = %q, want %q", tt.input, got, tt.expected)
@@ -44,6 +46,7 @@ func TestStripMenaExtension(t *testing.T) {
 
 // TestRouteMenaFile verifies routing decisions.
 func TestRouteMenaFile(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		input    string
@@ -59,6 +62,7 @@ func TestRouteMenaFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := RouteMenaFile(tt.input)
 			if got != tt.expected {
 				t.Errorf("RouteMenaFile(%q) = %q, want %q", tt.input, got, tt.expected)
@@ -69,6 +73,7 @@ func TestRouteMenaFile(t *testing.T) {
 
 // TestSyncMena_Destructive verifies full projection with destructive mode.
 func TestSyncMena_Destructive(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	menaDir := filepath.Join(tmpDir, "mena")
@@ -153,6 +158,7 @@ func TestSyncMena_Destructive(t *testing.T) {
 
 // TestSyncMena_Additive verifies additive mode preserves existing files.
 func TestSyncMena_Additive(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -202,6 +208,7 @@ func TestSyncMena_Additive(t *testing.T) {
 
 // TestSyncMena_PriorityOverride verifies later sources override earlier ones.
 func TestSyncMena_PriorityOverride(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	lowDir := filepath.Join(tmpDir, "low", "my-cmd")
@@ -252,6 +259,7 @@ func TestSyncMena_PriorityOverride(t *testing.T) {
 
 // TestSyncMena_EmbeddedFS verifies projection from an embedded FS source.
 func TestSyncMena_EmbeddedFS(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	fsys := fstest.MapFS{
@@ -309,6 +317,7 @@ func TestSyncMena_EmbeddedFS(t *testing.T) {
 
 // TestSyncMena_Filter_DroOnly verifies that ProjectDro filter only projects dromena.
 func TestSyncMena_Filter_DroOnly(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	menaDir := filepath.Join(tmpDir, "mena")
@@ -358,6 +367,7 @@ func TestSyncMena_Filter_DroOnly(t *testing.T) {
 
 // TestSyncMena_StandaloneFileStripping verifies standalone files have extensions stripped.
 func TestSyncMena_StandaloneFileStripping(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	menaDir := filepath.Join(tmpDir, "mena")
@@ -400,6 +410,7 @@ func TestSyncMena_StandaloneFileStripping(t *testing.T) {
 
 // TestSyncMena_EmptySources verifies graceful handling of empty sources.
 func TestSyncMena_EmptySources(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -425,6 +436,7 @@ func TestSyncMena_EmptySources(t *testing.T) {
 
 // TestSyncMena_NonexistentSource verifies graceful handling of missing sources.
 func TestSyncMena_NonexistentSource(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -450,6 +462,7 @@ func TestSyncMena_NonexistentSource(t *testing.T) {
 
 // TestParseMenaFrontmatterBytes verifies frontmatter extraction from raw bytes.
 func TestParseMenaFrontmatterBytes(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		data     string
@@ -463,6 +476,7 @@ func TestParseMenaFrontmatterBytes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			fm := ParseMenaFrontmatterBytes([]byte(tt.data))
 			if fm.Name != tt.wantName {
 				t.Errorf("name = %q, want %q", fm.Name, tt.wantName)
@@ -473,6 +487,7 @@ func TestParseMenaFrontmatterBytes(t *testing.T) {
 
 // TestDetectMenaType verifies the extension-based type detection
 func TestDetectMenaType(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		filename string
 		expected string
@@ -488,6 +503,7 @@ func TestDetectMenaType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.filename, func(t *testing.T) {
+			t.Parallel()
 			got := DetectMenaType(tt.filename)
 			if got != tt.expected {
 				t.Errorf("DetectMenaType(%q) = %q, want %q", tt.filename, got, tt.expected)
@@ -500,6 +516,7 @@ func TestDetectMenaType(t *testing.T) {
 // collision with a user-owned entry in commands/ causes the dromenon to fall back
 // to its source path instead of overwriting the user file.
 func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir // provenance manifest lives here
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -570,6 +587,7 @@ func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 // --overwrite-diverged allows the platform to reclaim a flat name from a
 // user-owned entry.
 func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -640,6 +658,7 @@ func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
 // without provenance (untracked) are also treated as user content and yield,
 // unless OverwriteDiverged is set.
 func TestSyncMena_NamespaceCollision_UntrackedEntry(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")

@@ -31,6 +31,7 @@ func extractHookCommand(group map[string]any) string {
 }
 
 func TestBuildHooksSettings(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -105,6 +106,7 @@ func TestBuildHooksSettings(t *testing.T) {
 }
 
 func TestBuildHooksSettings_IncludesTimeout(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -122,6 +124,7 @@ func TestBuildHooksSettings_IncludesTimeout(t *testing.T) {
 }
 
 func TestBuildHooksSettings_SkipsEmptyCommand(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -141,6 +144,7 @@ func TestBuildHooksSettings_SkipsEmptyCommand(t *testing.T) {
 }
 
 func TestMergeHooksSettings_FreshSettings(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -169,6 +173,7 @@ func TestMergeHooksSettings_FreshSettings(t *testing.T) {
 }
 
 func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -219,6 +224,7 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 }
 
 func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -258,6 +264,7 @@ func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
 }
 
 func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -298,6 +305,7 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 }
 
 func TestMergeHooksSettings_Idempotent(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -326,6 +334,7 @@ func TestMergeHooksSettings_Idempotent(t *testing.T) {
 }
 
 func TestIsAriManagedGroup(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name  string
 		group map[string]any
@@ -373,6 +382,7 @@ func TestIsAriManagedGroup(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := IsAriManagedGroup(tt.group)
 			if got != tt.want {
 				t.Errorf("IsAriManagedGroup() = %v, want %v", got, tt.want)
@@ -382,6 +392,7 @@ func TestIsAriManagedGroup(t *testing.T) {
 }
 
 func TestLoadHooksConfig(t *testing.T) {
+	t.Parallel()
 	// Create a temp directory structure with hooks.yaml
 	tmpDir := t.TempDir()
 	hooksDir := filepath.Join(tmpDir, "config")
@@ -419,6 +430,7 @@ hooks:
 }
 
 func TestLoadHooksConfig_RejectsV1Schema(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	hooksDir := filepath.Join(tmpDir, "config")
 	os.MkdirAll(hooksDir, 0755)
@@ -439,6 +451,7 @@ hooks:
 }
 
 func TestLoadHooksConfig_NoFile(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	cfg := LoadHooksConfigWithPaths(tmpDir, tmpDir)
@@ -448,6 +461,7 @@ func TestLoadHooksConfig_NoFile(t *testing.T) {
 }
 
 func TestBuildHooksSettings_IncludesAsync(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
@@ -465,6 +479,7 @@ func TestBuildHooksSettings_IncludesAsync(t *testing.T) {
 }
 
 func TestBuildHooksSettings_OmitsAsyncWhenFalse(t *testing.T) {
+	t.Parallel()
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{

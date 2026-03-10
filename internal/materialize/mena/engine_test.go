@@ -12,6 +12,7 @@ import (
 // TestCleanEmptyDirs_NonExistentRoot verifies that CleanEmptyDirs returns nil
 // errors when called with a path that does not exist on disk.
 func TestCleanEmptyDirs_NonExistentRoot(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	nonExistent := filepath.Join(tmpDir, "does-not-exist")
 
@@ -24,6 +25,7 @@ func TestCleanEmptyDirs_NonExistentRoot(t *testing.T) {
 // TestCleanEmptyDirs_ExistingEmptySubdir verifies normal behavior:
 // empty subdirectories are removed successfully.
 func TestCleanEmptyDirs_ExistingEmptySubdir(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	root := filepath.Join(tmpDir, "root")
 	subdir := filepath.Join(root, "empty-child")
@@ -60,6 +62,7 @@ func exists(path string) bool {
 
 // TestIsFromRite verifies the source_path rite origin matching helper.
 func TestIsFromRite(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name       string
 		sourcePath string
@@ -77,6 +80,7 @@ func TestIsFromRite(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := isFromRite(tt.sourcePath, tt.riteName)
 			if got != tt.want {
 				t.Errorf("isFromRite(%q, %q) = %v, want %v", tt.sourcePath, tt.riteName, got, tt.want)
@@ -88,6 +92,7 @@ func TestIsFromRite(t *testing.T) {
 // TestCleanStaleMena_CrossRitePreserved verifies that stale cleanup scoped to
 // rite B does not delete entries originating from rite A.
 func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")
@@ -187,6 +192,7 @@ func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
 // TestCleanStaleMena_SameRiteStaleRemoved verifies that stale entries from the
 // SAME rite are still correctly removed.
 func TestCleanStaleMena_SameRiteStaleRemoved(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")

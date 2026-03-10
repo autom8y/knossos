@@ -12,6 +12,7 @@ import (
 
 // TestFrontmatterAllMenaFiles validates frontmatter in all INDEX.dro.md and INDEX.lego.md files.
 func TestFrontmatterAllMenaFiles(t *testing.T) {
+	t.Parallel()
 	projectRoot := findProjectRoot(t)
 
 	var failures []string
@@ -82,6 +83,7 @@ func TestFrontmatterAllMenaFiles(t *testing.T) {
 
 // TestFrontmatterContextField validates that the context field parses correctly from YAML.
 func TestFrontmatterContextField(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name     string
 		yaml     string
@@ -110,6 +112,7 @@ func TestFrontmatterContextField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			var fm MenaFrontmatter
 			if err := yaml.Unmarshal([]byte(tt.yaml), &fm); err != nil {
 				t.Fatalf("failed to unmarshal: %v", err)

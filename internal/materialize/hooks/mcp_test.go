@@ -11,6 +11,7 @@ import (
 )
 
 func TestMergeMCPServers_EmptySettings(t *testing.T) {
+	t.Parallel()
 	settings := make(map[string]any)
 	mcpServers := []MCPServerConfig{
 		{
@@ -44,6 +45,7 @@ func TestMergeMCPServers_EmptySettings(t *testing.T) {
 }
 
 func TestMergeMCPServers_PreservesExistingServers(t *testing.T) {
+	t.Parallel()
 	settings := map[string]any{
 		"mcpServers": map[string]any{
 			"custom-server": map[string]any{
@@ -77,6 +79,7 @@ func TestMergeMCPServers_PreservesExistingServers(t *testing.T) {
 }
 
 func TestMergeMCPServers_UpdatesExistingServer(t *testing.T) {
+	t.Parallel()
 	settings := map[string]any{
 		"mcpServers": map[string]any{
 			"github": map[string]any{
@@ -107,6 +110,7 @@ func TestMergeMCPServers_UpdatesExistingServer(t *testing.T) {
 }
 
 func TestMergeMCPServers_PreservesOtherSettings(t *testing.T) {
+	t.Parallel()
 	settings := map[string]any{
 		"hooks": map[string]any{
 			"events": []string{"pre-commit"},
@@ -129,6 +133,7 @@ func TestMergeMCPServers_PreservesOtherSettings(t *testing.T) {
 }
 
 func TestLoadExistingSettings_NoFile(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
 
@@ -139,6 +144,7 @@ func TestLoadExistingSettings_NoFile(t *testing.T) {
 }
 
 func TestLoadExistingSettings_ValidJSON(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
 
@@ -162,6 +168,7 @@ func TestLoadExistingSettings_ValidJSON(t *testing.T) {
 }
 
 func TestLoadExistingSettings_InvalidJSON(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
 
@@ -174,6 +181,7 @@ func TestLoadExistingSettings_InvalidJSON(t *testing.T) {
 }
 
 func TestSaveSettings(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
 
@@ -202,6 +210,7 @@ func TestSaveSettings(t *testing.T) {
 }
 
 func TestMergeMCPServers_StdioDefault(t *testing.T) {
+	t.Parallel()
 	// When no Type is set, server should be treated as stdio (backward compat)
 	settings := make(map[string]any)
 	mcpServers := []MCPServerConfig{
@@ -229,6 +238,7 @@ func TestMergeMCPServers_StdioDefault(t *testing.T) {
 }
 
 func TestMergeMCPServers_SSETransport(t *testing.T) {
+	t.Parallel()
 	settings := make(map[string]any)
 	mcpServers := []MCPServerConfig{
 		{
@@ -260,6 +270,7 @@ func TestMergeMCPServers_SSETransport(t *testing.T) {
 }
 
 func TestMergeMCPServers_HTTPTransport(t *testing.T) {
+	t.Parallel()
 	settings := make(map[string]any)
 	mcpServers := []MCPServerConfig{
 		{
@@ -300,6 +311,7 @@ func TestMergeMCPServers_HTTPTransport(t *testing.T) {
 }
 
 func TestMergeMCPServers_BackwardCompat_ExistingStdio(t *testing.T) {
+	t.Parallel()
 	// Verify that existing stdio servers without Type field still work
 	settings := map[string]any{
 		"mcpServers": map[string]any{
@@ -336,6 +348,7 @@ func TestMergeMCPServers_BackwardCompat_ExistingStdio(t *testing.T) {
 }
 
 func TestMergeMCPServers_NoEnvOrArgs(t *testing.T) {
+	t.Parallel()
 	settings := make(map[string]any)
 	mcpServers := []MCPServerConfig{
 		{

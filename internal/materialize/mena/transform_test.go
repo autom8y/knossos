@@ -5,6 +5,7 @@ import "testing"
 // TestTransformMenaFilePath verifies INDEX.md promotion and SKILL.md rename
 // logic for all combinations of mena type, filename, and directory depth.
 func TestTransformMenaFilePath(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name         string
 		base         string
@@ -65,6 +66,7 @@ func TestTransformMenaFilePath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			gotBase, gotPromoted := TransformMenaFilePath(tt.base, tt.dir, tt.isDro)
 			if gotBase != tt.wantNewBase {
 				t.Errorf("TransformMenaFilePath(%q, %q, %v) newBase = %q, want %q",

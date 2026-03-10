@@ -14,6 +14,7 @@ import (
 // as both a directory (companions) and a promoted .md file on disk, the Step 4
 // collision check processes it only once, producing at most one warning.
 func TestResolveNamespace_DirAndFileDeduplicated(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
 	commandsDir := filepath.Join(claudeDir, "commands")
@@ -74,6 +75,7 @@ func TestResolveNamespace_DirAndFileDeduplicated(t *testing.T) {
 // both dir and file forms exist but are knossos-owned, neither produces a warning
 // and the dedup does not introduce regressions.
 func TestResolveNamespace_DirAndFileDeduplicated_KnossosOwned(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")

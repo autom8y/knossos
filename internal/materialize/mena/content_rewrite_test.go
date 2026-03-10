@@ -15,6 +15,7 @@ var sourceExtPatternForTest = regexp.MustCompile(`\.(lego|dro)\.md`)
 // backtick code spans, INDEX.lego.md -> SKILL.md rename, fenced block exclusion,
 // fragment preservation, and no-op cases.
 func TestRewriteMenaContentPaths(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name  string
 		input string
@@ -160,6 +161,7 @@ func TestRewriteMenaContentPaths(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := string(RewriteMenaContentPaths([]byte(tt.input)))
 			if got != tt.want {
 				t.Errorf("rewriteMenaContentPaths(%q)\n  got:  %q\n  want: %q", tt.input, got, tt.want)
@@ -176,6 +178,7 @@ func TestRewriteMenaContentPaths(t *testing.T) {
 // ensures the materializer pipeline correctly eliminates stale source extensions
 // from all link targets and backtick code spans.
 func TestRewriteCorpus(t *testing.T) {
+	t.Parallel()
 	// corpus is a representative mena document containing all pattern categories
 	// drawn from the 262 instances identified in the smell report:
 	//   - Markdown link targets (INDEX.lego.md, general .lego.md, .dro.md)
@@ -286,6 +289,7 @@ More links after fenced content: [back](../schemas/report.lego.md)
 // This protects against the class of bypass bugs identified in GO-001,
 // GO-002, and GO-003 where the rewriter was omitted from code paths.
 func TestSCAR_ContentRewriteNotBypassed(t *testing.T) {
+	t.Parallel()
 	input := "See [the skill](foo.lego.md) for details."
 
 	output := string(RewriteMenaContentPaths([]byte(input)))
