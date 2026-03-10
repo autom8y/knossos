@@ -33,6 +33,7 @@ func Build(root *cobra.Command, resolver *paths.Resolver) *SearchIndex {
 		entries = append(entries, CollectAgents(resolver)...)
 		entries = append(entries, CollectDromena(resolver)...)
 		entries = append(entries, CollectRouting(resolver)...)
+		entries = append(entries, CollectProcessions(resolver)...)
 		entries = append(entries, CollectParkedSessions(resolver)...)
 	}
 

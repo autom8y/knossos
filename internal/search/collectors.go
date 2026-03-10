@@ -11,6 +11,7 @@ import (
 	"github.com/autom8y/knossos/internal/agent"
 	"github.com/autom8y/knossos/internal/cmd/explain"
 	"github.com/autom8y/knossos/internal/frontmatter"
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/rite"
 )
@@ -276,6 +277,56 @@ type orchestratorFile struct {
 		Description string `yaml:"description"`
 	} `yaml:"frontmatter"`
 	Routing map[string]string `yaml:"routing"`
+}
+
+// CollectProcessions returns entries from resolved procession templates.
+// Each template produces a SearchEntry with domain "procession", station
+// names as keywords, and the generated dromena command as the action.
+// Returns an empty slice if resolver is nil or no templates are found.
+func CollectProcessions(resolver *paths.Resolver) []SearchEntry {
+	if resolver == nil || resolver.ProjectRoot() == "" {
+		return nil
+	}
+
+	resolved, err := procmena.ResolveProcessions(resolver.ProjectRoot(), nil)
+	if err != nil {
+		return nil
+	}
+
+	entries := make([]SearchEntry, 0, len(resolved))
+	for _, rp := range resolved {
+		// Build station list for summary and keywords
+		stationNames := make([]string, len(rp.Template.Stations))
+		riteNames := make([]string, 0, len(rp.Template.Stations))
+		seen := make(map[string]bool)
+		for i, s := range rp.Template.Stations {
+			stationNames[i] = s.Name
+			if !seen[s.Rite] {
+				riteNames = append(riteNames, s.Rite)
+				seen[s.Rite] = true
+			}
+		}
+
+		summary := rp.Template.Description
+		if summary == "" {
+			summary = strings.Join(stationNames, " → ")
+		}
+
+		// Keywords: station names + rite names + "procession" + "cross-rite"
+		keywords := append(stationNames, riteNames...)
+		keywords = append(keywords, "procession", "cross-rite", "workflow")
+
+		entries = append(entries, SearchEntry{
+			Name:        rp.Name,
+			Domain:      DomainProcession,
+			Summary:     summary,
+			Description: rp.Template.Description,
+			Action:      "/" + rp.Name,
+			Keywords:    keywords,
+			Boosted:     len(rp.Template.Stations) > 2, // boost multi-rite processions
+		})
+	}
+	return entries
 }
 
 // CollectRouting returns entries from orchestrator.yaml routing sections
