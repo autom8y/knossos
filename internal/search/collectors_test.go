@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/autom8y/knossos/internal/config"
+	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/rite"
 )
 
 // --- helpers ---
@@ -111,8 +112,9 @@ func TestCollectRitesNoRitesDir(t *testing.T) {
 	root := t.TempDir()
 	require.NoError(t, os.MkdirAll(filepath.Join(root, ".claude"), 0755))
 	resolver := paths.NewResolver(root)
-	// .knossos/rites doesn't exist — should return empty.
-	assert.Empty(t, CollectRites(resolver))
+	// Inject empty discovery — no rites in any tier.
+	disc := rite.NewDiscoveryWithPaths("", "", "", "", "")
+	assert.Empty(t, CollectRites(resolver, disc))
 }
 
 func TestCollectRitesWithRite(t *testing.T) {
@@ -122,7 +124,8 @@ func TestCollectRitesWithRite(t *testing.T) {
 	writeTestFile(t, filepath.Join(riteDir, "manifest.yaml"), "name: test-rite\ndescription: A test rite")
 
 	resolver := paths.NewResolver(root)
-	entries := CollectRites(resolver)
+	disc := rite.NewDiscoveryWithPaths(filepath.Join(root, ".knossos", "rites"), "", "", "", "")
+	entries := CollectRites(resolver, disc)
 
 	require.Len(t, entries, 1)
 	assert.Equal(t, "test-rite", entries[0].Name)
@@ -135,11 +138,10 @@ func TestCollectRitesActiveRiteBoosted(t *testing.T) {
 	riteDir := filepath.Join(root, ".knossos", "rites", "active-rite")
 	require.NoError(t, os.MkdirAll(riteDir, 0755))
 	writeTestFile(t, filepath.Join(riteDir, "manifest.yaml"), "name: active-rite")
-	// Mark it active.
-	writeTestFile(t, filepath.Join(root, ".knossos", "ACTIVE_RITE"), "active-rite")
 
 	resolver := paths.NewResolver(root)
-	entries := CollectRites(resolver)
+	disc := rite.NewDiscoveryWithPaths(filepath.Join(root, ".knossos", "rites"), "", "", "", "active-rite")
+	entries := CollectRites(resolver, disc)
 
 	require.Len(t, entries, 1)
 	assert.True(t, entries[0].Boosted, "active rite should be boosted")
@@ -304,7 +306,8 @@ routing:
 	writeTestFile(t, filepath.Join(riteDir, "orchestrator.yaml"), orchContent)
 
 	resolver := paths.NewResolver(root)
-	entries := CollectRites(resolver)
+	disc := rite.NewDiscoveryWithPaths(filepath.Join(root, ".knossos", "rites"), "", "", "", "")
+	entries := CollectRites(resolver, disc)
 
 	require.Len(t, entries, 1)
 	assert.Contains(t, entries[0].Keywords, "coordinate")
@@ -327,7 +330,8 @@ frontmatter:
 	writeTestFile(t, filepath.Join(riteDir, "orchestrator.yaml"), orchContent)
 
 	resolver := paths.NewResolver(root)
-	entries := CollectRites(resolver)
+	disc := rite.NewDiscoveryWithPaths(filepath.Join(root, ".knossos", "rites"), "", "", "", "")
+	entries := CollectRites(resolver, disc)
 
 	require.Len(t, entries, 1)
 	assert.Contains(t, entries[0].Aliases, "code quality", "domain should be added as alias")
@@ -352,7 +356,8 @@ frontmatter:
 	writeTestFile(t, filepath.Join(riteDir, "orchestrator.yaml"), orchContent)
 
 	resolver := paths.NewResolver(root)
-	entries := CollectRites(resolver)
+	disc := rite.NewDiscoveryWithPaths(filepath.Join(root, ".knossos", "rites"), "", "", "", "")
+	entries := CollectRites(resolver, disc)
 
 	require.Len(t, entries, 1)
 	// Summary should be first line only.
@@ -370,7 +375,8 @@ func TestCollectRitesNoOrchestratorGraceful(t *testing.T) {
 	// No orchestrator.yaml — enrichment should be skipped gracefully.
 
 	resolver := paths.NewResolver(root)
-	entries := CollectRites(resolver)
+	disc := rite.NewDiscoveryWithPaths(filepath.Join(root, ".knossos", "rites"), "", "", "", "")
+	entries := CollectRites(resolver, disc)
 
 	require.Len(t, entries, 1)
 	assert.Equal(t, "plain-rite", entries[0].Name)
@@ -381,14 +387,6 @@ func TestCollectRitesNoOrchestratorGraceful(t *testing.T) {
 }
 
 // --- CollectProcessions ---
-
-// isolateProcessionHome overrides KNOSSOS_HOME to prevent picking up real templates.
-func isolateProcessionHome(t *testing.T) {
-	t.Helper()
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", t.TempDir())
-	t.Cleanup(config.ResetKnossosHome)
-}
 
 func writeProcessionTemplate(t *testing.T, root, name, description string, stations int) {
 	t.Helper()
@@ -414,20 +412,23 @@ func TestCollectProcessions_NilResolver(t *testing.T) {
 }
 
 func TestCollectProcessions_NoTemplates(t *testing.T) {
-	isolateProcessionHome(t)
 	root := buildTestRoot(t)
 	resolver := paths.NewResolver(root)
-	entries := CollectProcessions(resolver)
+	// Inject empty resolved list — no templates in project dir only.
+	resolved, err := procmena.ResolveProcessionsWithDirs(filepath.Join(root, "processions"), "", "", "", nil)
+	require.NoError(t, err)
+	entries := CollectProcessions(resolver, resolved)
 	assert.Empty(t, entries)
 }
 
 func TestCollectProcessions_SingleTemplate(t *testing.T) {
-	isolateProcessionHome(t)
 	root := buildTestRoot(t)
 	writeProcessionTemplate(t, root, "sec-rem", "Security remediation lifecycle", 5)
 
 	resolver := paths.NewResolver(root)
-	entries := CollectProcessions(resolver)
+	resolved, err := procmena.ResolveProcessionsWithDirs(filepath.Join(root, "processions"), "", "", "", nil)
+	require.NoError(t, err)
+	entries := CollectProcessions(resolver, resolved)
 
 	require.Len(t, entries, 1)
 	assert.Equal(t, "sec-rem", entries[0].Name)
@@ -445,25 +446,27 @@ func TestCollectProcessions_SingleTemplate(t *testing.T) {
 }
 
 func TestCollectProcessions_NotBoostedWhenFewStations(t *testing.T) {
-	isolateProcessionHome(t)
 	root := buildTestRoot(t)
 	writeProcessionTemplate(t, root, "small", "Two station workflow", 2)
 
 	resolver := paths.NewResolver(root)
-	entries := CollectProcessions(resolver)
+	resolved, err := procmena.ResolveProcessionsWithDirs(filepath.Join(root, "processions"), "", "", "", nil)
+	require.NoError(t, err)
+	entries := CollectProcessions(resolver, resolved)
 
 	require.Len(t, entries, 1)
 	assert.False(t, entries[0].Boosted, "2-station template should not be boosted")
 }
 
 func TestCollectProcessions_MultipleTemplates(t *testing.T) {
-	isolateProcessionHome(t)
 	root := buildTestRoot(t)
 	writeProcessionTemplate(t, root, "workflow-a", "First workflow", 3)
 	writeProcessionTemplate(t, root, "workflow-b", "Second workflow", 2)
 
 	resolver := paths.NewResolver(root)
-	entries := CollectProcessions(resolver)
+	resolved, err := procmena.ResolveProcessionsWithDirs(filepath.Join(root, "processions"), "", "", "", nil)
+	require.NoError(t, err)
+	entries := CollectProcessions(resolver, resolved)
 
 	require.Len(t, entries, 2)
 	names := []string{entries[0].Name, entries[1].Name}

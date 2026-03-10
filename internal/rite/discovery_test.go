@@ -80,7 +80,7 @@ func TestDiscovery_List(t *testing.T) {
 
 	discovery := NewDiscoveryWithPaths(
 		filepath.Join(tempDir, "rites"),
-		"", // No user rites
+		"", "", "", // No user/org/platform rites
 		"test-rite",
 	)
 
@@ -118,7 +118,7 @@ func TestDiscovery_ListByForm(t *testing.T) {
 
 	discovery := NewDiscoveryWithPaths(
 		filepath.Join(tempDir, "rites"),
-		"",
+		"", "", "",
 		"",
 	)
 
@@ -150,7 +150,7 @@ func TestDiscovery_Get(t *testing.T) {
 
 	discovery := NewDiscoveryWithPaths(
 		filepath.Join(tempDir, "rites"),
-		"",
+		"", "", "",
 		"test-rite",
 	)
 
@@ -182,7 +182,7 @@ func TestDiscovery_GetManifest(t *testing.T) {
 
 	discovery := NewDiscoveryWithPaths(
 		filepath.Join(tempDir, "rites"),
-		"",
+		"", "", "",
 		"",
 	)
 
@@ -204,7 +204,7 @@ func TestDiscovery_GetActive(t *testing.T) {
 
 	discovery := NewDiscoveryWithPaths(
 		filepath.Join(tempDir, "rites"),
-		"",
+		"", "", "",
 		"test-rite",
 	)
 
@@ -219,7 +219,7 @@ func TestDiscovery_GetActive(t *testing.T) {
 	// No active rite
 	noActiveDiscovery := NewDiscoveryWithPaths(
 		filepath.Join(tempDir, "rites"),
-		"",
+		"", "", "",
 		"",
 	)
 	_, err = noActiveDiscovery.GetActive()
@@ -234,7 +234,7 @@ func TestDiscovery_Exists(t *testing.T) {
 
 	discovery := NewDiscoveryWithPaths(
 		filepath.Join(tempDir, "rites"),
-		"",
+		"", "", "",
 		"",
 	)
 
@@ -249,7 +249,7 @@ func TestDiscovery_Exists(t *testing.T) {
 func TestDiscovery_ActiveRiteName(t *testing.T) {
 	discovery := NewDiscoveryWithPaths(
 		"/unused",
-		"",
+		"", "", "",
 		"my-active-rite",
 	)
 
@@ -265,7 +265,7 @@ func TestDiscovery_EmptyDir(t *testing.T) {
 		t.Fatalf("Failed to create rites dir: %v", err)
 	}
 
-	discovery := NewDiscoveryWithPaths(ritesDir, "", "")
+	discovery := NewDiscoveryWithPaths(ritesDir, "", "", "", "")
 
 	rites, err := discovery.List()
 	if err != nil {
@@ -302,7 +302,7 @@ skills:
 		t.Fatalf("Failed to create dir: %v", err)
 	}
 
-	discovery := NewDiscoveryWithPaths(ritesDir, "", "")
+	discovery := NewDiscoveryWithPaths(ritesDir, "", "", "", "")
 
 	rites, err := discovery.List()
 	if err != nil {

@@ -83,16 +83,22 @@ func CollectConcepts() []SearchEntry {
 // Only project-scoped rites are collected; user/org rites are excluded so
 // that results reflect the active project context rather than the host system.
 // Returns an empty slice if resolver is nil or has no project root.
-func CollectRites(resolver *paths.Resolver) []SearchEntry {
+// CollectRites collects rite entries from the discovery chain. If disc is nil,
+// a default discovery is built from the resolver using project + platform tiers.
+func CollectRites(resolver *paths.Resolver, disc ...*rite.Discovery) []SearchEntry {
 	if resolver == nil || resolver.ProjectRoot() == "" {
 		return nil
 	}
 
-	// Use project-only discovery to avoid picking up unrelated user rites from
-	// the developer's home directory.
-	activeRite := resolver.ReadActiveRite()
-	discovery := rite.NewDiscoveryWithPaths(resolver.RitesDir(), "", activeRite)
-	rites, err := discovery.List()
+	var d *rite.Discovery
+	if len(disc) > 0 && disc[0] != nil {
+		d = disc[0]
+	} else {
+		// Default: project + platform tiers (excludes user/org for project-scoped results).
+		activeRite := resolver.ReadActiveRite()
+		d = rite.NewDiscoveryWithPaths(resolver.RitesDir(), "", "", rite.PlatformRitesDir(), activeRite)
+	}
+	rites, err := d.List()
 	if err != nil {
 		return nil
 	}
@@ -282,15 +288,22 @@ type orchestratorFile struct {
 // CollectProcessions returns entries from resolved procession templates.
 // Each template produces a SearchEntry with domain "procession", station
 // names as keywords, and the generated dromena command as the action.
+// If rps is provided, it is used directly instead of resolving from globals.
 // Returns an empty slice if resolver is nil or no templates are found.
-func CollectProcessions(resolver *paths.Resolver) []SearchEntry {
+func CollectProcessions(resolver *paths.Resolver, rps ...[]procmena.ResolvedProcession) []SearchEntry {
 	if resolver == nil || resolver.ProjectRoot() == "" {
 		return nil
 	}
 
-	resolved, err := procmena.ResolveProcessions(resolver.ProjectRoot(), nil)
-	if err != nil {
-		return nil
+	var resolved []procmena.ResolvedProcession
+	if len(rps) > 0 && rps[0] != nil {
+		resolved = rps[0]
+	} else {
+		var err error
+		resolved, err = procmena.ResolveProcessions(resolver.ProjectRoot(), nil)
+		if err != nil {
+			return nil
+		}
 	}
 
 	entries := make([]SearchEntry, 0, len(resolved))

@@ -8,6 +8,7 @@ import (
 	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/paths"
+	"github.com/autom8y/knossos/internal/resolution"
 )
 
 // Rite represents a discovered rite.
@@ -28,17 +29,13 @@ type Rite struct {
 	Source       string   `json:"source"` // "project", "user", "org", or "platform"
 }
 
-// Discovery locates available rites.
+// Discovery locates available rites via the unified resolution chain.
 type Discovery struct {
-	projectRitesDir  string
-	userRitesDir     string
-	orgRitesDir      string
-	platformRitesDir string
-	activeRite       string
+	chain      *resolution.Chain
+	activeRite string
 }
 
 // PlatformRitesDir returns the platform-level rites directory ($KNOSSOS_HOME/rites/).
-// This is the lowest-priority tier in the discovery chain.
 func PlatformRitesDir() string {
 	home := config.KnossosHome()
 	if home == "" {
@@ -50,66 +47,52 @@ func PlatformRitesDir() string {
 // NewDiscovery creates a new rite discovery instance.
 func NewDiscovery(resolver *paths.Resolver) *Discovery {
 	return &Discovery{
-		projectRitesDir:  resolver.RitesDir(),
-		userRitesDir:     paths.UserRitesDir(),
-		orgRitesDir:      paths.OrgRitesDir(config.ActiveOrg()),
-		platformRitesDir: PlatformRitesDir(),
-		activeRite:       resolver.ReadActiveRite(),
+		chain: resolution.RiteChain(
+			resolver.RitesDir(),
+			paths.UserRitesDir(),
+			paths.OrgRitesDir(config.ActiveOrg()),
+			PlatformRitesDir(),
+			nil, // no embedded FS for Discovery
+		),
+		activeRite: resolver.ReadActiveRite(),
 	}
 }
 
 // NewDiscoveryWithPaths creates a discovery with explicit paths.
-func NewDiscoveryWithPaths(projectRitesDir, userRitesDir, activeRite string) *Discovery {
+func NewDiscoveryWithPaths(projectRitesDir, userRitesDir, orgRitesDir, platformRitesDir, activeRite string) *Discovery {
 	return &Discovery{
-		projectRitesDir: projectRitesDir,
-		userRitesDir:    userRitesDir,
-		activeRite:      activeRite,
+		chain: resolution.RiteChain(
+			projectRitesDir,
+			userRitesDir,
+			orgRitesDir,
+			platformRitesDir,
+			nil,
+		),
+		activeRite: activeRite,
 	}
+}
+
+// riteValidator checks that an entry is a valid rite directory (has manifest.yaml).
+func riteValidator(item resolution.ResolvedItem) bool {
+	_, err := os.Stat(filepath.Join(item.Path, "manifest.yaml"))
+	return err == nil
 }
 
 // List returns all available rites.
 // Resolution order (highest priority wins): project > user > org > platform.
 func (d *Discovery) List() ([]Rite, error) {
-	// Build from lowest priority to highest. Higher tiers overwrite by name.
-	riteMap := make(map[string]Rite)
-
-	// Tier 4 (lowest): Platform rites from $KNOSSOS_HOME/rites/
-	if d.platformRitesDir != "" {
-		if platformRites, err := d.scanDir(d.platformRitesDir, "platform"); err == nil {
-			for _, r := range platformRites {
-				riteMap[r.Name] = r
-			}
-		}
+	items, err := d.chain.ResolveAll(riteValidator)
+	if err != nil {
+		return nil, err
 	}
 
-	// Tier 3: Org rites
-	if d.orgRitesDir != "" {
-		if orgRites, err := d.scanDir(d.orgRitesDir, "org"); err == nil {
-			for _, r := range orgRites {
-				riteMap[r.Name] = r
-			}
+	rites := make([]Rite, 0, len(items))
+	for _, item := range items {
+		r, err := loadRite(item.Path, item.Source)
+		if err != nil {
+			continue // skip invalid rites
 		}
-	}
-
-	// Tier 2: User rites
-	if d.userRitesDir != "" {
-		if userRites, err := d.scanDir(d.userRitesDir, "user"); err == nil {
-			for _, r := range userRites {
-				riteMap[r.Name] = r
-			}
-		}
-	}
-
-	// Tier 1 (highest): Project rites
-	if projectRites, err := d.scanDir(d.projectRitesDir, "project"); err == nil {
-		for _, r := range projectRites {
-			riteMap[r.Name] = r
-		}
-	}
-
-	var rites []Rite
-	for _, r := range riteMap {
-		rites = append(rites, r)
+		rites = append(rites, *r)
 	}
 
 	// Sort by name
@@ -212,34 +195,18 @@ func (d *Discovery) Exists(name string) bool {
 	return err == nil
 }
 
-// scanDir scans a directory for rites.
-func (d *Discovery) scanDir(dir, source string) ([]Rite, error) {
-	entries, err := os.ReadDir(dir)
+// GetRitePath returns the path to a rite directory.
+// Uses the resolution chain for full 4-tier lookup.
+func (d *Discovery) GetRitePath(name string) (string, error) {
+	item, err := d.chain.Resolve(name, riteValidator)
 	if err != nil {
-		return nil, err
+		return "", errors.ErrRiteNotFound(name)
 	}
-
-	var rites []Rite
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-
-		ritePath := filepath.Join(dir, entry.Name())
-		rite, err := d.loadRite(ritePath, source)
-		if err != nil {
-			// Skip invalid rites (missing rite.yaml, etc.)
-			continue
-		}
-
-		rites = append(rites, *rite)
-	}
-
-	return rites, nil
+	return item.Path, nil
 }
 
 // loadRite loads a rite from a directory.
-func (d *Discovery) loadRite(ritePath, source string) (*Rite, error) {
+func loadRite(ritePath, source string) (*Rite, error) {
 	manifest, err := LoadManifestFromDir(ritePath)
 	if err != nil {
 		return nil, err
@@ -316,40 +283,4 @@ func deriveForm(m *RiteManifest) RiteForm {
 		return FormPractitioner
 	}
 	return FormSimple
-}
-
-// GetRitePath returns the path to a rite directory.
-// Returns the first match from project or user directories.
-func (d *Discovery) GetRitePath(name string) (string, error) {
-	// Check project rites first
-	projectPath := filepath.Join(d.projectRitesDir, name)
-	if _, err := os.Stat(filepath.Join(projectPath, "manifest.yaml")); err == nil {
-		return projectPath, nil
-	}
-
-	// Check user rites
-	if d.userRitesDir != "" {
-		userPath := filepath.Join(d.userRitesDir, name)
-		if _, err := os.Stat(filepath.Join(userPath, "manifest.yaml")); err == nil {
-			return userPath, nil
-		}
-	}
-
-	// Check org rites
-	if d.orgRitesDir != "" {
-		orgPath := filepath.Join(d.orgRitesDir, name)
-		if _, err := os.Stat(filepath.Join(orgPath, "manifest.yaml")); err == nil {
-			return orgPath, nil
-		}
-	}
-
-	// Check platform rites ($KNOSSOS_HOME/rites/)
-	if d.platformRitesDir != "" {
-		platformPath := filepath.Join(d.platformRitesDir, name)
-		if _, err := os.Stat(filepath.Join(platformPath, "manifest.yaml")); err == nil {
-			return platformPath, nil
-		}
-	}
-
-	return "", errors.ErrRiteNotFound(name)
 }
