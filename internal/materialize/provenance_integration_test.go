@@ -15,6 +15,7 @@ import (
 // TestProvenanceIntegration_BasicMaterialization verifies that PROVENANCE_MANIFEST.yaml
 // is created with expected entries after a basic materialization.
 func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
@@ -82,6 +83,7 @@ func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 // TestProvenanceIntegration_DivergenceDetection verifies that divergence detection
 // promotes modified knossos files to user ownership.
 func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
@@ -143,6 +145,7 @@ func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 // TestProvenanceIntegration_Idempotency verifies that materializing twice produces
 // identical manifests (no spurious divergence).
 func TestProvenanceIntegration_Idempotency(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
@@ -197,6 +200,7 @@ func TestProvenanceIntegration_Idempotency(t *testing.T) {
 
 // TestProvenanceIntegration_DryRun verifies that dry-run mode does not write manifest.
 func TestProvenanceIntegration_DryRun(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
@@ -228,6 +232,7 @@ func TestProvenanceIntegration_DryRun(t *testing.T) {
 // TestProvenanceIntegration_MenaDirectories verifies directory-level provenance
 // for mena entries (commands/ and skills/).
 func TestProvenanceIntegration_MenaDirectories(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")

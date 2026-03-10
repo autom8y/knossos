@@ -33,6 +33,7 @@ func newMaterializerForTest(projectDir string) *Materializer {
 // --- cleanupStaleBlanketSettings tests ---
 
 func TestCleanupStaleSettings_NoFile(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -45,6 +46,7 @@ func TestCleanupStaleSettings_NoFile(t *testing.T) {
 }
 
 func TestCleanupStaleSettings_AgentGuardFingerprint(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -79,6 +81,7 @@ func TestCleanupStaleSettings_AgentGuardFingerprint(t *testing.T) {
 }
 
 func TestCleanupStaleSettings_EmptyStubFingerprint(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -99,6 +102,7 @@ func TestCleanupStaleSettings_EmptyStubFingerprint(t *testing.T) {
 }
 
 func TestCleanupStaleSettings_UserModified(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -136,6 +140,7 @@ func TestCleanupStaleSettings_UserModified(t *testing.T) {
 }
 
 func TestCleanupStaleSettings_HasProvenance(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -164,6 +169,7 @@ func TestCleanupStaleSettings_HasProvenance(t *testing.T) {
 }
 
 func TestCleanupStaleSettings_InvalidJSON(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -182,6 +188,7 @@ func TestCleanupStaleSettings_InvalidJSON(t *testing.T) {
 }
 
 func TestCleanupStaleSettings_WhitespaceVariant(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -202,6 +209,7 @@ func TestCleanupStaleSettings_WhitespaceVariant(t *testing.T) {
 }
 
 func TestCleanupStaleSettings_PartialMatch(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(claudeDir, 0755))
@@ -238,6 +246,7 @@ func TestCleanupStaleSettings_PartialMatch(t *testing.T) {
 // --- matchesStaleSettingsFingerprint unit tests ---
 
 func TestMatchesStaleSettingsFingerprint_AgentGuardBlanketDeny(t *testing.T) {
+	t.Parallel()
 	parsed := map[string]any{
 		"hooks": map[string]any{
 			"PreToolUse": []any{
@@ -257,6 +266,7 @@ func TestMatchesStaleSettingsFingerprint_AgentGuardBlanketDeny(t *testing.T) {
 }
 
 func TestMatchesStaleSettingsFingerprint_AgentGuardWithAllowPath(t *testing.T) {
+	t.Parallel()
 	parsed := map[string]any{
 		"hooks": map[string]any{
 			"PreToolUse": []any{
@@ -276,6 +286,7 @@ func TestMatchesStaleSettingsFingerprint_AgentGuardWithAllowPath(t *testing.T) {
 }
 
 func TestMatchesStaleSettingsFingerprint_EmptyStub(t *testing.T) {
+	t.Parallel()
 	parsed := map[string]any{
 		"permissions": map[string]any{
 			"allow":                 []any{},
@@ -287,6 +298,7 @@ func TestMatchesStaleSettingsFingerprint_EmptyStub(t *testing.T) {
 }
 
 func TestMatchesStaleSettingsFingerprint_EmptyStubWithExtraPermissions(t *testing.T) {
+	t.Parallel()
 	// permissions has extra fields beyond allow + additionalDirectories
 	parsed := map[string]any{
 		"permissions": map[string]any{
@@ -300,6 +312,7 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubWithExtraPermissions(t *testin
 }
 
 func TestMatchesStaleSettingsFingerprint_EmptyStubNonEmptyAllow(t *testing.T) {
+	t.Parallel()
 	parsed := map[string]any{
 		"permissions": map[string]any{
 			"allow":                 []any{"Bash(git:*)"},
@@ -311,6 +324,7 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubNonEmptyAllow(t *testing.T) {
 }
 
 func TestMatchesStaleSettingsFingerprint_EmptyStubWithNonEmptyHooks(t *testing.T) {
+	t.Parallel()
 	// hooks is not empty — user added something
 	parsed := map[string]any{
 		"permissions": map[string]any{
@@ -325,6 +339,7 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubWithNonEmptyHooks(t *testing.T
 }
 
 func TestMatchesStaleSettingsFingerprint_EmptyObject(t *testing.T) {
+	t.Parallel()
 	parsed := map[string]any{}
 	assert.False(t, matchesStaleSettingsFingerprint(parsed))
 }

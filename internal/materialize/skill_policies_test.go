@@ -8,6 +8,7 @@ import (
 // --- MergeSkillPolicies tests ---
 
 func TestMergeSkillPolicies_BothEmpty(t *testing.T) {
+	t.Parallel()
 	result := MergeSkillPolicies(nil, nil)
 	if result != nil {
 		t.Errorf("expected nil, got %v", result)
@@ -15,6 +16,7 @@ func TestMergeSkillPolicies_BothEmpty(t *testing.T) {
 }
 
 func TestMergeSkillPolicies_EmptyShared(t *testing.T) {
+	t.Parallel()
 	rite := []SkillPolicy{
 		{Skill: "foo", Mode: "inject"},
 	}
@@ -25,6 +27,7 @@ func TestMergeSkillPolicies_EmptyShared(t *testing.T) {
 }
 
 func TestMergeSkillPolicies_EmptyRite(t *testing.T) {
+	t.Parallel()
 	shared := []SkillPolicy{
 		{Skill: "bar", Mode: "inject"},
 	}
@@ -35,6 +38,7 @@ func TestMergeSkillPolicies_EmptyRite(t *testing.T) {
 }
 
 func TestMergeSkillPolicies_NoOverlap(t *testing.T) {
+	t.Parallel()
 	shared := []SkillPolicy{
 		{Skill: "shared-skill", Mode: "inject"},
 	}
@@ -55,6 +59,7 @@ func TestMergeSkillPolicies_NoOverlap(t *testing.T) {
 }
 
 func TestMergeSkillPolicies_RiteOverridesShared(t *testing.T) {
+	t.Parallel()
 	shared := []SkillPolicy{
 		{Skill: "ecosystem-ref", Mode: "inject", RequiresTools: []string{"Bash"}},
 	}
@@ -75,6 +80,7 @@ func TestMergeSkillPolicies_RiteOverridesShared(t *testing.T) {
 }
 
 func TestMergeSkillPolicies_OrderPreserved(t *testing.T) {
+	t.Parallel()
 	shared := []SkillPolicy{
 		{Skill: "a", Mode: "inject"},
 		{Skill: "b", Mode: "inject"},
@@ -105,6 +111,7 @@ func TestMergeSkillPolicies_OrderPreserved(t *testing.T) {
 // --- applySkillPolicies tests ---
 
 func TestApplySkillPolicies_InjectMatchesAll(t *testing.T) {
+	t.Parallel()
 	// Policy with no requires_tools matches any agent
 	fm := map[string]any{
 		"skills": []any{"existing-skill"},
@@ -121,6 +128,7 @@ func TestApplySkillPolicies_InjectMatchesAll(t *testing.T) {
 }
 
 func TestApplySkillPolicies_InjectRequiresTool_Missing(t *testing.T) {
+	t.Parallel()
 	// Agent lacks the required tool — skill should NOT be added
 	fm := map[string]any{
 		"tools": []any{"Read", "Write"},
@@ -136,6 +144,7 @@ func TestApplySkillPolicies_InjectRequiresTool_Missing(t *testing.T) {
 }
 
 func TestApplySkillPolicies_InjectRequiresTool_Present(t *testing.T) {
+	t.Parallel()
 	// Agent has the required tool — skill should be added
 	fm := map[string]any{
 		"tools": []any{"Bash", "Read"},
@@ -151,6 +160,7 @@ func TestApplySkillPolicies_InjectRequiresTool_Present(t *testing.T) {
 }
 
 func TestApplySkillPolicies_RequiresNone_Blocked(t *testing.T) {
+	t.Parallel()
 	// Agent has the blocked tool in disallowedTools — policy should NOT apply
 	fm := map[string]any{
 		"disallowedTools": []any{"Bash"},
@@ -166,6 +176,7 @@ func TestApplySkillPolicies_RequiresNone_Blocked(t *testing.T) {
 }
 
 func TestApplySkillPolicies_RequiresNone_NotBlocked(t *testing.T) {
+	t.Parallel()
 	// Agent does NOT have the blocked tool — policy should apply
 	fm := map[string]any{
 		"disallowedTools": []any{"Write"},
@@ -181,6 +192,7 @@ func TestApplySkillPolicies_RequiresNone_NotBlocked(t *testing.T) {
 }
 
 func TestApplySkillPolicies_ExcludeSpecific(t *testing.T) {
+	t.Parallel()
 	fm := map[string]any{
 		"skill_policy_exclude": []any{"excluded-skill"},
 	}
@@ -196,6 +208,7 @@ func TestApplySkillPolicies_ExcludeSpecific(t *testing.T) {
 }
 
 func TestApplySkillPolicies_ExcludeAll(t *testing.T) {
+	t.Parallel()
 	fm := map[string]any{
 		"skill_policy_exclude": "all",
 		"skills":               []any{"agent-skill"},
@@ -212,6 +225,7 @@ func TestApplySkillPolicies_ExcludeAll(t *testing.T) {
 }
 
 func TestApplySkillPolicies_EmptyRequiresTools_MatchesAll(t *testing.T) {
+	t.Parallel()
 	// No requires_tools means policy matches regardless of agent tools
 	fm := map[string]any{}
 	policies := []SkillPolicy{
@@ -225,6 +239,7 @@ func TestApplySkillPolicies_EmptyRequiresTools_MatchesAll(t *testing.T) {
 }
 
 func TestApplySkillPolicies_Dedup_NoDouble(t *testing.T) {
+	t.Parallel()
 	// Agent already has the skill — no duplicate should be created
 	fm := map[string]any{
 		"skills": []any{"ecosystem-ref"},
@@ -240,6 +255,7 @@ func TestApplySkillPolicies_Dedup_NoDouble(t *testing.T) {
 }
 
 func TestApplySkillPolicies_MultipleOrdering(t *testing.T) {
+	t.Parallel()
 	// Multiple policies — first policy's skill comes first
 	fm := map[string]any{
 		"skills": []any{"agent-skill"},
@@ -258,6 +274,7 @@ func TestApplySkillPolicies_MultipleOrdering(t *testing.T) {
 }
 
 func TestApplySkillPolicies_ReferenceMode_AddsComment(t *testing.T) {
+	t.Parallel()
 	// Reference mode prepends an HTML comment to the body
 	fm := map[string]any{}
 	body := []byte("# Agent Body\n")
@@ -273,6 +290,7 @@ func TestApplySkillPolicies_ReferenceMode_AddsComment(t *testing.T) {
 }
 
 func TestApplySkillPolicies_ReferenceMode_ExactFormat(t *testing.T) {
+	t.Parallel()
 	// Verify the exact comment format produced by reference mode
 	fm := map[string]any{}
 	policies := []SkillPolicy{
@@ -287,6 +305,7 @@ func TestApplySkillPolicies_ReferenceMode_ExactFormat(t *testing.T) {
 }
 
 func TestApplySkillPolicies_DeadReferenceGuard_SkillToolDisallowed(t *testing.T) {
+	t.Parallel()
 	// Agent has Skill in disallowedTools — reference comment must NOT be added
 	fm := map[string]any{
 		"disallowedTools": []any{"Skill"},
@@ -302,6 +321,7 @@ func TestApplySkillPolicies_DeadReferenceGuard_SkillToolDisallowed(t *testing.T)
 }
 
 func TestApplySkillPolicies_DeadReferenceGuard_InjectNotAffected(t *testing.T) {
+	t.Parallel()
 	// Agent has Skill in disallowedTools — inject mode is NOT affected by dead reference guard
 	fm := map[string]any{
 		"disallowedTools": []any{"Skill"},
@@ -317,6 +337,7 @@ func TestApplySkillPolicies_DeadReferenceGuard_InjectNotAffected(t *testing.T) {
 }
 
 func TestApplySkillPolicies_NoopWhenEmpty(t *testing.T) {
+	t.Parallel()
 	fm := map[string]any{
 		"skills": []any{"existing"},
 	}
@@ -328,6 +349,7 @@ func TestApplySkillPolicies_NoopWhenEmpty(t *testing.T) {
 }
 
 func TestApplySkillPolicies_CommaSeperatedTools(t *testing.T) {
+	t.Parallel()
 	// tools field as comma-separated string
 	fm := map[string]any{
 		"tools": "Bash, Read, Write",
@@ -343,6 +365,7 @@ func TestApplySkillPolicies_CommaSeperatedTools(t *testing.T) {
 }
 
 func TestParseToolsSet_YAMLList(t *testing.T) {
+	t.Parallel()
 	fm := map[string]any{
 		"tools": []any{"Bash", "Read"},
 	}
@@ -356,6 +379,7 @@ func TestParseToolsSet_YAMLList(t *testing.T) {
 }
 
 func TestParseToolsSet_CommaSeparated(t *testing.T) {
+	t.Parallel()
 	fm := map[string]any{
 		"tools": "Bash, Read, Write",
 	}
@@ -366,6 +390,7 @@ func TestParseToolsSet_CommaSeparated(t *testing.T) {
 }
 
 func TestParseToolsSet_Missing(t *testing.T) {
+	t.Parallel()
 	fm := map[string]any{}
 	set := parseToolsSet(fm, "tools")
 	if set != nil {
@@ -376,6 +401,7 @@ func TestParseToolsSet_Missing(t *testing.T) {
 // --- Agent override tests ---
 
 func TestApplySkillPolicies_Override_ReferenceToInject(t *testing.T) {
+	t.Parallel()
 	// Policy is reference, agent override says inject → skill added to skills:, no comment
 	fm := map[string]any{
 		"skill_policy_override": []any{
@@ -398,6 +424,7 @@ func TestApplySkillPolicies_Override_ReferenceToInject(t *testing.T) {
 }
 
 func TestApplySkillPolicies_Override_InjectToReference(t *testing.T) {
+	t.Parallel()
 	// Policy is inject, agent override says reference → comment added, not in skills:
 	fm := map[string]any{
 		"skill_policy_override": []any{
@@ -420,6 +447,7 @@ func TestApplySkillPolicies_Override_InjectToReference(t *testing.T) {
 }
 
 func TestApplySkillPolicies_ExcludeWinsOverOverride(t *testing.T) {
+	t.Parallel()
 	// Agent both excludes and overrides same skill — exclude wins, skill skipped entirely
 	fm := map[string]any{
 		"skill_policy_exclude": []any{"conventions"},
@@ -442,6 +470,7 @@ func TestApplySkillPolicies_ExcludeWinsOverOverride(t *testing.T) {
 }
 
 func TestApplySkillPolicies_MixedModes(t *testing.T) {
+	t.Parallel()
 	// Some policies inject, some reference → correct outputs for each
 	fm := map[string]any{}
 	body := []byte("# Body\n")
@@ -468,6 +497,7 @@ func TestApplySkillPolicies_MixedModes(t *testing.T) {
 }
 
 func TestApplySkillPolicies_MultipleReferenceComments_Order(t *testing.T) {
+	t.Parallel()
 	// Multiple reference policies — all comments prepended in policy order
 	fm := map[string]any{}
 	body := []byte("# Body\n")

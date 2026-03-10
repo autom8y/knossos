@@ -107,6 +107,7 @@ func newTestMaterializer(projectDir, knossosHome, userClaudeDir string) *Materia
 
 // TestUnifiedSync_RiteOnly tests scope=rite with a valid rite
 func TestUnifiedSync_RiteOnly(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
@@ -135,6 +136,7 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 
 // TestUnifiedSync_UserOnly tests scope=user without project context
 func TestUnifiedSync_UserOnly(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
 	projectDir := t.TempDir() // Empty project (no rite)
@@ -162,6 +164,7 @@ func TestUnifiedSync_UserOnly(t *testing.T) {
 
 // TestUnifiedSync_ScopeAll tests default scope (rite + user)
 func TestUnifiedSync_ScopeAll(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
@@ -193,6 +196,7 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 
 // TestUnifiedSync_NoActiveRite_ScopeAll tests graceful degradation
 func TestUnifiedSync_NoActiveRite_ScopeAll(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosHome := t.TempDir()
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
@@ -219,6 +223,7 @@ func TestUnifiedSync_NoActiveRite_ScopeAll(t *testing.T) {
 
 // TestUnifiedSync_NoActiveRite_ScopeRite tests error case
 func TestUnifiedSync_NoActiveRite_ScopeRite(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 
 	resolver := paths.NewResolver(projectDir)
@@ -236,6 +241,7 @@ func TestUnifiedSync_NoActiveRite_ScopeRite(t *testing.T) {
 
 // TestUnifiedSync_CollisionDetection tests user file shadowing rite
 func TestUnifiedSync_CollisionDetection(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
@@ -286,6 +292,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 
 // TestUnifiedSync_RecoveryMode tests --recover
 func TestUnifiedSync_RecoveryMode(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
 
@@ -328,6 +335,7 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 
 // TestUnifiedSync_OverwriteDiverged tests --overwrite-diverged
 func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
 
@@ -382,6 +390,7 @@ func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 
 // TestUnifiedSync_KeepOrphans tests --keep-orphans
 func TestUnifiedSync_KeepOrphans(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
 
@@ -426,6 +435,7 @@ func TestUnifiedSync_KeepOrphans(t *testing.T) {
 
 // TestUnifiedSync_ResourceFilter tests --resource flag
 func TestUnifiedSync_ResourceFilter(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
 
@@ -457,6 +467,7 @@ func TestUnifiedSync_ResourceFilter(t *testing.T) {
 
 // TestUnifiedSync_DryRun tests --dry-run for both scopes
 func TestUnifiedSync_DryRun(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
@@ -490,6 +501,7 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 
 // TestUnifiedSync_Idempotency tests running sync twice
 func TestUnifiedSync_Idempotency(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
@@ -555,6 +567,7 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 // are surfaced in scope=all mode instead of being silently swallowed.
 // Regression test for R1: error surfacing in Sync().
 func TestSync_ScopeAll_RiteError_SurfacesError(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 
 	// Write ACTIVE_RITE pointing to a non-existent rite
@@ -581,6 +594,7 @@ func TestSync_ScopeAll_RiteError_SurfacesError(t *testing.T) {
 // TestSync_ScopeRite_Error_StillFails verifies that scope=rite errors
 // are still returned as top-level errors (unchanged behavior).
 func TestSync_ScopeRite_Error_StillFails(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 
 	// Write ACTIVE_RITE pointing to a non-existent rite
@@ -602,6 +616,7 @@ func TestSync_ScopeRite_Error_StillFails(t *testing.T) {
 // CLAUDE.md pre-validation prevents partial state when template rendering fails.
 // Regression test for R2: pre-validation gate.
 func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "bad-rite")
@@ -674,6 +689,7 @@ func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 // so cross-cutting mode still has core features available.
 // Regression test for: shared mena missing in no-rite sync.
 func TestMinimalMode_ProjectsSharedMena(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 
 	projectDir := t.TempDir()

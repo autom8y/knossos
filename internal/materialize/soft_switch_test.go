@@ -11,6 +11,7 @@ import (
 
 // TestMaterializeWithOptions_SoftMode_AgentsUpdated verifies that agents/ directory is updated in soft mode.
 func TestMaterializeWithOptions_SoftMode_AgentsUpdated(t *testing.T) {
+	t.Parallel()
 	// Setup test directory
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
@@ -77,6 +78,7 @@ agents:
 
 // TestMaterializeWithOptions_SoftMode_CLAUDEmdUpdated verifies that CLAUDE.md is updated in soft mode.
 func TestMaterializeWithOptions_SoftMode_CLAUDEmdUpdated(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -117,6 +119,7 @@ agents:
 
 // TestMaterializeWithOptions_SoftMode_MenaSkipped verifies that commands/ and skills/ are NOT updated in soft mode.
 func TestMaterializeWithOptions_SoftMode_MenaSkipped(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -211,6 +214,7 @@ legomena:
 
 // TestMaterializeWithOptions_SoftMode_SettingsSkipped verifies that settings.local.json is NOT updated in soft mode.
 func TestMaterializeWithOptions_SoftMode_SettingsSkipped(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -273,6 +277,7 @@ mcp_servers:
 
 // TestMaterializeWithOptions_SoftMode_ActiveRiteUpdated verifies that ACTIVE_RITE is updated in soft mode.
 func TestMaterializeWithOptions_SoftMode_ActiveRiteUpdated(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -319,6 +324,7 @@ agents:
 
 // TestMaterializeWithOptions_SoftMode_ResultReporting verifies that result correctly reports soft mode status.
 func TestMaterializeWithOptions_SoftMode_ResultReporting(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -376,6 +382,7 @@ agents:
 
 // TestMaterializeWithOptions_FullMode_Unchanged verifies that full mode still runs all stages.
 func TestMaterializeWithOptions_FullMode_Unchanged(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 

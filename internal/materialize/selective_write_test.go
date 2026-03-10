@@ -13,6 +13,7 @@ import (
 // TestMaterializeAgents_PreservesUserAgents verifies that user-created agents
 // in .claude/agents/ survive materialization (selective write, not destructive nuke).
 func TestMaterializeAgents_PreservesUserAgents(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
@@ -47,6 +48,7 @@ func TestMaterializeAgents_PreservesUserAgents(t *testing.T) {
 // TestMaterializeAgents_KeepAllPreservesOrphans verifies that orphan agents
 // from a previous rite survive with KeepAll (the default) after rite switch.
 func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
@@ -84,6 +86,7 @@ func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 // TestSyncMena_PreservesUserCommands verifies that user-created commands
 // in .claude/commands/ survive destructive mode projection.
 func TestSyncMena_PreservesUserCommands(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create mena source with one command
@@ -132,6 +135,7 @@ func TestSyncMena_PreservesUserCommands(t *testing.T) {
 // TestSyncMena_PreservesUserSkills verifies that user-created skills
 // in .claude/skills/ survive destructive mode projection.
 func TestSyncMena_PreservesUserSkills(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create mena source with one legomena
@@ -177,6 +181,7 @@ func TestSyncMena_PreservesUserSkills(t *testing.T) {
 // TestSyncMena_CleansStaleCompanionFiles verifies that when a managed entry
 // is re-projected with fewer files, stale companion files are cleaned.
 func TestSyncMena_CleansStaleCompanionFiles(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	commandsDir := filepath.Join(tmpDir, "commands")
@@ -231,6 +236,7 @@ func TestSyncMena_CleansStaleCompanionFiles(t *testing.T) {
 // TestMaterialize_NoSkipGuard_AlwaysRuns verifies that MaterializeWithOptions
 // runs the full pipeline even when already on the same rite (skip guard removed).
 func TestMaterialize_NoSkipGuard_AlwaysRuns(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")

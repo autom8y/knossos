@@ -75,6 +75,7 @@ func setupSatelliteRite(t *testing.T, riteName string) string {
 // This test covers the primary gap: satellite-local rites previously resolved shared mena
 // from {satellite}/rites/shared/mena/ which does not exist, silently dropping all 12 shared entries.
 func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t *testing.T) {
+	t.Parallel()
 	// Set up a fake knossos home with shared rite mena
 	knossosHome := t.TempDir()
 	setupKnossosRiteSharedMena(t, knossosHome)
@@ -128,6 +129,7 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 // that dependency rite mena resolves from $KNOSSOS_HOME/rites/{dep}/mena/ when the
 // active rite declares dependencies on knossos-core rites.
 func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHome(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 	setupKnossosRiteSharedMena(t, knossosHome)
 	setupKnossosRiteDepMena(t, knossosHome, "10x-dev")
@@ -177,6 +179,7 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 // TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared verifies that
 // rite-local mena overrides same-named shared mena (rite > shared priority).
 func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T) {
+	t.Parallel()
 	knossosHome := t.TempDir()
 	setupKnossosRiteSharedMena(t, knossosHome)
 
@@ -239,6 +242,7 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 // its own rites (the self-hosting case) continues to work correctly after the fix.
 // In this case ritesBase == KNOSSOS_HOME/rites/ so the fix should be a no-op.
 func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
+	t.Parallel()
 	// Simulate the knossos self-hosting case: projectRoot == knossosHome
 	// Both the rite and shared/ are in the same rites/ directory.
 	knossosHome := t.TempDir()

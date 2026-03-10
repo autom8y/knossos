@@ -12,6 +12,7 @@ import (
 )
 
 func TestCleanupThroughlineIDs_RiteSwitch(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	sosDir := filepath.Join(projectDir, ".sos")
 	sessionsDir := filepath.Join(sosDir, "sessions")
@@ -71,6 +72,7 @@ func TestCleanupThroughlineIDs_RiteSwitch(t *testing.T) {
 }
 
 func TestCleanupThroughlineIDs_SameRiteNoCleanup(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	sosDir := filepath.Join(projectDir, ".sos")
 	sessionsDir := filepath.Join(sosDir, "sessions")
@@ -119,6 +121,7 @@ func TestCleanupThroughlineIDs_SameRiteNoCleanup(t *testing.T) {
 }
 
 func TestCleanupThroughlineIDs_NoSessionDirs(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 
@@ -157,6 +160,7 @@ func TestCleanupThroughlineIDs_NoSessionDirs(t *testing.T) {
 }
 
 func TestCleanupThroughlineIDs_SkipsNonSessionDirs(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	sosDir := filepath.Join(projectDir, ".sos")
 	sessionsDir := filepath.Join(sosDir, "sessions")
@@ -222,6 +226,7 @@ func TestCleanupThroughlineIDs_SkipsNonSessionDirs(t *testing.T) {
 }
 
 func TestCleanupThroughlineIDs_DryRunSkipsCleanup(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	sosDir := filepath.Join(projectDir, ".sos")
 	sessionsDir := filepath.Join(sosDir, "sessions")

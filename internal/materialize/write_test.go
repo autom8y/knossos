@@ -11,6 +11,7 @@ import (
 )
 
 func TestWriteIfChanged_SkipsIdentical(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	target := filepath.Join(tmpDir, "test.txt")
 
@@ -22,6 +23,7 @@ func TestWriteIfChanged_SkipsIdentical(t *testing.T) {
 }
 
 func TestWriteIfChanged_WritesWhenDifferent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	target := filepath.Join(tmpDir, "test.txt")
 

@@ -29,6 +29,7 @@ import (
 // presence rather than a compile-time guard, so that a re-introduction is caught at
 // test time with a clear failure message rather than silently compiling.
 func TestSCAR002_StagedMaterializeAbsent(t *testing.T) {
+	t.Parallel()
 	materializerType := reflect.TypeFor[*Materializer]()
 
 	_, exists := materializerType.MethodByName("StagedMaterialize")
@@ -47,6 +48,7 @@ func TestSCAR002_StagedMaterializeAbsent(t *testing.T) {
 // This test fails if directory-rename logic is re-introduced into the materialization
 // pipeline, regardless of whether it is inside StagedMaterialize or any other path.
 func TestSCAR002_MaterializeWithOptions_NoClaudeRename(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
@@ -96,6 +98,7 @@ func TestSCAR002_MaterializeWithOptions_NoClaudeRename(t *testing.T) {
 // be parsed) and asserts that MaterializeWithOptions returns a non-nil error rather than
 // silently bootstrapping. The test fails if error handling is reverted to silent discard.
 func TestSCAR004_CorruptProvenanceManifest_PropagatesError(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
@@ -143,6 +146,7 @@ func TestSCAR004_CorruptProvenanceManifest_PropagatesError(t *testing.T) {
 // "ari hook budget" entry does NOT have async: true. It fails immediately if async is
 // re-introduced, catching the regression at test time rather than in production.
 func TestSCAR008_BudgetHook_MustNotBeAsync(t *testing.T) {
+	t.Parallel()
 	// Resolve the repository root from this file's location.
 	// This test file lives at internal/materialize/scar_regression_test.go;
 	// the repo root is 2 directories up.
@@ -202,6 +206,7 @@ func parseHooksYAMLForSCAR008(t *testing.T, data []byte) ([]hooks.HookEntry, err
 // This test verifies that cross-rite agents from a top-level agents/ directory are NOT
 // materialized into project-level .claude/agents/ during rite-scope sync.
 func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	claudeDir := filepath.Join(projectDir, ".claude")
@@ -246,6 +251,7 @@ func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 // Both the parse-error and validation-error paths must propagate errors — this test
 // covers the second path to ensure neither can be silently swallowed independently.
 func TestSCAR004_InvalidSchemaProvenanceManifest_PropagatesError(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
@@ -301,6 +307,7 @@ func repoRootFromThisFile(t *testing.T) string {
 // scripts (e2e-validate.sh, etc.) are excluded because their echo output to stdout
 // is intentional user-facing output, not log contamination.
 func TestSCAR015_ShellScripts_StderrLogging(t *testing.T) {
+	t.Parallel()
 	repoRoot := repoRootFromThisFile(t)
 
 	// Only check shell scripts in sync-related paths (the original SCAR domain).
@@ -388,6 +395,7 @@ func TestSCAR015_ShellScripts_StderrLogging(t *testing.T) {
 // This test scans all .sh files for ((var++)) patterns that lack the || true guard.
 // It fails if an unprotected arithmetic increment is found in any shell script.
 func TestSCAR016_ShellScripts_NoUnprotectedArithmeticIncrement(t *testing.T) {
+	t.Parallel()
 	repoRoot := repoRootFromThisFile(t)
 
 	// Pattern: ((identifier++)) or ((identifier--)) without || true
@@ -450,6 +458,7 @@ func TestSCAR016_ShellScripts_NoUnprotectedArithmeticIncrement(t *testing.T) {
 // explicit instructions for session ID extraction and passing.
 // Updated post-3cf6c15: legacy dromena (continue, park, wrap) removed; sos added.
 func TestSCAR020_SessionDromena_ExplicitSessionIDPassing(t *testing.T) {
+	t.Parallel()
 	repoRoot := repoRootFromThisFile(t)
 
 	// Session dromena that must explicitly instruct session ID passing.
@@ -470,6 +479,7 @@ func TestSCAR020_SessionDromena_ExplicitSessionIDPassing(t *testing.T) {
 
 	for _, dromenon := range sessionDromena {
 		t.Run(filepath.Base(filepath.Dir(dromenon)), func(t *testing.T) {
+			t.Parallel()
 			path := filepath.Join(repoRoot, dromenon)
 			data, err := os.ReadFile(path)
 			if os.IsNotExist(err) {
@@ -508,6 +518,7 @@ func TestSCAR020_SessionDromena_ExplicitSessionIDPassing(t *testing.T) {
 // frontmatter markers. Template/schema/example files are excluded because
 // they legitimately reference session_id as a field definition.
 func TestSCAR027_SharedMena_NoSessionArtifacts(t *testing.T) {
+	t.Parallel()
 	repoRoot := repoRootFromThisFile(t)
 
 	// Session artifact frontmatter markers.

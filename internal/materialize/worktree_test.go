@@ -12,6 +12,7 @@ import (
 // TestIsGitWorktree_MainWorktree verifies that a freshly initialised git repository
 // (the main worktree) is not reported as a linked worktree.
 func TestIsGitWorktree_MainWorktree(t *testing.T) {
+	t.Parallel()
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	if isGitWorktree(fix.MainDir) {
@@ -22,6 +23,7 @@ func TestIsGitWorktree_MainWorktree(t *testing.T) {
 // TestIsGitWorktree_LinkedWorktree verifies that a linked worktree (created via
 // `git worktree add`) is correctly identified.
 func TestIsGitWorktree_LinkedWorktree(t *testing.T) {
+	t.Parallel()
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	if !isGitWorktree(fix.WorktreeDir) {
@@ -32,6 +34,7 @@ func TestIsGitWorktree_LinkedWorktree(t *testing.T) {
 // TestIsGitWorktree_NonGitDir verifies that a plain directory (not a git repo)
 // returns false without panicking.
 func TestIsGitWorktree_NonGitDir(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	if isGitWorktree(tmpDir) {
 		t.Error("isGitWorktree() on non-git dir should return false")
@@ -41,6 +44,7 @@ func TestIsGitWorktree_NonGitDir(t *testing.T) {
 // TestGetMainWorktreeDir_FromLinkedWorktree verifies that getMainWorktreeDir
 // returns the main worktree directory when called from a linked worktree.
 func TestGetMainWorktreeDir_FromLinkedWorktree(t *testing.T) {
+	t.Parallel()
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	mainDir, err := getMainWorktreeDir(fix.WorktreeDir)
@@ -66,6 +70,7 @@ func TestGetMainWorktreeDir_FromLinkedWorktree(t *testing.T) {
 // TestGetMainWorktreeDir_FromMainWorktree verifies that getMainWorktreeDir
 // returns an error when called from the main worktree (it is not a linked worktree).
 func TestGetMainWorktreeDir_FromMainWorktree(t *testing.T) {
+	t.Parallel()
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	_, err := getMainWorktreeDir(fix.MainDir)
@@ -78,6 +83,7 @@ func TestGetMainWorktreeDir_FromMainWorktree(t *testing.T) {
 // `ari sync` is run from a linked worktree (no ACTIVE_RITE present), it
 // inherits the rite from the main worktree's .knossos/ACTIVE_RITE.
 func TestSyncRiteScope_InWorktree_InheritsRite(t *testing.T) {
+	t.Parallel()
 	// Use an isolated dir for knossos home so only test rites are visible.
 	isolatedHome := t.TempDir()
 
@@ -145,6 +151,7 @@ hooks: []
 // that when neither the worktree nor the main worktree has an ACTIVE_RITE, sync
 // falls through to minimal mode.
 func TestSyncRiteScope_InWorktree_NoMainRite_FallsToMinimal(t *testing.T) {
+	t.Parallel()
 	isolatedHome := t.TempDir()
 
 	fix := worktreefixture.SetupWorktreeTestFixture(t)

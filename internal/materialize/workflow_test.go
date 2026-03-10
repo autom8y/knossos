@@ -13,6 +13,7 @@ import (
 )
 
 func TestMaterializeWorkflow_WritesFile(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
@@ -40,6 +41,7 @@ func TestMaterializeWorkflow_WritesFile(t *testing.T) {
 }
 
 func TestMaterializeWorkflow_NoWorkflowFile(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
@@ -65,6 +67,7 @@ func TestMaterializeWorkflow_NoWorkflowFile(t *testing.T) {
 }
 
 func TestMaterializeWorkflow_RemovesStaleOnNoWorkflow(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
@@ -95,6 +98,7 @@ func TestMaterializeWorkflow_RemovesStaleOnNoWorkflow(t *testing.T) {
 }
 
 func TestMaterializeWorkflow_Idempotent(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
@@ -123,6 +127,7 @@ func TestMaterializeWorkflow_Idempotent(t *testing.T) {
 }
 
 func TestMaterializeWorkflow_EmbeddedSource(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
@@ -149,6 +154,7 @@ func TestMaterializeWorkflow_EmbeddedSource(t *testing.T) {
 }
 
 func TestMaterializeWorkflow_OverwritesOld(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))

@@ -13,6 +13,7 @@ import (
 )
 
 func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	rulesDir := filepath.Join(claudeDir, "rules")
@@ -46,6 +47,7 @@ func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
 }
 
 func TestMaterializeRules_PreservesUserRules(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	rulesDir := filepath.Join(claudeDir, "rules")
@@ -88,6 +90,7 @@ func TestMaterializeRules_PreservesUserRules(t *testing.T) {
 }
 
 func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	rulesDir := filepath.Join(claudeDir, "rules")
@@ -119,6 +122,7 @@ func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
 }
 
 func TestMaterializeRules_Idempotent(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "rules"), 0755))
@@ -154,6 +158,7 @@ func TestMaterializeRules_Idempotent(t *testing.T) {
 // Template rules are knossos-internal development guides (internal/**, rites/**, etc.)
 // and are harmful noise on foreign (non-knossos) projects.
 func TestMaterializeRules_EmbeddedSource(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	rulesDir := filepath.Join(claudeDir, "rules")

@@ -40,6 +40,7 @@ func setupRite(t *testing.T, ritesDir, riteName, workflowContent string, agents 
 }
 
 func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
@@ -161,6 +162,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 }
 
 func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(knossosDir, "rites")
@@ -205,6 +207,7 @@ func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 }
 
 func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
@@ -273,6 +276,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 }
 
 func TestRiteSwitchIntegration_SyncStateJSON(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 

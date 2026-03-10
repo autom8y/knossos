@@ -14,6 +14,7 @@ import (
 // rite.RiteManifest parse the same manifest.yaml fields identically.
 // This test catches schema drift between the two subset projections.
 func TestRiteManifestDrift(t *testing.T) {
+	t.Parallel()
 	candidates := []string{
 		"../../rites/10x-dev/manifest.yaml",
 		"../../rites/shared/manifest.yaml",
@@ -28,6 +29,7 @@ func TestRiteManifestDrift(t *testing.T) {
 		tested++
 
 		t.Run(path, func(t *testing.T) {
+			t.Parallel()
 			// Parse as materialize.RiteManifest
 			var matManifest RiteManifest
 			require.NoError(t, yaml.Unmarshal(data, &matManifest))

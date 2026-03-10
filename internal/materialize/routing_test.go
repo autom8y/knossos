@@ -12,6 +12,7 @@ import (
 // TestRoutingDroToCommands verifies that INDEX.dro.md files
 // are routed to .claude/commands/ with extension stripped
 func TestRoutingDroToCommands(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -71,6 +72,7 @@ This is a test command.
 // TestRoutingLegoToSkills verifies that INDEX.lego.md files
 // are routed to .claude/skills/ with extension stripped
 func TestRoutingLegoToSkills(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -126,6 +128,7 @@ This is a test reference.
 // TestRoutingDefaultIsDro verifies that commands with plain INDEX.md
 // default to dromena routing (.claude/commands/) for backward compatibility
 func TestRoutingDefaultIsDro(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -176,6 +179,7 @@ This command has a plain INDEX.md and should default to dromena routing.
 // are routed to the same destination as the INDEX file based on extension,
 // and that INDEX extension is stripped in output
 func TestRoutingSupportingFilesFollowIndex(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -252,6 +256,7 @@ This is a test reference with supporting files.
 // TestRoutingMixedMena verifies that multiple mena with different
 // extensions are routed to their correct destinations with extensions stripped
 func TestRoutingMixedMena(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
@@ -349,6 +354,7 @@ description: A default command
 // (e.g., guidance/standards with INDEX.lego.md) were incorrectly routed to commands/.
 // Also verifies extension stripping in projected output.
 func TestRoutingNestedGrouping(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
@@ -455,6 +461,7 @@ description: A flat command
 // repopulates commands/ and skills/ even when output dirs are wiped between
 // invocations. This validates the idempotent re-projection behavior.
 func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
@@ -520,6 +527,7 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 
 // TestDetectMenaType verifies the extension-based type detection
 func TestDetectMenaType(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		filename string
 		expected string
@@ -535,6 +543,7 @@ func TestDetectMenaType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.filename, func(t *testing.T) {
+			t.Parallel()
 			got := DetectMenaType(tt.filename)
 			if got != tt.expected {
 				t.Errorf("DetectMenaType(%q) = %q, want %q", tt.filename, got, tt.expected)
