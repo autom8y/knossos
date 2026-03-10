@@ -28,6 +28,7 @@ create -> station 1 (work) -> proceed -> station 2 (work) -> ... -> final statio
 
 - [handoff-schema.md](handoff-schema.md) -- Required YAML frontmatter fields for handoff artifacts
 - [transition-protocol.md](transition-protocol.md) -- Proceed, recede, and abandon operation semantics
+- [execution-protocol.md](execution-protocol.md) -- Generic station orchestration protocol (Phases 1-3, loop handling, throughline)
 
 ## CLI Commands
 
