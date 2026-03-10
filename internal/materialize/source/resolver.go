@@ -64,6 +64,11 @@ func (r *SourceResolver) KnossosHome() string {
 	return r.knossosHome
 }
 
+// ActiveOrg returns the resolved active org name.
+func (r *SourceResolver) ActiveOrg() string {
+	return r.activeOrg
+}
+
 // WithEmbeddedFS sets the embedded filesystem for fallback rite resolution.
 // Returns the receiver for method chaining.
 func (r *SourceResolver) WithEmbeddedFS(fsys fs.FS) *SourceResolver {

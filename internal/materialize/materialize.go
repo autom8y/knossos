@@ -104,6 +104,7 @@ type Materializer struct {
 	embeddedProcessions fs.FS   // Embedded procession templates (fallback for resolution)
 	userClaudeDir       string  // If set, user-scope sync writes here instead of paths.UserClaudeDir()
 	xdgDataDir          string  // If set, used for XDG mena path instead of config.XDGDataDir()
+	knossosHome         string  // If set, used for archetype/procession resolution instead of config.KnossosHome()
 }
 
 // NewMaterializer creates a new materializer with default source resolution.
