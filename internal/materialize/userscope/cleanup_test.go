@@ -21,6 +21,7 @@ func manifestNames() []string {
 }
 
 func TestCleanupOldManifests_RemovesBackups(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create only .v2-backup files (simulates a satellite that ran previous migration)
@@ -39,6 +40,7 @@ func TestCleanupOldManifests_RemovesBackups(t *testing.T) {
 }
 
 func TestCleanupOldManifests_RemovesOriginals(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create only the original JSON manifests (no backups)
@@ -62,6 +64,7 @@ func TestCleanupOldManifests_RemovesOriginals(t *testing.T) {
 }
 
 func TestCleanupOldManifests_BothPresent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create both originals and .v2-backup files
@@ -86,6 +89,7 @@ func TestCleanupOldManifests_BothPresent(t *testing.T) {
 }
 
 func TestCleanupOldManifests_NonePresent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Should complete without errors when no files exist
@@ -95,6 +99,7 @@ func TestCleanupOldManifests_NonePresent(t *testing.T) {
 }
 
 func TestCleanupOldManifests_PartialPresence(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	names := manifestNames()
 

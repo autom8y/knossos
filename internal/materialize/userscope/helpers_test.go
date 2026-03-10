@@ -10,6 +10,7 @@ import (
 )
 
 func TestIsExecutableFile(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		path string
@@ -33,6 +34,7 @@ func TestIsExecutableFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := isExecutableFile(tt.path)
 			if got != tt.want {
 				t.Errorf("isExecutableFile(%q) = %v, want %v", tt.path, got, tt.want)
@@ -42,6 +44,7 @@ func TestIsExecutableFile(t *testing.T) {
 }
 
 func TestResourcePrefixForType(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		resource SyncResource
 		want     string
@@ -54,6 +57,7 @@ func TestResourcePrefixForType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(string(tt.resource), func(t *testing.T) {
+			t.Parallel()
 			got := resourcePrefixForType(tt.resource)
 			if got != tt.want {
 				t.Errorf("resourcePrefixForType(%q) = %q, want %q", tt.resource, got, tt.want)
@@ -63,6 +67,7 @@ func TestResourcePrefixForType(t *testing.T) {
 }
 
 func TestSyncResourceIsValid(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		resource SyncResource
 		want     bool
@@ -77,6 +82,7 @@ func TestSyncResourceIsValid(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(string(tt.resource), func(t *testing.T) {
+			t.Parallel()
 			got := tt.resource.IsValid()
 			if got != tt.want {
 				t.Errorf("SyncResource(%q).IsValid() = %v, want %v", tt.resource, got, tt.want)
@@ -86,7 +92,9 @@ func TestSyncResourceIsValid(t *testing.T) {
 }
 
 func TestErrorConstructors(t *testing.T) {
+	t.Parallel()
 	t.Run("ErrKnossosHomeNotSet", func(t *testing.T) {
+		t.Parallel()
 		err := ErrKnossosHomeNotSet()
 		if err == nil {
 			t.Fatal("expected non-nil error")
@@ -101,6 +109,7 @@ func TestErrorConstructors(t *testing.T) {
 	})
 
 	t.Run("ErrInvalidResourceType", func(t *testing.T) {
+		t.Parallel()
 		err := ErrInvalidResourceType()
 		if err == nil {
 			t.Fatal("expected non-nil error")
@@ -112,7 +121,9 @@ func TestErrorConstructors(t *testing.T) {
 }
 
 func TestCopyUserFile(t *testing.T) {
+	t.Parallel()
 	t.Run("copies content", func(t *testing.T) {
+		t.Parallel()
 		tmpDir := t.TempDir()
 		srcPath := filepath.Join(tmpDir, "source.md")
 		dstPath := filepath.Join(tmpDir, "dest.md")
@@ -134,6 +145,7 @@ func TestCopyUserFile(t *testing.T) {
 	})
 
 	t.Run("creates parent directory", func(t *testing.T) {
+		t.Parallel()
 		tmpDir := t.TempDir()
 		srcPath := filepath.Join(tmpDir, "source.md")
 		dstPath := filepath.Join(tmpDir, "nested", "deep", "dest.md")
@@ -150,6 +162,7 @@ func TestCopyUserFile(t *testing.T) {
 	})
 
 	t.Run("sets executable bit for scripts", func(t *testing.T) {
+		t.Parallel()
 		tmpDir := t.TempDir()
 		srcPath := filepath.Join(tmpDir, "hook.sh")
 		dstPath := filepath.Join(tmpDir, "dest", "hook.sh")
@@ -172,7 +185,9 @@ func TestCopyUserFile(t *testing.T) {
 }
 
 func TestRemoveUserOrphan(t *testing.T) {
+	t.Parallel()
 	t.Run("removes knossos-owned file", func(t *testing.T) {
+		t.Parallel()
 		tmpDir := t.TempDir()
 		agentPath := filepath.Join(tmpDir, "agents", "orphan.md")
 		os.MkdirAll(filepath.Dir(agentPath), 0755)
@@ -200,6 +215,7 @@ func TestRemoveUserOrphan(t *testing.T) {
 	})
 
 	t.Run("skips user-owned", func(t *testing.T) {
+		t.Parallel()
 		tmpDir := t.TempDir()
 		agentPath := filepath.Join(tmpDir, "agents", "user-agent.md")
 		os.MkdirAll(filepath.Dir(agentPath), 0755)
@@ -227,6 +243,7 @@ func TestRemoveUserOrphan(t *testing.T) {
 	})
 
 	t.Run("handles nil entry", func(t *testing.T) {
+		t.Parallel()
 		tmpDir := t.TempDir()
 		manifest := &provenance.ProvenanceManifest{
 			Entries: map[string]*provenance.ProvenanceEntry{},
@@ -236,6 +253,7 @@ func TestRemoveUserOrphan(t *testing.T) {
 	})
 
 	t.Run("removes directory entry", func(t *testing.T) {
+		t.Parallel()
 		tmpDir := t.TempDir()
 		dirPath := filepath.Join(tmpDir, "commands", "my-cmd")
 		os.MkdirAll(dirPath, 0755)
@@ -259,6 +277,7 @@ func TestRemoveUserOrphan(t *testing.T) {
 }
 
 func TestFindMenaSource(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	menaDir := filepath.Join(tmpDir, "mena")
 
@@ -275,6 +294,7 @@ func TestFindMenaSource(t *testing.T) {
 	os.WriteFile(filepath.Join(menaDir, "plain.md"), []byte("# Plain"), 0644)
 
 	t.Run("finds dro variant", func(t *testing.T) {
+		t.Parallel()
 		src, _ := findMenaSource(filepath.Join(menaDir, "my-cmd"), "INDEX.md")
 		if src == "" {
 			t.Error("expected to find dro variant of INDEX.md")
@@ -282,6 +302,7 @@ func TestFindMenaSource(t *testing.T) {
 	})
 
 	t.Run("finds lego variant", func(t *testing.T) {
+		t.Parallel()
 		src, _ := findMenaSource(filepath.Join(menaDir, "my-skill"), "INDEX.md")
 		if src == "" {
 			t.Error("expected to find lego variant of INDEX.md")
@@ -289,6 +310,7 @@ func TestFindMenaSource(t *testing.T) {
 	})
 
 	t.Run("finds exact match", func(t *testing.T) {
+		t.Parallel()
 		src, _ := findMenaSource(menaDir, "plain.md")
 		if src == "" {
 			t.Error("expected to find exact match for plain.md")
@@ -296,6 +318,7 @@ func TestFindMenaSource(t *testing.T) {
 	})
 
 	t.Run("returns empty for missing file", func(t *testing.T) {
+		t.Parallel()
 		src, _ := findMenaSource(menaDir, "nonexistent.md")
 		if src != "" {
 			t.Errorf("expected empty path for missing file, got %q", src)
@@ -304,6 +327,7 @@ func TestFindMenaSource(t *testing.T) {
 }
 
 func TestCountUserCollisions(t *testing.T) {
+	t.Parallel()
 	skipped := []UserSkippedEntry{
 		{Name: "agents/a.md", Reason: "collision with rite resource"},
 		{Name: "agents/b.md", Reason: "user-created"},
@@ -318,6 +342,7 @@ func TestCountUserCollisions(t *testing.T) {
 }
 
 func TestMatchesKnossosKey(t *testing.T) {
+	t.Parallel()
 	keys := map[string]bool{
 		"commands/spike/":    true,
 		"commands/spike.md":  true,
@@ -340,6 +365,7 @@ func TestMatchesKnossosKey(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := matchesKnossosKey(tt.key, keys)
 			if got != tt.want {
 				t.Errorf("matchesKnossosKey(%q) = %v, want %v", tt.key, got, tt.want)

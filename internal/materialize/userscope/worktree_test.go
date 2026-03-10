@@ -16,6 +16,7 @@ import (
 // The worktree has no .knossos/ at all. worktreeMainDir() should resolve to
 // the main worktree, and NewCollisionChecker(mainKnossosDir) should succeed.
 func TestCollisionChecker_InWorktree_FallsBackToMainProvenance(t *testing.T) {
+	t.Parallel()
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	// Worktree has no .knossos/ — the directory does not exist yet.
@@ -59,6 +60,7 @@ func TestCollisionChecker_InWorktree_FallsBackToMainProvenance(t *testing.T) {
 // but the main checker is also ineffective, so the caller must treat
 // IsEffective() = false as a "skip all writes" signal.
 func TestCollisionChecker_InWorktree_NoMainProvenance_FailsClosed(t *testing.T) {
+	t.Parallel()
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	// Remove the provenance manifest from the main worktree to simulate a
@@ -100,6 +102,7 @@ func TestCollisionChecker_InWorktree_NoMainProvenance_FailsClosed(t *testing.T) 
 // TestWorktreeMainDir_NotInWorktree verifies that worktreeMainDir returns an
 // error when called from a plain directory (not a git repo or main worktree).
 func TestWorktreeMainDir_NotInWorktree(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	_, err := worktreeMainDir(tmpDir)
 	if err == nil {
@@ -110,6 +113,7 @@ func TestWorktreeMainDir_NotInWorktree(t *testing.T) {
 // TestWorktreeMainDir_FromLinkedWorktree verifies that worktreeMainDir correctly
 // returns the main worktree path when called from a linked worktree.
 func TestWorktreeMainDir_FromLinkedWorktree(t *testing.T) {
+	t.Parallel()
 	fix := worktreefixture.SetupWorktreeTestFixture(t)
 
 	got, err := worktreeMainDir(fix.WorktreeDir)

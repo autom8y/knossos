@@ -29,6 +29,7 @@ func setupAgentSync(t *testing.T, agentFiles map[string]string) (string, string)
 }
 
 func TestSyncUserResource_AddsNewAgent(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"pythia.md": "# Pythia Agent\nPrompt content.\n",
 	})
@@ -69,6 +70,7 @@ func TestSyncUserResource_AddsNewAgent(t *testing.T) {
 }
 
 func TestSyncUserResource_SkipsUserOwned(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"my-agent.md": "# New Source Content\n",
 	})
@@ -108,6 +110,7 @@ func TestSyncUserResource_SkipsUserOwned(t *testing.T) {
 }
 
 func TestSyncUserResource_UpdatesKnossosOwned(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Updated Source Content\n",
 	})
@@ -148,6 +151,7 @@ func TestSyncUserResource_UpdatesKnossosOwned(t *testing.T) {
 }
 
 func TestSyncUserResource_UnchangedKnossosOwned(t *testing.T) {
+	t.Parallel()
 	content := "# Same Content\n"
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent.md": content,
@@ -181,6 +185,7 @@ func TestSyncUserResource_UnchangedKnossosOwned(t *testing.T) {
 }
 
 func TestSyncUserResource_SkipsDiverged(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# New Source Content\n",
 	})
@@ -219,6 +224,7 @@ func TestSyncUserResource_SkipsDiverged(t *testing.T) {
 }
 
 func TestSyncUserResource_OverwritesDiverged(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# New Source\n",
 	})
@@ -256,6 +262,7 @@ func TestSyncUserResource_OverwritesDiverged(t *testing.T) {
 }
 
 func TestSyncUserResource_CollisionSkipped(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"pythia.md": "# Pythia\n",
 	})
@@ -286,6 +293,7 @@ func TestSyncUserResource_CollisionSkipped(t *testing.T) {
 }
 
 func TestSyncUserResource_OrphanRemoval(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"keeper.md": "# Keeper\n",
 	})
@@ -322,6 +330,7 @@ func TestSyncUserResource_OrphanRemoval(t *testing.T) {
 }
 
 func TestSyncUserResource_DryRun(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"new-agent.md": "# New Agent\n",
 	})
@@ -356,6 +365,7 @@ func TestSyncUserResource_DryRun(t *testing.T) {
 }
 
 func TestSyncUserResource_RecreateDeletion_KnossosOwned(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Agent Content\n",
 	})
@@ -391,6 +401,7 @@ func TestSyncUserResource_RecreateDeletion_KnossosOwned(t *testing.T) {
 }
 
 func TestSyncUserResource_RecreateDeletion_UserOwned(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Source Content\n",
 	})
@@ -419,6 +430,7 @@ func TestSyncUserResource_RecreateDeletion_UserOwned(t *testing.T) {
 }
 
 func TestSyncUserResource_NewFileTargetExists_Untracked(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Source Content\n",
 	})
@@ -459,6 +471,7 @@ func TestSyncUserResource_NewFileTargetExists_Untracked(t *testing.T) {
 }
 
 func TestSyncUserResource_SourceMissing_NoEmbedded(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	knossosHome := filepath.Join(tmpDir, "knossos")
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
@@ -483,6 +496,7 @@ func TestSyncUserResource_SourceMissing_NoEmbedded(t *testing.T) {
 }
 
 func TestSyncUserResource_InvalidResourceType(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
@@ -497,6 +511,7 @@ func TestSyncUserResource_InvalidResourceType(t *testing.T) {
 }
 
 func TestSyncUserResource_MultipleAgents(t *testing.T) {
+	t.Parallel()
 	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
 		"agent-a.md": "# Agent A\n",
 		"agent-b.md": "# Agent B\n",
@@ -523,6 +538,7 @@ func TestSyncUserResource_MultipleAgents(t *testing.T) {
 }
 
 func TestSyncUserResource_Hooks_NestedStructure(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	knossosHome := filepath.Join(tmpDir, "knossos")
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
@@ -565,6 +581,7 @@ func TestSyncUserResource_Hooks_NestedStructure(t *testing.T) {
 // --- Tests for syncUserResourceFromEmbedded ---
 
 func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
@@ -603,6 +620,7 @@ func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
 }
 
 func TestSyncUserResourceFromEmbedded_SkipsUserOwned(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
@@ -646,6 +664,7 @@ func TestSyncUserResourceFromEmbedded_SkipsUserOwned(t *testing.T) {
 }
 
 func TestSyncUserResourceFromEmbedded_UpdatesKnossosOwned(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
@@ -690,6 +709,7 @@ func TestSyncUserResourceFromEmbedded_UpdatesKnossosOwned(t *testing.T) {
 }
 
 func TestSyncUserResourceFromEmbedded_CollisionSkipped(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
@@ -721,6 +741,7 @@ func TestSyncUserResourceFromEmbedded_CollisionSkipped(t *testing.T) {
 }
 
 func TestSyncUserResourceFromEmbedded_RecreatesDeleted(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
@@ -756,6 +777,7 @@ func TestSyncUserResourceFromEmbedded_RecreatesDeleted(t *testing.T) {
 }
 
 func TestSyncUserResourceFromEmbedded_DryRun(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
@@ -790,6 +812,7 @@ func TestSyncUserResourceFromEmbedded_DryRun(t *testing.T) {
 }
 
 func TestSyncUserResourceFromEmbedded_UntrackedUserFile(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")
 	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
@@ -830,6 +853,7 @@ func TestSyncUserResourceFromEmbedded_UntrackedUserFile(t *testing.T) {
 // --- Tests for syncUserResource with embedded fallback ---
 
 func TestSyncUserResource_FallsBackToEmbedded(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	knossosHome := filepath.Join(tmpDir, "knossos")
 	userClaudeDir := filepath.Join(tmpDir, "user-claude")

@@ -8,6 +8,7 @@ import (
 )
 
 func TestCollisionChecker_ExactMatch(t *testing.T) {
+	t.Parallel()
 	c := &CollisionChecker{
 		manifestLoaded: true,
 		riteEntries: map[string]bool{
@@ -27,6 +28,7 @@ func TestCollisionChecker_ExactMatch(t *testing.T) {
 }
 
 func TestCollisionChecker_PrefixContainment(t *testing.T) {
+	t.Parallel()
 	c := &CollisionChecker{
 		manifestLoaded: true,
 		riteEntries: map[string]bool{
@@ -46,6 +48,7 @@ func TestCollisionChecker_PrefixContainment(t *testing.T) {
 }
 
 func TestCollisionChecker_NoFalsePositive(t *testing.T) {
+	t.Parallel()
 	c := &CollisionChecker{
 		manifestLoaded: true,
 		riteEntries: map[string]bool{
@@ -67,6 +70,7 @@ func TestCollisionChecker_NoFalsePositive(t *testing.T) {
 }
 
 func TestCollisionChecker_AgentExactMatch(t *testing.T) {
+	t.Parallel()
 	c := &CollisionChecker{
 		manifestLoaded: true,
 		riteEntries: map[string]bool{
@@ -93,6 +97,7 @@ func TestCollisionChecker_AgentExactMatch(t *testing.T) {
 }
 
 func TestCollisionChecker_NoManifest(t *testing.T) {
+	t.Parallel()
 	c := &CollisionChecker{
 		manifestLoaded: false,
 	}
@@ -104,6 +109,7 @@ func TestCollisionChecker_NoManifest(t *testing.T) {
 }
 
 func TestCollisionChecker_EmptyEntries(t *testing.T) {
+	t.Parallel()
 	c := &CollisionChecker{
 		manifestLoaded: true,
 		riteEntries:    map[string]bool{},
@@ -119,6 +125,7 @@ func TestCollisionChecker_EmptyEntries(t *testing.T) {
 // no PROVENANCE_MANIFEST.yaml exists (e.g. a fresh worktree), IsEffective()
 // returns false so callers can fail-closed and skip user-scope writes.
 func TestCollisionChecker_MissingManifest_ReportsIneffective(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	// No manifest file written — .knossos/ is empty.
 	c := NewCollisionChecker(tmpDir)
@@ -139,6 +146,7 @@ func TestCollisionChecker_MissingManifest_ReportsIneffective(t *testing.T) {
 // manifest loaded successfully, there are simply no rite-owned resources.
 // This is distinct from a missing manifest.
 func TestCollisionChecker_EmptyEntries_ReportsIneffective(t *testing.T) {
+	t.Parallel()
 	// Write a valid PROVENANCE_MANIFEST.yaml with no entries using provenance.Save().
 	tmpDir := t.TempDir()
 	manifest := &provenance.ProvenanceManifest{

@@ -13,6 +13,7 @@ import (
 // TestCollectMena_FlattensDromena verifies that CollectMena resolves dromena
 // flat names from frontmatter, flattening nested paths like operations/spike -> spike.
 func TestCollectMena_FlattensDromena(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create nested dro: mena/operations/spike/INDEX.dro.md with name: spike
@@ -45,6 +46,7 @@ func TestCollectMena_FlattensDromena(t *testing.T) {
 // TestCollectMena_CompanionHiding verifies that non-INDEX .md files in dro
 // directories get user-invocable: false injected via syncUserMena.
 func TestCollectMena_CompanionHiding(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create dro with companion
@@ -98,6 +100,7 @@ func TestCollectMena_CompanionHiding(t *testing.T) {
 
 // TestCollectMena_LegoPreservesPath verifies that legomena paths are NOT flattened.
 func TestCollectMena_LegoPreservesPath(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create nested legomena
@@ -129,6 +132,7 @@ func TestCollectMena_LegoPreservesPath(t *testing.T) {
 
 // TestCollectMena_StandaloneFlattening verifies standalone dro files get flattened.
 func TestCollectMena_StandaloneFlattening(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create standalone dro in a grouping directory
@@ -160,6 +164,7 @@ func TestCollectMena_StandaloneFlattening(t *testing.T) {
 // TestSyncUserMena_CollisionSkipsRiteContent verifies that files matching rite
 // manifest entries are skipped during user-scope sync.
 func TestSyncUserMena_CollisionSkipsRiteContent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create dro source
@@ -199,6 +204,7 @@ func TestSyncUserMena_CollisionSkipsRiteContent(t *testing.T) {
 
 // TestSyncUserMena_PreservesUserOwned verifies that owner=user entries are never overwritten.
 func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create source
@@ -238,6 +244,7 @@ func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
 
 // TestSyncUserMena_Idempotent verifies that running sync twice produces zero changes.
 func TestSyncUserMena_Idempotent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create source
@@ -281,6 +288,7 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 // and skills/ entries are removed (even if marked owner: user by old pipeline),
 // while genuinely user-created entries are preserved.
 func TestWipeKnossosOwnedMenaEntries(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create mena source: "my-cmd" dromena directory
@@ -346,6 +354,7 @@ func TestWipeKnossosOwnedMenaEntries(t *testing.T) {
 // TestWipeKnossosOwnedMenaEntries_OldStylePaths verifies that old non-flattened
 // paths from the old pipeline are correctly identified and wiped.
 func TestWipeKnossosOwnedMenaEntries_OldStylePaths(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create mena source with grouping: operations/spike
@@ -402,6 +411,7 @@ func TestWipeKnossosOwnedMenaEntries_OldStylePaths(t *testing.T) {
 // TestWipeKnossosOwnedMenaEntries_UntrackedOrphans verifies that files on disk
 // matching knossos patterns are removed even when not in the manifest.
 func TestWipeKnossosOwnedMenaEntries_UntrackedOrphans(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create mena source: operations/spike directory entry with name: spike
@@ -440,6 +450,7 @@ func TestWipeKnossosOwnedMenaEntries_UntrackedOrphans(t *testing.T) {
 
 // TestWipeKnossosOwnedMenaEntries_DryRun verifies no changes in dry-run mode.
 func TestWipeKnossosOwnedMenaEntries_DryRun(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create mena source
@@ -499,6 +510,7 @@ func keysOfStandalone(m map[string]mena.MenaResolvedStandalone) []string {
 // smell-detection, etc.) are available in user scope (~/.claude/).
 // Regression test for: shared mena missing from user-scope sync.
 func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create platform mena (KNOSSOS_HOME/mena/)
@@ -557,6 +569,7 @@ func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
 // TestSyncUserMena_EmbeddedIncludesSharedRiteMena verifies that the embedded
 // fallback path includes rites/shared/mena/ entries alongside platform mena.
 func TestSyncUserMena_EmbeddedIncludesSharedRiteMena(t *testing.T) {
+	t.Parallel()
 	userClaudeDir := t.TempDir()
 
 	// Build an embedded FS with platform mena + shared rite mena
