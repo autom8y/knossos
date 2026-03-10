@@ -172,6 +172,9 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 	if embMena := common.EmbeddedMena(); embMena != nil {
 		m.WithEmbeddedMena(embMena)
 	}
+	if embProc := common.EmbeddedProcessions(); embProc != nil {
+		m.WithEmbeddedProcessions(embProc)
+	}
 	// Execute unified sync
 	result, err := m.Sync(opts)
 	if err != nil {

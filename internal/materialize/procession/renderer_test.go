@@ -139,7 +139,7 @@ func TestRenderToDir_MatchingRite(t *testing.T) {
 	tmpDir := t.TempDir()
 	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "security")
+	count, err := RenderToDir(projectDir, tmpDir, stubRender, "security", nil)
 	if err != nil {
 		t.Fatalf("RenderToDir: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestRenderToDir_NonMatchingRite(t *testing.T) {
 	tmpDir := t.TempDir()
 	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "docs")
+	count, err := RenderToDir(projectDir, tmpDir, stubRender, "docs", nil)
 	if err != nil {
 		t.Fatalf("RenderToDir: %v", err)
 	}
@@ -192,7 +192,7 @@ func TestRenderToDir_EmptyRite(t *testing.T) {
 	tmpDir := t.TempDir()
 	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "")
+	count, err := RenderToDir(projectDir, tmpDir, stubRender, "", nil)
 	if err != nil {
 		t.Fatalf("RenderToDir: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestRenderToDir_MultipleTemplates(t *testing.T) {
 	writeTestTemplate(t, projectDir, "sec-workflow", "security")
 	writeTestTemplate(t, projectDir, "doc-workflow", "docs")
 
-	count, err := RenderToDir(projectDir, tmpDir, stubRender, "security")
+	count, err := RenderToDir(projectDir, tmpDir, stubRender, "security", nil)
 	if err != nil {
 		t.Fatalf("RenderToDir: %v", err)
 	}

@@ -668,6 +668,9 @@ func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
 	if embMena := assets.Mena(); embMena != nil {
 		mat.WithEmbeddedMena(embMena)
 	}
+	if embProc := assets.Processions(); embProc != nil {
+		mat.WithEmbeddedProcessions(embProc)
+	}
 	_, _ = mat.Sync(materialize.SyncOptions{
 		Scope:       materialize.ScopeAll,
 		RiteName:    riteName,

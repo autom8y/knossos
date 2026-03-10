@@ -195,7 +195,7 @@ func (m *Materializer) renderProcessionMena(currentRite string) (string, error) 
 	}
 
 	projectRoot := m.resolver.ProjectRoot()
-	count, err := procmena.RenderToDir(projectRoot, procDir, RenderArchetype, currentRite)
+	count, err := procmena.RenderToDir(projectRoot, procDir, RenderArchetype, currentRite, m.embeddedProcessions)
 	if err != nil {
 		os.RemoveAll(procDir)
 		return "", err

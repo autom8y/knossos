@@ -95,7 +95,7 @@ Follow the protocol's three phases:
 
 The protocol also covers: **Loop Handling** (Potnia-driven, `loop_to` is a hint), **Throughline Resumption** (store Potnia agent ID), and **Error Recovery**.
 
-**Rite-context awareness**: The Potnia you are consulting is scoped to the current rite ({{.FirstRite}} for the first station). When the procession transitions to a different rite, a new Potnia with different specialists will be available. The handoff artifact is the continuity mechanism -- it must be self-contained because the next station's Potnia has no shared context with this one.
+**Rite-context awareness**: The Potnia you are consulting is scoped to the current rite. When the procession transitions to a different rite, a new Potnia with different specialists will be available. The handoff artifact is the continuity mechanism -- it must be self-contained because the next station's Potnia has no shared context with this one.
 
 ## Anti-Patterns
 

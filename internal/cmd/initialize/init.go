@@ -191,6 +191,9 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		// regardless of whether KNOSSOS_HOME is set or the source tree exists.
 		extractEmbeddedMenaToXDG(embMena)
 	}
+	if embProc := common.EmbeddedProcessions(); embProc != nil {
+		mat.WithEmbeddedProcessions(embProc)
+	}
 	// Bootstrap config/hooks.yaml from embedded bytes if not already present.
 	if hooksYAML := common.EmbeddedHooksYAML(); len(hooksYAML) > 0 {
 		hooksPath := filepath.Join(projectDir, "config", "hooks.yaml")

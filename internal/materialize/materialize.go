@@ -99,8 +99,9 @@ type Materializer struct {
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
 	claudeDirOverride string // If set, materialize to this directory instead of .claude/
-	embeddedAgents    fs.FS  // Embedded cross-rite agents (fallback for user scope)
-	embeddedMena      fs.FS  // Embedded platform mena (fallback for user scope)
+	embeddedAgents      fs.FS // Embedded cross-rite agents (fallback for user scope)
+	embeddedMena        fs.FS // Embedded platform mena (fallback for user scope)
+	embeddedProcessions fs.FS // Embedded procession templates (fallback for resolution)
 }
 
 // NewMaterializer creates a new materializer with default source resolution.
@@ -148,6 +149,13 @@ func (m *Materializer) WithEmbeddedAgents(fsys fs.FS) *Materializer {
 // WithEmbeddedMena sets the embedded mena filesystem for user scope fallback.
 func (m *Materializer) WithEmbeddedMena(fsys fs.FS) *Materializer {
 	m.embeddedMena = fsys
+	return m
+}
+
+// WithEmbeddedProcessions sets the embedded procession templates filesystem.
+// Used during sync to resolve procession templates when not available on disk.
+func (m *Materializer) WithEmbeddedProcessions(fsys fs.FS) *Materializer {
+	m.embeddedProcessions = fsys
 	return m
 }
 

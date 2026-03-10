@@ -29,7 +29,7 @@ Rolls back to a previous station for rework.
 
 **Semantics**:
 - `current_station` is set to the specified target station
-- All stations after the target are removed from `completed_stations`
+- `completed_stations` is preserved as an append-only log (stations are not removed)
 - Existing handoff artifacts are NOT deleted (preserved for reference)
 
 **When to use**:

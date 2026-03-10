@@ -1,6 +1,7 @@
 package procession
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -25,8 +26,8 @@ type RenderFunc func(projectRoot, templateName string, data any) ([]byte, error)
 //   - {tmpDir}/{name}-ref/INDEX.lego.md (procession-ref archetype, always)
 //
 // Returns the number of templates where any artifact was rendered.
-func RenderToDir(projectRoot string, tmpDir string, render RenderFunc, currentRite string) (int, error) {
-	resolved, err := ResolveProcessions(projectRoot, nil)
+func RenderToDir(projectRoot string, tmpDir string, render RenderFunc, currentRite string, embeddedFS fs.FS) (int, error) {
+	resolved, err := ResolveProcessions(projectRoot, embeddedFS)
 	if err != nil {
 		return 0, err
 	}

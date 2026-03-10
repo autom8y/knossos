@@ -23,6 +23,9 @@ func NewWiredMaterializer(resolver *paths.Resolver) *materialize.Materializer {
 	if embMena := common.EmbeddedMena(); embMena != nil {
 		m.WithEmbeddedMena(embMena)
 	}
+	if embProc := common.EmbeddedProcessions(); embProc != nil {
+		m.WithEmbeddedProcessions(embProc)
+	}
 
 	return m
 }
