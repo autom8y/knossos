@@ -167,14 +167,14 @@ Potnia signals station work is done. Proceed to Phase 3.
 
 4. **Handle rite transition**:
    - Read the updated procession state to get `next_rite`
-   - If `next_rite` differs from `active_rite`:
+   - Before checking if a rite switch is needed, check the next station's `alt_rite` field in the Station Map. If the station has an `alt_rite` and the user is already on that rite, no switch is needed. Example: if a station has `rite: hygiene, alt_rite: 10x-dev` and the user is on `10x-dev`, they can continue without switching.
+   - If `next_rite` (or `alt_rite`) matches `active_rite`: display "Station **{current}** complete. Continuing to **{next}**." Loop back to Phase 1.
+   - If neither `next_rite` nor `alt_rite` matches `active_rite`:
      ```bash
      ari sync --rite {next_rite}
      ```
      Tell user: "Station **{current}** complete. Restart CC to continue at **{next}** ({next_rite} rite)."
      STOP.
-   - If same rite: display "Station **{current}** complete. Continuing to **{next}**."
-     Loop back to Phase 1 for the next station.
 
 5. **If final station** (no next station):
    Display procession completion summary:
