@@ -8,6 +8,7 @@ import (
 )
 
 func TestBuildWorkflowData(t *testing.T) {
+	t.Parallel()
 	tmpl := &procession.Template{
 		Name:        "security-remediation",
 		Description: "Security findings lifecycle",
@@ -42,6 +43,7 @@ func TestBuildWorkflowData(t *testing.T) {
 }
 
 func TestBuildWorkflowData_StationTable(t *testing.T) {
+	t.Parallel()
 	tmpl := &procession.Template{
 		Name:        "test",
 		Description: "Test",
@@ -72,6 +74,7 @@ func TestBuildWorkflowData_StationTable(t *testing.T) {
 }
 
 func TestBuildWorkflowData_LongGoalTruncated(t *testing.T) {
+	t.Parallel()
 	longGoal := strings.Repeat("x", 100)
 	tmpl := &procession.Template{
 		Name:        "test",

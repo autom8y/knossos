@@ -8,6 +8,7 @@ import (
 )
 
 func TestSourceResolver_EmbeddedFallback(t *testing.T) {
+	t.Parallel()
 	// Create in-memory fs.FS with a test rite
 	fsys := fstest.MapFS{
 		"rites/test-rite/manifest.yaml": &fstest.MapFile{
@@ -45,6 +46,7 @@ func TestSourceResolver_EmbeddedFallback(t *testing.T) {
 }
 
 func TestSourceResolver_FilesystemOverridesEmbedded(t *testing.T) {
+	t.Parallel()
 	// Create a temp directory with a project rite
 	tmpDir := t.TempDir()
 	createTestRite(t, tmpDir, "test-rite")
@@ -71,6 +73,7 @@ func TestSourceResolver_FilesystemOverridesEmbedded(t *testing.T) {
 }
 
 func TestSourceResolver_EmbeddedNotFoundReturnsError(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"rites/other-rite/manifest.yaml": &fstest.MapFile{
 			Data: []byte("name: other-rite\nversion: 1.0\n"),
@@ -87,6 +90,7 @@ func TestSourceResolver_EmbeddedNotFoundReturnsError(t *testing.T) {
 }
 
 func TestSourceResolver_NoEmbeddedFS(t *testing.T) {
+	t.Parallel()
 	resolver := NewSourceResolverWithPaths("/nonexistent-project", "", "", "")
 	// No embedded FS set
 
@@ -97,6 +101,7 @@ func TestSourceResolver_NoEmbeddedFS(t *testing.T) {
 }
 
 func TestSourceResolver_ListIncludesEmbedded(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"rites/embedded-rite/manifest.yaml": &fstest.MapFile{
 			Data: []byte("name: embedded-rite\nversion: 1.0\n"),
@@ -127,6 +132,7 @@ func TestSourceResolver_ListIncludesEmbedded(t *testing.T) {
 }
 
 func TestSourceResolver_ListShadowsEmbedded(t *testing.T) {
+	t.Parallel()
 	// Create a temp dir with a project rite that shadows an embedded one
 	tmpDir := t.TempDir()
 	createTestRite(t, tmpDir, "shadowed-rite")
@@ -164,6 +170,7 @@ func TestSourceResolver_ListShadowsEmbedded(t *testing.T) {
 }
 
 func TestSourceResolver_EmbeddedCaching(t *testing.T) {
+	t.Parallel()
 	fsys := fstest.MapFS{
 		"rites/cached-rite/manifest.yaml": &fstest.MapFile{
 			Data: []byte("name: cached-rite\nversion: 1.0\n"),
@@ -232,6 +239,7 @@ func createUserRite(t *testing.T, userRitesDir, riteName string) {
 // --- Org Tier Tests (6-Tier Resolution) ---
 
 func TestSourceResolver_OrgTierResolvesRite(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 	createOrgRite(t, orgDir, "org-rite")
@@ -258,6 +266,7 @@ func TestSourceResolver_OrgTierResolvesRite(t *testing.T) {
 }
 
 func TestSourceResolver_UserShadowsOrg(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 	userDir := filepath.Join(tmpDir, "user-rites")
@@ -286,6 +295,7 @@ func TestSourceResolver_UserShadowsOrg(t *testing.T) {
 }
 
 func TestSourceResolver_OrgShadowsKnossos(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 	knossosDir := filepath.Join(tmpDir, "knossos")
@@ -321,6 +331,7 @@ func TestSourceResolver_OrgShadowsKnossos(t *testing.T) {
 }
 
 func TestSourceResolver_ProjectShadowsAll(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 	userDir := filepath.Join(tmpDir, "user-rites")
@@ -350,6 +361,7 @@ func TestSourceResolver_ProjectShadowsAll(t *testing.T) {
 }
 
 func TestSourceResolver_ListIncludesOrg(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 
@@ -395,6 +407,7 @@ func TestSourceResolver_ListIncludesOrg(t *testing.T) {
 }
 
 func TestSourceResolver_ListOrgShadowedByUser(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 	userDir := filepath.Join(tmpDir, "user-rites")
@@ -438,6 +451,7 @@ func TestSourceResolver_ListOrgShadowedByUser(t *testing.T) {
 }
 
 func TestSourceResolver_CacheOrgAware(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir1 := filepath.Join(tmpDir, "org1")
 	orgDir2 := filepath.Join(tmpDir, "org2")
@@ -482,6 +496,7 @@ func TestSourceResolver_CacheOrgAware(t *testing.T) {
 }
 
 func TestSourceResolver_EmptyOrgSkipped(t *testing.T) {
+	t.Parallel()
 	// When no org is configured, orgRitesDir is empty — should be skipped
 	fsys := fstest.MapFS{
 		"rites/fallback-rite/manifest.yaml": &fstest.MapFile{
@@ -503,6 +518,7 @@ func TestSourceResolver_EmptyOrgSkipped(t *testing.T) {
 }
 
 func TestSourceResolver_OrgNoTemplates(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "org")
 	createOrgRite(t, orgDir, "org-rite")
@@ -527,6 +543,7 @@ func TestSourceResolver_OrgNoTemplates(t *testing.T) {
 }
 
 func TestSourceResolver_ExplicitOrgAlias(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	orgDir := filepath.Join(tmpDir, "orgs", "test-org")
 	createOrgRite(t, orgDir, "aliased-rite")
@@ -552,6 +569,7 @@ func TestSourceResolver_ExplicitOrgAlias(t *testing.T) {
 }
 
 func TestSourceResolver_ExplicitOrgNoOrg(t *testing.T) {
+	t.Parallel()
 	resolver := &SourceResolver{
 		activeOrg: "", // Explicit: no active org
 		resolved:  make(map[string]*ResolvedRite),
@@ -577,6 +595,7 @@ func TestSourceResolver_ExplicitOrgNoOrg(t *testing.T) {
 // (knossos/templates/sections/ exists but templates/sections/ does not) and verifies
 // that the resolver correctly falls back to the knossos/templates/ path.
 func TestSCAR023_TemplatePathResolution_SelfHosting(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create the knossos self-hosting template layout:
@@ -621,6 +640,7 @@ func TestSCAR023_TemplatePathResolution_SelfHosting(t *testing.T) {
 // when templates/sections/ exists at the standard location, the resolver must
 // use it directly without fallback.
 func TestSCAR023_TemplatePathResolution_StandardProject(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create both template locations (standard takes priority)

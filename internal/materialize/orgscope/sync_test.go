@@ -7,6 +7,7 @@ import (
 )
 
 func TestSyncOrgScope_NoOrg(t *testing.T) {
+	t.Parallel()
 	// Use syncOrgScopeResolved directly to avoid config.ActiveOrg() side effects.
 	// Empty OrgName triggers the "no org" skip path.
 	result, err := syncOrgScopeResolved(SyncOrgScopeParams{})
@@ -19,6 +20,7 @@ func TestSyncOrgScope_NoOrg(t *testing.T) {
 }
 
 func TestSyncOrgScope_OrgDirNotExist(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	result, err := SyncOrgScope(SyncOrgScopeParams{
 		OrgName: "nonexistent-org",
@@ -36,6 +38,7 @@ func TestSyncOrgScope_OrgDirNotExist(t *testing.T) {
 }
 
 func TestSyncOrgScope_SyncsAgents(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create org directory with an agent
@@ -83,6 +86,7 @@ func TestSyncOrgScope_SyncsAgents(t *testing.T) {
 }
 
 func TestSyncOrgScope_SyncsMena(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create org directory with mena
@@ -120,6 +124,7 @@ func TestSyncOrgScope_SyncsMena(t *testing.T) {
 }
 
 func TestSyncOrgScope_DryRun(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create org with an agent
@@ -161,6 +166,7 @@ func TestSyncOrgScope_DryRun(t *testing.T) {
 }
 
 func TestSyncOrgScope_Idempotent(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	// Create org with an agent

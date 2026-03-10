@@ -36,6 +36,7 @@ artifact_dir: .sos/wip/another-procession/
 `
 
 func TestResolveProcessions_EmptyDir(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
@@ -50,6 +51,7 @@ func TestResolveProcessions_EmptyDir(t *testing.T) {
 }
 
 func TestResolveProcessions_ProjectLevel(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
@@ -71,6 +73,7 @@ func TestResolveProcessions_ProjectLevel(t *testing.T) {
 }
 
 func TestResolveProcessions_EmbeddedFallback(t *testing.T) {
+	t.Parallel()
 	embFS := fstest.MapFS{
 		"processions/test-procession.yaml": &fstest.MapFile{Data: []byte(validTemplate)},
 	}
@@ -88,6 +91,7 @@ func TestResolveProcessions_EmbeddedFallback(t *testing.T) {
 }
 
 func TestResolveProcessions_ProjectShadowsEmbedded(t *testing.T) {
+	t.Parallel()
 	// Embedded has test-procession
 	embFS := fstest.MapFS{
 		"processions/test-procession.yaml": &fstest.MapFile{Data: []byte(validTemplate)},
@@ -112,6 +116,7 @@ func TestResolveProcessions_ProjectShadowsEmbedded(t *testing.T) {
 }
 
 func TestResolveProcessions_MultipleTemplates(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
@@ -136,6 +141,7 @@ func TestResolveProcessions_MultipleTemplates(t *testing.T) {
 }
 
 func TestResolveProcessions_InvalidTemplateSkipped(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)
@@ -157,6 +163,7 @@ func TestResolveProcessions_InvalidTemplateSkipped(t *testing.T) {
 }
 
 func TestResolveProcessions_GitkeepIgnored(t *testing.T) {
+	t.Parallel()
 	dir := t.TempDir()
 	procDir := filepath.Join(dir, "processions")
 	os.MkdirAll(procDir, 0o755)

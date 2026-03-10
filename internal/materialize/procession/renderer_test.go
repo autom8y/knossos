@@ -60,6 +60,7 @@ func makeTestProcession(name, entryRite string) ResolvedProcession {
 // --- ResolveTemplate tests ---
 
 func TestResolveTemplate_Found(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 	writeTestTemplate(t, projectDir, "my-workflow", "security")
 
@@ -83,6 +84,7 @@ func TestResolveTemplate_Found(t *testing.T) {
 }
 
 func TestResolveTemplate_NotFound(t *testing.T) {
+	t.Parallel()
 	projectDir := t.TempDir()
 
 	procDir := filepath.Join(projectDir, "processions")
@@ -96,6 +98,7 @@ func TestResolveTemplate_NotFound(t *testing.T) {
 }
 
 func TestResolveTemplate_ProjectShadowsPlatform(t *testing.T) {
+	t.Parallel()
 	// Write template at platform tier
 	platformDir := t.TempDir()
 	writeTestTemplate(t, platformDir, "my-workflow", "platform-rite")
@@ -119,6 +122,7 @@ func TestResolveTemplate_ProjectShadowsPlatform(t *testing.T) {
 }
 
 func TestResolveTemplate_PlatformFallback(t *testing.T) {
+	t.Parallel()
 	// Write template at platform tier only
 	platformDir := t.TempDir()
 	writeTestTemplate(t, platformDir, "platform-only", "security")
@@ -140,6 +144,7 @@ func TestResolveTemplate_PlatformFallback(t *testing.T) {
 // --- RenderToDir tests ---
 
 func TestRenderToDir_MatchingRite(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	processions := []ResolvedProcession{
@@ -166,6 +171,7 @@ func TestRenderToDir_MatchingRite(t *testing.T) {
 }
 
 func TestRenderToDir_NonMatchingRite(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	processions := []ResolvedProcession{
@@ -193,6 +199,7 @@ func TestRenderToDir_NonMatchingRite(t *testing.T) {
 }
 
 func TestRenderToDir_EmptyRite(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	processions := []ResolvedProcession{
@@ -220,6 +227,7 @@ func TestRenderToDir_EmptyRite(t *testing.T) {
 }
 
 func TestRenderToDir_MultipleTemplates(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 
 	processions := []ResolvedProcession{
