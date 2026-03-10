@@ -103,6 +103,7 @@ type Materializer struct {
 	embeddedMena        fs.FS   // Embedded platform mena (fallback for user scope)
 	embeddedProcessions fs.FS   // Embedded procession templates (fallback for resolution)
 	userClaudeDir       string  // If set, user-scope sync writes here instead of paths.UserClaudeDir()
+	xdgDataDir          string  // If set, used for XDG mena path instead of config.XDGDataDir()
 }
 
 // NewMaterializer creates a new materializer with default source resolution.

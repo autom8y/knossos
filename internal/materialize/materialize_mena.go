@@ -227,7 +227,7 @@ func (m *Materializer) getMenaDir() string {
 	}
 
 	// 3. Check XDG data dir (installed user case)
-	if xdgMena := xdgMenaPath(); xdgMena != "" {
+	if xdgMena := m.xdgMenaPath(); xdgMena != "" {
 		if _, err := os.Stat(xdgMena); err == nil {
 			return xdgMena
 		}
@@ -237,6 +237,11 @@ func (m *Materializer) getMenaDir() string {
 }
 
 // xdgMenaPath returns the XDG data directory path for platform mena.
-func xdgMenaPath() string {
-	return filepath.Join(config.XDGDataDir(), "mena")
+// Uses m.xdgDataDir if set (test injection), otherwise falls back to config.XDGDataDir().
+func (m *Materializer) xdgMenaPath() string {
+	dataDir := m.xdgDataDir
+	if dataDir == "" {
+		dataDir = config.XDGDataDir()
+	}
+	return filepath.Join(dataDir, "mena")
 }
