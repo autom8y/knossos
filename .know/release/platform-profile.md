@@ -1,11 +1,11 @@
 ---
 domain: release/platform-profile
-generated_at: "2026-03-09T13:38:04Z"
+generated_at: "2026-03-09T18:16:34Z"
 expires_after: "30d"
 source_scope:
   - "./.know/release/"
 generator: cartographer
-source_hash: "a81ea97"
+source_hash: "5a24a76"
 confidence: 0.85
 format_version: "1.0"
 update_mode: "full"
@@ -75,6 +75,6 @@ Terminal stage: e2e-distribution.yml (has health check)
 
 ## Known Issues
 
-- None. Full pipeline chain verified green as of v0.7.1 (2026-03-09).
+- None. Full pipeline chain verified green as of v0.7.2 (2026-03-09).
 - 2 pre-existing informational workflow failures (non-blocking): ariadne-tests (golangci-lint schema), verify-doctrine (missing ariadne/ dir).
 - verify-formal-specs.yml was removed (no longer present as of v0.7.1).

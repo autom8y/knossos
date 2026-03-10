@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-09T13:38:04Z"
+generated_at: "2026-03-09T18:16:34Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "a81ea97"
+source_hash: "5a24a76"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -219,3 +219,27 @@ max_incremental_cycles: 0
 - Cached release knowledge accelerated cartographer reconnaissance
 - All fix/refactor/ci: 530 golangci-lint findings resolved, stale CI configs fixed, SCAR-018 enforcement
 - verify-formal-specs.yml removed from repo (reduces known non-blocking failures from 3 to 2)
+
+### v0.7.2 — 2026-03-09
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-09 |
+| Version | v0.7.1 -> v0.7.2 (patch) |
+| Commits | 2 (1 fix, 1 chore) |
+| Complexity | PATCH |
+| Tag SHA | 4b09f6798c054baaea3b2162fb478dbb7584ce22 |
+| Commit SHA | 5a24a76 |
+| release.yml | GREEN (110s, run 22867920447) |
+| e2e-distribution.yml | GREEN (61s, run 22867987422) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (commit 302d0b71, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Seventeenth consecutive PASS verdict (v0.3.2 → ... → v0.7.1 → v0.7.2)
+- Total chain: 161s (within historical baseline ~150-190s)
+- Dispatch latency: 2s
+- Cached release knowledge skipped cartographer and dependency-resolver entirely
+- Fix: retarget MCP server sync to .mcp.json (SCAR-028)
