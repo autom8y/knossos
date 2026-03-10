@@ -96,6 +96,16 @@ func writeActiveRite(t *testing.T, projectDir, riteName string) {
 	))
 }
 
+// newTestMaterializer creates a Materializer with explicit paths for test isolation.
+// Eliminates need for t.Setenv("KNOSSOS_HOME") and t.Setenv("HOME").
+func newTestMaterializer(projectDir, knossosHome, userClaudeDir string) *Materializer {
+	resolver := paths.NewResolver(projectDir)
+	sr := NewSourceResolverWithPaths(projectDir, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
+	m.userClaudeDir = userClaudeDir
+	return m
+}
+
 // TestUnifiedSync_RiteOnly tests scope=rite with a valid rite
 func TestUnifiedSync_RiteOnly(t *testing.T) {
 	projectDir := t.TempDir()
@@ -127,20 +137,12 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 // TestUnifiedSync_UserOnly tests scope=user without project context
 func TestUnifiedSync_UserOnly(t *testing.T) {
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
 	projectDir := t.TempDir() // Empty project (no rite)
 
 	setupKnossosHome(t, knossosHome)
 
-	// Override paths.UserClaudeDir for this test
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
-
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	opts := SyncOptions{
 		Scope: ScopeUser,
@@ -166,19 +168,13 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
 	writeActiveRite(t, projectDir, "test-rite")
 
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	opts := SyncOptions{
 		Scope: ScopeAll,
@@ -200,17 +196,11 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 func TestUnifiedSync_NoActiveRite_ScopeAll(t *testing.T) {
 	projectDir := t.TempDir()
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	opts := SyncOptions{
 		Scope: ScopeAll,
@@ -251,12 +241,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	// Setup rite with test-agent
 	setupTestRite(t, riteDir)
@@ -272,8 +257,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 	))
 
 	// First sync rite scope to populate .claude/
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	riteResult, err := m.Sync(SyncOptions{Scope: ScopeRite})
 	require.NoError(t, err)
@@ -304,12 +288,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 // TestUnifiedSync_RecoveryMode tests --recover
 func TestUnifiedSync_RecoveryMode(t *testing.T) {
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
@@ -323,8 +302,7 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 	))
 
 	projectDir := t.TempDir()
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	opts := SyncOptions{
 		Scope:   ScopeUser,
@@ -352,18 +330,12 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 // TestUnifiedSync_OverwriteDiverged tests --overwrite-diverged
 func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
 	projectDir := t.TempDir()
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	// First sync to establish baseline
 	_, err := m.Sync(SyncOptions{Scope: ScopeUser})
@@ -412,18 +384,12 @@ func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 // TestUnifiedSync_KeepOrphans tests --keep-orphans
 func TestUnifiedSync_KeepOrphans(t *testing.T) {
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
 	projectDir := t.TempDir()
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	// First sync to establish baseline
 	_, err := m.Sync(SyncOptions{Scope: ScopeUser})
@@ -462,18 +428,12 @@ func TestUnifiedSync_KeepOrphans(t *testing.T) {
 // TestUnifiedSync_ResourceFilter tests --resource flag
 func TestUnifiedSync_ResourceFilter(t *testing.T) {
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupKnossosHome(t, knossosHome)
 
 	projectDir := t.TempDir()
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	opts := SyncOptions{
 		Scope:    ScopeUser,
@@ -503,19 +463,13 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
-
 	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
-	t.Setenv("HOME", filepath.Dir(userClaudeDir))
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
 	writeActiveRite(t, projectDir, "test-rite")
 
-	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
 
 	opts := SyncOptions{
 		Scope:  ScopeAll,
