@@ -32,13 +32,21 @@ type OrgScopeResult struct {
 	Mena    int    `json:"mena,omitempty"`
 }
 
-// SyncOrgScope is the primary entry point for org-scope sync.
-// It syncs agents and mena from an org directory to ~/.claude/.
+// SyncOrgScope is the convenience entry point for org-scope sync.
+// It resolves org name from config.ActiveOrg() when not provided in params,
+// then delegates to syncOrgScopeResolved.
 func SyncOrgScope(params SyncOrgScopeParams) (*OrgScopeResult, error) {
-	orgName := params.OrgName
-	if orgName == "" {
-		orgName = config.ActiveOrg()
+	if params.OrgName == "" {
+		params.OrgName = config.ActiveOrg()
 	}
+	return syncOrgScopeResolved(params)
+}
+
+// syncOrgScopeResolved performs org-scope sync with all params resolved.
+// Requires OrgName to be explicitly set (empty means no org → skip).
+// Tests use this directly to avoid config.ActiveOrg() side effects.
+func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
+	orgName := params.OrgName
 	if orgName == "" {
 		return &OrgScopeResult{
 			Status: "skipped",

@@ -7,9 +7,9 @@ import (
 )
 
 func TestSyncOrgScope_NoOrg(t *testing.T) {
-	t.Setenv("KNOSSOS_ORG", "")
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
-	result, err := SyncOrgScope(SyncOrgScopeParams{})
+	// Use syncOrgScopeResolved directly to avoid config.ActiveOrg() side effects.
+	// Empty OrgName triggers the "no org" skip path.
+	result, err := syncOrgScopeResolved(SyncOrgScopeParams{})
 	if err != nil {
 		t.Fatalf("SyncOrgScope failed: %v", err)
 	}
