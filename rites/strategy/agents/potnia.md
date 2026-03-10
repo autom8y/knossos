@@ -9,7 +9,6 @@ color: yellow
 maxTurns: 40
 skills:
   - orchestrator-templates
-  - procession-ref
   - strategy-ref
   - cross-rite-handoff
   - doc-strategy

@@ -24,7 +24,6 @@ color: cyan
 maxTurns: 25
 skills:
   - orchestrator-templates
-  - procession-ref
   - review-ref
 disallowedTools:
   - Bash

@@ -9,7 +9,6 @@ color: red
 maxTurns: 40
 skills:
   - orchestrator-templates
-  - procession-ref
   - security-ref
   - cross-rite-handoff
   - doc-security

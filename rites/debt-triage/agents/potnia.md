@@ -9,7 +9,6 @@ color: orange
 maxTurns: 40
 skills:
   - orchestrator-templates
-  - procession-ref
   - debt-catalog
   - cross-rite-handoff
 disallowedTools:
