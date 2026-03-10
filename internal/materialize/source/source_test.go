@@ -531,15 +531,13 @@ func TestSourceResolver_ExplicitOrgAlias(t *testing.T) {
 	orgDir := filepath.Join(tmpDir, "orgs", "test-org")
 	createOrgRite(t, orgDir, "aliased-rite")
 
-	// Set up XDG paths to point to our temp dir
-	t.Setenv("XDG_DATA_HOME", tmpDir)
-
 	resolver := &SourceResolver{
 		projectRoot:     "/nonexistent-project",
 		projectRitesDir: "/nonexistent-project/.knossos/rites",
 		userRitesDir:    "/nonexistent-user-rites",
 		orgRitesDir:     filepath.Join(orgDir, "rites"),
 		knossosHome:     "/nonexistent-knossos-home",
+		dataDir:         tmpDir, // replaces t.Setenv("XDG_DATA_HOME", tmpDir)
 		resolved:        make(map[string]*ResolvedRite),
 	}
 
@@ -554,11 +552,9 @@ func TestSourceResolver_ExplicitOrgAlias(t *testing.T) {
 }
 
 func TestSourceResolver_ExplicitOrgNoOrg(t *testing.T) {
-	t.Setenv("KNOSSOS_ORG", "")
-	t.Setenv("XDG_CONFIG_HOME", t.TempDir()) // Prevent ActiveOrg() from reading active-org file
-
 	resolver := &SourceResolver{
-		resolved: make(map[string]*ResolvedRite),
+		activeOrg: "", // Explicit: no active org
+		resolved:  make(map[string]*ResolvedRite),
 	}
 
 	// "org" without active org should error

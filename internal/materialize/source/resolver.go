@@ -21,7 +21,9 @@ type SourceResolver struct {
 	userRitesDir    string
 	orgRitesDir     string // Org-level rites directory (between user and knossos)
 	knossosHome     string
-	EmbeddedFS      fs.FS // Embedded rites filesystem (compiled-in fallback)
+	activeOrg       string // Active org name (from config.ActiveOrg() at construction)
+	dataDir         string // XDG data dir for org path computation (defaults to paths.DataDir())
+	EmbeddedFS      fs.FS  // Embedded rites filesystem (compiled-in fallback)
 
 	// Cached resolutions (lazy-loaded)
 	mu       sync.RWMutex
@@ -37,6 +39,8 @@ func NewSourceResolver(projectRoot string) *SourceResolver {
 		userRitesDir:    paths.UserRitesDir(),
 		orgRitesDir:     paths.OrgRitesDir(config.ActiveOrg()),
 		knossosHome:     config.KnossosHome(),
+		activeOrg:       config.ActiveOrg(),
+		dataDir:         paths.DataDir(),
 		resolved:        make(map[string]*ResolvedRite),
 	}
 }
@@ -152,7 +156,7 @@ func (r *SourceResolver) ResolveRite(riteName string, explicitSource string) (*R
 func (r *SourceResolver) parseExplicitSource(source string) (RiteSource, error) {
 	// Handle "knossos" alias
 	if source == "knossos" || source == "knossos:" {
-		home := config.KnossosHome()
+		home := r.knossosHome
 		if home == "" {
 			return RiteSource{}, errors.New(errors.CodeGeneralError,
 				"KNOSSOS_HOME not set. Set KNOSSOS_HOME environment variable or use explicit path.")
@@ -166,7 +170,7 @@ func (r *SourceResolver) parseExplicitSource(source string) (RiteSource, error) 
 
 	// Handle "org" and "org:{name}" aliases
 	if source == "org" || strings.HasPrefix(source, "org:") {
-		orgName := config.ActiveOrg()
+		orgName := r.activeOrg
 		if strings.HasPrefix(source, "org:") {
 			orgName = source[4:]
 		}
@@ -174,7 +178,7 @@ func (r *SourceResolver) parseExplicitSource(source string) (RiteSource, error) 
 			return RiteSource{}, errors.New(errors.CodeGeneralError,
 				"No active org. Set KNOSSOS_ORG environment variable, run ari org set, or specify org:name.")
 		}
-		orgDir := paths.OrgRitesDir(orgName)
+		orgDir := filepath.Join(r.dataDir, "orgs", orgName, "rites")
 		return RiteSource{
 			Type:        SourceOrg,
 			Path:        orgDir,
