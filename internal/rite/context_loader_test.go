@@ -22,6 +22,7 @@ func getTestDataPath(t *testing.T) string {
 }
 
 func TestRiteContext_ToMarkdown(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		ctx  *RiteContext
@@ -65,6 +66,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := tt.ctx.ToMarkdown()
 			if got != tt.want {
 				t.Errorf("ToMarkdown() =\n%q\nwant\n%q", got, tt.want)
@@ -74,6 +76,7 @@ func TestRiteContext_ToMarkdown(t *testing.T) {
 }
 
 func TestRiteContext_Validate(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		ctx     *RiteContext
@@ -105,6 +108,7 @@ func TestRiteContext_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			err := tt.ctx.Validate()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
@@ -114,6 +118,7 @@ func TestRiteContext_Validate(t *testing.T) {
 }
 
 func TestRiteContext_AddRow(t *testing.T) {
+	t.Parallel()
 	ctx := NewRiteContext("test-rite")
 
 	ctx.AddRow("Key1", "Value1")
@@ -133,6 +138,7 @@ func TestRiteContext_AddRow(t *testing.T) {
 }
 
 func TestRiteContext_HasRows(t *testing.T) {
+	t.Parallel()
 	ctx := NewRiteContext("test-rite")
 
 	if ctx.HasRows() {
@@ -147,6 +153,7 @@ func TestRiteContext_HasRows(t *testing.T) {
 }
 
 func TestContextLoader_Load_FromYAML(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -183,6 +190,7 @@ func TestContextLoader_Load_FromYAML(t *testing.T) {
 }
 
 func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -206,6 +214,7 @@ func TestContextLoader_Load_FallbackToOrchestrator(t *testing.T) {
 }
 
 func TestContextLoader_Load_RiteNotFound(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -216,6 +225,7 @@ func TestContextLoader_Load_RiteNotFound(t *testing.T) {
 }
 
 func TestContextLoader_Load_EmptyRiteName(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -226,6 +236,7 @@ func TestContextLoader_Load_EmptyRiteName(t *testing.T) {
 }
 
 func TestContextLoader_Load_MalformedYAML(t *testing.T) {
+	t.Parallel()
 	// Create a temporary directory with malformed YAML
 	tmpDir := t.TempDir()
 	riteDir := filepath.Join(tmpDir, "bad-rite")
@@ -253,6 +264,7 @@ context_rows:
 }
 
 func TestContextLoader_Caching(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -296,6 +308,7 @@ func TestContextLoader_Caching(t *testing.T) {
 }
 
 func TestContextLoader_InvalidateAll(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -319,6 +332,7 @@ func TestContextLoader_InvalidateAll(t *testing.T) {
 }
 
 func TestContextLoader_HasContextFile(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -339,6 +353,7 @@ func TestContextLoader_HasContextFile(t *testing.T) {
 }
 
 func TestContextLoader_GetContextPath(t *testing.T) {
+	t.Parallel()
 	ritesDir := getTestDataPath(t)
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -351,6 +366,7 @@ func TestContextLoader_GetContextPath(t *testing.T) {
 }
 
 func TestContextLoader_UserDirPriority(t *testing.T) {
+	t.Parallel()
 	// Create temp directories for project and user rites
 	projectDir := t.TempDir()
 	userDir := t.TempDir()
@@ -403,6 +419,7 @@ context_rows:
 }
 
 func TestContextLoader_SaveContext(t *testing.T) {
+	t.Parallel()
 	ritesDir := t.TempDir()
 
 	// Create rite directory
@@ -444,6 +461,7 @@ func TestContextLoader_SaveContext(t *testing.T) {
 }
 
 func TestContextLoader_SaveContext_InvalidContext(t *testing.T) {
+	t.Parallel()
 	ritesDir := t.TempDir()
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 
@@ -456,6 +474,7 @@ func TestContextLoader_SaveContext_InvalidContext(t *testing.T) {
 }
 
 func TestContextLoader_SaveContext_RiteNotFound(t *testing.T) {
+	t.Parallel()
 	ritesDir := t.TempDir()
 	loader := NewContextLoaderWithPaths(ritesDir, "", "", "")
 

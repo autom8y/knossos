@@ -7,6 +7,7 @@ import (
 )
 
 func TestLoadWorkflow(t *testing.T) {
+	t.Parallel()
 	testdataPath := filepath.Join("..", "..", "testdata", "rites", "valid-rite", "workflow.yaml")
 	absPath, _ := filepath.Abs(testdataPath)
 
@@ -37,6 +38,7 @@ func TestLoadWorkflow(t *testing.T) {
 }
 
 func TestWorkflow_PhaseNames(t *testing.T) {
+	t.Parallel()
 	workflow := &Workflow{
 		Phases: []Phase{
 			{Name: "phase1"},
@@ -60,6 +62,7 @@ func TestWorkflow_PhaseNames(t *testing.T) {
 }
 
 func TestWorkflow_AgentNames(t *testing.T) {
+	t.Parallel()
 	workflow := &Workflow{
 		Phases: []Phase{
 			{Name: "phase1", Agent: "agent-a"},
@@ -89,6 +92,7 @@ func TestWorkflow_AgentNames(t *testing.T) {
 }
 
 func TestWorkflow_GetPhase(t *testing.T) {
+	t.Parallel()
 	workflow := &Workflow{
 		Phases: []Phase{
 			{Name: "phase1", Agent: "agent-a"},
@@ -111,6 +115,7 @@ func TestWorkflow_GetPhase(t *testing.T) {
 }
 
 func TestWorkflow_GetAgentInfo(t *testing.T) {
+	t.Parallel()
 	workflow := &Workflow{
 		Phases: []Phase{
 			{Name: "requirements", Agent: "requirements-analyst", Produces: "prd"},
@@ -142,6 +147,7 @@ func TestWorkflow_GetAgentInfo(t *testing.T) {
 }
 
 func TestDeriveRoleFromName(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name string
 		want string
@@ -154,6 +160,7 @@ func TestDeriveRoleFromName(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := deriveRoleFromName(tt.name)
 			if got != tt.want {
 				t.Errorf("deriveRoleFromName(%q) = %q, want %q", tt.name, got, tt.want)

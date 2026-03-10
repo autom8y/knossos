@@ -7,6 +7,7 @@ import (
 )
 
 func TestLoadManifest(t *testing.T) {
+	t.Parallel()
 	// Create a temp directory
 	tempDir := t.TempDir()
 
@@ -72,6 +73,7 @@ budget:
 }
 
 func TestLoadManifest_NotFound(t *testing.T) {
+	t.Parallel()
 	_, err := LoadManifest("/nonexistent/path/rite.yaml")
 	if err == nil {
 		t.Error("LoadManifest should fail for nonexistent file")
@@ -79,6 +81,7 @@ func TestLoadManifest_NotFound(t *testing.T) {
 }
 
 func TestLoadManifest_InvalidYAML(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	invalidPath := filepath.Join(tempDir, "invalid.yaml")
 	if err := os.WriteFile(invalidPath, []byte("invalid: yaml: content:"), 0644); err != nil {
@@ -92,6 +95,7 @@ func TestLoadManifest_InvalidYAML(t *testing.T) {
 }
 
 func TestRiteManifest_Validate(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name       string
 		manifest   RiteManifest
@@ -195,6 +199,7 @@ func TestRiteManifest_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			issues := tt.manifest.Validate()
 			if len(issues) != tt.wantIssues {
 				t.Errorf("Validate() returned %d issues, want %d\nIssues: %v",
@@ -205,6 +210,7 @@ func TestRiteManifest_Validate(t *testing.T) {
 }
 
 func TestIsValidForm(t *testing.T) {
+	t.Parallel()
 	validForms := []RiteForm{FormSimple, FormPractitioner, FormProcedural, FormFull}
 	for _, form := range validForms {
 		if !IsValidForm(form) {
@@ -221,6 +227,7 @@ func TestIsValidForm(t *testing.T) {
 }
 
 func TestIsKebabCase(t *testing.T) {
+	t.Parallel()
 	valid := []string{
 		"simple",
 		"kebab-case",
@@ -253,6 +260,7 @@ func TestIsKebabCase(t *testing.T) {
 }
 
 func TestRiteManifest_AgentNames(t *testing.T) {
+	t.Parallel()
 	m := &RiteManifest{
 		Agents: []AgentRef{
 			{Name: "agent1"},
@@ -274,6 +282,7 @@ func TestRiteManifest_AgentNames(t *testing.T) {
 }
 
 func TestRiteManifest_SkillRefs(t *testing.T) {
+	t.Parallel()
 	m := &RiteManifest{
 		Skills: []SkillRef{
 			{Ref: "skill1"},
@@ -294,6 +303,7 @@ func TestRiteManifest_SkillRefs(t *testing.T) {
 }
 
 func TestRiteManifest_GetAgent(t *testing.T) {
+	t.Parallel()
 	m := &RiteManifest{
 		Agents: []AgentRef{
 			{Name: "agent1", Role: "Role 1"},
@@ -316,6 +326,7 @@ func TestRiteManifest_GetAgent(t *testing.T) {
 }
 
 func TestRiteManifest_GetEstimatedTokens(t *testing.T) {
+	t.Parallel()
 	// With explicit estimate
 	m1 := &RiteManifest{
 		Budget: &BudgetInfo{
@@ -349,6 +360,7 @@ func TestRiteManifest_GetEstimatedTokens(t *testing.T) {
 }
 
 func TestRiteManifest_HasMethods(t *testing.T) {
+	t.Parallel()
 	m := &RiteManifest{
 		Agents: []AgentRef{{Name: "a"}},
 		Skills: []SkillRef{{Ref: "s"}},

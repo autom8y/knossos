@@ -5,6 +5,7 @@ import (
 )
 
 func TestBudgetCalculator_Defaults(t *testing.T) {
+	t.Parallel()
 	calc := NewBudgetCalculator()
 
 	if calc.DefaultAgentCost != 2000 {
@@ -19,6 +20,7 @@ func TestBudgetCalculator_Defaults(t *testing.T) {
 }
 
 func TestBudgetCalculator_CalculateInvocationCost(t *testing.T) {
+	t.Parallel()
 	calc := NewBudgetCalculator()
 
 	tests := []struct {
@@ -60,6 +62,7 @@ func TestBudgetCalculator_CalculateInvocationCost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := calc.CalculateInvocationCost(tt.borrowed)
 			if got != tt.want {
 				t.Errorf("CalculateInvocationCost() = %d, want %d", got, tt.want)
@@ -69,6 +72,7 @@ func TestBudgetCalculator_CalculateInvocationCost(t *testing.T) {
 }
 
 func TestBudgetCalculator_CalculateRiteCost(t *testing.T) {
+	t.Parallel()
 	calc := NewBudgetCalculator()
 
 	tests := []struct {
@@ -115,6 +119,7 @@ func TestBudgetCalculator_CalculateRiteCost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := calc.CalculateRiteCost(tt.manifest)
 			if got != tt.want {
 				t.Errorf("CalculateRiteCost() = %d, want %d", got, tt.want)
@@ -124,6 +129,7 @@ func TestBudgetCalculator_CalculateRiteCost(t *testing.T) {
 }
 
 func TestBudgetCalculator_CalculateSummaryCost(t *testing.T) {
+	t.Parallel()
 	calc := NewBudgetCalculator()
 
 	// With explicit budget

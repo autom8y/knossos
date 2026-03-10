@@ -10,6 +10,7 @@ import (
 )
 
 func TestStateManager_LoadSaveRoundTrip(t *testing.T) {
+	t.Parallel()
 	// Create temp directory structure
 	tempDir := t.TempDir()
 	claudeDir := filepath.Join(tempDir, ".claude")
@@ -78,6 +79,7 @@ func TestStateManager_LoadSaveRoundTrip(t *testing.T) {
 }
 
 func TestStateManager_LoadMissing(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	claudeDir := filepath.Join(tempDir, ".claude")
 	if err := os.MkdirAll(claudeDir, 0755); err != nil {
@@ -105,6 +107,7 @@ func TestStateManager_LoadMissing(t *testing.T) {
 }
 
 func TestInvocationState_AddInvocation(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Invocations: []Invocation{},
 	}
@@ -125,6 +128,7 @@ func TestInvocationState_AddInvocation(t *testing.T) {
 }
 
 func TestInvocationState_RemoveInvocation(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Invocations: []Invocation{
 			{ID: "inv-001", RiteName: "rite1"},
@@ -158,6 +162,7 @@ func TestInvocationState_RemoveInvocation(t *testing.T) {
 }
 
 func TestInvocationState_RemoveByRite(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Invocations: []Invocation{
 			{ID: "inv-001", RiteName: "rite-a"},
@@ -179,6 +184,7 @@ func TestInvocationState_RemoveByRite(t *testing.T) {
 }
 
 func TestInvocationState_RemoveAll(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Invocations: []Invocation{
 			{ID: "inv-001"},
@@ -196,6 +202,7 @@ func TestInvocationState_RemoveAll(t *testing.T) {
 }
 
 func TestInvocationState_FindByID(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Invocations: []Invocation{
 			{ID: "inv-001", RiteName: "rite1"},
@@ -218,6 +225,7 @@ func TestInvocationState_FindByID(t *testing.T) {
 }
 
 func TestInvocationState_FindByRite(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Invocations: []Invocation{
 			{ID: "inv-001", RiteName: "rite-a"},
@@ -233,6 +241,7 @@ func TestInvocationState_FindByRite(t *testing.T) {
 }
 
 func TestInvocationState_BudgetMethods(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Budget: StateBudget{
 			NativeTokens:   5000,
@@ -262,6 +271,7 @@ func TestInvocationState_BudgetMethods(t *testing.T) {
 }
 
 func TestInvocationState_UpdateBudget(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{}
 
 	state.UpdateBudget(5000, 3000)
@@ -278,6 +288,7 @@ func TestInvocationState_UpdateBudget(t *testing.T) {
 }
 
 func TestInvocationState_GetBorrowedComponents(t *testing.T) {
+	t.Parallel()
 	state := &InvocationState{
 		Invocations: []Invocation{
 			{
@@ -303,6 +314,7 @@ func TestInvocationState_GetBorrowedComponents(t *testing.T) {
 }
 
 func TestInvocationState_CleanExpired(t *testing.T) {
+	t.Parallel()
 	past := time.Now().Add(-1 * time.Hour)
 	future := time.Now().Add(1 * time.Hour)
 
@@ -327,6 +339,7 @@ func TestInvocationState_CleanExpired(t *testing.T) {
 }
 
 func TestGenerateInvocationID(t *testing.T) {
+	t.Parallel()
 	id1 := GenerateInvocationID()
 	id2 := GenerateInvocationID()
 

@@ -75,6 +75,7 @@ skills:
 }
 
 func TestDiscovery_List(t *testing.T) {
+	t.Parallel()
 	tempDir, cleanup := setupTestRites(t)
 	defer cleanup()
 
@@ -113,6 +114,7 @@ func TestDiscovery_List(t *testing.T) {
 }
 
 func TestDiscovery_ListByForm(t *testing.T) {
+	t.Parallel()
 	tempDir, cleanup := setupTestRites(t)
 	defer cleanup()
 
@@ -145,6 +147,7 @@ func TestDiscovery_ListByForm(t *testing.T) {
 }
 
 func TestDiscovery_Get(t *testing.T) {
+	t.Parallel()
 	tempDir, cleanup := setupTestRites(t)
 	defer cleanup()
 
@@ -177,6 +180,7 @@ func TestDiscovery_Get(t *testing.T) {
 }
 
 func TestDiscovery_GetManifest(t *testing.T) {
+	t.Parallel()
 	tempDir, cleanup := setupTestRites(t)
 	defer cleanup()
 
@@ -199,6 +203,7 @@ func TestDiscovery_GetManifest(t *testing.T) {
 }
 
 func TestDiscovery_GetActive(t *testing.T) {
+	t.Parallel()
 	tempDir, cleanup := setupTestRites(t)
 	defer cleanup()
 
@@ -229,6 +234,7 @@ func TestDiscovery_GetActive(t *testing.T) {
 }
 
 func TestDiscovery_Exists(t *testing.T) {
+	t.Parallel()
 	tempDir, cleanup := setupTestRites(t)
 	defer cleanup()
 
@@ -247,6 +253,7 @@ func TestDiscovery_Exists(t *testing.T) {
 }
 
 func TestDiscovery_ActiveRiteName(t *testing.T) {
+	t.Parallel()
 	discovery := NewDiscoveryWithPaths(
 		"/unused",
 		"", "", "",
@@ -259,6 +266,7 @@ func TestDiscovery_ActiveRiteName(t *testing.T) {
 }
 
 func TestDiscovery_EmptyDir(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	ritesDir := filepath.Join(tempDir, "rites")
 	if err := os.MkdirAll(ritesDir, 0755); err != nil {
@@ -277,6 +285,7 @@ func TestDiscovery_EmptyDir(t *testing.T) {
 }
 
 func TestDiscovery_InvalidRiteSkipped(t *testing.T) {
+	t.Parallel()
 	tempDir := t.TempDir()
 	ritesDir := filepath.Join(tempDir, "rites")
 
