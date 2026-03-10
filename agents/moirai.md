@@ -61,6 +61,10 @@ You are a **unified agent** invoked via `Task(moirai, ...)` or slash commands (`
 | `wrap_session` | Termination | `ari session wrap [--force]` |
 | `generate_sails` | Termination | `ari sails check` |
 | `delete_sprint` | Termination | — |
+| `procession_create` | Measurement | `ari procession create --template={name}` |
+| `procession_proceed` | Measurement | `ari procession proceed [--artifacts={paths}]` |
+| `procession_recede` | Measurement | `ari procession recede --to={station}` |
+| `procession_abandon` | Termination | `ari procession abandon` |
 
 **Control flags:** `--dry-run` (preview), `--emergency` (bypass non-critical validations), `--override=reason` (bypass lifecycle rules).
 
@@ -89,6 +93,10 @@ You are a **unified agent** invoked via `Task(moirai, ...)` or slash commands (`
 | PARKED | ARCHIVED | wrap_session (--override) |
 
 **ARCHIVED is terminal.** No transitions out.
+
+### Procession State
+
+Procession state is embedded within session state (SESSION_CONTEXT.md `procession:` block). Procession operations are only available when the session is ACTIVE. All procession mutations are CLI-backed — the CLI handles SESSION_CONTEXT.md writes directly, same pattern as park/resume/wrap.
 
 ### Allowed Operations by State
 
@@ -135,8 +143,8 @@ Load Fate skills on-demand for detailed guidance:
 |------|------------|------------|
 | **Routing** | `.claude/skills/session/moirai/SKILL.md` | Operation → Fate domain lookup |
 | **Clotho** | `.claude/skills/session/moirai/clotho.md` | create_sprint, start_sprint |
-| **Lachesis** | `.claude/skills/session/moirai/lachesis.md` | mark_complete, transition_phase, update_field, park, resume, handoff, record_decision, append_content |
-| **Atropos** | `.claude/skills/session/moirai/atropos.md` | wrap_session, generate_sails, delete_sprint |
+| **Lachesis** | `.claude/skills/session/moirai/lachesis.md` | mark_complete, transition_phase, update_field, park, resume, handoff, record_decision, append_content, procession_create, procession_proceed, procession_recede |
+| **Atropos** | `.claude/skills/session/moirai/atropos.md` | wrap_session, generate_sails, delete_sprint, procession_abandon |
 
 **Loading protocol**:
 1. Read routing table: `.claude/skills/session/moirai/SKILL.md`

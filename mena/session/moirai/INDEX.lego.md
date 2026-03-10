@@ -24,6 +24,10 @@ description: "Moirai routing table for Fate domains (Clotho/Lachesis/Atropos). U
 | wrap_session | Atropos | Termination | `ari session wrap -s "{session_id}" [--force]` |
 | generate_sails | Atropos | Termination | `ari sails check` |
 | delete_sprint | Atropos | Termination | — |
+| procession_create | Lachesis | Measurement | `ari procession create --template={name}` |
+| procession_proceed | Lachesis | Measurement | `ari procession proceed [--artifacts={paths}]` |
+| procession_recede | Lachesis | Measurement | `ari procession recede --to={station}` |
+| procession_abandon | Atropos | Termination | `ari procession abandon` |
 
 ## Loading Protocol
 

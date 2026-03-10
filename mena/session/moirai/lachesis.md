@@ -226,3 +226,94 @@ Appends content to a named section of the session context.
 **MOIRAI_BYPASS**: Required for SESSION_CONTEXT.md write.
 
 **Lock**: Required (context.lock).
+
+---
+
+## procession_create
+
+Starts a new procession from a template within the active session.
+
+**Syntax**: `procession_create template="{name}"`
+
+**CLI**: `ari procession create --template={name}`
+
+**Parameters**:
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| template | Yes | Procession template name |
+
+**Validation**:
+1. Session must be ACTIVE
+2. No existing procession in session (abandon first)
+3. Template must be resolvable via the 5-tier chain
+
+**Execution**:
+1. Call `ari procession create --template={name}`
+2. CLI resolves template, creates artifact directory, sets procession state in SESSION_CONTEXT.md
+3. Return CLI output (procession_id, current_station, artifact_dir)
+
+**MOIRAI_BYPASS**: Not needed (CLI handles SESSION_CONTEXT.md mutation).
+
+**Lock**: CLI handles locking.
+
+---
+
+## procession_proceed
+
+Advances the procession to the next station.
+
+**Syntax**: `procession_proceed [artifacts="{comma-separated-paths}"]`
+
+**CLI**: `ari procession proceed [--artifacts={paths}]`
+
+**Parameters**:
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| artifacts | No | Comma-separated handoff artifact paths |
+
+**Validation**:
+1. Session must be ACTIVE
+2. Procession must exist
+3. Artifacts (if provided) must pass handoff frontmatter validation
+
+**Execution**:
+1. Call `ari procession proceed [--artifacts={paths}]`
+2. CLI appends current station to completed_stations, advances current_station
+3. CLI recomputes next_station and next_rite
+4. Return CLI output (completed_station, new_current_station, next_station, complete flag)
+
+**Cross-rite note**: If next_station has a different rite, the CLI output includes `ari sync --rite {next_rite}`. The main thread should prompt the user to sync and restart CC.
+
+**MOIRAI_BYPASS**: Not needed (CLI handles SESSION_CONTEXT.md mutation).
+
+**Lock**: CLI handles locking.
+
+---
+
+## procession_recede
+
+Moves the procession back to an earlier station.
+
+**Syntax**: `procession_recede to="{station}"`
+
+**CLI**: `ari procession recede --to={station}`
+
+**Parameters**:
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| to | Yes | Target station name (must precede current station in template order) |
+
+**Validation**:
+1. Session must be ACTIVE
+2. Procession must exist
+3. Target station must exist and precede current station
+
+**Execution**:
+1. Call `ari procession recede --to={station}`
+2. CLI repositions current_station (completed_stations log is append-only, not rolled back)
+3. CLI recomputes next_station and next_rite
+4. Return CLI output (new_current_station, next_station)
+
+**MOIRAI_BYPASS**: Not needed (CLI handles SESSION_CONTEXT.md mutation).
+
+**Lock**: CLI handles locking.

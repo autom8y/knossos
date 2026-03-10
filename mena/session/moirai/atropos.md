@@ -106,3 +106,43 @@ Deletes or archives a sprint.
 **MOIRAI_BYPASS**: Required for SPRINT_CONTEXT.md deletion/move.
 
 **Lock**: Required (context.lock).
+
+---
+
+## procession_abandon
+
+Terminates the active procession without completing remaining stations.
+
+**Syntax**: `procession_abandon`
+
+**CLI**: `ari procession abandon`
+
+**Validation**:
+1. Session must be ACTIVE
+2. Procession must exist
+
+**Execution**:
+1. Call `ari procession abandon`
+2. CLI removes the procession block from SESSION_CONTEXT.md
+3. Session continues without a procession
+4. Return CLI output (abandoned procession_id and type)
+
+**MOIRAI_BYPASS**: Not needed (CLI handles SESSION_CONTEXT.md mutation).
+
+**Lock**: CLI handles locking.
+
+---
+
+## Procession Awareness in Wrap and Park
+
+When wrapping or parking a session with an active procession:
+
+**wrap_session**: If `SESSION_CONTEXT.md` has a non-nil `procession:` block when wrapping, include in the wrap summary:
+- Procession type and current station
+- Number of completed stations vs total
+- Whether the procession was abandoned or left incomplete
+- This is informational — wrapping does NOT automatically abandon the procession (the archived session retains the procession state for audit purposes)
+
+**park_session**: If parking a session with an active procession, note the procession state in the park reason or audit log:
+- Include current station name for resume context
+- This helps the user know where they left off when resuming
