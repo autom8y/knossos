@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -32,17 +31,13 @@ func TestGetMenaDir_ResolutionOrder_KnossosHomeBeforeXDG(t *testing.T) {
 		t.Fatalf("mkdir xdgMenaDir: %v", err)
 	}
 
-	// Point KNOSSOS_HOME and XDG_DATA_HOME at our temp directories.
-	// Reset KNOSSOS_HOME cache both before (clean slate) and after (isolation).
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Setenv("XDG_DATA_HOME", xdgDataHome)
-	t.Cleanup(config.ResetKnossosHome)
-
 	// Create a project root with no .knossos/mena/ so project-level is skipped.
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(projectRoot, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
+	// xdgDataDir replaces config.XDGDataDir() which returns $XDG_DATA_HOME/knossos
+	m.xdgDataDir = filepath.Join(xdgDataHome, "knossos")
 
 	got := m.getMenaDir()
 
@@ -64,10 +59,6 @@ func TestGetMenaDir_ResolutionOrder_ProjectOverridesKnossosHome(t *testing.T) {
 		t.Fatalf("mkdir knossosMenaDir: %v", err)
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Cleanup(config.ResetKnossosHome)
-
 	// Create a project root with a .knossos/mena/ directory.
 	projectRoot := t.TempDir()
 	projectMenaDir := filepath.Join(projectRoot, ".knossos", "mena")
@@ -76,7 +67,8 @@ func TestGetMenaDir_ResolutionOrder_ProjectOverridesKnossosHome(t *testing.T) {
 	}
 
 	resolver := paths.NewResolver(projectRoot)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(projectRoot, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 
 	got := m.getMenaDir()
 
@@ -100,14 +92,12 @@ func TestGetMenaDir_ResolutionOrder_XDGFallbackWhenNoKnossosHome(t *testing.T) {
 		t.Fatalf("mkdir xdgMenaDir: %v", err)
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Setenv("XDG_DATA_HOME", xdgDataHome)
-	t.Cleanup(config.ResetKnossosHome)
-
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(projectRoot, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
+	// xdgDataDir replaces config.XDGDataDir() which returns $XDG_DATA_HOME/knossos
+	m.xdgDataDir = filepath.Join(xdgDataHome, "knossos")
 
 	got := m.getMenaDir()
 
@@ -125,14 +115,12 @@ func TestGetMenaDir_ResolutionOrder_EmptyWhenNoneExist(t *testing.T) {
 	knossosHome := t.TempDir()
 	xdgDataHome := t.TempDir()
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Setenv("XDG_DATA_HOME", xdgDataHome)
-	t.Cleanup(config.ResetKnossosHome)
-
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(projectRoot, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
+	// xdgDataDir replaces config.XDGDataDir() which returns $XDG_DATA_HOME/knossos
+	m.xdgDataDir = filepath.Join(xdgDataHome, "knossos")
 
 	got := m.getMenaDir()
 

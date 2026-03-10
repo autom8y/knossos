@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
@@ -80,11 +79,6 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 	knossosHome := t.TempDir()
 	setupKnossosRiteSharedMena(t, knossosHome)
 
-	// Point KNOSSOS_HOME at our fake knossos directory
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Cleanup(config.ResetKnossosHome)
-
 	// Create a satellite project with a local rite (does NOT have rites/shared/)
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
 	claudeDir := filepath.Join(satelliteRoot, ".claude")
@@ -109,10 +103,9 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 	}
 
 	// Set up materializer with the satellite project as root
-	// The source resolver is built from satelliteRoot, so KnossosHome() will pick up
-	// the env var we just set.
 	resolver := paths.NewResolver(satelliteRoot)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 
 	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
@@ -139,10 +132,6 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 	setupKnossosRiteSharedMena(t, knossosHome)
 	setupKnossosRiteDepMena(t, knossosHome, "10x-dev")
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Cleanup(config.ResetKnossosHome)
-
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
 	claudeDir := filepath.Join(satelliteRoot, ".claude")
 
@@ -165,7 +154,8 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 	}
 
 	resolver := paths.NewResolver(satelliteRoot)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 
 	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
@@ -189,10 +179,6 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T) {
 	knossosHome := t.TempDir()
 	setupKnossosRiteSharedMena(t, knossosHome)
-
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Cleanup(config.ResetKnossosHome)
 
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
 	claudeDir := filepath.Join(satelliteRoot, ".claude")
@@ -225,7 +211,8 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 	}
 
 	resolver := paths.NewResolver(satelliteRoot)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 
 	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
@@ -269,10 +256,6 @@ func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
 		t.Fatalf("write manifest: %v", err)
 	}
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	t.Cleanup(config.ResetKnossosHome)
-
 	claudeDir := filepath.Join(knossosHome, ".claude")
 
 	// Resolved rite points to knossosHome/rites/ecosystem — filepath.Dir gives knossosHome/rites/
@@ -295,7 +278,8 @@ func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
 	}
 
 	resolver := paths.NewResolver(knossosHome)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(knossosHome, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 
 	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)

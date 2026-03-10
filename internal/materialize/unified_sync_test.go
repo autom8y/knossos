@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/stretchr/testify/assert"
@@ -676,9 +675,6 @@ func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 // Regression test for: shared mena missing in no-rite sync.
 func TestMinimalMode_ProjectsSharedMena(t *testing.T) {
 	knossosHome := t.TempDir()
-	t.Setenv("KNOSSOS_HOME", knossosHome)
-	config.ResetKnossosHome()
-	t.Cleanup(config.ResetKnossosHome)
 
 	projectDir := t.TempDir()
 	claudeDir := filepath.Join(projectDir, ".claude")
@@ -714,7 +710,8 @@ func TestMinimalMode_ProjectsSharedMena(t *testing.T) {
 	))
 
 	resolver := paths.NewResolver(projectDir)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(projectDir, "", "", knossosHome)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 
 	// No ACTIVE_RITE → triggers MaterializeMinimal path
 	result, err := m.MaterializeMinimal(Options{})

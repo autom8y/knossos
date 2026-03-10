@@ -9,7 +9,6 @@ import (
 
 	"github.com/autom8y/knossos/internal/provenance"
 
-	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -207,12 +206,9 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", "/nonexistent-knossos-home")
-	t.Cleanup(config.ResetKnossosHome)
-
 	resolver := paths.NewResolver(tmpDir)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(tmpDir, "", "", "/nonexistent-knossos-home")
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 	m.sourceResolver.WithEmbeddedFS(fsys)
 
 	manifest := &RiteManifest{
@@ -266,11 +262,6 @@ func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
 		t.Fatalf("WriteFile: %v", err)
 	}
 
-	// Point KNOSSOS_HOME to the fake platform dir so getMenaDir() would find it.
-	config.ResetKnossosHome()
-	t.Setenv("KNOSSOS_HOME", platformMenaDir)
-	t.Cleanup(config.ResetKnossosHome)
-
 	// Embedded FS contains only the rite-specific command.
 	fsys := fstest.MapFS{
 		"rites/foreign-rite/manifest.yaml": &fstest.MapFile{
@@ -287,7 +278,8 @@ func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")
 	resolver := paths.NewResolver(tmpDir)
-	m := NewMaterializer(resolver)
+	sr := NewSourceResolverWithPaths(tmpDir, "", "", platformMenaDir)
+	m := NewMaterializerWithSourceResolver(resolver, sr)
 	m.sourceResolver.WithEmbeddedFS(fsys)
 
 	manifest := &RiteManifest{
