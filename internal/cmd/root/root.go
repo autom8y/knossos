@@ -17,6 +17,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/explain"
 	"github.com/autom8y/knossos/internal/cmd/handoff"
 	"github.com/autom8y/knossos/internal/cmd/hook"
+	"github.com/autom8y/knossos/internal/cmd/procession"
 	initcmd "github.com/autom8y/knossos/internal/cmd/initialize"
 	"github.com/autom8y/knossos/internal/cmd/inscription"
 	"github.com/autom8y/knossos/internal/cmd/knows"
@@ -142,6 +143,7 @@ func init() {
 	rootCmd.AddCommand(sync.NewSyncCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(validate.NewValidateCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(handoff.NewHandoffCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
+	rootCmd.AddCommand(procession.NewProcessionCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(worktree.NewWorktreeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(hook.NewHookCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))
 	rootCmd.AddCommand(knows.NewKnowsCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))

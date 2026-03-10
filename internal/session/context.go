@@ -48,6 +48,10 @@ type Context struct {
 	ClaimedBy  string `yaml:"claimed_by,omitempty" json:"claimed_by,omitempty"`
 	ParkSource string `yaml:"park_source,omitempty" json:"park_source,omitempty"`
 
+	// Procession tracks an active cross-rite coordinated workflow.
+	// nil when no procession is active (most sessions). Added in v2.3 (additive, omitempty).
+	Procession *Procession `yaml:"procession,omitempty" json:"procession,omitempty"`
+
 	// Raw markdown body (after frontmatter)
 	Body string `yaml:"-" json:"-"`
 }
@@ -89,6 +93,29 @@ func (s *strandList) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
+// CompletedStation records the completion of a procession station.
+// Timestamps are stored as strings (RFC3339) rather than time.Time because
+// completed station timestamps are informational/audit-only and never used for
+// time arithmetic. This matches how Strand.LandedAt is stored.
+type CompletedStation struct {
+	Station     string   `yaml:"station"              json:"station"`
+	Rite        string   `yaml:"rite"                 json:"rite"`
+	CompletedAt string   `yaml:"completed_at"         json:"completed_at"`
+	Artifacts   []string `yaml:"artifacts,omitempty"  json:"artifacts,omitempty"`
+}
+
+// Procession tracks the state of a cross-rite coordinated workflow within a session.
+// Added in schema v2.3 (additive, omitempty). nil when no procession is active.
+type Procession struct {
+	ID                string             `yaml:"id"                            json:"id"`
+	Type              string             `yaml:"type"                          json:"type"`
+	CurrentStation    string             `yaml:"current_station"               json:"current_station"`
+	CompletedStations []CompletedStation `yaml:"completed_stations,omitempty"  json:"completed_stations,omitempty"`
+	NextStation       string             `yaml:"next_station,omitempty"        json:"next_station,omitempty"`
+	NextRite          string             `yaml:"next_rite,omitempty"           json:"next_rite,omitempty"`
+	ArtifactDir       string             `yaml:"artifact_dir"                  json:"artifact_dir"`
+}
+
 // contextYAML is the YAML representation with string timestamps.
 type contextYAML struct {
 	SchemaVersion string     `yaml:"schema_version"`
@@ -107,9 +134,10 @@ type contextYAML struct {
 	FrayedFrom    string     `yaml:"frayed_from,omitempty"`
 	FrayPoint     string     `yaml:"fray_point,omitempty"`
 	Strands       strandList `yaml:"strands,omitempty"`
-	FrameRef      string     `yaml:"frame_ref,omitempty"`
-	ClaimedBy     string     `yaml:"claimed_by,omitempty"`
-	ParkSource    string     `yaml:"park_source,omitempty"`
+	FrameRef      string      `yaml:"frame_ref,omitempty"`
+	ClaimedBy     string      `yaml:"claimed_by,omitempty"`
+	ParkSource    string      `yaml:"park_source,omitempty"`
+	Procession    *Procession `yaml:"procession,omitempty"`
 }
 
 // ParseContext parses SESSION_CONTEXT.md content.
@@ -196,6 +224,7 @@ func ParseContext(content []byte) (*Context, error) {
 	ctx.FrameRef = yamlData.FrameRef
 	ctx.ClaimedBy = yamlData.ClaimedBy
 	ctx.ParkSource = yamlData.ParkSource
+	ctx.Procession = yamlData.Procession
 
 	return ctx, nil
 }
@@ -244,6 +273,7 @@ func (c *Context) Serialize() ([]byte, error) {
 	yamlData.FrameRef = c.FrameRef
 	yamlData.ClaimedBy = c.ClaimedBy
 	yamlData.ParkSource = c.ParkSource
+	yamlData.Procession = c.Procession
 
 	// Marshal YAML
 	yamlBytes, err := yaml.Marshal(yamlData)

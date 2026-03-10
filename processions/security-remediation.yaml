@@ -1,0 +1,32 @@
+name: security-remediation
+description: "Security findings lifecycle: audit, assess, plan, remediate, validate"
+
+stations:
+  - name: audit
+    rite: security
+    goal: "Map attack surface, classify findings by exploitability, produce threat model and pentest report"
+    produces: [threat-model, pentest-report]
+
+  - name: assess
+    rite: debt-triage
+    goal: "Catalog findings, score risk, produce prioritized remediation backlog"
+    produces: [debt-inventory, priority-matrix]
+
+  - name: plan
+    rite: debt-triage
+    goal: "Group findings into sprint-sized tasks with acceptance criteria"
+    produces: [sprint-plan]
+
+  - name: remediate
+    rite: hygiene
+    alt_rite: 10x-dev
+    goal: "Execute remediation plan, produce PRs with fixes"
+    produces: [remediation-ledger]
+
+  - name: validate
+    rite: security
+    goal: "Review remediation PRs for security correctness"
+    produces: [validation-report]
+    loop_to: remediate
+
+artifact_dir: .sos/wip/security-remediation/

@@ -717,3 +717,396 @@ func TestNewContext_SchemaVersion23(t *testing.T) {
 		t.Errorf("NewContext SchemaVersion = %q, want %q", ctx.SchemaVersion, "2.3")
 	}
 }
+
+// --- Procession round-trip tests (Section 4.2 of DESIGN-procession-template-schema.md) ---
+
+func TestParseContext_Procession_NilWhenAbsent(t *testing.T) {
+	// Existing v2.3 session YAML with no procession field — ctx.Procession must be nil.
+	content := `---
+schema_version: "2.3"
+session_id: "session-20260310-143000-a1b2c3d4"
+status: "ACTIVE"
+created_at: "2026-03-10T14:30:00Z"
+initiative: "Baseline session without procession"
+complexity: "MODULE"
+active_rite: "10x-dev"
+current_phase: "requirements"
+---
+`
+	ctx, err := ParseContext([]byte(content))
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+	if ctx.Procession != nil {
+		t.Errorf("Procession should be nil for session without procession block, got %+v", ctx.Procession)
+	}
+}
+
+func TestParseContext_Procession_ParsedWhenPresent(t *testing.T) {
+	// YAML with a full procession block — all fields must be populated.
+	content := `---
+schema_version: "2.3"
+session_id: "session-20260310-143000-a1b2c3d4"
+status: "ACTIVE"
+created_at: "2026-03-10T14:30:00Z"
+initiative: "Security remediation for autom8y"
+complexity: "SYSTEM"
+active_rite: "debt-triage"
+rite: debt-triage
+current_phase: "requirements"
+procession:
+  id: security-remediation-2026-03-10
+  type: security-remediation
+  current_station: assess
+  completed_stations:
+    - station: audit
+      rite: security
+      completed_at: "2026-03-10T14:30:00Z"
+      artifacts:
+        - .sos/wip/security-remediation/THREAT-security-posture.md
+        - .sos/wip/security-remediation/HANDOFF-audit-to-assess.md
+  next_station: plan
+  next_rite: debt-triage
+  artifact_dir: .sos/wip/security-remediation/
+---
+`
+	ctx, err := ParseContext([]byte(content))
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+	if ctx.Procession == nil {
+		t.Fatal("Procession should not be nil when procession block is present")
+	}
+
+	p := ctx.Procession
+	if p.ID != "security-remediation-2026-03-10" {
+		t.Errorf("Procession.ID = %q, want %q", p.ID, "security-remediation-2026-03-10")
+	}
+	if p.Type != "security-remediation" {
+		t.Errorf("Procession.Type = %q, want %q", p.Type, "security-remediation")
+	}
+	if p.CurrentStation != "assess" {
+		t.Errorf("Procession.CurrentStation = %q, want %q", p.CurrentStation, "assess")
+	}
+	if len(p.CompletedStations) != 1 {
+		t.Fatalf("Procession.CompletedStations length = %d, want 1", len(p.CompletedStations))
+	}
+	if p.CompletedStations[0].Station != "audit" {
+		t.Errorf("CompletedStations[0].Station = %q, want %q", p.CompletedStations[0].Station, "audit")
+	}
+	if len(p.CompletedStations[0].Artifacts) != 2 {
+		t.Errorf("CompletedStations[0].Artifacts length = %d, want 2", len(p.CompletedStations[0].Artifacts))
+	}
+	if p.NextStation != "plan" {
+		t.Errorf("Procession.NextStation = %q, want %q", p.NextStation, "plan")
+	}
+	if p.NextRite != "debt-triage" {
+		t.Errorf("Procession.NextRite = %q, want %q", p.NextRite, "debt-triage")
+	}
+	if p.ArtifactDir != ".sos/wip/security-remediation/" {
+		t.Errorf("Procession.ArtifactDir = %q", p.ArtifactDir)
+	}
+}
+
+func TestContext_Serialize_NilProcessionOmitted(t *testing.T) {
+	// Context with Procession: nil — the serialized YAML must not contain "procession:".
+	now := time.Now().UTC().Truncate(time.Second)
+	ctx := &Context{
+		SchemaVersion: "2.3",
+		SessionID:     "session-20260310-143000-a1b2c3d4",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "No procession",
+		Complexity:    "MODULE",
+		ActiveRite:    "10x-dev",
+		CurrentPhase:  "requirements",
+		Procession:    nil,
+	}
+
+	data, err := ctx.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+	if strings.Contains(string(data), "procession:") {
+		t.Errorf("Serialized YAML should not contain procession: when Procession is nil\n%s", string(data))
+	}
+}
+
+func TestContext_Serialize_ProcessionIncluded(t *testing.T) {
+	// Context with a populated Procession — serialized YAML must contain the procession block.
+	now := time.Now().UTC().Truncate(time.Second)
+	ctx := &Context{
+		SchemaVersion: "2.3",
+		SessionID:     "session-20260310-143000-a1b2c3d4",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "Security remediation",
+		Complexity:    "SYSTEM",
+		ActiveRite:    "debt-triage",
+		CurrentPhase:  "requirements",
+		Procession: &Procession{
+			ID:             "security-remediation-2026-03-10",
+			Type:           "security-remediation",
+			CurrentStation: "assess",
+			NextStation:    "plan",
+			NextRite:       "debt-triage",
+			ArtifactDir:    ".sos/wip/security-remediation/",
+		},
+	}
+
+	data, err := ctx.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+	serialized := string(data)
+
+	if !strings.Contains(serialized, "procession:") {
+		t.Error("Serialized YAML should contain procession: block")
+	}
+	if !strings.Contains(serialized, "security-remediation-2026-03-10") {
+		t.Error("Serialized YAML should contain procession ID")
+	}
+	if !strings.Contains(serialized, "current_station: assess") {
+		t.Error("Serialized YAML should contain current_station")
+	}
+}
+
+func TestContext_Procession_RoundTrip(t *testing.T) {
+	// Full round-trip: Context with populated Procession -> Serialize -> ParseContext.
+	// The parsed result must be identical to the original.
+	now := time.Now().UTC().Truncate(time.Second)
+	original := &Context{
+		SchemaVersion: "2.3",
+		SessionID:     "session-20260310-143000-a1b2c3d4",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "Procession round trip",
+		Complexity:    "SYSTEM",
+		ActiveRite:    "debt-triage",
+		CurrentPhase:  "requirements",
+		Procession: &Procession{
+			ID:             "security-remediation-2026-03-10",
+			Type:           "security-remediation",
+			CurrentStation: "assess",
+			CompletedStations: []CompletedStation{
+				{
+					Station:     "audit",
+					Rite:        "security",
+					CompletedAt: "2026-03-10T14:30:00Z",
+					Artifacts: []string{
+						".sos/wip/security-remediation/THREAT-security-posture.md",
+					},
+				},
+			},
+			NextStation: "plan",
+			NextRite:    "debt-triage",
+			ArtifactDir: ".sos/wip/security-remediation/",
+		},
+		Body: "\n# Test\n",
+	}
+
+	data, err := original.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+
+	parsed, err := ParseContext(data)
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	if parsed.Procession == nil {
+		t.Fatal("Procession should not be nil after round-trip")
+	}
+
+	p := parsed.Procession
+	if p.ID != original.Procession.ID {
+		t.Errorf("Procession.ID = %q, want %q", p.ID, original.Procession.ID)
+	}
+	if p.Type != original.Procession.Type {
+		t.Errorf("Procession.Type = %q, want %q", p.Type, original.Procession.Type)
+	}
+	if p.CurrentStation != original.Procession.CurrentStation {
+		t.Errorf("Procession.CurrentStation = %q, want %q", p.CurrentStation, original.Procession.CurrentStation)
+	}
+	if p.NextStation != original.Procession.NextStation {
+		t.Errorf("Procession.NextStation = %q, want %q", p.NextStation, original.Procession.NextStation)
+	}
+	if p.NextRite != original.Procession.NextRite {
+		t.Errorf("Procession.NextRite = %q, want %q", p.NextRite, original.Procession.NextRite)
+	}
+	if p.ArtifactDir != original.Procession.ArtifactDir {
+		t.Errorf("Procession.ArtifactDir = %q, want %q", p.ArtifactDir, original.Procession.ArtifactDir)
+	}
+}
+
+func TestContext_CompletedStations_RoundTrip(t *testing.T) {
+	// Procession with 2 completed stations — CompletedStations slice survives serialize/parse
+	// with correct timestamps and artifact paths.
+	now := time.Now().UTC().Truncate(time.Second)
+	original := &Context{
+		SchemaVersion: "2.3",
+		SessionID:     "session-20260310-143000-a1b2c3d4",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "Completed stations round trip",
+		Complexity:    "SYSTEM",
+		ActiveRite:    "plan",
+		CurrentPhase:  "requirements",
+		Procession: &Procession{
+			ID:             "security-remediation-2026-03-10",
+			Type:           "security-remediation",
+			CurrentStation: "plan",
+			CompletedStations: []CompletedStation{
+				{
+					Station:     "audit",
+					Rite:        "security",
+					CompletedAt: "2026-03-10T10:00:00Z",
+					Artifacts: []string{
+						".sos/wip/security-remediation/THREAT-security-posture.md",
+						".sos/wip/security-remediation/PENTEST-security-posture.md",
+					},
+				},
+				{
+					Station:     "assess",
+					Rite:        "debt-triage",
+					CompletedAt: "2026-03-10T12:00:00Z",
+					Artifacts: []string{
+						".sos/wip/security-remediation/DEBT-INVENTORY.md",
+					},
+				},
+			},
+			NextStation: "remediate",
+			NextRite:    "hygiene",
+			ArtifactDir: ".sos/wip/security-remediation/",
+		},
+	}
+
+	data, err := original.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+
+	parsed, err := ParseContext(data)
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	if parsed.Procession == nil {
+		t.Fatal("Procession should not be nil")
+	}
+	if len(parsed.Procession.CompletedStations) != 2 {
+		t.Fatalf("CompletedStations length = %d, want 2", len(parsed.Procession.CompletedStations))
+	}
+
+	cs0 := parsed.Procession.CompletedStations[0]
+	if cs0.Station != "audit" {
+		t.Errorf("CompletedStations[0].Station = %q, want %q", cs0.Station, "audit")
+	}
+	if cs0.CompletedAt != "2026-03-10T10:00:00Z" {
+		t.Errorf("CompletedStations[0].CompletedAt = %q, want %q", cs0.CompletedAt, "2026-03-10T10:00:00Z")
+	}
+	if len(cs0.Artifacts) != 2 {
+		t.Errorf("CompletedStations[0].Artifacts length = %d, want 2", len(cs0.Artifacts))
+	}
+
+	cs1 := parsed.Procession.CompletedStations[1]
+	if cs1.Station != "assess" {
+		t.Errorf("CompletedStations[1].Station = %q, want %q", cs1.Station, "assess")
+	}
+	if cs1.CompletedAt != "2026-03-10T12:00:00Z" {
+		t.Errorf("CompletedStations[1].CompletedAt = %q, want %q", cs1.CompletedAt, "2026-03-10T12:00:00Z")
+	}
+}
+
+func TestContext_Procession_EmptyCompletedStations(t *testing.T) {
+	// Procession with empty CompletedStations — field should be omitted or empty after round-trip.
+	now := time.Now().UTC().Truncate(time.Second)
+	ctx := &Context{
+		SchemaVersion: "2.3",
+		SessionID:     "session-20260310-143000-a1b2c3d4",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "Empty completed stations",
+		Complexity:    "SYSTEM",
+		ActiveRite:    "security",
+		CurrentPhase:  "requirements",
+		Procession: &Procession{
+			ID:                "security-remediation-2026-03-10",
+			Type:              "security-remediation",
+			CurrentStation:    "audit",
+			CompletedStations: nil,
+			ArtifactDir:       ".sos/wip/security-remediation/",
+		},
+	}
+
+	data, err := ctx.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+
+	parsed, err := ParseContext(data)
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+
+	if parsed.Procession == nil {
+		t.Fatal("Procession should not be nil")
+	}
+	// CompletedStations may be nil or empty — both are acceptable
+	if len(parsed.Procession.CompletedStations) != 0 {
+		t.Errorf("CompletedStations should be empty, got %v", parsed.Procession.CompletedStations)
+	}
+}
+
+func TestContext_Procession_NilNextStation(t *testing.T) {
+	// Procession at the final station (NextStation: "", NextRite: "") — omitempty fields must
+	// be absent from YAML and parse back as empty strings.
+	now := time.Now().UTC().Truncate(time.Second)
+	ctx := &Context{
+		SchemaVersion: "2.3",
+		SessionID:     "session-20260310-143000-a1b2c3d4",
+		Status:        StatusActive,
+		CreatedAt:     now,
+		Initiative:    "Final station procession",
+		Complexity:    "SYSTEM",
+		ActiveRite:    "security",
+		CurrentPhase:  "requirements",
+		Procession: &Procession{
+			ID:             "security-remediation-2026-03-10",
+			Type:           "security-remediation",
+			CurrentStation: "validate",
+			NextStation:    "", // at final station
+			NextRite:       "", // at final station
+			ArtifactDir:    ".sos/wip/security-remediation/",
+		},
+	}
+
+	data, err := ctx.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize() error = %v", err)
+	}
+	serialized := string(data)
+
+	// next_station and next_rite must be omitted (omitempty) when empty
+	if strings.Contains(serialized, "next_station:") {
+		t.Error("next_station should be omitted when empty")
+	}
+	if strings.Contains(serialized, "next_rite:") {
+		t.Error("next_rite should be omitted when empty")
+	}
+
+	parsed, err := ParseContext(data)
+	if err != nil {
+		t.Fatalf("ParseContext() error = %v", err)
+	}
+	if parsed.Procession == nil {
+		t.Fatal("Procession should not be nil")
+	}
+	if parsed.Procession.NextStation != "" {
+		t.Errorf("NextStation = %q, want empty string", parsed.Procession.NextStation)
+	}
+	if parsed.Procession.NextRite != "" {
+		t.Errorf("NextRite = %q, want empty string", parsed.Procession.NextRite)
+	}
+}

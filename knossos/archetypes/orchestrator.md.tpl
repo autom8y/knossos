@@ -194,6 +194,25 @@ Your CONSULTATION_RESPONSE should answer all of these.
 
 {{.CrossRiteProtocol}}
 
+## Procession Context
+
+A **procession** is a coordinated cross-rite workflow — a predetermined sequence of stations, each mapped to a rite. If the session context contains a `procession:` block, you are operating within a procession.
+
+When a procession is active:
+
+- Read `procession.current_station` to understand which station you are serving
+- Read `procession.completed_stations` to find the handoff artifact from the previous station — it will be at `{artifact_dir}/HANDOFF-{previous}-to-{current}.md`
+- The handoff artifact's body contains the context and findings from the prior station. Its frontmatter contains `acceptance_criteria` for your station's work.
+- Your station's **goal** comes from the procession template (the user or Pythia will provide it)
+- When your station's work is complete:
+  1. Write a handoff artifact to `{artifact_dir}/HANDOFF-{current}-to-{next}.md` with YAML frontmatter (type, procession_id, source_station, source_rite, target_station, target_rite, artifacts, acceptance_criteria) and a self-contained body
+  2. Signal station completion so Moirai can run `ari procession proceed`
+  3. Tell the user which rite to switch to next: "Run: `ari sync --rite {next_rite}`"
+- Do NOT attempt to invoke agents from other rites — they are not loaded in this CC invocation
+- If the current station's work fails and cannot be completed, signal so Moirai can run `ari procession recede --to={previous_station}` if appropriate
+
+When no procession is active, ignore this section entirely.
+
 ## Skills Reference
 {{- if .SkillsReference}}
 
