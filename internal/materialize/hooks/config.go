@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/hook"
 )
 
 // HooksConfig represents a parsed hooks.yaml file.
@@ -103,6 +104,13 @@ func BuildHooksSettings(cfg *HooksConfig, channel string) map[string]any {
 
 	// Sort each event's entries by priority (lower = first)
 	for event, entries := range byEvent {
+		// Translate the CC-canonical event name to the channel's wire name.
+		// For "gemini", events with no equivalent are silently skipped.
+		translatedEvent, skip := hook.TranslateEventForChannel(event, channel)
+		if skip {
+			continue
+		}
+
 		sort.Slice(entries, func(i, j int) bool {
 			pi, pj := entries[i].Priority, entries[j].Priority
 			if pi == 0 {
@@ -136,12 +144,15 @@ func BuildHooksSettings(cfg *HooksConfig, channel string) map[string]any {
 				"hooks": []map[string]any{hookHandler},
 			}
 			if entry.Matcher != "" {
-				matcherGroup["matcher"] = entry.Matcher
+				// Translate CC tool names (Edit, Bash, ...) to channel-specific names
+				// (replace, run_shell_command, ...). No-op for "claude" channel.
+				translatedMatcher := hook.TranslateMatcherForChannel(entry.Matcher, channel)
+				matcherGroup["matcher"] = translatedMatcher
 			}
 			matcherGroups = append(matcherGroups, matcherGroup)
 		}
 
-		hooks[event] = matcherGroups
+		hooks[translatedEvent] = matcherGroups
 	}
 
 	return hooks

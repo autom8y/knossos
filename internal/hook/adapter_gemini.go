@@ -6,17 +6,16 @@ import (
 	"os"
 )
 
-type GeminiPayload struct {
-	SessionID      string          `json:"sessionId"`
-	ConversationID string          `json:"conversationId"`
-	CWD            string          `json:"cwd"`
-	HookEventName  string          `json:"event"`
-	ToolName       string          `json:"toolName"`
-	ToolInput      json.RawMessage `json:"toolInput"`
-	ToolResponse   json.RawMessage `json:"toolResponse"`
-	Prompt         string          `json:"prompt"`
-}
-
+// GeminiAdapter handles Gemini CLI hook payloads.
+// Gemini sends the same snake_case JSON fields as Claude Code (session_id,
+// hook_event_name, tool_name, tool_input, tool_response, cwd), so StdinPayload
+// can parse Gemini payloads directly. Gemini-only fields (timestamp, mcp_context)
+// are silently ignored by json.Unmarshal.
+//
+// The only Gemini-specific logic is event name translation: Gemini wire names
+// (BeforeTool, AfterTool, etc.) are translated to CC canonical names (PreToolUse,
+// PostToolUse, etc.) before validation, so all downstream hook commands operate
+// on a uniform Env regardless of which CLI fired the event.
 type GeminiAdapter struct{}
 
 func (a *GeminiAdapter) ParsePayload(reader io.Reader) (*Env, error) {
@@ -27,13 +26,18 @@ func (a *GeminiAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 		return &Env{ProjectDir: projectDir}, nil
 	}
 
-	var payload GeminiPayload
+	var payload StdinPayload
 	if err := json.Unmarshal(data, &payload); err != nil {
 		return &Env{ProjectDir: projectDir}, nil
 	}
 
-	event := HookEvent(payload.HookEventName)
+	// Translate Gemini wire event name to CC canonical before validation.
+	// e.g. "BeforeTool" -> "PreToolUse"; unknown Gemini-only events (BeforeModel)
+	// pass through TranslateInboundEvent unchanged, then fail isValidHookEvent.
+	translatedEvent := TranslateInboundEvent(payload.HookEventName)
+	event := HookEvent(translatedEvent)
 	if event != "" && !isValidHookEvent(event) {
+		// Gemini-only events (e.g. BeforeModel, AfterModel) -- silently ignore
 		event = ""
 	}
 
@@ -68,17 +72,17 @@ func (a *GeminiAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 	}, nil
 }
 
+// FormatResponse serializes a hook decision to JSON for stdout.
+// Gemini reads the same {"decision": "...", "reason": "..."} format as Claude Code.
+// No os.Exit: the caller prints the response bytes and the process exits naturally.
 func (a *GeminiAdapter) FormatResponse(decision string, reason string) ([]byte, error) {
-	// Gemini CLI uses exit codes: 0 = allow, 1 = block
-	// We return the reason as stderr output if blocked
-	if decision == "block" || decision == "deny" { // "deny" just in case
-		os.Stderr.WriteString(reason + "\n")
-		os.Exit(1)
+	resp := map[string]interface{}{
+		"decision": decision,
 	}
-	
-	// Exit 0 implicitly happens if we just return normally, but we can also os.Exit(0)
-	// Return empty since Gemini reads stderr and exit codes, not a JSON response.
-	return []byte{}, nil
+	if reason != "" {
+		resp["reason"] = reason
+	}
+	return json.Marshal(resp)
 }
 
 func (a *GeminiAdapter) ChannelName() string {
