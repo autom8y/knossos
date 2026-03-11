@@ -40,11 +40,21 @@ func (c *GeminiCompiler) CompileCommand(name, description, argHint, body string)
 func (c *GeminiCompiler) CompileSkill(name, description, body string) (string, string, []byte, error) {
 	var buf bytes.Buffer
 	buf.WriteString("---\n")
-	buf.WriteString(fmt.Sprintf("name: %s\n", name))
-	if description != "" {
-		buf.WriteString(fmt.Sprintf("description: %q\n", description))
+	
+	fm := map[string]string{
+		"name":    name,
+		"version": "1.0",
 	}
-	buf.WriteString("version: \"1.0\"\n")
+	if description != "" {
+		fm["description"] = description
+	}
+	
+	encoder := yaml.NewEncoder(&buf)
+	if err := encoder.Encode(fm); err != nil {
+		return "", "", nil, fmt.Errorf("failed to encode frontmatter: %w", err)
+	}
+	encoder.Close()
+	
 	buf.WriteString("---\n")
 	buf.WriteString(strings.TrimLeft(body, " \t\n\r"))
 

@@ -10,6 +10,7 @@ import (
 )
 
 func TestClaudeCompiler_IdentityTransform(t *testing.T) {
+	t.Parallel()
 	c := &compiler.ClaudeCompiler{}
 
 	// Test Command
@@ -49,6 +50,7 @@ func TestClaudeCompiler_IdentityTransform(t *testing.T) {
 }
 
 func TestGeminiCompiler_CommandToTOML(t *testing.T) {
+	t.Parallel()
 	c := &compiler.GeminiCompiler{}
 
 	name, content, err := c.CompileCommand("test-cmd", "A test", "<arg>", "# body")
@@ -82,6 +84,7 @@ func TestGeminiCompiler_CommandToTOML(t *testing.T) {
 }
 
 func TestGeminiCompiler_SkillFormat(t *testing.T) {
+	t.Parallel()
 	c := &compiler.GeminiCompiler{}
 
 	dir, filename, content, err := c.CompileSkill("test-skill", "A test", "# body")
@@ -106,6 +109,7 @@ func TestGeminiCompiler_SkillFormat(t *testing.T) {
 }
 
 func TestGeminiCompiler_AgentFormat(t *testing.T) {
+	t.Parallel()
 	c := &compiler.GeminiCompiler{}
 	
 	fm := map[string]any{"name": "test-agent", "role": "tester"}

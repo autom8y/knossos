@@ -86,7 +86,7 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 
 // materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
 // Delegates to inscription.SyncCLAUDEmd without manifest updates.
-func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector) (string, error) {
+func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector, comp compiler.ChannelCompiler) (string, error) {
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
 		ActiveRite:       "",
@@ -98,8 +98,8 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 	}
 
 	contextFilename := "CLAUDE.md"
-	if m.claudeDirOverride != "" && strings.HasSuffix(m.claudeDirOverride, ".gemini") {
-		contextFilename = "GEMINI.md"
+	if comp != nil {
+		contextFilename = comp.ContextFilename()
 	}
 
 	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{

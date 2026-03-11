@@ -142,6 +142,13 @@ func NewMaterializerWithSourceResolver(resolver *paths.Resolver, sr *SourceResol
 	}
 }
 
+func compilerForChannel(channel string) compiler.ChannelCompiler {
+	if channel == "gemini" {
+		return &compiler.GeminiCompiler{}
+	}
+	return &compiler.ClaudeCompiler{}
+}
+
 // WithSourceResolver replaces the materializer's source resolver.
 // Enables test injection without global state mutation. Returns the receiver.
 func (m *Materializer) WithSourceResolver(sr *SourceResolver) *Materializer {
@@ -298,8 +305,10 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 	}
 
+	comp := compilerForChannel(opts.Channel)
+
 	// Generate minimal CLAUDE.md (no agents)
-	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector)
+	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -312,12 +321,6 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 
 	// Project platform mena + shared rite mena so cross-cutting mode still
 	// has core features (/know, /radar, /research, etc.).
-	var comp compiler.ChannelCompiler
-	if opts.Channel == "gemini" {
-		comp = &compiler.GeminiCompiler{}
-	} else {
-		comp = &compiler.ClaudeCompiler{}
-	}
 	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged, comp); err != nil {
 		slog.Warn("failed to materialize mena in minimal mode", "error", err)
 		// Non-fatal: mena is a best-effort enhancement in minimal mode
