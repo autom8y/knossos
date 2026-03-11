@@ -263,6 +263,14 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		Source:          "minimal",
 	}
 
+	// Save existing override and restore it when done to prevent mutation leaking
+	originalOverride := m.claudeDirOverride
+	defer func() { m.claudeDirOverride = originalOverride }()
+
+	if opts.Channel == "gemini" {
+		m.claudeDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
+	}
+
 	claudeDir := m.getClaudeDir()
 
 	// Dry-run: just return success
@@ -346,6 +354,10 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		OrphansDetected: []string{},
 		OrphanAction:    "kept",
 	}
+
+	// Save existing override and restore it when done to prevent mutation leaking
+	originalOverride := m.claudeDirOverride
+	defer func() { m.claudeDirOverride = originalOverride }()
 
 	if opts.Channel == "gemini" {
 		m.claudeDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
@@ -740,7 +752,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 
 // syncRiteScopeMinimal handles cross-cutting mode (no rite).
 func (m *Materializer) syncRiteScopeMinimal(opts SyncOptions) (*RiteScopeResult, error) {
-	legacyOpts := Options{DryRun: opts.DryRun, Minimal: true}
+	legacyOpts := Options{DryRun: opts.DryRun, Minimal: true, Channel: opts.Channel}
 	legacyResult, err := m.MaterializeMinimal(legacyOpts)
 	if err != nil {
 		return nil, err

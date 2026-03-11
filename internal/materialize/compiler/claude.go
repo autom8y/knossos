@@ -1,7 +1,6 @@
 package compiler
 
 import (
-	"bytes"
 	"fmt"
 
 	"gopkg.in/yaml.v3"
@@ -18,18 +17,16 @@ func (c *ClaudeCompiler) CompileSkill(name, description, body string) (string, s
 }
 
 func (c *ClaudeCompiler) CompileAgent(name string, frontmatter map[string]any, body string) ([]byte, error) {
-	var buf bytes.Buffer
-	buf.WriteString("---\n")
-	
-	encoder := yaml.NewEncoder(&buf)
-	if err := encoder.Encode(frontmatter); err != nil {
-		return nil, fmt.Errorf("failed to encode frontmatter: %w", err)
+	yamlOut, err := yaml.Marshal(frontmatter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal frontmatter: %w", err)
 	}
-	encoder.Close()
-	
-	buf.WriteString("---\n")
-	buf.WriteString(body)
-	return buf.Bytes(), nil
+
+	result := []byte("---\n")
+	result = append(result, yamlOut...)
+	result = append(result, []byte("---\n")...)
+	result = append(result, []byte(body)...)
+	return result, nil
 }
 
 func (c *ClaudeCompiler) ContextFilename() string {

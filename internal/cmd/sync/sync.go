@@ -101,6 +101,12 @@ Examples:
 				return errors.New(errors.CodeUsageError, "--el-cheapo only affects rite scope; use --scope=rite or default")
 			}
 
+			// Validate channel before starting sync
+			channel, _ := cmd.Root().PersistentFlags().GetString("channel")
+			if channel != "claude" && channel != "gemini" {
+				return fmt.Errorf("invalid channel: %q (must be claude or gemini)", channel)
+			}
+
 			// Build SyncOptions
 			opts := materialize.SyncOptions{
 				Scope:             syncScope,
@@ -114,6 +120,7 @@ Examples:
 				KeepOrphans:       keepOrphans,
 				Soft:              soft,
 				ElCheapo:          elCheapo,
+				Channel:           channel,
 			}
 
 			return runSync(ctx, opts, budget, cmd)
