@@ -1,0 +1,13 @@
+id: COMPLAINT-20260311-143022-drift-detect
+filed_by: drift-detect
+filed_at: "2026-03-11T14:30:22Z"
+title: "retry-spiral drift: Bash tool failed 3 times in loop"
+severity: medium
+description: |
+  Detected retry spiral: Bash tool invoked 3 times within 2 minutes with
+  identical arguments. Each attempt produced the same error. Agent did not
+  back off or seek alternative approach.
+tags:
+  - retry-spiral
+  - bash-tool
+status: filed

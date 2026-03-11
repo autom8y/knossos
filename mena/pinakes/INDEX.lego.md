@@ -45,6 +45,7 @@ This table IS the registry. A domain exists when it has a row here and a criteri
 | **feature-knowledge** | `domains/feature-knowledge.md` | feature | Per-feature knowledge capture: purpose, conceptual model, implementation map, boundaries |
 | **release-platform-profile** | `domains/release-platform-profile.md` | release | Cached stable platform state: repo ecosystems, pipeline chains, dependency topology, build configs |
 | **release-history** | `domains/release-history.md` | release | Release outcome log: versions released, CI pass/fail patterns, failure classifications, trend analysis |
+| **complaints** | `domains/complaints.lego.md` | framework | Complaint pipeline: filing volume, severity distribution, resolution rates, tag emergence |
 
 ### Scope Values
 
@@ -92,6 +93,7 @@ No +/- modifiers. Simplicity prevents grade inflation and gaming.
 - [agents.md](domains/agents.md) - Agent prompt audit criteria
 - [hooks.md](domains/hooks.md) - Hook wiring audit criteria
 - [mena-structure.md](domains/mena-structure.md) - Mena directory audit criteria
+- [complaints.lego.md](domains/complaints.lego.md) - Complaint pipeline audit criteria
 
 ### Domain Criteria — Codebase
 - [architecture.md](domains/architecture.md) - Architecture knowledge capture

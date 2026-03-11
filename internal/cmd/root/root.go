@@ -13,6 +13,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/agent"
 	"github.com/autom8y/knossos/internal/cmd/artifact"
 	"github.com/autom8y/knossos/internal/cmd/ask"
+	"github.com/autom8y/knossos/internal/cmd/complaint"
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/cmd/explain"
 	"github.com/autom8y/knossos/internal/cmd/handoff"
@@ -163,6 +164,7 @@ func init() {
 	rootCmd.AddCommand(explain.NewExplainCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(tour.NewTourCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(ask.NewAskCmd(rootCmd, &globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(complaint.NewComplaintCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(versionCmd)
 }
 

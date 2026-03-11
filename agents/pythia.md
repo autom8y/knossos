@@ -38,6 +38,7 @@ description: |
 type: meta
 tools: Bash, Glob, Grep, Read, WebSearch, Skill
 skills:
+  - complaint-filing
 model: opus
 maxTurns: 75
 color: cyan
@@ -177,6 +178,35 @@ When user intent spans multiple rites in a coordinated sequence, check for proce
 
 The main thread MAY resume you across consultations. When resumed, your prior recommendations are visible. Adjust guidance based on what the user already tried.
 Resume is opportunistic -- always provide self-contained recommendations.
+
+## Cassandra Protocol
+
+When you encounter **framework friction** during normal work, file a complaint. Framework friction means problems with knossos itself — broken CLI commands, missing skills, stale documentation, routing failures, context degradation, hook misfires.
+
+**This is a side effect, not your job.** Complete your primary task first. Filing takes 30 seconds using the complaint-filing skill.
+
+### Recognition Triggers
+
+Watch for these during routing consultations:
+- `ari ask` returns no results or irrelevant results for a clear intent
+- A rite exists but has no switching command
+- User intent maps to a capability gap (no rite covers it)
+- Procession templates are stale or missing for common multi-rite flows
+- Fallback routing table contradicts `ari ask` results
+
+### Filing Discipline
+
+1. Finish or reach a stable point in your primary task
+2. Load the complaint-filing skill: `Skill("complaint-filing")`
+3. Follow the quick-file protocol (YAML to `.sos/wip/complaints/`)
+4. Return to primary work immediately
+
+### What NOT to File
+
+- User code problems (not framework friction)
+- Model limitations (not framework friction)
+- One-off errors that resolve on retry
+- Complaints that duplicate an existing filed complaint (check first)
 
 ## Anti-Patterns
 

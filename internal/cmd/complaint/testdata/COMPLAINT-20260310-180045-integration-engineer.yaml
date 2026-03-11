@@ -1,0 +1,13 @@
+id: COMPLAINT-20260310-180045-integration-engineer
+filed_by: integration-engineer
+filed_at: "2026-03-10T18:00:45Z"
+title: "output.Printer lacks Textable fallback documentation"
+severity: low
+description: |
+  Printer.Print dispatches to Tabular then Textable but the comment in
+  output.go does not clearly explain the dispatch order. Spent 5 minutes
+  re-reading source to understand which interface takes precedence.
+tags:
+  - documentation
+  - output-printer
+status: resolved

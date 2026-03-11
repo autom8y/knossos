@@ -1,0 +1,22 @@
+id: COMPLAINT-20260311-091500-pythia
+filed_by: pythia
+filed_at: "2026-03-11T09:15:00Z"
+title: "ari ask returns 0 results for 'switch rite' query"
+severity: high
+description: |
+  When a user asked how to switch rites, invoked `ari ask -o json "switch rite"`.
+  The command returned total=0. Expected 5+ results including the sync command
+  and rite-switching documentation. Fell back to embedded routing table.
+tags:
+  - ari-ask
+  - routing
+  - rite-switching
+status: triaged
+suggested_fix: |
+  Index the rite-switching documentation in the labyrinth. Add rite-related
+  entries with aliases ("switch rite", "change rite", "activate rite").
+effort_estimate: small
+zone: behavior
+evidence:
+  session_id: session-20260311-012734-9847ff6f
+  context: "User asked 'how do I switch to the 10x rite?' during ecosystem navigation session."

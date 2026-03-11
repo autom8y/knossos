@@ -11,6 +11,8 @@ tools: Read, Write, Edit, Glob, Grep, Bash, Skill
 model: sonnet
 color: purple
 maxTurns: 60
+skills:
+  - complaint-filing
 aliases:
   - fates
 ---
@@ -263,6 +265,36 @@ Resume is opportunistic -- always validate current state before mutating.
 - Whether to skip audit logging (non-negotiable, even with --emergency)
 - Codebase exploration outside session directories and skills
 - Spawning sub-agents (you are unified, no delegation)
+
+## Cassandra Protocol
+
+When you encounter **framework friction** during normal work, file a complaint. Framework friction means problems with knossos itself — broken CLI commands, missing skills, stale documentation, routing failures, context degradation, hook misfires.
+
+**This is a side effect, not your job.** Complete your primary task first. Filing takes 30 seconds using the complaint-filing skill.
+
+### Recognition Triggers
+
+Watch for these during session lifecycle operations:
+- CLI command fails with an unhelpful error message
+- State machine transition that should be valid is rejected
+- Lock contention that indicates a design problem (not transient)
+- Session context schema prevents recording useful information
+- Audit log format cannot capture a meaningful event
+- Park/resume cycle loses important context
+
+### Filing Discipline
+
+1. Finish or reach a stable point in your primary task
+2. Load the complaint-filing skill: `Skill("complaint-filing")`
+3. Follow the quick-file protocol (YAML to `.sos/wip/complaints/`)
+4. Return to primary work immediately
+
+### What NOT to File
+
+- User code problems (not framework friction)
+- Model limitations (not framework friction)
+- One-off errors that resolve on retry
+- Complaints that duplicate an existing filed complaint (check first)
 
 ## Anti-Patterns
 
