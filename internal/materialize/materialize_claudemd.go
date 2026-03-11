@@ -7,6 +7,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/inscription"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
@@ -14,7 +15,7 @@ import (
 // Delegates to inscription.SyncCLAUDEmd for the core merge/write logic,
 // then records provenance for the written file.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride string) (string, error) {
+func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride string, comp compiler.ChannelCompiler) (string, error) {
 	// Build render context with full agent details
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
@@ -43,14 +44,20 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		templateFS = m.templatesFS(resolved)
 	}
 
+	contextFilename := "CLAUDE.md"
+	if comp != nil {
+		contextFilename = comp.ContextFilename()
+	}
+
 	// Delegate to canonical SyncCLAUDEmd
 	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
-		ClaudeDir:      claudeDir,
-		RenderCtx:      renderCtx,
-		ActiveRite:     manifest.Name,
-		TemplateDir:    m.templatesDir,
-		TemplateFS:     templateFS,
-		UpdateManifest: true,
+		ClaudeDir:       claudeDir,
+		RenderCtx:       renderCtx,
+		ActiveRite:      manifest.Name,
+		TemplateDir:     m.templatesDir,
+		TemplateFS:      templateFS,
+		UpdateManifest:  true,
+		ContextFilename: contextFilename,
 	})
 	if err != nil {
 		return "", err
@@ -66,7 +73,7 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 				srcRelPath = rel
 			}
 		}
-		collector.Record("CLAUDE.md", provenance.NewKnossosEntry(
+		collector.Record(contextFilename, provenance.NewKnossosEntry(
 			provenance.ScopeRite,
 			srcRelPath,
 			"template",
@@ -90,11 +97,17 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 	}
 
+	contextFilename := "CLAUDE.md"
+	if m.claudeDirOverride != "" && strings.HasSuffix(m.claudeDirOverride, ".gemini") {
+		contextFilename = "GEMINI.md"
+	}
+
 	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
-		ClaudeDir:      claudeDir,
-		RenderCtx:      renderCtx,
-		TemplateDir:    m.templatesDir,
-		UpdateManifest: false,
+		ClaudeDir:       claudeDir,
+		RenderCtx:       renderCtx,
+		TemplateDir:     m.templatesDir,
+		UpdateManifest:  false,
+		ContextFilename: contextFilename,
 	})
 	if err != nil {
 		return "", err

@@ -12,6 +12,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/fileutil"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/autom8y/knossos/internal/registry"
@@ -311,7 +312,13 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 
 	// Project platform mena + shared rite mena so cross-cutting mode still
 	// has core features (/know, /radar, /research, etc.).
-	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged); err != nil {
+	var comp compiler.ChannelCompiler
+	if opts.Channel == "gemini" {
+		comp = &compiler.GeminiCompiler{}
+	} else {
+		comp = &compiler.ClaudeCompiler{}
+	}
+	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged, comp); err != nil {
 		slog.Warn("failed to materialize mena in minimal mode", "error", err)
 		// Non-fatal: mena is a best-effort enhancement in minimal mode
 	}
@@ -389,6 +396,13 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	modelOverride := ""
 	if opts.ElCheapo {
 		modelOverride = "haiku"
+	}
+
+	var comp compiler.ChannelCompiler
+	if opts.Channel == "gemini" {
+		comp = &compiler.GeminiCompiler{}
+	} else {
+		comp = &compiler.ClaudeCompiler{}
 	}
 
 	// Dry-run: just detect orphans and return
@@ -484,7 +498,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
 	if !opts.Soft {
-		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged); err != nil {
+		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged, comp); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 		}
 	}
@@ -497,7 +511,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride)
+	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
