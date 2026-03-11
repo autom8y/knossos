@@ -408,6 +408,27 @@ All 28 fix locations verified against current filesystem at HEAD (`dbf81b8`).
 
 6. **Shell-era session locking scars** (LOCK-001, LOCK-003, STATE-001): Three shell session locking bugs from the bash era are documented in git history (`3dea170`) but not numbered in the SCAR catalog. The shell code they fixed has since been superseded by Go implementations.
 
+### SCAR-030: Go 1.23 Lacks t.Chdir — Use DI Parameter Injection
+
+**Category**: testing
+**What failed**: `os.Chdir` in tests mutates process-global CWD, blocking `t.Parallel()`. Go 1.24 adds `t.Chdir()` but Go 1.23 does not have it.
+**Fix pattern**: Add `workDir string` field to the struct under test or function parameter. Production caller uses `os.Getwd()`; tests inject `t.TempDir()`. Do not use `t.Cleanup` chdir-restore patterns — they are not parallel-safe.
+**Guard**: `cmd/initialize` tests verify this pattern (commit `5ec4a18`). Grep for `os.Chdir` in test files to detect regression.
+
+### SCAR-031: Materialize Tests Are I/O-Bound — t.Parallel Yields ~30% Not 50%+
+
+**Category**: performance
+**What failed**: Expected `t.Parallel()` to cut materialize root test time from 37.6s to <20s. Actual: 26.4s (-29.7%).
+**Root cause**: Tests perform filesystem materialization to `t.TempDir()`. I/O wait dominates, not CPU. Parallelism reduces wall-clock time but cannot eliminate I/O bottleneck.
+**Guard**: Baseline measurement captured. Further speedup requires in-memory filesystem mocks or test architecture changes — separate initiative.
+
+### SCAR-032: TestInit_WithRite Global State via common.SetEmbeddedAssets
+
+**Category**: global_state
+**What failed**: `TestInit_WithRite` in `cmd/initialize` calls `common.SetEmbeddedAssets()` which mutates package-level global state. Cannot be parallelized.
+**Fix pattern**: Refactor `SetEmbeddedAssets` to use DI (struct field or function parameter) when `common` package gets DI treatment.
+**Guard**: Test deliberately excluded from `t.Parallel()` adoption (commit `5ec4a18`). Documented exception.
+
 ---
 
 ## Assessment Metadata

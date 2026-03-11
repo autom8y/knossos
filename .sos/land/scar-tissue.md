@@ -1,56 +1,61 @@
 ---
 domain: "scar-tissue"
-generated_at: "2026-03-09T10:15:06Z"
+generated_at: "2026-03-10T20:00:00Z"
 expires_after: "14d"
 source_scope: [".sos/archive/**"]
 generator: "dionysus"
-source_hash: "2849e0b"
+source_hash: "5ec4a18"
 confidence: 0.85
 format_version: "1.0"
-sessions_synthesized: 39
-last_session: "session-20260309-000328-ead5f874"
+sessions_synthesized: 43
+last_session: "session-20260310-192540-28b102b0"
 ---
 
 ## Blocker Catalog
 
 | Session | Blocker | Resolution | Domain |
 |---------|---------|-----------|--------|
-| session-20260303-163517-f43d2334 | GoReleaser uses GITHUB_TOKEN which GitHub suppresses from triggering downstream workflows | Options: swap for PAT, GitHub App token, explicit workflow_dispatch chain, or workflow_run trigger | ci-infrastructure |
-| session-20260304-001522-1c07b3bd | Pre-existing Go test failures present during framework agnosticism audit | Confirmed pre-dating the initiative; not caused by audit work | test-infrastructure |
 | session-20260302-114829-b2f806a3 | Paused debt audit to run deep spike on org-level best practices root cause analysis | Parked session, pivoted to spike | planning |
 | session-20260302-122533-2820b8a1 | Parking Sprint 3 to start Square Zero Debt Remediation initiative | Scope shift to higher-priority initiative | planning |
+| session-20260303-163517-f43d2334 | GoReleaser uses GITHUB_TOKEN which GitHub suppresses from triggering downstream workflows | Options: swap for PAT, GitHub App token, explicit workflow_dispatch chain, or workflow_run trigger | ci-infrastructure |
+| session-20260304-001522-1c07b3bd | Pre-existing Go test failures present during framework agnosticism audit | Confirmed pre-dating the initiative; not caused by audit work | test-infrastructure |
+| session-20260304-154410-af90596d | Post-mortem revealed 3 code paths bypassing content rewriter (engine.go standalone, userscope walker, userscope standalone) | Exported RewriteMenaContentPaths and wired into all 3 bypass paths in Phase 2 | materialization-pipeline |
 
 ## Rejected Alternatives
 
 | Session | Decision | Rejected | Rationale |
 |---------|---------|----------|-----------|
-| session-20260303-163517-f43d2334 | Option A (swap GITHUB_TOKEN for PAT) or Option D (workflow_run trigger) | Option B (GitHub App token): high setup effort; Option C (explicit workflow_dispatch chain): requires PAT | Effort vs. complexity tradeoff; A requires PAT scope check, D is zero-PAT |
-| session-20260304-001522-1c07b3bd | .ledge/ as canonical artifact path | docs/ as artifact path | Platform mena uses .ledge/; docs/ was ecosystem bleed from workflow.yaml files |
-| session-20260304-001522-1c07b3bd | .claude/ writes only via ari sync | Direct .claude/ writes from agents | Framework agnosticism requires binary to not assume specific ecosystem |
 | session-20260303-003107-55293519 | PRD phase skipped for debt remediation | Writing a fresh PRD | Debt audit artifacts (LEDGER, RISK-REPORT, SPRINT-PLAN) already serve as requirements |
 | session-20260303-132132-f3031827 | Requirements phase skipped for .know/ incremental refresh | Formal requirements phase | Spike + framing documents provide comprehensive coverage |
 | session-20260303-135856-c525b918 | Requirements + design phase skipped for release context persistence | Formal requirements and design phases | Spike + framing documents provide comprehensive coverage including architecture, schemas, workstream decomposition |
+| session-20260303-163517-f43d2334 | Option A (swap GITHUB_TOKEN for PAT) or Option D (workflow_run trigger) | Option B (GitHub App token): high setup effort; Option C (explicit workflow_dispatch chain): requires PAT | Effort vs. complexity tradeoff; A requires PAT scope check, D is zero-PAT |
+| session-20260304-001522-1c07b3bd | .ledge/ as canonical artifact path | docs/ as artifact path | Platform mena uses .ledge/; docs/ was ecosystem bleed from workflow.yaml files |
+| session-20260304-001522-1c07b3bd | .claude/ writes only via ari sync | Direct .claude/ writes from agents | Framework agnosticism requires binary to not assume specific ecosystem |
 | session-20260304-154410-af90596d | Option C documentary fencing for educational .lego.md/.dro.md refs | Rewriting educational references (would corrupt documentation) | Educational references should be preserved verbatim in code fences |
 
 ## Friction Signals
 
 - **Recurring**: Patterns across 2+ sessions
-  - Session parking at requirements phase: 28/39 sessions never progressed past requirements, seen across all rites
+  - Session parking at requirements phase: 30/43 sessions never progressed past requirements, seen across all rites
   - Duplicate/retry sessions for same initiative: session-20260302-151610-273eeb4a and session-20260302-151730-bffc2248 (canonical dotfile path remediation started twice within 1 minute)
-  - Auto-parked on Stop: frequent auto-parking pattern, seen in 20+ sessions
+  - Auto-parked on Stop: frequent auto-parking pattern, seen in 25+ sessions
   - GITHUB_TOKEN suppression: documented in session-20260303-163517-f43d2334, broader pattern of CI infrastructure friction
   - Framework agnosticism bleed: 75 findings in session-20260304-001522-1c07b3bd indicating systemic ecosystem coupling in distributed binary
+  - Phase skipping pattern: 3 sessions (003107, 132132, 135856) skipped formal requirements/design phases because spike + framing documents provided sufficient coverage
+  - Materialization bypass bugs: content rewriting implemented in primary path but missed bypass paths (engine.go standalone, userscope walker, userscope standalone) in session-20260304-154410-af90596d
+  - t.Setenv friction: sessions 20260310-174131 and 20260310-192540 both target t.Setenv elimination, indicating systemic test parallelization blocker
 
 - **One-time**: Isolated friction events
   - Pre-existing Go test failures during hygiene audit: session-20260304-001522-1c07b3bd
-  - V2 (artifact path bleed) is systemic — all 12 workflow.yaml use docs/ while platform mena uses .ledge/: session-20260304-001522-1c07b3bd
+  - V2 (artifact path bleed) is systemic -- all 12 workflow.yaml use docs/ while platform mena uses .ledge/: session-20260304-001522-1c07b3bd
   - Forge artifact glossary internally contradictory: session-20260304-001522-1c07b3bd
+  - 15 broken cross-reference links discovered during post-mortem of mena content path hygiene: session-20260304-154410-af90596d
 
 ## Quality Friction (Sails Analysis)
 
 | Sails Color | Sessions | Common Failure Proofs |
 |------------|---------|---------------------|
-| GRAY | 39 | All proofs UNKNOWN (no CI proof infrastructure captured) |
+| GRAY | 43 | All proofs UNKNOWN (no CI proof infrastructure captured) |
 | WHITE | 0 | N/A |
 | BLACK | 0 | N/A |
 
@@ -65,3 +70,5 @@ last_session: "session-20260309-000328-ead5f874"
 - Phase 2 Context Quality Remediation: 8 workstreams across 15 rites, session-20260302-150407-07b8e5be parked at requirements with detailed multi-session plan
 - knowledge-maturation-pipeline: session-20260305-172543-d0e8d2fc parked at requirements
 - Comprehensive Debt Remediation 44 items: session-20260303-003107-55293519 parked at design phase, Waves 1-4 pending execution
+- Procession completion: 11 workstreams across 4 waves, session-20260310-122716-65d5c100 parked at requirements
+- External DI Remediation and t.Parallel() Adoption: 4 workstreams (WS-A through WS-D) across 361+ tests, session-20260310-192540-28b102b0 parked at requirements

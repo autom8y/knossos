@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-09T18:16:34Z"
+generated_at: "2026-03-10T14:02:00Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "5a24a76"
+source_hash: "c5d0238"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -243,3 +243,28 @@ max_incremental_cycles: 0
 - Dispatch latency: 2s
 - Cached release knowledge skipped cartographer and dependency-resolver entirely
 - Fix: retarget MCP server sync to .mcp.json (SCAR-028)
+
+### v0.8.0 — 2026-03-10
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-10 |
+| Version | v0.7.2 -> v0.8.0 (minor) |
+| Commits | 19 (12 feat, 4 fix, 1 refactor, 1 chore, 1 other) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 4092f3acde76b7ba493dd6dc28347c8c3a284d0b |
+| Commit SHA | c5d0238 |
+| release.yml | GREEN (110s, run 22906121647) |
+| e2e-distribution.yml | GREEN (51s, run 22906197948) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.8.0, commit c754006, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Eighteenth consecutive PASS verdict (v0.3.2 → ... → v0.7.2 → v0.8.0)
+- Total chain: 153s (within historical baseline ~150-190s)
+- Dispatch latency: 2s
+- Cached release knowledge skipped cartographer and dependency-resolver entirely
+- Primary scope: procession — cross-rite coordinated workflow primitives
+- Headline features: procession create/proceed/recede/list commands, cross-rite mena pipeline, procession search collector, alt_rite awareness, Moirai/Pythia/go procession integration, P2+P3 lifecycle test hardening
