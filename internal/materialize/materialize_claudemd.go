@@ -15,27 +15,27 @@ import (
 // Delegates to inscription.SyncCLAUDEmd for the core merge/write logic,
 // then records provenance for the written file.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride string, comp compiler.ChannelCompiler) (string, error) {
+func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride, channel string, comp compiler.ChannelCompiler) (string, error) {
 	// Build render context with full agent details
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
 		agents = append(agents, inscription.AgentInfo{
-			Name:     agent.Name,
-			File:     agent.Name + ".md",
-			Role:     agent.Role,
-			Produces: "", // Not in minimal manifest
+			Name:		agent.Name,
+			File:		agent.Name + ".md",
+			Role:		agent.Role,
+			Produces:	"",	// Not in minimal manifest
 		})
 	}
 
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
-		ActiveRite:       manifest.Name,
-		AgentCount:       len(manifest.Agents),
-		Agents:           agents,
-		KnossosVars:      make(map[string]string),
-		ProjectRoot:      projectRoot,
-		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
-		ModelOverride:    modelOverride,
+		ActiveRite:		manifest.Name,
+		AgentCount:		len(manifest.Agents),
+		Agents:			agents,
+		KnossosVars:		make(map[string]string),
+		ProjectRoot:		projectRoot,
+		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
+		ModelOverride:		modelOverride,
 	}
 
 	// Resolve template source: embedded FS or filesystem directory
@@ -51,13 +51,13 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 
 	// Delegate to canonical SyncCLAUDEmd
 	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
-		ClaudeDir:       claudeDir,
-		RenderCtx:       renderCtx,
-		ActiveRite:      manifest.Name,
-		TemplateDir:     m.templatesDir,
-		TemplateFS:      templateFS,
-		UpdateManifest:  true,
-		ContextFilename: contextFilename,
+		ClaudeDir:		claudeDir,
+		RenderCtx:		renderCtx,
+		ActiveRite:		manifest.Name,
+		TemplateDir:		m.templatesDir,
+		TemplateFS:		templateFS,
+		UpdateManifest:		true,
+		ContextFilename:	contextFilename,
 	})
 	if err != nil {
 		return "", err
@@ -77,7 +77,7 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 			provenance.ScopeRite,
 			srcRelPath,
 			"template",
-			checksum.Content(result.MergeResult.Content),
+			checksum.Content(result.MergeResult.Content), channel,
 		))
 	}
 
@@ -89,12 +89,12 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector, comp compiler.ChannelCompiler) (string, error) {
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
-		ActiveRite:       "",
-		AgentCount:       0,
-		Agents:           []inscription.AgentInfo{},
-		KnossosVars:      make(map[string]string),
-		ProjectRoot:      projectRoot,
-		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
+		ActiveRite:		"",
+		AgentCount:		0,
+		Agents:			[]inscription.AgentInfo{},
+		KnossosVars:		make(map[string]string),
+		ProjectRoot:		projectRoot,
+		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 	}
 
 	contextFilename := "CLAUDE.md"
@@ -103,11 +103,11 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 	}
 
 	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
-		ClaudeDir:       claudeDir,
-		RenderCtx:       renderCtx,
-		TemplateDir:     m.templatesDir,
-		UpdateManifest:  false,
-		ContextFilename: contextFilename,
+		ClaudeDir:		claudeDir,
+		RenderCtx:		renderCtx,
+		TemplateDir:		m.templatesDir,
+		UpdateManifest:		false,
+		ContextFilename:	contextFilename,
 	})
 	if err != nil {
 		return "", err
@@ -123,21 +123,21 @@ func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir str
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
 		agents = append(agents, inscription.AgentInfo{
-			Name: agent.Name,
-			File: agent.Name + ".md",
-			Role: agent.Role,
+			Name:	agent.Name,
+			File:	agent.Name + ".md",
+			Role:	agent.Role,
 		})
 	}
 
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
-		ActiveRite:       manifest.Name,
-		AgentCount:       len(manifest.Agents),
-		Agents:           agents,
-		KnossosVars:      make(map[string]string),
-		ProjectRoot:      projectRoot,
-		IsKnossosProject: m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
-		ModelOverride:    modelOverride,
+		ActiveRite:		manifest.Name,
+		AgentCount:		len(manifest.Agents),
+		Agents:			agents,
+		KnossosVars:		make(map[string]string),
+		ProjectRoot:		projectRoot,
+		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
+		ModelOverride:		modelOverride,
 	}
 
 	// Resolve template source

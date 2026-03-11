@@ -27,13 +27,13 @@ func (s *syncer) syncUserResourceFromEmbedded(
 	targetDir := filepath.Join(userClaudeDir, string(resourceType))
 
 	result := &UserResourceResult{
-		Source: "embedded:" + embeddedRoot,
-		Target: targetDir,
+		Source:	"embedded:" + embeddedRoot,
+		Target:	targetDir,
 		Changes: UserSyncChanges{
-			Added:     []string{},
-			Updated:   []string{},
-			Skipped:   []UserSkippedEntry{},
-			Unchanged: []string{},
+			Added:		[]string{},
+			Updated:	[]string{},
+			Skipped:	[]UserSkippedEntry{},
+			Unchanged:	[]string{},
 		},
 	}
 
@@ -58,8 +58,8 @@ func (s *syncer) syncUserResourceFromEmbedded(
 		// Check for collision with rite
 		if collision, _ := collisionChecker.CheckCollision(manifestKey); collision {
 			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-				Name:   manifestKey,
-				Reason: "collision with rite resource",
+				Name:	manifestKey,
+				Reason:	"collision with rite resource",
 			})
 			return nil
 		}
@@ -85,12 +85,12 @@ func (s *syncer) syncUserResourceFromEmbedded(
 						slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
-						provenance.ScopeUser, targetChecksum,
+						provenance.ScopeUser, targetChecksum, "",
 					)
 				}
 				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-					Name:   manifestKey,
-					Reason: "user-created",
+					Name:	manifestKey,
+					Reason:	"user-created",
 				})
 				return nil
 			}
@@ -104,7 +104,7 @@ func (s *syncer) syncUserResourceFromEmbedded(
 					return err
 				}
 				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-					provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+					provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum, "",
 				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
@@ -125,14 +125,14 @@ func (s *syncer) syncUserResourceFromEmbedded(
 						return err
 					}
 					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-						provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+						provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum, "",
 					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
 			} else {
 				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-					Name:   manifestKey,
-					Reason: "user-created",
+					Name:	manifestKey,
+					Reason:	"user-created",
 				})
 			}
 
@@ -147,7 +147,7 @@ func (s *syncer) syncUserResourceFromEmbedded(
 						return err
 					}
 					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-						provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+						provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum, "",
 					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
@@ -168,7 +168,7 @@ func (s *syncer) syncUserResourceFromEmbedded(
 							return err
 						}
 						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-							provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+							provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum, "",
 						)
 					}
 					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
@@ -182,14 +182,14 @@ func (s *syncer) syncUserResourceFromEmbedded(
 								return err
 							}
 							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-								provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum,
+								provenance.ScopeUser, "embedded:"+path, "embedded", sourceChecksum, "",
 							)
 						}
 						result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 					} else {
 						result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-							Name:   manifestKey,
-							Reason: "diverged (use --overwrite-diverged to force)",
+							Name:	manifestKey,
+							Reason:	"diverged (use --overwrite-diverged to force)",
 						})
 					}
 				}
@@ -204,11 +204,11 @@ func (s *syncer) syncUserResourceFromEmbedded(
 	}
 
 	result.Summary = UserSyncSummary{
-		Added:      len(result.Changes.Added),
-		Updated:    len(result.Changes.Updated),
-		Skipped:    len(result.Changes.Skipped),
-		Unchanged:  len(result.Changes.Unchanged),
-		Collisions: countUserCollisions(result.Changes.Skipped),
+		Added:		len(result.Changes.Added),
+		Updated:	len(result.Changes.Updated),
+		Skipped:	len(result.Changes.Skipped),
+		Unchanged:	len(result.Changes.Unchanged),
+		Collisions:	countUserCollisions(result.Changes.Skipped),
 	}
 
 	return result, nil

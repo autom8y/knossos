@@ -16,9 +16,9 @@ import (
 // buildTestManifest creates a minimal ProvenanceManifest for use in tests.
 func buildTestManifest(entries map[string]*provenance.ProvenanceEntry) *provenance.ProvenanceManifest {
 	m := &provenance.ProvenanceManifest{
-		SchemaVersion: provenance.CurrentSchemaVersion,
-		LastSync:      time.Now().UTC(),
-		Entries:       make(map[string]*provenance.ProvenanceEntry),
+		SchemaVersion:	provenance.CurrentSchemaVersion,
+		LastSync:	time.Now().UTC(),
+		Entries:	make(map[string]*provenance.ProvenanceEntry),
 	}
 	maps.Copy(m.Entries, entries)
 	return m
@@ -71,7 +71,7 @@ func TestCleanupStaleSettings_AgentGuardFingerprint(t *testing.T) {
 	require.NoError(t, os.WriteFile(settingsPath, []byte(content), 0644))
 
 	m := newMaterializerForTest(projectDir)
-	manifest := buildTestManifest(nil) // No provenance entry for settings.json
+	manifest := buildTestManifest(nil)	// No provenance entry for settings.json
 
 	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
 	assert.True(t, removed, "should remove blanket-deny agent-guard settings.json")
@@ -157,7 +157,7 @@ func TestCleanupStaleSettings_HasProvenance(t *testing.T) {
 			provenance.ScopeRite,
 			"rites/eco/templates/settings.json",
 			"project",
-			"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "",
 		),
 	})
 
@@ -251,11 +251,11 @@ func TestMatchesStaleSettingsFingerprint_AgentGuardBlanketDeny(t *testing.T) {
 		"hooks": map[string]any{
 			"PreToolUse": []any{
 				map[string]any{
-					"matcher": ".*",
+					"matcher":	".*",
 					"hooks": []any{
 						map[string]any{
-							"type":    "command",
-							"command": "ari hook agent-guard",
+							"type":		"command",
+							"command":	"ari hook agent-guard",
 						},
 					},
 				},
@@ -271,11 +271,11 @@ func TestMatchesStaleSettingsFingerprint_AgentGuardWithAllowPath(t *testing.T) {
 		"hooks": map[string]any{
 			"PreToolUse": []any{
 				map[string]any{
-					"matcher": ".*",
+					"matcher":	".*",
 					"hooks": []any{
 						map[string]any{
-							"type":    "command",
-							"command": "ari hook agent-guard --allow-path /some/path",
+							"type":		"command",
+							"command":	"ari hook agent-guard --allow-path /some/path",
 						},
 					},
 				},
@@ -289,10 +289,10 @@ func TestMatchesStaleSettingsFingerprint_EmptyStub(t *testing.T) {
 	t.Parallel()
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                 []any{},
-			"additionalDirectories": []any{},
+			"allow":			[]any{},
+			"additionalDirectories":	[]any{},
 		},
-		"hooks": map[string]any{},
+		"hooks":	map[string]any{},
 	}
 	assert.True(t, matchesStaleSettingsFingerprint(parsed))
 }
@@ -302,11 +302,11 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubWithExtraPermissions(t *testin
 	// permissions has extra fields beyond allow + additionalDirectories
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                 []any{},
-			"additionalDirectories": []any{},
-			"deny":                  []any{"Bash(rm:*)"},
+			"allow":			[]any{},
+			"additionalDirectories":	[]any{},
+			"deny":				[]any{"Bash(rm:*)"},
 		},
-		"hooks": map[string]any{},
+		"hooks":	map[string]any{},
 	}
 	assert.False(t, matchesStaleSettingsFingerprint(parsed))
 }
@@ -315,10 +315,10 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubNonEmptyAllow(t *testing.T) {
 	t.Parallel()
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                 []any{"Bash(git:*)"},
-			"additionalDirectories": []any{},
+			"allow":			[]any{"Bash(git:*)"},
+			"additionalDirectories":	[]any{},
 		},
-		"hooks": map[string]any{},
+		"hooks":	map[string]any{},
 	}
 	assert.False(t, matchesStaleSettingsFingerprint(parsed))
 }
@@ -328,8 +328,8 @@ func TestMatchesStaleSettingsFingerprint_EmptyStubWithNonEmptyHooks(t *testing.T
 	// hooks is not empty — user added something
 	parsed := map[string]any{
 		"permissions": map[string]any{
-			"allow":                 []any{},
-			"additionalDirectories": []any{},
+			"allow":			[]any{},
+			"additionalDirectories":	[]any{},
 		},
 		"hooks": map[string]any{
 			"PostToolUse": []any{},

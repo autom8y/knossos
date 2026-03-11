@@ -16,12 +16,12 @@ import (
 // syncer holds dependencies for user-scope sync operations.
 // Created internally by SyncUserScope from the params struct.
 type syncer struct {
-	resolver       *paths.Resolver
-	embeddedAgents fs.FS
-	embeddedMena   fs.FS
-	embeddedRites  fs.FS
-	knossosHome    string
-	userClaudeDir  string
+	resolver	*paths.Resolver
+	embeddedAgents	fs.FS
+	embeddedMena	fs.FS
+	embeddedRites	fs.FS
+	knossosHome	string
+	userClaudeDir	string
 }
 
 // SyncUserScope is the primary entry point for user-scope sync.
@@ -32,12 +32,12 @@ func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 		userClaudeDir = paths.UserClaudeDir()
 	}
 	s := &syncer{
-		resolver:       params.Resolver,
-		embeddedAgents: params.EmbeddedAgents,
-		embeddedMena:   params.EmbeddedMena,
-		embeddedRites:  params.EmbeddedRites,
-		knossosHome:    params.KnossosHome,
-		userClaudeDir:  userClaudeDir,
+		resolver:	params.Resolver,
+		embeddedAgents:	params.EmbeddedAgents,
+		embeddedMena:	params.EmbeddedMena,
+		embeddedRites:	params.EmbeddedRites,
+		knossosHome:	params.KnossosHome,
+		userClaudeDir:	userClaudeDir,
 	}
 	return s.syncUserScope(params.Opts)
 }
@@ -51,9 +51,9 @@ func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 // project .claude/ directory, but that concern does not apply here.
 func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	result := &UserScopeResult{
-		Status:    "success",
-		Resources: make(map[SyncResource]*UserResourceResult),
-		Errors:    []UserResourceError{},
+		Status:		"success",
+		Resources:	make(map[SyncResource]*UserResourceResult),
+		Errors:		[]UserResourceError{},
 	}
 
 	// Resolve KNOSSOS_HOME
@@ -131,8 +131,8 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		)
 		if err != nil {
 			result.Errors = append(result.Errors, UserResourceError{
-				Resource: resourceType,
-				Err:      err.Error(),
+				Resource:	resourceType,
+				Err:		err.Error(),
 			})
 			continue
 		}
@@ -194,13 +194,13 @@ func (s *syncer) syncUserResource(
 	}
 
 	result := &UserResourceResult{
-		Source: sourceDir,
-		Target: strings.Join(targetDirs, " + "),
+		Source:	sourceDir,
+		Target:	strings.Join(targetDirs, " + "),
 		Changes: UserSyncChanges{
-			Added:     []string{},
-			Updated:   []string{},
-			Skipped:   []UserSkippedEntry{},
-			Unchanged: []string{},
+			Added:		[]string{},
+			Updated:	[]string{},
+			Skipped:	[]UserSkippedEntry{},
+			Unchanged:	[]string{},
 		},
 	}
 
@@ -293,8 +293,8 @@ func (s *syncer) syncUserResource(
 		// Check for collision with rite
 		if collision, _ := collisionChecker.CheckCollision(manifestKey); collision {
 			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-				Name:   manifestKey,
-				Reason: "collision with rite resource",
+				Name:	manifestKey,
+				Reason:	"collision with rite resource",
 			})
 			return nil
 		}
@@ -324,7 +324,7 @@ func (s *syncer) syncUserResource(
 						// Adopt as knossos-owned
 						if !opts.DryRun {
 							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-								provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+								provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 							)
 						}
 						result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
@@ -332,12 +332,12 @@ func (s *syncer) syncUserResource(
 						// Adopt as user-owned (modified)
 						if !opts.DryRun {
 							manifest.Entries[manifestKey] = provenance.NewUserEntry(
-								provenance.ScopeUser, targetChecksum,
+								provenance.ScopeUser, targetChecksum, "",
 							)
 						}
 						result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-							Name:   manifestKey,
-							Reason: "adopted as user (local modifications)",
+							Name:	manifestKey,
+							Reason:	"adopted as user (local modifications)",
 						})
 					}
 					return nil
@@ -349,12 +349,12 @@ func (s *syncer) syncUserResource(
 						slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
-						provenance.ScopeUser, targetChecksum,
+						provenance.ScopeUser, targetChecksum, "",
 					)
 				}
 				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-					Name:   manifestKey,
-					Reason: "user-created",
+					Name:	manifestKey,
+					Reason:	"user-created",
 				})
 				return nil
 			}
@@ -365,7 +365,7 @@ func (s *syncer) syncUserResource(
 					return err
 				}
 				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
@@ -384,15 +384,15 @@ func (s *syncer) syncUserResource(
 						return err
 					}
 					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
 			} else {
 				// File exists on disk — never touch user-created files
 				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-					Name:   manifestKey,
-					Reason: "user-created",
+					Name:	manifestKey,
+					Reason:	"user-created",
 				})
 			}
 
@@ -404,7 +404,7 @@ func (s *syncer) syncUserResource(
 						return err
 					}
 					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 					)
 				}
 				result.Changes.Added = append(result.Changes.Added, manifestKey)
@@ -424,7 +424,7 @@ func (s *syncer) syncUserResource(
 							return err
 						}
 						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 						)
 					}
 					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
@@ -437,15 +437,15 @@ func (s *syncer) syncUserResource(
 								return err
 							}
 							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-								provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+								provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 							)
 						}
 						result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 					} else {
 						// Skip diverged without --overwrite-diverged
 						result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-							Name:   manifestKey,
-							Reason: "diverged (use --overwrite-diverged to force)",
+							Name:	manifestKey,
+							Reason:	"diverged (use --overwrite-diverged to force)",
 						})
 					}
 				}
@@ -470,11 +470,11 @@ func (s *syncer) syncUserResource(
 
 	// Calculate summary
 	result.Summary = UserSyncSummary{
-		Added:      len(result.Changes.Added),
-		Updated:    len(result.Changes.Updated),
-		Skipped:    len(result.Changes.Skipped),
-		Unchanged:  len(result.Changes.Unchanged),
-		Collisions: countUserCollisions(result.Changes.Skipped),
+		Added:		len(result.Changes.Added),
+		Updated:	len(result.Changes.Updated),
+		Skipped:	len(result.Changes.Skipped),
+		Unchanged:	len(result.Changes.Unchanged),
+		Collisions:	countUserCollisions(result.Changes.Skipped),
 	}
 
 	return result, nil

@@ -119,7 +119,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 
 		// Record provenance at write time with exact source attribution
 		if opts.Collector != nil {
-			recordMenaProvenance(opts.Collector, opts.ProjectRoot, targetType, entry.FlatName, destDir, entry.Source)
+			recordMenaProvenance(opts.Collector, opts.ProjectRoot, targetType, entry.FlatName, destDir, opts.Channel, entry.Source)
 		}
 	}
 
@@ -151,7 +151,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 			if name == "" {
 				name = strings.TrimSuffix(sf.FlatName, ".md")
 			}
-			
+
 			if sf.MenaType == "dro" {
 				newFilename, newContent, err := opts.Compiler.CompileCommand(name, fm.Description, fm.ArgumentHint, string(data))
 				if err != nil {
@@ -193,7 +193,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 				provenance.ScopeRite,
 				sourcePath,
 				"project",
-				checksum.Content(string(data)),
+				checksum.Content(string(data)), opts.Channel,
 			))
 		}
 	}
@@ -207,7 +207,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 }
 
 // recordMenaProvenance records a provenance entry for a projected mena directory.
-func recordMenaProvenance(collector provenance.Collector, projectRoot, targetType, name, destDir string, src MenaSource) {
+func recordMenaProvenance(collector provenance.Collector, projectRoot, targetType, name, destDir, channel string, src MenaSource) {
 	hash, err := checksum.Dir(destDir)
 	if err != nil {
 		// Directory may not exist if INDEX.md was promoted and there were no companions.
@@ -215,7 +215,7 @@ func recordMenaProvenance(collector provenance.Collector, projectRoot, targetTyp
 		if data, readErr := os.ReadFile(promotedFile); readErr == nil {
 			hash = checksum.Content(string(data))
 		} else {
-			return // best-effort: skip if both fail
+			return	// best-effort: skip if both fail
 		}
 	}
 
@@ -243,7 +243,7 @@ func recordMenaProvenance(collector provenance.Collector, projectRoot, targetTyp
 		provenance.ScopeRite,
 		sourcePath,
 		sourceType,
-		hash,
+		hash, channel,
 	))
 }
 
@@ -272,7 +272,7 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 	manifestPath := filepath.Join(knossosDir, provenance.ManifestFileName)
 	manifest, err := provenance.Load(manifestPath)
 	if err != nil {
-		return // No manifest = no stale entries to clean
+		return	// No manifest = no stale entries to clean
 	}
 
 	// Find knossos-owned mena entries not in current projection
@@ -345,7 +345,7 @@ func isFromRite(sourcePath, riteName string) bool {
 // Callers should surface these errors as warnings, not abort the pipeline.
 func CleanEmptyDirs(root string) []error {
 	if _, err := os.Stat(root); err != nil {
-		return nil // Directory doesn't exist, nothing to clean
+		return nil	// Directory doesn't exist, nothing to clean
 	}
 	return cleanEmptyDirsRecursive(root)
 }

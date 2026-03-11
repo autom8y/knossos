@@ -43,7 +43,7 @@ This is a test command.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -103,7 +103,7 @@ This is a test reference.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -159,7 +159,7 @@ This command has a plain INDEX.md and should default to dromena routing.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -219,7 +219,7 @@ This is a test reference with supporting files.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -315,7 +315,7 @@ description: A default command
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -419,7 +419,7 @@ description: A flat command
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -495,7 +495,7 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	manifest := &RiteManifest{Name: "test", Version: "1.0.0"}
 
 	// First materialization — should populate both dirs
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("First materializeMena failed: %v", err)
 	}
 
@@ -514,7 +514,7 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	os.RemoveAll(filepath.Join(claudeDir, "skills"))
 
 	// Second materialization (same rite) — should repopulate
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("Second materializeMena failed: %v", err)
 	}
 

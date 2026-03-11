@@ -72,6 +72,10 @@ type MenaProjectionOptions struct {
 
 	// Compiler handles channel-specific format transforms.
 	Compiler ChannelCompiler
+
+	// Channel identifies the AI assistant channel (e.g., "gemini").
+	// Used for provenance recording. Empty defaults to claude behavior.
+	Channel string
 }
 
 // MenaProjectionResult reports what the projection did.

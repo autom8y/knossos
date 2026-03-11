@@ -53,7 +53,7 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *Rite
 			provenance.ScopeRite,
 			"(generated)",
 			"template",
-			hash,
+			hash, channel,
 		))
 	}
 
@@ -66,7 +66,7 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *Rite
 //
 // Uses union merge semantics: rite servers are added/updated; existing
 // satellite servers not in the manifest are preserved.
-func (m *Materializer) materializeMcpJson(projectRoot string, manifest *RiteManifest, collector provenance.Collector) error {
+func (m *Materializer) materializeMcpJson(projectRoot string, manifest *RiteManifest, collector provenance.Collector, channel string) error {
 	if manifest == nil || len(manifest.MCPServers) == 0 {
 		return nil
 	}
@@ -95,7 +95,7 @@ func (m *Materializer) materializeMcpJson(projectRoot string, manifest *RiteMani
 			provenance.ScopeRite,
 			"(generated)",
 			"template",
-			hash,
+			hash, channel,
 		))
 	}
 
@@ -122,9 +122,9 @@ func (m *Materializer) injectElCheapoSettings(claudeDir string) error {
 	revertHook := map[string]any{
 		"hooks": []map[string]any{
 			{
-				"type":    "command",
-				"command": "ari hook cheapo-revert --output json",
-				"timeout": 30,
+				"type":		"command",
+				"command":	"ari hook cheapo-revert --output json",
+				"timeout":	30,
 			},
 		},
 	}
@@ -234,7 +234,7 @@ func (m *Materializer) cleanupThroughlineIDs() int {
 // materializeWorkflow copies workflow.yaml from the rite to .knossos/ACTIVE_WORKFLOW.yaml.
 // If the rite has no workflow.yaml, any existing ACTIVE_WORKFLOW.yaml is removed to
 // prevent stale workflow data from a previous rite persisting after switch.
-func (m *Materializer) materializeWorkflow(knossosDir string, resolved *ResolvedRite, collector provenance.Collector) error {
+func (m *Materializer) materializeWorkflow(knossosDir string, resolved *ResolvedRite, collector provenance.Collector, channel string) error {
 	dstPath := filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml")
 	rFS := m.riteFS(resolved)
 	content, err := fs.ReadFile(rFS, "workflow.yaml")
@@ -259,7 +259,7 @@ func (m *Materializer) materializeWorkflow(knossosDir string, resolved *Resolved
 			provenance.ScopeRite,
 			srcRelPath,
 			string(resolved.Source.Type),
-			checksum.Bytes(content),
+			checksum.Bytes(content), channel,
 		))
 	}
 

@@ -253,8 +253,8 @@ func TestRunTimeline_FromEvents(t *testing.T) {
 
 	// Write two v3 TypedEvents to events.jsonl.
 	events := []clewcontract.TypedEvent{
-		clewcontract.NewTypedDecisionRecordedEvent("chose X over Y", "perf reason", nil),
-		clewcontract.NewTypedAgentDelegatedEvent(clewcontract.SourceAgent, "architect", "", "design task", ""),
+		clewcontract.NewTypedDecisionRecordedEvent("", "chose X over Y", "perf reason", nil),
+		clewcontract.NewTypedAgentDelegatedEvent(clewcontract.SourceAgent, "", "architect", "", "design task", ""),
 	}
 	writeTypedEventsJSONL(t, sessionDir, events)
 
@@ -300,7 +300,7 @@ func TestRunTimeline_FromEvents_NonCuratedEventsFiltered(t *testing.T) {
 
 	// Write a curated v3 event (decision.recorded) and a non-curated v3 event (tool.use).
 	// tool.use is a non-curated type — write it directly as JSONL.
-	curatedEvent := clewcontract.NewTypedDecisionRecordedEvent("important decision", "", nil)
+	curatedEvent := clewcontract.NewTypedDecisionRecordedEvent("", "important decision", "", nil)
 
 	eventsPath := filepath.Join(sessionDir, "events.jsonl")
 	f, err := os.Create(eventsPath)

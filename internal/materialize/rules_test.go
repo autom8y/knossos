@@ -37,7 +37,7 @@ func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{})
+	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// The old rule should be replaced with new content
@@ -75,7 +75,7 @@ func TestMaterializeRules_PreservesUserRules(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{})
+	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// User rule should survive
@@ -113,7 +113,7 @@ func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{})
+	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	got, err := os.ReadFile(filepath.Join(rulesDir, "mena.md"))
@@ -139,8 +139,8 @@ func TestMaterializeRules_Idempotent(t *testing.T) {
 	m.templatesDir = templatesDir
 
 	// Run twice
-	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}))
-	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}))
+	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}, ""))
+	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}, ""))
 
 	// Same output
 	got, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
@@ -185,7 +185,7 @@ func TestMaterializeRules_EmbeddedSource(t *testing.T) {
 		Source:   RiteSource{Type: SourceEmbedded, Path: "embedded"},
 	}
 
-	err := m.materializeRules(claudeDir, resolved, provenance.NullCollector{})
+	err := m.materializeRules(claudeDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// Stale knossos-managed rules must be removed.

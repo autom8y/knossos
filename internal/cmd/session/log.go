@@ -144,20 +144,20 @@ func validateLogFlags(opts logOptions) error {
 func buildLogEvent(message string, opts logOptions) clewcontract.TypedEvent {
 	switch opts.eventType {
 	case "decision":
-		return clewcontract.NewTypedDecisionRecordedEvent(message, opts.rationale, nil)
+		return clewcontract.NewTypedDecisionRecordedEvent("", message, opts.rationale, nil)
 
 	case "agent":
 		// Pass message as the task ID so it appears in the timeline summary.
 		// agentType and agentID are not supplied from CLI; they're empty.
 		return clewcontract.NewTypedAgentDelegatedEvent(
-			clewcontract.SourceAgent, opts.agent, "", message, "")
+			clewcontract.SourceAgent, "", opts.agent, "", message, "")
 
 	case "commit":
-		return clewcontract.NewTypedCommitCreatedEvent(opts.sha, message)
+		return clewcontract.NewTypedCommitCreatedEvent("", opts.sha, message)
 
 	case "command":
 		// Override source to SourceAgent since this is an explicit CLI call, not a hook.
-		event := clewcontract.NewTypedCommandInvokedEvent(message, "manual")
+		event := clewcontract.NewTypedCommandInvokedEvent("", message, "manual")
 		event.Source = clewcontract.SourceAgent
 		return event
 
@@ -167,6 +167,6 @@ func buildLogEvent(message string, opts logOptions) clewcontract.TypedEvent {
 		// Per spec: general → note event with source=agent.
 		// We emit as decision.recorded (which is curated) with no rationale
 		// so it appears on the timeline as a NOTE-like DECISION entry.
-		return clewcontract.NewTypedDecisionRecordedEvent(message, "", nil)
+		return clewcontract.NewTypedDecisionRecordedEvent("", message, "", nil)
 	}
 }

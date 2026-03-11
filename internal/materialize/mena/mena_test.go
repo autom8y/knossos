@@ -15,9 +15,9 @@ import (
 func TestStripMenaExtension(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name     string
-		input    string
-		expected string
+		name		string
+		input		string
+		expected	string
 	}{
 		{"dro.md stripped", "INDEX.dro.md", "INDEX.md"},
 		{"lego.md stripped", "INDEX.lego.md", "INDEX.md"},
@@ -48,9 +48,9 @@ func TestStripMenaExtension(t *testing.T) {
 func TestRouteMenaFile(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name     string
-		input    string
-		expected string
+		name		string
+		input		string
+		expected	string
 	}{
 		{"dro routes to commands", "INDEX.dro.md", "commands"},
 		{"lego routes to skills", "INDEX.lego.md", "skills"},
@@ -107,10 +107,10 @@ func TestSyncMena_Destructive(t *testing.T) {
 
 	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectAll,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	result, err := SyncMena(sources, opts)
@@ -185,10 +185,10 @@ func TestSyncMena_Additive(t *testing.T) {
 
 	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionAdditive,
-		Filter:            ProjectAll,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionAdditive,
+		Filter:			ProjectAll,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	_, err := SyncMena(sources, opts)
@@ -235,10 +235,10 @@ func TestSyncMena_PriorityOverride(t *testing.T) {
 		{Path: filepath.Join(tmpDir, "high")},
 	}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectAll,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	_, err := SyncMena(sources, opts)
@@ -280,10 +280,10 @@ func TestSyncMena_EmbeddedFS(t *testing.T) {
 	}
 
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectAll,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	result, err := SyncMena(sources, opts)
@@ -341,10 +341,10 @@ func TestSyncMena_Filter_DroOnly(t *testing.T) {
 
 	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectDro,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectDro,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	result, err := SyncMena(sources, opts)
@@ -387,10 +387,10 @@ func TestSyncMena_StandaloneFileStripping(t *testing.T) {
 
 	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectAll,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	_, err := SyncMena(sources, opts)
@@ -418,10 +418,10 @@ func TestSyncMena_EmptySources(t *testing.T) {
 
 	sources := []MenaSource{}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectAll,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	result, err := SyncMena(sources, opts)
@@ -444,10 +444,10 @@ func TestSyncMena_NonexistentSource(t *testing.T) {
 
 	sources := []MenaSource{{Path: filepath.Join(tmpDir, "nonexistent-mena")}}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectAll,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
 	}
 
 	result, err := SyncMena(sources, opts)
@@ -464,9 +464,9 @@ func TestSyncMena_NonexistentSource(t *testing.T) {
 func TestParseMenaFrontmatterBytes(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name     string
-		data     string
-		wantName string
+		name		string
+		data		string
+		wantName	string
 	}{
 		{"with frontmatter", "---\nname: test\ndescription: d\n---\n# Body\n", "test"},
 		{"no frontmatter delimiters", "# Just a file with no frontmatter\n", ""},
@@ -489,8 +489,8 @@ func TestParseMenaFrontmatterBytes(t *testing.T) {
 func TestDetectMenaType(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		filename string
-		expected string
+		filename	string
+		expected	string
 	}{
 		{"INDEX.dro.md", "dro"},
 		{"INDEX.lego.md", "lego"},
@@ -518,7 +518,7 @@ func TestDetectMenaType(t *testing.T) {
 func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir // provenance manifest lives here
+	claudeDir := tmpDir	// provenance manifest lives here
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 
@@ -532,11 +532,11 @@ func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 
 	// Write a provenance manifest marking it as user-owned
 	manifest := &provenance.ProvenanceManifest{
-		SchemaVersion: provenance.CurrentSchemaVersion,
-		LastSync:      time.Now().UTC(),
-		ActiveRite:    "test",
+		SchemaVersion:	provenance.CurrentSchemaVersion,
+		LastSync:	time.Now().UTC(),
+		ActiveRite:	"test",
 		Entries: map[string]*provenance.ProvenanceEntry{
-			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000"),
+			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000", ""),
 		},
 	}
 	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
@@ -555,11 +555,11 @@ func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 
 	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectDro,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
-		OverwriteDiverged: false, // default: yield to user
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectDro,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
+		OverwriteDiverged:	false,	// default: yield to user
 	}
 
 	result, err := SyncMena(sources, opts)
@@ -603,11 +603,11 @@ func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
 
 	// Write provenance manifest marking it user-owned
 	manifest := &provenance.ProvenanceManifest{
-		SchemaVersion: provenance.CurrentSchemaVersion,
-		LastSync:      time.Now().UTC(),
-		ActiveRite:    "test",
+		SchemaVersion:	provenance.CurrentSchemaVersion,
+		LastSync:	time.Now().UTC(),
+		ActiveRite:	"test",
 		Entries: map[string]*provenance.ProvenanceEntry{
-			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000"),
+			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000", ""),
 		},
 	}
 	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
@@ -626,11 +626,11 @@ func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
 
 	sources := []MenaSource{{Path: menaDir}}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectDro,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
-		OverwriteDiverged: true, // reclaim flat name
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectDro,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
+		OverwriteDiverged:	true,	// reclaim flat name
 	}
 
 	result, err := SyncMena(sources, opts)
@@ -685,11 +685,11 @@ func TestSyncMena_NamespaceCollision_UntrackedEntry(t *testing.T) {
 
 	// Without OverwriteDiverged: should yield to untracked entry
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectDro,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
-		OverwriteDiverged: false,
+		Mode:			MenaProjectionDestructive,
+		Filter:			ProjectDro,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
+		OverwriteDiverged:	false,
 	}
 
 	_, err := SyncMena(sources, opts)

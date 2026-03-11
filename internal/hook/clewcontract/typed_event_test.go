@@ -57,7 +57,7 @@ func TestNewEventTypeConstants(t *testing.T) {
 
 func TestTypedEvent_JSONFields(t *testing.T) {
 	// All four envelope fields must be present in serialized output.
-	event := newTypedEvent(EventTypeSessionCreated, SourceCLI, SessionCreatedData{
+	event := newTypedEvent(EventTypeSessionCreated, SourceCLI, "", SessionCreatedData{
 		SessionID:  "session-001",
 		Initiative: "Add dark mode",
 		Complexity: "MODULE",
@@ -110,7 +110,7 @@ func TestTypedEvent_SourceField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			event := newTypedEvent(EventTypeSessionCreated, tt.source, SessionCreatedData{
+			event := newTypedEvent(EventTypeSessionCreated, tt.source, "", SessionCreatedData{
 				SessionID:  "s-001",
 				Initiative: "test",
 				Complexity: "PATCH",
@@ -135,7 +135,7 @@ func TestTypedEvent_SourceField(t *testing.T) {
 
 func TestTypedEvent_DataNeverNull(t *testing.T) {
 	// Data must be a JSON object, never null, even for minimal events.
-	event := NewTypedSessionResumedEvent("session-001")
+	event := NewTypedSessionResumedEvent("", "session-001")
 
 	data, err := json.Marshal(event)
 	if err != nil {
@@ -160,7 +160,7 @@ func TestTypedEvent_DataNeverNull(t *testing.T) {
 }
 
 func TestTypedEvent_TimestampFormat(t *testing.T) {
-	event := NewTypedSessionCreatedEvent("s-001", "initiative", "MODULE", "ecosystem")
+	event := NewTypedSessionCreatedEvent("", "s-001", "initiative", "MODULE", "ecosystem")
 
 	if event.Ts == "" {
 		t.Error("Ts should not be empty")
@@ -456,7 +456,7 @@ func TestHandoffExecutedData_ArtifactsAlwaysPresent(t *testing.T) {
 // --- Constructor functions ---
 
 func TestNewTypedSessionCreatedEvent(t *testing.T) {
-	event := NewTypedSessionCreatedEvent("s-001", "Add dark mode", "MODULE", "ecosystem")
+	event := NewTypedSessionCreatedEvent("", "s-001", "Add dark mode", "MODULE", "ecosystem")
 
 	if event.Type != EventTypeSessionCreated {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeSessionCreated)
@@ -488,7 +488,7 @@ func TestNewTypedSessionCreatedEvent(t *testing.T) {
 }
 
 func TestNewTypedSessionParkedEvent(t *testing.T) {
-	event := NewTypedSessionParkedEvent("s-001", "lunch break")
+	event := NewTypedSessionParkedEvent("", "s-001", "lunch break")
 
 	if event.Type != EventTypeSessionParked {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeSessionParked)
@@ -510,7 +510,7 @@ func TestNewTypedSessionParkedEvent(t *testing.T) {
 }
 
 func TestNewTypedSessionResumedEvent(t *testing.T) {
-	event := NewTypedSessionResumedEvent("s-001")
+	event := NewTypedSessionResumedEvent("", "s-001")
 
 	if event.Type != EventTypeSessionResumed {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeSessionResumed)
@@ -529,7 +529,7 @@ func TestNewTypedSessionResumedEvent(t *testing.T) {
 }
 
 func TestNewTypedSessionWrappedEvent(t *testing.T) {
-	event := NewTypedSessionWrappedEvent("s-001", "WHITE", 3600000)
+	event := NewTypedSessionWrappedEvent("", "s-001", "WHITE", 3600000)
 
 	if event.Type != EventTypeSessionWrapped {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeSessionWrapped)
@@ -551,7 +551,7 @@ func TestNewTypedSessionWrappedEvent(t *testing.T) {
 }
 
 func TestNewTypedAgentDelegatedEvent_HookSource(t *testing.T) {
-	event := NewTypedAgentDelegatedEvent(SourceHook, "context-architect", "specialist", "task-001", "agent-abc")
+	event := NewTypedAgentDelegatedEvent(SourceHook, "", "context-architect", "specialist", "task-001", "agent-abc")
 
 	if event.Type != EventTypeAgentDelegated {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeAgentDelegated)
@@ -574,7 +574,7 @@ func TestNewTypedAgentDelegatedEvent_HookSource(t *testing.T) {
 
 func TestNewTypedAgentDelegatedEvent_CLISource(t *testing.T) {
 	// agent.delegated can also come from CLI (ari handoff execute)
-	event := NewTypedAgentDelegatedEvent(SourceCLI, "integration-engineer", "", "", "")
+	event := NewTypedAgentDelegatedEvent(SourceCLI, "", "integration-engineer", "", "", "")
 
 	if event.Source != SourceCLI {
 		t.Errorf("Source = %q, want %q", event.Source, SourceCLI)
@@ -583,7 +583,7 @@ func TestNewTypedAgentDelegatedEvent_CLISource(t *testing.T) {
 
 func TestNewTypedAgentCompletedEvent(t *testing.T) {
 	artifacts := []string{"/path/to/typed_event.go", "/path/to/typed_event_test.go"}
-	event := NewTypedAgentCompletedEvent(SourceHook, "integration-engineer", "specialist", "task-001", "agent-xyz", "success", 15000, artifacts)
+	event := NewTypedAgentCompletedEvent(SourceHook, "", "integration-engineer", "specialist", "task-001", "agent-xyz", "success", 15000, artifacts)
 
 	if event.Type != EventTypeAgentCompleted {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeAgentCompleted)
@@ -608,7 +608,7 @@ func TestNewTypedAgentCompletedEvent(t *testing.T) {
 }
 
 func TestNewTypedCommitCreatedEvent(t *testing.T) {
-	event := NewTypedCommitCreatedEvent("abc123f", "feat: add theme provider")
+	event := NewTypedCommitCreatedEvent("", "abc123f", "feat: add theme provider")
 
 	if event.Type != EventTypeCommitCreated {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeCommitCreated)
@@ -630,7 +630,7 @@ func TestNewTypedCommitCreatedEvent(t *testing.T) {
 }
 
 func TestNewTypedDecisionRecordedEvent(t *testing.T) {
-	event := NewTypedDecisionRecordedEvent("Use PostgreSQL", "Better ACID", []string{"MongoDB", "SQLite"})
+	event := NewTypedDecisionRecordedEvent("", "Use PostgreSQL", "Better ACID", []string{"MongoDB", "SQLite"})
 
 	if event.Type != EventTypeDecisionRecorded {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeDecisionRecorded)
@@ -652,7 +652,7 @@ func TestNewTypedDecisionRecordedEvent(t *testing.T) {
 }
 
 func TestNewTypedCommandInvokedEvent(t *testing.T) {
-	event := NewTypedCommandInvokedEvent("ecosystem-ref", "skill")
+	event := NewTypedCommandInvokedEvent("", "ecosystem-ref", "skill")
 
 	if event.Type != EventTypeCommandInvoked {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeCommandInvoked)
@@ -675,7 +675,7 @@ func TestNewTypedCommandInvokedEvent(t *testing.T) {
 
 func TestNewTypedHandoffExecutedEvent_NilArtifacts(t *testing.T) {
 	// nil artifacts should be normalized to empty slice, not serialized as null.
-	event := NewTypedHandoffExecutedEvent("agent-a", "agent-b", "s-001", nil)
+	event := NewTypedHandoffExecutedEvent("", "agent-a", "agent-b", "s-001", nil)
 
 	var d HandoffExecutedData
 	if err := json.Unmarshal(event.Data, &d); err != nil {
@@ -691,7 +691,7 @@ func TestNewTypedHandoffExecutedEvent_NilArtifacts(t *testing.T) {
 }
 
 func TestNewTypedFieldUpdatedEvent(t *testing.T) {
-	event := NewTypedFieldUpdatedEvent("s-001", "complexity", "PATCH", "MODULE")
+	event := NewTypedFieldUpdatedEvent("", "s-001", "complexity", "PATCH", "MODULE")
 
 	if event.Type != EventTypeFieldUpdated {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeFieldUpdated)
@@ -710,7 +710,7 @@ func TestNewTypedFieldUpdatedEvent(t *testing.T) {
 }
 
 func TestNewTypedHookFiredEvent(t *testing.T) {
-	event := NewTypedHookFiredEvent("clew", "PostToolUse")
+	event := NewTypedHookFiredEvent("", "clew", "PostToolUse")
 
 	if event.Type != EventTypeHookFired {
 		t.Errorf("Type = %q, want %q", event.Type, EventTypeHookFired)
@@ -735,7 +735,7 @@ func TestNewTypedHookFiredEvent(t *testing.T) {
 
 func TestTypedEvent_JSONLFormat(t *testing.T) {
 	// TypedEvent should serialize to a valid single-line JSON object.
-	event := NewTypedSessionCreatedEvent("s-001", "dark mode", "MODULE", "ecosystem")
+	event := NewTypedSessionCreatedEvent("", "s-001", "dark mode", "MODULE", "ecosystem")
 
 	data, err := json.Marshal(event)
 	if err != nil {
@@ -910,7 +910,7 @@ func TestEventWriter_WriteTyped(t *testing.T) {
 	}
 	defer writer.Close()
 
-	event := NewTypedSessionCreatedEvent("s-001", "test initiative", "MODULE", "ecosystem")
+	event := NewTypedSessionCreatedEvent("", "s-001", "test initiative", "MODULE", "ecosystem")
 	if err := writer.WriteTyped(event); err != nil {
 		t.Fatalf("WriteTyped failed: %v", err)
 	}
@@ -962,7 +962,7 @@ func TestEventWriter_WriteTyped_InterleavedWithV2(t *testing.T) {
 	}
 
 	// v3 typed event
-	v3Event := NewTypedAgentDelegatedEvent(SourceHook, "architect", "specialist", "task-001", "")
+	v3Event := NewTypedAgentDelegatedEvent(SourceHook, "", "architect", "specialist", "task-001", "")
 	if err := writer.WriteTyped(v3Event); err != nil {
 		t.Fatalf("WriteTyped(v3) failed: %v", err)
 	}
@@ -1014,7 +1014,7 @@ func TestBufferedEventWriter_WriteTyped(t *testing.T) {
 	w := NewBufferedEventWriter(tmpDir, 100*time.Millisecond)
 
 	// Write a v3 typed event
-	event := NewTypedCommitCreatedEvent("abc123", "feat: test commit")
+	event := NewTypedCommitCreatedEvent("", "abc123", "feat: test commit")
 	w.WriteTyped(event)
 
 	if w.Len() != 1 {
@@ -1052,9 +1052,9 @@ func TestBufferedEventWriter_WriteTyped_InterleavedWithV2(t *testing.T) {
 
 	// Mix v2 and v3 events
 	w.Write(NewSessionCreatedEvent("s-001", "init", "PATCH", ""))
-	w.WriteTyped(NewTypedCommitCreatedEvent("abc123", "feat: first commit"))
+	w.WriteTyped(NewTypedCommitCreatedEvent("", "abc123", "feat: first commit"))
 	w.Write(NewSessionParkedEvent("s-001", "lunch"))
-	w.WriteTyped(NewTypedAgentDelegatedEvent(SourceHook, "architect", "", "", ""))
+	w.WriteTyped(NewTypedAgentDelegatedEvent(SourceHook, "", "architect", "", "", ""))
 
 	if w.Len() != 4 {
 		t.Errorf("Len() = %d, want 4 (2 v2 + 2 v3)", w.Len())
@@ -1104,8 +1104,8 @@ func TestBufferedEventWriter_Len_CountsBothTypes(t *testing.T) {
 	w := NewBufferedEventWriter(tmpDir, 10*time.Second) // long interval so no auto-flush
 
 	w.Write(NewSessionCreatedEvent("s-001", "init", "PATCH", ""))
-	w.WriteTyped(NewTypedCommitCreatedEvent("abc123", "test"))
-	w.WriteTyped(NewTypedAgentDelegatedEvent(SourceHook, "arch", "", "", ""))
+	w.WriteTyped(NewTypedCommitCreatedEvent("", "abc123", "test"))
+	w.WriteTyped(NewTypedAgentDelegatedEvent(SourceHook, "", "arch", "", "", ""))
 
 	if w.Len() != 3 {
 		t.Errorf("Len() = %d, want 3 (1 v2 + 2 v3)", w.Len())

@@ -16,20 +16,20 @@ func TestCollectorAccumulation(t *testing.T) {
 
 	now := time.Now().UTC()
 	entry1 := &ProvenanceEntry{
-		Owner:      OwnerKnossos,
-		Scope:      ScopeRite,
-		SourcePath: "rites/ecosystem/agents/orchestrator.md",
-		SourceType: "project",
-		Checksum:   "sha256:abc123",
-		LastSynced: now,
+		Owner:		OwnerKnossos,
+		Scope:		ScopeRite,
+		SourcePath:	"rites/ecosystem/agents/orchestrator.md",
+		SourceType:	"project",
+		Checksum:	"sha256:abc123",
+		LastSynced:	now,
 	}
 	entry2 := &ProvenanceEntry{
-		Owner:      OwnerKnossos,
-		Scope:      ScopeRite,
-		SourcePath: "mena/operations/commit/",
-		SourceType: "project",
-		Checksum:   "sha256:def456",
-		LastSynced: now,
+		Owner:		OwnerKnossos,
+		Scope:		ScopeRite,
+		SourcePath:	"mena/operations/commit/",
+		SourceType:	"project",
+		Checksum:	"sha256:def456",
+		LastSynced:	now,
 	}
 
 	collector.Record("agents/orchestrator.md", entry1)
@@ -64,9 +64,9 @@ func TestCollectorThreadSafety(t *testing.T) {
 			for j := range numRecordsPerGoroutine {
 				path := filepath.Join("test", string(rune('a'+id)), string(rune('A'+j)))
 				entry := &ProvenanceEntry{
-					Owner:      OwnerKnossos,
-					Checksum:   "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-					LastSynced: now,
+					Owner:		OwnerKnossos,
+					Checksum:	"sha256:0000000000000000000000000000000000000000000000000000000000000000",
+					LastSynced:	now,
 				}
 				collector.Record(path, entry)
 			}
@@ -86,28 +86,28 @@ func TestManifestRoundTrip(t *testing.T) {
 	tmpDir := t.TempDir()
 	manifestPath := filepath.Join(tmpDir, ManifestFileName)
 
-	now := time.Now().UTC().Truncate(time.Second) // YAML loses sub-second precision
+	now := time.Now().UTC().Truncate(time.Second)	// YAML loses sub-second precision
 
 	original := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
-		ActiveRite:    "ecosystem",
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
+		ActiveRite:	"ecosystem",
 		Entries: map[string]*ProvenanceEntry{
 			"agents/orchestrator.md": {
-				Owner:      OwnerKnossos,
-				Scope:      ScopeRite,
-				SourcePath: "rites/ecosystem/agents/orchestrator.md",
-				SourceType: "project",
-				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Scope:		ScopeRite,
+				SourcePath:	"rites/ecosystem/agents/orchestrator.md",
+				SourceType:	"project",
+				Checksum:	"sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced:	now,
 			},
 			"commands/commit/": {
-				Owner:      OwnerKnossos,
-				Scope:      ScopeRite,
-				SourcePath: "mena/operations/commit/",
-				SourceType: "project",
-				Checksum:   "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Scope:		ScopeRite,
+				SourcePath:	"mena/operations/commit/",
+				SourceType:	"project",
+				Checksum:	"sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+				LastSynced:	now,
 			},
 		},
 	}
@@ -185,17 +185,17 @@ func TestLoadOrBootstrapExistingFile(t *testing.T) {
 
 	now := time.Now().UTC().Truncate(time.Second)
 	original := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
-		ActiveRite:    "ecosystem",
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
+		ActiveRite:	"ecosystem",
 		Entries: map[string]*ProvenanceEntry{
 			"agents/orchestrator.md": {
-				Owner:      OwnerKnossos,
-				Scope:      ScopeRite,
-				SourcePath: "rites/ecosystem/agents/orchestrator.md",
-				SourceType: "project",
-				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Scope:		ScopeRite,
+				SourcePath:	"rites/ecosystem/agents/orchestrator.md",
+				SourceType:	"project",
+				Checksum:	"sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced:	now,
 			},
 		},
 	}
@@ -239,16 +239,16 @@ func TestDivergenceChecksumMatch(t *testing.T) {
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
-				Owner:      OwnerKnossos,
-				Scope:      ScopeRite,
-				SourcePath: "test/source.md",
-				SourceType: "project",
-				Checksum:   hash,
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Scope:		ScopeRite,
+				SourcePath:	"test/source.md",
+				SourceType:	"project",
+				Checksum:	hash,
+				LastSynced:	now,
 			},
 		},
 	}
@@ -287,16 +287,16 @@ func TestDivergenceChecksumMismatch(t *testing.T) {
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
-				Owner:      OwnerKnossos,
-				Scope:      ScopeRite,
-				SourcePath: "test/source.md",
-				SourceType: "project",
-				Checksum:   originalHash,
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Scope:		ScopeRite,
+				SourcePath:	"test/source.md",
+				SourceType:	"project",
+				Checksum:	originalHash,
+				LastSynced:	now,
 			},
 		},
 	}
@@ -329,13 +329,13 @@ func TestDivergenceUserOwnedCarriedForward(t *testing.T) {
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"custom-agent.md": {
-				Owner:      OwnerUser,
-				Checksum:   "sha256:userchecksum1234567890abcdef1234567890abcdef1234567890abcdef123456",
-				LastSynced: now,
+				Owner:		OwnerUser,
+				Checksum:	"sha256:userchecksum1234567890abcdef1234567890abcdef1234567890abcdef123456",
+				LastSynced:	now,
 			},
 		},
 	}
@@ -368,13 +368,13 @@ func TestDivergenceUnknownOwnedCarriedForward(t *testing.T) {
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"legacy-file.md": {
-				Owner:      OwnerUntracked,
-				Checksum:   "sha256:unknownchecksum1234567890abcdef1234567890abcdef1234567890abcdef12",
-				LastSynced: now,
+				Owner:		OwnerUntracked,
+				Checksum:	"sha256:unknownchecksum1234567890abcdef1234567890abcdef1234567890abcdef12",
+				LastSynced:	now,
 			},
 		},
 	}
@@ -407,16 +407,16 @@ func TestDivergenceFileMissing(t *testing.T) {
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"deleted.md": {
-				Owner:      OwnerKnossos,
-				Scope:      ScopeRite,
-				SourcePath: "test/deleted.md",
-				SourceType: "project",
-				Checksum:   "sha256:deadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Scope:		ScopeRite,
+				SourcePath:	"test/deleted.md",
+				SourceType:	"project",
+				Checksum:	"sha256:deadbeef1234567890abcdef1234567890abcdef1234567890abcdef12345678",
+				LastSynced:	now,
 			},
 		},
 	}
@@ -455,9 +455,9 @@ func TestDivergenceNewFile(t *testing.T) {
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
-		Entries:       map[string]*ProvenanceEntry{},
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
+		Entries:	map[string]*ProvenanceEntry{},
 	}
 
 	report, err := DetectDivergence(previous, nil, claudeDir)
@@ -499,16 +499,16 @@ func TestMenaDirectoryChecksum(t *testing.T) {
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"commands/commit/": {
-				Owner:      OwnerKnossos,
-				Scope:      ScopeRite,
-				SourcePath: "mena/operations/commit/",
-				SourceType: "project",
-				Checksum:   dirHash,
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Scope:		ScopeRite,
+				SourcePath:	"mena/operations/commit/",
+				SourceType:	"project",
+				Checksum:	dirHash,
+				LastSynced:	now,
 			},
 		},
 	}
@@ -549,9 +549,9 @@ func TestMenaDirectoryChecksum(t *testing.T) {
 // TestValidationMissingSchemaVersion tests that manifest without schema_version fails validation.
 func TestValidationMissingSchemaVersion(t *testing.T) {
 	manifest := &ProvenanceManifest{
-		SchemaVersion: "",
-		LastSync:      time.Now().UTC(),
-		Entries:       make(map[string]*ProvenanceEntry),
+		SchemaVersion:	"",
+		LastSync:	time.Now().UTC(),
+		Entries:	make(map[string]*ProvenanceEntry),
 	}
 
 	err := validateManifest(manifest)
@@ -564,13 +564,13 @@ func TestValidationMissingSchemaVersion(t *testing.T) {
 func TestValidationInvalidChecksum(t *testing.T) {
 	now := time.Now().UTC()
 	manifest := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
-				Owner:      OwnerKnossos,
-				Checksum:   "invalid-checksum",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Checksum:	"invalid-checksum",
+				LastSynced:	now,
 			},
 		},
 	}
@@ -585,13 +585,13 @@ func TestValidationInvalidChecksum(t *testing.T) {
 func TestValidationKnossosRequiresSource(t *testing.T) {
 	now := time.Now().UTC()
 	manifest := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
-				Owner:      OwnerKnossos,
-				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				Checksum:	"sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced:	now,
 				// Missing SourcePath and SourceType
 			},
 		},
@@ -606,7 +606,7 @@ func TestValidationKnossosRequiresSource(t *testing.T) {
 // TestNewKnossosEntry tests that NewKnossosEntry sets all fields correctly.
 func TestNewKnossosEntry(t *testing.T) {
 	before := time.Now().UTC()
-	entry := NewKnossosEntry(ScopeRite, "rites/eco/agents/foo.md", "project", "sha256:abc123")
+	entry := NewKnossosEntry(ScopeRite, "rites/eco/agents/foo.md", "project", "sha256:abc123", "")
 	after := time.Now().UTC()
 
 	if entry.Owner != OwnerKnossos {
@@ -631,7 +631,7 @@ func TestNewKnossosEntry(t *testing.T) {
 
 // TestNewKnossosEntryScopeUser tests NewKnossosEntry with ScopeUser.
 func TestNewKnossosEntryScopeUser(t *testing.T) {
-	entry := NewKnossosEntry(ScopeUser, "agents/foo.md", "embedded", "sha256:def456")
+	entry := NewKnossosEntry(ScopeUser, "agents/foo.md", "embedded", "sha256:def456", "")
 
 	if entry.Owner != OwnerKnossos {
 		t.Errorf("expected Owner=knossos, got %s", entry.Owner)
@@ -644,7 +644,7 @@ func TestNewKnossosEntryScopeUser(t *testing.T) {
 // TestNewUserEntry tests that NewUserEntry sets all fields correctly.
 func TestNewUserEntry(t *testing.T) {
 	before := time.Now().UTC()
-	entry := NewUserEntry(ScopeUser, "sha256:usercheck")
+	entry := NewUserEntry(ScopeUser, "sha256:usercheck", "")
 	after := time.Now().UTC()
 
 	if entry.Owner != OwnerUser {
@@ -670,7 +670,7 @@ func TestNewUserEntry(t *testing.T) {
 // TestNewUntrackedEntry tests that NewUntrackedEntry sets all fields correctly.
 func TestNewUntrackedEntry(t *testing.T) {
 	before := time.Now().UTC()
-	entry := NewUntrackedEntry(ScopeUser, "sha256:untrackedcheck")
+	entry := NewUntrackedEntry(ScopeUser, "sha256:untrackedcheck", "")
 	after := time.Now().UTC()
 
 	if entry.Owner != OwnerUntracked {
@@ -696,8 +696,8 @@ func TestNewUntrackedEntry(t *testing.T) {
 // TestScopeTypeIsValid tests that ScopeType.IsValid() returns correct values.
 func TestScopeTypeIsValid(t *testing.T) {
 	tests := []struct {
-		scope ScopeType
-		valid bool
+		scope	ScopeType
+		valid	bool
 	}{
 		{ScopeRite, true},
 		{ScopeUser, true},
@@ -725,22 +725,22 @@ func TestOwnerTypeUnknownInvalid(t *testing.T) {
 func TestMigrateV1ToV2(t *testing.T) {
 	now := time.Now().UTC()
 	v1Manifest := &ProvenanceManifest{
-		SchemaVersion: "1.0",
-		LastSync:      now,
-		ActiveRite:    "ecosystem",
+		SchemaVersion:	"1.0",
+		LastSync:	now,
+		ActiveRite:	"ecosystem",
 		Entries: map[string]*ProvenanceEntry{
 			"agents/orchestrator.md": {
-				Owner:      OwnerKnossos,
-				SourcePath: "rites/ecosystem/agents/orchestrator.md",
-				SourceType: "project",
-				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				SourcePath:	"rites/ecosystem/agents/orchestrator.md",
+				SourceType:	"project",
+				Checksum:	"sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced:	now,
 				// Scope is empty (v1.0 format)
 			},
 			"custom-agent.md": {
-				Owner:      OwnerType("unknown"), // v1.0 used "unknown"
-				Checksum:   "sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-				LastSynced: now,
+				Owner:		OwnerType("unknown"),	// v1.0 used "unknown"
+				Checksum:	"sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+				LastSynced:	now,
 			},
 		},
 	}
@@ -768,15 +768,15 @@ func TestMigrateV1ToV2(t *testing.T) {
 func TestValidationMissingScope(t *testing.T) {
 	now := time.Now().UTC()
 	manifest := &ProvenanceManifest{
-		SchemaVersion: CurrentSchemaVersion,
-		LastSync:      now,
+		SchemaVersion:	CurrentSchemaVersion,
+		LastSync:	now,
 		Entries: map[string]*ProvenanceEntry{
 			"test.md": {
-				Owner:      OwnerKnossos,
-				SourcePath: "test/source.md",
-				SourceType: "project",
-				Checksum:   "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-				LastSynced: now,
+				Owner:		OwnerKnossos,
+				SourcePath:	"test/source.md",
+				SourceType:	"project",
+				Checksum:	"sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+				LastSynced:	now,
 				// Missing Scope
 			},
 		},

@@ -31,7 +31,7 @@ func (m *Materializer) knownRuleTemplateNames(_ *ResolvedRite) map[string]bool {
 // On rite switch, stale knossos-managed rules are removed before writing new ones.
 // Provenance is determined by template filename: any .md file whose name matches
 // a template source file is knossos-managed; all others are user-created.
-func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite, collector provenance.Collector) error {
+func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite, collector provenance.Collector, channel string) error {
 	rulesDir := filepath.Join(claudeDir, "rules")
 	if err := paths.EnsureDir(rulesDir); err != nil {
 		return err
@@ -80,7 +80,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 		entries, err := os.ReadDir(sourceRulesDir)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return nil // No template rules = no-op
+				return nil	// No template rules = no-op
 			}
 			return err
 		}
@@ -132,7 +132,7 @@ func (m *Materializer) materializeRules(claudeDir string, resolved *ResolvedRite
 				provenance.ScopeRite,
 				srcRelPath,
 				"template",
-				checksum.Bytes(content),
+				checksum.Bytes(content), channel,
 			))
 		}
 	}

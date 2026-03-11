@@ -100,6 +100,7 @@ func structurallyEqual(a, b *ProvenanceManifest) bool {
 		}
 		if entryA.Owner != entryB.Owner ||
 			entryA.Scope != entryB.Scope ||
+			entryA.Channel != entryB.Channel ||
 			entryA.SourcePath != entryB.SourcePath ||
 			entryA.SourceType != entryB.SourceType ||
 			entryA.Checksum != entryB.Checksum {

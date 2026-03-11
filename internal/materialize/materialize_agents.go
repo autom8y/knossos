@@ -19,7 +19,7 @@ import (
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
 // Cross-rite agents (pythia, moirai, etc.) are user-scope owned and NOT handled here.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride string) error {
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride, channel string) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
@@ -75,7 +75,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 				provenance.ScopeRite,
 				sourcePath,
 				"archetype",
-				checksum.Bytes(content),
+				checksum.Bytes(content), channel,
 			))
 		}
 	}
@@ -87,11 +87,11 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		rFS := m.riteFS(resolved)
 		agentsSub, err := fs.Sub(rFS, "agents")
 		if err != nil {
-			return nil // No agents sub-dir in embedded FS
+			return nil	// No agents sub-dir in embedded FS
 		}
 		// Check if agents dir exists in embedded FS
 		if _, err := fs.Stat(rFS, "agents"); err != nil {
-			return nil // No agents in this rite
+			return nil	// No agents in this rite
 		}
 		// Copy agents and record provenance
 		writeErr = fs.WalkDir(agentsSub, ".", func(path string, d fs.DirEntry, walkErr error) error {
@@ -130,7 +130,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 					provenance.ScopeRite,
 					sourcePath,
 					string(resolved.Source.Type),
-					checksum.Bytes(content),
+					checksum.Bytes(content), channel,
 				))
 			}
 			return nil
@@ -139,7 +139,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		// Filesystem path: use existing os-based copy
 		sourceAgentsDir := filepath.Join(ritePath, "agents")
 		if _, err := os.Stat(sourceAgentsDir); os.IsNotExist(err) {
-			return nil // No agents in this rite
+			return nil	// No agents in this rite
 		}
 
 		writeErr = filepath.WalkDir(sourceAgentsDir, func(path string, d fs.DirEntry, err error) error {
@@ -194,7 +194,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 					provenance.ScopeRite,
 					srcRelPath,
 					string(resolved.Source.Type),
-					checksum.Bytes(content),
+					checksum.Bytes(content), channel,
 				))
 			}
 

@@ -309,7 +309,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	m.cleanupStaleBlanketSettings(claudeDir, prevManifest)
 
 	// Generate rules from templates (if available)
-	if err := m.materializeRules(claudeDir, nil, collector); err != nil {
+	if err := m.materializeRules(claudeDir, nil, collector, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 	}
 
@@ -329,7 +329,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 
 	// Project platform mena + shared rite mena so cross-cutting mode still
 	// has core features (/know, /radar, /research, etc.).
-	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged, comp); err != nil {
+	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged, opts.Channel, comp); err != nil {
 		slog.Warn("failed to materialize mena in minimal mode", "error", err)
 		// Non-fatal: mena is a best-effort enhancement in minimal mode
 	}
@@ -507,26 +507,26 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	mergedSkillPolicies := MergeSkillPolicies(sharedSkillPolicies, manifest.SkillPolicies)
 
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
 	if !opts.Soft {
-		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged, comp); err != nil {
+		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged, opts.Channel, comp); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 		}
 	}
 
 	// 6. Generate rules/ directory from templates/rules
 	if !opts.Soft {
-		if err := m.materializeRules(claudeDir, resolved, collector); err != nil {
+		if err := m.materializeRules(claudeDir, resolved, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 		}
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride, comp)
+	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride, opts.Channel, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -542,7 +542,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// 8.1. Write MCP servers to .mcp.json at project root (SCAR-028)
 	if !opts.Soft {
 		projectRoot := filepath.Dir(claudeDir)
-		if err := m.materializeMcpJson(projectRoot, manifest, collector); err != nil {
+		if err := m.materializeMcpJson(projectRoot, manifest, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize .mcp.json", err)
 		}
 	}
@@ -561,7 +561,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 9.5. Copy workflow.yaml to ACTIVE_WORKFLOW.yaml
 	if !opts.Soft {
-		if err := m.materializeWorkflow(knossosDir, resolved, collector); err != nil {
+		if err := m.materializeWorkflow(knossosDir, resolved, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize workflow", err)
 		}
 	}

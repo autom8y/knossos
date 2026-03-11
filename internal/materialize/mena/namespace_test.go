@@ -45,16 +45,16 @@ func TestResolveNamespace_DirAndFileDeduplicated(t *testing.T) {
 
 	collected := map[string]menaCollectedEntry{
 		"group/my-cmd": {
-			source:      MenaSource{Path: droDir},
-			name:        "my-cmd",
-			sourceIndex: 0,
-			menaType:    "dro",
+			source:		MenaSource{Path: droDir},
+			name:		"my-cmd",
+			sourceIndex:	0,
+			menaType:	"dro",
 		},
 	}
 
 	opts := MenaProjectionOptions{
-		TargetCommandsDir: commandsDir,
-		OverwriteDiverged: false,
+		TargetCommandsDir:	commandsDir,
+		OverwriteDiverged:	false,
 	}
 
 	_, warnings := resolveNamespace(collected, nil, opts)
@@ -95,15 +95,15 @@ func TestResolveNamespace_DirAndFileDeduplicated_KnossosOwned(t *testing.T) {
 
 	// Provenance marks it as knossos-owned
 	manifest := &provenance.ProvenanceManifest{
-		SchemaVersion: provenance.CurrentSchemaVersion,
-		LastSync:      time.Now().UTC(),
-		ActiveRite:    "test",
+		SchemaVersion:	provenance.CurrentSchemaVersion,
+		LastSync:	time.Now().UTC(),
+		ActiveRite:	"test",
 		Entries: map[string]*provenance.ProvenanceEntry{
 			"commands/my-cmd/": provenance.NewKnossosEntry(
 				provenance.ScopeRite,
 				"rites/test/mena/my-cmd",
 				"project",
-				"sha256:0000000000000000000000000000000000000000000000000000000000000000",
+				"sha256:0000000000000000000000000000000000000000000000000000000000000000", "",
 			),
 		},
 	}
@@ -121,17 +121,17 @@ func TestResolveNamespace_DirAndFileDeduplicated_KnossosOwned(t *testing.T) {
 
 	collected := map[string]menaCollectedEntry{
 		"my-cmd": {
-			source:      MenaSource{Path: droDir},
-			name:        "my-cmd",
-			sourceIndex: 0,
-			menaType:    "dro",
+			source:		MenaSource{Path: droDir},
+			name:		"my-cmd",
+			sourceIndex:	0,
+			menaType:	"dro",
 		},
 	}
 
 	opts := MenaProjectionOptions{
-		TargetCommandsDir: commandsDir,
-		KnossosDir:        knossosDir,
-		OverwriteDiverged: false,
+		TargetCommandsDir:	commandsDir,
+		KnossosDir:		knossosDir,
+		OverwriteDiverged:	false,
 	}
 
 	flatNames, warnings := resolveNamespace(collected, nil, opts)

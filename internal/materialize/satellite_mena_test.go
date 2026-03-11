@@ -109,7 +109,7 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -160,7 +160,7 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -218,7 +218,7 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
@@ -286,7 +286,7 @@ func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
 	sr := NewSourceResolverWithPaths(knossosHome, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 

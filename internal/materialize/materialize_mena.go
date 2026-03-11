@@ -19,7 +19,7 @@ import (
 //
 // This method builds the source list and delegates to SyncMena() for the
 // actual collection, routing, extension stripping, and file copying.
-func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, overwriteDiverged bool, comp compiler.ChannelCompiler) error {
+func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, overwriteDiverged bool, channel string, comp compiler.ChannelCompiler) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -123,6 +123,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		OverwriteDiverged: overwriteDiverged,
 		RiteName:          manifest.Name,
 		Compiler:          comp,
+		Channel:           channel,
 	}
 
 	_, err := mena.SyncMena(sources, opts)
@@ -133,7 +134,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 // .claude/commands/ and .claude/skills/ without requiring an active rite.
 // Called from MaterializeMinimal so that cross-cutting mode still gets core
 // features like /know, /radar, /research.
-func (m *Materializer) materializeMinimalMena(claudeDir string, collector provenance.Collector, overwriteDiverged bool, comp compiler.ChannelCompiler) error {
+func (m *Materializer) materializeMinimalMena(claudeDir string, collector provenance.Collector, overwriteDiverged bool, channel string, comp compiler.ChannelCompiler) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
@@ -173,6 +174,7 @@ func (m *Materializer) materializeMinimalMena(claudeDir string, collector proven
 		KnossosDir:        m.resolver.KnossosDir(),
 		OverwriteDiverged: overwriteDiverged,
 		Compiler:          comp,
+		Channel:           channel,
 	}
 
 	_, err := mena.SyncMena(sources, opts)
