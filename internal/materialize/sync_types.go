@@ -50,6 +50,7 @@ type SyncOptions struct {
 	KeepOrphans       bool
 	Soft              bool // CC-safe mode: only update agents + CLAUDE.md
 	ElCheapo          bool // Force all agents to haiku model (ephemeral, reverted on session exit)
+	Channel           string // "claude" (default), "gemini", or "all"
 }
 
 // SyncResult contains unified outcome.

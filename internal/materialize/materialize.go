@@ -28,6 +28,7 @@ type Options struct {
 	Soft              bool // CC-safe mode: only update agents + CLAUDE.md
 	OverwriteDiverged bool // Allow overwriting user-owned mena entries on flat-name collision
 	ElCheapo          bool // Force haiku model override on all agents (ephemeral)
+	Channel           string
 }
 
 // Result contains materialization outcome details.
@@ -334,6 +335,10 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		Status:          "success",
 		OrphansDetected: []string{},
 		OrphanAction:    "kept",
+	}
+
+	if opts.Channel == "gemini" {
+		m.claudeDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
 	}
 
 	claudeDir := m.getClaudeDir()
@@ -684,6 +689,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		Soft:              opts.Soft,
 		OverwriteDiverged: opts.OverwriteDiverged,
 		ElCheapo:          opts.ElCheapo,
+		Channel:           opts.Channel,
 	}
 
 	legacyResult, err := m.MaterializeWithOptions(riteName, legacyOpts)
