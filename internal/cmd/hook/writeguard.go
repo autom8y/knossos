@@ -138,6 +138,12 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 		return outputAllow(printer)
 	}
 
+	// .sos/wip/complaints/ bypass: complaint YAML files don't use markdown frontmatter.
+	// Skip frontmatter validation for this path (Cassandra Protocol, Phase 0).
+	if toolName == "Write" && isComplaintsPath(filePath) {
+		return outputAllow(printer)
+	}
+
 	// .sos/wip/ validation: only applies to Write tool (not Edit — edits to existing files
 	// skip frontmatter re-validation per design). .sos/wip/ paths are never protected, so
 	// we return early here and skip the protected-file check entirely.
@@ -415,6 +421,12 @@ func outputAllow(printer *output.Printer) error {
 		},
 	}
 	return printer.Print(result)
+}
+
+// isComplaintsPath returns true if filePath targets the .sos/wip/complaints/ directory.
+// Complaint YAML files bypass frontmatter validation (Cassandra Protocol).
+func isComplaintsPath(filePath string) bool {
+	return strings.Contains(filePath, ".sos/wip/complaints/")
 }
 
 // isWipPath returns true if filePath targets the .sos/wip/ directory.

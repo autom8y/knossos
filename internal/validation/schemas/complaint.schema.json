@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "embed:///schemas/complaint.schema.json",
+  "title": "Complaint Schema",
+  "description": "Schema for Cassandra complaint artifacts. Two-tier: quick-file (required fields only) and deep-file (extends with evidence, fix, and classification).",
+  "type": "object",
+
+  "$defs": {
+    "severity_enum": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Friction severity level"
+    },
+    "complaint_status_enum": {
+      "type": "string",
+      "enum": ["filed", "triaged", "accepted", "rejected", "resolved"],
+      "description": "Complaint lifecycle status"
+    },
+    "zone_enum": {
+      "type": "string",
+      "enum": ["parameter", "behavior", "structure"],
+      "description": "Three-zone modification classification (parameter=auto-tunable, behavior=human-gated, structure=never-auto-modify)"
+    },
+    "effort_enum": {
+      "type": "string",
+      "enum": ["trivial", "small", "medium", "large", "epic"],
+      "description": "Estimated effort to resolve"
+    }
+  },
+
+  "required": [
+    "id",
+    "filed_by",
+    "filed_at",
+    "title",
+    "severity",
+    "description",
+    "status"
+  ],
+
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^COMPLAINT-[0-9]{8}-[0-9]{6}-[a-z0-9-]+$",
+      "description": "Complaint identifier (COMPLAINT-{YYYYMMDD}-{HHMMSS}-{agent})"
+    },
+    "filed_by": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Agent or hook that filed the complaint"
+    },
+    "filed_at": {
+      "$ref": "embed:///schemas/common.schema.json#/$defs/iso8601_timestamp"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "Short description of the friction"
+    },
+    "severity": {
+      "$ref": "#/$defs/severity_enum"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Free-form observation of the friction encountered"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Free-form tags for emergent taxonomy (categories derived from data during /reflect triage)"
+    },
+    "status": {
+      "$ref": "#/$defs/complaint_status_enum"
+    },
+
+    "evidence": {
+      "type": "object",
+      "description": "Deep-file: supporting evidence for the observation",
+      "properties": {
+        "session_id": {
+          "$ref": "embed:///schemas/common.schema.json#/$defs/session_id"
+        },
+        "event_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "References to events.jsonl entries or other evidence"
+        },
+        "context": {
+          "type": "string",
+          "description": "What happened leading to the friction"
+        }
+      }
+    },
+    "suggested_fix": {
+      "type": "string",
+      "description": "Deep-file: proposed resolution"
+    },
+    "effort_estimate": {
+      "$ref": "#/$defs/effort_enum"
+    },
+    "related_scars": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^SCAR-[0-9]+$"
+      },
+      "description": "Deep-file: references to related .know/scar-tissue entries"
+    },
+    "zone": {
+      "$ref": "#/$defs/zone_enum"
+    }
+  },
+
+  "additionalProperties": true
+}

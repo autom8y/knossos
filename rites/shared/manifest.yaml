@@ -18,6 +18,7 @@ agents: []
 dromena: []
 
 legomena:
+  - complaint-filing
   - conventions
   - cross-rite-handoff
   - interview
@@ -29,7 +30,7 @@ hooks: []
 
 hook_defaults:
   write_guard:
-    allow_paths: [".ledge/", ".know/", ".claude/agent-memory/", ".claude/agent-memory-local/"]
+    allow_paths: [".ledge/", ".know/", ".claude/agent-memory/", ".claude/agent-memory-local/", ".sos/wip/complaints/"]
     timeout: 3
 
 dependencies: []

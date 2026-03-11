@@ -102,6 +102,14 @@ hooks:
     priority: 90
     description: "Tracks tool use count for cognitive budget warnings"
 
+  # H-drift: CLI-agent interop drift detection (Cassandra Protocol)
+  - event: PostToolUse
+    command: "ari hook driftdetect --output json"
+    timeout: 5
+    async: true
+    priority: 95
+    description: "Detects CLI-agent surface drift and auto-files complaints"
+
   # ===========================================================================
   # WorktreeCreate Hooks (delegation hook: must create worktree and print path)
   # ===========================================================================
