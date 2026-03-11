@@ -21,7 +21,7 @@ func TestMaterializeSettingsWithManifest_NoMCPServers(t *testing.T) {
 		Name: "test-rite",
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	// Verify settings file was created
@@ -62,7 +62,7 @@ func TestMaterializeSettingsWithManifest_StaleMcpServersRemoved(t *testing.T) {
 	require.NoError(t, os.WriteFile(settingsPath, data, 0644))
 
 	manifest := &RiteManifest{Name: "test-rite"}
-	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	// Verify mcpServers was removed
@@ -271,7 +271,7 @@ func TestSCAR028_MCPServers_NotInSettingsLocalJson(t *testing.T) {
 		},
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	settingsPath := filepath.Join(tempDir, "settings.local.json")

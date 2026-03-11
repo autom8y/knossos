@@ -89,7 +89,7 @@ func LoadHooksConfigWithPaths(knossosHome, projectRoot string) *HooksConfig {
 // Claude Code hook format: each event maps to an array of matcher groups.
 // Each matcher group has an optional "matcher" (regex string) and a "hooks"
 // array of hook handlers (each with "type" and "command").
-func BuildHooksSettings(cfg *HooksConfig) map[string]any {
+func BuildHooksSettings(cfg *HooksConfig, channel string) map[string]any {
 	hooks := make(map[string]any)
 
 	// Group entries by event type
@@ -126,6 +126,11 @@ func BuildHooksSettings(cfg *HooksConfig) map[string]any {
 			if entry.Async {
 				hookHandler["async"] = true
 			}
+			if channel == "gemini" {
+				hookHandler["env"] = map[string]string{
+					"KNOSSOS_CHANNEL": "gemini",
+				}
+			}
 
 			matcherGroup := map[string]any{
 				"hooks": []map[string]any{hookHandler},
@@ -145,8 +150,8 @@ func BuildHooksSettings(cfg *HooksConfig) map[string]any {
 // MergeHooksSettings merges knossos-managed hooks into existing settings.
 // Preserves user-defined matcher groups (those without "ari hook" commands).
 // Replaces all knossos-managed matcher groups with the new configuration.
-func MergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfig) map[string]any {
-	newHooks := BuildHooksSettings(hooksConfig)
+func MergeHooksSettings(existingSettings map[string]any, hooksConfig *HooksConfig, channel string) map[string]any {
+	newHooks := BuildHooksSettings(hooksConfig, channel)
 
 	// Get existing hooks section
 	existingHooks, _ := existingSettings["hooks"].(map[string]any)

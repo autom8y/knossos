@@ -323,7 +323,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	result.LegacyBackupPath = legacyBackupPath
 
 	// Generate settings.local.json if needed (no manifest in minimal mode)
-	if err := m.materializeSettingsWithManifest(claudeDir, nil, collector); err != nil {
+	if err := m.materializeSettingsWithManifest(claudeDir, nil, collector, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
@@ -534,7 +534,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 8. Generate or update settings.local.json (hooks only; MCP servers moved to .mcp.json per SCAR-028)
 	if !opts.Soft {
-		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector); err != nil {
+		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 		}
 	}

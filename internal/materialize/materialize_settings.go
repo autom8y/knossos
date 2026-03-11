@@ -19,7 +19,7 @@ import (
 // materializeSettingsWithManifest generates or updates settings.local.json.
 // Loads hooks.yaml and merges hook registrations into settings.
 // MCP servers are NOT written here — see materializeMcpJson (SCAR-028).
-func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *RiteManifest, collector provenance.Collector) error {
+func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *RiteManifest, collector provenance.Collector, channel string) error {
 	settingsPath := filepath.Join(claudeDir, "settings.local.json")
 
 	// Load existing settings or create empty map
@@ -30,7 +30,7 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *Rite
 
 	// Load hooks.yaml and merge hook registrations
 	if hooksConfig := m.loadHooksConfig(); hooksConfig != nil {
-		existingSettings = mergeHooksSettings(existingSettings, hooksConfig)
+		existingSettings = mergeHooksSettings(existingSettings, hooksConfig, channel)
 	} else if existingSettings["hooks"] == nil {
 		// No hooks.yaml found — ensure hooks key exists (empty)
 		existingSettings["hooks"] = make(map[string]any)
