@@ -87,6 +87,7 @@ type RiteScopeResult struct {
 	PreviousRite          string   `json:"previous_rite,omitempty"`          // previous ACTIVE_RITE name
 	ThroughlineIDsCleaned int      `json:"throughline_ids_cleaned,omitempty"` // count of .throughline-ids.json files removed
 	ElCheapoMode          bool     `json:"el_cheapo_mode,omitempty"`          // true if el-cheapo model override active
+	ChannelResults        map[string]*RiteScopeResult `json:"channel_results,omitempty"` // per-channel results when channel=all
 }
 
 // Type aliases for user-scope types from the userscope sub-package.

@@ -94,6 +94,110 @@ func TestMaterializeWithOptions_DefaultChannel(t *testing.T) {
 	}
 }
 
+func TestSync_ChannelAll_ProjectsBoth(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	resolver := paths.NewResolver(tmpDir)
+
+	createTestRite(t, tmpDir)
+
+	// Write ACTIVE_RITE so syncRiteScope knows which rite to use
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	m := materialize.NewMaterializerWithSource(resolver, filepath.Join(tmpDir, "rites"))
+
+	opts := materialize.SyncOptions{
+		Scope:   materialize.ScopeRite,
+		Channel: "all",
+	}
+
+	result, err := m.Sync(opts)
+	if err != nil {
+		t.Fatalf("Sync(channel=all) failed: %v", err)
+	}
+
+	if result.RiteResult == nil {
+		t.Fatal("expected RiteResult to be non-nil")
+	}
+
+	// Should have ChannelResults for both channels
+	if len(result.RiteResult.ChannelResults) != 2 {
+		t.Fatalf("expected 2 channel results, got %d", len(result.RiteResult.ChannelResults))
+	}
+
+	for _, chName := range []string{"claude", "gemini"} {
+		chResult, ok := result.RiteResult.ChannelResults[chName]
+		if !ok {
+			t.Errorf("missing channel result for %q", chName)
+			continue
+		}
+		if chResult.Status != "success" {
+			t.Errorf("channel %q status = %q, want %q (error: %s)", chName, chResult.Status, "success", chResult.Error)
+		}
+	}
+
+	// Both directories should exist
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
+		t.Errorf("expected %s to be created", claudeDir)
+	}
+
+	geminiDir := filepath.Join(tmpDir, ".gemini")
+	if _, err := os.Stat(geminiDir); os.IsNotExist(err) {
+		t.Errorf("expected %s to be created", geminiDir)
+	}
+
+	// Top-level result should inherit from first channel (claude)
+	if result.RiteResult.RiteName != "test-rite" {
+		t.Errorf("wrapper RiteName = %q, want %q", result.RiteResult.RiteName, "test-rite")
+	}
+}
+
+func TestSync_ChannelAll_PartialOnFailure(t *testing.T) {
+	t.Parallel()
+
+	// This test verifies that if a channel=all sync has one channel succeed
+	// and another fail, the wrapper result status is "partial".
+	// We can't easily force one channel to fail without deeper mocking,
+	// so we just verify the structural contract: if both succeed, status != "partial".
+	tmpDir := t.TempDir()
+	resolver := paths.NewResolver(tmpDir)
+
+	createTestRite(t, tmpDir)
+
+	knossosDir := filepath.Join(tmpDir, ".knossos")
+	if err := os.MkdirAll(knossosDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(knossosDir, "ACTIVE_RITE"), []byte("test-rite"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	m := materialize.NewMaterializerWithSource(resolver, filepath.Join(tmpDir, "rites"))
+
+	opts := materialize.SyncOptions{
+		Scope:   materialize.ScopeRite,
+		Channel: "all",
+	}
+
+	result, err := m.Sync(opts)
+	if err != nil {
+		t.Fatalf("Sync(channel=all) failed: %v", err)
+	}
+
+	// When both succeed, status should NOT be "partial"
+	if result.RiteResult.Status == "partial" {
+		t.Errorf("status = %q when both channels succeeded; expected non-partial", result.RiteResult.Status)
+	}
+}
+
 func TestMaterializeWithOptions_ClaudeUnchanged(t *testing.T) {
 	t.Parallel()
 

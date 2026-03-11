@@ -21,6 +21,11 @@ func (GeminiChannel) Name() string        { return "gemini" }
 func (GeminiChannel) DirName() string     { return ".gemini" }
 func (GeminiChannel) ContextFile() string { return "GEMINI.md" }
 
+// AllChannels returns all supported target channels in projection order.
+func AllChannels() []TargetChannel {
+	return []TargetChannel{ClaudeChannel{}, GeminiChannel{}}
+}
+
 func ChannelByName(name string) (TargetChannel, error) {
 	switch name {
 	case "claude", "":

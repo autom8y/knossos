@@ -592,19 +592,20 @@ type SyncResultOutput struct {
 
 // SyncRiteResult represents rite scope sync result.
 type SyncRiteResult struct {
-	Status          string   `json:"status"`
-	Error           string   `json:"error,omitempty"`
-	RiteName        string   `json:"rite,omitempty"`
-	Source          string   `json:"source,omitempty"`
-	SourcePath      string   `json:"source_path,omitempty"`
-	OrphansDetected []string `json:"orphans_detected,omitempty"`
-	OrphanAction    string   `json:"orphan_action,omitempty"`
-	LegacyBackup    string   `json:"legacy_backup,omitempty"`
-	SoftMode        bool     `json:"soft_mode,omitempty"`
-	DeferredStages  []string `json:"deferred_stages,omitempty"`
-	ElCheapoMode    bool     `json:"el_cheapo_mode,omitempty"`
-	RiteSwitched    bool     `json:"rite_switched,omitempty"`
-	PreviousRite    string   `json:"previous_rite,omitempty"`
+	Status          string                      `json:"status"`
+	Error           string                      `json:"error,omitempty"`
+	RiteName        string                      `json:"rite,omitempty"`
+	Source          string                      `json:"source,omitempty"`
+	SourcePath      string                      `json:"source_path,omitempty"`
+	OrphansDetected []string                    `json:"orphans_detected,omitempty"`
+	OrphanAction    string                      `json:"orphan_action,omitempty"`
+	LegacyBackup    string                      `json:"legacy_backup,omitempty"`
+	SoftMode        bool                        `json:"soft_mode,omitempty"`
+	DeferredStages  []string                    `json:"deferred_stages,omitempty"`
+	ElCheapoMode    bool                        `json:"el_cheapo_mode,omitempty"`
+	RiteSwitched    bool                        `json:"rite_switched,omitempty"`
+	PreviousRite    string                      `json:"previous_rite,omitempty"`
+	ChannelResults  map[string]*SyncRiteResult  `json:"channel_results,omitempty"`
 }
 
 // SyncOrgResult represents org scope sync result.
@@ -659,6 +660,15 @@ func (s SyncResultOutput) Text() string {
 		}
 		if s.Rite.ElCheapoMode {
 			b.WriteString("  El-cheapo mode: all agents using haiku\n")
+		}
+		if len(s.Rite.ChannelResults) > 0 {
+			for chName, chResult := range s.Rite.ChannelResults {
+				fmt.Fprintf(&b, "    Channel %s: %s", chName, chResult.Status)
+				if chResult.Error != "" {
+					fmt.Fprintf(&b, " (%s)", chResult.Error)
+				}
+				b.WriteString("\n")
+			}
 		}
 	}
 

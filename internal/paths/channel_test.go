@@ -61,6 +61,22 @@ func TestResolver_ChannelDir(t *testing.T) {
 	}
 }
 
+func TestAllChannels(t *testing.T) {
+	t.Parallel()
+
+	channels := paths.AllChannels()
+	if len(channels) != 2 {
+		t.Fatalf("AllChannels() returned %d channels, want 2", len(channels))
+	}
+
+	if channels[0].Name() != "claude" {
+		t.Errorf("AllChannels()[0].Name() = %q, want %q", channels[0].Name(), "claude")
+	}
+	if channels[1].Name() != "gemini" {
+		t.Errorf("AllChannels()[1].Name() = %q, want %q", channels[1].Name(), "gemini")
+	}
+}
+
 func TestClaudeChannel_BackwardCompat(t *testing.T) {
 	t.Parallel()
 	r := paths.NewResolver("/fake/root")

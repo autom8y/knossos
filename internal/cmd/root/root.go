@@ -138,7 +138,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&globalOpts.SessionID, "session-id", "s", "",
 		"Session ID (overrides current)")
 	rootCmd.PersistentFlags().StringVar(&globalOpts.Channel, "channel", "claude",
-		"target channel: claude or gemini")
+		"target channel: claude, gemini, or all")
 
 	// Add subcommands
 	rootCmd.AddCommand(session.NewSessionCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))

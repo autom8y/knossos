@@ -682,6 +682,12 @@ func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
 
 // syncRiteScope delegates to existing MaterializeWithOptions.
 func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error) {
+	// Dispatch multi-channel: resolve "all" into per-channel iterations.
+	// The value "all" is resolved ONLY here -- MaterializeWithOptions never sees it.
+	if opts.Channel == "all" {
+		return m.syncRiteScopeAllChannels(opts)
+	}
+
 	riteName := opts.RiteName
 
 	// Always read previous ACTIVE_RITE for rite-switch detection
@@ -750,8 +756,79 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 	return result, nil
 }
 
+// syncRiteScopeAllChannels iterates over all channels, calling the single-channel
+// syncRiteScope path for each. It aggregates per-channel results into ChannelResults.
+// Rite-switch cleanup runs only on the first channel iteration (via the existing guard
+// in syncRiteScope which reads ACTIVE_RITE state -- the first channel writes the new
+// ACTIVE_RITE, so subsequent channels see matching rites and skip cleanup).
+func (m *Materializer) syncRiteScopeAllChannels(opts SyncOptions) (*RiteScopeResult, error) {
+	channels := paths.AllChannels()
+	channelResults := make(map[string]*RiteScopeResult, len(channels))
+	var firstResult *RiteScopeResult
+	hasFailure := false
+
+	for _, ch := range channels {
+		perChannelOpts := opts
+		perChannelOpts.Channel = ch.Name()
+
+		chResult, err := m.syncRiteScope(perChannelOpts)
+		if err != nil {
+			channelResults[ch.Name()] = &RiteScopeResult{
+				Status: "error",
+				Error:  err.Error(),
+			}
+			hasFailure = true
+			continue
+		}
+		channelResults[ch.Name()] = chResult
+		if firstResult == nil {
+			firstResult = chResult
+		}
+	}
+
+	// Build wrapper result: top-level fields populated from first successful channel
+	wrapper := &RiteScopeResult{
+		ChannelResults: channelResults,
+	}
+	if firstResult != nil {
+		wrapper.Status = firstResult.Status
+		wrapper.RiteName = firstResult.RiteName
+		wrapper.Source = firstResult.Source
+		wrapper.SourcePath = firstResult.SourcePath
+		wrapper.OrphansDetected = firstResult.OrphansDetected
+		wrapper.OrphanAction = firstResult.OrphanAction
+		wrapper.BackupPath = firstResult.BackupPath
+		wrapper.LegacyBackupPath = firstResult.LegacyBackupPath
+		wrapper.SoftMode = firstResult.SoftMode
+		wrapper.DeferredStages = firstResult.DeferredStages
+		wrapper.ElCheapoMode = firstResult.ElCheapoMode
+		wrapper.RiteSwitched = firstResult.RiteSwitched
+		wrapper.PreviousRite = firstResult.PreviousRite
+		wrapper.ThroughlineIDsCleaned = firstResult.ThroughlineIDsCleaned
+	}
+
+	// If any channel failed but at least one succeeded, mark as partial
+	if hasFailure && firstResult != nil {
+		wrapper.Status = "partial"
+	} else if hasFailure && firstResult == nil {
+		// All channels failed -- return the first channel's error
+		for _, ch := range channels {
+			if r, ok := channelResults[ch.Name()]; ok && r.Error != "" {
+				return nil, fmt.Errorf("all channels failed; %s: %s", ch.Name(), r.Error)
+			}
+		}
+	}
+
+	return wrapper, nil
+}
+
 // syncRiteScopeMinimal handles cross-cutting mode (no rite).
 func (m *Materializer) syncRiteScopeMinimal(opts SyncOptions) (*RiteScopeResult, error) {
+	// Dispatch multi-channel for minimal path
+	if opts.Channel == "all" {
+		return m.syncRiteScopeMinimalAllChannels(opts)
+	}
+
 	legacyOpts := Options{DryRun: opts.DryRun, Minimal: true, Channel: opts.Channel}
 	legacyResult, err := m.MaterializeMinimal(legacyOpts)
 	if err != nil {
@@ -761,6 +838,52 @@ func (m *Materializer) syncRiteScopeMinimal(opts SyncOptions) (*RiteScopeResult,
 		Status: legacyResult.Status,
 		Source: "minimal",
 	}, nil
+}
+
+// syncRiteScopeMinimalAllChannels iterates over all channels for minimal sync.
+func (m *Materializer) syncRiteScopeMinimalAllChannels(opts SyncOptions) (*RiteScopeResult, error) {
+	channels := paths.AllChannels()
+	channelResults := make(map[string]*RiteScopeResult, len(channels))
+	var firstResult *RiteScopeResult
+	hasFailure := false
+
+	for _, ch := range channels {
+		perChannelOpts := opts
+		perChannelOpts.Channel = ch.Name()
+
+		chResult, err := m.syncRiteScopeMinimal(perChannelOpts)
+		if err != nil {
+			channelResults[ch.Name()] = &RiteScopeResult{
+				Status: "error",
+				Error:  err.Error(),
+			}
+			hasFailure = true
+			continue
+		}
+		channelResults[ch.Name()] = chResult
+		if firstResult == nil {
+			firstResult = chResult
+		}
+	}
+
+	wrapper := &RiteScopeResult{
+		ChannelResults: channelResults,
+	}
+	if firstResult != nil {
+		wrapper.Status = firstResult.Status
+		wrapper.Source = firstResult.Source
+	}
+	if hasFailure && firstResult != nil {
+		wrapper.Status = "partial"
+	} else if hasFailure && firstResult == nil {
+		for _, ch := range channels {
+			if r, ok := channelResults[ch.Name()]; ok && r.Error != "" {
+				return nil, fmt.Errorf("all channels failed; %s: %s", ch.Name(), r.Error)
+			}
+		}
+	}
+
+	return wrapper, nil
 }
 
 // syncUserScope is implemented in user_scope.go (delegates to userscope sub-package)

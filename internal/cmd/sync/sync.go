@@ -103,8 +103,8 @@ Examples:
 
 			// Validate channel before starting sync
 			channel, _ := cmd.Root().PersistentFlags().GetString("channel")
-			if channel != "claude" && channel != "gemini" {
-				return fmt.Errorf("invalid channel: %q (must be claude or gemini)", channel)
+			if channel != "claude" && channel != "gemini" && channel != "all" {
+				return fmt.Errorf("invalid channel: %q (must be claude, gemini, or all)", channel)
 			}
 
 			// Build SyncOptions
@@ -227,21 +227,7 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 	}
 
 	if result.RiteResult != nil {
-		out.Rite = &output.SyncRiteResult{
-			Status:          result.RiteResult.Status,
-			Error:           result.RiteResult.Error,
-			RiteName:        result.RiteResult.RiteName,
-			Source:          result.RiteResult.Source,
-			SourcePath:      result.RiteResult.SourcePath,
-			OrphansDetected: result.RiteResult.OrphansDetected,
-			OrphanAction:    result.RiteResult.OrphanAction,
-			LegacyBackup:    result.RiteResult.LegacyBackupPath,
-			SoftMode:        result.RiteResult.SoftMode,
-			DeferredStages:  result.RiteResult.DeferredStages,
-			ElCheapoMode:    result.RiteResult.ElCheapoMode,
-			RiteSwitched:    result.RiteResult.RiteSwitched,
-			PreviousRite:    result.RiteResult.PreviousRite,
-		}
+		out.Rite = convertRiteResult(result.RiteResult)
 	}
 
 	if result.OrgResult != nil {
@@ -273,5 +259,32 @@ func formatSyncResult(result *materialize.SyncResult, opts materialize.SyncOptio
 		out.User = userOut
 	}
 
+	return out
+}
+
+// convertRiteResult maps a materialize.RiteScopeResult to an output.SyncRiteResult,
+// including recursive conversion of per-channel results for channel=all dispatch.
+func convertRiteResult(r *materialize.RiteScopeResult) *output.SyncRiteResult {
+	out := &output.SyncRiteResult{
+		Status:          r.Status,
+		Error:           r.Error,
+		RiteName:        r.RiteName,
+		Source:          r.Source,
+		SourcePath:      r.SourcePath,
+		OrphansDetected: r.OrphansDetected,
+		OrphanAction:    r.OrphanAction,
+		LegacyBackup:    r.LegacyBackupPath,
+		SoftMode:        r.SoftMode,
+		DeferredStages:  r.DeferredStages,
+		ElCheapoMode:    r.ElCheapoMode,
+		RiteSwitched:    r.RiteSwitched,
+		PreviousRite:    r.PreviousRite,
+	}
+	if len(r.ChannelResults) > 0 {
+		out.ChannelResults = make(map[string]*output.SyncRiteResult, len(r.ChannelResults))
+		for chName, chResult := range r.ChannelResults {
+			out.ChannelResults[chName] = convertRiteResult(chResult)
+		}
+	}
 	return out
 }
