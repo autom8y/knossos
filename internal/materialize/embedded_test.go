@@ -9,6 +9,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/provenance"
 
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -181,7 +182,7 @@ func TestMaterializeAgents_FromEmbedded(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeAgents(manifest, "rites/test-rite", claudeDir, resolved, provenance.NullCollector{}, nil, nil, ""); err != nil {
+	if err := m.materializeAgents(manifest, "rites/test-rite", claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", ""); err != nil {
 		t.Fatalf("materializeAgents from embedded failed: %v", err)
 	}
 
@@ -232,7 +233,7 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena from embedded failed: %v", err)
 	}
 
@@ -303,7 +304,7 @@ func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false); err != nil {
+	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 

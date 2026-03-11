@@ -1,0 +1,145 @@
+package materialize_test
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/autom8y/knossos/internal/materialize"
+	"github.com/autom8y/knossos/internal/paths"
+)
+
+func createTestRite(t *testing.T, dir string) string {
+	t.Helper()
+	riteDir := filepath.Join(dir, "rites", "test-rite")
+	if err := os.MkdirAll(riteDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	manifestContent := `
+name: test-rite
+version: 1.0.0
+description: A test rite
+`
+	if err := os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), []byte(manifestContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	return riteDir
+}
+
+func TestMaterializeWithOptions_GeminiChannel(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	resolver := paths.NewResolver(tmpDir)
+
+	// Create test rite
+	createTestRite(t, tmpDir)
+
+	m := materialize.NewMaterializerWithSource(resolver, filepath.Join(tmpDir, "rites"))
+
+	opts := materialize.Options{
+		Channel: "gemini",
+		DryRun:  false,
+	}
+
+	_, err := m.MaterializeWithOptions("test-rite", opts)
+	if err != nil {
+		t.Fatalf("MaterializeWithOptions failed: %v", err)
+	}
+
+	// Should write to .gemini
+	geminiDir := filepath.Join(tmpDir, ".gemini")
+	if _, err := os.Stat(geminiDir); os.IsNotExist(err) {
+		t.Errorf("expected %s to be created", geminiDir)
+	}
+
+	// Should NOT write to .claude
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	if _, err := os.Stat(claudeDir); !os.IsNotExist(err) {
+		t.Errorf("expected %s to NOT be created", claudeDir)
+	}
+}
+
+func TestMaterializeWithOptions_DefaultChannel(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	resolver := paths.NewResolver(tmpDir)
+
+	createTestRite(t, tmpDir)
+
+	m := materialize.NewMaterializerWithSource(resolver, filepath.Join(tmpDir, "rites"))
+
+	opts := materialize.Options{
+		Channel: "claude",
+		DryRun:  false,
+	}
+
+	_, err := m.MaterializeWithOptions("test-rite", opts)
+	if err != nil {
+		t.Fatalf("MaterializeWithOptions failed: %v", err)
+	}
+
+	// Should write to .claude
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
+		t.Errorf("expected %s to be created", claudeDir)
+	}
+
+	// Should NOT write to .gemini
+	geminiDir := filepath.Join(tmpDir, ".gemini")
+	if _, err := os.Stat(geminiDir); !os.IsNotExist(err) {
+		t.Errorf("expected %s to NOT be created", geminiDir)
+	}
+}
+
+func TestMaterializeWithOptions_ClaudeUnchanged(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	resolver := paths.NewResolver(tmpDir)
+
+	createTestRite(t, tmpDir)
+
+	// Pre-create a file in .claude to test it's untouched
+	claudeDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	markerFile := filepath.Join(claudeDir, "marker.txt")
+	if err := os.WriteFile(markerFile, []byte("untouched"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	markerInfoBefore, err := os.Stat(markerFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m := materialize.NewMaterializerWithSource(resolver, filepath.Join(tmpDir, "rites"))
+
+	opts := materialize.Options{
+		Channel: "gemini",
+		DryRun:  false,
+	}
+
+	_, err = m.MaterializeWithOptions("test-rite", opts)
+	if err != nil {
+		t.Fatalf("MaterializeWithOptions failed: %v", err)
+	}
+
+	markerInfoAfter, err := os.Stat(markerFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if markerInfoBefore.ModTime() != markerInfoAfter.ModTime() {
+		t.Errorf(".claude dir contents were modified")
+	}
+
+	// .gemini should also exist now
+	geminiDir := filepath.Join(tmpDir, ".gemini")
+	if _, err := os.Stat(geminiDir); os.IsNotExist(err) {
+		t.Errorf("expected %s to be created", geminiDir)
+	}
+}

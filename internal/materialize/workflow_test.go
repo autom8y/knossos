@@ -32,7 +32,7 @@ func TestMaterializeWorkflow_WritesFile(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
@@ -58,7 +58,7 @@ func TestMaterializeWorkflow_NoWorkflowFile(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// ACTIVE_WORKFLOW.yaml should not exist
@@ -89,7 +89,7 @@ func TestMaterializeWorkflow_RemovesStaleOnNoWorkflow(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// Stale file must be removed
@@ -117,9 +117,9 @@ func TestMaterializeWorkflow_Idempotent(t *testing.T) {
 	}
 
 	// First write
-	require.NoError(t, m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}))
+	require.NoError(t, m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, ""))
 	// Second write should be a no-op (writeIfChanged returns false)
-	require.NoError(t, m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}))
+	require.NoError(t, m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, ""))
 
 	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
@@ -145,7 +145,7 @@ func TestMaterializeWorkflow_EmbeddedSource(t *testing.T) {
 		Source:   RiteSource{Type: SourceEmbedded, Path: "embedded"},
 	}
 
-	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
@@ -178,7 +178,7 @@ func TestMaterializeWorkflow_OverwritesOld(t *testing.T) {
 		Source:   RiteSource{Type: SourceProject, Path: riteDir},
 	}
 
-	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))

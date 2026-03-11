@@ -44,7 +44,7 @@ func TestBuildHooksSettings(t *testing.T) {
 		},
 	}
 
-	hooks := BuildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg, "claude")
 
 	// Check all event types are present
 	expectedEvents := []string{"PreToolUse", "PostToolUse", "SessionStart", "Stop"}
@@ -114,7 +114,7 @@ func TestBuildHooksSettings_IncludesTimeout(t *testing.T) {
 		},
 	}
 
-	hooks := BuildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg, "claude")
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
 	hooksArr := preToolUse[0]["hooks"].([]map[string]any)
 
@@ -133,7 +133,7 @@ func TestBuildHooksSettings_SkipsEmptyCommand(t *testing.T) {
 		},
 	}
 
-	hooks := BuildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg, "claude")
 	preToolUse, ok := hooks["PreToolUse"].([]map[string]any)
 	if !ok {
 		t.Fatalf("PreToolUse is not []map[string]any")
@@ -153,7 +153,7 @@ func TestMergeHooksSettings_FreshSettings(t *testing.T) {
 	}
 
 	settings := make(map[string]any)
-	result := MergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg, "claude")
 
 	hooks, ok := result["hooks"].(map[string]any)
 	if !ok {
@@ -202,7 +202,7 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 		},
 	}
 
-	result := MergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg, "claude")
 
 	hooks := result["hooks"].(map[string]any)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
@@ -242,7 +242,7 @@ func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
 		},
 	}
 
-	result := MergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg, "claude")
 
 	hooks := result["hooks"].(map[string]any)
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
@@ -290,7 +290,7 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 		},
 	}
 
-	result := MergeHooksSettings(settings, cfg)
+	result := MergeHooksSettings(settings, cfg, "claude")
 
 	hooks := result["hooks"].(map[string]any)
 	postToolUse := hooks["PostToolUse"].([]map[string]any)
@@ -315,14 +315,14 @@ func TestMergeHooksSettings_Idempotent(t *testing.T) {
 	}
 
 	settings := make(map[string]any)
-	result1 := MergeHooksSettings(settings, cfg)
+	result1 := MergeHooksSettings(settings, cfg, "claude")
 
 	// Serialize to JSON and back (simulates load/save cycle)
 	data, _ := json.Marshal(result1)
 	var settings2 map[string]any
 	json.Unmarshal(data, &settings2)
 
-	result2 := MergeHooksSettings(settings2, cfg)
+	result2 := MergeHooksSettings(settings2, cfg, "claude")
 
 	// Marshal both and compare
 	data1, _ := json.MarshalIndent(result1, "", "  ")
@@ -469,7 +469,7 @@ func TestBuildHooksSettings_IncludesAsync(t *testing.T) {
 		},
 	}
 
-	hooks := BuildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg, "claude")
 	postToolUse := hooks["PostToolUse"].([]map[string]any)
 	hooksArr := postToolUse[0]["hooks"].([]map[string]any)
 
@@ -487,7 +487,7 @@ func TestBuildHooksSettings_OmitsAsyncWhenFalse(t *testing.T) {
 		},
 	}
 
-	hooks := BuildHooksSettings(cfg)
+	hooks := BuildHooksSettings(cfg, "claude")
 	preToolUse := hooks["PreToolUse"].([]map[string]any)
 	hooksArr := preToolUse[0]["hooks"].([]map[string]any)
 

@@ -4,9 +4,12 @@
 package mena
 
 import (
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	menapkg "github.com/autom8y/knossos/internal/mena"
 	"github.com/autom8y/knossos/internal/provenance"
 )
+
+type ChannelCompiler = compiler.ChannelCompiler
 
 // MenaSource is a re-export alias for menapkg.MenaSource.
 // The type is defined in internal/mena to allow shared use by the registry validator.
@@ -66,6 +69,13 @@ type MenaProjectionOptions struct {
 	// stale mena cleanup is scoped to entries originating from this rite,
 	// preventing cross-rite entry deletion during rite switches.
 	RiteName string
+
+	// Compiler handles channel-specific format transforms.
+	Compiler ChannelCompiler
+
+	// Channel identifies the AI assistant channel (e.g., "gemini").
+	// Used for provenance recording. Empty defaults to claude behavior.
+	Channel string
 }
 
 // MenaProjectionResult reports what the projection did.

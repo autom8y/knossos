@@ -257,7 +257,7 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 				for _, p := range promoResult.Promoted {
 					endWriter.WriteTyped(
 						clewcontract.NewTypedArtifactPromotedEvent(
-							sessionID, p.SourcePath, p.ShelfPath, p.Category,
+							"", sessionID, p.SourcePath, p.ShelfPath, p.Category,
 						),
 					)
 				}

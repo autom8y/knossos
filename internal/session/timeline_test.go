@@ -15,7 +15,7 @@ import (
 
 // TestFormatTimelineEntry_SessionCreated verifies session.created produces correct entry.
 func TestFormatTimelineEntry_SessionCreated(t *testing.T) {
-	event := clewcontract.NewTypedSessionCreatedEvent("session-001", "Add dark mode", "MODULE", "")
+	event := clewcontract.NewTypedSessionCreatedEvent("", "session-001", "Add dark mode", "MODULE", "")
 	// Patch timestamp to a known value for deterministic output.
 	event.Ts = "2026-03-01T14:03:22.500Z"
 
@@ -31,7 +31,7 @@ func TestFormatTimelineEntry_SessionCreated(t *testing.T) {
 
 // TestFormatTimelineEntry_CategoryPadding verifies PHASE is padded to 8 chars (TF-02).
 func TestFormatTimelineEntry_CategoryPadding(t *testing.T) {
-	event := clewcontract.NewTypedPhaseTransitionedEvent("session-001", "requirements", "design")
+	event := clewcontract.NewTypedPhaseTransitionedEvent("", "session-001", "requirements", "design")
 	event.Ts = "2026-03-01T14:20:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -44,7 +44,7 @@ func TestFormatTimelineEntry_CategoryPadding(t *testing.T) {
 
 // TestFormatTimelineEntry_TimeExtraction verifies UTC HH:MM extraction (TF-03).
 func TestFormatTimelineEntry_TimeExtraction(t *testing.T) {
-	event := clewcontract.NewTypedSessionCreatedEvent("session-001", "test", "PATCH", "")
+	event := clewcontract.NewTypedSessionCreatedEvent("", "session-001", "test", "PATCH", "")
 	event.Ts = "2026-03-01T14:03:22.500Z"
 
 	entry := FormatTimelineEntry(event)
@@ -57,7 +57,7 @@ func TestFormatTimelineEntry_TimeExtraction(t *testing.T) {
 // TestFormatTimelineEntry_SummaryTruncation verifies 80-char summary truncation (TF-01).
 func TestFormatTimelineEntry_SummaryTruncation(t *testing.T) {
 	longDecision := strings.Repeat("x", 100)
-	event := clewcontract.NewTypedDecisionRecordedEvent(longDecision, "", nil)
+	event := clewcontract.NewTypedDecisionRecordedEvent("", longDecision, "", nil)
 	event.Ts = "2026-03-01T14:15:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -78,7 +78,7 @@ func TestFormatTimelineEntry_SummaryTruncation(t *testing.T) {
 
 // TestFormatTimelineEntry_CommitSHAShortening verifies SHA is truncated to 7 chars (TF-04).
 func TestFormatTimelineEntry_CommitSHAShortening(t *testing.T) {
-	event := clewcontract.NewTypedCommitCreatedEvent("abc123f890abcdef1234567890", "feat: theme provider")
+	event := clewcontract.NewTypedCommitCreatedEvent("", "abc123f890abcdef1234567890", "feat: theme provider")
 	event.Ts = "2026-03-01T14:12:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -90,7 +90,7 @@ func TestFormatTimelineEntry_CommitSHAShortening(t *testing.T) {
 
 // TestFormatTimelineEntry_SessionWrappedAbsentSailsColor verifies graceful degradation (TF-05).
 func TestFormatTimelineEntry_SessionWrappedAbsentSailsColor(t *testing.T) {
-	event := clewcontract.NewTypedSessionWrappedEvent("session-001", "", 0)
+	event := clewcontract.NewTypedSessionWrappedEvent("", "session-001", "", 0)
 	event.Ts = "2026-03-01T15:00:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -105,7 +105,7 @@ func TestFormatTimelineEntry_SessionWrappedAbsentSailsColor(t *testing.T) {
 
 // TestFormatTimelineEntry_SessionWrappedWithSailsColor verifies color is included.
 func TestFormatTimelineEntry_SessionWrappedWithSailsColor(t *testing.T) {
-	event := clewcontract.NewTypedSessionWrappedEvent("session-001", "WHITE", 60000)
+	event := clewcontract.NewTypedSessionWrappedEvent("", "session-001", "WHITE", 60000)
 	event.Ts = "2026-03-01T15:00:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -117,7 +117,7 @@ func TestFormatTimelineEntry_SessionWrappedWithSailsColor(t *testing.T) {
 
 // TestFormatTimelineEntry_MalformedTimestamp verifies fallback to 00:00 (edge case).
 func TestFormatTimelineEntry_MalformedTimestamp(t *testing.T) {
-	event := clewcontract.NewTypedSessionCreatedEvent("session-001", "test", "PATCH", "")
+	event := clewcontract.NewTypedSessionCreatedEvent("", "session-001", "test", "PATCH", "")
 	event.Ts = "not-a-timestamp"
 
 	entry := FormatTimelineEntry(event)
@@ -130,7 +130,7 @@ func TestFormatTimelineEntry_MalformedTimestamp(t *testing.T) {
 // TestFormatTimelineEntry_AgentDelegated verifies agent delegation summary.
 func TestFormatTimelineEntry_AgentDelegated(t *testing.T) {
 	event := clewcontract.NewTypedAgentDelegatedEvent(
-		clewcontract.SourceAgent, "architect", "", "component design", "")
+		clewcontract.SourceAgent, "", "architect", "", "component design", "")
 	event.Ts = "2026-03-01T14:05:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -142,7 +142,7 @@ func TestFormatTimelineEntry_AgentDelegated(t *testing.T) {
 
 // TestFormatTimelineEntry_DecisionWithRationale verifies decision + rationale format.
 func TestFormatTimelineEntry_DecisionWithRationale(t *testing.T) {
-	event := clewcontract.NewTypedDecisionRecordedEvent("CSS vars over styled-components", "runtime perf", nil)
+	event := clewcontract.NewTypedDecisionRecordedEvent("", "CSS vars over styled-components", "runtime perf", nil)
 	event.Ts = "2026-03-01T14:15:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -154,7 +154,7 @@ func TestFormatTimelineEntry_DecisionWithRationale(t *testing.T) {
 
 // TestFormatTimelineEntry_CommandInvoked verifies command.invoked summary.
 func TestFormatTimelineEntry_CommandInvoked(t *testing.T) {
-	event := clewcontract.NewTypedCommandInvokedEvent("/consult", "skill")
+	event := clewcontract.NewTypedCommandInvokedEvent("", "/consult", "skill")
 	event.Ts = "2026-03-01T14:30:00.000Z"
 
 	entry := FormatTimelineEntry(event)
@@ -425,7 +425,7 @@ func TestEventTypeToCategory_AllCategories(t *testing.T) {
 
 // TestExtractSummary_PhaseTransition verifies phase transition summary format.
 func TestExtractSummary_PhaseTransition(t *testing.T) {
-	event := clewcontract.NewTypedPhaseTransitionedEvent("session-001", "requirements", "design")
+	event := clewcontract.NewTypedPhaseTransitionedEvent("", "session-001", "requirements", "design")
 	summary := ExtractSummary(event)
 	if summary != "requirements -> design" {
 		t.Errorf("ExtractSummary = %q, want %q", summary, "requirements -> design")
@@ -434,7 +434,7 @@ func TestExtractSummary_PhaseTransition(t *testing.T) {
 
 // TestExtractSummary_CommitShortSHA verifies SHA is always 7 chars.
 func TestExtractSummary_CommitShortSHA(t *testing.T) {
-	event := clewcontract.NewTypedCommitCreatedEvent("abc123f890abcdef", "feat: thing")
+	event := clewcontract.NewTypedCommitCreatedEvent("", "abc123f890abcdef", "feat: thing")
 	summary := ExtractSummary(event)
 	if !strings.HasPrefix(summary, "abc123f: ") {
 		t.Errorf("ExtractSummary = %q, want prefix 'abc123f: '", summary)
@@ -444,7 +444,7 @@ func TestExtractSummary_CommitShortSHA(t *testing.T) {
 // TestExtractSummary_DecisionRationaleShortened verifies rationale >30 chars is truncated.
 func TestExtractSummary_DecisionRationaleShortened(t *testing.T) {
 	longRationale := strings.Repeat("r", 35)
-	event := clewcontract.NewTypedDecisionRecordedEvent("my decision", longRationale, nil)
+	event := clewcontract.NewTypedDecisionRecordedEvent("", "my decision", longRationale, nil)
 	summary := ExtractSummary(event)
 
 	// Should contain "my decision (" and the rationale truncated to 30 chars with "..."
@@ -478,7 +478,7 @@ func TestExtractSummary_EmptyDataFallback(t *testing.T) {
 
 // TestFormatTimelineEntry_RFC3339Timestamp verifies RFC3339 timestamp is also handled.
 func TestFormatTimelineEntry_RFC3339Timestamp(t *testing.T) {
-	event := clewcontract.NewTypedSessionCreatedEvent("session-001", "test", "PATCH", "")
+	event := clewcontract.NewTypedSessionCreatedEvent("", "session-001", "test", "PATCH", "")
 	// Use RFC3339 format (with timezone offset) -- should be converted to UTC HH:MM.
 	event.Ts = "2026-03-01T14:03:22+00:00"
 

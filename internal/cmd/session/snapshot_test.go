@@ -211,7 +211,7 @@ func TestRunSnapshot_OrchestratorTextOutput(t *testing.T) {
 	ctx, _, eventsPath := setupSnapshotTestSession(t, "")
 
 	writeSnapshotEvents(t, eventsPath, []clewcontract.TypedEvent{
-		clewcontract.NewTypedDecisionRecordedEvent("use CSS variables", "runtime perf", nil),
+		clewcontract.NewTypedDecisionRecordedEvent("", "use CSS variables", "runtime perf", nil),
 	})
 
 	if err := runSnapshot(ctx, snapshotOptions{role: "orchestrator", agentName: "potnia"}); err != nil {
@@ -265,7 +265,7 @@ func TestRunSnapshot_JSONStructureViaLibrary(t *testing.T) {
 	ctx, _, eventsPath := setupSnapshotTestSession(t, "")
 
 	writeSnapshotEvents(t, eventsPath, []clewcontract.TypedEvent{
-		clewcontract.NewTypedDecisionRecordedEvent("chose X", "fast", nil),
+		clewcontract.NewTypedDecisionRecordedEvent("", "chose X", "fast", nil),
 	})
 
 	resolver := ctx.GetResolver()
@@ -325,7 +325,7 @@ func TestRunSnapshot_MarkdownViaLibrary(t *testing.T) {
 	ctx, _, eventsPath := setupSnapshotTestSession(t, "")
 
 	writeSnapshotEvents(t, eventsPath, []clewcontract.TypedEvent{
-		clewcontract.NewTypedAgentDelegatedEvent(clewcontract.SourceHook, "context-architect", "specialist", "", ""),
+		clewcontract.NewTypedAgentDelegatedEvent(clewcontract.SourceHook, "", "context-architect", "specialist", "", ""),
 	})
 
 	resolver := ctx.GetResolver()

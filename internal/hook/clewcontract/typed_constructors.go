@@ -13,8 +13,8 @@ package clewcontract
 
 // NewTypedSessionCreatedEvent creates a v3 "session.created" TypedEvent.
 // Source: cli (emitted by `ari session create`).
-func NewTypedSessionCreatedEvent(sessionID, initiative, complexity, rite string) TypedEvent {
-	return newTypedEvent(EventTypeSessionCreated, SourceCLI, SessionCreatedData{
+func NewTypedSessionCreatedEvent(channel string, sessionID, initiative, complexity, rite string) TypedEvent {
+	return newTypedEvent(EventTypeSessionCreated, SourceCLI, channel, SessionCreatedData{
 		SessionID:  sessionID,
 		Initiative: initiative,
 		Complexity: complexity,
@@ -24,8 +24,8 @@ func NewTypedSessionCreatedEvent(sessionID, initiative, complexity, rite string)
 
 // NewTypedSessionParkedEvent creates a v3 "session.parked" TypedEvent.
 // Source: cli (emitted by `ari session park`).
-func NewTypedSessionParkedEvent(sessionID, reason string) TypedEvent {
-	return newTypedEvent(EventTypeSessionParked, SourceCLI, SessionParkedData{
+func NewTypedSessionParkedEvent(channel string, sessionID, reason string) TypedEvent {
+	return newTypedEvent(EventTypeSessionParked, SourceCLI, channel, SessionParkedData{
 		SessionID: sessionID,
 		Reason:    reason,
 	})
@@ -33,8 +33,8 @@ func NewTypedSessionParkedEvent(sessionID, reason string) TypedEvent {
 
 // NewTypedSessionResumedEvent creates a v3 "session.resumed" TypedEvent.
 // Source: cli (emitted by `ari session resume`).
-func NewTypedSessionResumedEvent(sessionID string) TypedEvent {
-	return newTypedEvent(EventTypeSessionResumed, SourceCLI, SessionResumedData{
+func NewTypedSessionResumedEvent(channel string, sessionID string) TypedEvent {
+	return newTypedEvent(EventTypeSessionResumed, SourceCLI, channel, SessionResumedData{
 		SessionID: sessionID,
 	})
 }
@@ -43,8 +43,8 @@ func NewTypedSessionResumedEvent(sessionID string) TypedEvent {
 // Source: cli (emitted by `ari session wrap`).
 // This is the curated "session intentionally concluded" signal.
 // sailsColor is optional (WHITE, GRAY, BLACK); pass empty string if not yet generated.
-func NewTypedSessionWrappedEvent(sessionID, sailsColor string, durationMs int64) TypedEvent {
-	return newTypedEvent(EventTypeSessionWrapped, SourceCLI, SessionWrappedData{
+func NewTypedSessionWrappedEvent(channel string, sessionID, sailsColor string, durationMs int64) TypedEvent {
+	return newTypedEvent(EventTypeSessionWrapped, SourceCLI, channel, SessionWrappedData{
 		SessionID:  sessionID,
 		SailsColor: sailsColor,
 		DurationMs: durationMs,
@@ -53,8 +53,8 @@ func NewTypedSessionWrappedEvent(sessionID, sailsColor string, durationMs int64)
 
 // NewTypedSessionFrayedEvent creates a v3 "session.frayed" TypedEvent.
 // Source: cli (emitted by `ari session fray`).
-func NewTypedSessionFrayedEvent(parentID, childID, frayPoint string) TypedEvent {
-	return newTypedEvent(EventTypeSessionFrayed, SourceCLI, SessionFrayedData{
+func NewTypedSessionFrayedEvent(channel string, parentID, childID, frayPoint string) TypedEvent {
+	return newTypedEvent(EventTypeSessionFrayed, SourceCLI, channel, SessionFrayedData{
 		ParentID:  parentID,
 		ChildID:   childID,
 		FrayPoint: frayPoint,
@@ -63,8 +63,8 @@ func NewTypedSessionFrayedEvent(parentID, childID, frayPoint string) TypedEvent 
 
 // NewTypedPhaseTransitionedEvent creates a v3 "phase.transitioned" TypedEvent.
 // Source: cli (emitted by `ari session transition`).
-func NewTypedPhaseTransitionedEvent(sessionID, fromPhase, toPhase string) TypedEvent {
-	return newTypedEvent(EventTypePhaseTransitioned, SourceCLI, PhaseTransitionedData{
+func NewTypedPhaseTransitionedEvent(channel string, sessionID, fromPhase, toPhase string) TypedEvent {
+	return newTypedEvent(EventTypePhaseTransitioned, SourceCLI, channel, PhaseTransitionedData{
 		SessionID: sessionID,
 		From:      fromPhase,
 		To:        toPhase,
@@ -74,8 +74,8 @@ func NewTypedPhaseTransitionedEvent(sessionID, fromPhase, toPhase string) TypedE
 // NewTypedAgentDelegatedEvent creates a v3 "agent.delegated" TypedEvent.
 // Source: hook (emitted by SubagentStart hook) or cli (emitted by `ari handoff execute`).
 // agentType and taskID are optional; agentID is the CC-assigned subagent identifier.
-func NewTypedAgentDelegatedEvent(source EventSource, agentName, agentType, taskID, agentID string) TypedEvent {
-	return newTypedEvent(EventTypeAgentDelegated, source, AgentDelegatedData{
+func NewTypedAgentDelegatedEvent(source EventSource, channel string, agentName, agentType, taskID, agentID string) TypedEvent {
+	return newTypedEvent(EventTypeAgentDelegated, source, channel, AgentDelegatedData{
 		AgentName: agentName,
 		AgentType: agentType,
 		TaskID:    taskID,
@@ -87,8 +87,8 @@ func NewTypedAgentDelegatedEvent(source EventSource, agentName, agentType, taskI
 // Source: hook (emitted by SubagentStop hook) or cli (emitted by `ari handoff prepare`).
 // agentType, taskID, agentID, outcome, and durationMs are optional.
 // artifacts is optional; pass nil or empty slice when no artifacts produced.
-func NewTypedAgentCompletedEvent(source EventSource, agentName, agentType, taskID, agentID, outcome string, durationMs int64, artifacts []string) TypedEvent {
-	return newTypedEvent(EventTypeAgentCompleted, source, AgentCompletedData{
+func NewTypedAgentCompletedEvent(source EventSource, channel string, agentName, agentType, taskID, agentID, outcome string, durationMs int64, artifacts []string) TypedEvent {
+	return newTypedEvent(EventTypeAgentCompleted, source, channel, AgentCompletedData{
 		AgentName:  agentName,
 		AgentType:  agentType,
 		TaskID:     taskID,
@@ -103,8 +103,8 @@ func NewTypedAgentCompletedEvent(source EventSource, agentName, agentType, taskI
 // Source: hook (emitted by PostToolUse hook when git commit detected in Bash output).
 // sha may be short (7-char) or full (40-char) commit hash.
 // message should be the first line of the commit message only.
-func NewTypedCommitCreatedEvent(sha, message string) TypedEvent {
-	return newTypedEvent(EventTypeCommitCreated, SourceHook, CommitCreatedData{
+func NewTypedCommitCreatedEvent(channel string, sha, message string) TypedEvent {
+	return newTypedEvent(EventTypeCommitCreated, SourceHook, channel, CommitCreatedData{
 		SHA:     sha,
 		Message: message,
 	})
@@ -113,8 +113,8 @@ func NewTypedCommitCreatedEvent(sha, message string) TypedEvent {
 // NewTypedDecisionRecordedEvent creates a v3 "decision.recorded" TypedEvent.
 // Source: agent (emitted via `ari session log --type=decision`).
 // rejected is optional; pass nil when no alternatives were considered.
-func NewTypedDecisionRecordedEvent(decision, rationale string, rejected []string) TypedEvent {
-	return newTypedEvent(EventTypeDecisionRecorded, SourceAgent, DecisionRecordedData{
+func NewTypedDecisionRecordedEvent(channel string, decision, rationale string, rejected []string) TypedEvent {
+	return newTypedEvent(EventTypeDecisionRecorded, SourceAgent, channel, DecisionRecordedData{
 		Decision:  decision,
 		Rationale: rationale,
 		Rejected:  rejected,
@@ -124,8 +124,8 @@ func NewTypedDecisionRecordedEvent(decision, rationale string, rejected []string
 // NewTypedCommandInvokedEvent creates a v3 "command.invoked" TypedEvent.
 // Source: hook (emitted by PostToolUse hook when Skill tool call detected).
 // commandType should be "skill" or "command".
-func NewTypedCommandInvokedEvent(command, commandType string) TypedEvent {
-	return newTypedEvent(EventTypeCommandInvoked, SourceHook, CommandInvokedData{
+func NewTypedCommandInvokedEvent(channel string, command, commandType string) TypedEvent {
+	return newTypedEvent(EventTypeCommandInvoked, SourceHook, channel, CommandInvokedData{
 		Command: command,
 		Type:    commandType,
 	})
@@ -136,8 +136,8 @@ func NewTypedCommandInvokedEvent(command, commandType string) TypedEvent {
 // NewTypedToolInvokedEvent creates a v3 "tool.invoked" TypedEvent.
 // Source: hook (emitted by PostToolUse hook for every tool call).
 // meta is optional; use for tool-specific fields (exit_code, command, etc.).
-func NewTypedToolInvokedEvent(tool, path, summary string, meta map[string]any) TypedEvent {
-	return newTypedEvent(EventTypeToolInvoked, SourceHook, ToolInvokedData{
+func NewTypedToolInvokedEvent(channel string, tool, path, summary string, meta map[string]any) TypedEvent {
+	return newTypedEvent(EventTypeToolInvoked, SourceHook, channel, ToolInvokedData{
 		Tool:    tool,
 		Path:    path,
 		Summary: summary,
@@ -147,8 +147,8 @@ func NewTypedToolInvokedEvent(tool, path, summary string, meta map[string]any) T
 
 // NewTypedFileModifiedEvent creates a v3 "file.modified" TypedEvent.
 // Source: hook (emitted by PostToolUse hook via emitSupplementalEvents).
-func NewTypedFileModifiedEvent(path string, linesChanged int) TypedEvent {
-	return newTypedEvent(EventTypeFileModified, SourceHook, FileModifiedData{
+func NewTypedFileModifiedEvent(channel string, path string, linesChanged int) TypedEvent {
+	return newTypedEvent(EventTypeFileModified, SourceHook, channel, FileModifiedData{
 		Path:         path,
 		LinesChanged: linesChanged,
 	})
@@ -157,8 +157,8 @@ func NewTypedFileModifiedEvent(path string, linesChanged int) TypedEvent {
 // NewTypedArtifactCreatedEvent creates a v3 "artifact.created" TypedEvent.
 // Source: hook (emitted by PostToolUse hook via emitSupplementalEvents).
 // validatesAgainst, wipType, and slug are optional.
-func NewTypedArtifactCreatedEvent(artifactType, path, phase, validatesAgainst, wipType, slug string) TypedEvent {
-	return newTypedEvent(EventTypeArtifactCreatedV3, SourceHook, ArtifactCreatedData{
+func NewTypedArtifactCreatedEvent(channel string, artifactType, path, phase, validatesAgainst, wipType, slug string) TypedEvent {
+	return newTypedEvent(EventTypeArtifactCreatedV3, SourceHook, channel, ArtifactCreatedData{
 		ArtifactType:     artifactType,
 		Path:             path,
 		Phase:            phase,
@@ -170,8 +170,8 @@ func NewTypedArtifactCreatedEvent(artifactType, path, phase, validatesAgainst, w
 
 // NewTypedErrorOccurredEvent creates a v3 "error.occurred" TypedEvent.
 // Source: hook or cli.
-func NewTypedErrorOccurredEvent(source EventSource, errorCode, message, context string, recoverable bool, suggestedAction string) TypedEvent {
-	return newTypedEvent(EventTypeErrorOccurred, source, ErrorOccurredData{
+func NewTypedErrorOccurredEvent(source EventSource, channel string, errorCode, message, context string, recoverable bool, suggestedAction string) TypedEvent {
+	return newTypedEvent(EventTypeErrorOccurred, source, channel, ErrorOccurredData{
 		ErrorCode:       errorCode,
 		Message:         message,
 		Context:         context,
@@ -183,8 +183,8 @@ func NewTypedErrorOccurredEvent(source EventSource, errorCode, message, context 
 // NewTypedSessionStartedEvent creates a v3 "session.started" TypedEvent.
 // Source: hook (emitted by SessionStart CC lifecycle hook).
 // Distinct from NewTypedSessionCreatedEvent: started = CC session began; created = knossos session created via CLI.
-func NewTypedSessionStartedEvent(sessionID, initiative, complexity, rite string) TypedEvent {
-	return newTypedEvent(EventTypeSessionStart, SourceHook, SessionStartedData{
+func NewTypedSessionStartedEvent(channel string, sessionID, initiative, complexity, rite string) TypedEvent {
+	return newTypedEvent(EventTypeSessionStart, SourceHook, channel, SessionStartedData{
 		SessionID:  sessionID,
 		Initiative: initiative,
 		Complexity: complexity,
@@ -195,8 +195,8 @@ func NewTypedSessionStartedEvent(sessionID, initiative, complexity, rite string)
 // NewTypedSessionEndedEvent creates a v3 "session.ended" TypedEvent.
 // Source: hook or cli.
 // cognitiveBudget is optional; pass nil when not available.
-func NewTypedSessionEndedEvent(source EventSource, sessionID, status string, durationMs int64, cognitiveBudget map[string]any) TypedEvent {
-	return newTypedEvent(EventTypeSessionEnd, source, SessionEndedData{
+func NewTypedSessionEndedEvent(source EventSource, channel string, sessionID, status string, durationMs int64, cognitiveBudget map[string]any) TypedEvent {
+	return newTypedEvent(EventTypeSessionEnd, source, channel, SessionEndedData{
 		SessionID:       sessionID,
 		Status:          status,
 		DurationMs:      durationMs,
@@ -207,8 +207,8 @@ func NewTypedSessionEndedEvent(source EventSource, sessionID, status string, dur
 // NewTypedSessionArchivedEvent creates a v3 "session.archived" TypedEvent.
 // Source: cli (emitted by `ari session wrap`).
 // fromStatus is the status the session transitions from: "ACTIVE" or "PARKED".
-func NewTypedSessionArchivedEvent(sessionID, fromStatus string) TypedEvent {
-	return newTypedEvent(EventTypeSessionArchived, SourceCLI, SessionArchivedData{
+func NewTypedSessionArchivedEvent(channel string, sessionID, fromStatus string) TypedEvent {
+	return newTypedEvent(EventTypeSessionArchived, SourceCLI, channel, SessionArchivedData{
 		SessionID:  sessionID,
 		FromStatus: fromStatus,
 	})
@@ -217,8 +217,8 @@ func NewTypedSessionArchivedEvent(sessionID, fromStatus string) TypedEvent {
 // NewTypedStrandResolvedEvent creates a v3 "session.strand_resolved" TypedEvent.
 // Source: cli (emitted by `ari session wrap` when a frayed child wraps).
 // resolution is one of: "wrapped", "abandoned".
-func NewTypedStrandResolvedEvent(parentID, childID, resolution string) TypedEvent {
-	return newTypedEvent(EventTypeStrandResolved, SourceCLI, StrandResolvedData{
+func NewTypedStrandResolvedEvent(channel string, parentID, childID, resolution string) TypedEvent {
+	return newTypedEvent(EventTypeStrandResolved, SourceCLI, channel, StrandResolvedData{
 		ParentID:   parentID,
 		ChildID:    childID,
 		Resolution: resolution,
@@ -227,8 +227,8 @@ func NewTypedStrandResolvedEvent(parentID, childID, resolution string) TypedEven
 
 // NewTypedSchemaMigratedEvent creates a v3 "session.schema_migrated" TypedEvent.
 // Source: cli (emitted by `ari session migrate`).
-func NewTypedSchemaMigratedEvent(sessionID, fromVersion, toVersion string) TypedEvent {
-	return newTypedEvent(EventTypeSchemaMigrated, SourceCLI, SchemaMigratedData{
+func NewTypedSchemaMigratedEvent(channel string, sessionID, fromVersion, toVersion string) TypedEvent {
+	return newTypedEvent(EventTypeSchemaMigrated, SourceCLI, channel, SchemaMigratedData{
 		SessionID:   sessionID,
 		FromVersion: fromVersion,
 		ToVersion:   toVersion,
@@ -237,8 +237,8 @@ func NewTypedSchemaMigratedEvent(sessionID, fromVersion, toVersion string) Typed
 
 // NewTypedLockAcquiredEvent creates a v3 "lock.acquired" TypedEvent.
 // Source: cli (emitted by session lock operations).
-func NewTypedLockAcquiredEvent(sessionID, holder string) TypedEvent {
-	return newTypedEvent(EventTypeLockAcquired, SourceCLI, LockAcquiredData{
+func NewTypedLockAcquiredEvent(channel string, sessionID, holder string) TypedEvent {
+	return newTypedEvent(EventTypeLockAcquired, SourceCLI, channel, LockAcquiredData{
 		SessionID: sessionID,
 		Holder:    holder,
 	})
@@ -246,8 +246,8 @@ func NewTypedLockAcquiredEvent(sessionID, holder string) TypedEvent {
 
 // NewTypedLockReleasedEvent creates a v3 "lock.released" TypedEvent.
 // Source: cli (emitted by session lock operations; currently declared but not emitted).
-func NewTypedLockReleasedEvent(sessionID, holder string) TypedEvent {
-	return newTypedEvent(EventTypeLockReleased, SourceCLI, LockReleasedData{
+func NewTypedLockReleasedEvent(channel string, sessionID, holder string) TypedEvent {
+	return newTypedEvent(EventTypeLockReleased, SourceCLI, channel, LockReleasedData{
 		SessionID: sessionID,
 		Holder:    holder,
 	})
@@ -256,8 +256,8 @@ func NewTypedLockReleasedEvent(sessionID, holder string) TypedEvent {
 // NewTypedSailsGeneratedEvent creates a v3 "quality.sails_generated" TypedEvent.
 // Source: cli (emitted by `ari session wrap`).
 // evidence is optional; keys: tests, build, lint, adversarial, integration.
-func NewTypedSailsGeneratedEvent(sessionID, color, computedBase string, reasons []string, filePath string, evidence map[string]string) TypedEvent {
-	return newTypedEvent(EventTypeSailsGenerated, SourceCLI, SailsGeneratedTypedData{
+func NewTypedSailsGeneratedEvent(channel string, sessionID, color, computedBase string, reasons []string, filePath string, evidence map[string]string) TypedEvent {
+	return newTypedEvent(EventTypeSailsGenerated, SourceCLI, channel, SailsGeneratedTypedData{
 		SessionID:    sessionID,
 		Color:        color,
 		ComputedBase: computedBase,
@@ -270,8 +270,8 @@ func NewTypedSailsGeneratedEvent(sessionID, color, computedBase string, reasons 
 // NewTypedContextSwitchEvent creates a v3 "context_switch" TypedEvent.
 // Source: hook.
 // Note: context_switch uses a legacy non-dotted type string retained for backward compat.
-func NewTypedContextSwitchEvent(summary, path string) TypedEvent {
-	return newTypedEvent(EventTypeContextSwitch, SourceHook, ContextSwitchData{
+func NewTypedContextSwitchEvent(channel string, summary, path string) TypedEvent {
+	return newTypedEvent(EventTypeContextSwitch, SourceHook, channel, ContextSwitchData{
 		Summary: summary,
 		Path:    path,
 	})
@@ -279,8 +279,8 @@ func NewTypedContextSwitchEvent(summary, path string) TypedEvent {
 
 // NewTypedHandoffPreparedEvent creates a v3 "agent.handoff_prepared" TypedEvent.
 // Source: cli (emitted by `ari handoff prepare`).
-func NewTypedHandoffPreparedEvent(fromAgent, toAgent, sessionID string) TypedEvent {
-	return newTypedEvent(EventTypeHandoffPrepared, SourceCLI, HandoffPreparedData{
+func NewTypedHandoffPreparedEvent(channel string, fromAgent, toAgent, sessionID string) TypedEvent {
+	return newTypedEvent(EventTypeHandoffPrepared, SourceCLI, channel, HandoffPreparedData{
 		FromAgent: fromAgent,
 		ToAgent:   toAgent,
 		SessionID: sessionID,
@@ -290,11 +290,11 @@ func NewTypedHandoffPreparedEvent(fromAgent, toAgent, sessionID string) TypedEve
 // NewTypedHandoffExecutedEvent creates a v3 "agent.handoff_executed" TypedEvent.
 // Source: cli (emitted by `ari handoff execute`).
 // artifacts may be an empty slice; it is always serialized (never omitted).
-func NewTypedHandoffExecutedEvent(fromAgent, toAgent, sessionID string, artifacts []string) TypedEvent {
+func NewTypedHandoffExecutedEvent(channel string, fromAgent, toAgent, sessionID string, artifacts []string) TypedEvent {
 	if artifacts == nil {
 		artifacts = []string{}
 	}
-	return newTypedEvent(EventTypeHandoffExecuted, SourceCLI, HandoffExecutedData{
+	return newTypedEvent(EventTypeHandoffExecuted, SourceCLI, channel, HandoffExecutedData{
 		FromAgent: fromAgent,
 		ToAgent:   toAgent,
 		SessionID: sessionID,
@@ -304,8 +304,8 @@ func NewTypedHandoffExecutedEvent(fromAgent, toAgent, sessionID string, artifact
 
 // NewTypedArtifactPromotedEvent creates a v3 "artifact.promoted" TypedEvent.
 // Source: cli (emitted by `ari session wrap --auto-promote`).
-func NewTypedArtifactPromotedEvent(sessionID, sourcePath, shelfPath, category string) TypedEvent {
-	return newTypedEvent(EventTypeArtifactPromoted, SourceCLI, ArtifactPromotedData{
+func NewTypedArtifactPromotedEvent(channel string, sessionID, sourcePath, shelfPath, category string) TypedEvent {
+	return newTypedEvent(EventTypeArtifactPromoted, SourceCLI, channel, ArtifactPromotedData{
 		SessionID:  sessionID,
 		SourcePath: sourcePath,
 		ShelfPath:  shelfPath,
@@ -318,8 +318,8 @@ func NewTypedArtifactPromotedEvent(sessionID, sourcePath, shelfPath, category st
 // NewTypedFieldUpdatedEvent creates a v3 "field.updated" TypedEvent.
 // Source: cli (future `ari session field-set` command).
 // oldValue and newValue may be nil, string, number, bool, or any JSON-serializable type.
-func NewTypedFieldUpdatedEvent(sessionID, key string, oldValue, newValue any) TypedEvent {
-	return newTypedEvent(EventTypeFieldUpdated, SourceCLI, FieldUpdatedData{
+func NewTypedFieldUpdatedEvent(channel string, sessionID, key string, oldValue, newValue any) TypedEvent {
+	return newTypedEvent(EventTypeFieldUpdated, SourceCLI, channel, FieldUpdatedData{
 		SessionID: sessionID,
 		Key:       key,
 		OldValue:  oldValue,
@@ -330,8 +330,8 @@ func NewTypedFieldUpdatedEvent(sessionID, key string, oldValue, newValue any) Ty
 // NewTypedHookFiredEvent creates a v3 "hook.fired" TypedEvent for observability.
 // Source: hook (future hook runner observability implementation).
 // eventType is the CC hook event name (e.g., "PostToolUse", "SessionStart").
-func NewTypedHookFiredEvent(hookName, eventType string) TypedEvent {
-	return newTypedEvent(EventTypeHookFired, SourceHook, HookFiredData{
+func NewTypedHookFiredEvent(channel string, hookName, eventType string) TypedEvent {
+	return newTypedEvent(EventTypeHookFired, SourceHook, channel, HookFiredData{
 		HookName:  hookName,
 		EventType: eventType,
 	})

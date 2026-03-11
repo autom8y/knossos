@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 
 	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
+	"github.com/autom8y/knossos/internal/materialize/mena"
 	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
@@ -17,25 +19,25 @@ import (
 //
 // This method builds the source list and delegates to SyncMena() for the
 // actual collection, routing, extension stripping, and file copying.
-func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, overwriteDiverged bool) error {
+func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, overwriteDiverged bool, channel string, comp compiler.ChannelCompiler) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
 	isEmbedded := resolved != nil && resolved.Source.Type == SourceEmbedded && m.sourceResolver.EmbeddedFS != nil
 
 	// Build priority-ordered source list (later sources override earlier)
-	var sources []MenaSource
+	var sources []mena.MenaSource
 
 	// 1. Platform-level mena (lowest priority, can be overridden by rite-specific)
 	// Resolution order: project-level mena/ → KnossosHome → XDG data dir → embedded fallback.
 	// Platform mena IS the product — operations, guidance, session skills ship to all users.
 	if menaDir := m.getMenaDir(); menaDir != "" {
-		sources = append(sources, MenaSource{Path: menaDir})
+		sources = append(sources, mena.MenaSource{Path: menaDir})
 	} else if isEmbedded && m.embeddedMena != nil {
 		// No filesystem mena found; fall back to embedded platform mena.
 		// This is the expected path for users who installed via `go install`
 		// and don't have the knossos source tree.
-		sources = append(sources, MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
+		sources = append(sources, mena.MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
 	}
 
 	// 1.5. Procession-generated mena (between platform and shared)
@@ -43,7 +45,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 	// per-procession skill (universal). Dromena only projected when current rite
 	// matches the template's entry rite.
 	if procDir, err := m.renderProcessionMena(manifest.Name); err == nil && procDir != "" {
-		sources = append(sources, MenaSource{Path: procDir})
+		sources = append(sources, mena.MenaSource{Path: procDir})
 	}
 
 	if isEmbedded {
@@ -51,17 +53,17 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		embFS := m.sourceResolver.EmbeddedFS
 
 		// 2. Shared rite mena
-		sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
+		sources = append(sources, mena.MenaSource{Fsys: embFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
 
 		// 3. Dependency rite mena (in order)
 		for _, dep := range manifest.Dependencies {
 			if dep != "shared" {
-				sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/" + dep + "/mena", IsEmbedded: true})
+				sources = append(sources, mena.MenaSource{Fsys: embFS, FsysPath: "rites/" + dep + "/mena", IsEmbedded: true})
 			}
 		}
 
 		// 4. Current rite mena (highest priority)
-		sources = append(sources, MenaSource{Fsys: embFS, FsysPath: "rites/" + manifest.Name + "/mena", IsEmbedded: true})
+		sources = append(sources, mena.MenaSource{Fsys: embFS, FsysPath: "rites/" + manifest.Name + "/mena", IsEmbedded: true})
 	} else if resolved != nil {
 		// Determine the base directory for shared/dependency rites.
 		//
@@ -95,24 +97,24 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 
 		// 2. Shared rite mena (resolved from knossos-core, not from satellite rites dir)
 		sharedMenaDir := filepath.Join(sharedRitesBase, "shared", "mena")
-		sources = append(sources, MenaSource{Path: sharedMenaDir})
+		sources = append(sources, mena.MenaSource{Path: sharedMenaDir})
 
 		// 3. Dependency rite mena (dependencies are knossos-core rites, same base)
 		for _, dep := range manifest.Dependencies {
 			if dep != "shared" {
-				sources = append(sources, MenaSource{Path: filepath.Join(sharedRitesBase, dep, "mena")})
+				sources = append(sources, mena.MenaSource{Path: filepath.Join(sharedRitesBase, dep, "mena")})
 			}
 		}
 
 		// 4. Current rite mena (highest priority — always from the resolved rite path)
 		currentRiteMenaDir := filepath.Join(resolved.RitePath, "mena")
-		sources = append(sources, MenaSource{Path: currentRiteMenaDir})
+		sources = append(sources, mena.MenaSource{Path: currentRiteMenaDir})
 	}
 
 	// Delegate to SyncMena with destructive mode and provenance collector
-	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
+	opts := mena.MenaProjectionOptions{
+		Mode:              mena.MenaProjectionDestructive,
+		Filter:            mena.ProjectAll,
 		TargetCommandsDir: commandsDir,
 		TargetSkillsDir:   skillsDir,
 		Collector:         collector,
@@ -120,9 +122,11 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		KnossosDir:        m.resolver.KnossosDir(),
 		OverwriteDiverged: overwriteDiverged,
 		RiteName:          manifest.Name,
+		Compiler:          comp,
+		Channel:           channel,
 	}
 
-	_, err := SyncMena(sources, opts)
+	_, err := mena.SyncMena(sources, opts)
 	return err
 }
 
@@ -130,48 +134,50 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 // .claude/commands/ and .claude/skills/ without requiring an active rite.
 // Called from MaterializeMinimal so that cross-cutting mode still gets core
 // features like /know, /radar, /research.
-func (m *Materializer) materializeMinimalMena(claudeDir string, collector provenance.Collector, overwriteDiverged bool) error {
+func (m *Materializer) materializeMinimalMena(claudeDir string, collector provenance.Collector, overwriteDiverged bool, channel string, comp compiler.ChannelCompiler) error {
 	commandsDir := filepath.Join(claudeDir, "commands")
 	skillsDir := filepath.Join(claudeDir, "skills")
 
-	var sources []MenaSource
+	var sources []mena.MenaSource
 
 	// 1. Platform-level mena (lowest priority)
 	if menaDir := m.getMenaDir(); menaDir != "" {
-		sources = append(sources, MenaSource{Path: menaDir})
+		sources = append(sources, mena.MenaSource{Path: menaDir})
 	} else if m.embeddedMena != nil {
-		sources = append(sources, MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
+		sources = append(sources, mena.MenaSource{Fsys: m.embeddedMena, FsysPath: "mena", IsEmbedded: true})
 	}
 
 	// 1.5. Procession-generated mena (legomena only in minimal mode — no active rite)
 	if procDir, err := m.renderProcessionMena(""); err == nil && procDir != "" {
-		sources = append(sources, MenaSource{Path: procDir})
+		sources = append(sources, mena.MenaSource{Path: procDir})
 	}
 
 	// 2. Shared rite mena — core cross-rite features (/know, /radar, etc.)
 	if m.sourceResolver.EmbeddedFS != nil {
-		sources = append(sources, MenaSource{Fsys: m.sourceResolver.EmbeddedFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
+		sources = append(sources, mena.MenaSource{Fsys: m.sourceResolver.EmbeddedFS, FsysPath: "rites/shared/mena", IsEmbedded: true})
 	} else if knossosHome := m.sourceResolver.KnossosHome(); knossosHome != "" {
 		sharedMenaDir := filepath.Join(knossosHome, "rites", "shared", "mena")
-		sources = append(sources, MenaSource{Path: sharedMenaDir})
+		sources = append(sources, mena.MenaSource{Path: sharedMenaDir})
 	}
 
 	if len(sources) == 0 {
 		return nil // No mena sources available
 	}
 
-	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		Filter:            ProjectAll,
+	opts := mena.MenaProjectionOptions{
+		Mode:              mena.MenaProjectionDestructive,
+		Filter:            mena.ProjectAll,
 		TargetCommandsDir: commandsDir,
 		TargetSkillsDir:   skillsDir,
 		Collector:         collector,
 		ProjectRoot:       m.resolver.ProjectRoot(),
 		KnossosDir:        m.resolver.KnossosDir(),
 		OverwriteDiverged: overwriteDiverged,
+		Compiler:          comp,
+		Channel:           channel,
 	}
 
-	_, err := SyncMena(sources, opts)
+	_, err := mena.SyncMena(sources, opts)
 	return err
 }
 

@@ -61,17 +61,17 @@ func writeEventsJSONL(t *testing.T, events []clewcontract.TypedEvent) string {
 
 // makeTypedDecision creates a decision.recorded TypedEvent.
 func makeTypedDecision(decision, rationale string) clewcontract.TypedEvent {
-	return clewcontract.NewTypedDecisionRecordedEvent(decision, rationale, nil)
+	return clewcontract.NewTypedDecisionRecordedEvent("", decision, rationale, nil)
 }
 
 // makeTypedDelegation creates an agent.delegated TypedEvent for a named agent.
 func makeTypedDelegation(agentName string) clewcontract.TypedEvent {
-	return clewcontract.NewTypedAgentDelegatedEvent(clewcontract.SourceHook, agentName, "specialist", "", "")
+	return clewcontract.NewTypedAgentDelegatedEvent(clewcontract.SourceHook, "", agentName, "specialist", "", "")
 }
 
 // makeTypedSessionCreated creates a session.created TypedEvent.
 func makeTypedSessionCreated(initiative string) clewcontract.TypedEvent {
-	return clewcontract.NewTypedSessionCreatedEvent("session-test", initiative, "MODULE", "")
+	return clewcontract.NewTypedSessionCreatedEvent("", "session-test", initiative, "MODULE", "")
 }
 
 // --- Test: GenerateSnapshot ---

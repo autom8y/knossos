@@ -28,13 +28,13 @@ func (s *syncer) syncUserMena(
 	skillsDir := filepath.Join(userClaudeDir, "skills")
 
 	result := &UserResourceResult{
-		Source: sourceDir,
-		Target: commandsDir + " + " + skillsDir,
+		Source:	sourceDir,
+		Target:	commandsDir + " + " + skillsDir,
 		Changes: UserSyncChanges{
-			Added:     []string{},
-			Updated:   []string{},
-			Skipped:   []UserSkippedEntry{},
-			Unchanged: []string{},
+			Added:		[]string{},
+			Updated:	[]string{},
+			Skipped:	[]UserSkippedEntry{},
+			Unchanged:	[]string{},
 		},
 	}
 
@@ -44,7 +44,7 @@ func (s *syncer) syncUserMena(
 		if s.embeddedMena != nil {
 			return s.syncUserMenaFromEmbedded(userClaudeDir, manifest, collisionChecker, opts)
 		}
-		return result, nil // No source = no-op
+		return result, nil	// No source = no-op
 	}
 
 	// Ensure target directories exist (unless dry-run)
@@ -80,7 +80,7 @@ func (s *syncer) syncUserMena(
 	for key, entry := range manifest.Entries {
 		if entry.Owner == provenance.OwnerKnossos {
 			if strings.HasPrefix(key, "commands/") || strings.HasPrefix(key, "skills/") {
-				snapshot[key] = false // not yet seen
+				snapshot[key] = false	// not yet seen
 			}
 		}
 	}
@@ -123,11 +123,11 @@ func (s *syncer) syncUserMena(
 
 	// Calculate summary
 	result.Summary = UserSyncSummary{
-		Added:      len(result.Changes.Added),
-		Updated:    len(result.Changes.Updated),
-		Skipped:    len(result.Changes.Skipped),
-		Unchanged:  len(result.Changes.Unchanged),
-		Collisions: countUserCollisions(result.Changes.Skipped),
+		Added:		len(result.Changes.Added),
+		Updated:	len(result.Changes.Updated),
+		Skipped:	len(result.Changes.Skipped),
+		Unchanged:	len(result.Changes.Unchanged),
+		Collisions:	countUserCollisions(result.Changes.Skipped),
 	}
 
 	return result, nil
@@ -145,13 +145,13 @@ func (s *syncer) syncUserMenaFromEmbedded(
 	skillsDir := filepath.Join(userClaudeDir, "skills")
 
 	result := &UserResourceResult{
-		Source: "embedded:mena",
-		Target: commandsDir + " + " + skillsDir,
+		Source:	"embedded:mena",
+		Target:	commandsDir + " + " + skillsDir,
 		Changes: UserSyncChanges{
-			Added:     []string{},
-			Updated:   []string{},
-			Skipped:   []UserSkippedEntry{},
-			Unchanged: []string{},
+			Added:		[]string{},
+			Updated:	[]string{},
+			Skipped:	[]UserSkippedEntry{},
+			Unchanged:	[]string{},
 		},
 	}
 
@@ -215,11 +215,11 @@ func (s *syncer) syncUserMenaFromEmbedded(
 	}
 
 	result.Summary = UserSyncSummary{
-		Added:      len(result.Changes.Added),
-		Updated:    len(result.Changes.Updated),
-		Skipped:    len(result.Changes.Skipped),
-		Unchanged:  len(result.Changes.Unchanged),
-		Collisions: countUserCollisions(result.Changes.Skipped),
+		Added:		len(result.Changes.Added),
+		Updated:	len(result.Changes.Updated),
+		Skipped:	len(result.Changes.Skipped),
+		Unchanged:	len(result.Changes.Unchanged),
+		Collisions:	countUserCollisions(result.Changes.Skipped),
 	}
 
 	return result, nil
@@ -385,8 +385,8 @@ func syncUserMenaFile(
 	// Check for collision with rite
 	if collision, _ := collisionChecker.CheckCollision(manifestKey); collision {
 		result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-			Name:   manifestKey,
-			Reason: "collision with rite resource",
+			Name:	manifestKey,
+			Reason:	"collision with rite resource",
 		})
 		return nil
 	}
@@ -406,19 +406,19 @@ func syncUserMenaFile(
 				if checksumErr == nil && targetChecksum == sourceChecksum {
 					if !opts.DryRun {
 						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 						)
 					}
 					result.Changes.Unchanged = append(result.Changes.Unchanged, manifestKey)
 				} else {
 					if !opts.DryRun {
 						manifest.Entries[manifestKey] = provenance.NewUserEntry(
-							provenance.ScopeUser, targetChecksum,
+							provenance.ScopeUser, targetChecksum, "",
 						)
 					}
 					result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-						Name:   manifestKey,
-						Reason: "adopted as user (local modifications)",
+						Name:	manifestKey,
+						Reason:	"adopted as user (local modifications)",
 					})
 				}
 				return nil
@@ -430,12 +430,12 @@ func syncUserMenaFile(
 					slog.Warn("checksum failed, treating as changed", "path", targetPath, "error", checksumErr)
 				}
 				manifest.Entries[manifestKey] = provenance.NewUserEntry(
-					provenance.ScopeUser, targetChecksum,
+					provenance.ScopeUser, targetChecksum, "",
 				)
 			}
 			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-				Name:   manifestKey,
-				Reason: "user-created",
+				Name:	manifestKey,
+				Reason:	"user-created",
 			})
 			return nil
 		}
@@ -449,7 +449,7 @@ func syncUserMenaFile(
 				return err
 			}
 			manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-				provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+				provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 			)
 		}
 		result.Changes.Added = append(result.Changes.Added, manifestKey)
@@ -470,14 +470,14 @@ func syncUserMenaFile(
 					return err
 				}
 				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
 		} else {
 			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-				Name:   manifestKey,
-				Reason: "user-created",
+				Name:	manifestKey,
+				Reason:	"user-created",
 			})
 		}
 
@@ -492,7 +492,7 @@ func syncUserMenaFile(
 					return err
 				}
 				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 				)
 			}
 			result.Changes.Added = append(result.Changes.Added, manifestKey)
@@ -513,7 +513,7 @@ func syncUserMenaFile(
 						return err
 					}
 					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+						provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 					)
 				}
 				result.Changes.Updated = append(result.Changes.Updated, manifestKey)
@@ -528,14 +528,14 @@ func syncUserMenaFile(
 							return err
 						}
 						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+							provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 						)
 					}
 					result.Changes.Updated = append(result.Changes.Updated, manifestKey)
 				} else {
 					result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
-						Name:   manifestKey,
-						Reason: "diverged (use --overwrite-diverged to force)",
+						Name:	manifestKey,
+						Reason:	"diverged (use --overwrite-diverged to force)",
 					})
 				}
 			}
@@ -563,7 +563,7 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 	}
 	resolution, err := mena.CollectMena(sources, mena.MenaProjectionOptions{Filter: mena.ProjectAll})
 	if err != nil {
-		return // Best effort: if CollectMena fails, skip wipe
+		return	// Best effort: if CollectMena fails, skip wipe
 	}
 
 	// Build set of manifest key prefixes that knossos produces (old + new style).
@@ -685,4 +685,3 @@ func findMenaSource(sourceDir, strippedRelPath string) (string, string) {
 
 	return "", ""
 }
-

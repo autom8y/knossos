@@ -4,7 +4,6 @@ package hook
 
 import (
 	"encoding/json"
-	"io"
 	"os"
 )
 
@@ -72,75 +71,30 @@ type Env struct {
 	UserMessage string
 }
 
-// parseStdin reads and parses the JSON payload from stdin.
-// Returns nil if stdin is a terminal or empty.
-func parseStdin() *StdinPayload {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return nil
+// GetAdapter returns the appropriate LifecycleAdapter based on the KNOSSOS_CHANNEL env var.
+func GetAdapter() LifecycleAdapter {
+	if os.Getenv("KNOSSOS_CHANNEL") == "gemini" {
+		return &GeminiAdapter{}
 	}
-	// If stdin is a terminal (no pipe), return nil
-	if (stat.Mode() & os.ModeCharDevice) != 0 {
-		return nil
-	}
-	data, err := io.ReadAll(os.Stdin)
-	if err != nil || len(data) == 0 {
-		return nil
-	}
-	var payload StdinPayload
-	if err := json.Unmarshal(data, &payload); err != nil {
-		return nil
-	}
-	return &payload
+	return &ClaudeAdapter{}
 }
 
 // ParseEnv reads hook data from stdin JSON and returns an Env.
 // CLAUDE_PROJECT_DIR is the only value still read from environment.
 func ParseEnv() *Env {
-	stdin := parseStdin()
+	adapter := GetAdapter()
 
-	projectDir := os.Getenv(EnvProjectDir)
-
-	if stdin == nil {
-		return &Env{
-			ProjectDir: projectDir,
-		}
+	// We must check if stdin is a terminal before reading
+	stat, err := os.Stdin.Stat()
+	if err != nil || (stat.Mode()&os.ModeCharDevice) != 0 {
+		return &Env{ProjectDir: os.Getenv(EnvProjectDir)}
 	}
 
-	event := HookEvent(stdin.HookEventName)
-	if event != "" && !isValidHookEvent(event) {
-		event = ""
+	env, err := adapter.ParsePayload(os.Stdin)
+	if err != nil || env == nil {
+		return &Env{ProjectDir: os.Getenv(EnvProjectDir)}
 	}
-
-	var cwd string
-	if stdin.CWD != "" {
-		cwd = stdin.CWD
-		if projectDir == "" {
-			projectDir = stdin.CWD
-		}
-	}
-
-	var toolInput string
-	if len(stdin.ToolInput) > 0 && string(stdin.ToolInput) != "null" {
-		toolInput = unwrapJSONValue(stdin.ToolInput)
-	}
-
-	var toolResult string
-	if len(stdin.ToolResponse) > 0 && string(stdin.ToolResponse) != "null" {
-		toolResult = unwrapJSONValue(stdin.ToolResponse)
-	}
-
-	return &Env{
-		Event:          event,
-		ToolName:       stdin.ToolName,
-		ToolInput:      toolInput,
-		ToolResult:     toolResult,
-		SessionID:      stdin.SessionID,
-		ProjectDir:     projectDir,
-		CWD:            cwd,
-		ConversationID: stdin.ConversationID,
-		UserMessage:    stdin.Prompt,
-	}
+	return env
 }
 
 // isValidHookEvent checks if the provided event is a known HookEvent.

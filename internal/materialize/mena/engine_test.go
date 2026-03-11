@@ -64,10 +64,10 @@ func exists(path string) bool {
 func TestIsFromRite(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name       string
-		sourcePath string
-		riteName   string
-		want       bool
+		name		string
+		sourcePath	string
+		riteName	string
+		want		bool
 	}{
 		{"relative match", "rites/10x-dev/mena/commit/", "10x-dev", true},
 		{"absolute match", "../../Code/knossos/rites/ecosystem/mena/spike/", "ecosystem", true},
@@ -131,29 +131,29 @@ func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
 	// Write a provenance manifest with entries from BOTH rites
 	fullChecksum := "sha256:0000000000000000000000000000000000000000000000000000000000000000"
 	manifest := &provenance.ProvenanceManifest{
-		SchemaVersion: provenance.CurrentSchemaVersion,
-		LastSync:      time.Now().UTC(),
-		ActiveRite:    "ecosystem",
+		SchemaVersion:	provenance.CurrentSchemaVersion,
+		LastSync:	time.Now().UTC(),
+		ActiveRite:	"ecosystem",
 		Entries: map[string]*provenance.ProvenanceEntry{
 			// Rite A (ecosystem) entries
 			"skills/ecosystem-ref/": provenance.NewKnossosEntry(
 				provenance.ScopeRite,
 				"rites/ecosystem/mena/ecosystem-ref",
 				"project",
-				fullChecksum,
+				fullChecksum, "",
 			),
 			"commands/eco-cmd": provenance.NewKnossosEntry(
 				provenance.ScopeRite,
 				"rites/ecosystem/mena/eco-cmd",
 				"project",
-				fullChecksum,
+				fullChecksum, "",
 			),
 			// Rite B (forge) entries
 			"skills/forge-ref/": provenance.NewKnossosEntry(
 				provenance.ScopeRite,
 				"rites/forge/mena/forge-ref",
 				"project",
-				fullChecksum,
+				fullChecksum, "",
 			),
 		},
 	}
@@ -166,11 +166,11 @@ func TestCleanStaleMena_CrossRitePreserved(t *testing.T) {
 		SkillsProjected: []string{"forge-ref"},
 	}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
-		KnossosDir:        knossosDir,
-		RiteName:          "forge",
+		Mode:			MenaProjectionDestructive,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
+		KnossosDir:		knossosDir,
+		RiteName:		"forge",
 	}
 
 	cleanStaleMenaEntries(opts, result)
@@ -216,15 +216,15 @@ func TestCleanStaleMena_SameRiteStaleRemoved(t *testing.T) {
 
 	fullChecksum := "sha256:0000000000000000000000000000000000000000000000000000000000000000"
 	manifest := &provenance.ProvenanceManifest{
-		SchemaVersion: provenance.CurrentSchemaVersion,
-		LastSync:      time.Now().UTC(),
-		ActiveRite:    "ecosystem",
+		SchemaVersion:	provenance.CurrentSchemaVersion,
+		LastSync:	time.Now().UTC(),
+		ActiveRite:	"ecosystem",
 		Entries: map[string]*provenance.ProvenanceEntry{
 			"skills/old-skill/": provenance.NewKnossosEntry(
 				provenance.ScopeRite,
 				"rites/ecosystem/mena/old-skill",
 				"project",
-				fullChecksum,
+				fullChecksum, "",
 			),
 		},
 	}
@@ -235,11 +235,11 @@ func TestCleanStaleMena_SameRiteStaleRemoved(t *testing.T) {
 	// Sync ecosystem with no skills projected (old-skill was renamed/removed)
 	result := &MenaProjectionResult{}
 	opts := MenaProjectionOptions{
-		Mode:              MenaProjectionDestructive,
-		TargetCommandsDir: commandsDir,
-		TargetSkillsDir:   skillsDir,
-		KnossosDir:        knossosDir,
-		RiteName:          "ecosystem",
+		Mode:			MenaProjectionDestructive,
+		TargetCommandsDir:	commandsDir,
+		TargetSkillsDir:	skillsDir,
+		KnossosDir:		knossosDir,
+		RiteName:		"ecosystem",
 	}
 
 	cleanStaleMenaEntries(opts, result)

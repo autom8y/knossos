@@ -56,6 +56,7 @@ type GlobalOptions struct {
 	Config     string
 	ProjectDir string
 	SessionID  string
+	Channel    string // "claude" (default), "gemini", or "all"
 }
 
 var globalOpts GlobalOptions
@@ -136,6 +137,8 @@ func init() {
 		"Project root directory (overrides discovery)")
 	rootCmd.PersistentFlags().StringVarP(&globalOpts.SessionID, "session-id", "s", "",
 		"Session ID (overrides current)")
+	rootCmd.PersistentFlags().StringVar(&globalOpts.Channel, "channel", "claude",
+		"target channel: claude or gemini")
 
 	// Add subcommands
 	rootCmd.AddCommand(session.NewSessionCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir, &globalOpts.SessionID))

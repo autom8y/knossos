@@ -248,7 +248,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Test workflow materialization from embedded
-	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{})
+	err := m.materializeWorkflow(knossosDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 	got, err := os.ReadFile(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
 	require.NoError(t, err)
@@ -257,7 +257,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	// Test rules materialization from embedded -- expect NO rules written.
 	// Embedded rites are for foreign projects; knossos-internal rules (internal/**,
 	// rites/**, etc.) are harmful noise on non-knossos codebases.
-	err = m.materializeRules(claudeDir, resolved, provenance.NullCollector{})
+	err = m.materializeRules(claudeDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 	_, err = os.Stat(filepath.Join(claudeDir, "rules", "internal-session.md"))
 	assert.True(t, os.IsNotExist(err), "embedded rules must NOT be written to foreign projects")
@@ -268,7 +268,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 		Agents:     []Agent{{Name: "tester", Role: "tests"}},
 		EntryAgent: "tester",
 	}
-	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "")
+	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "")
 	require.NoError(t, err)
 	got, err = os.ReadFile(filepath.Join(claudeDir, "agents", "tester.md"))
 	require.NoError(t, err)

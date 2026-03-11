@@ -41,6 +41,10 @@ type TypedEvent struct {
 	// One of: cli, hook, agent.
 	Source EventSource `json:"source"`
 
+	// Channel identifies which AI assistant triggered the event.
+	// Typically "claude" or "gemini", defaults to "claude" if omitted.
+	Channel string `json:"channel,omitempty"`
+
 	// Data is the per-type structured payload. Always a valid JSON object.
 	// Use the concrete typed constructors to produce correctly-typed Data values.
 	Data json.RawMessage `json:"data"`
@@ -55,18 +59,23 @@ func typedEventTimestamp() string {
 // newTypedEvent constructs a TypedEvent by marshaling the data payload.
 // data must be a value that serializes as a JSON object (struct with json tags).
 // If marshaling fails, Data is set to the empty object `{}` to preserve invariant.
-func newTypedEvent(eventType EventType, source EventSource, data any) TypedEvent {
+// Channel is only set when non-empty and not "claude" (the default).
+func newTypedEvent(eventType EventType, source EventSource, channel string, data any) TypedEvent {
 	raw, err := json.Marshal(data)
 	if err != nil {
 		// Invariant: Data is always a valid JSON object. Fall back to empty object.
 		raw = json.RawMessage(`{}`)
 	}
-	return TypedEvent{
+	te := TypedEvent{
 		Ts:     typedEventTimestamp(),
 		Type:   eventType,
 		Source: source,
 		Data:   raw,
 	}
+	if channel != "" && channel != "claude" {
+		te.Channel = channel
+	}
+	return te
 }
 
 // New v3 EventType constants for renamed and new types.

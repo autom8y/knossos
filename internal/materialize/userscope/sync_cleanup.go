@@ -49,12 +49,12 @@ func ensureDirForFile(path string) error {
 func isExecutableFile(path string) bool {
 	ext := strings.ToLower(filepath.Ext(path))
 	executableExtensions := map[string]bool{
-		".sh":   true,
-		".bash": true,
-		".zsh":  true,
-		".py":   true,
-		".rb":   true,
-		".pl":   true,
+		".sh":		true,
+		".bash":	true,
+		".zsh":		true,
+		".py":		true,
+		".rb":		true,
+		".pl":		true,
 	}
 	if executableExtensions[ext] {
 		return true
@@ -71,7 +71,7 @@ func isExecutableFile(path string) bool {
 func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userClaudeDir string) {
 	entry := manifest.Entries[key]
 	if entry == nil || entry.Owner != provenance.OwnerKnossos {
-		return // Safety: only remove knossos-owned orphans
+		return	// Safety: only remove knossos-owned orphans
 	}
 
 	// Determine target path from key
@@ -133,7 +133,7 @@ func recoverUserResource(
 ) error {
 	// Check if target directory exists
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-		return nil // Nothing to recover
+		return nil	// Nothing to recover
 	}
 
 	return filepath.WalkDir(targetDir, func(path string, d os.DirEntry, err error) error {
@@ -182,7 +182,7 @@ func recoverUserResource(
 						slog.Warn("checksum failed, treating as changed", "path", path, "error", checksumErr)
 					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
-						provenance.ScopeUser, targetChecksum,
+						provenance.ScopeUser, targetChecksum, "",
 					)
 				}
 				return nil
@@ -197,7 +197,7 @@ func recoverUserResource(
 						slog.Warn("checksum failed, treating as changed", "path", path, "error", checksumErr)
 					}
 					manifest.Entries[manifestKey] = provenance.NewUserEntry(
-						provenance.ScopeUser, targetChecksum,
+						provenance.ScopeUser, targetChecksum, "",
 					)
 				}
 				return nil
@@ -218,11 +218,11 @@ func recoverUserResource(
 		if !opts.DryRun {
 			if srcErr == nil && tgtErr == nil && sourceChecksum == targetChecksum {
 				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
-					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum,
+					provenance.ScopeUser, sourceRelPath, "user-sync", sourceChecksum, "",
 				)
 			} else {
 				manifest.Entries[manifestKey] = provenance.NewUserEntry(
-					provenance.ScopeUser, targetChecksum,
+					provenance.ScopeUser, targetChecksum, "",
 				)
 			}
 		}
@@ -237,7 +237,7 @@ func resourcePrefixForType(resourceType SyncResource) string {
 	case ResourceAgents:
 		return "agents/"
 	case ResourceMena:
-		return "" // Mena already includes commands/ or skills/ prefix
+		return ""	// Mena already includes commands/ or skills/ prefix
 	case ResourceHooks:
 		return "hooks/"
 	default:
@@ -255,4 +255,3 @@ func countUserCollisions(skipped []UserSkippedEntry) int {
 	}
 	return count
 }
-

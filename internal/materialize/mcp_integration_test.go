@@ -21,7 +21,7 @@ func TestMaterializeSettingsWithManifest_NoMCPServers(t *testing.T) {
 		Name: "test-rite",
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	// Verify settings file was created
@@ -62,7 +62,7 @@ func TestMaterializeSettingsWithManifest_StaleMcpServersRemoved(t *testing.T) {
 	require.NoError(t, os.WriteFile(settingsPath, data, 0644))
 
 	manifest := &RiteManifest{Name: "test-rite"}
-	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	// Verify mcpServers was removed
@@ -99,7 +99,7 @@ func TestMaterializeMcpJson_WritesToProjectRoot(t *testing.T) {
 		},
 	}
 
-	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
+	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// Verify .mcp.json was created
@@ -159,7 +159,7 @@ func TestMaterializeMcpJson_PreservesExistingSatelliteServers(t *testing.T) {
 		},
 	}
 
-	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
+	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// Verify both servers exist
@@ -186,7 +186,7 @@ func TestMaterializeMcpJson_NilManifest(t *testing.T) {
 	t.Parallel()
 	projectRoot := t.TempDir()
 
-	err := (&Materializer{}).materializeMcpJson(projectRoot, nil, provenance.NullCollector{})
+	err := (&Materializer{}).materializeMcpJson(projectRoot, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// .mcp.json should NOT be created
@@ -201,7 +201,7 @@ func TestMaterializeMcpJson_EmptyMCPServers(t *testing.T) {
 	projectRoot := t.TempDir()
 	manifest := &RiteManifest{Name: "test-rite"}
 
-	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
+	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// .mcp.json should NOT be created
@@ -241,7 +241,7 @@ func TestMaterializeMcpJson_UpdatesExistingRiteServer(t *testing.T) {
 		},
 	}
 
-	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{})
+	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	data, err = os.ReadFile(mcpJsonPath)
@@ -271,7 +271,7 @@ func TestSCAR028_MCPServers_NotInSettingsLocalJson(t *testing.T) {
 		},
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{})
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	settingsPath := filepath.Join(tempDir, "settings.local.json")

@@ -69,8 +69,21 @@ type Event struct {
 	// One-line summary of the event
 	Summary string `json:"summary"`
 
+	// Channel identifies which AI assistant triggered the event.
+	// Typically "claude" or "gemini", defaults to "claude" if omitted.
+	Channel string `json:"channel,omitempty"`
+
 	// Additional metadata (lines_changed, exit_code, duration_ms, etc.)
 	Meta map[string]any `json:"meta,omitempty"`
+}
+
+// WithChannel returns a copy of the Event with the Channel field set.
+// Channel is only set when it is non-empty and not "claude" (the default).
+func (e Event) WithChannel(channel string) Event {
+	if channel != "" && channel != "claude" {
+		e.Channel = channel
+	}
+	return e
 }
 
 // timestamp returns the current time in RFC3339 format with milliseconds.

@@ -16,20 +16,20 @@ import (
 
 // SyncOrgScopeParams provides all dependencies for org-scope sync.
 type SyncOrgScopeParams struct {
-	OrgName      string // Explicit org name (empty = use config.ActiveOrg())
-	OrgDir       string // Override org data directory (for testing; empty = use paths.OrgDataDir)
-	UserClaudeDir string // Override user .claude directory (for testing; empty = use paths.UserClaudeDir)
-	DryRun       bool
+	OrgName		string	// Explicit org name (empty = use config.ActiveOrg())
+	OrgDir		string	// Override org data directory (for testing; empty = use paths.OrgDataDir)
+	UserClaudeDir	string	// Override user .claude directory (for testing; empty = use paths.UserClaudeDir)
+	DryRun		bool
 }
 
 // OrgScopeResult wraps org scope sync outcome.
 type OrgScopeResult struct {
-	Status  string `json:"status"`
-	Error   string `json:"error,omitempty"`
-	OrgName string `json:"org_name,omitempty"`
-	Source  string `json:"source,omitempty"`
-	Agents  int    `json:"agents,omitempty"`
-	Mena    int    `json:"mena,omitempty"`
+	Status	string	`json:"status"`
+	Error	string	`json:"error,omitempty"`
+	OrgName	string	`json:"org_name,omitempty"`
+	Source	string	`json:"source,omitempty"`
+	Agents	int	`json:"agents,omitempty"`
+	Mena	int	`json:"mena,omitempty"`
 }
 
 // SyncOrgScope is the convenience entry point for org-scope sync.
@@ -49,8 +49,8 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	orgName := params.OrgName
 	if orgName == "" {
 		return &OrgScopeResult{
-			Status: "skipped",
-			Error:  "no active org configured",
+			Status:	"skipped",
+			Error:	"no active org configured",
 		}, nil
 	}
 
@@ -60,9 +60,9 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	}
 	if _, err := os.Stat(orgDir); os.IsNotExist(err) {
 		return &OrgScopeResult{
-			Status:  "skipped",
-			OrgName: orgName,
-			Error:   "org directory does not exist: " + orgDir,
+			Status:		"skipped",
+			OrgName:	orgName,
+			Error:		"org directory does not exist: " + orgDir,
 		}, nil
 	}
 
@@ -79,9 +79,9 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	}
 
 	result := &OrgScopeResult{
-		Status:  "success",
-		OrgName: orgName,
-		Source:  orgDir,
+		Status:		"success",
+		OrgName:	orgName,
+		Source:		orgDir,
 	}
 
 	// Sync agents
@@ -132,7 +132,7 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 	count := 0
 	for _, entry := range entries {
 		if entry.IsDir() {
-			continue // Flat files only for now
+			continue	// Flat files only for now
 		}
 		name := entry.Name()
 		sourcePath := filepath.Join(sourceDir, name)
@@ -150,7 +150,7 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 		relPath := name
 		if existing, ok := manifest.Entries[relPath]; ok {
 			if existing.Scope == provenance.ScopeOrg && existing.Checksum == sourceChecksum {
-				continue // Unchanged
+				continue	// Unchanged
 			}
 		}
 
@@ -169,7 +169,7 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 			provenance.ScopeOrg,
 			sourcePath,
 			"org",
-			sourceChecksum,
+			sourceChecksum, "",
 		)
 		count++
 	}

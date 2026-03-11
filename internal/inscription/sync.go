@@ -31,6 +31,10 @@ type CLAUDEmdSyncOptions struct {
 	// UpdateManifest controls whether manifest hashes are updated after merge.
 	// Set to true for full syncs, false for minimal/cross-cutting mode.
 	UpdateManifest bool
+
+	// ContextFilename is the name of the context file (e.g. "CLAUDE.md" or "GEMINI.md").
+	// Defaults to "CLAUDE.md" if empty.
+	ContextFilename string
 }
 
 // CLAUDEmdSyncResult contains the result of a CLAUDE.md sync.
@@ -105,19 +109,23 @@ func SyncCLAUDEmd(opts CLAUDEmdSyncOptions) (*CLAUDEmdSyncResult, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to generate CLAUDE.md sections", err)
 	}
 
-	// 4. Read existing CLAUDE.md and detect legacy format
-	claudeMdPath := filepath.Join(opts.ClaudeDir, "CLAUDE.md")
+	// 4. Read existing context file and detect legacy format
+	contextFilename := opts.ContextFilename
+	if contextFilename == "" {
+		contextFilename = "CLAUDE.md"
+	}
+	claudeMdPath := filepath.Join(opts.ClaudeDir, contextFilename)
 	existingContent := ""
 	legacyBackupPath := ""
 
 	if data, err := os.ReadFile(claudeMdPath); err == nil {
 		existingContent = string(data)
 
-		// Detect legacy CLAUDE.md (no KNOSSOS markers) and backup before overwriting
+		// Detect legacy context file (no KNOSSOS markers) and backup before overwriting
 		if !strings.Contains(existingContent, "<!-- KNOSSOS:START") && len(existingContent) > 0 {
 			legacyBackupPath = claudeMdPath + ".legacy-backup"
 			if err := os.WriteFile(legacyBackupPath, data, 0644); err != nil {
-				return nil, errors.Wrap(errors.CodeGeneralError, "failed to backup legacy CLAUDE.md", err)
+				return nil, errors.Wrap(errors.CodeGeneralError, "failed to backup legacy context file", err)
 			}
 			existingContent = ""
 		}
@@ -133,7 +141,7 @@ func SyncCLAUDEmd(opts CLAUDEmdSyncOptions) (*CLAUDEmdSyncResult, error) {
 	// 6. Write only if content changed
 	written, err := fileutil.WriteIfChanged(claudeMdPath, []byte(mergeResult.Content), 0644)
 	if err != nil {
-		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write CLAUDE.md", err)
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write context file", err)
 	}
 
 	// 7. Update manifest hashes and version

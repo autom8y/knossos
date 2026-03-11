@@ -67,6 +67,10 @@ type ProvenanceEntry struct {
 	// See TENSION-007 in .know/design-constraints.md for context.
 	SourceType string `yaml:"source_type,omitempty"`
 
+	// Channel tracks which AI assistant channel generated or owns this file.
+	// Used for parallel projection pipelines (e.g., claude vs gemini).
+	Channel string `yaml:"channel,omitempty"`
+
 	// Checksum is the SHA256 hash of the file (or directory for mena) at write time.
 	// Uses the "sha256:" prefix per ADR-0026 and internal/checksum convention.
 	Checksum string `yaml:"checksum"`
@@ -153,13 +157,14 @@ func OrgManifestPath(userClaudeDir string) string {
 
 // NewKnossosEntry constructs a ProvenanceEntry for a knossos-managed file.
 // Sets Owner=OwnerKnossos, LastSynced=time.Now().UTC().
-func NewKnossosEntry(scope ScopeType, sourcePath, sourceType, checksum string) *ProvenanceEntry {
+func NewKnossosEntry(scope ScopeType, sourcePath, sourceType, checksum, channel string) *ProvenanceEntry {
 	return &ProvenanceEntry{
 		Owner:      OwnerKnossos,
 		Scope:      scope,
 		SourcePath: sourcePath,
 		SourceType: sourceType,
 		Checksum:   checksum,
+		Channel:    channel,
 		LastSynced: time.Now().UTC(),
 	}
 }
@@ -167,22 +172,24 @@ func NewKnossosEntry(scope ScopeType, sourcePath, sourceType, checksum string) *
 // NewUserEntry constructs a ProvenanceEntry for a user-managed file.
 // Sets Owner=OwnerUser, LastSynced=time.Now().UTC().
 // SourcePath and SourceType are intentionally left empty (user files have no knossos source).
-func NewUserEntry(scope ScopeType, checksum string) *ProvenanceEntry {
+func NewUserEntry(scope ScopeType, checksum, channel string) *ProvenanceEntry {
 	return &ProvenanceEntry{
 		Owner:      OwnerUser,
 		Scope:      scope,
 		Checksum:   checksum,
+		Channel:    channel,
 		LastSynced: time.Now().UTC(),
 	}
 }
 
 // NewUntrackedEntry constructs a ProvenanceEntry for a pre-existing untracked file.
 // Sets Owner=OwnerUntracked, LastSynced=time.Now().UTC().
-func NewUntrackedEntry(scope ScopeType, checksum string) *ProvenanceEntry {
+func NewUntrackedEntry(scope ScopeType, checksum, channel string) *ProvenanceEntry {
 	return &ProvenanceEntry{
 		Owner:      OwnerUntracked,
 		Scope:      scope,
 		Checksum:   checksum,
+		Channel:    channel,
 		LastSynced: time.Now().UTC(),
 	}
 }
