@@ -25,6 +25,7 @@ legomena:
   - orchestrator-templates
   - shared-templates
   - smell-detection
+  - triage-scoring
 
 hooks: []
 
