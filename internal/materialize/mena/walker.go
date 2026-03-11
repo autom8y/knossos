@@ -37,7 +37,7 @@ func openMenaFS(src MenaSource) (fsys fs.FS, root string, err error) {
 // This is the unified replacement for the two previously separate functions:
 //   - copyDirWithStripping (filesystem)
 //   - copyDirFromFSWithStripping (embed.FS)
-func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool) error {
+func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool, comp ChannelCompiler) error {
 	return fs.WalkDir(fsys, root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -81,6 +81,31 @@ func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool) error {
 		// Only markdown files contain link targets and backtick spans that need rewriting.
 		if strings.HasSuffix(base, ".md") {
 			content = RewriteMenaContentPaths(content)
+		}
+
+		// Apply channel compiler transforms for primary mena files
+		if comp != nil && dir == "." && (base == "INDEX.md" || base == "SKILL.md") {
+			fm := ParseMenaFrontmatterBytes(content)
+			name := fm.Name
+			if name == "" {
+				name = filepath.Base(dst)
+			}
+			
+			if hideCompanions { // dromena
+				newFilename, newContent, err := comp.CompileCommand(name, fm.Description, fm.ArgumentHint, string(content))
+				if err != nil {
+					return err
+				}
+				destPath = filepath.Join(filepath.Dir(destPath), newFilename)
+				content = newContent
+			} else { // legomena
+				_, newFilename, newContent, err := comp.CompileSkill(name, fm.Description, string(content))
+				if err != nil {
+					return err
+				}
+				destPath = filepath.Join(filepath.Dir(destPath), newFilename)
+				content = newContent
+			}
 		}
 
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {

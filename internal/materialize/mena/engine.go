@@ -75,7 +75,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 			sourceFileNames = collectFSFileNames(srcFS, hideCompanions)
 		}
 
-		if err := copyDirFS(srcFS, srcRoot, destDir, hideCompanions); err != nil {
+		if err := copyDirFS(srcFS, srcRoot, destDir, hideCompanions, opts.Compiler); err != nil {
 			return nil, err
 		}
 
@@ -143,6 +143,32 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		if strings.HasSuffix(destPath, ".md") {
 			data = RewriteMenaContentPaths(data)
 		}
+
+		// Apply channel compiler transforms for standalone files
+		if opts.Compiler != nil && strings.HasSuffix(destPath, ".md") {
+			fm := ParseMenaFrontmatterBytes(data)
+			name := fm.Name
+			if name == "" {
+				name = strings.TrimSuffix(sf.FlatName, ".md")
+			}
+			
+			if sf.MenaType == "dro" {
+				newFilename, newContent, err := opts.Compiler.CompileCommand(name, fm.Description, fm.ArgumentHint, string(data))
+				if err != nil {
+					return nil, err
+				}
+				destPath = filepath.Join(filepath.Dir(destPath), newFilename)
+				data = newContent
+			} else {
+				_, newFilename, newContent, err := opts.Compiler.CompileSkill(name, fm.Description, string(data))
+				if err != nil {
+					return nil, err
+				}
+				destPath = filepath.Join(filepath.Dir(destPath), newFilename)
+				data = newContent
+			}
+		}
+
 		if _, err := fileutil.WriteIfChanged(destPath, data, 0644); err != nil {
 			return nil, err
 		}

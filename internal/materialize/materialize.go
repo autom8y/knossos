@@ -12,6 +12,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/fileutil"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/autom8y/knossos/internal/registry"
@@ -28,6 +29,7 @@ type Options struct {
 	Soft              bool // CC-safe mode: only update agents + CLAUDE.md
 	OverwriteDiverged bool // Allow overwriting user-owned mena entries on flat-name collision
 	ElCheapo          bool // Force haiku model override on all agents (ephemeral)
+	Channel           string
 }
 
 // Result contains materialization outcome details.
@@ -138,6 +140,13 @@ func NewMaterializerWithSourceResolver(resolver *paths.Resolver, sr *SourceResol
 		sourceResolver: sr,
 		templatesDir:   filepath.Join(resolver.ProjectRoot(), "templates"),
 	}
+}
+
+func compilerForChannel(channel string) compiler.ChannelCompiler {
+	if channel == "gemini" {
+		return &compiler.GeminiCompiler{}
+	}
+	return &compiler.ClaudeCompiler{}
 }
 
 // WithSourceResolver replaces the materializer's source resolver.
@@ -254,6 +263,14 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		Source:          "minimal",
 	}
 
+	// Save existing override and restore it when done to prevent mutation leaking
+	originalOverride := m.claudeDirOverride
+	defer func() { m.claudeDirOverride = originalOverride }()
+
+	if opts.Channel == "gemini" {
+		m.claudeDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
+	}
+
 	claudeDir := m.getClaudeDir()
 
 	// Dry-run: just return success
@@ -296,21 +313,23 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 	}
 
+	comp := compilerForChannel(opts.Channel)
+
 	// Generate minimal CLAUDE.md (no agents)
-	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector)
+	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
 	result.LegacyBackupPath = legacyBackupPath
 
 	// Generate settings.local.json if needed (no manifest in minimal mode)
-	if err := m.materializeSettingsWithManifest(claudeDir, nil, collector); err != nil {
+	if err := m.materializeSettingsWithManifest(claudeDir, nil, collector, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
 	// Project platform mena + shared rite mena so cross-cutting mode still
 	// has core features (/know, /radar, /research, etc.).
-	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged); err != nil {
+	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged, comp); err != nil {
 		slog.Warn("failed to materialize mena in minimal mode", "error", err)
 		// Non-fatal: mena is a best-effort enhancement in minimal mode
 	}
@@ -334,6 +353,14 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		Status:          "success",
 		OrphansDetected: []string{},
 		OrphanAction:    "kept",
+	}
+
+	// Save existing override and restore it when done to prevent mutation leaking
+	originalOverride := m.claudeDirOverride
+	defer func() { m.claudeDirOverride = originalOverride }()
+
+	if opts.Channel == "gemini" {
+		m.claudeDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
 	}
 
 	claudeDir := m.getClaudeDir()
@@ -384,6 +411,13 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	modelOverride := ""
 	if opts.ElCheapo {
 		modelOverride = "haiku"
+	}
+
+	var comp compiler.ChannelCompiler
+	if opts.Channel == "gemini" {
+		comp = &compiler.GeminiCompiler{}
+	} else {
+		comp = &compiler.ClaudeCompiler{}
 	}
 
 	// Dry-run: just detect orphans and return
@@ -479,7 +513,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
 	if !opts.Soft {
-		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged); err != nil {
+		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged, comp); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 		}
 	}
@@ -492,7 +526,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride)
+	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -500,7 +534,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 8. Generate or update settings.local.json (hooks only; MCP servers moved to .mcp.json per SCAR-028)
 	if !opts.Soft {
-		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector); err != nil {
+		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 		}
 	}
@@ -684,6 +718,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		Soft:              opts.Soft,
 		OverwriteDiverged: opts.OverwriteDiverged,
 		ElCheapo:          opts.ElCheapo,
+		Channel:           opts.Channel,
 	}
 
 	legacyResult, err := m.MaterializeWithOptions(riteName, legacyOpts)
@@ -717,7 +752,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 
 // syncRiteScopeMinimal handles cross-cutting mode (no rite).
 func (m *Materializer) syncRiteScopeMinimal(opts SyncOptions) (*RiteScopeResult, error) {
-	legacyOpts := Options{DryRun: opts.DryRun, Minimal: true}
+	legacyOpts := Options{DryRun: opts.DryRun, Minimal: true, Channel: opts.Channel}
 	legacyResult, err := m.MaterializeMinimal(legacyOpts)
 	if err != nil {
 		return nil, err
