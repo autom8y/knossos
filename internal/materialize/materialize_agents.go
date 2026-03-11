@@ -222,7 +222,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 // If a provenance manifest exists, uses manifest-based detection: files with
 // owner=user or files not in the provenance manifest are orphans.
 // Otherwise, falls back to rite manifest membership check (backward compatible).
-func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite) ([]string, error) {
+func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, channel string) ([]string, error) {
 	agentsDir := filepath.Join(claudeDir, "agents")
 	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
 		return []string{}, nil
@@ -236,8 +236,9 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, r
 		expectedAgents[agent.Name+".md"] = true
 	}
 
-	// Try loading provenance manifest for manifest-based detection
-	manifestPath := provenance.ManifestPath(m.getKnossosDir())
+	// Try loading provenance manifest for manifest-based detection.
+	// Uses channel-keyed path so gemini reads its own manifest.
+	manifestPath := provenance.ManifestPathForChannel(m.getKnossosDir(), channel)
 	provenanceManifest, err := provenance.Load(manifestPath)
 
 	// If provenance manifest exists, use manifest-based orphan detection

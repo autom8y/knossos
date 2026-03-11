@@ -134,6 +134,16 @@ func ManifestPath(knossosDir string) string {
 	return filepath.Join(knossosDir, ManifestFileName)
 }
 
+// ManifestPathForChannel returns the manifest path for a specific channel.
+// For channel="" or "claude": returns the default PROVENANCE_MANIFEST.yaml path (backward compat).
+// For "gemini": returns PROVENANCE_MANIFEST_GEMINI.yaml.
+func ManifestPathForChannel(knossosDir, channel string) string {
+	if channel == "gemini" {
+		return filepath.Join(knossosDir, GeminiManifestFileName)
+	}
+	return filepath.Join(knossosDir, ManifestFileName)
+}
+
 // validateManifest validates the manifest structure and content per TDD Section 1.
 func validateManifest(manifest *ProvenanceManifest) error {
 	var issues []string

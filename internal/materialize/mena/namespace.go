@@ -133,7 +133,7 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 			claudeDir := filepath.Dir(opts.TargetCommandsDir)
 			knossosDir = filepath.Join(filepath.Dir(claudeDir), ".knossos")
 		}
-		manifestPath := filepath.Join(knossosDir, provenance.ManifestFileName)
+		manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)
 		oldManifest, loadErr := provenance.Load(manifestPath)
 		if loadErr != nil && !errors.IsNotFound(loadErr) {
 			slog.Warn("failed to load provenance manifest for collision check", "error", loadErr)

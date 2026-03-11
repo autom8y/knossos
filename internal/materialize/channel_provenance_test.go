@@ -25,9 +25,9 @@ func TestMaterialize_ChannelInProvenance(t *testing.T) {
 			wantChannel: "",
 		},
 		{
-			name:        "claude channel recorded as claude",
+			name:        "claude channel normalized to empty (W-001)",
 			channel:     "claude",
-			wantChannel: "claude",
+			wantChannel: "",
 		},
 	}
 

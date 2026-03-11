@@ -292,7 +292,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	if err := paths.EnsureDir(knossosDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .knossos directory", err)
 	}
-	manifestPath := provenance.ManifestPath(knossosDir)
+	manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)
 	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
@@ -422,7 +422,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// Dry-run: just detect orphans and return
 	if opts.DryRun {
-		orphans, err := m.detectOrphans(manifest, claudeDir, resolved)
+		orphans, err := m.detectOrphans(manifest, claudeDir, resolved, opts.Channel)
 		if err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
 		}
@@ -451,7 +451,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// (parse failure, schema validation) propagate and abort the pipeline. A corrupted
 	// provenance manifest must be fixed or removed manually -- silent bootstrapping would
 	// mask data corruption and defeat the purpose of the manifest.
-	manifestPath := provenance.ManifestPath(knossosDir)
+	manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)
 	prevManifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
@@ -475,7 +475,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 3. Handle orphans before materializing agents
-	orphans, err := m.detectOrphans(manifest, claudeDir, resolved)
+	orphans, err := m.detectOrphans(manifest, claudeDir, resolved, opts.Channel)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
 	}

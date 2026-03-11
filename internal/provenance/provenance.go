@@ -10,7 +10,11 @@ import (
 )
 
 // ManifestFileName is the provenance manifest filename within .knossos/.
+// Used for the default (claude) channel. Other channels use channel-keyed filenames.
 const ManifestFileName = "PROVENANCE_MANIFEST.yaml"
+
+// GeminiManifestFileName is the provenance manifest filename for the gemini channel.
+const GeminiManifestFileName = "PROVENANCE_MANIFEST_GEMINI.yaml"
 
 // UserManifestFileName is the user-level provenance manifest filename.
 const UserManifestFileName = "USER_PROVENANCE_MANIFEST.yaml"
@@ -157,7 +161,11 @@ func OrgManifestPath(userClaudeDir string) string {
 
 // NewKnossosEntry constructs a ProvenanceEntry for a knossos-managed file.
 // Sets Owner=OwnerKnossos, LastSynced=time.Now().UTC().
+// W-001: normalizes "claude" channel to "" for consistency with newTypedEvent() convention.
 func NewKnossosEntry(scope ScopeType, sourcePath, sourceType, checksum, channel string) *ProvenanceEntry {
+	if channel == "claude" {
+		channel = ""
+	}
 	return &ProvenanceEntry{
 		Owner:      OwnerKnossos,
 		Scope:      scope,
