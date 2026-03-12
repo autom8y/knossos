@@ -121,7 +121,7 @@ func (r *Registry) SessionRegistryPath(sessionID string) string {
 
 // ProjectRegistryPath returns the path to the project registry.
 func (r *Registry) ProjectRegistryPath() string {
-	return filepath.Join(r.paths.ClaudeDir(), "artifacts", "registry.yaml")
+	return filepath.Join(r.paths.ChannelDir(paths.ClaudeChannel{}), "artifacts", "registry.yaml")
 }
 
 // LoadSessionRegistry loads the artifact registry for a session.

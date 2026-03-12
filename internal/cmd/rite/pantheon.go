@@ -10,6 +10,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 func newPantheonCmd(ctx *cmdContext) *cobra.Command {
@@ -49,7 +50,7 @@ func runPantheon(ctx *cmdContext) error {
 	}
 
 	// Read agents from .claude/agents/
-	agentsDir := filepath.Join(resolver.ClaudeDir(), "agents")
+	agentsDir := filepath.Join(resolver.ChannelDir(paths.ClaudeChannel{}), "agents")
 	entries, err := os.ReadDir(agentsDir)
 	if err != nil {
 		return errors.Wrap(errors.CodeFileNotFound, fmt.Sprintf("failed to read agents directory: %s", agentsDir), err)

@@ -227,7 +227,7 @@ func CollectDromena(resolver *paths.Resolver) []SearchEntry {
 		return nil
 	}
 
-	commandsDir := filepath.Join(resolver.ClaudeDir(), "commands")
+	commandsDir := filepath.Join(resolver.ChannelDir(paths.ClaudeChannel{}), "commands")
 
 	var entries []SearchEntry
 	err := filepath.WalkDir(commandsDir, func(path string, d os.DirEntry, err error) error {

@@ -251,7 +251,7 @@ func collect(resolver *paths.Resolver, projectDir string) HealthDashboard {
 
 // collectChannel gathers channel directory health data.
 func collectChannel(resolver *paths.Resolver) ChannelHealth {
-	channelDir := resolver.ClaudeDir()
+	channelDir := resolver.ChannelDir(paths.ClaudeChannel{})
 	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
 		return ChannelHealth{Exists: false}
 	}

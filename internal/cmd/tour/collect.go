@@ -25,7 +25,7 @@ func collectTour(resolver *paths.Resolver) TourOutput {
 }
 
 func collectChannel(resolver *paths.Resolver) ChannelSection {
-	channelDir := resolver.ClaudeDir()
+	channelDir := resolver.ChannelDir(paths.ClaudeChannel{})
 	if !dirExists(channelDir) {
 		return ChannelSection{Exists: false, Path: "channel/"}
 	}
