@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 func TestNewPipeline(t *testing.T) {
@@ -51,7 +53,7 @@ func TestNewPipelineWithPaths(t *testing.T) {
 
 func TestPipeline_Validate_NoManifest(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(channelDir, 0755)
 
 	pipeline := NewPipeline(tmpDir)
@@ -81,7 +83,7 @@ func TestPipeline_Validate_NoManifest(t *testing.T) {
 
 func TestPipeline_Validate_WithManifest(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(channelDir, 0755)
 
 	// Create a valid manifest
@@ -115,7 +117,7 @@ regions:
 
 func TestPipeline_Validate_InvalidManifest(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(channelDir, 0755)
 
 	// Create an invalid manifest (missing required fields)
@@ -140,7 +142,7 @@ func TestPipeline_Validate_InvalidManifest(t *testing.T) {
 
 func TestPipeline_DryRun(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(channelDir, 0755)
 
 	// Create manifest
@@ -186,7 +188,7 @@ section_order:
 
 func TestPipeline_Sync_CreatesBackup(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	os.MkdirAll(channelDir, 0755)
 
@@ -226,7 +228,7 @@ section_order:
 
 func TestPipeline_Sync_NoBackupOption(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	os.MkdirAll(channelDir, 0755)
 
@@ -270,7 +272,7 @@ section_order:
 
 func TestPipeline_Sync_DryRunDoesNotWrite(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(channelDir, 0755)
 
 	// Create manifest
@@ -305,7 +307,7 @@ section_order:
 
 func TestPipeline_Sync_UpdatesManifestVersion(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(channelDir, 0755)
 
 	// Create manifest with version 5
@@ -356,7 +358,7 @@ func TestPipeline_ListBackups(t *testing.T) {
 
 func TestPipeline_GetDiff(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(channelDir, 0755)
 
 	// Create existing CLAUDE.md with old content
@@ -688,7 +690,7 @@ description: "Tests everything adversarially"
 func TestLoadAgents_WithYAMLFrontmatter(t *testing.T) {
 	// Create temp directory
 	tmpDir := t.TempDir()
-	agentsDir := filepath.Join(tmpDir, ".claude", "agents")
+	agentsDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName(), "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents dir: %v", err)
 	}
@@ -792,7 +794,7 @@ func TestBuildRenderContext_IsKnossosProject(t *testing.T) {
 			tmpDir := t.TempDir()
 
 			// Create minimal structure needed for buildRenderContext
-			channelDir := filepath.Join(tmpDir, ".claude")
+			channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 			os.MkdirAll(channelDir, 0755)
 
 			pipeline := NewPipeline(tmpDir)
