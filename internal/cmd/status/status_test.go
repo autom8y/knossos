@@ -15,7 +15,7 @@ import (
 func setupProject(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
-	os.MkdirAll(filepath.Join(dir, ".claude", "agents"), 0755)
+	os.MkdirAll(filepath.Join(dir, paths.ClaudeChannel{}.DirName(), "agents"), 0755)
 	os.MkdirAll(filepath.Join(dir, ".knossos"), 0755)
 	return dir
 }
@@ -28,9 +28,9 @@ func TestCollectClaude_Exists(t *testing.T) {
 	os.WriteFile(filepath.Join(root, ".knossos", "ACTIVE_RITE"), []byte("10x-dev\n"), 0644)
 
 	// Write some agent files
-	os.WriteFile(filepath.Join(root, ".claude", "agents", "potnia.md"), []byte("# agent"), 0644)
-	os.WriteFile(filepath.Join(root, ".claude", "agents", "architect.md"), []byte("# agent"), 0644)
-	os.WriteFile(filepath.Join(root, ".claude", "agents", "README.txt"), []byte("not an agent"), 0644) // should be excluded
+	os.WriteFile(filepath.Join(root, paths.ClaudeChannel{}.DirName(), "agents", "potnia.md"), []byte("# agent"), 0644)
+	os.WriteFile(filepath.Join(root, paths.ClaudeChannel{}.DirName(), "agents", "architect.md"), []byte("# agent"), 0644)
+	os.WriteFile(filepath.Join(root, paths.ClaudeChannel{}.DirName(), "agents", "README.txt"), []byte("not an agent"), 0644) // should be excluded
 
 	health := collectChannel(resolver)
 

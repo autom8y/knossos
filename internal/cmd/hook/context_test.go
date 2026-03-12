@@ -12,6 +12,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/materialize/source"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/test/hooks/testutil"
 )
@@ -734,7 +735,7 @@ current_phase: "implementation"
 	os.WriteFile(filepath.Join(ritesDir, "beta", "manifest.yaml"), []byte("name: beta"), 0644)
 
 	// Create agents directory
-	agentsDir := filepath.Join(tmpDir, ".claude", "agents")
+	agentsDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName(), "agents")
 	os.MkdirAll(agentsDir, 0755)
 	os.WriteFile(filepath.Join(agentsDir, "orchestrator.md"), []byte("# Orch"), 0644)
 	os.WriteFile(filepath.Join(agentsDir, "builder.md"), []byte("# Build"), 0644)

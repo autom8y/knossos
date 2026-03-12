@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/session"
 )
 
@@ -60,7 +61,7 @@ func setupProjectDir(t *testing.T) string {
 	tmpDir := t.TempDir()
 
 	dirs := []string{
-		filepath.Join(tmpDir, ".claude"),
+		filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName()),
 		filepath.Join(tmpDir, ".knossos"),
 		filepath.Join(tmpDir, ".sos", "sessions"),
 		filepath.Join(tmpDir, ".sos", "sessions", ".locks"),
