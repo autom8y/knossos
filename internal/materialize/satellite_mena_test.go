@@ -83,7 +83,7 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 
 	// Create a satellite project with a local rite (does NOT have rites/shared/)
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
-	channelDir := filepath.Join(satelliteRoot, ".claude")
+	channelDir := filepath.Join(satelliteRoot, paths.ClaudeChannel{}.DirName())
 
 	// Create a resolved rite pointing to the satellite's local rite directory
 	// (simulating how the source resolver resolves a satellite-local rite)
@@ -136,7 +136,7 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 	setupKnossosRiteDepMena(t, knossosHome, "10x-dev")
 
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
-	channelDir := filepath.Join(satelliteRoot, ".claude")
+	channelDir := filepath.Join(satelliteRoot, paths.ClaudeChannel{}.DirName())
 
 	ritePath := filepath.Join(satelliteRoot, ".knossos", "rites", "data-analyst")
 	resolved := &ResolvedRite{
@@ -185,7 +185,7 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 	setupKnossosRiteSharedMena(t, knossosHome)
 
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
-	channelDir := filepath.Join(satelliteRoot, ".claude")
+	channelDir := filepath.Join(satelliteRoot, paths.ClaudeChannel{}.DirName())
 
 	// Create a rite-local mena entry with the same name as the shared one ("shared-cmd")
 	// but different content — the rite version should win.
@@ -261,7 +261,7 @@ func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
 		t.Fatalf("write manifest: %v", err)
 	}
 
-	channelDir := filepath.Join(knossosHome, ".claude")
+	channelDir := filepath.Join(knossosHome, paths.ClaudeChannel{}.DirName())
 
 	// Resolved rite points to knossosHome/rites/ecosystem — filepath.Dir gives knossosHome/rites/
 	// which IS the same as $KNOSSOS_HOME/rites, so sharedRitesBase should stay as ritesBase.

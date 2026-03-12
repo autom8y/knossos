@@ -16,7 +16,7 @@ func TestMaterializeAgents_PreservesUserAgents(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 
 	// Setup a rite with one agent
 	agents := []Agent{{Name: "designer", Role: "designs things"}}
@@ -51,7 +51,7 @@ func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 
 	// Setup rite-a with agent "designer"
 	setupRite(t, ritesDir, "rite-a", "", []Agent{{Name: "designer", Role: "designs"}})
@@ -239,7 +239,7 @@ func TestMaterialize_NoSkipGuard_AlwaysRuns(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 
 	agents := []Agent{{Name: "tester", Role: "tests things"}}
 	setupRite(t, ritesDir, "test-rite", "", agents)

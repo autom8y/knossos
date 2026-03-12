@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // validKnossosEntry returns a knossos-owned entry with a valid checksum for testing.
@@ -33,7 +35,7 @@ func validUserEntry() *ProvenanceEntry {
 // produces a valid manifest containing only the collector's entries.
 func TestMerge_EmptyInputs(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	collector := NewCollector()
 	entry := validKnossosEntry("rites/eco/agents/foo.md")
@@ -65,7 +67,7 @@ func TestMerge_EmptyInputs(t *testing.T) {
 // that still exist on disk are carried forward, while entries for deleted files are dropped.
 func TestMerge_Step0_CarryForwardKnossos(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +113,7 @@ func TestMerge_Step0_CarryForwardKnossos(t *testing.T) {
 // are correctly resolved on disk (trailing slash stripped before stat).
 func TestMerge_Step0_CarryForwardKnossosDirEntry(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -143,7 +145,7 @@ func TestMerge_Step0_CarryForwardKnossosDirEntry(t *testing.T) {
 // layered in Step 1, and that entries with empty checksums are skipped.
 func TestMerge_Step1_DivergencePromoted(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	divergenceReport := &DivergenceReport{
 		Promoted: map[string]*ProvenanceEntry{
@@ -192,7 +194,7 @@ func TestMerge_Step1_DivergencePromoted(t *testing.T) {
 // EXCEPT entries that were promoted to user ownership in the divergence report.
 func TestMerge_Step2_CollectorLayering(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -283,7 +285,7 @@ func TestMerge_Step2_CollectorLayering(t *testing.T) {
 // collector this sync are promoted to owner:user in Step 3.
 func TestMerge_Step3_UntrackedPromotion(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	now := time.Now().UTC()
 	untrackedEntry := &ProvenanceEntry{
@@ -341,7 +343,7 @@ func TestMerge_Step3_UntrackedPromotion(t *testing.T) {
 // the final map (e.g., via divergence CarriedForward in Step 1), Step 3 does not overwrite it.
 func TestMerge_Step3_UntrackedAlreadyInFinal(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	now := time.Now().UTC()
 	untrackedChecksum := "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
@@ -393,7 +395,7 @@ func TestMerge_Step3_UntrackedAlreadyInFinal(t *testing.T) {
 // collector entries reclaim user-promoted entries instead of skipping them.
 func TestMerge_Step2_OverwriteDivergedReclaims(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	now := time.Now().UTC()
 	userChecksum := "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
