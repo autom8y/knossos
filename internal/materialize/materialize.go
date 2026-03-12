@@ -342,8 +342,14 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	_ = os.Remove(filepath.Join(channelDir, "INVOCATION_STATE.yaml"))
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, channelDir, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
+	finalManifest, err := m.saveProvenanceManifest(manifestPath, channelDir, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged)
+	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
+	}
+
+	// Generate channel .gitignore from provenance (non-fatal)
+	if _, gitErr := generateChannelGitignore(channelDir, finalManifest); gitErr != nil {
+		slog.Warn("failed to generate channel .gitignore", "channel_dir", channelDir, "error", gitErr)
 	}
 
 	return result, nil
@@ -580,8 +586,14 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, channelDir, activeRiteName, collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
+	finalManifest, err := m.saveProvenanceManifest(manifestPath, channelDir, activeRiteName, collector, divergenceReport, prevManifest, opts.OverwriteDiverged)
+	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
+	}
+
+	// Generate channel .gitignore from provenance (non-fatal)
+	if _, gitErr := generateChannelGitignore(channelDir, finalManifest); gitErr != nil {
+		slog.Warn("failed to generate channel .gitignore", "channel_dir", channelDir, "error", gitErr)
 	}
 
 	return result, nil

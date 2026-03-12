@@ -442,8 +442,11 @@ func (m *Materializer) saveProvenanceManifest(
 	divergenceReport *provenance.DivergenceReport,
 	prevManifest *provenance.ProvenanceManifest,
 	overwriteDiverged bool,
-) error {
+) (*provenance.ProvenanceManifest, error) {
 	knossosDir := m.resolver.KnossosDir()
 	finalManifest := provenance.Merge(channelDir, knossosDir, activeRite, collector, divergenceReport, prevManifest, overwriteDiverged)
-	return provenance.Save(manifestPath, finalManifest)
+	if err := provenance.Save(manifestPath, finalManifest); err != nil {
+		return nil, err
+	}
+	return finalManifest, nil
 }
