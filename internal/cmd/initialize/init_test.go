@@ -8,6 +8,7 @@ import (
 	"testing/fstest"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 func TestInit_FreshDirectory(t *testing.T) {
@@ -33,7 +34,7 @@ func TestInit_FreshDirectory(t *testing.T) {
 	}
 
 	// Verify .claude/ directory was created.
-	channelDir := filepath.Join(dir, ".claude")
+	channelDir := filepath.Join(dir, paths.ClaudeChannel{}.DirName())
 	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
 		t.Error(".claude/ directory was not created")
 	}
@@ -45,7 +46,7 @@ func TestInit_FreshDirectory(t *testing.T) {
 	}
 
 	// Verify CLAUDE.md was created.
-	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
+	claudeMdPath := filepath.Join(channelDir, paths.ClaudeChannel{}.ContextFile())
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
 		t.Error("CLAUDE.md was not created")
 	}
@@ -121,7 +122,7 @@ dependencies:
 		t.Fatalf("runInit() with rite returned error: %v", err)
 	}
 
-	channelDir := filepath.Join(dir, ".claude")
+	channelDir := filepath.Join(dir, paths.ClaudeChannel{}.DirName())
 
 	// Verify agents were materialized.
 	agentsDir := filepath.Join(channelDir, "agents")
@@ -221,7 +222,7 @@ func TestInit_Force(t *testing.T) {
 
 	// Pre-create .knossos/ with a valid KNOSSOS_MANIFEST.yaml.
 	knossosDir := filepath.Join(dir, ".knossos")
-	channelDir := filepath.Join(dir, ".claude")
+	channelDir := filepath.Join(dir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -259,7 +260,7 @@ section_order:
 	}
 
 	// Verify CLAUDE.md was generated (proves re-materialization happened).
-	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
+	claudeMdPath := filepath.Join(channelDir, paths.ClaudeChannel{}.ContextFile())
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
 		t.Error("CLAUDE.md was not created after --force reinitialize")
 	}
@@ -276,12 +277,12 @@ func TestInit_NonKnossosClaudeDir(t *testing.T) {
 	dir := t.TempDir()
 
 	// Pre-create .claude/ without KNOSSOS_MANIFEST.yaml (non-Knossos project).
-	channelDir := filepath.Join(dir, ".claude")
+	channelDir := filepath.Join(dir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	// Write some existing content (like a manual CLAUDE.md).
-	if err := os.WriteFile(filepath.Join(channelDir, "CLAUDE.md"), []byte("# Custom"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(channelDir, paths.ClaudeChannel{}.ContextFile()), []byte("# Custom"), 0644); err != nil {
 		t.Fatal(err)
 	}
 
