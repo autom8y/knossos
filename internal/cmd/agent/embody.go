@@ -160,7 +160,7 @@ func (o embodyOutput) Text() string {
 		b.WriteString("\n> Capability\n")
 		if cap, ok := env.Data.(*perspective.CapabilityData); ok {
 			if len(cap.Tools) > 0 {
-				toolSummary := truncateList(cap.CCNativeTools, 5)
+				toolSummary := truncateList(cap.ChannelNativeTools, 5)
 				fmt.Fprintf(&b, "  Tools: %s (%d total)\n", toolSummary, len(cap.Tools))
 			} else {
 				b.WriteString("  Tools: none\n")

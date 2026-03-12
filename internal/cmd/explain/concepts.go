@@ -20,7 +20,7 @@ type Frontmatter struct {
 	Summary string   `yaml:"summary"`
 	SeeAlso []string `yaml:"see_also"`
 	Aliases []string `yaml:"aliases"`
-	CCTerm  string   `yaml:"cc_term"`
+	HarnessTerm string   `yaml:"cc_term"`
 }
 
 var (
@@ -124,8 +124,8 @@ func parseConcept(name string, data []byte) (*ConceptEntry, error) {
 
 	// Compute display name
 	displayName := name
-	if fm.CCTerm != "" {
-		displayName = name + " (" + fm.CCTerm + ")"
+	if fm.HarnessTerm != "" {
+		displayName = name + " (" + fm.HarnessTerm + ")"
 	}
 
 	return &ConceptEntry{
@@ -135,7 +135,7 @@ func parseConcept(name string, data []byte) (*ConceptEntry, error) {
 		Description: body,
 		SeeAlso:     fm.SeeAlso,
 		Aliases:     fm.Aliases,
-		CCTerm:      fm.CCTerm,
+		HarnessTerm: fm.HarnessTerm,
 	}, nil
 }
 

@@ -109,7 +109,7 @@ func TestCollectTourFullProject(t *testing.T) {
 	assert.Equal(t, 1, tour.Directories.Channel.Commands.Count)
 	assert.Equal(t, 2, tour.Directories.Channel.Skills.Count)
 	assert.True(t, tour.Directories.Channel.SettingsJSON)
-	assert.True(t, tour.Directories.Channel.ClaudeMD)
+	assert.True(t, tour.Directories.Channel.ContextFile)
 	assert.Equal(t, "10x-dev", tour.Directories.Channel.ActiveRite)
 
 	assert.True(t, tour.Directories.Knossos.Exists)
@@ -240,7 +240,7 @@ func TestClaudeMDPresent(t *testing.T) {
 
 	resolver := paths.NewResolver(root)
 	section := collectChannel(resolver)
-	assert.True(t, section.ClaudeMD)
+	assert.True(t, section.ContextFile)
 }
 
 func TestClaudeActiveRiteValue(t *testing.T) {

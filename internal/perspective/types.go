@@ -92,7 +92,7 @@ type IdentityData struct {
 // CapabilityData contains the agent's tool and hook configuration (L3).
 type CapabilityData struct {
 	Tools             []string      `json:"tools" yaml:"tools"`
-	CCNativeTools     []string      `json:"cc_native_tools" yaml:"cc_native_tools"`
+	ChannelNativeTools []string      `json:"channel_native_tools" yaml:"channel_native_tools"`
 	MCPTools          []MCPToolRef  `json:"mcp_tools" yaml:"mcp_tools"`
 	UnknownTools      []string      `json:"unknown_tools,omitempty" yaml:"unknown_tools,omitempty"`
 	ToolsFromDefaults bool          `json:"tools_from_defaults" yaml:"tools_from_defaults"`

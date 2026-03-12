@@ -147,7 +147,7 @@ func resolveCapability(ctx *ParseContext) *LayerEnvelope {
 
 	data := &CapabilityData{
 		Tools:             resolvedTools,
-		CCNativeTools:     ccNative,
+		ChannelNativeTools: ccNative,
 		MCPTools:          mcpTools,
 		UnknownTools:      unknown,
 		ToolsFromDefaults: toolsFromDefaults,

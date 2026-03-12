@@ -39,7 +39,7 @@ type StrandOutput struct {
 // ContextOutput represents the output of the context hook.
 type ContextOutput struct {
 	SessionID       string               `json:"session_id,omitempty"`
-	CCSessionID     string               `json:"cc_session_id,omitempty"` // CC's own session ID (for claim)
+	HarnessSessionID string               `json:"cc_session_id,omitempty"` // TODO(PLS-Sprint4): rename JSON tag and YAML key when mena schemas are updated
 	FrayedFrom      string               `json:"frayed_from,omitempty"`
 	FrameRef        string               `json:"frame_ref,omitempty"`
 	ParkSource      string               `json:"park_source,omitempty"`
@@ -77,8 +77,8 @@ func (c ContextOutput) Text() string {
 	if !c.HasSession {
 		// No-session path: emit minimal frontmatter
 		b.WriteString("has_session: false\n")
-		if c.CCSessionID != "" {
-			fmt.Fprintf(&b, "cc_session_id: %q\n", c.CCSessionID)
+		if c.HarnessSessionID != "" {
+			fmt.Fprintf(&b, "cc_session_id: %q\n", c.HarnessSessionID)
 		}
 		b.WriteString("---\n")
 		return b.String()
@@ -86,8 +86,8 @@ func (c ContextOutput) Text() string {
 
 	// Required fields (always present when has_session=true)
 	fmt.Fprintf(&b, "session_id: %s\n", c.SessionID)
-	if c.CCSessionID != "" {
-		fmt.Fprintf(&b, "cc_session_id: %q\n", c.CCSessionID)
+	if c.HarnessSessionID != "" {
+		fmt.Fprintf(&b, "cc_session_id: %q\n", c.HarnessSessionID)
 	}
 	fmt.Fprintf(&b, "status: %s\n", c.Status)
 	fmt.Fprintf(&b, "initiative: %q\n", c.Initiative)
@@ -336,7 +336,7 @@ func runContextCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer
 	// Build output
 	result := ContextOutput{
 		SessionID:       sessCtx.SessionID,
-		CCSessionID:     hookEnv.SessionID,
+		HarnessSessionID: hookEnv.SessionID,
 		FrayedFrom:      sessCtx.FrayedFrom,
 		FrameRef:        sessCtx.FrameRef,
 		ParkSource:      sessCtx.ParkSource,
@@ -422,7 +422,7 @@ func runContextCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer
 // outputNoSession outputs the no-session response.
 // ccSessionID is forwarded so models can still use claim even without an active session.
 func outputNoSession(printer *output.Printer, ccSessionID string) error {
-	result := ContextOutput{HasSession: false, CCSessionID: ccSessionID}
+	result := ContextOutput{HasSession: false, HarnessSessionID: ccSessionID}
 	return printer.Print(result)
 }
 

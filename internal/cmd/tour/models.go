@@ -29,7 +29,7 @@ type ChannelSection struct {
 	Commands     DirCount `json:"commands"`
 	Skills       DirCount `json:"skills"`
 	SettingsJSON bool     `json:"settings_json"`
-	ClaudeMD     bool     `json:"claude_md"`
+	ContextFile  bool     `json:"context_file"`
 	ActiveRite   string   `json:"active_rite,omitempty"`
 }
 
@@ -99,7 +99,7 @@ func (t TourOutput) Text() string {
 		} else {
 			b.WriteString("  settings.json  missing\n")
 		}
-		if c.ClaudeMD {
+		if c.ContextFile {
 			b.WriteString("  CLAUDE.md      present\n")
 		} else {
 			b.WriteString("  CLAUDE.md      missing\n")

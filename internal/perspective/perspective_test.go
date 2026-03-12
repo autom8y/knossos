@@ -308,8 +308,8 @@ description: test`,
 			if len(cap.Tools) != tt.wantToolCount {
 				t.Errorf("tools count = %d, want %d (tools: %v)", len(cap.Tools), tt.wantToolCount, cap.Tools)
 			}
-			if len(cap.CCNativeTools) != tt.wantCCNativeCount {
-				t.Errorf("cc_native count = %d, want %d", len(cap.CCNativeTools), tt.wantCCNativeCount)
+			if len(cap.ChannelNativeTools) != tt.wantCCNativeCount {
+				t.Errorf("cc_native count = %d, want %d", len(cap.ChannelNativeTools), tt.wantCCNativeCount)
 			}
 			if len(cap.MCPTools) != tt.wantMCPCount {
 				t.Errorf("mcp count = %d, want %d", len(cap.MCPTools), tt.wantMCPCount)

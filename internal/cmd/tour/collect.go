@@ -58,7 +58,7 @@ func collectChannel(resolver *paths.Resolver) ChannelSection {
 	section.SettingsJSON = fileExists(filepath.Join(channelDir, "settings.json"))
 
 	// Check CLAUDE.md existence
-	section.ClaudeMD = fileExists(filepath.Join(channelDir, "CLAUDE.md"))
+	section.ContextFile = fileExists(filepath.Join(channelDir, "CLAUDE.md"))
 
 	// Read ACTIVE_RITE value
 	section.ActiveRite = resolver.ReadActiveRite()

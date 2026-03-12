@@ -186,7 +186,7 @@ This is the description body.
 	assert.Equal(t, "This is the description body.", entry.Description)
 	assert.Equal(t, []string{"foo", "bar"}, entry.SeeAlso)
 	assert.Equal(t, []string{"test-alias"}, entry.Aliases)
-	assert.Equal(t, "test-cc", entry.CCTerm)
+	assert.Equal(t, "test-cc", entry.HarnessTerm)
 	assert.Equal(t, "test (test-cc)", entry.DisplayName)
 }
 
