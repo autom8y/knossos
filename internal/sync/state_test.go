@@ -12,8 +12,8 @@ import (
 func TestStateManager_InitializeAndLoad(t *testing.T) {
 	// Create temp directory
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("failed to create .claude dir: %v", err)
 	}
 

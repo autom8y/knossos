@@ -22,10 +22,10 @@ func newTestParseContext(t *testing.T, agentFrontmatter, agentBody string, opts 
 	riteDir := filepath.Join(dir, "rites", riteName)
 	agentsDir := filepath.Join(riteDir, "agents")
 	knossosDir := filepath.Join(dir, ".knossos")
-	claudeDir := filepath.Join(dir, ".claude")
-	claudeAgentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(dir, ".claude")
+	channelAgentsDir := filepath.Join(channelDir, "agents")
 
-	for _, d := range []string{agentsDir, knossosDir, claudeDir, claudeAgentsDir} {
+	for _, d := range []string{agentsDir, knossosDir, channelDir, channelAgentsDir} {
 		if err := os.MkdirAll(d, 0755); err != nil {
 			t.Fatal(err)
 		}
@@ -499,10 +499,10 @@ description: test`, "body")
 		riteDir := filepath.Join(dir, "rites", riteName)
 		agentsDir := filepath.Join(riteDir, "agents")
 		knossosDir := filepath.Join(dir, ".knossos")
-		claudeDir := filepath.Join(dir, ".claude")
-		claudeAgentsDir := filepath.Join(claudeDir, "agents")
+		channelDir := filepath.Join(dir, ".claude")
+		channelAgentsDir := filepath.Join(channelDir, "agents")
 
-		for _, d := range []string{agentsDir, knossosDir, claudeDir, claudeAgentsDir} {
+		for _, d := range []string{agentsDir, knossosDir, channelDir, channelAgentsDir} {
 			if err := os.MkdirAll(d, 0755); err != nil {
 				t.Fatal(err)
 			}
@@ -514,7 +514,7 @@ description: test`, "body")
 		_ = os.WriteFile(filepath.Join(agentsDir, "test-agent.md"), []byte(agentContent), 0644)
 
 		materializedContent := "---\nname: test-agent\ndescription: test\n---\nbody"
-		_ = os.WriteFile(filepath.Join(claudeAgentsDir, "test-agent.md"), []byte(materializedContent), 0644)
+		_ = os.WriteFile(filepath.Join(channelAgentsDir, "test-agent.md"), []byte(materializedContent), 0644)
 
 		_ = os.WriteFile(filepath.Join(riteDir, "manifest.yaml"), []byte("name: test-rite\nversion: \"1.0\"\nagents: []\n"), 0644)
 
@@ -523,7 +523,7 @@ description: test`, "body")
 		_ = os.WriteFile(filepath.Join(sharedDir, "manifest.yaml"), []byte("name: shared\n"), 0644)
 
 		// Compute checksum of materialized file
-		cs, _ := checksum.File(filepath.Join(claudeAgentsDir, "test-agent.md"))
+		cs, _ := checksum.File(filepath.Join(channelAgentsDir, "test-agent.md"))
 
 		// Write provenance manifest with matching checksum
 		manifest := &provenance.ProvenanceManifest{

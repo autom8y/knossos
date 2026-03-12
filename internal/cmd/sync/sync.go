@@ -196,9 +196,9 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 
 	// Budget report (appended to sync output)
 	if showBudget {
-		claudeDir := filepath.Join(projectDir, ".claude")
+		channelDir := filepath.Join(projectDir, ".claude")
 		budgetData := map[string]any{}
-		if err := formatBudgetReport(claudeDir, budgetData); err != nil {
+		if err := formatBudgetReport(channelDir, budgetData); err != nil {
 			printer.VerboseLog("warn", "budget calculation failed", map[string]any{"error": err.Error()})
 		} else if b, ok := budgetData["budget"]; ok {
 			out.Budget = b
@@ -211,8 +211,8 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 
 	// Print human-readable budget text after structured output
 	if showBudget {
-		claudeDir := filepath.Join(projectDir, ".claude")
-		text, err := budgetText(claudeDir)
+		channelDir := filepath.Join(projectDir, ".claude")
+		text, err := budgetText(channelDir)
 		if err == nil {
 			printer.PrintText(text)
 		}

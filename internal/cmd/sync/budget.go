@@ -10,13 +10,13 @@ import (
 )
 
 // formatBudgetReport generates a human-readable budget report and adds structured data to the output map.
-func formatBudgetReport(claudeDir string, out map[string]any) error {
+func formatBudgetReport(channelDir string, out map[string]any) error {
 	counter, err := tokenizer.New()
 	if err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "initializing tokenizer", err)
 	}
 
-	report, err := counter.CalculateBudget(claudeDir)
+	report, err := counter.CalculateBudget(channelDir)
 	if err != nil {
 		return errors.Wrap(errors.CodeGeneralError, "calculating budget", err)
 	}
@@ -61,13 +61,13 @@ func formatBudgetReport(claudeDir string, out map[string]any) error {
 }
 
 // budgetText generates a human-readable text summary of the budget.
-func budgetText(claudeDir string) (string, error) {
+func budgetText(channelDir string) (string, error) {
 	counter, err := tokenizer.New()
 	if err != nil {
 		return "", err
 	}
 
-	report, err := counter.CalculateBudget(claudeDir)
+	report, err := counter.CalculateBudget(channelDir)
 	if err != nil {
 		return "", err
 	}
@@ -76,7 +76,7 @@ func budgetText(claudeDir string) (string, error) {
 	b.WriteString("\nContext Budget Report\n")
 	b.WriteString(strings.Repeat("=", 50) + "\n")
 	fmt.Fprintf(&b, "Total tokens in %s: %s\n\n",
-		filepath.Base(claudeDir), formatNum(report.TotalTokens))
+		filepath.Base(channelDir), formatNum(report.TotalTokens))
 
 	// Category breakdown
 	b.WriteString("By category:\n")

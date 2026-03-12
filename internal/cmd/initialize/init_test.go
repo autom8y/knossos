@@ -33,8 +33,8 @@ func TestInit_FreshDirectory(t *testing.T) {
 	}
 
 	// Verify .claude/ directory was created.
-	claudeDir := filepath.Join(dir, ".claude")
-	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
+	channelDir := filepath.Join(dir, ".claude")
+	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
 		t.Error(".claude/ directory was not created")
 	}
 
@@ -45,13 +45,13 @@ func TestInit_FreshDirectory(t *testing.T) {
 	}
 
 	// Verify CLAUDE.md was created.
-	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
 		t.Error("CLAUDE.md was not created")
 	}
 
 	// Verify settings.local.json was created.
-	settingsPath := filepath.Join(claudeDir, "settings.local.json")
+	settingsPath := filepath.Join(channelDir, "settings.local.json")
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
 		t.Error("settings.local.json was not created")
 	}
@@ -121,10 +121,10 @@ dependencies:
 		t.Fatalf("runInit() with rite returned error: %v", err)
 	}
 
-	claudeDir := filepath.Join(dir, ".claude")
+	channelDir := filepath.Join(dir, ".claude")
 
 	// Verify agents were materialized.
-	agentsDir := filepath.Join(claudeDir, "agents")
+	agentsDir := filepath.Join(channelDir, "agents")
 	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
 		t.Error("agents/ directory was not created")
 	}
@@ -221,11 +221,11 @@ func TestInit_Force(t *testing.T) {
 
 	// Pre-create .knossos/ with a valid KNOSSOS_MANIFEST.yaml.
 	knossosDir := filepath.Join(dir, ".knossos")
-	claudeDir := filepath.Join(dir, ".claude")
+	channelDir := filepath.Join(dir, ".claude")
 	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	manifestPath := filepath.Join(knossosDir, "KNOSSOS_MANIFEST.yaml")
@@ -259,13 +259,13 @@ section_order:
 	}
 
 	// Verify CLAUDE.md was generated (proves re-materialization happened).
-	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
 		t.Error("CLAUDE.md was not created after --force reinitialize")
 	}
 
 	// Verify settings.local.json was created.
-	settingsPath := filepath.Join(claudeDir, "settings.local.json")
+	settingsPath := filepath.Join(channelDir, "settings.local.json")
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
 		t.Error("settings.local.json was not created after --force reinitialize")
 	}
@@ -276,12 +276,12 @@ func TestInit_NonKnossosClaudeDir(t *testing.T) {
 	dir := t.TempDir()
 
 	// Pre-create .claude/ without KNOSSOS_MANIFEST.yaml (non-Knossos project).
-	claudeDir := filepath.Join(dir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(dir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 	// Write some existing content (like a manual CLAUDE.md).
-	if err := os.WriteFile(filepath.Join(claudeDir, "CLAUDE.md"), []byte("# Custom"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(channelDir, "CLAUDE.md"), []byte("# Custom"), 0644); err != nil {
 		t.Fatal(err)
 	}
 

@@ -98,14 +98,14 @@ func runShow(ctx *cmdContext, scopeFilter string) error {
 	// Load rite-scope manifest (from project .knossos/)
 	if scopeFilter == "" || scopeFilter == "rite" {
 		knossosDir := filepath.Join(resolver.ProjectRoot(), ".knossos")
-		claudeDir := filepath.Join(resolver.ProjectRoot(), ".claude")
+		channelDir := filepath.Join(resolver.ProjectRoot(), ".claude")
 		manifestPath := provenance.ManifestPath(knossosDir)
 		manifest, err := provenance.LoadOrBootstrap(manifestPath)
 		if err == nil && len(manifest.Entries) > 0 {
 			combinedOutput.Rite = manifest
 			for path, entry := range manifest.Entries {
 				allEntries = append(allEntries, makeShowEntry(
-					path, entry, claudeDir, *ctx.Verbose))
+					path, entry, channelDir, *ctx.Verbose))
 			}
 		}
 	}
@@ -114,15 +114,15 @@ func runShow(ctx *cmdContext, scopeFilter string) error {
 	if scopeFilter == "" || scopeFilter == "user" {
 		homeDir, err := os.UserHomeDir()
 		if err == nil {
-			userClaudeDir := filepath.Join(homeDir, ".claude")
-			userManifestPath := provenance.UserManifestPath(userClaudeDir)
+			userChannelDir := filepath.Join(homeDir, ".claude")
+			userManifestPath := provenance.UserManifestPath(userChannelDir)
 			userManifest, loadErr := provenance.LoadOrBootstrap(userManifestPath)
 			if loadErr == nil && len(userManifest.Entries) > 0 {
 				combinedOutput.User = userManifest
 				for path, entry := range userManifest.Entries {
 					displayPath := "~/" + path
 					showEntry := makeShowEntryWithDisplayPath(
-						displayPath, path, entry, userClaudeDir, *ctx.Verbose)
+						displayPath, path, entry, userChannelDir, *ctx.Verbose)
 					allEntries = append(allEntries, showEntry)
 				}
 			}
@@ -184,14 +184,14 @@ func (s *ShowOutput) Rows() [][]string {
 }
 
 // makeShowEntry creates a ShowEntry from a ProvenanceEntry.
-func makeShowEntry(path string, entry *provenance.ProvenanceEntry, claudeDir string, verbose bool) *ShowEntry {
+func makeShowEntry(path string, entry *provenance.ProvenanceEntry, channelDir string, verbose bool) *ShowEntry {
 	showEntry := &ShowEntry{
 		Path:       path,
 		Owner:      string(entry.Owner),
 		Scope:      string(entry.Scope),
 		SourcePath: entry.SourcePath,
 		SourceType: entry.SourceType,
-		Status:     computeStatus(claudeDir, path, entry),
+		Status:     computeStatus(channelDir, path, entry),
 	}
 
 	// Add checksum if verbose
@@ -204,14 +204,14 @@ func makeShowEntry(path string, entry *provenance.ProvenanceEntry, claudeDir str
 
 // makeShowEntryWithDisplayPath creates a ShowEntry with separate display and actual paths.
 // Used for user-scope entries where displayPath has "~/" prefix but actualPath is used for status.
-func makeShowEntryWithDisplayPath(displayPath, actualPath string, entry *provenance.ProvenanceEntry, claudeDir string, verbose bool) *ShowEntry {
+func makeShowEntryWithDisplayPath(displayPath, actualPath string, entry *provenance.ProvenanceEntry, channelDir string, verbose bool) *ShowEntry {
 	showEntry := &ShowEntry{
 		Path:       displayPath,
 		Owner:      string(entry.Owner),
 		Scope:      string(entry.Scope),
 		SourcePath: entry.SourcePath,
 		SourceType: entry.SourceType,
-		Status:     computeStatus(claudeDir, actualPath, entry),
+		Status:     computeStatus(channelDir, actualPath, entry),
 	}
 
 	// Add checksum if verbose
@@ -223,14 +223,14 @@ func makeShowEntryWithDisplayPath(displayPath, actualPath string, entry *provena
 }
 
 // computeStatus determines the status of a file based on its checksum.
-func computeStatus(claudeDir, path string, entry *provenance.ProvenanceEntry) string {
+func computeStatus(channelDir, path string, entry *provenance.ProvenanceEntry) string {
 	// User and untracked files have no validation
 	if entry.Owner != provenance.OwnerKnossos {
 		return "-"
 	}
 
 	// Compute current checksum
-	fullPath := filepath.Join(claudeDir, path)
+	fullPath := filepath.Join(channelDir, path)
 	var currentChecksum string
 	var err error
 

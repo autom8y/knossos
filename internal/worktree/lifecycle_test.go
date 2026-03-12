@@ -332,8 +332,8 @@ func setupTestGitRepo(t *testing.T) string {
 	}
 
 	// Create .claude directory
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	return tmpDir
 }

@@ -166,8 +166,8 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		return printer.Print(result)
 	}
 
-	claudeDir := filepath.Join(projectDir, ".claude")
-	if _, err := os.Stat(claudeDir); err == nil && !force {
+	channelDir := filepath.Join(projectDir, ".claude")
+	if _, err := os.Stat(channelDir); err == nil && !force {
 		// .claude/ exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.
 		errMsg := errors.New(errors.CodeUsageError, ".claude/ exists but is not Knossos-managed; use --force to initialize")
 		return common.PrintAndReturn(printer, errMsg)

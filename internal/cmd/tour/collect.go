@@ -25,8 +25,8 @@ func collectTour(resolver *paths.Resolver) TourOutput {
 }
 
 func collectChannel(resolver *paths.Resolver) ChannelSection {
-	claudeDir := resolver.ClaudeDir()
-	if !dirExists(claudeDir) {
+	channelDir := resolver.ClaudeDir()
+	if !dirExists(channelDir) {
 		return ChannelSection{Exists: false, Path: ".claude/"}
 	}
 
@@ -43,22 +43,22 @@ func collectChannel(resolver *paths.Resolver) ChannelSection {
 	}
 
 	// Count all files in commands/
-	commandsDir := filepath.Join(claudeDir, "commands")
+	commandsDir := filepath.Join(channelDir, "commands")
 	section.Commands = DirCount{
 		Count: countAllFiles(commandsDir),
 	}
 
 	// Count all files in skills/
-	skillsDir := filepath.Join(claudeDir, "skills")
+	skillsDir := filepath.Join(channelDir, "skills")
 	section.Skills = DirCount{
 		Count: countAllFiles(skillsDir),
 	}
 
 	// Check settings.json existence
-	section.SettingsJSON = fileExists(filepath.Join(claudeDir, "settings.json"))
+	section.SettingsJSON = fileExists(filepath.Join(channelDir, "settings.json"))
 
 	// Check CLAUDE.md existence
-	section.ClaudeMD = fileExists(filepath.Join(claudeDir, "CLAUDE.md"))
+	section.ClaudeMD = fileExists(filepath.Join(channelDir, "CLAUDE.md"))
 
 	// Read ACTIVE_RITE value
 	section.ActiveRite = resolver.ReadActiveRite()

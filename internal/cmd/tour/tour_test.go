@@ -20,10 +20,10 @@ func createTestProject(t *testing.T) string {
 	root := t.TempDir()
 
 	// .claude/ directory
-	claudeDir := filepath.Join(root, ".claude")
-	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "agents"), 0755))
-	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "commands"), 0755))
-	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "skills"), 0755))
+	channelDir := filepath.Join(root, ".claude")
+	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "agents"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "commands"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "skills"), 0755))
 
 	// .knossos/ directory
 	knossosDir := filepath.Join(root, ".knossos")

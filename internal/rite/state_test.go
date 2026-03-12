@@ -13,8 +13,8 @@ func TestStateManager_LoadSaveRoundTrip(t *testing.T) {
 	t.Parallel()
 	// Create temp directory structure
 	tempDir := t.TempDir()
-	claudeDir := filepath.Join(tempDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tempDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
 
@@ -81,8 +81,8 @@ func TestStateManager_LoadSaveRoundTrip(t *testing.T) {
 func TestStateManager_LoadMissing(t *testing.T) {
 	t.Parallel()
 	tempDir := t.TempDir()
-	claudeDir := filepath.Join(tempDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tempDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude dir: %v", err)
 	}
 
