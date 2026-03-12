@@ -20,8 +20,8 @@ func TestParseEnv_StdinOnly(t *testing.T) {
 
 	env := ParseEnv()
 
-	if env.Event != EventPreToolUse {
-		t.Errorf("Expected event %s, got %s", EventPreToolUse, env.Event)
+	if env.Event != EventPreTool {
+		t.Errorf("Expected event %s, got %s", EventPreTool, env.Event)
 	}
 	if env.ToolName != "Bash" {
 		t.Errorf("Expected tool name Bash, got %s", env.ToolName)
@@ -90,8 +90,8 @@ func TestEnvEventChecks(t *testing.T) {
 		isPreCompact    bool
 		isSubagentStart bool
 	}{
-		{EventPreToolUse, true, false, false, false, false, false},
-		{EventPostToolUse, false, true, false, false, false, false},
+		{EventPreTool, true, false, false, false, false, false},
+		{EventPostTool, false, true, false, false, false, false},
 		{EventStop, false, false, true, false, false, false},
 		{EventSessionStart, false, false, false, true, false, false},
 		{EventPreCompact, false, false, false, false, true, false},
@@ -103,11 +103,11 @@ func TestEnvEventChecks(t *testing.T) {
 		t.Run(string(tt.event), func(t *testing.T) {
 			env := &Env{Event: tt.event}
 
-			if got := env.IsPreToolUse(); got != tt.isPreTool {
-				t.Errorf("IsPreToolUse() = %v, want %v", got, tt.isPreTool)
+			if got := env.IsPreTool(); got != tt.isPreTool {
+				t.Errorf("IsPreTool() = %v, want %v", got, tt.isPreTool)
 			}
-			if got := env.IsPostToolUse(); got != tt.isPostTool {
-				t.Errorf("IsPostToolUse() = %v, want %v", got, tt.isPostTool)
+			if got := env.IsPostTool(); got != tt.isPostTool {
+				t.Errorf("IsPostTool() = %v, want %v", got, tt.isPostTool)
 			}
 			if got := env.IsStop(); got != tt.isStop {
 				t.Errorf("IsStop() = %v, want %v", got, tt.isStop)
@@ -127,20 +127,22 @@ func TestEnvEventChecks(t *testing.T) {
 
 func TestValidHookEvents(t *testing.T) {
 	validEvents := []HookEvent{
-		EventPreToolUse,
-		EventPostToolUse,
-		EventPostToolUseFailure,
+		EventPreTool,
+		EventPostTool,
+		EventPostToolFailure,
 		EventPermissionRequest,
 		EventStop,
 		EventSessionStart,
 		EventSessionEnd,
-		EventUserPromptSubmit,
+		EventPrePrompt,
 		EventPreCompact,
 		EventSubagentStart,
 		EventSubagentStop,
 		EventNotification,
 		EventTeammateIdle,
 		EventTaskCompleted,
+		EventPreModel,
+		EventPostModel,
 	}
 
 	for _, event := range validEvents {
@@ -240,8 +242,8 @@ func TestParseStdin_PopulatesEnv(t *testing.T) {
 
 	env := ParseEnv()
 
-	if env.Event != EventPostToolUse {
-		t.Errorf("Event = %q, want %q", env.Event, EventPostToolUse)
+	if env.Event != EventPostTool {
+		t.Errorf("Event = %q, want %q", env.Event, EventPostTool)
 	}
 	if env.ToolName != "Write" {
 		t.Errorf("ToolName = %q, want %q", env.ToolName, "Write")
@@ -308,8 +310,8 @@ func TestParseStdin_UserPromptSubmit(t *testing.T) {
 
 	env := ParseEnv()
 
-	if env.Event != EventUserPromptSubmit {
-		t.Errorf("Event = %q, want %q", env.Event, EventUserPromptSubmit)
+	if env.Event != EventPrePrompt {
+		t.Errorf("Event = %q, want %q", env.Event, EventPrePrompt)
 	}
 	if env.UserMessage != "/sos start my-initiative" {
 		t.Errorf("UserMessage = %q, want %q", env.UserMessage, "/sos start my-initiative")

@@ -18,7 +18,7 @@ func TestPrecompact_NoSession(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -42,7 +42,7 @@ func TestPrecompact_NonPreCompactEvent(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -88,7 +88,7 @@ func TestPrecompact_NoSessionContextFile(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -154,7 +154,7 @@ current_phase: requirements
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -237,7 +237,7 @@ Just a few lines
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -312,7 +312,7 @@ current_phase: implementation
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -389,7 +389,7 @@ Small body content.
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -454,7 +454,7 @@ Small body.
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -523,7 +523,7 @@ Small body.
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runPrecompactCore(ctx, printer); err != nil {
+	if err := runPrecompactCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

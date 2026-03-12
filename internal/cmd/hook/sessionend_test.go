@@ -80,7 +80,7 @@ func TestRunSessionEnd_WrongEvent(t *testing.T) {
 		},
 	}
 
-	err := runSessionEndCore(ctx, printer)
+	err := runSessionEndCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runSessionEnd() error = %v", err)
 	}
@@ -93,8 +93,8 @@ func TestRunSessionEnd_WrongEvent(t *testing.T) {
 	if result.WasEnded {
 		t.Error("Expected WasEnded=false for non-SessionEnd event")
 	}
-	if result.Message != "not a SessionEnd event" {
-		t.Errorf("Message = %q, want %q", result.Message, "not a SessionEnd event")
+	if result.Message != "not a session_end event" {
+		t.Errorf("Message = %q, want %q", result.Message, "not a session_end event")
 	}
 }
 
@@ -147,7 +147,7 @@ current_phase: "implementation"
 		},
 	}
 
-	err := runSessionEndCore(ctx, printer)
+	err := runSessionEndCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runSessionEnd() error = %v", err)
 	}
@@ -231,7 +231,7 @@ park_source: manual
 		},
 	}
 
-	err := runSessionEndCore(ctx, printer)
+	err := runSessionEndCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runSessionEnd() error = %v", err)
 	}

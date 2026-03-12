@@ -184,7 +184,7 @@ func TestRunWriteguard_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -229,7 +229,7 @@ func TestRunWriteguard_BypassEnvVar(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -268,7 +268,7 @@ func TestRunWriteguard_NonWriteTool(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -306,7 +306,7 @@ func TestRunWriteguard_BlockSessionContext(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -350,7 +350,7 @@ func TestRunWriteguard_BlockSprintContext(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -391,7 +391,7 @@ func TestRunWriteguard_AllowRegularFile(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -493,7 +493,7 @@ func TestWriteguard_ParkedSession_MoiraiLockAllow(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -543,7 +543,7 @@ func TestWriteguard_ParkedSession_NoLock(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -598,7 +598,7 @@ func TestWriteguard_ParkedSession_StaleLock(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -638,7 +638,7 @@ func runWipTest(t *testing.T, env *testutil.HookEnv) hook.PreToolUseOutput {
 	testutil.SetupEnv(t, env)
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(makeWipCtx(), printer); err != nil {
+	if err := runWriteguardCore(nil, makeWipCtx(), printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -956,7 +956,7 @@ func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(ctx, printer)
+		runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -988,7 +988,7 @@ func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(ctx, printer)
+		runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -1031,7 +1031,7 @@ func TestWriteguard_StdinIntegration_AllowRegularFile(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -1078,7 +1078,7 @@ func TestWriteguard_StdinIntegration_BlockProtectedFile(t *testing.T) {
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -1144,7 +1144,7 @@ status: ARCHIVED
 		},
 	}
 
-	err := runWriteguardCore(ctx, printer)
+	err := runWriteguardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runWriteguard() error = %v", err)
 	}
@@ -1384,7 +1384,7 @@ func TestWriteguard_SectionEdit_TimelineNoLock_Allow(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1425,7 +1425,7 @@ func TestWriteguard_SectionEdit_FrontmatterWithLock_Allow(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1458,7 +1458,7 @@ func TestWriteguard_SectionEdit_FrontmatterNoLock_Deny(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1497,7 +1497,7 @@ func TestWriteguard_SectionEdit_ArtifactsWithLock_Allow(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1530,7 +1530,7 @@ func TestWriteguard_SectionEdit_ArtifactsNoLock_Deny(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1569,7 +1569,7 @@ func TestWriteguard_SectionEdit_Mixed_Deny(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1605,7 +1605,7 @@ func TestWriteguard_SectionEdit_Unknown_Deny(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1640,7 +1640,7 @@ func TestWriteguard_SessionContextWrite_WithLock_Allow(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1672,7 +1672,7 @@ func TestWriteguard_SessionContextWrite_NoLock_Deny(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runWriteguardCore(ctx, printer); err != nil {
+	if err := runWriteguardCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runWriteguardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -1778,7 +1778,7 @@ func BenchmarkWriteguardHook_TimelineAllow(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(ctx, printer)
+		runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -1833,7 +1833,7 @@ func BenchmarkWriteguardHook_FrontmatterBlock(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(ctx, printer)
+		runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()

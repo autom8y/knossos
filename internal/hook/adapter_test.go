@@ -20,8 +20,8 @@ func TestClaudeAdapter_ParsePayload(t *testing.T) {
 	if env.SessionID != "sess-123" {
 		t.Errorf("expected session_id sess-123, got %s", env.SessionID)
 	}
-	if env.Event != EventPreToolUse {
-		t.Errorf("expected EventPreToolUse, got %s", env.Event)
+	if env.Event != EventPreTool {
+		t.Errorf("expected EventPreTool, got %s", env.Event)
 	}
 }
 
@@ -40,8 +40,8 @@ func TestGeminiAdapter_ParsePayload(t *testing.T) {
 		t.Errorf("expected session_id sess-gemini, got %s", env.SessionID)
 	}
 	// BeforeTool should be translated to PreToolUse
-	if env.Event != EventPreToolUse {
-		t.Errorf("expected EventPreToolUse after translation, got %s", env.Event)
+	if env.Event != EventPreTool {
+		t.Errorf("expected EventPreTool after translation, got %s", env.Event)
 	}
 }
 
@@ -55,15 +55,15 @@ func TestGeminiAdapter_EventTranslation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if env.Event != EventPreToolUse {
-		t.Errorf("BeforeTool should translate to EventPreToolUse, got %s", env.Event)
+	if env.Event != EventPreTool {
+		t.Errorf("BeforeTool should translate to EventPreTool, got %s", env.Event)
 	}
 }
 
-func TestGeminiAdapter_UnknownEventDropped(t *testing.T) {
+func TestGeminiAdapter_BeforeModelTranslated(t *testing.T) {
 	adapter := &GeminiAdapter{}
 
-	// BeforeModel is a Gemini-only event with no CC equivalent
+	// BeforeModel is a Gemini-exclusive event, now a valid canonical event (ADR-0032)
 	payload := `{"session_id": "sess-1", "hook_event_name": "BeforeModel"}`
 	reader := bytes.NewReader([]byte(payload))
 
@@ -71,9 +71,26 @@ func TestGeminiAdapter_UnknownEventDropped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	// Unknown Gemini-only event should result in empty event
+	// BeforeModel should translate to EventPreModel (canonical)
+	if env.Event != EventPreModel {
+		t.Errorf("BeforeModel should translate to EventPreModel, got %s", env.Event)
+	}
+}
+
+func TestGeminiAdapter_UnknownEventDropped(t *testing.T) {
+	adapter := &GeminiAdapter{}
+
+	// Truly unknown event with no canonical mapping
+	payload := `{"session_id": "sess-1", "hook_event_name": "SomeUnknownEvent"}`
+	reader := bytes.NewReader([]byte(payload))
+
+	env, err := adapter.ParsePayload(reader)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	// Unknown event should result in empty event
 	if env.Event != "" {
-		t.Errorf("BeforeModel should produce empty event, got %s", env.Event)
+		t.Errorf("SomeUnknownEvent should produce empty event, got %s", env.Event)
 	}
 }
 

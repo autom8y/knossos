@@ -35,7 +35,7 @@ func runAgentGuardTest(t *testing.T, env *testutil.HookEnv, agentName string, al
 	testutil.SetupEnv(t, env)
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runAgentGuardCore(makeAgentGuardCtx(), printer, agentName, allowPaths); err != nil {
+	if err := runAgentGuardCore(nil, makeAgentGuardCtx(), printer,agentName, allowPaths); err != nil {
 		t.Fatalf("runAgentGuardCore() error = %v", err)
 	}
 	var result hook.PreToolUseOutput
@@ -370,7 +370,7 @@ func TestAgentGuard_StdinIntegration_DenyOutsidePaths(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	err := runAgentGuardCore(makeAgentGuardCtx(), printer, "ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
+	err := runAgentGuardCore(nil, makeAgentGuardCtx(), printer,"ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
 	if err != nil {
 		t.Fatalf("runAgentGuardCore() error = %v", err)
 	}
@@ -405,7 +405,7 @@ func TestAgentGuard_StdinIntegration_AllowWipPath(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	err := runAgentGuardCore(makeAgentGuardCtx(), printer, "ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
+	err := runAgentGuardCore(nil, makeAgentGuardCtx(), printer,"ecosystem-analyst", []string{".sos/wip/", "docs/ecosystem/"})
 	if err != nil {
 		t.Fatalf("runAgentGuardCore() error = %v", err)
 	}
@@ -439,7 +439,7 @@ func BenchmarkAgentGuard_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAgentGuardCore(ctx, printer, "ecosystem-analyst", allowPaths)
+		runAgentGuardCore(nil, ctx, printer, "ecosystem-analyst", allowPaths)
 	}
 
 	elapsed := b.Elapsed()

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/test/hooks/testutil"
 )
 
@@ -63,7 +64,7 @@ func TestRunBudget_Disabled(t *testing.T) {
 	os.Remove(expectedPath)
 
 	ctx := newTestContext(t)
-	err := runBudget(ctx)
+	err := runBudget(nil, ctx)
 	if err != nil {
 		t.Fatalf("runBudget() error = %v", err)
 	}
@@ -138,28 +139,20 @@ func TestResolveStateFile(t *testing.T) {
 		t.Setenv(envSessionKey, "my-test-key")
 		t.Setenv("CLAUDE_SESSION_ID", "should-not-use")
 
-		result := resolveStateFile(ctx)
+		result := resolveStateFile(ctx, &hook.Env{})
 		expected := filepath.Join(os.TempDir(), "ari-msg-count-my-test-key")
 		if result != expected {
 			t.Errorf("resolveStateFile() = %q, want %q", result, expected)
 		}
 	})
 
-	t.Run("falls back to session ID from stdin", func(t *testing.T) {
+	t.Run("falls back to session ID from hookEnv", func(t *testing.T) {
 		t.Setenv(envSessionKey, "")
 		os.Unsetenv(envSessionKey)
 
-		// Pipe session ID via stdin JSON (CC's actual transport)
-		oldStdin := os.Stdin
-		r, w, _ := os.Pipe()
-		go func() {
-			w.Write([]byte(`{"hook_event_name":"PostToolUse","session_id":"sess-abc-123"}`))
-			w.Close()
-		}()
-		os.Stdin = r
-		t.Cleanup(func() { os.Stdin = oldStdin })
-
-		result := resolveStateFile(ctx)
+		// Pass session ID via hookEnv (the actual transport after adapter parsing)
+		env := &hook.Env{SessionID: "sess-abc-123"}
+		result := resolveStateFile(ctx, env)
 		expected := filepath.Join(os.TempDir(), "ari-msg-count-sess-abc-123")
 		if result != expected {
 			t.Errorf("resolveStateFile() = %q, want %q", result, expected)
@@ -169,7 +162,7 @@ func TestResolveStateFile(t *testing.T) {
 	t.Run("sanitizes special characters", func(t *testing.T) {
 		t.Setenv(envSessionKey, "test/key with spaces!@#")
 
-		result := resolveStateFile(ctx)
+		result := resolveStateFile(ctx, &hook.Env{})
 		expected := filepath.Join(os.TempDir(), "ari-msg-count-test_key_with_spaces___")
 		if result != expected {
 			t.Errorf("resolveStateFile() = %q, want %q", result, expected)
@@ -211,7 +204,7 @@ func TestRunBudget_WarnThreshold(t *testing.T) {
 	})
 
 	ctx := newTestContext(t)
-	err := runBudget(ctx)
+	err := runBudget(nil, ctx)
 	if err != nil {
 		t.Fatalf("runBudget() error = %v", err)
 	}
@@ -242,7 +235,7 @@ func TestRunBudget_ParkThreshold(t *testing.T) {
 	})
 
 	ctx := newTestContext(t)
-	err := runBudget(ctx)
+	err := runBudget(nil, ctx)
 	if err != nil {
 		t.Fatalf("runBudget() error = %v", err)
 	}
@@ -274,7 +267,7 @@ func TestRunBudget_OneShot(t *testing.T) {
 	ctx := newTestContext(t)
 
 	// First call: count=1 >= warn=1 → should create marker
-	err := runBudget(ctx)
+	err := runBudget(nil, ctx)
 	if err != nil {
 		t.Fatalf("runBudget() first call error = %v", err)
 	}
@@ -288,7 +281,7 @@ func TestRunBudget_OneShot(t *testing.T) {
 	markerInfo, _ := os.Stat(expectedPath + ".warned")
 	markerModTime := markerInfo.ModTime()
 
-	err = runBudget(ctx)
+	err = runBudget(nil, ctx)
 	if err != nil {
 		t.Fatalf("runBudget() second call error = %v", err)
 	}
@@ -319,7 +312,7 @@ func TestRunBudget_CustomThresholds(t *testing.T) {
 	ctx := newTestContext(t)
 
 	// count=1, below both thresholds
-	err := runBudget(ctx)
+	err := runBudget(nil, ctx)
 	if err != nil {
 		t.Fatalf("runBudget() error = %v", err)
 	}
@@ -353,7 +346,7 @@ func TestRunBudget_InvalidThresholds(t *testing.T) {
 	ctx := newTestContext(t)
 
 	// Should use defaultWarn (250) for invalid warn, ignore invalid park
-	err := runBudget(ctx)
+	err := runBudget(nil, ctx)
 	if err != nil {
 		t.Fatalf("runBudget() error = %v", err)
 	}

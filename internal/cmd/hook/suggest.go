@@ -63,7 +63,7 @@ cleaned up when the session is removed.
 Performance: <60ms total (async, no latency impact on tool execution).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runSuggest(ctx)
+				return runSuggest(cmd, ctx)
 			})
 		},
 	}
@@ -71,18 +71,23 @@ Performance: <60ms total (async, no latency impact on tool execution).`,
 	return cmd
 }
 
-func runSuggest(ctx *cmdContext) error {
+func runSuggest(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runSuggestCore(ctx, printer)
+	return runSuggestCore(cmd, ctx, printer)
 }
 
 // runSuggestCore contains the suggest hook logic with injected printer for testing.
-func runSuggestCore(ctx *cmdContext, printer *output.Printer) error {
-	hookEnv := ctx.getHookEnv()
+func runSuggestCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a PostToolUse event (or empty for testing)
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostToolUse {
-		return printer.Print(SuggestOutput{Message: "not a PostToolUse event"})
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostTool {
+		return printer.Print(SuggestOutput{Message: "not a post_tool event"})
 	}
 
 	// Resolve session

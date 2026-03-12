@@ -333,7 +333,7 @@ func TestRunContext_EarlyExit_HooksDisabled(t *testing.T) {
 	}
 
 	// Override getPrinter to use our buffer
-	err := runContextCore(ctx, printer)
+	err := runContextCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -412,7 +412,7 @@ current_phase: "implementation"
 		},
 	}
 
-	err := runContextCore(ctx, printer)
+	err := runContextCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -469,7 +469,7 @@ func TestRunContext_NoSession(t *testing.T) {
 		},
 	}
 
-	err := runContextCore(ctx, printer)
+	err := runContextCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -534,7 +534,7 @@ current_phase: "implementation"
 		},
 	}
 
-	err := runContextCore(ctx, printer)
+	err := runContextCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -610,7 +610,7 @@ current_phase: "requirements"
 		},
 	}
 
-	err := runContextCore(ctx, printer)
+	err := runContextCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -765,7 +765,7 @@ current_phase: "implementation"
 		sourceResolver: srcResolver,
 	}
 
-	err := runContextCore(ctx, printer)
+	err := runContextCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runContextCore() error = %v", err)
 	}
@@ -832,7 +832,7 @@ func BenchmarkContextHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextCore(ctx, printer)
+		runContextCore(nil, ctx, printer)
 	}
 
 	// Report ns/op
@@ -895,7 +895,7 @@ current_phase: "implementation"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextCore(ctx, printer)
+		runContextCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -991,7 +991,7 @@ current_phase: "implementation"
 		},
 	}
 
-	if err := runContextCore(ctx, printer); err != nil {
+	if err := runContextCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runContextCore() error = %v", err)
 	}
 
@@ -1065,7 +1065,7 @@ current_phase: "requirements"
 		},
 	}
 
-	if err := runContextCore(ctx, printer); err != nil {
+	if err := runContextCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runContextCore() error = %v", err)
 	}
 
@@ -1317,7 +1317,7 @@ current_phase: "implementation"
 		},
 	}
 
-	if err := runContextCore(ctx, printer); err != nil {
+	if err := runContextCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runContextCore() error = %v", err)
 	}
 
@@ -1382,7 +1382,7 @@ strands:
 		},
 	}
 
-	if err := runContextCore(ctx, printer); err != nil {
+	if err := runContextCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runContextCore() error = %v", err)
 	}
 
@@ -1456,7 +1456,7 @@ claimed_by: "cc-session-xyz"
 		},
 	}
 
-	if err := runContextCore(ctx, printer); err != nil {
+	if err := runContextCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runContextCore() error = %v", err)
 	}
 

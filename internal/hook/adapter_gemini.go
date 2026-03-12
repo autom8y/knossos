@@ -13,9 +13,9 @@ import (
 // are silently ignored by json.Unmarshal.
 //
 // The only Gemini-specific logic is event name translation: Gemini wire names
-// (BeforeTool, AfterTool, etc.) are translated to CC canonical names (PreToolUse,
-// PostToolUse, etc.) before validation, so all downstream hook commands operate
-// on a uniform Env regardless of which CLI fired the event.
+// (BeforeTool, AfterTool, etc.) are translated to knossos canonical names
+// (pre_tool, post_tool, etc.) before validation, so all downstream hook commands
+// operate on a uniform Env regardless of which CLI fired the event.
 type GeminiAdapter struct{}
 
 func (a *GeminiAdapter) ParsePayload(reader io.Reader) (*Env, error) {
@@ -31,13 +31,12 @@ func (a *GeminiAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 		return &Env{ProjectDir: projectDir}, nil
 	}
 
-	// Translate Gemini wire event name to CC canonical before validation.
-	// e.g. "BeforeTool" -> "PreToolUse"; unknown Gemini-only events (BeforeModel)
-	// pass through TranslateInboundEvent unchanged, then fail isValidHookEvent.
-	translatedEvent := TranslateInboundEvent(payload.HookEventName)
-	event := HookEvent(translatedEvent)
+	// Translate Gemini wire event name to knossos canonical (ADR-0032).
+	// e.g. "BeforeTool" -> "pre_tool"; Gemini-exclusive events (BeforeModel -> "pre_model")
+	// are now valid canonical events.
+	event := HookEvent(WireToCanonical(payload.HookEventName))
 	if event != "" && !isValidHookEvent(event) {
-		// Gemini-only events (e.g. BeforeModel, AfterModel) -- silently ignore
+		// Unknown events -- silently ignore
 		event = ""
 	}
 

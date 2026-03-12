@@ -294,8 +294,8 @@ func TestGetHookEnv(t *testing.T) {
 	if hookEnv == nil {
 		t.Fatal("getHookEnv() returned nil")
 	}
-	if string(hookEnv.Event) != "PreToolUse" {
-		t.Errorf("Event = %q, want %q", hookEnv.Event, "PreToolUse")
+	if string(hookEnv.Event) != "pre_tool" {
+		t.Errorf("Event = %q, want %q", hookEnv.Event, "pre_tool")
 	}
 	if hookEnv.ToolName != "Bash" {
 		t.Errorf("ToolName = %q, want %q", hookEnv.ToolName, "Bash")
@@ -384,7 +384,7 @@ func TestIntegration_ContextHook_NoSession(t *testing.T) {
 		timeout: DefaultTimeout,
 	}
 
-	err := runContextCore(ctx, printer)
+	err := runContextCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runContext() error = %v", err)
 	}
@@ -437,7 +437,7 @@ func TestIntegration_ValidateHook_Chain(t *testing.T) {
 				timeout: DefaultTimeout,
 			}
 
-			err := runValidateCore(ctx, printer)
+			err := runValidateCore(nil, ctx, printer)
 			if err != nil {
 				t.Fatalf("runValidate() error = %v", err)
 			}
@@ -492,7 +492,7 @@ func TestIntegration_WriteguardHook_Chain(t *testing.T) {
 				timeout: DefaultTimeout,
 			}
 
-			err := runWriteguardCore(ctx, printer)
+			err := runWriteguardCore(nil, ctx, printer)
 			if err != nil {
 				t.Fatalf("runWriteguard() error = %v", err)
 			}
@@ -536,7 +536,7 @@ func BenchmarkHook_EarlyExitPath(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextCore(ctx, printer)
+		runContextCore(nil, ctx, printer)
 	}
 
 	// Verify early exit is fast

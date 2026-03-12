@@ -14,23 +14,26 @@ const EnvProjectDir = "CLAUDE_PROJECT_DIR"
 // HookEvent represents the type of hook event.
 type HookEvent string
 
-// Known hook events from Claude Code.
-// See: https://code.claude.com/docs/en/hooks
+// Knossos canonical hook events (ADR-0032).
+// String values are snake_case canonical names; adapters translate to/from wire format.
 const (
-	EventPreToolUse         HookEvent = "PreToolUse"
-	EventPostToolUse        HookEvent = "PostToolUse"
-	EventPostToolUseFailure HookEvent = "PostToolUseFailure"
-	EventPermissionRequest  HookEvent = "PermissionRequest"
-	EventStop               HookEvent = "Stop"
-	EventSessionStart       HookEvent = "SessionStart"
-	EventSessionEnd         HookEvent = "SessionEnd"
-	EventUserPromptSubmit   HookEvent = "UserPromptSubmit"
-	EventPreCompact         HookEvent = "PreCompact"
-	EventSubagentStart      HookEvent = "SubagentStart"
-	EventSubagentStop       HookEvent = "SubagentStop"
-	EventNotification       HookEvent = "Notification"
-	EventTeammateIdle       HookEvent = "TeammateIdle"
-	EventTaskCompleted      HookEvent = "TaskCompleted"
+	EventPreTool           HookEvent = "pre_tool"
+	EventPostTool          HookEvent = "post_tool"
+	EventPostToolFailure   HookEvent = "post_tool_failure"
+	EventPermissionRequest HookEvent = "permission_request"
+	EventStop              HookEvent = "stop"
+	EventSessionStart      HookEvent = "session_start"
+	EventSessionEnd        HookEvent = "session_end"
+	EventPrePrompt         HookEvent = "pre_prompt"
+	EventPreCompact        HookEvent = "pre_compact"
+	EventSubagentStart     HookEvent = "subagent_start"
+	EventSubagentStop      HookEvent = "subagent_stop"
+	EventNotification      HookEvent = "notification"
+	EventTeammateIdle      HookEvent = "teammate_idle"
+	EventTaskCompleted     HookEvent = "task_completed"
+	// Gemini-exclusive events (no CC wire equivalent)
+	EventPreModel  HookEvent = "pre_model"
+	EventPostModel HookEvent = "post_model"
 )
 
 // StdinPayload represents the JSON data Claude Code sends to hooks via stdin.
@@ -60,10 +63,10 @@ type Env struct {
 	// Event type that triggered this hook
 	Event HookEvent
 
-	// Tool information (for PreToolUse/PostToolUse)
+	// Tool information (for pre_tool/post_tool events)
 	ToolName   string
 	ToolInput  string
-	ToolResult string // Tool output/result (PostToolUse only)
+	ToolResult string // Tool output/result (post_tool only)
 
 	// Session context
 	SessionID      string
@@ -111,10 +114,10 @@ func ParseEnv() *Env {
 // isValidHookEvent checks if the provided event is a known HookEvent.
 func isValidHookEvent(event HookEvent) bool {
 	switch event {
-	case EventPreToolUse, EventPostToolUse, EventPostToolUseFailure, EventPermissionRequest,
-		EventStop, EventSessionStart, EventSessionEnd, EventUserPromptSubmit,
+	case EventPreTool, EventPostTool, EventPostToolFailure, EventPermissionRequest,
+		EventStop, EventSessionStart, EventSessionEnd, EventPrePrompt,
 		EventPreCompact, EventSubagentStart, EventSubagentStop, EventNotification,
-		EventTeammateIdle, EventTaskCompleted:
+		EventTeammateIdle, EventTaskCompleted, EventPreModel, EventPostModel:
 		return true
 	default:
 		return false
@@ -132,14 +135,14 @@ func unwrapJSONValue(raw json.RawMessage) string {
 	return string(raw)
 }
 
-// IsPreToolUse returns true if this is a PreToolUse event.
-func (e *Env) IsPreToolUse() bool {
-	return e.Event == EventPreToolUse
+// IsPreTool returns true if this is a pre_tool event.
+func (e *Env) IsPreTool() bool {
+	return e.Event == EventPreTool
 }
 
-// IsPostToolUse returns true if this is a PostToolUse event.
-func (e *Env) IsPostToolUse() bool {
-	return e.Event == EventPostToolUse
+// IsPostTool returns true if this is a post_tool event.
+func (e *Env) IsPostTool() bool {
+	return e.Event == EventPostTool
 }
 
 // IsStop returns true if this is a Stop event.

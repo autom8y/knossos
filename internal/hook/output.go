@@ -24,6 +24,7 @@ type HookSpecificOutput struct {
 func OutputDenyAuth() PreToolUseOutput {
 	return PreToolUseOutput{
 		HookSpecificOutput: HookSpecificOutput{
+			// CC wire format (SCAR-009) -- do not change to canonical name
 			HookEventName:            "PreToolUse",
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "invalid_signature",

@@ -70,7 +70,7 @@ func TestRunAutopark_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runAutoparkCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -108,7 +108,7 @@ func TestRunAutopark_WrongEvent(t *testing.T) {
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runAutoparkCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -121,8 +121,8 @@ func TestRunAutopark_WrongEvent(t *testing.T) {
 	if result.WasParked {
 		t.Error("Expected WasParked=false for non-Stop event")
 	}
-	if result.Message != "not a Stop event" {
-		t.Errorf("Message = %q, want %q", result.Message, "not a Stop event")
+	if result.Message != "not a stop event" {
+		t.Errorf("Message = %q, want %q", result.Message, "not a stop event")
 	}
 }
 
@@ -156,7 +156,7 @@ func TestRunAutopark_NoSession(t *testing.T) {
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runAutoparkCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -220,7 +220,7 @@ current_phase: "implementation"
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runAutoparkCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -306,7 +306,7 @@ parked_reason: "manual"
 		},
 	}
 
-	err := runAutoparkCore(ctx, printer)
+	err := runAutoparkCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAutopark() error = %v", err)
 	}
@@ -348,7 +348,7 @@ func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAutoparkCore(ctx, printer)
+		runAutoparkCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()

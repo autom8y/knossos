@@ -53,7 +53,7 @@ func TestRunSuggestCore_NoSession(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSuggestCore(ctx, printer); err != nil {
+	if err := runSuggestCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -77,7 +77,7 @@ func TestRunSuggestCore_WrongEvent(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSuggestCore(ctx, printer); err != nil {
+	if err := runSuggestCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -89,8 +89,8 @@ func TestRunSuggestCore_WrongEvent(t *testing.T) {
 	if result.Detected {
 		t.Error("expected detected=false for wrong event")
 	}
-	if result.Message != "not a PostToolUse event" {
-		t.Errorf("expected message 'not a PostToolUse event', got: %s", result.Message)
+	if result.Message != "not a post_tool event" {
+		t.Errorf("expected message 'not a post_tool event', got: %s", result.Message)
 	}
 }
 
@@ -120,7 +120,7 @@ current_phase: design
 	// Write cache with same phase (no transition expected)
 	os.WriteFile(filepath.Join(sessionDir, SuggestPhaseCacheFile), []byte("design"), 0644)
 
-	pipeHookStdin(t, string(hook.EventPostToolUse), tmpDir, "")
+	pipeHookStdin(t, string(hook.EventPostTool), tmpDir, "")
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -139,7 +139,7 @@ current_phase: design
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSuggestCore(ctx, printer); err != nil {
+	if err := runSuggestCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -176,7 +176,7 @@ current_phase: requirements
 
 	// No cache file (first invocation)
 
-	pipeHookStdin(t, string(hook.EventPostToolUse), tmpDir, "")
+	pipeHookStdin(t, string(hook.EventPostTool), tmpDir, "")
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -195,7 +195,7 @@ current_phase: requirements
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSuggestCore(ctx, printer); err != nil {
+	if err := runSuggestCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -242,7 +242,7 @@ current_phase: implementation
 	// Cache has previous phase (design), current is implementation
 	os.WriteFile(filepath.Join(sessionDir, SuggestPhaseCacheFile), []byte("design"), 0644)
 
-	pipeHookStdin(t, string(hook.EventPostToolUse), tmpDir, "")
+	pipeHookStdin(t, string(hook.EventPostTool), tmpDir, "")
 
 	outputFlag := "json"
 	verboseFlag := false
@@ -261,7 +261,7 @@ current_phase: implementation
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSuggestCore(ctx, printer); err != nil {
+	if err := runSuggestCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

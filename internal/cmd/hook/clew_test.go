@@ -71,7 +71,7 @@ func TestRunClew_WrongEventType(t *testing.T) {
 		},
 	}
 
-	err := runClewCore(ctx, printer)
+	err := runClewCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -84,8 +84,8 @@ func TestRunClew_WrongEventType(t *testing.T) {
 	if result.Recorded {
 		t.Error("Expected Recorded=false for wrong event type")
 	}
-	if result.Reason != "not a PostToolUse event" {
-		t.Errorf("Reason = %q, want %q", result.Reason, "not a PostToolUse event")
+	if result.Reason != "not a post_tool event" {
+		t.Errorf("Reason = %q, want %q", result.Reason, "not a post_tool event")
 	}
 }
 
@@ -116,7 +116,7 @@ func TestRunClew_NoActiveSession(t *testing.T) {
 		},
 	}
 
-	err := runClewCore(ctx, printer)
+	err := runClewCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -172,7 +172,7 @@ func TestRunClew_WithActiveSession(t *testing.T) {
 		},
 	}
 
-	err := runClewCore(ctx, printer)
+	err := runClewCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -252,7 +252,7 @@ throughline:
 		},
 	}
 
-	err := runClewCore(ctx, printer)
+	err := runClewCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -341,7 +341,7 @@ Files modified:
 		},
 	}
 
-	err := runClewCore(ctx, printer)
+	err := runClewCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runThread() error = %v", err)
 	}
@@ -421,7 +421,7 @@ func TestClew_StdinIntegration_RecordsToolEvent(t *testing.T) {
 		},
 	}
 
-	err := runClewCore(ctx, printer)
+	err := runClewCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runClew() error = %v", err)
 	}
@@ -495,7 +495,7 @@ func runClewWithStdin(t *testing.T, ctx *cmdContext, payload string) ClewOutput 
 
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
-	if err := runClewCore(ctx, printer); err != nil {
+	if err := runClewCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runClewCore() error = %v", err)
 	}
 	var result ClewOutput

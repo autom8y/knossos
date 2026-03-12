@@ -6,33 +6,34 @@ import (
 )
 
 // geminiTestConfig returns a representative HooksConfig covering all skip/translate scenarios.
+// Event names use knossos canonical vocabulary (ADR-0032).
 func geminiTestConfig() *HooksConfig {
 	return &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			// Translatable: PreToolUse -> BeforeTool
-			{Event: "PreToolUse", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Timeout: 3, Priority: 3},
-			{Event: "PreToolUse", Matcher: "Bash", Command: "ari hook validate --output json", Timeout: 5, Priority: 5},
-			// Translatable: PostToolUse -> AfterTool
-			{Event: "PostToolUse", Matcher: "Edit|Write|Bash", Command: "ari hook clew --output json", Timeout: 5, Async: true, Priority: 5},
-			{Event: "PostToolUse", Command: "ari hook budget --output json", Timeout: 3, Priority: 90},
-			// Translatable: SessionStart -> SessionStart (identity)
-			{Event: "SessionStart", Command: "ari hook context --output json", Timeout: 10, Priority: 5},
-			// Translatable: SessionEnd -> SessionEnd (identity)
-			{Event: "SessionEnd", Command: "ari hook sessionend --output json", Timeout: 5, Priority: 5},
-			// Translatable: PreCompact -> PreCompress
-			{Event: "PreCompact", Command: "ari hook precompact --output json", Timeout: 5, Priority: 5},
+			// Translatable: pre_tool -> BeforeTool
+			{Event: "pre_tool", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Timeout: 3, Priority: 3},
+			{Event: "pre_tool", Matcher: "Bash", Command: "ari hook validate --output json", Timeout: 5, Priority: 5},
+			// Translatable: post_tool -> AfterTool
+			{Event: "post_tool", Matcher: "Edit|Write|Bash", Command: "ari hook clew --output json", Timeout: 5, Async: true, Priority: 5},
+			{Event: "post_tool", Command: "ari hook budget --output json", Timeout: 3, Priority: 90},
+			// Translatable: session_start -> SessionStart (identity)
+			{Event: "session_start", Command: "ari hook context --output json", Timeout: 10, Priority: 5},
+			// Translatable: session_end -> SessionEnd (identity)
+			{Event: "session_end", Command: "ari hook sessionend --output json", Timeout: 5, Priority: 5},
+			// Translatable: pre_compact -> PreCompress
+			{Event: "pre_compact", Command: "ari hook precompact --output json", Timeout: 5, Priority: 5},
 			// No Gemini equivalent -- must be skipped
-			{Event: "Stop", Command: "ari hook autopark --output json", Timeout: 5, Priority: 5},
-			{Event: "WorktreeCreate", Command: "ari hook worktree-seed --output json", Timeout: 30, Priority: 5},
-			{Event: "WorktreeRemove", Command: "ari hook worktree-remove --output json", Timeout: 10, Priority: 5},
-			{Event: "SubagentStart", Command: "ari hook subagent-start --output json", Timeout: 5, Priority: 5},
-			{Event: "SubagentStop", Command: "ari hook subagent-stop --output json", Timeout: 5, Priority: 5},
+			{Event: "stop", Command: "ari hook autopark --output json", Timeout: 5, Priority: 5},
+			{Event: "worktree_create", Command: "ari hook worktree-seed --output json", Timeout: 30, Priority: 5},
+			{Event: "worktree_remove", Command: "ari hook worktree-remove --output json", Timeout: 10, Priority: 5},
+			{Event: "subagent_start", Command: "ari hook subagent-start --output json", Timeout: 5, Priority: 5},
+			{Event: "subagent_stop", Command: "ari hook subagent-stop --output json", Timeout: 5, Priority: 5},
 		},
 	}
 }
 
-// TestBuildHooksSettings_GeminiEventTranslation verifies that CC event names are
+// TestBuildHooksSettings_GeminiEventTranslation verifies that canonical event names are
 // translated to Gemini wire names when channel == "gemini".
 func TestBuildHooksSettings_GeminiEventTranslation(t *testing.T) {
 	t.Parallel()
@@ -47,11 +48,11 @@ func TestBuildHooksSettings_GeminiEventTranslation(t *testing.T) {
 		}
 	}
 
-	// CC-canonical names must NOT appear as keys (they were translated)
-	ccNames := []string{"PreToolUse", "PostToolUse", "PreCompact"}
-	for _, key := range ccNames {
+	// Canonical names must NOT appear as keys (they were translated)
+	canonicalNames := []string{"pre_tool", "post_tool", "pre_compact", "session_start", "session_end"}
+	for _, key := range canonicalNames {
 		if hooks[key] != nil {
-			t.Errorf("CC-canonical key %q should not appear in Gemini output", key)
+			t.Errorf("canonical key %q should not appear in Gemini output", key)
 		}
 	}
 }
@@ -63,7 +64,10 @@ func TestBuildHooksSettings_GeminiSkipsUnmappable(t *testing.T) {
 
 	hooks := BuildHooksSettings(geminiTestConfig(), "gemini")
 
-	skippedEvents := []string{"Stop", "WorktreeCreate", "WorktreeRemove", "SubagentStart", "SubagentStop"}
+	// These canonical events have no Gemini wire equivalent
+	skippedEvents := []string{"stop", "worktree_create", "worktree_remove", "subagent_start", "subagent_stop",
+		// Also verify the CC wire names are not present
+		"Stop", "WorktreeCreate", "WorktreeRemove", "SubagentStart", "SubagentStop"}
 	for _, event := range skippedEvents {
 		if hooks[event] != nil {
 			t.Errorf("event %q has no Gemini equivalent and should be absent, but it is present", event)
@@ -145,32 +149,36 @@ func TestBuildHooksSettings_GeminiPreservesEnv(t *testing.T) {
 	}
 }
 
-// TestBuildHooksSettings_ClaudeUnchanged is a regression guard: channel=="claude"
-// must produce the same output as before (no CC event name translation, no tool
-// matcher translation, no KNOSSOS_CHANNEL env var).
-func TestBuildHooksSettings_ClaudeUnchanged(t *testing.T) {
+// TestBuildHooksSettings_ClaudeTranslation verifies that canonical event names are
+// translated to CC wire names when channel == "claude".
+func TestBuildHooksSettings_ClaudeTranslation(t *testing.T) {
 	t.Parallel()
 
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Timeout: 3, Priority: 3},
-			{Event: "Stop", Command: "ari hook autopark --output json", Timeout: 5, Priority: 5},
-			{Event: "PostToolUse", Matcher: "Edit|Write|Bash", Command: "ari hook clew --output json", Timeout: 5, Async: true, Priority: 5},
+			{Event: "pre_tool", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Timeout: 3, Priority: 3},
+			{Event: "stop", Command: "ari hook autopark --output json", Timeout: 5, Priority: 5},
+			{Event: "post_tool", Matcher: "Edit|Write|Bash", Command: "ari hook clew --output json", Timeout: 5, Async: true, Priority: 5},
 		},
 	}
 
 	hooks := BuildHooksSettings(cfg, "claude")
 
-	// CC event names must be preserved as-is
+	// CC wire event names must be present
 	if hooks["PreToolUse"] == nil {
 		t.Error("claude output should have PreToolUse key")
 	}
 	if hooks["Stop"] == nil {
-		t.Error("claude output should have Stop key (not skipped for claude)")
+		t.Error("claude output should have Stop key")
 	}
 	if hooks["PostToolUse"] == nil {
 		t.Error("claude output should have PostToolUse key")
+	}
+
+	// Canonical names must NOT appear as keys
+	if hooks["pre_tool"] != nil {
+		t.Error("canonical name pre_tool should not appear in claude output")
 	}
 
 	// Matcher must be CC tool names unchanged
@@ -201,11 +209,11 @@ func TestMergeHooksSettings_GeminiIdempotent(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Priority: 3},
-			{Event: "PostToolUse", Command: "ari hook budget --output json", Priority: 90},
-			{Event: "SessionStart", Command: "ari hook context --output json", Priority: 5},
+			{Event: "pre_tool", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Priority: 3},
+			{Event: "post_tool", Command: "ari hook budget --output json", Priority: 90},
+			{Event: "session_start", Command: "ari hook context --output json", Priority: 5},
 			// This event should be skipped for gemini
-			{Event: "Stop", Command: "ari hook autopark --output json", Priority: 5},
+			{Event: "stop", Command: "ari hook autopark --output json", Priority: 5},
 		},
 	}
 

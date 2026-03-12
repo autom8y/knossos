@@ -46,7 +46,7 @@ func TestSubagentStart_NoSession(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStartCore(ctx, printer); err != nil {
+	if err := runSubagentStartCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -68,7 +68,7 @@ func TestSubagentStop_NoSession(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStopCore(ctx, printer); err != nil {
+	if err := runSubagentStopCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -89,7 +89,7 @@ func TestSubagentStart_WrongEvent(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStartCore(ctx, printer); err != nil {
+	if err := runSubagentStartCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -101,8 +101,8 @@ func TestSubagentStart_WrongEvent(t *testing.T) {
 	if result.Recorded {
 		t.Error("expected recorded=false for wrong event")
 	}
-	if result.Reason != "not a SubagentStart event" {
-		t.Errorf("expected reason 'not a SubagentStart event', got: %s", result.Reason)
+	if result.Reason != "not a subagent_start event" {
+		t.Errorf("expected reason 'not a subagent_start event', got: %s", result.Reason)
 	}
 }
 
@@ -113,7 +113,7 @@ func TestSubagentStop_WrongEvent(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStopCore(ctx, printer); err != nil {
+	if err := runSubagentStopCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -125,8 +125,8 @@ func TestSubagentStop_WrongEvent(t *testing.T) {
 	if result.Recorded {
 		t.Error("expected recorded=false for wrong event")
 	}
-	if result.Reason != "not a SubagentStop event" {
-		t.Errorf("expected reason 'not a SubagentStop event', got: %s", result.Reason)
+	if result.Reason != "not a subagent_stop event" {
+		t.Errorf("expected reason 'not a subagent_stop event', got: %s", result.Reason)
 	}
 }
 
@@ -157,7 +157,7 @@ func TestSubagentStart_LogsToClew(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStartCore(ctx, printer); err != nil {
+	if err := runSubagentStartCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -213,7 +213,7 @@ func TestSubagentStop_LogsToClew(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStopCore(ctx, printer); err != nil {
+	if err := runSubagentStopCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -299,7 +299,7 @@ func TestSubagentStart_PersistsThroughlineID(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStartCore(ctx, printer); err != nil {
+	if err := runSubagentStartCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -354,7 +354,7 @@ func TestSubagentStart_NonThroughlineAgentNotPersisted(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStartCore(ctx, printer); err != nil {
+	if err := runSubagentStartCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -429,7 +429,7 @@ func TestSubagentStart_NoAgentIDSkipsPersistence(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runSubagentStartCore(ctx, printer); err != nil {
+	if err := runSubagentStartCore(nil, ctx, printer); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

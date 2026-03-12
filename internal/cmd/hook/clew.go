@@ -64,7 +64,7 @@ and debugging. (Ariadne gave Theseus a CLEW - ball of thread - to navigate the l
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runClew(ctx)
+				return runClew(cmd, ctx)
 			})
 		},
 	}
@@ -73,9 +73,9 @@ Performance: <100ms target execution time.`,
 }
 
 // runClew is the cobra RunE handler that creates the printer and delegates to runClewCore.
-func runClew(ctx *cmdContext) error {
+func runClew(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runClewCore(ctx, printer)
+	return runClewCore(cmd, ctx, printer)
 }
 
 // getSessionDir determines the session directory from context and environment.
@@ -102,15 +102,20 @@ func outputNotRecorded(printer *output.Printer, reason string) error {
 // runClewCore contains the actual clew hook logic. It accepts an injected printer
 // for testing purposes, allowing tests to capture output without creating a full
 // command context.
-func runClewCore(ctx *cmdContext, printer *output.Printer) error {
+func runClewCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
-	hookEnv := ctx.getHookEnv()
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a PostToolUse event (or allow for testing without event)
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostToolUse {
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostTool {
 		printer.VerboseLog("debug", "skipping clew hook for non-PostToolUse event",
 			map[string]any{"event": string(hookEnv.Event)})
-		return outputNotRecorded(printer, "not a PostToolUse event")
+		return outputNotRecorded(printer, "not a post_tool event")
 	}
 
 	// Get session directory

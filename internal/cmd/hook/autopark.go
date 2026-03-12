@@ -48,7 +48,7 @@ This hook is triggered on Stop events. It:
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runAutopark(ctx)
+				return runAutopark(cmd, ctx)
 			})
 		},
 	}
@@ -56,21 +56,26 @@ Performance: <100ms target execution time.`,
 	return cmd
 }
 
-func runAutopark(ctx *cmdContext) error {
+func runAutopark(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runAutoparkCore(ctx, printer)
+	return runAutoparkCore(cmd, ctx, printer)
 }
 
 // runAutoparkCore contains the actual logic with injected printer for testing.
-func runAutoparkCore(ctx *cmdContext, printer *output.Printer) error {
+func runAutoparkCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
-	hookEnv := ctx.getHookEnv()
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a Stop event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventStop {
 		printer.VerboseLog("debug", "skipping autopark hook for non-Stop event",
 			map[string]any{"event": string(hookEnv.Event)})
-		return outputNoPark(printer, "not a Stop event")
+		return outputNoPark(printer, "not a stop event")
 	}
 
 	// Resolve session context

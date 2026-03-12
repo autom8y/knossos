@@ -2,11 +2,12 @@ package hook
 
 import "testing"
 
-func TestTranslateEventForChannel_ClaudePassthrough(t *testing.T) {
+func TestTranslateEventForChannel_ClaudeTranslated(t *testing.T) {
 	t.Parallel()
-	event, skip := TranslateEventForChannel("PreToolUse", "claude")
+	// Canonical -> CC wire
+	event, skip := TranslateEventForChannel("pre_tool", "claude")
 	if skip {
-		t.Error("claude channel should never skip events")
+		t.Error("claude channel should never skip pre_tool")
 	}
 	if event != "PreToolUse" {
 		t.Errorf("got %q, want %q", event, "PreToolUse")
@@ -15,9 +16,9 @@ func TestTranslateEventForChannel_ClaudePassthrough(t *testing.T) {
 
 func TestTranslateEventForChannel_GeminiTranslated(t *testing.T) {
 	t.Parallel()
-	event, skip := TranslateEventForChannel("PreToolUse", "gemini")
+	event, skip := TranslateEventForChannel("pre_tool", "gemini")
 	if skip {
-		t.Error("PreToolUse is translatable, should not be skipped")
+		t.Error("pre_tool is translatable, should not be skipped")
 	}
 	if event != "BeforeTool" {
 		t.Errorf("got %q, want %q", event, "BeforeTool")
@@ -26,9 +27,9 @@ func TestTranslateEventForChannel_GeminiTranslated(t *testing.T) {
 
 func TestTranslateEventForChannel_GeminiSkipsUnmappable(t *testing.T) {
 	t.Parallel()
-	event, skip := TranslateEventForChannel("Stop", "gemini")
+	event, skip := TranslateEventForChannel("stop", "gemini")
 	if !skip {
-		t.Error("Stop has no Gemini equivalent, should be skipped")
+		t.Error("stop has no Gemini equivalent, should be skipped")
 	}
 	if event != "" {
 		t.Errorf("skipped event should be empty string, got %q", event)
@@ -37,29 +38,82 @@ func TestTranslateEventForChannel_GeminiSkipsUnmappable(t *testing.T) {
 
 func TestTranslateEventForChannel_GeminiIdentityMapping(t *testing.T) {
 	t.Parallel()
-	event, skip := TranslateEventForChannel("SessionStart", "gemini")
+	event, skip := TranslateEventForChannel("session_start", "gemini")
 	if skip {
-		t.Error("SessionStart is translatable (identity), should not be skipped")
+		t.Error("session_start is translatable, should not be skipped")
 	}
 	if event != "SessionStart" {
 		t.Errorf("got %q, want %q", event, "SessionStart")
 	}
 }
 
-func TestTranslateInboundEvent_GeminiWireName(t *testing.T) {
+func TestTranslateEventForChannel_GeminiExclusive(t *testing.T) {
 	t.Parallel()
-	result := TranslateInboundEvent("BeforeTool")
-	if result != "PreToolUse" {
-		t.Errorf("got %q, want %q", result, "PreToolUse")
+	// pre_model is Gemini-exclusive; claude should have no wire
+	event, skip := TranslateEventForChannel("pre_model", "claude")
+	if !skip {
+		t.Error("pre_model has no CC equivalent, should be skipped for claude")
+	}
+	if event != "" {
+		t.Errorf("skipped event should be empty string, got %q", event)
+	}
+
+	// Gemini should get BeforeModel
+	event, skip = TranslateEventForChannel("pre_model", "gemini")
+	if skip {
+		t.Error("pre_model should translate for gemini")
+	}
+	if event != "BeforeModel" {
+		t.Errorf("got %q, want %q", event, "BeforeModel")
 	}
 }
 
-func TestTranslateInboundEvent_CCCanonicalPassthrough(t *testing.T) {
+func TestWireToCanonical_CCWireName(t *testing.T) {
 	t.Parallel()
-	// CC canonical names are not Gemini wire names -- pass through unchanged
-	result := TranslateInboundEvent("PreToolUse")
-	if result != "PreToolUse" {
-		t.Errorf("got %q, want %q", result, "PreToolUse")
+	result := WireToCanonical("PreToolUse")
+	if result != "pre_tool" {
+		t.Errorf("got %q, want %q", result, "pre_tool")
+	}
+}
+
+func TestWireToCanonical_GeminiWireName(t *testing.T) {
+	t.Parallel()
+	result := WireToCanonical("BeforeTool")
+	if result != "pre_tool" {
+		t.Errorf("got %q, want %q", result, "pre_tool")
+	}
+}
+
+func TestWireToCanonical_CanonicalPassthrough(t *testing.T) {
+	t.Parallel()
+	// Canonical names are not in wireToCanonical -- pass through unchanged
+	result := WireToCanonical("pre_tool")
+	if result != "pre_tool" {
+		t.Errorf("got %q, want %q", result, "pre_tool")
+	}
+}
+
+func TestWireToCanonical_UnknownPassthrough(t *testing.T) {
+	t.Parallel()
+	result := WireToCanonical("UnknownEvent")
+	if result != "UnknownEvent" {
+		t.Errorf("got %q, want %q", result, "UnknownEvent")
+	}
+}
+
+func TestTranslateInboundEvent_GeminiWireName(t *testing.T) {
+	t.Parallel()
+	result := TranslateInboundEvent("BeforeTool")
+	if result != "pre_tool" {
+		t.Errorf("got %q, want %q", result, "pre_tool")
+	}
+}
+
+func TestTranslateInboundEvent_CCWireName(t *testing.T) {
+	t.Parallel()
+	result := TranslateInboundEvent("PostToolUse")
+	if result != "post_tool" {
+		t.Errorf("got %q, want %q", result, "post_tool")
 	}
 }
 
@@ -108,5 +162,43 @@ func TestTranslateMatcherForChannel_UnknownToolPassthrough(t *testing.T) {
 	result := TranslateMatcherForChannel("CustomTool", "gemini")
 	if result != "CustomTool" {
 		t.Errorf("got %q, want %q", result, "CustomTool")
+	}
+}
+
+func TestCanonicalToWire_AllBidirectionalEvents(t *testing.T) {
+	t.Parallel()
+	// Table of all bidirectional events per ADR-0032
+	tests := []struct {
+		canonical string
+		ccWire    string
+		gemWire   string
+	}{
+		{"pre_tool", "PreToolUse", "BeforeTool"},
+		{"post_tool", "PostToolUse", "AfterTool"},
+		{"session_start", "SessionStart", "SessionStart"},
+		{"session_end", "SessionEnd", "SessionEnd"},
+		{"pre_prompt", "UserPromptSubmit", "BeforeAgent"},
+		{"pre_compact", "PreCompact", "PreCompress"},
+		{"notification", "Notification", "Notification"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.canonical, func(t *testing.T) {
+			t.Parallel()
+			ccWire, skip := CanonicalToWire(tt.canonical, "claude")
+			if skip {
+				t.Errorf("canonical %q should not be skipped for claude", tt.canonical)
+			}
+			if ccWire != tt.ccWire {
+				t.Errorf("CC wire = %q, want %q", ccWire, tt.ccWire)
+			}
+
+			gemWire, skip := CanonicalToWire(tt.canonical, "gemini")
+			if skip {
+				t.Errorf("canonical %q should not be skipped for gemini", tt.canonical)
+			}
+			if gemWire != tt.gemWire {
+				t.Errorf("Gemini wire = %q, want %q", gemWire, tt.gemWire)
+			}
+		})
 	}
 }

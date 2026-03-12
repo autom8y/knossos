@@ -15,7 +15,7 @@ func TestRecordToolEvent_Bash(t *testing.T) {
 	sessionDir := filepath.Join(tmpDir, "session")
 
 	env := &hook.Env{
-		Event:    hook.EventPostToolUse,
+		Event:    hook.EventPostTool,
 		ToolName: "Bash",
 	}
 
@@ -53,7 +53,7 @@ func TestRecordToolEvent_Edit(t *testing.T) {
 	sessionDir := filepath.Join(tmpDir, "session")
 
 	env := &hook.Env{
-		Event:    hook.EventPostToolUse,
+		Event:    hook.EventPostTool,
 		ToolName: "Edit",
 	}
 
@@ -91,7 +91,7 @@ func TestRecordToolEvent_Write(t *testing.T) {
 	sessionDir := filepath.Join(tmpDir, "session")
 
 	env := &hook.Env{
-		Event:    hook.EventPostToolUse,
+		Event:    hook.EventPostTool,
 		ToolName: "Write",
 	}
 
@@ -125,7 +125,7 @@ func TestRecordToolEvent_Read(t *testing.T) {
 	sessionDir := filepath.Join(tmpDir, "session")
 
 	env := &hook.Env{
-		Event:    hook.EventPostToolUse,
+		Event:    hook.EventPostTool,
 		ToolName: "Read",
 	}
 
@@ -160,7 +160,7 @@ func TestRecordToolEvent_Glob(t *testing.T) {
 	sessionDir := filepath.Join(tmpDir, "session")
 
 	env := &hook.Env{
-		Event:    hook.EventPostToolUse,
+		Event:    hook.EventPostTool,
 		ToolName: "Glob",
 	}
 
@@ -191,7 +191,7 @@ func TestRecordToolEvent_Grep(t *testing.T) {
 	sessionDir := filepath.Join(tmpDir, "session")
 
 	env := &hook.Env{
-		Event:    hook.EventPostToolUse,
+		Event:    hook.EventPostTool,
 		ToolName: "Grep",
 	}
 
@@ -222,7 +222,7 @@ func TestRecordToolEvent_Task(t *testing.T) {
 	sessionDir := filepath.Join(tmpDir, "session")
 
 	env := &hook.Env{
-		Event:    hook.EventPostToolUse,
+		Event:    hook.EventPostTool,
 		ToolName: "Task",
 	}
 
@@ -348,7 +348,7 @@ func TestIntegration_PostToolUseSequence(t *testing.T) {
 
 	for _, s := range sequence {
 		env := &hook.Env{
-			Event:    hook.EventPostToolUse,
+			Event:    hook.EventPostTool,
 			ToolName: s.tool,
 		}
 		toolInput, err := hook.ParseToolInput(s.inputJSON)

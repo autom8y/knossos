@@ -124,10 +124,11 @@ func (c *cmdContext) getPrinter() *output.Printer {
 }
 
 // getHookEnv parses the hook environment variables.
-func (c *cmdContext) getHookEnv(cmd *cobra.Command) *hook.Env {
+// cmd is optional -- when provided, the --signature flag is read from it.
+func (c *cmdContext) getHookEnv(cmd ...*cobra.Command) *hook.Env {
 	env := hook.ParseEnv()
-	if env != nil {
-		sig, _ := cmd.Flags().GetString("signature")
+	if env != nil && len(cmd) > 0 && cmd[0] != nil {
+		sig, _ := cmd[0].Flags().GetString("signature")
 		if sig != "" {
 			env.Signature = sig
 		}

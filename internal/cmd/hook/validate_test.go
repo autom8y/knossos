@@ -257,7 +257,7 @@ func TestRunValidate_EarlyExit_HooksDisabled(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -296,7 +296,7 @@ func TestRunValidate_BypassEnvVar(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -334,7 +334,7 @@ func TestRunValidate_NonBashTool(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -372,7 +372,7 @@ func TestRunValidate_AllowSafeCommand(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -410,7 +410,7 @@ func TestRunValidate_BlockRmRfGit(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -457,7 +457,7 @@ func TestRunValidate_BlockForcePush(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -501,7 +501,7 @@ func TestRunValidate_BlockNoVerify(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -545,7 +545,7 @@ func TestRunValidate_BlockResetHard(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -589,7 +589,7 @@ func TestRunValidate_BlockCleanFd(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -641,7 +641,7 @@ func BenchmarkValidateHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(ctx, printer)
+		runValidateCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -673,7 +673,7 @@ func BenchmarkValidateHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(ctx, printer)
+		runValidateCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -714,7 +714,7 @@ func BenchmarkValidateHook_Validation(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(ctx, printer)
+		runValidateCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -756,7 +756,7 @@ func TestValidate_StdinIntegration_AllowSafeCommand(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}
@@ -803,7 +803,7 @@ func TestValidate_StdinIntegration_BlockDangerousCommand(t *testing.T) {
 		},
 	}
 
-	err := runValidateCore(ctx, printer)
+	err := runValidateCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runValidate() error = %v", err)
 	}

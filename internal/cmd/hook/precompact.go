@@ -42,7 +42,7 @@ Output (stdout JSON):
 Performance: <100ms for rotation operation.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runPrecompact(ctx)
+				return runPrecompact(cmd, ctx)
 			})
 		},
 	}
@@ -50,15 +50,20 @@ Performance: <100ms for rotation operation.`,
 	return cmd
 }
 
-func runPrecompact(ctx *cmdContext) error {
+func runPrecompact(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runPrecompactCore(ctx, printer)
+	return runPrecompactCore(cmd, ctx, printer)
 }
 
 // runPrecompactCore contains the actual logic with injected printer for testing.
-func runPrecompactCore(ctx *cmdContext, printer *output.Printer) error {
+func runPrecompactCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
-	hookEnv := ctx.getHookEnv()
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a PreCompact event (or empty for direct invocation/testing)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreCompact {

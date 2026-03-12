@@ -9,6 +9,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/materialize"
+	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -35,7 +36,7 @@ It re-materializes the channel directory without the model override,
 restoring original agent models and settings.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runCheapoRevert(ctx)
+				return runCheapoRevert(cmd, ctx)
 			})
 		},
 	}
@@ -44,15 +45,25 @@ restoring original agent models and settings.`,
 }
 
 // runCheapoRevert implements the cheapo-revert hook with proper timeout and event guard.
-func runCheapoRevert(ctx *cmdContext) error {
+func runCheapoRevert(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	hookEnv := ctx.getHookEnv()
+	return runCheapoRevertCore(cmd, ctx, printer)
+}
+
+// runCheapoRevertCore contains the actual logic with injected printer for testing.
+func runCheapoRevertCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Event guard: only process Stop events (or empty for direct CLI/test invocation).
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventStop {
 		return printer.Print(CheapoRevertOutput{
 			Status:  "skipped",
-			Message: "not a Stop event",
+			Message: "not a stop event",
 		})
 	}
 

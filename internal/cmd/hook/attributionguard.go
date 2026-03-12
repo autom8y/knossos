@@ -51,7 +51,7 @@ Output (stdout JSON):
 Performance: <1ms for non-git-commit commands (fast-path).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runAttributionGuard(ctx)
+				return runAttributionGuard(cmd, ctx)
 			})
 		},
 	}
@@ -59,17 +59,22 @@ Performance: <1ms for non-git-commit commands (fast-path).`,
 	return cmd
 }
 
-func runAttributionGuard(ctx *cmdContext) error {
+func runAttributionGuard(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runAttributionGuardCore(ctx, printer)
+	return runAttributionGuardCore(cmd, ctx, printer)
 }
 
 // runAttributionGuardCore contains the actual logic with injected printer for testing.
-func runAttributionGuardCore(ctx *cmdContext, printer *output.Printer) error {
-	hookEnv := ctx.getHookEnv()
+func runAttributionGuardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Fast-path: only handle PreToolUse events
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreTool {
 		return outputAttributionAllow(printer)
 	}
 

@@ -258,7 +258,7 @@ func TestGitConventionsValidation(t *testing.T) {
 				},
 			}
 
-			err := runGitConventionsCore(ctx, printer)
+			err := runGitConventionsCore(nil, ctx, printer)
 			if err != nil {
 				t.Fatalf("runGitConventionsCore() error = %v", err)
 			}
@@ -310,7 +310,7 @@ func TestGitConventions_NonBashTool(t *testing.T) {
 		},
 	}
 
-	err := runGitConventionsCore(ctx, printer)
+	err := runGitConventionsCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runGitConventionsCore() error = %v", err)
 	}
@@ -353,7 +353,7 @@ func TestGitConventions_StdinIntegration_AllowValid(t *testing.T) {
 		},
 	}
 
-	err := runGitConventionsCore(ctx, printer)
+	err := runGitConventionsCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runGitConventionsCore() error = %v", err)
 	}
@@ -396,7 +396,7 @@ func TestGitConventions_StdinIntegration_DenyInvalid(t *testing.T) {
 		},
 	}
 
-	err := runGitConventionsCore(ctx, printer)
+	err := runGitConventionsCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runGitConventionsCore() error = %v", err)
 	}
@@ -444,7 +444,7 @@ func BenchmarkGitConventions_FastPath(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runGitConventionsCore(ctx, printer)
+		runGitConventionsCore(nil, ctx, printer)
 	}
 }
 

@@ -97,7 +97,7 @@ current_phase: "implementation"
 		sourceResolver: srcResolver,
 	}
 
-	if err := runContextCore(ctx, printer); err != nil {
+	if err := runContextCore(nil, ctx, printer); err != nil {
 		t.Fatalf("runContextCore() error = %v", err)
 	}
 

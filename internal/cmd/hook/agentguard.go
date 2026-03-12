@@ -40,7 +40,7 @@ Flags:
 Performance: <5ms for all paths.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runAgentGuard(ctx, agentName, allowPaths)
+				return runAgentGuard(cmd, ctx, agentName, allowPaths)
 			})
 		},
 	}
@@ -54,21 +54,26 @@ Performance: <5ms for all paths.`,
 }
 
 // runAgentGuard is the entry point called by RunE via withTimeout.
-func runAgentGuard(ctx *cmdContext, agentName string, allowPaths []string) error {
+func runAgentGuard(cmd *cobra.Command, ctx *cmdContext, agentName string, allowPaths []string) error {
 	printer := ctx.getPrinter()
-	return runAgentGuardCore(ctx, printer, agentName, allowPaths)
+	return runAgentGuardCore(cmd, ctx, printer, agentName, allowPaths)
 }
 
 // runAgentGuardCore contains the testable core logic for agent-guard.
 // It enforces path-based write boundaries: only writes to paths matching an
 // --allow-path prefix are permitted. All other writes are denied with an
 // agent-specific reason message.
-func runAgentGuardCore(ctx *cmdContext, printer *output.Printer, agentName string, allowPaths []string) error {
-	hookEnv := ctx.getHookEnv()
+func runAgentGuardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer, agentName string, allowPaths []string) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Pass through non-PreToolUse events without inspection.
 	// Empty event (direct CLI invocation or test) is treated as PreToolUse.
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreTool {
 		return outputAllow(printer)
 	}
 

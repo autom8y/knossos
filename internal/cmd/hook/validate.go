@@ -103,9 +103,11 @@ func runValidateCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printe
 
 	// Check bypass env var
 	if os.Getenv(ValidateBypassEnvVar) == "1" {
+		return outputValidateAllow(printer)
+	}
 
-	// Verify this is a PreToolUse event
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
+	// Verify this is a pre_tool event
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreTool {
 		return outputValidateAllow(printer)
 	}
 

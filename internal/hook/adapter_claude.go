@@ -21,7 +21,9 @@ func (a *ClaudeAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 		return &Env{ProjectDir: projectDir}, nil
 	}
 
-	event := HookEvent(stdin.HookEventName)
+	// Translate CC wire event name to knossos canonical (ADR-0032).
+	// e.g. "PreToolUse" -> "pre_tool"; unknown events pass through, then fail isValidHookEvent.
+	event := HookEvent(WireToCanonical(stdin.HookEventName))
 	if event != "" && !isValidHookEvent(event) {
 		event = ""
 	}

@@ -128,7 +128,7 @@ func runWriteguardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Prin
 	}
 
 	// Verify this is a PreToolUse event
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreTool {
 		return outputAllow(printer)
 	}
 

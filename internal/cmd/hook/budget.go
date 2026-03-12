@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/registry"
 	"github.com/autom8y/knossos/internal/suggest"
 )
@@ -60,42 +61,47 @@ Environment Variables:
   ARI_SESSION_KEY    Explicit session key (for testing)
 
 Performance: <5ms target execution time (file I/O only).`,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return ctx.withTimeout(func() error {
-				return runBudget(ctx)
-			})
-		},
-	}
-
-	return cmd
+RunE: func(cmd *cobra.Command, args []string) error {
+	return ctx.withTimeout(func() error {
+		return runBudget(cmd, ctx)
+	})
+},
 }
 
-func runBudget(ctx *cmdContext) error {
-	printer := ctx.getPrinter()
+return cmd
+}
 
-	// Fast path: disabled via env
-	if os.Getenv(envBudgetDisable) == "1" {
-		return printer.Print(BudgetOutput{Message: "budget tracking disabled"})
-	}
+func runBudget(cmd *cobra.Command, ctx *cmdContext) error {
+printer := ctx.getPrinter()
+hookEnv := ctx.getHookEnv(cmd)
 
-	// Resolve thresholds
-	warnThreshold := defaultWarn
-	if v := os.Getenv(envMsgWarn); v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 {
-			warnThreshold = n
-		}
-	}
+// Authentication Check: Verify signature of raw payload
+if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+return printer.Print(hook.OutputDenyAuth())
+}
 
-	parkThreshold := 0
-	if v := os.Getenv(envMsgPark); v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 {
-			parkThreshold = n
-		}
-	}
+// Fast path: disabled via env
+if os.Getenv(envBudgetDisable) == "1" {
+return printer.Print(BudgetOutput{Message: "budget tracking disabled"})
+}
 
-	// Resolve state file path
-	stateFile := resolveStateFile(ctx)
+// Resolve thresholds
+warnThreshold := defaultWarn
+if v := os.Getenv(envMsgWarn); v != "" {
+if n, err := strconv.Atoi(v); err == nil && n > 0 {
+	warnThreshold = n
+}
+}
 
+parkThreshold := 0
+if v := os.Getenv(envMsgPark); v != "" {
+if n, err := strconv.Atoi(v); err == nil && n > 0 {
+	parkThreshold = n
+}
+}
+
+// Resolve state file path
+stateFile := resolveStateFile(ctx, hookEnv)
 	// Increment counter atomically
 	count, err := incrementCounter(stateFile)
 	if err != nil {
@@ -156,13 +162,12 @@ func runBudget(ctx *cmdContext) error {
 
 // resolveStateFile determines the temp file path for counter state.
 // Key resolution: ARI_SESSION_KEY > CLAUDE_SESSION_ID > ppid-{PPID}
-func resolveStateFile(ctx *cmdContext) string {
+func resolveStateFile(ctx *cmdContext, hookEnv *hook.Env) string {
 	var key string
 
 	if v := os.Getenv(envSessionKey); v != "" {
 		key = v
 	} else {
-		hookEnv := ctx.getHookEnv()
 		if hookEnv.SessionID != "" {
 			key = hookEnv.SessionID
 		} else {

@@ -60,7 +60,7 @@ Output (stdout JSON):
 Performance: <1ms for non-git-commit commands (fast-path).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runGitConventions(ctx)
+				return runGitConventions(cmd, ctx)
 			})
 		},
 	}
@@ -68,18 +68,23 @@ Performance: <1ms for non-git-commit commands (fast-path).`,
 	return cmd
 }
 
-func runGitConventions(ctx *cmdContext) error {
+func runGitConventions(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runGitConventionsCore(ctx, printer)
+	return runGitConventionsCore(cmd, ctx, printer)
 }
 
 // runGitConventionsCore contains the actual logic with injected printer for testing.
-func runGitConventionsCore(ctx *cmdContext, printer *output.Printer) error {
+func runGitConventionsCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
-	hookEnv := ctx.getHookEnv()
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Fast-path: only handle PreToolUse events
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreTool {
 		return outputGitConventionsAllow(printer)
 	}
 

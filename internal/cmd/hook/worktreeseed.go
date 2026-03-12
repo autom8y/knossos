@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,7 +14,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/materialize"
+	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/paths"
 )
 
@@ -55,7 +56,7 @@ to seed the channel directory with the rite configuration.
 
 Exit 0 = success; non-zero = failure (harness will not proceed).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runWorktreeSeed(ctx)
+			return runWorktreeSeed(cmd, ctx)
 		},
 	}
 
@@ -63,17 +64,24 @@ Exit 0 = success; non-zero = failure (harness will not proceed).`,
 }
 
 // runWorktreeSeed implements the WorktreeCreate delegation hook.
-func runWorktreeSeed(ctx *cmdContext) error {
+func runWorktreeSeed(cmd *cobra.Command, ctx *cmdContext) error {
+	printer := ctx.getPrinter()
+	return runWorktreeSeedCore(cmd, ctx, printer)
+}
+
+// runWorktreeSeedCore contains the actual logic with injected printer for testing.
+func runWorktreeSeedCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// All log output must go to STDERR. Stdout is reserved for the worktree path.
 	stderr := os.Stderr
 
-	// Step 1: Read stdin JSON payload from CC.
-	stdinBytes, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		fmt.Fprintf(stderr, "worktree-seed: failed to read stdin: %v\n", err)
-		return err
+	// Step 0: Get hook environment and verify signature.
+	hookEnv := ctx.getHookEnv(cmd)
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
 	}
 
+	// Step 1: Read stdin JSON payload from CC.
+	stdinBytes := hookEnv.RawPayload
 	var payload worktreeCreatePayload
 	if len(stdinBytes) > 0 {
 		if err := json.Unmarshal(stdinBytes, &payload); err != nil {
@@ -90,10 +98,10 @@ func runWorktreeSeed(ctx *cmdContext) error {
 		if payload.CWD != "" {
 			projectRoot = payload.CWD
 		} else {
-			projectRoot, err = os.Getwd()
-			if err != nil {
-				fmt.Fprintf(stderr, "worktree-seed: cannot determine project root: %v\n", err)
-				return err
+			projectRoot, _ = os.Getwd()
+			if projectRoot == "" {
+				fmt.Fprintf(stderr, "worktree-seed: cannot determine project root\n")
+				return errors.New(errors.CodeValidationFailed, "worktree-seed: cannot determine project root")
 			}
 		}
 	}

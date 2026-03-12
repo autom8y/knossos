@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -14,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/hook"
+	"github.com/autom8y/knossos/internal/output"
 )
 
 // worktreeRemovePayload is the stdin JSON payload CC sends for WorktreeRemove events.
@@ -39,7 +40,7 @@ Input (stdin JSON):
 All output goes to STDERR. Exit 0 = success.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runWorktreeRemove(ctx)
+				return runWorktreeRemove(cmd, ctx)
 			})
 		},
 	}
@@ -48,17 +49,24 @@ All output goes to STDERR. Exit 0 = success.`,
 }
 
 // runWorktreeRemove implements the WorktreeRemove cleanup hook.
-func runWorktreeRemove(ctx *cmdContext) error {
+func runWorktreeRemove(cmd *cobra.Command, ctx *cmdContext) error {
+	printer := ctx.getPrinter()
+	return runWorktreeRemoveCore(cmd, ctx, printer)
+}
+
+// runWorktreeRemoveCore contains the actual logic with injected printer for testing.
+func runWorktreeRemoveCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// All output to STDERR.
 	stderr := os.Stderr
 
-	// Step 1: Read stdin JSON payload from CC.
-	stdinBytes, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		fmt.Fprintf(stderr, "worktree-remove: failed to read stdin: %v\n", err)
-		return err
+	// Step 0: Get hook environment and verify signature.
+	hookEnv := ctx.getHookEnv(cmd)
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
 	}
 
+	// Step 1: Read stdin JSON payload from CC.
+	stdinBytes := hookEnv.RawPayload
 	var payload worktreeRemovePayload
 	if len(stdinBytes) > 0 {
 		if err := json.Unmarshal(stdinBytes, &payload); err != nil {

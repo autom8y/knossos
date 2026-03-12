@@ -56,7 +56,7 @@ when the CC conversation terminates.
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runSessionEnd(ctx)
+				return runSessionEnd(cmd, ctx)
 			})
 		},
 	}
@@ -64,20 +64,25 @@ Performance: <100ms target execution time.`,
 	return cmd
 }
 
-func runSessionEnd(ctx *cmdContext) error {
+func runSessionEnd(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runSessionEndCore(ctx, printer)
+	return runSessionEndCore(cmd, ctx, printer)
 }
 
 // runSessionEndCore contains the actual logic with injected printer for testing.
-func runSessionEndCore(ctx *cmdContext, printer *output.Printer) error {
-	hookEnv := ctx.getHookEnv()
+func runSessionEndCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a SessionEnd event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventSessionEnd {
 		printer.VerboseLog("debug", "skipping sessionend hook for non-SessionEnd event",
 			map[string]any{"event": string(hookEnv.Event)})
-		return outputNoEnd(printer, "not a SessionEnd event")
+		return outputNoEnd(printer, "not a session_end event")
 	}
 
 	// Resolve session context

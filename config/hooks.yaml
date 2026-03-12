@@ -6,71 +6,74 @@
 # v2 adds 'command' field for direct binary invocation (replaces bash wrappers).
 #
 # Priority: Lower values execute first (range: 1-100)
+#
+# Event names use knossos canonical vocabulary (ADR-0032, snake_case).
+# The materialization pipeline translates canonical -> wire format per channel.
 
 schema_version: "2.0"
 
 hooks:
   # ===========================================================================
-  # SessionStart Hooks
+  # session_start Hooks
   # ===========================================================================
-  - event: SessionStart
+  - event: session_start
     command: "ari hook context --output json"
     timeout: 10
     priority: 5
     description: "Injects session context via ari hook context"
 
   # ===========================================================================
-  # SessionEnd Hooks
+  # session_end Hooks
   # ===========================================================================
-  - event: SessionEnd
+  - event: session_end
     command: "ari hook sessionend --output json"
     timeout: 5
     priority: 5
     description: "Emits session.ended event and auto-parks on session end"
 
   # ===========================================================================
-  # Stop Hooks
+  # stop Hooks
   # ===========================================================================
-  - event: Stop
+  - event: stop
     command: "ari hook autopark --output json"
     timeout: 5
     priority: 5
     description: "Auto-parks session on stop via ari hook autopark"
 
   # ===========================================================================
-  # PreCompact Hooks
+  # pre_compact Hooks
   # ===========================================================================
-  - event: PreCompact
+  - event: pre_compact
     command: "ari hook precompact --output json"
     timeout: 5
     priority: 5
     description: "Rotates SESSION_CONTEXT.md on context compaction"
 
   # ===========================================================================
-  # PreToolUse Hooks
+  # pre_tool Hooks
   # ===========================================================================
-  - event: PreToolUse
+  - event: pre_tool
     matcher: "Edit|Write"
     command: "ari hook writeguard --output json"
     timeout: 3
     priority: 3
     description: "Guards session context writes via ari hook writeguard"
 
-  - event: PreToolUse
+  - event: pre_tool
     matcher: "Bash"
     command: "ari hook validate --output json"
     timeout: 5
     priority: 5
     description: "Validates bash commands via ari hook validate"
 
-  - event: PreToolUse
+  - event: pre_tool
     matcher: "Bash"
     command: "ari hook git-conventions --output json"
     timeout: 5
     priority: 5
     description: "Validates git commit messages against conventional format"
 
-  - event: PreToolUse
+  - event: pre_tool
     matcher: "Bash"
     command: "ari hook attribution-guard --output json"
     timeout: 5
@@ -78,9 +81,9 @@ hooks:
     description: "Blocks git commits containing AI attribution markers (Co-Authored-By, Generated with)"
 
   # ===========================================================================
-  # PostToolUse Hooks
+  # post_tool Hooks
   # ===========================================================================
-  - event: PostToolUse
+  - event: post_tool
     matcher: "Edit|Write|Bash"
     command: "ari hook clew --output json"
     timeout: 5
@@ -89,21 +92,21 @@ hooks:
     description: "Tracks artifacts and commits via ari hook clew"
 
   # H5: Phase-transition detection for proactive suggestions
-  - event: PostToolUse
+  - event: post_tool
     command: "ari hook suggest --output json"
     timeout: 5
     async: true
     priority: 85
     description: "Detects phase transitions and surfaces contextual suggestions"
 
-  - event: PostToolUse
+  - event: post_tool
     command: "ari hook budget --output json"
     timeout: 3
     priority: 90
     description: "Tracks tool use count for cognitive budget warnings"
 
   # H-drift: CLI-agent interop drift detection (Cassandra Protocol)
-  - event: PostToolUse
+  - event: post_tool
     command: "ari hook driftdetect --output json"
     timeout: 5
     async: true
@@ -111,27 +114,29 @@ hooks:
     description: "Detects CLI-agent surface drift and auto-files complaints"
 
   # ===========================================================================
-  # WorktreeCreate Hooks (delegation hook: must create worktree and print path)
+  # worktree_create Hooks
+  # CC-specific lifecycle event (not yet in ADR-0032 canonical set)
   # ===========================================================================
-  - event: WorktreeCreate
+  - event: worktree_create
     command: "ari hook worktree-seed --output json"
     timeout: 30
     priority: 5
     description: "Creates and seeds git worktrees with rite configuration on CC WorktreeCreate"
 
   # ===========================================================================
-  # WorktreeRemove Hooks
+  # worktree_remove Hooks
+  # CC-specific lifecycle event (not yet in ADR-0032 canonical set)
   # ===========================================================================
-  - event: WorktreeRemove
+  - event: worktree_remove
     command: "ari hook worktree-remove --output json"
     timeout: 10
     priority: 5
     description: "Removes git worktrees on CC WorktreeRemove"
 
   # ===========================================================================
-  # SubagentStart Hooks
+  # subagent_start Hooks
   # ===========================================================================
-  - event: SubagentStart
+  - event: subagent_start
     command: "ari hook subagent-start --output json"
     timeout: 5
     async: true
@@ -139,12 +144,11 @@ hooks:
     description: "Logs subagent spawn events to session clew"
 
   # ===========================================================================
-  # SubagentStop Hooks
+  # subagent_stop Hooks
   # ===========================================================================
-  - event: SubagentStop
+  - event: subagent_stop
     command: "ari hook subagent-stop --output json"
     timeout: 5
     async: true
     priority: 5
     description: "Logs subagent completion events to session clew"
-

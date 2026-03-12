@@ -56,7 +56,7 @@ This hook is triggered on SubagentStart events. It:
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runSubagentStart(ctx)
+				return runSubagentStart(cmd, ctx)
 			})
 		},
 	}
@@ -79,7 +79,7 @@ This hook is triggered on SubagentStop events. It:
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runSubagentStop(ctx)
+				return runSubagentStop(cmd, ctx)
 			})
 		},
 	}
@@ -87,23 +87,28 @@ Performance: <100ms target execution time.`,
 	return cmd
 }
 
-func runSubagentStart(ctx *cmdContext) error {
+func runSubagentStart(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runSubagentStartCore(ctx, printer)
+	return runSubagentStartCore(cmd, ctx, printer)
 }
 
-func runSubagentStop(ctx *cmdContext) error {
+func runSubagentStop(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runSubagentStopCore(ctx, printer)
+	return runSubagentStopCore(cmd, ctx, printer)
 }
 
 // runSubagentStartCore contains the SubagentStart hook logic.
-func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
-	hookEnv := ctx.getHookEnv()
+func runSubagentStartCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a SubagentStart event (or empty for testing)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventSubagentStart {
-		return outputSubagentResult(printer, false, "not a SubagentStart event")
+		return outputSubagentResult(printer, false, "not a subagent_start event")
 	}
 
 	// Get session directory for clew logging
@@ -159,12 +164,17 @@ func runSubagentStartCore(ctx *cmdContext, printer *output.Printer) error {
 }
 
 // runSubagentStopCore contains the SubagentStop hook logic.
-func runSubagentStopCore(ctx *cmdContext, printer *output.Printer) error {
-	hookEnv := ctx.getHookEnv()
+func runSubagentStopCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a SubagentStop event (or empty for testing)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventSubagentStop {
-		return outputSubagentResult(printer, false, "not a SubagentStop event")
+		return outputSubagentResult(printer, false, "not a subagent_stop event")
 	}
 
 	// Get session directory for clew logging

@@ -35,18 +35,18 @@ func TestBuildHooksSettings(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Priority: 3},
-			{Event: "PreToolUse", Matcher: "Bash", Command: "ari hook validate --output json", Priority: 5},
-			{Event: "PostToolUse", Matcher: "Edit|Write|Bash", Command: "ari hook clew --output json", Priority: 5},
-			{Event: "PostToolUse", Command: "ari hook budget --output json", Priority: 90},
-			{Event: "SessionStart", Command: "ari hook context --output json", Priority: 5},
-			{Event: "Stop", Command: "ari hook autopark --output json", Priority: 5},
+			{Event: "pre_tool", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Priority: 3},
+			{Event: "pre_tool", Matcher: "Bash", Command: "ari hook validate --output json", Priority: 5},
+			{Event: "post_tool", Matcher: "Edit|Write|Bash", Command: "ari hook clew --output json", Priority: 5},
+			{Event: "post_tool", Command: "ari hook budget --output json", Priority: 90},
+			{Event: "session_start", Command: "ari hook context --output json", Priority: 5},
+			{Event: "stop", Command: "ari hook autopark --output json", Priority: 5},
 		},
 	}
 
 	hooks := BuildHooksSettings(cfg, "claude")
 
-	// Check all event types are present
+	// Check all event types are present (translated to CC wire names)
 	expectedEvents := []string{"PreToolUse", "PostToolUse", "SessionStart", "Stop"}
 	for _, event := range expectedEvents {
 		if hooks[event] == nil {
@@ -110,7 +110,7 @@ func TestBuildHooksSettings_IncludesTimeout(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Timeout: 3},
+			{Event: "pre_tool", Command: "ari hook writeguard --output json", Timeout: 3},
 		},
 	}
 
@@ -128,8 +128,8 @@ func TestBuildHooksSettings_SkipsEmptyCommand(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Command: "ari hook writeguard --output json"},
-			{Event: "PreToolUse", Command: ""}, // Should be skipped
+			{Event: "pre_tool", Command: "ari hook writeguard --output json"},
+			{Event: "pre_tool", Command: ""}, // Should be skipped
 		},
 	}
 
@@ -148,7 +148,7 @@ func TestMergeHooksSettings_FreshSettings(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Priority: 3},
+			{Event: "pre_tool", Command: "ari hook writeguard --output json", Priority: 3},
 		},
 	}
 
@@ -177,11 +177,12 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Priority: 3},
+			{Event: "pre_tool", Command: "ari hook writeguard --output json", Priority: 3},
 		},
 	}
 
 	// Simulate existing settings with a user-defined matcher group and an old ari group
+	// NOTE: existing settings use CC wire names (PreToolUse) since that's what settings.local.json contains
 	settings := map[string]any{
 		"hooks": map[string]any{
 			"PreToolUse": []any{
@@ -228,11 +229,11 @@ func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Priority: 3},
+			{Event: "pre_tool", Command: "ari hook writeguard --output json", Priority: 3},
 		},
 	}
 
-	// Simulate existing settings with old flat format entries
+	// Simulate existing settings with old flat format entries (CC wire names)
 	settings := map[string]any{
 		"hooks": map[string]any{
 			"PreToolUse": []any{
@@ -268,11 +269,11 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PostToolUse", Command: "ari hook budget --output json", Priority: 90},
+			{Event: "post_tool", Command: "ari hook budget --output json", Priority: 90},
 		},
 	}
 
-	// Simulate existing settings with old ari matcher groups
+	// Simulate existing settings with old ari matcher groups (CC wire names)
 	settings := map[string]any{
 		"hooks": map[string]any{
 			"PostToolUse": []any{
@@ -309,8 +310,8 @@ func TestMergeHooksSettings_Idempotent(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Priority: 3},
-			{Event: "PostToolUse", Command: "ari hook budget --output json", Priority: 90},
+			{Event: "pre_tool", Matcher: "Edit|Write", Command: "ari hook writeguard --output json", Priority: 3},
+			{Event: "post_tool", Command: "ari hook budget --output json", Priority: 90},
 		},
 	}
 
@@ -402,7 +403,7 @@ func TestLoadHooksConfig(t *testing.T) {
 
 	hooksYAML := `schema_version: "2.0"
 hooks:
-  - event: PreToolUse
+  - event: pre_tool
     matcher: "Edit|Write"
     command: "ari hook writeguard --output json"
     timeout: 3
@@ -438,7 +439,7 @@ func TestLoadHooksConfig_RejectsV1Schema(t *testing.T) {
 	// v1 schema (no command field, has path field)
 	hooksYAML := `schema_version: "1.0"
 hooks:
-  - event: PreToolUse
+  - event: pre_tool
     path: ari/writeguard.sh
     timeout: 3
 `
@@ -465,7 +466,7 @@ func TestBuildHooksSettings_IncludesAsync(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PostToolUse", Command: "ari hook clew --output json", Async: true},
+			{Event: "post_tool", Command: "ari hook clew --output json", Async: true},
 		},
 	}
 
@@ -483,7 +484,7 @@ func TestBuildHooksSettings_OmitsAsyncWhenFalse(t *testing.T) {
 	cfg := &HooksConfig{
 		SchemaVersion: "2.0",
 		Hooks: []HookEntry{
-			{Event: "PreToolUse", Command: "ari hook writeguard --output json", Async: false},
+			{Event: "pre_tool", Command: "ari hook writeguard --output json", Async: false},
 		},
 	}
 

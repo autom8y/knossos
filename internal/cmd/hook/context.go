@@ -251,7 +251,7 @@ Output is formatted as YAML frontmatter suitable for Claude context.
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runContext(ctx)
+				return runContext(cmd, ctx)
 			})
 		},
 	}
@@ -259,15 +259,20 @@ Performance: <100ms target execution time.`,
 	return cmd
 }
 
-func runContext(ctx *cmdContext) error {
+func runContext(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runContextCore(ctx, printer)
+	return runContextCore(cmd, ctx, printer)
 }
 
 // runContextCore contains the actual logic with injected printer for testing.
-func runContextCore(ctx *cmdContext, printer *output.Printer) error {
+func runContextCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
-	hookEnv := ctx.getHookEnv()
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Verify this is a SessionStart event (or allow for testing without event)
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventSessionStart {

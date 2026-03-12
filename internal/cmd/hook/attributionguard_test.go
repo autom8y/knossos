@@ -197,7 +197,7 @@ EOF
 				},
 			}
 
-			err := runAttributionGuardCore(ctx, printer)
+			err := runAttributionGuardCore(nil, ctx, printer)
 			if err != nil {
 				t.Fatalf("runAttributionGuardCore() error = %v", err)
 			}
@@ -249,7 +249,7 @@ func TestAttributionGuard_NonBashTool(t *testing.T) {
 		},
 	}
 
-	err := runAttributionGuardCore(ctx, printer)
+	err := runAttributionGuardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAttributionGuardCore() error = %v", err)
 	}
@@ -292,7 +292,7 @@ func TestAttributionGuard_StdinIntegration_DenyCoAuthored(t *testing.T) {
 		},
 	}
 
-	err := runAttributionGuardCore(ctx, printer)
+	err := runAttributionGuardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAttributionGuardCore() error = %v", err)
 	}
@@ -335,7 +335,7 @@ func TestAttributionGuard_StdinIntegration_AllowClean(t *testing.T) {
 		},
 	}
 
-	err := runAttributionGuardCore(ctx, printer)
+	err := runAttributionGuardCore(nil, ctx, printer)
 	if err != nil {
 		t.Fatalf("runAttributionGuardCore() error = %v", err)
 	}
@@ -380,7 +380,7 @@ func BenchmarkAttributionGuard_FastPath(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAttributionGuardCore(ctx, printer)
+		runAttributionGuardCore(nil, ctx, printer)
 	}
 }
 
@@ -414,6 +414,6 @@ func BenchmarkAttributionGuard_CommitScan(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAttributionGuardCore(ctx, printer)
+		runAttributionGuardCore(nil, ctx, printer)
 	}
 }

@@ -491,14 +491,14 @@ func TestRunDriftdetectCore_ToolFallback(t *testing.T) {
 	fixedTime := time.Date(2026, 3, 11, 14, 30, 0, 0, time.UTC)
 
 	// Pipe stdin with a Bash tool event containing a grep command
-	pipeHookStdinWithTool(t, string(hook.EventPostToolUse), tmpDir, "Bash",
+	pipeHookStdinWithTool(t, string(hook.EventPostTool), tmpDir, "Bash",
 		`{"command": "grep -r 'TODO' src/"}`)
 
 	ctx := &cmdContext{}
 	var stdout, stderr bytes.Buffer
 	printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
 
-	if err := runDriftdetectCore(ctx, printer, func() time.Time { return fixedTime }); err != nil {
+	if err := runDriftdetectCore(nil, ctx, printer, func() time.Time { return fixedTime }); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

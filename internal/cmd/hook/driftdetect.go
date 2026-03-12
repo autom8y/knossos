@@ -90,7 +90,7 @@ When a pattern is detected, a quick-file complaint is written to
 Performance: <50ms (async, no latency impact on tool execution).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runDriftdetect(ctx)
+				return runDriftdetect(cmd, ctx)
 			})
 		},
 	}
@@ -98,19 +98,24 @@ Performance: <50ms (async, no latency impact on tool execution).`,
 	return cmd
 }
 
-func runDriftdetect(ctx *cmdContext) error {
+func runDriftdetect(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runDriftdetectCore(ctx, printer, time.Now)
+	return runDriftdetectCore(cmd, ctx, printer, time.Now)
 }
 
 // runDriftdetectCore contains the drift detection logic with injected dependencies for testing.
-func runDriftdetectCore(ctx *cmdContext, printer *output.Printer, nowFn func() time.Time) error {
-	hookEnv := ctx.getHookEnv()
+func runDriftdetectCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer, nowFn func() time.Time) error {
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return printer.Print(hook.OutputDenyAuth())
+	}
 
 	// Accept PostToolUse and PostToolUseFailure events
-	isFailure := hookEnv.Event == hook.EventPostToolUseFailure
-	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostToolUse && !isFailure {
-		return printer.Print(DriftOutput{Message: "not a PostToolUse event"})
+	isFailure := hookEnv.Event == hook.EventPostToolFailure
+	if hookEnv.Event != "" && hookEnv.Event != hook.EventPostTool && !isFailure {
+		return printer.Print(DriftOutput{Message: "not a post_tool event"})
 	}
 
 	// Must have tool information
