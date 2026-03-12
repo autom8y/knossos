@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // Integration tests for the inscription pipeline as specified in TDD Section 11.2.
@@ -17,7 +19,7 @@ import (
 func TestInscription_SyncCleanProject(t *testing.T) {
 	// Setup: Create a temp project directory with no CLAUDE.md
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
@@ -94,7 +96,7 @@ Produces: Test reports
 func TestInscription_SyncWithSatelliteSections(t *testing.T) {
 	// Setup: Create project with existing CLAUDE.md containing satellite section
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
@@ -177,7 +179,7 @@ section_order:
 func TestInscription_SyncOverwritesKnossosRegions(t *testing.T) {
 	// Setup: Create project with modified knossos region
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
@@ -262,7 +264,7 @@ section_order:
 func TestInscription_SyncRegenerateWithUserEdits(t *testing.T) {
 	// Setup: Create project with modified regenerate region
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
@@ -352,7 +354,7 @@ section_order:
 func TestInscription_RollbackAfterSync(t *testing.T) {
 	// Setup: Create project with existing CLAUDE.md
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
@@ -435,7 +437,7 @@ section_order:
 func TestInscription_DryRunNoChanges(t *testing.T) {
 	// Setup: Create project with existing CLAUDE.md
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
@@ -533,7 +535,7 @@ section_order:
 func TestInscription_IdempotentSync(t *testing.T) {
 	// Setup: Create a clean project
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
@@ -626,7 +628,7 @@ func TestInscription_IdempotentSync(t *testing.T) {
 func TestInscription_RiteSwitchTriggersSync(t *testing.T) {
 	// Setup: Create project with existing content
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
@@ -711,7 +713,7 @@ section_order:
 // TestInscription_MalformedMarkersHandled tests graceful handling of malformed markers.
 func TestInscription_MalformedMarkersHandled(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
@@ -769,7 +771,7 @@ section_order:
 // TestInscription_LargeFile tests handling of large CLAUDE.md files.
 func TestInscription_LargeFile(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
@@ -831,7 +833,7 @@ section_order:
 // TestInscription_ConcurrentBackups tests backup cleanup with multiple syncs.
 func TestInscription_ConcurrentBackups(t *testing.T) {
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
