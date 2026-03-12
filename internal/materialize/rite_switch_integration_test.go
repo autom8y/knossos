@@ -42,7 +42,7 @@ func setupRite(t *testing.T, ritesDir, riteName, workflowContent string, agents 
 func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(knossosDir, "rites")
 
@@ -93,7 +93,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	assert.NotEmpty(t, state.LastSync)
 
 	// Verify template rule was written
-	ruleContent, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
+	ruleContent, err := os.ReadFile(filepath.Join(channelDir, "rules", "internal-session.md"))
 	require.NoError(t, err)
 	assert.Equal(t, "session rule v1", string(ruleContent))
 
@@ -105,7 +105,7 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 		[]byte("current_rite: rite-a\n"), 0644))
 	// 2. Create a user rule
 	require.NoError(t, os.WriteFile(
-		filepath.Join(claudeDir, "rules", "my-custom.md"),
+		filepath.Join(channelDir, "rules", "my-custom.md"),
 		[]byte("my custom rule"), 0644))
 
 	// Phase 2: Switch to rite-b
@@ -135,12 +135,12 @@ func TestRiteSwitchIntegration_StateConsistency(t *testing.T) {
 	assert.True(t, os.IsNotExist(err), "INVOCATION_STATE.yaml should be removed on rite switch")
 
 	// Verify user rule survived
-	userRule, err := os.ReadFile(filepath.Join(claudeDir, "rules", "my-custom.md"))
+	userRule, err := os.ReadFile(filepath.Join(channelDir, "rules", "my-custom.md"))
 	require.NoError(t, err)
 	assert.Equal(t, "my custom rule", string(userRule))
 
 	// Verify template rule still exists (same template name, refreshed content)
-	ruleContent, err = os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
+	ruleContent, err = os.ReadFile(filepath.Join(channelDir, "rules", "internal-session.md"))
 	require.NoError(t, err)
 	assert.Equal(t, "session rule v1", string(ruleContent))
 
@@ -209,7 +209,7 @@ func TestRiteSwitchIntegration_NoWorkflow(t *testing.T) {
 func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
 
 	workflowContent := []byte("name: embedded-wf\nphases:\n  - test\n")
@@ -244,7 +244,7 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 
 	// Directly test the sub-methods since MaterializeWithOptions goes through
 	// source resolution which needs filesystem rites.
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Test workflow materialization from embedded
@@ -257,9 +257,9 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 	// Test rules materialization from embedded -- expect NO rules written.
 	// Embedded rites are for foreign projects; knossos-internal rules (internal/**,
 	// rites/**, etc.) are harmful noise on non-knossos codebases.
-	err = m.materializeRules(claudeDir, resolved, provenance.NullCollector{}, "")
+	err = m.materializeRules(channelDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
-	_, err = os.Stat(filepath.Join(claudeDir, "rules", "internal-session.md"))
+	_, err = os.Stat(filepath.Join(channelDir, "rules", "internal-session.md"))
 	assert.True(t, os.IsNotExist(err), "embedded rules must NOT be written to foreign projects")
 
 	// Test agents materialization from embedded
@@ -268,9 +268,9 @@ func TestRiteSwitchIntegration_EmbeddedSource(t *testing.T) {
 		Agents:     []Agent{{Name: "tester", Role: "tests"}},
 		EntryAgent: "tester",
 	}
-	err = m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err = m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
 	require.NoError(t, err)
-	got, err = os.ReadFile(filepath.Join(claudeDir, "agents", "tester.md"))
+	got, err = os.ReadFile(filepath.Join(channelDir, "agents", "tester.md"))
 	require.NoError(t, err)
 	assert.Equal(t, string(agentContent), string(got))
 }

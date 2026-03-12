@@ -59,9 +59,9 @@ func TestMaterializeWithOptions_GeminiChannel(t *testing.T) {
 	}
 
 	// Should NOT write to .claude
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if _, err := os.Stat(claudeDir); !os.IsNotExist(err) {
-		t.Errorf("expected %s to NOT be created", claudeDir)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if _, err := os.Stat(channelDir); !os.IsNotExist(err) {
+		t.Errorf("expected %s to NOT be created", channelDir)
 	}
 }
 
@@ -86,9 +86,9 @@ func TestMaterializeWithOptions_DefaultChannel(t *testing.T) {
 	}
 
 	// Should write to .claude
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
-		t.Errorf("expected %s to be created", claudeDir)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
+		t.Errorf("expected %s to be created", channelDir)
 	}
 
 	// Should NOT write to .gemini
@@ -148,9 +148,9 @@ func TestSync_ChannelAll_ProjectsBoth(t *testing.T) {
 	}
 
 	// Both directories should exist
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
-		t.Errorf("expected %s to be created", claudeDir)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
+		t.Errorf("expected %s to be created", channelDir)
 	}
 
 	geminiDir := filepath.Join(tmpDir, ".gemini")
@@ -211,11 +211,11 @@ func TestMaterializeWithOptions_ClaudeUnchanged(t *testing.T) {
 	createTestRite(t, tmpDir)
 
 	// Pre-create a file in .claude to test it's untouched
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	markerFile := filepath.Join(claudeDir, "marker.txt")
+	markerFile := filepath.Join(channelDir, "marker.txt")
 	if err := os.WriteFile(markerFile, []byte("untouched"), 0644); err != nil {
 		t.Fatal(err)
 	}

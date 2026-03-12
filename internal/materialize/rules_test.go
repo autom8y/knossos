@@ -15,8 +15,8 @@ import (
 func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	rulesDir := filepath.Join(claudeDir, "rules")
+	channelDir := filepath.Join(projectDir, ".claude")
+	rulesDir := filepath.Join(channelDir, "rules")
 	require.NoError(t, os.MkdirAll(rulesDir, 0755))
 
 	// Simulate a rule from a previous rite's templates
@@ -37,7 +37,7 @@ func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{}, "")
+	err := m.materializeRules(channelDir, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// The old rule should be replaced with new content
@@ -49,8 +49,8 @@ func TestMaterializeRules_WipesOldKnossosRules(t *testing.T) {
 func TestMaterializeRules_PreservesUserRules(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	rulesDir := filepath.Join(claudeDir, "rules")
+	channelDir := filepath.Join(projectDir, ".claude")
+	rulesDir := filepath.Join(channelDir, "rules")
 	require.NoError(t, os.MkdirAll(rulesDir, 0755))
 
 	// User-created rule (not in templates)
@@ -75,7 +75,7 @@ func TestMaterializeRules_PreservesUserRules(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{}, "")
+	err := m.materializeRules(channelDir, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// User rule should survive
@@ -92,8 +92,8 @@ func TestMaterializeRules_PreservesUserRules(t *testing.T) {
 func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	rulesDir := filepath.Join(claudeDir, "rules")
+	channelDir := filepath.Join(projectDir, ".claude")
+	rulesDir := filepath.Join(channelDir, "rules")
 	require.NoError(t, os.MkdirAll(rulesDir, 0755))
 
 	// Old template rule that no longer has a template source
@@ -113,7 +113,7 @@ func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
 	m := NewMaterializer(resolver)
 	m.templatesDir = templatesDir
 
-	err := m.materializeRules(claudeDir, nil, provenance.NullCollector{}, "")
+	err := m.materializeRules(channelDir, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	got, err := os.ReadFile(filepath.Join(rulesDir, "mena.md"))
@@ -124,8 +124,8 @@ func TestMaterializeRules_RemovesStaleTemplateRule(t *testing.T) {
 func TestMaterializeRules_Idempotent(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "rules"), 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "rules"), 0755))
 
 	templatesDir := filepath.Join(projectDir, "templates")
 	sourceRulesDir := filepath.Join(templatesDir, "rules")
@@ -139,16 +139,16 @@ func TestMaterializeRules_Idempotent(t *testing.T) {
 	m.templatesDir = templatesDir
 
 	// Run twice
-	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}, ""))
-	require.NoError(t, m.materializeRules(claudeDir, nil, provenance.NullCollector{}, ""))
+	require.NoError(t, m.materializeRules(channelDir, nil, provenance.NullCollector{}, ""))
+	require.NoError(t, m.materializeRules(channelDir, nil, provenance.NullCollector{}, ""))
 
 	// Same output
-	got, err := os.ReadFile(filepath.Join(claudeDir, "rules", "internal-session.md"))
+	got, err := os.ReadFile(filepath.Join(channelDir, "rules", "internal-session.md"))
 	require.NoError(t, err)
 	assert.Equal(t, "session rule", string(got))
 
 	// Only the template rule exists
-	entries, err := os.ReadDir(filepath.Join(claudeDir, "rules"))
+	entries, err := os.ReadDir(filepath.Join(channelDir, "rules"))
 	require.NoError(t, err)
 	assert.Len(t, entries, 1)
 }
@@ -160,8 +160,8 @@ func TestMaterializeRules_Idempotent(t *testing.T) {
 func TestMaterializeRules_EmbeddedSource(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	rulesDir := filepath.Join(claudeDir, "rules")
+	channelDir := filepath.Join(projectDir, ".claude")
+	rulesDir := filepath.Join(channelDir, "rules")
 	require.NoError(t, os.MkdirAll(rulesDir, 0755))
 
 	// Pre-populate stale knossos-managed rules simulating a prior filesystem sync.
@@ -185,7 +185,7 @@ func TestMaterializeRules_EmbeddedSource(t *testing.T) {
 		Source:   RiteSource{Type: SourceEmbedded, Path: "embedded"},
 	}
 
-	err := m.materializeRules(claudeDir, resolved, provenance.NullCollector{}, "")
+	err := m.materializeRules(channelDir, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// Stale knossos-managed rules must be removed.

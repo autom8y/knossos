@@ -97,11 +97,11 @@ func writeActiveRite(t *testing.T, projectDir, riteName string) {
 
 // newTestMaterializer creates a Materializer with explicit paths for test isolation.
 // Eliminates need for t.Setenv("KNOSSOS_HOME") and t.Setenv("HOME").
-func newTestMaterializer(projectDir, knossosHome, userClaudeDir string) *Materializer {
+func newTestMaterializer(projectDir, knossosHome, userChannelDir string) *Materializer {
 	resolver := paths.NewResolver(projectDir)
 	sr := NewSourceResolverWithPaths(projectDir, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
-	m.userClaudeDir = userClaudeDir
+	m.userChannelDir = userChannelDir
 	return m
 }
 
@@ -109,7 +109,7 @@ func newTestMaterializer(projectDir, knossosHome, userClaudeDir string) *Materia
 func TestUnifiedSync_RiteOnly(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
@@ -129,8 +129,8 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 	assert.Nil(t, result.UserResult)
 
 	// Verify .claude/ populated
-	assert.FileExists(t, filepath.Join(claudeDir, "agents", "test-agent.md"))
-	assert.FileExists(t, filepath.Join(claudeDir, "CLAUDE.md"))
+	assert.FileExists(t, filepath.Join(channelDir, "agents", "test-agent.md"))
+	assert.FileExists(t, filepath.Join(channelDir, "CLAUDE.md"))
 	assert.FileExists(t, filepath.Join(projectDir, ".knossos", "ACTIVE_RITE"))
 }
 
@@ -138,12 +138,12 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 func TestUnifiedSync_UserOnly(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 	projectDir := t.TempDir() // Empty project (no rite)
 
 	setupKnossosHome(t, knossosHome)
 
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	opts := SyncOptions{
 		Scope: ScopeUser,
@@ -156,27 +156,27 @@ func TestUnifiedSync_UserOnly(t *testing.T) {
 	assert.Equal(t, "success", result.UserResult.Status)
 
 	// Verify ~/.claude/ populated
-	assert.FileExists(t, filepath.Join(userClaudeDir, "agents", "user-agent.md"))
-	assert.FileExists(t, filepath.Join(userClaudeDir, "commands", "test-command.md"))
-	assert.FileExists(t, filepath.Join(userClaudeDir, "skills", "test-skill", "SKILL.md"))
-	assert.FileExists(t, filepath.Join(userClaudeDir, "hooks", "test-hook.sh"))
+	assert.FileExists(t, filepath.Join(userChannelDir, "agents", "user-agent.md"))
+	assert.FileExists(t, filepath.Join(userChannelDir, "commands", "test-command.md"))
+	assert.FileExists(t, filepath.Join(userChannelDir, "skills", "test-skill", "SKILL.md"))
+	assert.FileExists(t, filepath.Join(userChannelDir, "hooks", "test-hook.sh"))
 }
 
 // TestUnifiedSync_ScopeAll tests default scope (rite + user)
 func TestUnifiedSync_ScopeAll(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
 	writeActiveRite(t, projectDir, "test-rite")
 
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	opts := SyncOptions{
 		Scope: ScopeAll,
@@ -190,8 +190,8 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 	assert.Equal(t, "success", result.UserResult.Status)
 
 	// Verify both .claude/ and ~/.claude/ populated
-	assert.FileExists(t, filepath.Join(claudeDir, "agents", "test-agent.md"))
-	assert.FileExists(t, filepath.Join(userClaudeDir, "agents", "user-agent.md"))
+	assert.FileExists(t, filepath.Join(channelDir, "agents", "test-agent.md"))
+	assert.FileExists(t, filepath.Join(userChannelDir, "agents", "user-agent.md"))
 }
 
 // TestUnifiedSync_NoActiveRite_ScopeAll tests graceful degradation
@@ -199,11 +199,11 @@ func TestUnifiedSync_NoActiveRite_ScopeAll(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	setupKnossosHome(t, knossosHome)
 
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	opts := SyncOptions{
 		Scope: ScopeAll,
@@ -246,7 +246,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	// Setup rite with test-agent
 	setupTestRite(t, riteDir)
@@ -262,7 +262,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 	))
 
 	// First sync rite scope to populate .claude/
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	riteResult, err := m.Sync(SyncOptions{Scope: ScopeRite})
 	require.NoError(t, err)
@@ -294,12 +294,12 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 func TestUnifiedSync_RecoveryMode(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	setupKnossosHome(t, knossosHome)
 
 	// Pre-create file in ~/.claude/ that matches KNOSSOS_HOME
-	agentsDir := filepath.Join(userClaudeDir, "agents")
+	agentsDir := filepath.Join(userChannelDir, "agents")
 	require.NoError(t, os.MkdirAll(agentsDir, 0755))
 	require.NoError(t, os.WriteFile(
 		filepath.Join(agentsDir, "user-agent.md"),
@@ -308,7 +308,7 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 	))
 
 	projectDir := t.TempDir()
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	opts := SyncOptions{
 		Scope:   ScopeUser,
@@ -325,7 +325,7 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 	assert.Contains(t, agentResource.Changes.Unchanged, "agents/user-agent.md")
 
 	// Verify manifest was created and file is tracked
-	manifestPath := provenance.UserManifestPath(userClaudeDir)
+	manifestPath := provenance.UserManifestPath(userChannelDir)
 	manifest, err := provenance.Load(manifestPath)
 	require.NoError(t, err)
 	entry, exists := manifest.Entries["agents/user-agent.md"]
@@ -337,19 +337,19 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	setupKnossosHome(t, knossosHome)
 
 	projectDir := t.TempDir()
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	// First sync to establish baseline
 	_, err := m.Sync(SyncOptions{Scope: ScopeUser})
 	require.NoError(t, err)
 
 	// Modify target file (simulate divergence)
-	targetPath := filepath.Join(userClaudeDir, "agents", "user-agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "user-agent.md")
 	require.NoError(t, os.WriteFile(
 		targetPath,
 		[]byte("# Modified Agent\n\nLocally modified.\n"),
@@ -392,12 +392,12 @@ func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 func TestUnifiedSync_KeepOrphans(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	setupKnossosHome(t, knossosHome)
 
 	projectDir := t.TempDir()
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	// First sync to establish baseline
 	_, err := m.Sync(SyncOptions{Scope: ScopeUser})
@@ -413,7 +413,7 @@ func TestUnifiedSync_KeepOrphans(t *testing.T) {
 	assert.NotNil(t, result1.UserResult)
 
 	// Verify orphan was removed
-	targetPath := filepath.Join(userClaudeDir, "agents", "user-agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "user-agent.md")
 	_, err = os.Stat(targetPath)
 	assert.True(t, os.IsNotExist(err), "Orphan should be removed by default")
 
@@ -437,12 +437,12 @@ func TestUnifiedSync_KeepOrphans(t *testing.T) {
 func TestUnifiedSync_ResourceFilter(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	setupKnossosHome(t, knossosHome)
 
 	projectDir := t.TempDir()
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	opts := SyncOptions{
 		Scope:    ScopeUser,
@@ -459,27 +459,27 @@ func TestUnifiedSync_ResourceFilter(t *testing.T) {
 	assert.NotContains(t, result.UserResult.Resources, ResourceHooks)
 
 	// Verify only agents directory created
-	assert.DirExists(t, filepath.Join(userClaudeDir, "agents"))
-	assert.NoDirExists(t, filepath.Join(userClaudeDir, "commands"))
-	assert.NoDirExists(t, filepath.Join(userClaudeDir, "skills"))
-	assert.NoDirExists(t, filepath.Join(userClaudeDir, "hooks"))
+	assert.DirExists(t, filepath.Join(userChannelDir, "agents"))
+	assert.NoDirExists(t, filepath.Join(userChannelDir, "commands"))
+	assert.NoDirExists(t, filepath.Join(userChannelDir, "skills"))
+	assert.NoDirExists(t, filepath.Join(userChannelDir, "hooks"))
 }
 
 // TestUnifiedSync_DryRun tests --dry-run for both scopes
 func TestUnifiedSync_DryRun(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
 	writeActiveRite(t, projectDir, "test-rite")
 
-	m := newTestMaterializer(projectDir, knossosHome, userClaudeDir)
+	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	opts := SyncOptions{
 		Scope:  ScopeAll,
@@ -492,8 +492,8 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 	assert.NotNil(t, result.UserResult)
 
 	// Verify no files were actually written
-	assert.NoDirExists(t, filepath.Join(claudeDir, "agents"))
-	assert.NoDirExists(t, filepath.Join(userClaudeDir, "agents"))
+	assert.NoDirExists(t, filepath.Join(channelDir, "agents"))
+	assert.NoDirExists(t, filepath.Join(userChannelDir, "agents"))
 
 	// Rite dry-run should still report what would happen
 	assert.Equal(t, "success", result.RiteResult.Status)
@@ -503,7 +503,7 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 func TestUnifiedSync_Idempotency(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
@@ -522,7 +522,7 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 	assert.NotNil(t, result1.RiteResult)
 
 	// Read CLAUDE.md content after first sync
-	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
 	content1, err := os.ReadFile(claudeMdPath)
 	require.NoError(t, err)
 
@@ -618,7 +618,7 @@ func TestSync_ScopeRite_Error_StillFails(t *testing.T) {
 func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "bad-rite")
 
 	// Set up a rite with an agent but a broken template
@@ -655,9 +655,9 @@ func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 	))
 
 	// Pre-create .claude/ with an existing agent that should NOT be overwritten
-	require.NoError(t, os.MkdirAll(filepath.Join(claudeDir, "agents"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "agents"), 0755))
 	require.NoError(t, os.WriteFile(
-		filepath.Join(claudeDir, "agents", "existing-agent.md"),
+		filepath.Join(channelDir, "agents", "existing-agent.md"),
 		[]byte("# Existing Agent\n\nShould not be touched.\n"),
 		0644,
 	))
@@ -675,12 +675,12 @@ func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 
 	// Verify no partial state: existing agent should be untouched,
 	// new agent should NOT have been written
-	existingContent, readErr := os.ReadFile(filepath.Join(claudeDir, "agents", "existing-agent.md"))
+	existingContent, readErr := os.ReadFile(filepath.Join(channelDir, "agents", "existing-agent.md"))
 	require.NoError(t, readErr)
 	assert.Contains(t, string(existingContent), "Should not be touched", "existing agent should be preserved")
 
 	// The new rite's agent should NOT be on disk
-	_, statErr := os.Stat(filepath.Join(claudeDir, "agents", "test-agent.md"))
+	_, statErr := os.Stat(filepath.Join(channelDir, "agents", "test-agent.md"))
 	assert.True(t, os.IsNotExist(statErr), "new agent should NOT be written when pre-validation fails")
 }
 
@@ -693,7 +693,7 @@ func TestMinimalMode_ProjectsSharedMena(t *testing.T) {
 	knossosHome := t.TempDir()
 
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 
 	// Set up platform mena (root level) — getMenaDir() needs this to resolve
 	platformMenaDir := filepath.Join(knossosHome, "mena", "nav-cmd")
@@ -735,13 +735,13 @@ func TestMinimalMode_ProjectsSharedMena(t *testing.T) {
 	assert.Equal(t, "minimal", result.Status)
 
 	// Platform mena should be projected (INDEX-only dromena become flat files)
-	assert.FileExists(t, filepath.Join(claudeDir, "commands", "nav-cmd.md"),
+	assert.FileExists(t, filepath.Join(channelDir, "commands", "nav-cmd.md"),
 		"platform mena dromenon should be projected in minimal mode")
 
 	// Shared rite mena should ALSO be projected (the fix)
-	assert.FileExists(t, filepath.Join(claudeDir, "commands", "know.md"),
+	assert.FileExists(t, filepath.Join(channelDir, "commands", "know.md"),
 		"shared rite dromenon (/know) should be projected in minimal mode")
 	// Legomena keep directory structure; INDEX.lego.md projects as SKILL.md
-	assert.FileExists(t, filepath.Join(claudeDir, "skills", "shared-ref", "SKILL.md"),
+	assert.FileExists(t, filepath.Join(channelDir, "skills", "shared-ref", "SKILL.md"),
 		"shared rite legomenon should be projected in minimal mode")
 }

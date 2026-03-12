@@ -35,21 +35,21 @@ func newMaterializerForTest(projectDir string) *Materializer {
 func TestCleanupStaleSettings_NoFile(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	m := newMaterializerForTest(projectDir)
 	manifest := buildTestManifest(nil)
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.False(t, removed, "should return false when settings.json does not exist")
 }
 
 func TestCleanupStaleSettings_AgentGuardFingerprint(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	// Blanket-deny agent-guard hook — the original writeDefaultSettings() template
 	content := `{
@@ -67,13 +67,13 @@ func TestCleanupStaleSettings_AgentGuardFingerprint(t *testing.T) {
     ]
   }
 }`
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+	settingsPath := filepath.Join(channelDir, "settings.json")
 	require.NoError(t, os.WriteFile(settingsPath, []byte(content), 0644))
 
 	m := newMaterializerForTest(projectDir)
 	manifest := buildTestManifest(nil)	// No provenance entry for settings.json
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.True(t, removed, "should remove blanket-deny agent-guard settings.json")
 
 	_, err := os.Stat(settingsPath)
@@ -83,18 +83,18 @@ func TestCleanupStaleSettings_AgentGuardFingerprint(t *testing.T) {
 func TestCleanupStaleSettings_EmptyStubFingerprint(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	// Empty CC-default stub found in satellites
 	content := `{"permissions":{"allow":[],"additionalDirectories":[]},"hooks":{}}`
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+	settingsPath := filepath.Join(channelDir, "settings.json")
 	require.NoError(t, os.WriteFile(settingsPath, []byte(content), 0644))
 
 	m := newMaterializerForTest(projectDir)
 	manifest := buildTestManifest(nil)
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.True(t, removed, "should remove empty CC-default stub settings.json")
 
 	_, err := os.Stat(settingsPath)
@@ -104,8 +104,8 @@ func TestCleanupStaleSettings_EmptyStubFingerprint(t *testing.T) {
 func TestCleanupStaleSettings_UserModified(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	// User added additional custom hooks alongside the agent-guard hook
 	content := `{
@@ -126,13 +126,13 @@ func TestCleanupStaleSettings_UserModified(t *testing.T) {
     "allow": ["Bash(git:*)"]
   }
 }`
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+	settingsPath := filepath.Join(channelDir, "settings.json")
 	require.NoError(t, os.WriteFile(settingsPath, []byte(content), 0644))
 
 	m := newMaterializerForTest(projectDir)
 	manifest := buildTestManifest(nil)
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.False(t, removed, "should not remove settings.json with extra user fields")
 
 	_, err := os.Stat(settingsPath)
@@ -142,12 +142,12 @@ func TestCleanupStaleSettings_UserModified(t *testing.T) {
 func TestCleanupStaleSettings_HasProvenance(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	// Matches fingerprint 2 but has a provenance entry — pipeline-managed
 	content := `{"permissions":{"allow":[],"additionalDirectories":[]},"hooks":{}}`
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+	settingsPath := filepath.Join(channelDir, "settings.json")
 	require.NoError(t, os.WriteFile(settingsPath, []byte(content), 0644))
 
 	m := newMaterializerForTest(projectDir)
@@ -161,7 +161,7 @@ func TestCleanupStaleSettings_HasProvenance(t *testing.T) {
 		),
 	})
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.False(t, removed, "should not remove settings.json that has a provenance entry")
 
 	_, err := os.Stat(settingsPath)
@@ -171,16 +171,16 @@ func TestCleanupStaleSettings_HasProvenance(t *testing.T) {
 func TestCleanupStaleSettings_InvalidJSON(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+	settingsPath := filepath.Join(channelDir, "settings.json")
 	require.NoError(t, os.WriteFile(settingsPath, []byte("not valid json {{{}"), 0644))
 
 	m := newMaterializerForTest(projectDir)
 	manifest := buildTestManifest(nil)
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.False(t, removed, "should not remove settings.json with invalid JSON")
 
 	_, err := os.Stat(settingsPath)
@@ -190,18 +190,18 @@ func TestCleanupStaleSettings_InvalidJSON(t *testing.T) {
 func TestCleanupStaleSettings_WhitespaceVariant(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	// Reformatted version of the blanket-deny pattern (different indentation/newlines)
 	content := `{"hooks":{"PreToolUse":[{"matcher":".*","hooks":[{"type":"command","command":"ari hook agent-guard"}]}]}}`
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+	settingsPath := filepath.Join(channelDir, "settings.json")
 	require.NoError(t, os.WriteFile(settingsPath, []byte(content), 0644))
 
 	m := newMaterializerForTest(projectDir)
 	manifest := buildTestManifest(nil)
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.True(t, removed, "structural comparison should be whitespace-insensitive")
 
 	_, err := os.Stat(settingsPath)
@@ -211,8 +211,8 @@ func TestCleanupStaleSettings_WhitespaceVariant(t *testing.T) {
 func TestCleanupStaleSettings_PartialMatch(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	// agent-guard hook that includes --allow-path: this is the current pipeline output, not stale
 	content := `{
@@ -230,13 +230,13 @@ func TestCleanupStaleSettings_PartialMatch(t *testing.T) {
     ]
   }
 }`
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+	settingsPath := filepath.Join(channelDir, "settings.json")
 	require.NoError(t, os.WriteFile(settingsPath, []byte(content), 0644))
 
 	m := newMaterializerForTest(projectDir)
 	manifest := buildTestManifest(nil)
 
-	removed := m.cleanupStaleBlanketSettings(claudeDir, manifest)
+	removed := m.cleanupStaleBlanketSettings(channelDir, manifest)
 	assert.False(t, removed, "agent-guard with --allow-path is not the stale pattern")
 
 	_, err := os.Stat(settingsPath)

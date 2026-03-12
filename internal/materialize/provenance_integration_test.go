@@ -85,7 +85,7 @@ func TestProvenanceIntegration_BasicMaterialization(t *testing.T) {
 func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
@@ -119,7 +119,7 @@ func TestProvenanceIntegration_DivergenceDetection(t *testing.T) {
 	assert.Equal(t, provenance.OwnerKnossos, manifest1.Entries["rules/test-rule.md"].Owner)
 
 	// User modifies a knossos-owned file
-	rulePath := filepath.Join(claudeDir, "rules", "test-rule.md")
+	rulePath := filepath.Join(channelDir, "rules", "test-rule.md")
 	require.NoError(t, os.WriteFile(rulePath, []byte("USER MODIFIED CONTENT"), 0644))
 
 	// Materialize second time (should detect divergence)
@@ -234,7 +234,7 @@ func TestProvenanceIntegration_DryRun(t *testing.T) {
 func TestProvenanceIntegration_MenaDirectories(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
@@ -288,14 +288,14 @@ func TestProvenanceIntegration_MenaDirectories(t *testing.T) {
 
 	// Verify command checksum matches promoted file (INDEX.md promoted to test-command.md)
 	// Dromena without companions have no subdirectory — checksum is from promoted file
-	promotedCommandPath := filepath.Join(claudeDir, "commands", "test-command.md")
+	promotedCommandPath := filepath.Join(channelDir, "commands", "test-command.md")
 	promotedData, err := os.ReadFile(promotedCommandPath)
 	require.NoError(t, err, "promoted command file should exist")
 	commandHash := checksum.Content(string(promotedData))
 	assert.Equal(t, commandHash, commandEntry.Checksum, "command checksum should match promoted file")
 
 	// Verify skill checksum matches directory (legomena are not promoted)
-	skillDirPath := filepath.Join(claudeDir, "skills", "test-skill")
+	skillDirPath := filepath.Join(channelDir, "skills", "test-skill")
 	skillHash, err := checksum.Dir(skillDirPath)
 	require.NoError(t, err)
 	assert.Equal(t, skillHash, skillEntry.Checksum, "skill directory checksum should match")

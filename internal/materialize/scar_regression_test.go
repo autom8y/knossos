@@ -50,7 +50,7 @@ func TestSCAR002_StagedMaterializeAbsent(t *testing.T) {
 func TestSCAR002_MaterializeWithOptions_NoClaudeRename(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -72,12 +72,12 @@ func TestSCAR002_MaterializeWithOptions_NoClaudeRename(t *testing.T) {
 	assert.Equal(t, "success", result.Status)
 
 	// .claude/ must exist at original path — not renamed or moved.
-	info, err := os.Stat(claudeDir)
+	info, err := os.Stat(channelDir)
 	require.NoError(t, err, "SCAR-002 regression: .claude/ must exist after materialization")
 	assert.True(t, info.IsDir(), ".claude/ must be a directory")
 
 	// Ensure no .claude.bak/ was created (the renamed form from the old StagedMaterialize).
-	backupDir := claudeDir + ".bak"
+	backupDir := channelDir + ".bak"
 	_, bakErr := os.Stat(backupDir)
 	assert.True(t, os.IsNotExist(bakErr),
 		"SCAR-002 regression: .claude.bak/ must not exist after materialization; "+
@@ -209,8 +209,8 @@ func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	claudeDir := filepath.Join(projectDir, ".claude")
-	agentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(projectDir, ".claude")
+	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Setup a rite with one specialist agent.
 	setupRite(t, ritesDir, "test-rite", "", []Agent{{Name: "principal-engineer", Role: "implements code"}})

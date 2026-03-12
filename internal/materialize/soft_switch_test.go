@@ -14,7 +14,7 @@ func TestMaterializeWithOptions_SoftMode_AgentsUpdated(t *testing.T) {
 	t.Parallel()
 	// Setup test directory
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite with an agent
 	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
@@ -44,7 +44,7 @@ agents:
 	// Create materializer with explicit source
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializerWithSource(resolver, filepath.Dir(riteDir))
-	m.claudeDirOverride = claudeDir
+	m.channelDirOverride = channelDir
 
 	// Execute soft mode sync
 	opts := Options{
@@ -61,7 +61,7 @@ agents:
 	}
 
 	// Verify agents directory was created and contains the agent
-	agentPath := filepath.Join(claudeDir, "agents", "test-agent.md")
+	agentPath := filepath.Join(channelDir, "agents", "test-agent.md")
 	if _, err := os.Stat(agentPath); os.IsNotExist(err) {
 		t.Error("Expected agent file to be created in soft mode")
 	}
@@ -80,7 +80,7 @@ agents:
 func TestMaterializeWithOptions_SoftMode_InscriptionUpdated(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite
 	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
@@ -102,7 +102,7 @@ agents:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializerWithSource(resolver, filepath.Dir(riteDir))
-	m.claudeDirOverride = claudeDir
+	m.channelDirOverride = channelDir
 
 	opts := Options{Soft: true}
 	_, err := m.MaterializeWithOptions("test-rite", opts)
@@ -111,7 +111,7 @@ agents:
 	}
 
 	// Verify CLAUDE.md was created
-	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
 	if _, err := os.Stat(claudeMdPath); os.IsNotExist(err) {
 		t.Error("Expected CLAUDE.md to be created in soft mode")
 	}
@@ -121,11 +121,11 @@ agents:
 func TestMaterializeWithOptions_SoftMode_MenaSkipped(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Pre-create commands and skills directories with marker files
-	commandsDir := filepath.Join(claudeDir, "commands")
-	skillsDir := filepath.Join(claudeDir, "skills")
+	commandsDir := filepath.Join(channelDir, "commands")
+	skillsDir := filepath.Join(channelDir, "skills")
 	if err := os.MkdirAll(commandsDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -181,7 +181,7 @@ legomena:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializerWithSource(resolver, filepath.Dir(riteDir))
-	m.claudeDirOverride = claudeDir
+	m.channelDirOverride = channelDir
 
 	opts := Options{Soft: true}
 	result, err := m.MaterializeWithOptions("test-rite", opts)
@@ -216,14 +216,14 @@ legomena:
 func TestMaterializeWithOptions_SoftMode_SettingsSkipped(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	// Pre-create settings with marker content
-	settingsPath := filepath.Join(claudeDir, "settings.local.json")
+	settingsPath := filepath.Join(channelDir, "settings.local.json")
 	originalSettings := `{"marker":"ORIGINAL"}`
 	if err := os.WriteFile(settingsPath, []byte(originalSettings), 0644); err != nil {
 		t.Fatal(err)
@@ -252,7 +252,7 @@ mcp_servers:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializerWithSource(resolver, filepath.Dir(riteDir))
-	m.claudeDirOverride = claudeDir
+	m.channelDirOverride = channelDir
 
 	opts := Options{Soft: true}
 	result, err := m.MaterializeWithOptions("test-rite", opts)
@@ -279,7 +279,7 @@ mcp_servers:
 func TestMaterializeWithOptions_SoftMode_ActiveRiteUpdated(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite
 	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "new-rite")
@@ -301,7 +301,7 @@ agents:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializerWithSource(resolver, filepath.Dir(riteDir))
-	m.claudeDirOverride = claudeDir
+	m.channelDirOverride = channelDir
 
 	opts := Options{Soft: true}
 	_, err := m.MaterializeWithOptions("new-rite", opts)
@@ -326,7 +326,7 @@ agents:
 func TestMaterializeWithOptions_SoftMode_ResultReporting(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create minimal test rite
 	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
@@ -348,7 +348,7 @@ agents:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializerWithSource(resolver, filepath.Dir(riteDir))
-	m.claudeDirOverride = claudeDir
+	m.channelDirOverride = channelDir
 
 	opts := Options{Soft: true}
 	result, err := m.MaterializeWithOptions("test-rite", opts)
@@ -384,7 +384,7 @@ agents:
 func TestMaterializeWithOptions_FullMode_Unchanged(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create test rite with mena
 	riteDir := filepath.Join(tmpDir, ".knossos", "rites", "test-rite")
@@ -414,7 +414,7 @@ dromena:
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializerWithSource(resolver, filepath.Dir(riteDir))
-	m.claudeDirOverride = claudeDir
+	m.channelDirOverride = channelDir
 
 	// Execute WITHOUT soft mode (full mode)
 	opts := Options{Soft: false}
@@ -434,13 +434,13 @@ dromena:
 	}
 
 	// Verify mena was materialized (promoted command file should exist)
-	commandFile := filepath.Join(claudeDir, "commands", "test-command.md")
+	commandFile := filepath.Join(channelDir, "commands", "test-command.md")
 	if _, err := os.Stat(commandFile); os.IsNotExist(err) {
 		t.Error("Expected promoted command file to be created in full mode")
 	}
 
 	// Verify settings was created
-	settingsPath := filepath.Join(claudeDir, "settings.local.json")
+	settingsPath := filepath.Join(channelDir, "settings.local.json")
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
 		t.Error("Expected settings.local.json to be created in full mode")
 	}

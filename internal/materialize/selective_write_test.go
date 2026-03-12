@@ -16,14 +16,14 @@ func TestMaterializeAgents_PreservesUserAgents(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 
 	// Setup a rite with one agent
 	agents := []Agent{{Name: "designer", Role: "designs things"}}
 	setupRite(t, ritesDir, "test-rite", "", agents)
 
 	// Pre-create a user agent that is NOT in the rite manifest
-	agentsDir := filepath.Join(claudeDir, "agents")
+	agentsDir := filepath.Join(channelDir, "agents")
 	require.NoError(t, os.MkdirAll(agentsDir, 0755))
 	userAgent := filepath.Join(agentsDir, "my-custom-agent.md")
 	require.NoError(t, os.WriteFile(userAgent, []byte("# My Custom Agent\n"), 0644))
@@ -51,7 +51,7 @@ func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 
 	// Setup rite-a with agent "designer"
 	setupRite(t, ritesDir, "rite-a", "", []Agent{{Name: "designer", Role: "designs"}})
@@ -65,7 +65,7 @@ func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 	_, err := m.MaterializeWithOptions("rite-a", Options{Force: true, KeepAll: true})
 	require.NoError(t, err)
 
-	designerPath := filepath.Join(claudeDir, "agents", "designer.md")
+	designerPath := filepath.Join(channelDir, "agents", "designer.md")
 	assert.FileExists(t, designerPath, "designer should exist after rite-a materialization")
 
 	// Switch to rite-b with KeepAll
@@ -79,7 +79,7 @@ func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 	assert.FileExists(t, designerPath, "orphan agent should survive with KeepAll")
 
 	// deployer should be written
-	deployerPath := filepath.Join(claudeDir, "agents", "deployer.md")
+	deployerPath := filepath.Join(channelDir, "agents", "deployer.md")
 	assert.FileExists(t, deployerPath, "deployer should exist after rite-b materialization")
 }
 
@@ -239,7 +239,7 @@ func TestMaterialize_NoSkipGuard_AlwaysRuns(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 
 	agents := []Agent{{Name: "tester", Role: "tests things"}}
 	setupRite(t, ritesDir, "test-rite", "", agents)
@@ -252,7 +252,7 @@ func TestMaterialize_NoSkipGuard_AlwaysRuns(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "success", result.Status, "first materialization should succeed")
 
-	agentPath := filepath.Join(claudeDir, "agents", "tester.md")
+	agentPath := filepath.Join(channelDir, "agents", "tester.md")
 	assert.FileExists(t, agentPath)
 
 	// Modify the source agent file

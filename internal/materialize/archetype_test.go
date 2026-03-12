@@ -459,13 +459,13 @@ func TestRenderArchetype_SkillsYAMLList(t *testing.T) {
 // --- Integration tests: archetype wiring in materializeAgents ---
 
 // setupArchetypeRite creates a minimal rite directory with an archetype agent and
-// a normal source agent. Returns (projectDir, claudeDir).
+// a normal source agent. Returns (projectDir, channelDir).
 func setupArchetypeRite(t *testing.T) (string, string) {
 	t.Helper()
 	root := projectRoot(t) // real project root for archetype templates
 
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites", "test-arch")
 	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
@@ -496,12 +496,12 @@ func setupArchetypeRite(t *testing.T) (string, string) {
 		t.Fatalf("setup: %v", err)
 	}
 
-	return projectDir, claudeDir
+	return projectDir, channelDir
 }
 
 func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 	t.Parallel()
-	projectDir, claudeDir := setupArchetypeRite(t)
+	projectDir, channelDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
 		Name:        "test-arch",
@@ -534,13 +534,13 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
 
 	// Verify potnia was rendered from archetype template
-	potniaPath := filepath.Join(claudeDir, "agents", "potnia.md")
+	potniaPath := filepath.Join(channelDir, "agents", "potnia.md")
 	potniaContent, err := os.ReadFile(potniaPath)
 	if err != nil {
 		t.Fatalf("expected potnia agent at %s: %v", potniaPath, err)
@@ -574,7 +574,7 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 
 func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 	t.Parallel()
-	projectDir, claudeDir := setupArchetypeRite(t)
+	projectDir, channelDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
 		Name:        "test-arch",
@@ -607,13 +607,13 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
 
 	// Verify engineer was copied from source (not archetype)
-	engPath := filepath.Join(claudeDir, "agents", "engineer.md")
+	engPath := filepath.Join(channelDir, "agents", "engineer.md")
 	engContent, err := os.ReadFile(engPath)
 	if err != nil {
 		t.Fatalf("expected engineer agent at %s: %v", engPath, err)
@@ -632,7 +632,7 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 
 func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 	t.Parallel()
-	projectDir, claudeDir := setupArchetypeRite(t)
+	projectDir, channelDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
 		Name:        "test-arch",
@@ -664,12 +664,12 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
 
-	potniaPath := filepath.Join(claudeDir, "agents", "potnia.md")
+	potniaPath := filepath.Join(channelDir, "agents", "potnia.md")
 	potniaContent, err := os.ReadFile(potniaPath)
 	if err != nil {
 		t.Fatalf("expected potnia at %s: %v", potniaPath, err)
@@ -693,7 +693,7 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 	t.Parallel()
 	// When no agents have archetype set, behavior is identical to before.
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites", "plain")
 	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
@@ -721,13 +721,13 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "plain")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
 
 	// Verify worker was copied from source
-	workerPath := filepath.Join(claudeDir, "agents", "worker.md")
+	workerPath := filepath.Join(channelDir, "agents", "worker.md")
 	data, err := os.ReadFile(workerPath)
 	if err != nil {
 		t.Fatalf("expected worker at %s: %v", workerPath, err)
@@ -741,7 +741,7 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites", "bad")
 	if err := os.MkdirAll(filepath.Join(ritesDir, "agents"), 0755); err != nil {
@@ -764,7 +764,7 @@ func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "bad")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
 	if err == nil {
 		t.Fatal("expected error for unknown archetype, got nil")
 	}
@@ -775,7 +775,7 @@ func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 
 func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 	t.Parallel()
-	projectDir, claudeDir := setupArchetypeRite(t)
+	projectDir, channelDir := setupArchetypeRite(t)
 
 	manifest := &RiteManifest{
 		Name:        "test-arch",
@@ -811,7 +811,7 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 	// Use a real collector to capture provenance records
 	collector := provenance.NewCollector()
 
-	err := m.materializeAgents(manifest, resolved.RitePath, claudeDir, resolved, collector, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, collector, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}

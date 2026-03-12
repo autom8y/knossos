@@ -83,7 +83,7 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 
 	// Create a satellite project with a local rite (does NOT have rites/shared/)
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
-	claudeDir := filepath.Join(satelliteRoot, ".claude")
+	channelDir := filepath.Join(satelliteRoot, ".claude")
 
 	// Create a resolved rite pointing to the satellite's local rite directory
 	// (simulating how the source resolver resolves a satellite-local rite)
@@ -109,18 +109,18 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify: shared dromenon should appear in .claude/commands/
-	sharedCmd := filepath.Join(claudeDir, "commands", "shared-cmd.md")
+	sharedCmd := filepath.Join(channelDir, "commands", "shared-cmd.md")
 	if _, err := os.Stat(sharedCmd); os.IsNotExist(err) {
 		t.Errorf("FAIL: shared dromenon not materialized; expected at %s", sharedCmd)
 	}
 
 	// Verify: shared legomenon should appear in .claude/skills/
-	sharedSkill := filepath.Join(claudeDir, "skills", "shared-skill", "SKILL.md")
+	sharedSkill := filepath.Join(channelDir, "skills", "shared-skill", "SKILL.md")
 	if _, err := os.Stat(sharedSkill); os.IsNotExist(err) {
 		t.Errorf("FAIL: shared legomenon not materialized; expected at %s", sharedSkill)
 	}
@@ -136,7 +136,7 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 	setupKnossosRiteDepMena(t, knossosHome, "10x-dev")
 
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
-	claudeDir := filepath.Join(satelliteRoot, ".claude")
+	channelDir := filepath.Join(satelliteRoot, ".claude")
 
 	ritePath := filepath.Join(satelliteRoot, ".knossos", "rites", "data-analyst")
 	resolved := &ResolvedRite{
@@ -160,18 +160,18 @@ func TestMaterializeMena_SatelliteLocalRite_DependencyMenaResolvesFromKnossosHom
 	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Shared mena must appear
-	sharedCmd := filepath.Join(claudeDir, "commands", "shared-cmd.md")
+	sharedCmd := filepath.Join(channelDir, "commands", "shared-cmd.md")
 	if _, err := os.Stat(sharedCmd); os.IsNotExist(err) {
 		t.Errorf("FAIL: shared dromenon not materialized; expected at %s", sharedCmd)
 	}
 
 	// Dependency mena must appear
-	depSkill := filepath.Join(claudeDir, "skills", "dep-skill", "SKILL.md")
+	depSkill := filepath.Join(channelDir, "skills", "dep-skill", "SKILL.md")
 	if _, err := os.Stat(depSkill); os.IsNotExist(err) {
 		t.Errorf("FAIL: dependency legomenon not materialized; expected at %s", depSkill)
 	}
@@ -185,7 +185,7 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 	setupKnossosRiteSharedMena(t, knossosHome)
 
 	satelliteRoot := setupSatelliteRite(t, "data-analyst")
-	claudeDir := filepath.Join(satelliteRoot, ".claude")
+	channelDir := filepath.Join(satelliteRoot, ".claude")
 
 	// Create a rite-local mena entry with the same name as the shared one ("shared-cmd")
 	// but different content — the rite version should win.
@@ -218,12 +218,12 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 	sr := NewSourceResolverWithPaths(satelliteRoot, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify: rite-local version of shared-cmd must be projected
-	cmdFile := filepath.Join(claudeDir, "commands", "shared-cmd.md")
+	cmdFile := filepath.Join(channelDir, "commands", "shared-cmd.md")
 	content, err := os.ReadFile(cmdFile)
 	if err != nil {
 		t.Fatalf("shared-cmd.md not found at %s: %v", cmdFile, err)
@@ -233,7 +233,7 @@ func TestMaterializeMena_SatelliteLocalRite_RiteMenaOverridesShared(t *testing.T
 	}
 
 	// Verify: shared legomenon should still appear (not overridden by rite)
-	sharedSkill := filepath.Join(claudeDir, "skills", "shared-skill", "SKILL.md")
+	sharedSkill := filepath.Join(channelDir, "skills", "shared-skill", "SKILL.md")
 	if _, err := os.Stat(sharedSkill); os.IsNotExist(err) {
 		t.Errorf("FAIL: shared legomenon not materialized; expected at %s", sharedSkill)
 	}
@@ -261,7 +261,7 @@ func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
 		t.Fatalf("write manifest: %v", err)
 	}
 
-	claudeDir := filepath.Join(knossosHome, ".claude")
+	channelDir := filepath.Join(knossosHome, ".claude")
 
 	// Resolved rite points to knossosHome/rites/ecosystem — filepath.Dir gives knossosHome/rites/
 	// which IS the same as $KNOSSOS_HOME/rites, so sharedRitesBase should stay as ritesBase.
@@ -286,17 +286,17 @@ func TestMaterializeMena_KnossosCoreSelf_NoRegression(t *testing.T) {
 	sr := NewSourceResolverWithPaths(knossosHome, "", "", knossosHome)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Shared mena must still appear for knossos-core rites
-	sharedCmd := filepath.Join(claudeDir, "commands", "shared-cmd.md")
+	sharedCmd := filepath.Join(channelDir, "commands", "shared-cmd.md")
 	if _, err := os.Stat(sharedCmd); os.IsNotExist(err) {
 		t.Errorf("REGRESSION: shared dromenon not materialized for knossos-core rite; expected at %s", sharedCmd)
 	}
 
-	sharedSkill := filepath.Join(claudeDir, "skills", "shared-skill", "SKILL.md")
+	sharedSkill := filepath.Join(channelDir, "skills", "shared-skill", "SKILL.md")
 	if _, err := os.Stat(sharedSkill); os.IsNotExist(err) {
 		t.Errorf("REGRESSION: shared legomenon not materialized for knossos-core rite; expected at %s", sharedSkill)
 	}

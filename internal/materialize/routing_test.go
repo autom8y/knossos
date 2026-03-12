@@ -15,7 +15,7 @@ import (
 func TestRoutingDroToCommands(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with a dromena command
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-cmd")
@@ -43,13 +43,13 @@ This is a test command.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify: dromena INDEX promoted to parent level (.claude/commands/test-cmd.md)
-	commandsPath := filepath.Join(claudeDir, "commands", "test-cmd.md")
-	skillsPath := filepath.Join(claudeDir, "skills", "test-cmd", "SKILL.md")
+	commandsPath := filepath.Join(channelDir, "commands", "test-cmd.md")
+	skillsPath := filepath.Join(channelDir, "skills", "test-cmd", "SKILL.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
 		t.Errorf("Expected promoted dromena at .claude/commands/test-cmd.md, but it does not exist")
@@ -60,11 +60,11 @@ This is a test command.
 	}
 
 	// Verify: old paths should NOT exist
-	oldSubdirPath := filepath.Join(claudeDir, "commands", "test-cmd", "INDEX.md")
+	oldSubdirPath := filepath.Join(channelDir, "commands", "test-cmd", "INDEX.md")
 	if _, err := os.Stat(oldSubdirPath); err == nil {
 		t.Errorf("INDEX.md should not exist in subdirectory (promoted to test-cmd.md)")
 	}
-	oldPath := filepath.Join(claudeDir, "commands", "test-cmd", "INDEX.dro.md")
+	oldPath := filepath.Join(channelDir, "commands", "test-cmd", "INDEX.dro.md")
 	if _, err := os.Stat(oldPath); err == nil {
 		t.Errorf("Extension stripping failed: INDEX.dro.md should not exist in output, but it does")
 	}
@@ -75,7 +75,7 @@ This is a test command.
 func TestRoutingLegoToSkills(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with a legomena reference
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-ref")
@@ -103,13 +103,13 @@ This is a test reference.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify: file should be in .claude/skills/ as SKILL.md (CC entrypoint), NOT in .claude/commands/
-	skillsPath := filepath.Join(claudeDir, "skills", "test-ref", "SKILL.md")
-	commandsPath := filepath.Join(claudeDir, "commands", "test-ref", "SKILL.md")
+	skillsPath := filepath.Join(channelDir, "skills", "test-ref", "SKILL.md")
+	commandsPath := filepath.Join(channelDir, "commands", "test-ref", "SKILL.md")
 
 	if _, err := os.Stat(skillsPath); os.IsNotExist(err) {
 		t.Errorf("Expected legomena to be in .claude/skills/test-ref/SKILL.md (CC entrypoint), but it does not exist")
@@ -120,7 +120,7 @@ This is a test reference.
 	}
 
 	// Verify: old un-stripped name should NOT exist
-	oldPath := filepath.Join(claudeDir, "skills", "test-ref", "INDEX.lego.md")
+	oldPath := filepath.Join(channelDir, "skills", "test-ref", "INDEX.lego.md")
 	if _, err := os.Stat(oldPath); err == nil {
 		t.Errorf("Extension stripping failed: INDEX.lego.md should not exist in output, but it does")
 	}
@@ -131,7 +131,7 @@ This is a test reference.
 func TestRoutingDefaultIsDro(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with a plain INDEX.md (no .dro/.lego extension)
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-default")
@@ -159,13 +159,13 @@ This command has a plain INDEX.md and should default to dromena routing.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify: plain INDEX.md defaults to dromena, promoted to .claude/commands/test-default.md
-	commandsPath := filepath.Join(claudeDir, "commands", "test-default.md")
-	skillsPath := filepath.Join(claudeDir, "skills", "test-default", "SKILL.md")
+	commandsPath := filepath.Join(channelDir, "commands", "test-default.md")
+	skillsPath := filepath.Join(channelDir, "skills", "test-default", "SKILL.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
 		t.Errorf("Expected promoted default at .claude/commands/test-default.md, but it does not exist")
@@ -182,7 +182,7 @@ This command has a plain INDEX.md and should default to dromena routing.
 func TestRoutingSupportingFilesFollowIndex(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena directory with legomena INDEX and supporting files
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-with-files")
@@ -219,15 +219,15 @@ This is a test reference with supporting files.
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify: ALL files should be in .claude/skills/ (following INDEX.lego.md)
 	// INDEX.lego.md is renamed to SKILL.md (CC entrypoint convention)
-	skillsIndexPath := filepath.Join(claudeDir, "skills", "test-with-files", "SKILL.md")
-	skillsBehaviorPath := filepath.Join(claudeDir, "skills", "test-with-files", "behavior.md")
-	skillsExamplesPath := filepath.Join(claudeDir, "skills", "test-with-files", "examples.md")
+	skillsIndexPath := filepath.Join(channelDir, "skills", "test-with-files", "SKILL.md")
+	skillsBehaviorPath := filepath.Join(channelDir, "skills", "test-with-files", "behavior.md")
+	skillsExamplesPath := filepath.Join(channelDir, "skills", "test-with-files", "examples.md")
 
 	if _, err := os.Stat(skillsIndexPath); os.IsNotExist(err) {
 		t.Errorf("Expected SKILL.md (renamed from INDEX.lego.md, CC entrypoint) to be in .claude/skills/test-with-files/, but it does not exist")
@@ -242,13 +242,13 @@ This is a test reference with supporting files.
 	}
 
 	// Verify: files should NOT be in .claude/commands/
-	commandsIndexPath := filepath.Join(claudeDir, "commands", "test-with-files", "INDEX.md")
+	commandsIndexPath := filepath.Join(channelDir, "commands", "test-with-files", "INDEX.md")
 	if _, err := os.Stat(commandsIndexPath); err == nil {
 		t.Errorf("Files should NOT be in .claude/commands/test-with-files/, but INDEX.md exists")
 	}
 
 	// Verify: old un-stripped name should NOT exist
-	oldPath := filepath.Join(claudeDir, "skills", "test-with-files", "INDEX.lego.md")
+	oldPath := filepath.Join(channelDir, "skills", "test-with-files", "INDEX.lego.md")
 	if _, err := os.Stat(oldPath); err == nil {
 		t.Errorf("Extension stripping failed: INDEX.lego.md should not exist in output, but it does")
 	}
@@ -259,7 +259,7 @@ This is a test reference with supporting files.
 func TestRoutingMixedMena(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
 
 	// Create dromena command
@@ -315,35 +315,35 @@ description: A default command
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify dromena promoted to parent level
-	droPath := filepath.Join(claudeDir, "commands", "dro-cmd.md")
+	droPath := filepath.Join(channelDir, "commands", "dro-cmd.md")
 	if _, err := os.Stat(droPath); os.IsNotExist(err) {
 		t.Errorf("Expected dro-cmd.md at .claude/commands/ (promoted), but it does not exist")
 	}
 
 	// Verify legomena is in .claude/skills/ as SKILL.md (CC entrypoint convention)
-	legoPath := filepath.Join(claudeDir, "skills", "lego-ref", "SKILL.md")
+	legoPath := filepath.Join(channelDir, "skills", "lego-ref", "SKILL.md")
 	if _, err := os.Stat(legoPath); os.IsNotExist(err) {
 		t.Errorf("Expected lego-ref to be in .claude/skills/ as SKILL.md (CC entrypoint), but it does not exist")
 	}
 
 	// Verify default promoted to parent level
-	defaultPath := filepath.Join(claudeDir, "commands", "default-cmd.md")
+	defaultPath := filepath.Join(channelDir, "commands", "default-cmd.md")
 	if _, err := os.Stat(defaultPath); os.IsNotExist(err) {
 		t.Errorf("Expected default-cmd.md at .claude/commands/ (promoted), but it does not exist")
 	}
 
 	// Verify no cross-contamination
-	droInSkills := filepath.Join(claudeDir, "skills", "dro-cmd", "SKILL.md")
+	droInSkills := filepath.Join(channelDir, "skills", "dro-cmd", "SKILL.md")
 	if _, err := os.Stat(droInSkills); err == nil {
 		t.Errorf("dro-cmd should NOT be in .claude/skills/, but it exists")
 	}
 
-	legoInCommands := filepath.Join(claudeDir, "commands", "lego-ref", "SKILL.md")
+	legoInCommands := filepath.Join(channelDir, "commands", "lego-ref", "SKILL.md")
 	if _, err := os.Stat(legoInCommands); err == nil {
 		t.Errorf("lego-ref should NOT be in .claude/commands/, but it exists")
 	}
@@ -357,7 +357,7 @@ description: A default command
 func TestRoutingNestedGrouping(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
 
 	// Create grouping dir "guidance" (no INDEX file -- just a container)
@@ -419,40 +419,40 @@ description: A flat command
 		Version: "1.0.0",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Verify: guidance/standards -> skills/guidance/standards/ (legomena, SKILL.md entrypoint)
-	skillsStandards := filepath.Join(claudeDir, "skills", "guidance", "standards", "SKILL.md")
+	skillsStandards := filepath.Join(channelDir, "skills", "guidance", "standards", "SKILL.md")
 	if _, err := os.Stat(skillsStandards); os.IsNotExist(err) {
 		t.Errorf("Expected guidance/standards to be in skills/ as SKILL.md (CC entrypoint), but %s does not exist", skillsStandards)
 	}
-	skillsConventions := filepath.Join(claudeDir, "skills", "guidance", "standards", "code-conventions.md")
+	skillsConventions := filepath.Join(channelDir, "skills", "guidance", "standards", "code-conventions.md")
 	if _, err := os.Stat(skillsConventions); os.IsNotExist(err) {
 		t.Errorf("Expected supporting file to follow INDEX to skills/, but %s does not exist", skillsConventions)
 	}
 
 	// Verify: guidance/standards NOT in commands/
-	commandsStandards := filepath.Join(claudeDir, "commands", "guidance", "standards", "SKILL.md")
+	commandsStandards := filepath.Join(channelDir, "commands", "guidance", "standards", "SKILL.md")
 	if _, err := os.Stat(commandsStandards); err == nil {
 		t.Errorf("Legomena guidance/standards should NOT be in commands/, but %s exists", commandsStandards)
 	}
 
 	// Verify: guidance/file-verification -> commands/file-verification.md (dromena, promoted)
-	commandsFV := filepath.Join(claudeDir, "commands", "file-verification.md")
+	commandsFV := filepath.Join(channelDir, "commands", "file-verification.md")
 	if _, err := os.Stat(commandsFV); os.IsNotExist(err) {
 		t.Errorf("Expected file-verification.md at commands/ (promoted), but %s does not exist", commandsFV)
 	}
 
 	// Verify: file-verification NOT in skills/
-	skillsFV := filepath.Join(claudeDir, "skills", "file-verification", "SKILL.md")
+	skillsFV := filepath.Join(channelDir, "skills", "file-verification", "SKILL.md")
 	if _, err := os.Stat(skillsFV); err == nil {
 		t.Errorf("Dromena file-verification should NOT be in skills/, but %s exists", skillsFV)
 	}
 
 	// Verify: flat-cmd -> commands/flat-cmd.md (promoted)
-	flatPath := filepath.Join(claudeDir, "commands", "flat-cmd.md")
+	flatPath := filepath.Join(channelDir, "commands", "flat-cmd.md")
 	if _, err := os.Stat(flatPath); os.IsNotExist(err) {
 		t.Errorf("Expected flat-cmd.md at commands/ (promoted), but %s does not exist", flatPath)
 	}
@@ -464,7 +464,7 @@ description: A flat command
 func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	// Create mena with both dromena and legomena
 	menaBase := filepath.Join(tmpDir, ".knossos", "mena")
@@ -495,12 +495,12 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	manifest := &RiteManifest{Name: "test", Version: "1.0.0"}
 
 	// First materialization — should populate both dirs
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("First materializeMena failed: %v", err)
 	}
 
-	commandsPromoted := filepath.Join(claudeDir, "commands", "test-cmd.md")
-	skillsIndex := filepath.Join(claudeDir, "skills", "test-ref", "SKILL.md")
+	commandsPromoted := filepath.Join(channelDir, "commands", "test-cmd.md")
+	skillsIndex := filepath.Join(channelDir, "skills", "test-ref", "SKILL.md")
 
 	if _, err := os.Stat(commandsPromoted); os.IsNotExist(err) {
 		t.Fatalf("First pass: expected %s to exist", commandsPromoted)
@@ -510,11 +510,11 @@ func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	}
 
 	// Wipe the output dirs (simulating the state where they're empty)
-	os.RemoveAll(filepath.Join(claudeDir, "commands"))
-	os.RemoveAll(filepath.Join(claudeDir, "skills"))
+	os.RemoveAll(filepath.Join(channelDir, "commands"))
+	os.RemoveAll(filepath.Join(channelDir, "skills"))
 
 	// Second materialization (same rite) — should repopulate
-	if err := m.materializeMena(manifest, claudeDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, nil, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("Second materializeMena failed: %v", err)
 	}
 

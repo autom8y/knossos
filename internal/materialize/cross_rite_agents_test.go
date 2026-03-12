@@ -17,8 +17,8 @@ func TestCrossRiteAgents_NotMaterializedToProject(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	claudeDir := filepath.Join(projectDir, ".claude")
-	agentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(projectDir, ".claude")
+	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Setup a rite with one agent
 	setupRite(t, ritesDir, "test-rite", "", []Agent{{Name: "designer", Role: "designs"}})
@@ -51,8 +51,8 @@ func TestCrossRiteAgents_OrphanedOnRiteSwitch(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	claudeDir := filepath.Join(projectDir, ".claude")
-	agentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(projectDir, ".claude")
+	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Setup a rite
 	setupRite(t, ritesDir, "test-rite", "", []Agent{{Name: "designer", Role: "designs"}})

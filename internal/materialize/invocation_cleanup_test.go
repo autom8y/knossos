@@ -13,9 +13,9 @@ import (
 func TestClearInvocationState_RemovesFile(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, ".claude")
 	knossosDir := filepath.Join(projectDir, ".knossos")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 	require.NoError(t, os.MkdirAll(knossosDir, 0755))
 
 	// Create INVOCATION_STATE.yaml in .knossos/
@@ -25,7 +25,7 @@ func TestClearInvocationState_RemovesFile(t *testing.T) {
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
 
-	err := m.clearInvocationState(claudeDir)
+	err := m.clearInvocationState(channelDir)
 	require.NoError(t, err)
 
 	_, err = os.Stat(invPath)
@@ -35,12 +35,12 @@ func TestClearInvocationState_RemovesFile(t *testing.T) {
 func TestClearInvocationState_NoFile(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	claudeDir := filepath.Join(projectDir, ".claude")
-	require.NoError(t, os.MkdirAll(claudeDir, 0755))
+	channelDir := filepath.Join(projectDir, ".claude")
+	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	resolver := paths.NewResolver(projectDir)
 	m := NewMaterializer(resolver)
 
-	err := m.clearInvocationState(claudeDir)
+	err := m.clearInvocationState(channelDir)
 	require.NoError(t, err, "should not error when file doesn't exist")
 }

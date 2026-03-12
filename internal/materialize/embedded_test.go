@@ -161,8 +161,8 @@ func TestMaterializeAgents_FromEmbedded(t *testing.T) {
 	}
 
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	resolver := paths.NewResolver(tmpDir)
 	m := NewMaterializer(resolver)
@@ -182,12 +182,12 @@ func TestMaterializeAgents_FromEmbedded(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeAgents(manifest, "rites/test-rite", claudeDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil); err != nil {
+	if err := m.materializeAgents(manifest, "rites/test-rite", channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil); err != nil {
 		t.Fatalf("materializeAgents from embedded failed: %v", err)
 	}
 
 	// Verify agent file was written
-	agentPath := filepath.Join(claudeDir, "agents", "agent-one.md")
+	agentPath := filepath.Join(channelDir, "agents", "agent-one.md")
 	data, err := os.ReadFile(agentPath)
 	if err != nil {
 		t.Fatalf("Expected agent file at %s, got error: %v", agentPath, err)
@@ -212,7 +212,7 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 	}
 
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	resolver := paths.NewResolver(tmpDir)
 	sr := NewSourceResolverWithPaths(tmpDir, "", "", "/nonexistent-knossos-home")
@@ -233,18 +233,18 @@ func TestMaterializeMena_FromEmbedded(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena from embedded failed: %v", err)
 	}
 
 	// Verify dromena INDEX promoted to parent level
-	cmdPath := filepath.Join(claudeDir, "commands", "my-cmd.md")
+	cmdPath := filepath.Join(channelDir, "commands", "my-cmd.md")
 	if _, err := os.Stat(cmdPath); err != nil {
 		t.Errorf("Expected promoted dromena at %s, got error: %v", cmdPath, err)
 	}
 
 	// Verify legomena routed to skills/ as SKILL.md (CC entrypoint convention)
-	skillPath := filepath.Join(claudeDir, "skills", "shared-ref", "SKILL.md")
+	skillPath := filepath.Join(channelDir, "skills", "shared-ref", "SKILL.md")
 	if _, err := os.Stat(skillPath); err != nil {
 		t.Errorf("Expected legomena at %s (renamed from INDEX.lego.md, CC entrypoint), got error: %v", skillPath, err)
 	}
@@ -285,7 +285,7 @@ func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
 	}
 
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 	resolver := paths.NewResolver(tmpDir)
 	sr := NewSourceResolverWithPaths(tmpDir, "", "", platformMenaDir)
 	m := NewMaterializerWithSourceResolver(resolver, sr)
@@ -304,12 +304,12 @@ func TestMaterializeMena_EmbeddedSkipsPlatformMena(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeMena(manifest, claudeDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
+	if err := m.materializeMena(manifest, channelDir, resolved, provenance.NullCollector{}, false, "", &compiler.ClaudeCompiler{}); err != nil {
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
 	// Rite-specific command MUST appear.
-	riteCmdPath := filepath.Join(claudeDir, "commands", "rite-cmd.md")
+	riteCmdPath := filepath.Join(channelDir, "commands", "rite-cmd.md")
 	if _, err := os.Stat(riteCmdPath); err != nil {
 		t.Errorf("Expected rite command at %s, got error: %v", riteCmdPath, err)
 	}
