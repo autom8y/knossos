@@ -15,7 +15,7 @@ import (
 func TestRoutingDroToCommands(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	// Create mena directory with a dromena command
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-cmd")
@@ -75,7 +75,7 @@ This is a test command.
 func TestRoutingLegoToSkills(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	// Create mena directory with a legomena reference
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-ref")
@@ -131,7 +131,7 @@ This is a test reference.
 func TestRoutingDefaultIsDro(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	// Create mena directory with a plain INDEX.md (no .dro/.lego extension)
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-default")
@@ -182,7 +182,7 @@ This command has a plain INDEX.md and should default to dromena routing.
 func TestRoutingSupportingFilesFollowIndex(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	// Create mena directory with legomena INDEX and supporting files
 	menaDir := filepath.Join(tmpDir, ".knossos", "mena", "test-with-files")
@@ -259,7 +259,7 @@ This is a test reference with supporting files.
 func TestRoutingMixedMena(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
 
 	// Create dromena command
@@ -357,7 +357,7 @@ description: A default command
 func TestRoutingNestedGrouping(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	menaBaseDir := filepath.Join(tmpDir, ".knossos", "mena")
 
 	// Create grouping dir "guidance" (no INDEX file -- just a container)
@@ -464,7 +464,7 @@ description: A flat command
 func TestRematerializeMena_RepopulatesAfterWipe(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 
 	// Create mena with both dromena and legomena
 	menaBase := filepath.Join(tmpDir, ".knossos", "mena")
