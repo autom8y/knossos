@@ -392,66 +392,36 @@ func UserAgentsDirForChannel(channel string) string {
 	return filepath.Join(UserChannelDir(channel), "agents")
 }
 
-// UserAgentsDir returns the user-level agents directory for the default channel (claude).
-// Deprecated: Use UserAgentsDirForChannel for channel-aware paths.
-func UserAgentsDir() string {
-	return UserAgentsDirForChannel("claude")
-}
 
 // UserSkillsDirForChannel returns the user-level skills directory for a specific channel.
 func UserSkillsDirForChannel(channel string) string {
 	return filepath.Join(UserChannelDir(channel), "skills")
 }
 
-// UserSkillsDir returns the user-level skills directory for the default channel (claude).
-// Deprecated: Use UserSkillsDirForChannel for channel-aware paths.
-func UserSkillsDir() string {
-	return UserSkillsDirForChannel("claude")
-}
 
 // UserCommandsDirForChannel returns the user-level commands directory for a specific channel.
 func UserCommandsDirForChannel(channel string) string {
 	return filepath.Join(UserChannelDir(channel), "commands")
 }
 
-// UserCommandsDir returns the user-level commands directory for the default channel (claude).
-// Deprecated: Use UserCommandsDirForChannel for channel-aware paths.
-func UserCommandsDir() string {
-	return UserCommandsDirForChannel("claude")
-}
 
 // UserHooksDirForChannel returns the user-level hooks directory for a specific channel.
 func UserHooksDirForChannel(channel string) string {
 	return filepath.Join(UserChannelDir(channel), "hooks")
 }
 
-// UserHooksDir returns the user-level hooks directory for the default channel (claude).
-// Deprecated: Use UserHooksDirForChannel for channel-aware paths.
-func UserHooksDir() string {
-	return UserHooksDirForChannel("claude")
-}
 
 // UserProvenanceManifestForChannel returns the user-level provenance manifest for a specific channel.
 func UserProvenanceManifestForChannel(channel string) string {
 	return filepath.Join(UserChannelDir(channel), "USER_PROVENANCE_MANIFEST.yaml")
 }
 
-// UserProvenanceManifest returns the path to the user-level provenance manifest.
-// Deprecated: Use UserProvenanceManifestForChannel for channel-aware paths.
-func UserProvenanceManifest() string {
-	return UserProvenanceManifestForChannel("claude")
-}
 
 // OrgProvenanceManifestForChannel returns the org-level provenance manifest for a specific channel.
 func OrgProvenanceManifestForChannel(channel string) string {
 	return filepath.Join(UserChannelDir(channel), "ORG_PROVENANCE_MANIFEST.yaml")
 }
 
-// OrgProvenanceManifest returns the path to the org-level provenance manifest.
-// Deprecated: Use OrgProvenanceManifestForChannel for channel-aware paths.
-func OrgProvenanceManifest() string {
-	return OrgProvenanceManifestForChannel("claude")
-}
 
 // --- Session ID Helpers ---
 

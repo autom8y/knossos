@@ -544,11 +544,6 @@ func TestUserLevelPaths(t *testing.T) {
 		want string
 	}{
 		{"UserChannelDir/claude", UserChannelDir("claude"), filepath.Join(homeDir, ".claude")},
-		{"UserAgentsDir", UserAgentsDir(), filepath.Join(homeDir, ".claude", "agents")},
-		{"UserSkillsDir", UserSkillsDir(), filepath.Join(homeDir, ".claude", "skills")},
-		{"UserCommandsDir", UserCommandsDir(), filepath.Join(homeDir, ".claude", "commands")},
-		{"UserHooksDir", UserHooksDir(), filepath.Join(homeDir, ".claude", "hooks")},
-		{"UserProvenanceManifest", UserProvenanceManifest(), filepath.Join(homeDir, ".claude", "USER_PROVENANCE_MANIFEST.yaml")},
 	}
 
 	for _, tt := range tests {
@@ -607,12 +602,6 @@ func TestForChannelBackwardCompat(t *testing.T) {
 		deprecated string
 		forChannel string
 	}{
-		{"UserAgentsDir", UserAgentsDir(), UserAgentsDirForChannel("claude")},
-		{"UserSkillsDir", UserSkillsDir(), UserSkillsDirForChannel("claude")},
-		{"UserCommandsDir", UserCommandsDir(), UserCommandsDirForChannel("claude")},
-		{"UserHooksDir", UserHooksDir(), UserHooksDirForChannel("claude")},
-		{"UserProvenanceManifest", UserProvenanceManifest(), UserProvenanceManifestForChannel("claude")},
-		{"OrgProvenanceManifest", OrgProvenanceManifest(), OrgProvenanceManifestForChannel("claude")},
 	}
 
 	for _, tt := range tests {
