@@ -124,7 +124,7 @@ func runWriteguardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Prin
 
 	// Authentication Check: Verify signature of raw payload
 	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
-		return outputDenyAuth(printer)
+		return printer.Print(hook.OutputDenyAuth())
 	}
 
 	// Verify this is a PreToolUse event
@@ -425,19 +425,6 @@ func outputBlockArchived(printer *output.Printer, sessionID string) error {
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Session " + sessionID + " is archived (terminal state). Context files cannot be mutated after archiving.",
 			AdditionalContext:        "Session " + sessionID + " was previously wrapped with '" + registry.Ref(registry.CLISessionWrap) + "' and is now immutable. Archived session data is preserved at .sos/archive/" + sessionID + "/",
-		},
-	}
-	return printer.Print(result)
-}
-
-// outputDenyAuth outputs a deny decision when authentication fails.
-func outputDenyAuth(printer *output.Printer) error {
-	result := hook.PreToolUseOutput{
-		HookSpecificOutput: hook.HookSpecificOutput{
-			HookEventName:            "PreToolUse",
-			PermissionDecision:       "deny",
-			PermissionDecisionReason: "invalid_signature",
-			AdditionalContext:        "Hook authentication failed. Ensure KNOSSOS_HOOK_SECRET is correctly configured.",
 		},
 	}
 	return printer.Print(result)

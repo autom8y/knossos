@@ -19,3 +19,15 @@ type HookSpecificOutput struct {
 	UpdatedInput             json.RawMessage `json:"updatedInput,omitempty"`
 	AdditionalContext        string          `json:"additionalContext,omitempty"`
 }
+
+// OutputDenyAuth returns a PreToolUseOutput for authentication failures.
+func OutputDenyAuth() PreToolUseOutput {
+	return PreToolUseOutput{
+		HookSpecificOutput: HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "invalid_signature",
+			AdditionalContext:        "Hook authentication failed. Ensure KNOSSOS_HOOK_SECRET is correctly configured.",
+		},
+	}
+}
