@@ -280,17 +280,17 @@ func (g *Generator) templateFuncs() template.FuncMap {
 		return ".claude"
 	}
 
-	// toolName translates a canonical tool name to the channel-appropriate equivalent.
+	// toolName translates a CC tool name to the channel-appropriate wire name.
 	// For Gemini, translates known tools; unknown tools pass through.
 	// For Claude (or empty channel), returns the name unchanged.
 	// Used in templates as: `{{ toolName "Read" }}(".know/architecture.md")`
-	funcs["toolName"] = func(ccName string) string {
+	funcs["toolName"] = func(name string) string {
 		if g.Context != nil && g.Context.Channel == "gemini" {
-			if gemini, ok := channel.CCToGeminiTool[ccName]; ok {
+			if gemini, ok := channel.TranslateTool(name); ok && gemini != "" {
 				return gemini
 			}
 		}
-		return ccName
+		return name
 	}
 
 	// Note: Sprig already provides join, lower, upper, title, and many more

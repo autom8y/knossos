@@ -96,15 +96,11 @@ func TranslateMatcherForChannel(matcher, targetChannel string) string {
 	segments := strings.Split(matcher, "|")
 	translated := make([]string, len(segments))
 	for i, seg := range segments {
-		// Use the shared channel map directly (not TranslateTool) so that CC-only
-		// tools appearing in hook matchers pass through unchanged rather than being
-		// dropped. A matcher for a nonexistent tool is harmless -- the hook never fires.
-		if geminiTool, ok := channel.CCToGeminiTool[seg]; ok {
-			translated[i] = geminiTool
-		} else {
-			// Unknown tool name passes through unchanged (defensive)
-			translated[i] = seg
-		}
+		// Use ccWireToGeminiWire (not TranslateTool) so that CC-only tools appearing
+		// in hook matchers pass through unchanged rather than being dropped.
+		// A matcher for a nonexistent Gemini tool is harmless — the hook never fires.
+		geminiTool, _ := channel.CCWireToGeminiWire(seg)
+		translated[i] = geminiTool
 	}
 	return strings.Join(translated, "|")
 }

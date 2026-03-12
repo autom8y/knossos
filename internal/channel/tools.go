@@ -1,44 +1,8 @@
 package channel
 
-// CCToGeminiTool maps CC-canonical tool names to Gemini equivalents.
-// Both agent-frontmatter names (Read) and hook wire-protocol names (ReadFiles)
-// are included so this is the single source of truth per ADR-0031.
-//
-// Source of truth for Gemini tool names:
-//
-//	google-gemini/gemini-cli → packages/core/src/tools/definitions/base-declarations.ts
-var CCToGeminiTool = map[string]string{
-	// File system tools
-	"Read":      "read_file",          // agent frontmatter name
-	"ReadFiles": "read_file",          // hook wire-protocol name
-	"Edit":      "replace",            // EDIT_TOOL_NAME
-	"Write":     "write_file",         // WRITE_FILE_TOOL_NAME
-	"Glob":      "glob",              // GLOB_TOOL_NAME
-	"Grep":      "grep_search",       // GREP_TOOL_NAME
-	// Shell
-	"Bash": "run_shell_command",       // SHELL_TOOL_NAME
-	// Web
-	"WebSearch": "google_web_search",  // WEB_SEARCH_TOOL_NAME
-	"WebFetch":  "web_fetch",          // WEB_FETCH_TOOL_NAME
-	// Task management
-	"TodoWrite": "write_todos",        // WRITE_TODOS_TOOL_NAME
-	// Skills
-	"Skill": "activate_skill",         // ACTIVATE_SKILL_TOOL_NAME
-}
-
-// CCOnlyTools lists CC tools that have no Gemini equivalent.
-// These are silently dropped from Gemini agent frontmatter (tools and disallowedTools).
-var CCOnlyTools = map[string]bool{
-	"Task":         true, // Gemini uses implicit description-based agent routing
-	"NotebookEdit": true, // No Gemini equivalent
-}
-
 // CanonicalTool maps knossos canonical tool names to per-channel wire names.
 // This is the harness-agnostic vocabulary: templates and platform code reference
 // canonical names; channel compilers resolve to wire names at projection time.
-//
-// The existing CCToGeminiTool map is retained for backward compatibility.
-// New code should prefer CanonicalToWireTool / WireToCanonicalTool.
 var CanonicalTool = map[string]map[string]string{
 	"read_file":      {"claude": "Read", "gemini": "read_file"},
 	"edit_file":      {"claude": "Edit", "gemini": "replace"},
@@ -94,6 +58,30 @@ func WireToCanonicalTool(wireName string) (string, bool) {
 	return wireName, false
 }
 
+// CCWireToGeminiWire translates a CC wire tool name to its Gemini wire equivalent.
+// Unlike TranslateTool, this function does NOT drop CC-only tools — they pass through
+// unchanged. This is the correct semantics for hook matchers, where a matcher for a
+// nonexistent Gemini tool is harmless (the hook never fires).
+//
+// Return semantics:
+//   - (geminiName, true): translated successfully.
+//   - (ccTool, false): no Gemini equivalent found — caller receives the original name.
+func CCWireToGeminiWire(ccTool string) (string, bool) {
+	for _, wires := range CanonicalTool {
+		if wires["claude"] == ccTool {
+			if gemini, ok := wires["gemini"]; ok {
+				return gemini, true
+			}
+			// CC-only canonical entry — no Gemini equivalent; pass through.
+			return ccTool, false
+		}
+	}
+	// Wire aliases not in canonical map (e.g., "ReadFiles" -> "read_file").
+	// Fall through: look for a direct gemini entry matching the CC name.
+	// Unknown tool passes through unchanged.
+	return ccTool, false
+}
+
 // TranslateTool returns the Gemini equivalent for a CC tool name.
 //
 // Return semantics:
@@ -101,11 +89,26 @@ func WireToCanonicalTool(wireName string) (string, bool) {
 //   - (geminiName, true): translated successfully.
 //   - (ccTool, true): unknown tool — passes through unchanged (forward compat).
 func TranslateTool(ccTool string) (string, bool) {
-	if CCOnlyTools[ccTool] {
-		return "", false
+	for _, wires := range CanonicalTool {
+		if wires["claude"] == ccTool {
+			gemini, hasGemini := wires["gemini"]
+			if !hasGemini {
+				// Exists in canonical map with a claude entry but no gemini entry:
+				// this is a claude-only tool — drop it.
+				return "", false
+			}
+			return gemini, true
+		}
 	}
-	if gemini, ok := CCToGeminiTool[ccTool]; ok {
-		return gemini, true
+	// Wire aliases not in canonical map (e.g., "ReadFiles").
+	// Check wireToCanonical to resolve aliases to their canonical entry.
+	if canonical, ok := wireToCanonical[ccTool]; ok {
+		// Resolved to canonical: look up the gemini wire name.
+		wires := CanonicalTool[canonical]
+		if gemini, ok := wires["gemini"]; ok {
+			return gemini, true
+		}
+		return "", false
 	}
 	// Unknown tool passes through unchanged (defensive forward compatibility).
 	return ccTool, true

@@ -6,56 +6,27 @@ import (
 	"github.com/autom8y/knossos/internal/channel"
 )
 
-// TestCCToGeminiTool_Coverage verifies both key spaces (frontmatter and wire-protocol)
-// are present in the map.
-func TestCCToGeminiTool_Coverage(t *testing.T) {
+// TestTranslateTool_CCOnlyBehavior verifies tools with a claude entry but no gemini
+// entry in CanonicalTool are treated as channel-only and dropped.
+func TestTranslateTool_CCOnlyBehavior(t *testing.T) {
 	t.Parallel()
 
-	required := []struct {
-		key      string
-		expected string
-	}{
-		{"Read", "read_file"},              // agent frontmatter name
-		{"ReadFiles", "read_file"},         // hook wire-protocol name
-		{"Edit", "replace"},
-		{"Write", "write_file"},
-		{"Bash", "run_shell_command"},
-		{"Glob", "glob"},
-		{"Grep", "grep_search"},
-		{"WebSearch", "google_web_search"},
-		{"WebFetch", "web_fetch"},
-		{"TodoWrite", "write_todos"},
-		{"Skill", "activate_skill"},
+	// "delegate" canonical entry has claude="Task" but no gemini entry.
+	// TranslateTool("Task") must return ("", false).
+	got, ok := channel.TranslateTool("Task")
+	if ok {
+		t.Errorf("TranslateTool(Task): ok=true, want false (no gemini entry in CanonicalTool)")
+	}
+	if got != "" {
+		t.Errorf("TranslateTool(Task) = %q, want \"\"", got)
 	}
 
-	for _, tc := range required {
-		got, ok := channel.CCToGeminiTool[tc.key]
+	// Verify tools that have Gemini equivalents are NOT treated as CC-only.
+	translated := []string{"WebSearch", "WebFetch", "TodoWrite", "Skill"}
+	for _, tool := range translated {
+		_, ok := channel.TranslateTool(tool)
 		if !ok {
-			t.Errorf("CCToGeminiTool[%q] missing", tc.key)
-			continue
-		}
-		if got != tc.expected {
-			t.Errorf("CCToGeminiTool[%q] = %q, want %q", tc.key, got, tc.expected)
-		}
-	}
-}
-
-// TestCCOnlyTools_AllPresent verifies the CC-only tool set is complete.
-func TestCCOnlyTools_AllPresent(t *testing.T) {
-	t.Parallel()
-
-	required := []string{"Task", "NotebookEdit"}
-	for _, tool := range required {
-		if !channel.CCOnlyTools[tool] {
-			t.Errorf("CCOnlyTools missing %q", tool)
-		}
-	}
-
-	// Verify tools that WERE CC-only but now have Gemini equivalents are NOT in CCOnlyTools.
-	promoted := []string{"WebSearch", "WebFetch", "TodoWrite", "Skill"}
-	for _, tool := range promoted {
-		if channel.CCOnlyTools[tool] {
-			t.Errorf("CCOnlyTools still contains %q — should be in CCToGeminiTool", tool)
+			t.Errorf("TranslateTool(%q): ok=false, tool has a Gemini equivalent", tool)
 		}
 	}
 }
@@ -69,7 +40,6 @@ func TestTranslateTool_KnownMapping(t *testing.T) {
 		expected string
 	}{
 		{"Read", "read_file"},
-		{"ReadFiles", "read_file"},
 		{"Bash", "run_shell_command"},
 		{"Edit", "replace"},
 		{"Write", "write_file"},
@@ -92,19 +62,18 @@ func TestTranslateTool_KnownMapping(t *testing.T) {
 	}
 }
 
-// TestTranslateTool_CCOnlyDropped verifies CC-only tools return ("", false).
+// TestTranslateTool_CCOnlyDropped verifies tools with a claude entry but no gemini
+// entry in CanonicalTool return ("", false) — they are dropped during translation.
 func TestTranslateTool_CCOnlyDropped(t *testing.T) {
 	t.Parallel()
 
-	ccOnly := []string{"Task", "NotebookEdit"}
-	for _, tool := range ccOnly {
-		got, ok := channel.TranslateTool(tool)
-		if ok {
-			t.Errorf("TranslateTool(%q): ok=true, want false (CC-only tool should be dropped)", tool)
-		}
-		if got != "" {
-			t.Errorf("TranslateTool(%q) = %q, want \"\" for CC-only tool", tool, got)
-		}
+	// "Task" maps to the "delegate" canonical entry which has claude="Task" but no gemini.
+	got, ok := channel.TranslateTool("Task")
+	if ok {
+		t.Errorf("TranslateTool(Task): ok=true, want false (no gemini wire in CanonicalTool)")
+	}
+	if got != "" {
+		t.Errorf("TranslateTool(Task) = %q, want \"\"", got)
 	}
 }
 
@@ -171,7 +140,8 @@ func TestTranslateFrontmatterTools_EmptyInput(t *testing.T) {
 func TestTranslateFrontmatterTools_AllCCOnly(t *testing.T) {
 	t.Parallel()
 
-	got := channel.TranslateFrontmatterTools([]string{"Task", "NotebookEdit"})
+	// "Task" has a claude entry in CanonicalTool but no gemini entry — it is dropped.
+	got := channel.TranslateFrontmatterTools([]string{"Task"})
 	if len(got) != 0 {
 		t.Errorf("expected empty slice when all tools are CC-only, got %v", got)
 	}
@@ -276,40 +246,41 @@ func TestWireToCanonicalTool(t *testing.T) {
 	}
 }
 
-// TestCanonicalTool_Completeness verifies every entry in CCToGeminiTool has
-// a corresponding canonical mapping, ensuring the two vocabularies stay aligned.
+// TestCanonicalTool_Completeness verifies that every canonical entry with a "gemini"
+// wire name also has a "claude" wire name, and that TranslateTool round-trips correctly
+// for all bidirectional tools.
 func TestCanonicalTool_Completeness(t *testing.T) {
 	t.Parallel()
 
-	// Wire-protocol aliases: CC hook names that map to the same tool as a
-	// frontmatter name. These are CC-internal aliases, not separate canonical tools.
-	wireAliases := map[string]string{
-		"ReadFiles": "Read", // hook wire-protocol alias for Read
-	}
+	for canonical, wires := range channel.CanonicalTool {
+		ccWire, hasCC := wires["claude"]
+		geminiWire, hasGemini := wires["gemini"]
 
-	for cc, gemini := range channel.CCToGeminiTool {
-		// If cc is a known wire alias, verify its target is in the canonical map instead.
-		if target, isAlias := wireAliases[cc]; isAlias {
-			if _, ok := channel.WireToCanonicalTool(target); !ok {
-				t.Errorf("wire alias %q -> %q, but target has no canonical mapping", cc, target)
+		if !hasCC && !hasGemini {
+			t.Errorf("canonical %q has no wire entries for any channel", canonical)
+			continue
+		}
+
+		if hasCC && hasGemini {
+			// Bidirectional: TranslateTool(ccWire) must return (geminiWire, true).
+			got, ok := channel.TranslateTool(ccWire)
+			if !ok {
+				t.Errorf("TranslateTool(%q) [canonical %q]: ok=false, want true", ccWire, canonical)
 			}
-			continue
+			if got != geminiWire {
+				t.Errorf("TranslateTool(%q) [canonical %q] = %q, want %q", ccWire, canonical, got, geminiWire)
+			}
 		}
 
-		ccCanonical, ccOK := channel.WireToCanonicalTool(cc)
-		geminiCanonical, geminiOK := channel.WireToCanonicalTool(gemini)
-
-		if !ccOK {
-			t.Errorf("CC tool %q has no canonical mapping", cc)
-			continue
-		}
-		if !geminiOK {
-			t.Errorf("Gemini tool %q (from CC %q) has no canonical mapping", gemini, cc)
-			continue
-		}
-		if ccCanonical != geminiCanonical {
-			t.Errorf("CC %q -> canonical %q, but Gemini %q -> canonical %q (should match)",
-				cc, ccCanonical, gemini, geminiCanonical)
+		if hasCC && !hasGemini {
+			// CC-only: TranslateTool(ccWire) must return ("", false).
+			got, ok := channel.TranslateTool(ccWire)
+			if ok {
+				t.Errorf("TranslateTool(%q) [canonical %q, CC-only]: ok=true, want false", ccWire, canonical)
+			}
+			if got != "" {
+				t.Errorf("TranslateTool(%q) [canonical %q, CC-only] = %q, want \"\"", ccWire, canonical, got)
+			}
 		}
 	}
 }
