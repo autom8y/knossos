@@ -195,7 +195,7 @@ func (m *Materializer) getChannelDir() string {
 	if m.channelDirOverride != "" {
 		return m.channelDirOverride
 	}
-	return m.resolver.ClaudeDir()
+	return m.resolver.ChannelDir(paths.ClaudeChannel{})
 }
 
 // getKnossosDir returns the .knossos/ directory for the project.
@@ -270,7 +270,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	defer func() { m.channelDirOverride = originalOverride }()
 
 	if opts.Channel == "gemini" {
-		m.channelDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
+		m.channelDirOverride = m.resolver.ChannelDir(paths.GeminiChannel{})
 	}
 
 	channelDir := m.getChannelDir()
@@ -371,7 +371,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	defer func() { m.channelDirOverride = originalOverride }()
 
 	if opts.Channel == "gemini" {
-		m.channelDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
+		m.channelDirOverride = m.resolver.ChannelDir(paths.GeminiChannel{})
 	}
 
 	channelDir := m.getChannelDir()
@@ -612,7 +612,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 // cannot be created, the subsequent sync steps will fail with actionable errors.
 func (m *Materializer) ensureProjectDirs() {
 	dirs := []string{
-		m.resolver.ClaudeDir(),   // channel dir
+		m.resolver.ChannelDir(paths.ClaudeChannel{}),   // channel dir (intentional default per HA-3-030)
 		m.resolver.SessionsDir(), // .sos/sessions/ (implies .sos/)
 		m.resolver.KnossosDir(),  // .knossos/
 	}
