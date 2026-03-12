@@ -94,7 +94,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 
 	// Check inscription sync - simple check if rite name appears in inscription file
 	inscriptionSynced := false
-	if content, err := os.ReadFile(resolver.ClaudeMDFile()); err == nil {
+	if content, err := os.ReadFile(resolver.ContextFileForChannel(paths.ClaudeChannel{})); err == nil {
 		inscriptionSynced = strings.Contains(string(content), riteName)
 	}
 

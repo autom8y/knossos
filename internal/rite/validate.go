@@ -214,8 +214,8 @@ func (v *Validator) checkInscriptionSync(result *ValidationResult, rite *Rite) {
 		return
 	}
 
-	claudeMDPath := v.resolver.ClaudeMDFile()
-	content, err := os.ReadFile(claudeMDPath)
+	contextFilePath := v.resolver.ContextFileForChannel(paths.ClaudeChannel{})
+	content, err := os.ReadFile(contextFilePath)
 	if err != nil {
 		result.Checks = append(result.Checks, ValidationCheck{
 			Check:   "INSCRIPTION_SYNC",
