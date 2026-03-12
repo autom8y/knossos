@@ -45,8 +45,8 @@ func extractFrontmatter(content string) *AgentFrontmatter {
 // It coordinates the generator, merger, and backup manager to produce
 // a synchronized CLAUDE.md file based on templates and project state.
 type Pipeline struct {
-	// ClaudeMDPath is the path to the CLAUDE.md file.
-	ClaudeMDPath string
+	// InscriptionPath is the path to the context file (e.g. CLAUDE.md, GEMINI.md).
+	InscriptionPath string
 
 	// ManifestPath is the path to the KNOSSOS_MANIFEST.yaml file.
 	ManifestPath string
@@ -154,7 +154,7 @@ type ValidationIssue struct {
 // NewPipeline creates a new pipeline for the given project root.
 func NewPipeline(projectRoot string) *Pipeline {
 	return &Pipeline{
-		ClaudeMDPath: filepath.Join(projectRoot, ".claude", "CLAUDE.md"),
+		InscriptionPath: filepath.Join(projectRoot, ".claude", "CLAUDE.md"),
 		ManifestPath: DefaultManifestPath(projectRoot),
 		TemplateDir:  filepath.Join(projectRoot, "knossos", "templates"),
 		BackupDir:    filepath.Join(projectRoot, ".knossos", "backups"),
@@ -163,10 +163,10 @@ func NewPipeline(projectRoot string) *Pipeline {
 }
 
 // NewPipelineWithPaths creates a pipeline with custom paths.
-func NewPipelineWithPaths(claudeMDPath, manifestPath, templateDir, backupDir string) *Pipeline {
-	projectRoot := filepath.Dir(filepath.Dir(claudeMDPath))
+func NewPipelineWithPaths(inscriptionPath, manifestPath, templateDir, backupDir string) *Pipeline {
+	projectRoot := filepath.Dir(filepath.Dir(inscriptionPath))
 	return &Pipeline{
-		ClaudeMDPath: claudeMDPath,
+		InscriptionPath: inscriptionPath,
 		ManifestPath: manifestPath,
 		TemplateDir:  templateDir,
 		BackupDir:    backupDir,
@@ -205,14 +205,14 @@ func (p *Pipeline) Sync(opts InscriptionSyncOptions) (*SyncResult, error) {
 	// Create backup before writing (Pipeline-specific feature)
 	backupPath := ""
 	if !opts.NoBackup {
-		if data, _ := os.ReadFile(p.ClaudeMDPath); len(data) > 0 {
+		if data, _ := os.ReadFile(p.InscriptionPath); len(data) > 0 {
 			backupMgr := NewBackupManager(p.ProjectRoot)
 			backupPath, _ = backupMgr.CreateBackup()
 		}
 	}
 
 	// Delegate to unified SyncInscription
-	channelDir := filepath.Dir(p.ClaudeMDPath)
+	channelDir := filepath.Dir(p.InscriptionPath)
 	result, err := SyncInscription(SyncInscriptionOptions{
 		ChannelDir:     channelDir,
 		RenderCtx:      ctx,
@@ -267,7 +267,7 @@ func (p *Pipeline) DryRun(opts InscriptionSyncOptions) (*SyncPreview, error) {
 
 	// Load existing content
 	existingContent := ""
-	if data, err := os.ReadFile(p.ClaudeMDPath); err == nil {
+	if data, err := os.ReadFile(p.InscriptionPath); err == nil {
 		existingContent = string(data)
 	}
 
@@ -348,10 +348,10 @@ func (p *Pipeline) Validate() (*ValidationResult, error) {
 	result.RegionCount = len(manifest.Regions)
 
 	// Check CLAUDE.md exists
-	if _, err := os.Stat(p.ClaudeMDPath); os.IsNotExist(err) {
+	if _, err := os.Stat(p.InscriptionPath); os.IsNotExist(err) {
 		result.Issues = append(result.Issues, ValidationIssue{
 			Severity: "warning",
-			Message:  "CLAUDE.md not found at " + p.ClaudeMDPath,
+			Message:  "Context file not found at " + p.InscriptionPath,
 		})
 	} else if err != nil {
 		// Handle other stat errors (permissions, etc.)
@@ -362,7 +362,7 @@ func (p *Pipeline) Validate() (*ValidationResult, error) {
 		})
 	} else {
 		// Parse CLAUDE.md for markers
-		content, err := os.ReadFile(p.ClaudeMDPath)
+		content, err := os.ReadFile(p.InscriptionPath)
 		if err != nil {
 			result.Valid = false
 			result.Issues = append(result.Issues, ValidationIssue{
@@ -467,7 +467,7 @@ func (p *Pipeline) GetDiff(regionName string) (string, error) {
 
 	// Load existing content
 	existingContent := ""
-	if data, err := os.ReadFile(p.ClaudeMDPath); err == nil {
+	if data, err := os.ReadFile(p.InscriptionPath); err == nil {
 		existingContent = string(data)
 	}
 

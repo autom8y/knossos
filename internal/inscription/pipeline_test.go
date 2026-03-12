@@ -12,8 +12,8 @@ import (
 func TestNewPipeline(t *testing.T) {
 	pipeline := NewPipeline("/project")
 
-	if pipeline.ClaudeMDPath != "/project/.claude/CLAUDE.md" {
-		t.Errorf("NewPipeline() ClaudeMDPath = %q, want '/project/.claude/CLAUDE.md'", pipeline.ClaudeMDPath)
+	if pipeline.InscriptionPath != "/project/.claude/CLAUDE.md" {
+		t.Errorf("NewPipeline() InscriptionPath = %q, want '/project/.claude/CLAUDE.md'", pipeline.InscriptionPath)
 	}
 	if pipeline.ManifestPath != "/project/.knossos/KNOSSOS_MANIFEST.yaml" {
 		t.Errorf("NewPipeline() ManifestPath = %q, want '/project/.knossos/KNOSSOS_MANIFEST.yaml'", pipeline.ManifestPath)
@@ -37,8 +37,8 @@ func TestNewPipelineWithPaths(t *testing.T) {
 		"/custom/backups",
 	)
 
-	if pipeline.ClaudeMDPath != "/custom/path/CLAUDE.md" {
-		t.Errorf("NewPipelineWithPaths() ClaudeMDPath = %q", pipeline.ClaudeMDPath)
+	if pipeline.InscriptionPath != "/custom/path/CLAUDE.md" {
+		t.Errorf("NewPipelineWithPaths() InscriptionPath = %q", pipeline.InscriptionPath)
 	}
 	if pipeline.ManifestPath != "/custom/manifest.yaml" {
 		t.Errorf("NewPipelineWithPaths() ManifestPath = %q", pipeline.ManifestPath)
