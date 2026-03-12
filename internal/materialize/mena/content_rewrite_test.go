@@ -393,6 +393,56 @@ func TestRewriteChannelPaths(t *testing.T) {
 			want:       ".gemini/skills/a.md and .gemini/commands/b.md",
 		},
 
+		// Canonical .channel/ placeholder tests
+		{
+			name:       "channel_placeholder_to_claude",
+			input:      ".channel/skills/pinakes/SKILL.md",
+			channelDir: ".claude",
+			want:       ".claude/skills/pinakes/SKILL.md",
+		},
+		{
+			name:       "channel_placeholder_to_gemini",
+			input:      ".channel/skills/pinakes/SKILL.md",
+			channelDir: ".gemini",
+			want:       ".gemini/skills/pinakes/SKILL.md",
+		},
+		{
+			name:       "channel_placeholder_commands",
+			input:      ".channel/commands/spike.md",
+			channelDir: ".gemini",
+			want:       ".gemini/commands/spike.md",
+		},
+		{
+			name:       "channel_placeholder_agents",
+			input:      ".channel/agents/potnia.md",
+			channelDir: ".claude",
+			want:       ".claude/agents/potnia.md",
+		},
+		{
+			name:       "channel_placeholder_empty_defaults_claude",
+			input:      ".channel/skills/foo.md",
+			channelDir: "",
+			want:       ".claude/skills/foo.md",
+		},
+		{
+			name:       "channel_placeholder_mixed_with_legacy",
+			input:      ".channel/skills/a.md and .claude/commands/b.md",
+			channelDir: ".gemini",
+			want:       ".gemini/skills/a.md and .gemini/commands/b.md",
+		},
+		{
+			name:       "channel_placeholder_bare_not_rewritten",
+			input:      ".channel/settings.json",
+			channelDir: ".gemini",
+			want:       ".channel/settings.json",
+		},
+		{
+			name:       "channel_placeholder_in_backtick",
+			input:      "`Read(\".channel/skills/pinakes/domains/{domain}.md\")`",
+			channelDir: ".gemini",
+			want:       "`Read(\".gemini/skills/pinakes/domains/{domain}.md\")`",
+		},
+
 		// Section 3.3: Exclusion tests (rewriteChannelPaths level, not fenced)
 		{
 			name:       "template_block_preserved",

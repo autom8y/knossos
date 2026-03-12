@@ -44,19 +44,23 @@ func channelDirName(channel string) string {
 	}
 }
 
-// rewriteChannelPaths rewrites .claude/ path prefixes in non-fenced content
+// rewriteChannelPaths rewrites channel path placeholders in non-fenced content
 // to the target channel directory. Processing is line-by-line to respect
 // exclusion zones (template blocks and HA-tagged lines).
 //
-// When channelDir is ".claude" or empty, this is a no-op identity transform.
-// When channelDir is ".gemini", .claude/skills/ becomes .gemini/skills/, etc.
+// Two source patterns are handled:
+//   - ".channel/" — the canonical agnostic placeholder in mena source files
+//   - ".claude/" — legacy fallback for source files not yet migrated to .channel/
+//
+// Both are rewritten to the target channelDir (e.g., ".claude" or ".gemini").
+// When channelDir is ".claude", the .channel/ placeholder is still rewritten
+// (to ".claude/"), but legacy ".claude/" references are identity (no-op).
 //
 // Only the three mena content subdirectories are rewritten:
-// .claude/skills/, .claude/commands/, .claude/agents/.
-// Other .claude/ paths (settings.json, CLAUDE.md) are NOT affected.
+// {skills,commands,agents}. Other paths (settings.json, CLAUDE.md) are NOT affected.
 func rewriteChannelPaths(s string, channelDir string) string {
-	if channelDir == "" || channelDir == ".claude" {
-		return s // Identity: no rewriting needed for claude channel
+	if channelDir == "" {
+		channelDir = ".claude"
 	}
 
 	// Process line-by-line to respect exclusion zones
@@ -70,9 +74,16 @@ func rewriteChannelPaths(s string, channelDir string) string {
 		if strings.Contains(line, "// HA-") {
 			continue
 		}
-		lines[i] = strings.ReplaceAll(line, ".claude/skills/", channelDir+"/skills/")
-		lines[i] = strings.ReplaceAll(lines[i], ".claude/commands/", channelDir+"/commands/")
-		lines[i] = strings.ReplaceAll(lines[i], ".claude/agents/", channelDir+"/agents/")
+		// Canonical placeholder: .channel/ → target channel dir
+		lines[i] = strings.ReplaceAll(line, ".channel/skills/", channelDir+"/skills/")
+		lines[i] = strings.ReplaceAll(lines[i], ".channel/commands/", channelDir+"/commands/")
+		lines[i] = strings.ReplaceAll(lines[i], ".channel/agents/", channelDir+"/agents/")
+		// Legacy fallback: .claude/ → target channel dir (no-op when channelDir is ".claude")
+		if channelDir != ".claude" {
+			lines[i] = strings.ReplaceAll(lines[i], ".claude/skills/", channelDir+"/skills/")
+			lines[i] = strings.ReplaceAll(lines[i], ".claude/commands/", channelDir+"/commands/")
+			lines[i] = strings.ReplaceAll(lines[i], ".claude/agents/", channelDir+"/agents/")
+		}
 	}
 	return strings.Join(lines, "\n")
 }
@@ -86,7 +97,8 @@ func rewriteChannelPaths(s string, channelDir string) string {
 //   - INDEX.lego.md -> SKILL.md (in link targets and backtick spans)
 //   - {name}.lego.md -> {name}.md (in link targets and backtick spans)
 //   - {name}.dro.md -> {name}.md (in link targets and backtick spans)
-//   - .claude/{skills,commands,agents}/ -> {channelDir}/{skills,commands,agents}/
+//   - .channel/{skills,commands,agents}/ -> {channelDir}/{skills,commands,agents}/ (canonical)
+//   - .claude/{skills,commands,agents}/ -> {channelDir}/{skills,commands,agents}/ (legacy fallback)
 //
 // Content inside fenced code blocks (``` regions) is never modified.
 // Lines containing template blocks ({{ }}) or HA-tags are not channel-rewritten.
