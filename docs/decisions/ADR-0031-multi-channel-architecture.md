@@ -2,7 +2,7 @@
 
 ## Status
 
-ACCEPTED
+ACCEPTED (Amended by ADR-0032)
 
 ## Date
 
@@ -211,3 +211,4 @@ The interface-based approach (Option E, the chosen design) provides clean extens
 
 - **ADR-0026** (Provenance): Established the `PROVENANCE_MANIFEST.yaml` format and checksum conventions that the per-channel manifest scheme extends
 - **ADR-0030** (Processions): Cross-rite coordination that operates above the channel layer -- processions are channel-agnostic by design
+- **ADR-0032** amends this decision, replacing CC-canonical event/tool names with knossos-owned canonical vocabulary. The channel abstraction interfaces are unchanged; only the vocabulary they operate on changes.
