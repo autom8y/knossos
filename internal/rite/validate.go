@@ -77,7 +77,7 @@ func (v *Validator) Validate(riteName string) (*ValidationResult, error) {
 	v.checkAgentsDir(result, rite)
 	v.checkWorkflowYAML(result, rite)
 	v.checkAgentFiles(result, rite)
-	v.checkClaudeMDSync(result, rite)
+	v.checkInscriptionSync(result, rite)
 	v.checkValidEntryPoint(result, rite)
 
 	// Set overall validity
@@ -201,12 +201,13 @@ func (v *Validator) checkAgentFiles(result *ValidationResult, rite *Rite) {
 }
 
 
-// checkClaudeMDSync verifies CLAUDE.md satellite sections match active rite.
-func (v *Validator) checkClaudeMDSync(result *ValidationResult, rite *Rite) {
+// checkInscriptionSync verifies inscription file satellite sections match active rite.
+// Checks CLAUDE.md (the CC inscription compilation target) for rite alignment.
+func (v *Validator) checkInscriptionSync(result *ValidationResult, rite *Rite) {
 	// Only check if this is the active rite
 	if !rite.Active {
 		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "CLAUDE_MD_SYNC",
+			Check:   "INSCRIPTION_SYNC",
 			Status:  CheckPass,
 			Message: "Skipped (rite not active)",
 		})
@@ -217,29 +218,29 @@ func (v *Validator) checkClaudeMDSync(result *ValidationResult, rite *Rite) {
 	content, err := os.ReadFile(claudeMDPath)
 	if err != nil {
 		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "CLAUDE_MD_SYNC",
+			Check:   "INSCRIPTION_SYNC",
 			Status:  CheckWarn,
 			Message: "Could not read CLAUDE.md: " + err.Error(),
 		})
 		result.Warnings++
-		result.Fixable = append(result.Fixable, "CLAUDE_MD_SYNC")
+		result.Fixable = append(result.Fixable, "INSCRIPTION_SYNC")
 		return
 	}
 
 	// Check if rite name appears in Quick Start section
 	if !strings.Contains(string(content), rite.Name) {
 		result.Checks = append(result.Checks, ValidationCheck{
-			Check:   "CLAUDE_MD_SYNC",
+			Check:   "INSCRIPTION_SYNC",
 			Status:  CheckWarn,
 			Message: "CLAUDE.md does not reference active rite",
 		})
 		result.Warnings++
-		result.Fixable = append(result.Fixable, "CLAUDE_MD_SYNC")
+		result.Fixable = append(result.Fixable, "INSCRIPTION_SYNC")
 		return
 	}
 
 	result.Checks = append(result.Checks, ValidationCheck{
-		Check:   "CLAUDE_MD_SYNC",
+		Check:   "INSCRIPTION_SYNC",
 		Status:  CheckPass,
 		Message: "CLAUDE.md satellites synced",
 	})
@@ -283,7 +284,7 @@ func (v *Validator) Fix(riteName string) error {
 	}
 
 	for _, fixable := range result.Fixable {
-		if fixable == "CLAUDE_MD_SYNC" {
+		if fixable == "INSCRIPTION_SYNC" {
 			rite, err := v.discovery.Get(riteName)
 			if err != nil {
 				continue

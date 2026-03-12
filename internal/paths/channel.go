@@ -27,15 +27,19 @@ func AllChannels() []TargetChannel {
 	return []TargetChannel{ClaudeChannel{}, GeminiChannel{}}
 }
 
+// ChannelByName returns the TargetChannel for the given name.
+// Empty string defaults to "claude" for backward compatibility (HA-6-001).
+// Valid channels are derived from AllChannels(), not hardcoded (HA-6-027).
 func ChannelByName(name string) (TargetChannel, error) {
-	switch name {
-	case "claude", "":
-		return ClaudeChannel{}, nil
-	case "gemini":
-		return GeminiChannel{}, nil
-	default:
-		return nil, fmt.Errorf("unknown channel: %q", name)
+	if name == "" {
+		return ClaudeChannel{}, nil // intentional default (HA-3-030)
 	}
+	for _, ch := range AllChannels() {
+		if ch.Name() == name {
+			return ch, nil
+		}
+	}
+	return nil, fmt.Errorf("unknown channel: %q", name)
 }
 
 func (r *Resolver) ChannelDir(ch TargetChannel) string {

@@ -24,11 +24,16 @@ type BashToolInput struct {
 
 // Protected paths that should not be deleted with rm -rf.
 // Ordered from longest to shortest to match more specific paths first.
+// Includes all channel directories (SCAR-002: never remove projected dirs).
 var protectedPaths = []string{
 	".github/",
 	".github",
 	".claude/",
 	".claude",
+	".gemini/",
+	".gemini",
+	".knossos/",
+	".knossos",
 	".git/",
 	".git",
 	"node_modules/",
