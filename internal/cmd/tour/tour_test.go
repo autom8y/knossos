@@ -20,7 +20,7 @@ func createTestProject(t *testing.T) string {
 	root := t.TempDir()
 
 	// .claude/ directory
-	channelDir := filepath.Join(root, ".claude")
+	channelDir := filepath.Join(root, paths.ClaudeChannel{}.DirName())
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "agents"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "commands"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "skills"), 0755))
@@ -68,18 +68,18 @@ func TestCollectTourFullProject(t *testing.T) {
 	root := createTestProject(t)
 
 	// Add agents
-	writeFile(t, filepath.Join(root, ".claude", "agents", "architect.md"), "# Architect")
-	writeFile(t, filepath.Join(root, ".claude", "agents", "engineer.md"), "# Engineer")
-	writeFile(t, filepath.Join(root, ".claude", "agents", "qa.md"), "# QA")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "agents", "architect.md"), "# Architect")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "agents", "engineer.md"), "# Engineer")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "agents", "qa.md"), "# QA")
 
 	// Add commands and skills
-	writeFile(t, filepath.Join(root, ".claude", "commands", "deploy.dro.md"), "deploy")
-	writeFile(t, filepath.Join(root, ".claude", "skills", "conventions.lego.md"), "conventions")
-	writeFile(t, filepath.Join(root, ".claude", "skills", "standards.lego.md"), "standards")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "commands", "deploy.dro.md"), "deploy")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "skills", "conventions.lego.md"), "conventions")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "skills", "standards.lego.md"), "standards")
 
 	// Add settings.json and CLAUDE.md
-	writeFile(t, filepath.Join(root, ".claude", "settings.json"), "{}")
-	writeFile(t, filepath.Join(root, ".claude", "CLAUDE.md"), "# Claude")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "settings.json"), "{}")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), paths.ClaudeChannel{}.ContextFile()), "# Claude")
 	writeFile(t, filepath.Join(root, ".knossos", "ACTIVE_RITE"), "10x-dev")
 
 	// Add rites with manifests
@@ -134,7 +134,7 @@ func TestCollectTourFullProject(t *testing.T) {
 func TestCollectTourEmptyProject(t *testing.T) {
 	// TC-T02: Empty project (.claude only)
 	root := t.TempDir()
-	require.NoError(t, os.MkdirAll(filepath.Join(root, ".claude"), 0755))
+	require.NoError(t, os.MkdirAll(filepath.Join(root, paths.ClaudeChannel{}.DirName()), 0755))
 
 	resolver := paths.NewResolver(root)
 	tour := collectTour(resolver)
@@ -203,7 +203,7 @@ func TestCollectTourMissingSOS(t *testing.T) {
 func TestClaudeAgentCount(t *testing.T) {
 	// TC-T07: Agent count
 	root := createTestProject(t)
-	agentsDir := filepath.Join(root, ".claude", "agents")
+	agentsDir := filepath.Join(root, paths.ClaudeChannel{}.DirName(), "agents")
 	writeFile(t, filepath.Join(agentsDir, "a.md"), "agent")
 	writeFile(t, filepath.Join(agentsDir, "b.md"), "agent")
 	writeFile(t, filepath.Join(agentsDir, "c.md"), "agent")
@@ -217,7 +217,7 @@ func TestClaudeAgentCount(t *testing.T) {
 func TestClaudeSettingsJSONPresent(t *testing.T) {
 	// TC-T08: settings.json present
 	root := createTestProject(t)
-	writeFile(t, filepath.Join(root, ".claude", "settings.json"), "{}")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), "settings.json"), "{}")
 
 	resolver := paths.NewResolver(root)
 	section := collectChannel(resolver)
@@ -236,7 +236,7 @@ func TestClaudeSettingsJSONMissing(t *testing.T) {
 func TestClaudeMDPresent(t *testing.T) {
 	// TC-T10: CLAUDE.md present
 	root := createTestProject(t)
-	writeFile(t, filepath.Join(root, ".claude", "CLAUDE.md"), "# Claude")
+	writeFile(t, filepath.Join(root, paths.ClaudeChannel{}.DirName(), paths.ClaudeChannel{}.ContextFile()), "# Claude")
 
 	resolver := paths.NewResolver(root)
 	section := collectChannel(resolver)
