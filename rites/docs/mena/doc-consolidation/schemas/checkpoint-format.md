@@ -211,7 +211,7 @@ status:
   last_activity: "2024-12-25T14:30:00Z"
 
 sources:
-  - path: ".claude/skills/doc-ecosystem/INDEX.md"
+  - path: "{channel_dir}/skills/doc-ecosystem/INDEX.md"
     hash: "a1b2c3d4e5f6..."
     last_read: "2024-12-25T10:30:00Z"
     status: current

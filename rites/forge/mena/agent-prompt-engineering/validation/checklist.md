@@ -130,7 +130,7 @@ Complete these checks before adding to rite catalog:
 - [ ] Reviewed by second person for clarity
 - [ ] Tested with sample input to verify expected behavior
 - [ ] Added to rite catalog manifest
-- [ ] CLAUDE.md updated with agent reference
+- [ ] Context file updated with agent reference
 
 ---
 

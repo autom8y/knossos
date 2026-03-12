@@ -141,14 +141,14 @@ For sessions exceeding 5 minutes, emit progress checkpoints after completing maj
 
 ### Prerequisites
 - Current ari installed (`ari --version`)
-- No uncommitted changes in `.claude/` directory
-- Backup of `.claude/settings.local.json`
+- No uncommitted changes in the channel directory
+- Backup of the channel settings file
 
 ### Step 1: Backup Current Settings
 ```bash
-cp .claude/settings.local.json .claude/settings.local.json.bak
+cp {channel_dir}/settings.local.json {channel_dir}/settings.local.json.bak
 ```
-**Verify**: File exists at `.claude/settings.local.json.bak`
+**Verify**: File exists at `{channel_dir}/settings.local.json.bak`
 
 ### Step 2: Update ari
 ```bash
@@ -165,7 +165,7 @@ ari sync
 ### Rollback
 If Step 3 fails:
 ```bash
-cp .claude/settings.local.json.bak .claude/settings.local.json
+cp {channel_dir}/settings.local.json.bak {channel_dir}/settings.local.json
 ```
 ```
 

@@ -81,5 +81,5 @@ When Agent Curator finishes, the rite is:
 ## See Also
 
 - `/forge-rite <name>` — Archaeology-first rite creation with domain expertise extraction
-- Full documentation: `.claude/skills/forge-ref/INDEX.md`
+- Full documentation: `forge-ref` skill
 - Forge overview: `/forge`

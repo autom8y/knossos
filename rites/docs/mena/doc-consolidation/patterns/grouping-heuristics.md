@@ -138,9 +138,9 @@ Directory location provides topic context.
 
 | Directory Pattern | Default Topic | Confidence |
 |-------------------|---------------|------------|
-| `.claude/skills/{skill-name}/` | `{skill-name}` | High |
-| `.claude/agents/` | agent-routing | Medium |
-| `.claude/hooks/` | hook-lifecycle | High |
+| `{channel_dir}/skills/{skill-name}/` | `{skill-name}` | High |
+| `{channel_dir}/agents/` | agent-routing | Medium |
+| `{channel_dir}/hooks/` | hook-lifecycle | High |
 | `.ledge/specs/` | Inspect content | Low |
 | `docs/guides/` | Inspect content | Low |
 | `docs/api/` | API reference (new topic) | Medium |
@@ -150,10 +150,10 @@ Directory location provides topic context.
 ```yaml
 # Directory-level defaults
 directory_topics:
-  ".claude/skills/doc-consolidation": "doc-consolidation"
-  ".claude/skills/doc-ecosystem": "ecosystem-sync"
-  ".claude/hooks": "hook-lifecycle"
-  ".claude/agents": "agent-routing"
+  "{channel_dir}/skills/doc-consolidation": "doc-consolidation"
+  "{channel_dir}/skills/doc-ecosystem": "ecosystem-sync"
+  "{channel_dir}/hooks": "hook-lifecycle"
+  "{channel_dir}/agents": "agent-routing"
 
 # Files inherit directory topic unless content strongly suggests otherwise
 inheritance_threshold: 0.4  # Override only if content score > 0.4 for different topic

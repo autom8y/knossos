@@ -18,7 +18,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 | Rite | `$KNOSSOS_HOME/rites/{name}/` | Name, agent count, domain |
 | Workflow | `workflow.yaml` | Phases, complexity levels, entry point |
 | Agents | `agents/*.md` | Role, model, color, tools |
-| Command | `.claude/commands/{name}.md` | Quick-switch integration |
+| Command | channel commands directory `{name}.md` | Quick-switch integration |
 | Skill | `{name}-ref/` (in rite mena) | Reference documentation |
 
 ---
@@ -162,7 +162,7 @@ mkdir -p $KNOSSOS_HOME/rites/{name}/agents
 # - agent files from templates/agent-template.md
 
 # 3. Create command and skill
-# - .claude/commands/{name}.md
+# - {channel_dir}/commands/{name}.md
 # - rites/{name}/mena/{name}-ref/INDEX.lego.md
 
 # 4. Sync to project

@@ -20,13 +20,13 @@ rites/shared/
 ## Sync Behavior
 
 `ari sync --rite` automatically syncs shared rite content alongside the active rite:
-- Skills, hooks, and commands are synced to `.claude/skills/`, `.claude/hooks/`, `.claude/commands/`
+- Skills, hooks, and commands are synced to the channel skills, hooks, and commands directories
 - Shared content is always available regardless of active rite
 - Rite-specific content takes precedence over shared content (rite-privileged override)
 
 ## Runtime Behavior
 
-At runtime, shared skills are flattened into `.claude/skills/` with no subdirectory nesting. The skill `rites/shared/skills/foo.md` appears as `.claude/skills/foo.md`.
+At runtime, shared skills are flattened into the channel skills directory with no subdirectory nesting. The skill `rites/shared/skills/foo.md` appears as `{channel_dir}/skills/foo.md`.
 
 ## Override Resolution
 
@@ -39,4 +39,4 @@ This ensures rites can override shared primitives with specialized versions.
 
 ## Tracking
 
-Shared skill sync state is tracked via `.claude/.shared-skills` marker file, separate from the `.claude/.rite-skills` marker used for active rite content.
+Shared skill sync state is tracked via a `.shared-skills` marker file in the channel directory, separate from the `.rite-skills` marker used for active rite content.

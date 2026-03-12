@@ -14,22 +14,22 @@ Ari sync manages synchronization between knossos repository and user/project Cla
 ### Sync Commands
 | Command | Purpose | Target |
 |---------|---------|--------|
-| `ari sync --scope=user --resource=agents` | Sync agents to user config | `~/.claude/agents/` |
-| `ari sync --scope=user --resource=mena` | Sync commands + skills to user config | `~/.claude/commands/` + `~/.claude/skills/` |
-| `ari sync --scope=user --resource=hooks` | Sync hooks to user config | `~/.claude/hooks/` |
+| `ari sync --scope=user --resource=agents` | Sync agents to user config | user channel agents directory |
+| `ari sync --scope=user --resource=mena` | Sync commands + skills to user config | user channel commands + skills directories |
+| `ari sync --scope=user --resource=hooks` | Sync hooks to user config | user channel hooks directory |
 | `ari sync --scope=user` | Sync all user resources | All of the above |
 
 ### Key Paths
 - Knossos: `$KNOSSOS_HOME` or `~/Code/knossos`
-- User Agents: `~/.claude/agents/`
-- User Commands: `~/.claude/commands/`
-- User Skills: `~/.claude/skills/`
+- User Agents: user channel agents directory
+- User Commands: user channel commands directory
+- User Skills: user channel skills directory
 
 ### Common Commands
 ```bash
-ari sync --scope=user --resource=agents  # Sync agents/ to ~/.claude/agents/
-ari sync --scope=user --resource=mena   # Sync mena/ to ~/.claude/commands/ + skills/
-ari sync --scope=user --resource=hooks  # Sync hooks/ to ~/.claude/hooks/
+ari sync --scope=user --resource=agents  # Sync agents/ to user channel agents directory
+ari sync --scope=user --resource=mena   # Sync mena/ to user channel commands + skills directories
+ari sync --scope=user --resource=hooks  # Sync hooks/ to user channel hooks directory
 ari sync --scope=user                   # Sync all user resources
 ari sync --rite=<name>         # Switch/activate a rite
 ari rite list                  # List available rites
@@ -69,7 +69,7 @@ knossos (base) -> project (local overlay)
 | Layer | Source | Precedence |
 |-------|--------|------------|
 | Knossos | `$KNOSSOS_HOME/rites/{name}/` | Base agents and skills |
-| Project | `.claude/agents/`, `.claude/skills/` | Local overrides |
+| Project | channel agents and skills directories | Local overrides |
 
 ## Rite Manifest Schema
 

@@ -176,7 +176,7 @@ metadata:
   extraction_token_count: 1850
 
 sources:
-  - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+  - path: "{channel_dir}/skills/doc-ecosystem/INDEX.lego.md"
     hash: "a1b2c3d4..."
     authority: primary
     sections_used:
@@ -194,7 +194,7 @@ sources:
 canonical_sections:
   - id: "tier-precedence"
     heading: "Tier Precedence"
-    authority_source: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+    authority_source: "{channel_dir}/skills/doc-ecosystem/INDEX.lego.md"
     content_summary: "Settings merge follows a strict precedence order: user > team > project > skeleton. Later tiers override earlier ones for scalar values."
     key_points:
       - "Four tiers: skeleton (base), project, team, user (highest)"
@@ -227,7 +227,7 @@ shared_concepts:
   - concept: "tier"
     definition: "A layer of configuration with defined precedence in the merge hierarchy"
     sources:
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: "{channel_dir}/skills/doc-ecosystem/INDEX.lego.md"
         treatment: "Defines the four-tier model with examples"
       - path: ".ledge/specs/TDD-0042-settings.md"
         treatment: "Technical implementation of tier loading order"
@@ -238,7 +238,7 @@ conflicts:
     severity: significant
     description: "Sources disagree on default array merge strategy"
     sources:
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: "{channel_dir}/skills/doc-ecosystem/INDEX.lego.md"
         position: "Default strategy is 'append'"
         evidence: "Line 178: 'Arrays append by default...'"
       - path: ".ledge/specs/TDD-0042-settings.md"

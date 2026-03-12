@@ -24,7 +24,7 @@ If no positional argument is given, ask the user what they want to release.
 
 ### Phase 0 -- Pre-Flight
 
-1. **Verify releaser rite is active**: Check `.claude/CLAUDE.md` for `releaser` in the agent configurations section. If not active, run `ari sync --rite releaser` first and inform the user.
+1. **Verify releaser rite is active**: Check the context file for `releaser` in the agent configurations section. If not active, run `ari sync --rite releaser` first and inform the user.
 2. **Verify gh auth**: Run `gh auth status` -- if unauthenticated, ERROR and stop.
 3. **Clean slate**: Check `.sos/wip/release/` for artifacts from a prior run. If found, ask the user whether to clear them or resume from where the prior run left off.
 4. **Parse arguments**: Extract glob pattern or repo list from `$ARGUMENTS`. Extract `--complexity` and `--dry-run` flags.

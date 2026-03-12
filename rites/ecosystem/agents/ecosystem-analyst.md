@@ -138,11 +138,11 @@ See `file-verification` skill for the full protocol. Summary:
 ### Root Cause
 `internal/materialize/materialize.go`: merge logic uses overwrite instead of
 concatenation for arrays. When satellite has custom hooks in
-`.claude/settings.local.json` and knossos adds new hooks, satellite
+the channel settings file and knossos adds new hooks, satellite
 hooks are lost.
 
 ### Reproduction
-1. Create test satellite with `.claude/settings.local.json`:
+1. Create test satellite with the channel settings file:
    `{"hooks": {"events": ["pre-commit"]}}`
 2. Run `ari sync`
 3. Observe: satellite hooks array replaced by knossos hooks

@@ -298,7 +298,7 @@ Only load skills if criteria reference them or domain requires that context.
 **Prompt from /theoria:**
 ```
 Audit domain: dromena
-Scope: .claude/commands/*.dro.md
+Scope: {channel_dir}/commands/*.dro.md
 Criteria:
 1. All dromena have frontmatter with name, description, category
 2. Description is 1-2 sentences, under 200 chars
@@ -308,7 +308,7 @@ Criteria:
 ```
 
 **Your process:**
-1. Glob for `.claude/commands/*.dro.md`
+1. Glob for `{channel_dir}/commands/*.dro.md`
 2. Read each file, check frontmatter and body
 3. Count compliance per criterion
 4. Assign grades with evidence

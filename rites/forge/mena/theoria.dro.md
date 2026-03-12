@@ -66,7 +66,7 @@ For each domain in the audit list:
    - Example: `mena/pinakes/domains/dromena.md`
 
 2. Extract from criteria file:
-   - **Scope**: Target files glob pattern (e.g., `.claude/commands/**/*.md`)
+   - **Scope**: Target files glob pattern (e.g., `{channel_dir}/commands/**/*.md`)
    - **Criteria definitions**: Each criterion with name, weight, and grading thresholds
    - **Evaluation guidance**: Evidence collection instructions
 
@@ -324,8 +324,8 @@ Same as `/theoria all` — audits all registered domains.
 - `.wip/STATE-OF-{TARGET}-{YYYY-MM-DD}.md` — synkrisis synthesis report
 
 **Dependencies:**
-- Requires `pinakes` legomena to be materialized in `.claude/skills/`
-- Requires `theoros` agent to be materialized in `.claude/agents/`
+- Requires `pinakes` legomena to be materialized in the channel skills directory
+- Requires `theoros` agent to be materialized in the channel agents directory
 - Both available after `ari sync` in forge rite
 
 ## Design Decisions

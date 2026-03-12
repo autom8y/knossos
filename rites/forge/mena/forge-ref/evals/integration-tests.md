@@ -25,7 +25,7 @@ EXIT_CODE=$?
 # Verify
 echo "Exit code: $EXIT_CODE"
 cat .knossos/ACTIVE_RITE
-ls .claude/agents/
+ls {channel_dir}/agents/
 cat .knossos/ACTIVE_WORKFLOW.yaml
 
 # Restore

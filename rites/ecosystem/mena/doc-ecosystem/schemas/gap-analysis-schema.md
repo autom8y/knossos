@@ -161,7 +161,7 @@ Deep audit identified 5 issues in session state validation across hooks.
 **Description**: session-context.sh validates SESSION_CONTEXT.md inline instead of calling shared function.
 
 **Evidence**:
-- File: `internal/hook/context.go` (hook source; projects to `.claude/` via `ari sync`)
+- File: `internal/hook/context.go` (hook source; projects to the channel directory via `ari sync`)
 - Lines 45-78: Inline YAML parsing and validation
 
 **Impact**: Changes to validation logic require updating multiple files.

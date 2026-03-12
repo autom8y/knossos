@@ -329,7 +329,7 @@ fail_action: Block archive; show dependency violations
 
 ### CR-2: Skill Reference Updates
 
-References to consolidated skills in CLAUDE.md and other skills are updated.
+References to consolidated skills in the context file and other skills are updated.
 
 ```yaml
 validation:
@@ -339,7 +339,7 @@ validation:
   automated: partial
 
 check:
-  scope: .claude/skills/, .claude/CLAUDE.md
+  scope: channel skills directory, context file
   verify:
     - skill references point to consolidated docs
     - "When to Activate" triggers are updated
@@ -351,7 +351,7 @@ fail_action: Block archive; list stale references
 
 ### CR-3: Navigation Integrity
 
-CLAUDE.md and skill indexes provide valid navigation paths.
+The context file and skill indexes provide valid navigation paths.
 
 ```yaml
 validation:
@@ -361,7 +361,7 @@ validation:
   automated: partial
 
 check:
-  scope: .claude/CLAUDE.md, .claude/skills/*/index.md
+  scope: context file, channel skills indexes
   verify:
     - all linked paths exist
     - navigation reflects consolidated structure

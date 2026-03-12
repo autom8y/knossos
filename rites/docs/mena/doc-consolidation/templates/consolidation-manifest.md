@@ -148,4 +148,4 @@
 
 ---
 
-*Managed by the [Documentation Consolidation Workflow](/.claude/skills/doc-consolidation/INDEX.md)*
+*Managed by the [Documentation Consolidation Workflow](doc-consolidation)*

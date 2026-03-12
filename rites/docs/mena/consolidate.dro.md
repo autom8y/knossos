@@ -17,7 +17,7 @@ Consolidate documentation from a category directory into numbered, well-organize
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `category_dir` | Yes | Directory containing docs to consolidate (e.g., `.claude/skills/documentation`) |
+| `category_dir` | Yes | Directory containing docs to consolidate (e.g., `{channel_dir}/skills/documentation`) |
 | `--dry-run` | No | Generate MANIFEST.yaml only, do not execute consolidation |
 
 ## Workflow Phases
@@ -43,7 +43,7 @@ This command orchestrates the ecosystem workflow for documentation consolidation
    - Identify content categories and relationships
    - Generate MANIFEST.yaml with consolidation plan:
      ```yaml
-     source_dir: .claude/skills/documentation
+     source_dir: {channel_dir}/skills/documentation
      files_to_consolidate:
        - path: templates.md
          category: templates
@@ -126,4 +126,4 @@ If consolidation is interrupted:
 ## Reference
 
 Full workflow documentation: `doc-consolidation`
-Agent details: `.claude/agents/potnia.md`
+Agent details: `potnia` (channel agents directory)

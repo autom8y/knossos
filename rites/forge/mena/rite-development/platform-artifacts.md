@@ -35,7 +35,7 @@ ari sync --rite {rite-name}
 
 # Verify sync worked
 cat .knossos/ACTIVE_RITE
-ls .claude/agents/
+ls {channel_dir}/agents/
 ```
 
 ---
@@ -51,10 +51,10 @@ Key behaviors to understand:
 - Warns if workflow.yaml missing
 
 ### Sync Phase
-- Clears .claude/agents/
+- Clears the channel agents directory
 - Copies new agents from knossos
 - Copies workflow.yaml to .knossos/ACTIVE_WORKFLOW.yaml
-- Preserves global agents from ~/.claude/agents/
+- Preserves global agents from the user channel agents directory
 
 ### State Update
 - Writes rite name to .knossos/ACTIVE_RITE

@@ -14,7 +14,7 @@
 [2-3 sentences describing what changed and why satellite owners care]
 
 ## Before You Begin
-- [ ] Backup `.claude/` directory
+- [ ] Backup channel directory
 - [ ] Verify current ari version: `ari --version`
 - [ ] Read this runbook completely before starting
 
@@ -60,7 +60,7 @@ ari sync  # Pulls latest knossos changes
 ### 3. Migrate Settings
 ```bash
 # Specific migration commands
-mv .claude/settings.json .claude/settings.json.backup
+mv {channel_dir}/settings.json {channel_dir}/settings.json.backup
 # Apply transformation...
 ```
 
@@ -83,7 +83,7 @@ If migration fails:
 
 ```bash
 # Restore backup
-cp .claude/settings.json.backup .claude/settings.json
+cp {channel_dir}/settings.json.backup {channel_dir}/settings.json
 ari sync --force  # Reset to pre-migration state
 ```
 

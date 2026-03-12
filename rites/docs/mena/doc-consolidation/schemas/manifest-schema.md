@@ -26,7 +26,7 @@ metadata:
   created_at: string   # ISO 8601 timestamp
   updated_at: string   # ISO 8601 timestamp
   generator: string    # Agent/process that created this
-  scope: string        # What was scanned (e.g., ".claude/skills/", "docs/")
+  scope: string        # What was scanned (e.g., "{channel_dir}/skills/", "docs/")
   file_count: integer  # Total files cataloged
   topic_count: integer # Number of topics identified
 
@@ -98,7 +98,7 @@ ambiguous:
 
 ```yaml
 file_type:
-  - skill           # .claude/skills/**/*.md
+  - skill           # {channel_dir}/skills/**/*.md
   - template        # Template files (PRD, TDD, etc.)
   - guide           # How-to or procedural docs
   - reference       # API docs, specifications
@@ -151,12 +151,12 @@ metadata:
   created_at: "2024-12-25T09:00:00Z"
   updated_at: "2024-12-25T09:00:00Z"
   generator: "discovery-agent-v1"
-  scope: ".claude/skills/"
+  scope: "{channel_dir}/skills/"
   file_count: 12
   topic_count: 4
 
 files:
-  - path: ".claude/skills/doc-ecosystem/INDEX.md"
+  - path: "{channel_dir}/skills/doc-ecosystem/INDEX.md"
     hash: "a1b2c3d4e5f6g7h8..."
     line_count: 510
     token_estimate: 4200
@@ -190,7 +190,7 @@ files:
       - "Tier Precedence"
       - "Array Merge"
 
-  - path: ".claude/skills/10x-workflow/INDEX.md"
+  - path: "{channel_dir}/skills/10x-workflow/INDEX.md"
     hash: "c3d4e5f6g7h8i9j0..."
     line_count: 120
     token_estimate: 950
@@ -207,7 +207,7 @@ files:
       - "Quality Gates"
       - "Session Protocol"
 
-  - path: ".claude/skills/10x-workflow/quality-gates.md"
+  - path: "{channel_dir}/skills/10x-workflow/quality-gates.md"
     hash: "d4e5f6g7h8i9j0k1..."
     line_count: 95
     token_estimate: 780
@@ -228,7 +228,7 @@ topics:
     priority: high
     estimated_sources: 2
     estimated_tokens: 5700
-    primary_source: ".claude/skills/doc-ecosystem/INDEX.md"
+    primary_source: "{channel_dir}/skills/doc-ecosystem/INDEX.md"
     dependencies: []
     tags:
       - "cem"
@@ -241,7 +241,7 @@ topics:
     priority: critical
     estimated_sources: 1
     estimated_tokens: 950
-    primary_source: ".claude/skills/10x-workflow/INDEX.md"
+    primary_source: "{channel_dir}/skills/10x-workflow/INDEX.md"
     dependencies: []
     tags:
       - "workflow"
@@ -254,7 +254,7 @@ topics:
     priority: high
     estimated_sources: 2
     estimated_tokens: 1730
-    primary_source: ".claude/skills/10x-workflow/quality-gates.md"
+    primary_source: "{channel_dir}/skills/10x-workflow/quality-gates.md"
     dependencies:
       - "agent-routing"
     tags:
@@ -267,7 +267,7 @@ topics:
     priority: normal
     estimated_sources: 1
     estimated_tokens: 4200
-    primary_source: ".claude/skills/doc-ecosystem/INDEX.md"
+    primary_source: "{channel_dir}/skills/doc-ecosystem/INDEX.md"
     dependencies:
       - "settings-merge"
     tags:
@@ -276,10 +276,10 @@ topics:
       - "satellite"
 
 exclusions:
-  - path: ".claude/skills/.archive/glossary.md"
+  - path: "{channel_dir}/skills/.archive/glossary.md"
     reason: deprecated
     note: "Superseded by domain-specific glossary files"
-  - path: ".claude/skills/.DS_Store"
+  - path: "{channel_dir}/skills/.DS_Store"
     reason: binary
     note: "macOS system file"
 

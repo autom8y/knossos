@@ -203,5 +203,5 @@ Full details with fixes: [principles.md](principles.md) (integrated into each pr
 ## Related Documentation
 
 - Agent template: see `rite-development` skill for agent template
-- Existing agents: `rites/*/agents/*.md` (source) or `.claude/agents/*.md` (projection)
+- Existing agents: `rites/*/agents/*.md` (source) or channel agents directory (projection)
 - Rite catalog: Check `rites/` directory for production examples

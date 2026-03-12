@@ -80,4 +80,4 @@
 
 ---
 
-*This document was consolidated using the [Documentation Consolidation Workflow](/.claude/skills/doc-consolidation/INDEX.md).*
+*This document was consolidated using the [Documentation Consolidation Workflow](doc-consolidation).*

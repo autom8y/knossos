@@ -154,7 +154,7 @@ conflicts:
     description: "Default array merge strategy differs between sources"
 
     sources:
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: "{channel_dir}/skills/doc-ecosystem/INDEX.lego.md"
         position: "Arrays append by default"
         evidence: "Line 178: 'Arrays append by default...'"
         authority: primary

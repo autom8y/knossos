@@ -105,7 +105,7 @@ The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline a
 
 ### Recommended Focus
 - **Core**: Sync pipeline and knossos infrastructure changes
-- **Secondary**: CLAUDE.md governance
+- **Secondary**: Context file governance
 - **Remove**: Cross-rite coordination, satellite testing matrix
 
 ---

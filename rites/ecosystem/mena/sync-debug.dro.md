@@ -46,7 +46,7 @@ Invoke the Ecosystem Analyst agent with sync pipeline diagnostic focus to trace 
 
 The Ecosystem Analyst will examine:
 - [ ] Sync pipeline version in satellite vs knossos
-- [ ] Settings schema compatibility (`.claude/settings.json` format)
+- [ ] Settings schema compatibility (channel settings file format)
 - [ ] Conflict detection logic (does it correctly identify conflicts?)
 - [ ] Merge algorithm (3-way merge working correctly?)
 - [ ] File permissions and ownership

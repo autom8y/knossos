@@ -112,7 +112,7 @@ Verify ari sync --rite can load the rite.
 1. Run: `ari sync --rite {rite-name}`
 2. Check exit code is 0
 3. Verify .knossos/ACTIVE_RITE contains rite name
-4. Verify .claude/agents/ has correct files
+4. Verify the channel agents directory has correct files
 5. Verify .knossos/ACTIVE_WORKFLOW.yaml exists
 
 ### Phase 5: Rollback Preparation
@@ -141,7 +141,7 @@ Ready for Eval Specialist when:
 - [ ] File count matches expected (from RITE-SPEC)
 - [ ] ari sync --rite loads rite without errors
 - [ ] .knossos/ACTIVE_RITE shows correct rite name
-- [ ] .claude/agents/ contains copied agent files
+- [ ] Channel agents directory contains copied agent files
 - [ ] .knossos/ACTIVE_WORKFLOW.yaml exists and is valid
 
 ## Session Checkpoints
@@ -175,7 +175,7 @@ When deploying rites reveals:
 
 ## Anti-Patterns to Avoid
 
-- **Wrong Location**: Deploying to wrong directory (e.g., .claude/agents/ instead of knossos).
+- **Wrong Location**: Deploying to wrong directory (e.g., channel agents directory instead of knossos source).
 - **Missing Workflow**: Forgetting workflow.yaml. Rites won't function without it.
 - **Permission Errors**: Wrong file permissions blocking ari sync.
 - **Naming Mismatch**: Agent filenames not matching workflow.yaml references.

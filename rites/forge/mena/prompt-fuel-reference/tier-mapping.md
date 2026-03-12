@@ -22,7 +22,7 @@
 ## Domain Knowledge
 
 - **[SCAR-003 + TRIBAL-003] NEVER use os.RemoveAll on user-containing directories.** Use selective removal with a managed-set of filenames. The user-content-never-destroyed invariant is the platform's core trust contract.
-- **[SCAR-001 + GUARD-011] All project .claude/ writes MUST use writeIfChanged().** CC's file watcher crashes on unnecessary writes. Plain os.WriteFile is acceptable only for user-scope ~/.claude/ paths.
+- **[SCAR-001 + GUARD-011] All project channel directory writes MUST use writeIfChanged().** The harness file watcher crashes on unnecessary writes. Plain os.WriteFile is acceptable only for user-scope channel paths.
 ```
 
 ## IMPORTANT Tier -- Skill Reference

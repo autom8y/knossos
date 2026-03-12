@@ -25,9 +25,9 @@ Test the agent: $ARGUMENTS
 ### 2. Locate Agent
 
 Find agent file at:
-- `.claude/agents/{agent-name}.md` (if in active rite)
+- Channel agents directory `{agent-name}.md` (if in active rite)
 - `$KNOSSOS_HOME/rites/{rite-name}/agents/{agent-name}.md` (if rite specified)
-- `~/.claude/agents/{agent-name}.md` (if global agent)
+- User channel agents directory `{agent-name}.md` (if global agent)
 
 If not found, report error with available agents.
 
@@ -102,5 +102,5 @@ Overall: {PASS | FAIL}
 
 ## Reference
 
-Full documentation: `.claude/skills/forge-ref/INDEX.md`
+Full documentation: `forge-ref` skill
 Agent completeness checklist: see `agent-prompt-engineering` skill validation checklist

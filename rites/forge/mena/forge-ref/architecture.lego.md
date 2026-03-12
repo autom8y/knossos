@@ -12,7 +12,7 @@ The Forge is a standard knossos rite. Activate it with `ari sync --rite forge`.
 ### How It Works
 
 1. Forge agents live in `$KNOSSOS_HOME/rites/forge/agents/`
-2. `ari sync --rite forge` projects agents to `.claude/agents/`
+2. `ari sync --rite forge` projects agents to the channel agents directory
 3. Invoke Forge agents via the Task tool from the main thread
 
 ### Why Forge?
@@ -26,7 +26,7 @@ The Forge is a standard knossos rite. Activate it with `ari sync --rite forge`.
 | Type | Location |
 |------|----------|
 | Forge agents (source) | `$KNOSSOS_HOME/rites/forge/agents/` |
-| Forge agents (projected) | `.claude/agents/` (when forge rite is active) |
-| Forge commands | `.claude/commands/` |
+| Forge agents (projected) | channel agents directory (when forge rite is active) |
+| Forge commands | channel commands directory |
 | Patterns | `patterns/` |
 | Evals | `evals/` |

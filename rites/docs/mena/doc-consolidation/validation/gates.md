@@ -423,7 +423,7 @@ archive_gate:
       failure: "Unstaged files: {list}"
 
     navigation_updated:
-      rule: "CLAUDE.md and skill indexes reference consolidated paths"
+      rule: "context file and skill indexes reference consolidated paths"
       failure: "Navigation references old paths: {list}"
 
     no_broken_links:
@@ -478,7 +478,7 @@ archive_gate:
 |----|-------|----------|-----------|
 | VG-1 | Spot-check 3 random sections for info loss | Blocking | No |
 | VG-2 | All skill references updated | Blocking | Partial |
-| VG-3 | CLAUDE.md navigation correct | Blocking | Yes |
+| VG-3 | Context file navigation correct | Blocking | Yes |
 | VG-4 | Token reduction achieved | Blocking | Yes |
 | VG-5 | Staleness detection functional | Warning | Yes |
 | VG-6 | Consolidation metrics logged | Warning | Yes |
@@ -500,12 +500,12 @@ validation_gate:
       failure: "Information loss detected in section: {section_id}"
 
     skill_references_updated:
-      rule: "all .claude/skills/ references point to current locations"
+      rule: "all channel skills references point to current locations"
       failure: "Stale skill references: {list}"
 
     claude_md_correct:
-      rule: "CLAUDE.md skill table and links resolve correctly"
-      failure: "CLAUDE.md navigation errors: {list}"
+      rule: "context file skill table and links resolve correctly"
+      failure: "context file navigation errors: {list}"
 
     token_reduction:
       rule: "post-consolidation tokens < pre-consolidation tokens"
@@ -574,7 +574,7 @@ validation_gate:
 
 - [ ] VG-1: Spot-check 3 sections (no info loss)
 - [ ] VG-2: All skill references updated
-- [ ] VG-3: CLAUDE.md navigation correct
+- [ ] VG-3: Context file navigation correct
 - [ ] VG-4: Token reduction achieved
 - [ ] VG-5: Staleness detection works (warning)
 - [ ] VG-6: Metrics logged (warning)

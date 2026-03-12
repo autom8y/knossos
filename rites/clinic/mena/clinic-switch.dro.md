@@ -53,4 +53,4 @@ Back-routes: diagnosis->examination (evidence gap), treatment->diagnosis (insuff
 
 ## Reference
 
-Full documentation: `.claude/skills/clinic-ref/INDEX.md`
+Full documentation: `clinic-ref` skill

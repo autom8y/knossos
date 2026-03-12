@@ -114,5 +114,5 @@ When Agent Curator finishes, the rite is:
 ## See Also
 
 - `/new-rite <name>` — Direct rite creation without archaeology
-- Full documentation: `.claude/skills/forge-ref/INDEX.md`
+- Full documentation: `forge-ref` skill
 - Forge overview: `/forge`

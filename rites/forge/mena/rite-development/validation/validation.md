@@ -31,7 +31,7 @@
 - [ ] All 11 sections present (see agent-template.md)
 
 ### Integration
-- [ ] Command file exists: `.claude/commands/{rite-name}.md`
+- [ ] Command file exists: `{channel_dir}/commands/{rite-name}.md`
 - [ ] Skill directory exists: `rites/{rite-name}/mena/{rite-name}-ref/`
 - [ ] `ari sync --rite {rite-name}` completes without error
 
@@ -46,7 +46,7 @@ $KNOSSOS_HOME/ari sync --rite {rite-name}
 
 # Verify workflow and agents copied
 cat .knossos/ACTIVE_WORKFLOW.yaml
-ls .claude/agents/
+ls {channel_dir}/agents/
 
 # Verify terminal phase
 grep -B1 "next: null" $KNOSSOS_HOME/rites/{rite-name}/workflow.yaml
@@ -106,7 +106,7 @@ ari rite list
 ```bash
 # Full rite validation
 $KNOSSOS_HOME/ari sync --rite {rite-name} && \
-ls .claude/agents/ && \
+ls {channel_dir}/agents/ && \
 cat .knossos/ACTIVE_WORKFLOW.yaml
 
 # Check YAML syntax
@@ -116,7 +116,7 @@ python3 -c "import yaml; yaml.safe_load(open('workflow.yaml'))"
 head -20 agents/*.md | grep -A10 "^---"
 
 # Check command file
-cat .claude/commands/{rite-name}.md | head -10
+cat {channel_dir}/commands/{rite-name}.md | head -10
 ```
 
 ---

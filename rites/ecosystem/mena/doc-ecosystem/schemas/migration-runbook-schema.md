@@ -166,7 +166,7 @@ prerequisites:
     verification: "Run: git status --porcelain (should return empty)"
   - description: "No active sessions"
     verification: "Run: ari session status (should show no active session)"
-  - description: "Backup of .claude/ directory"
+  - description: "Backup of channel directory"
     verification: "Confirm backup exists at known location"
 steps:
   - number: 1
@@ -190,7 +190,7 @@ steps:
     expected_output: "All sessions valid."
 rollback_steps:
   - number: 1
-    action: "Restore .claude/ from backup"
+    action: "Restore channel directory from backup"
     verification: "git status shows only expected changes"
   - number: 2
     action: "Reset to previous commit"
@@ -218,7 +218,7 @@ This runbook guides satellite owners through migrating from session schema v1.0 
 
 - [ ] Git working directory is clean
 - [ ] No active sessions
-- [ ] Backup of .claude/ directory created
+- [ ] Backup of channel directory created
 - [ ] Stakeholders notified of brief downtime
 
 ## Migration Steps
