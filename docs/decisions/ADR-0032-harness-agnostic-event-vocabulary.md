@@ -63,7 +63,7 @@ The canonical vocabulary is not an abstraction layer. It is the real vocabulary.
 
 ### 6a. Canonical Event Table (GATE 1)
 
-All 16 knossos lifecycle events. The `direction` column indicates which harnesses fire the event: `bidirectional` means both CC and Gemini support it, `cc_only` means CC-exclusive, `gemini_only` means Gemini-exclusive, `outbound_only` means knossos generates these hooks (no harness fires them inbound).
+All 18 knossos lifecycle events. The `direction` column indicates which harnesses fire the event: `bidirectional` means both CC and Gemini support it, `cc_only` means CC-exclusive, `gemini_only` means Gemini-exclusive, `outbound_only` means knossos generates these hooks (no harness fires them inbound).
 
 | canonical_name | go_constant | cc_wire | gemini_wire | direction |
 |---------------|-------------|---------|-------------|-----------|
@@ -83,6 +83,8 @@ All 16 knossos lifecycle events. The `direction` column indicates which harnesse
 | `task_completed` | `EventTaskCompleted` | `TaskCompleted` | — | cc_only |
 | `pre_model` | `EventPreModel` | — | `BeforeModel` | gemini_only |
 | `post_model` | `EventPostModel` | — | `AfterModel` | gemini_only |
+| `worktree_create` | `EventWorktreeCreate` | `WorktreeCreate` | — | cc_only |
+| `worktree_remove` | `EventWorktreeRemove` | `WorktreeRemove` | — | cc_only |
 
 **Interpretation of direction values:**
 
@@ -336,6 +338,16 @@ events:
     cc_wire: null
     gemini_wire: AfterModel
     direction: gemini_only
+  - canonical: worktree_create
+    go_constant: EventWorktreeCreate
+    cc_wire: WorktreeCreate
+    gemini_wire: null
+    direction: cc_only
+  - canonical: worktree_remove
+    go_constant: EventWorktreeRemove
+    cc_wire: WorktreeRemove
+    gemini_wire: null
+    direction: cc_only
 
 tools:
   - canonical: read_file
