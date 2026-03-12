@@ -96,7 +96,7 @@ The ecosystem rite is a **5-agent infrastructure rite** handling sync pipeline a
 1. Gap Analysis for infrastructure bugs
 2. Context Design for sync/knossos changes
 3. Migration Runbooks for breaking changes
-4. CLAUDE.md architecture governance (claude-md-architecture skill)
+4. Inscription architecture governance (inscription-architecture skill)
 
 ### What It Over-Claims
 1. Hub coordination (no mechanism)

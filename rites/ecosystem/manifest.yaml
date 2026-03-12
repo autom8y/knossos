@@ -60,7 +60,7 @@ dromena:
   - sync-debug
 
 legomena:
-  - claude-md-architecture
+  - inscription-architecture
   - doc-ecosystem
   - ecosystem-ref
 
