@@ -139,7 +139,10 @@ func runWriteguardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Prin
 	}
 
 	// Parse file path from tool input
-	filePath := parseFilePath(printer, hookEnv.ToolInput)
+	filePath, blocked := parseFilePath(printer, hookEnv.ToolInput)
+	if blocked {
+		return outputBlockTraversal(printer)
+	}
 	if filePath == "" {
 		return outputAllow(printer)
 	}
@@ -221,21 +224,23 @@ func runWriteguardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Prin
 }
 
 // parseFilePath extracts file_path from JSON tool input and hardens it against traversal.
-func parseFilePath(printer *output.Printer, toolInput string) string {
+// Returns (path, blocked). path is empty on parse error or if field missing.
+// blocked is true if a traversal attempt was detected.
+func parseFilePath(printer *output.Printer, toolInput string) (string, bool) {
 	if toolInput == "" {
-		return ""
+		return "", false
 	}
 
 	var input map[string]any
 	if err := json.Unmarshal([]byte(toolInput), &input); err != nil {
 		printer.VerboseLog("warn", "failed to parse tool input JSON",
 			map[string]any{"error": err.Error(), "input": toolInput})
-		return ""
+		return "", false
 	}
 
 	fp, ok := input["file_path"].(string)
 	if !ok || fp == "" {
-		return ""
+		return "", false
 	}
 
 	// Hardening: Normalize path and block traversal
@@ -245,10 +250,23 @@ func parseFilePath(printer *output.Printer, toolInput string) string {
 	if filepath.IsAbs(cleaned) || strings.HasPrefix(cleaned, "..") {
 		printer.VerboseLog("warn", "blocked potential path traversal attempt",
 			map[string]any{"raw": fp, "cleaned": cleaned})
-		return ""
+		return "", true
 	}
 
-	return cleaned
+	return cleaned, false
+}
+
+// outputBlockTraversal outputs a deny decision for path traversal attempts.
+func outputBlockTraversal(printer *output.Printer) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "Blocked potential path traversal attempt",
+			AdditionalContext:        "File paths must be relative and remain within the project workspace.",
+		},
+	}
+	return printer.Print(result)
 }
 
 // isSessionContext returns true if filePath targets a SESSION_CONTEXT.md file.

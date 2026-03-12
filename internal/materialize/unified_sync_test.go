@@ -109,7 +109,7 @@ func newTestMaterializer(projectDir, knossosHome, userChannelDir string) *Materi
 func TestUnifiedSync_RiteOnly(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
@@ -130,7 +130,7 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 
 	// Verify .claude/ populated
 	assert.FileExists(t, filepath.Join(channelDir, "agents", "test-agent.md"))
-	assert.FileExists(t, filepath.Join(channelDir, "CLAUDE.md"))
+	assert.FileExists(t, filepath.Join(channelDir, paths.ClaudeChannel{}.ContextFile()))
 	assert.FileExists(t, filepath.Join(projectDir, ".knossos", "ACTIVE_RITE"))
 }
 
@@ -138,7 +138,7 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 func TestUnifiedSync_UserOnly(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 	projectDir := t.TempDir() // Empty project (no rite)
 
 	setupKnossosHome(t, knossosHome)
@@ -166,11 +166,11 @@ func TestUnifiedSync_UserOnly(t *testing.T) {
 func TestUnifiedSync_ScopeAll(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
@@ -199,7 +199,7 @@ func TestUnifiedSync_NoActiveRite_ScopeAll(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	setupKnossosHome(t, knossosHome)
 
@@ -246,7 +246,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	// Setup rite with test-agent
 	setupTestRite(t, riteDir)
@@ -294,7 +294,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 func TestUnifiedSync_RecoveryMode(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	setupKnossosHome(t, knossosHome)
 
@@ -337,7 +337,7 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	setupKnossosHome(t, knossosHome)
 
@@ -392,7 +392,7 @@ func TestUnifiedSync_OverwriteDiverged(t *testing.T) {
 func TestUnifiedSync_KeepOrphans(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	setupKnossosHome(t, knossosHome)
 
@@ -437,7 +437,7 @@ func TestUnifiedSync_KeepOrphans(t *testing.T) {
 func TestUnifiedSync_ResourceFilter(t *testing.T) {
 	t.Parallel()
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	setupKnossosHome(t, knossosHome)
 
@@ -469,11 +469,11 @@ func TestUnifiedSync_ResourceFilter(t *testing.T) {
 func TestUnifiedSync_DryRun(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	knossosHome := t.TempDir()
-	userChannelDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), paths.ClaudeChannel{}.DirName())
 
 	setupTestRite(t, riteDir)
 	setupKnossosHome(t, knossosHome)
@@ -503,7 +503,7 @@ func TestUnifiedSync_DryRun(t *testing.T) {
 func TestUnifiedSync_Idempotency(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "test-rite")
 
 	setupTestRite(t, riteDir)
@@ -521,9 +521,9 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, result1.RiteResult)
 
-	// Read CLAUDE.md content after first sync
-	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
-	content1, err := os.ReadFile(claudeMdPath)
+	// Read context file content after first sync
+	contextFilePath := filepath.Join(channelDir, paths.ClaudeChannel{}.ContextFile())
+	content1, err := os.ReadFile(contextFilePath)
 	require.NoError(t, err)
 
 	// Read provenance manifest after first sync (now in .knossos/)
@@ -543,8 +543,8 @@ func TestUnifiedSync_Idempotency(t *testing.T) {
 	assert.NotNil(t, result2.RiteResult)
 	assert.Equal(t, "success", result2.RiteResult.Status)
 
-	// Read CLAUDE.md content after second sync
-	content2, err := os.ReadFile(claudeMdPath)
+	// Read context file content after second sync
+	content2, err := os.ReadFile(contextFilePath)
 	require.NoError(t, err)
 
 	// Read provenance manifest after second sync
@@ -618,7 +618,7 @@ func TestSync_ScopeRite_Error_StillFails(t *testing.T) {
 func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	riteDir := filepath.Join(projectDir, ".knossos", "rites", "bad-rite")
 
 	// Set up a rite with an agent but a broken template
@@ -693,7 +693,7 @@ func TestMinimalMode_ProjectsSharedMena(t *testing.T) {
 	knossosHome := t.TempDir()
 
 	projectDir := t.TempDir()
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 
 	// Set up platform mena (root level) — getMenaDir() needs this to resolve
 	platformMenaDir := filepath.Join(knossosHome, "mena", "nav-cmd")

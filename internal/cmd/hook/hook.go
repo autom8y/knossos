@@ -88,6 +88,7 @@ Performance Targets:
 	cmd.PersistentFlags().String("signature", "", "HMAC-SHA256 signature of the stdin payload")
 
 	// Add hook subcommands
+	cmd.AddCommand(newCallCmd(ctx))
 	cmd.AddCommand(newContextCmd(ctx))
 	cmd.AddCommand(newAutoparkCmd(ctx))
 	cmd.AddCommand(newWriteguardCmd(ctx))

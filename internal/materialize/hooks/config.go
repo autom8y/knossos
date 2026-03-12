@@ -124,9 +124,14 @@ func BuildHooksSettings(cfg *HooksConfig, channel string) map[string]any {
 
 		matcherGroups := make([]map[string]any, 0, len(entries))
 		for _, entry := range entries {
+			cmd := entry.Command
+			if strings.HasPrefix(cmd, ariHookPrefix) && !strings.Contains(cmd, "ari hook call") {
+				cmd = strings.Replace(cmd, "ari hook", "ari hook call ari hook", 1)
+			}
+
 			hookHandler := map[string]any{
 				"type":    "command",
-				"command": entry.Command,
+				"command": cmd,
 			}
 			if entry.Timeout > 0 {
 				hookHandler["timeout"] = entry.Timeout

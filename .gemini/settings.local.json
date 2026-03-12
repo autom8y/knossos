@@ -8,7 +8,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "ari hook clew --output json",
+            "command": "ari hook call ari hook clew --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -22,7 +22,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "ari hook suggest --output json",
+            "command": "ari hook call ari hook suggest --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -34,7 +34,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook budget --output json",
+            "command": "ari hook call ari hook budget --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -47,7 +47,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "ari hook driftdetect --output json",
+            "command": "ari hook call ari hook driftdetect --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -61,7 +61,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook writeguard --output json",
+            "command": "ari hook call ari hook writeguard --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -74,7 +74,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook validate --output json",
+            "command": "ari hook call ari hook validate --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -87,7 +87,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook git-conventions --output json",
+            "command": "ari hook call ari hook git-conventions --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -100,7 +100,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook attribution-guard --output json",
+            "command": "ari hook call ari hook attribution-guard --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -115,7 +115,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook precompact --output json",
+            "command": "ari hook call ari hook precompact --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -129,7 +129,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook sessionend --output json",
+            "command": "ari hook call ari hook sessionend --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
@@ -143,7 +143,7 @@
       {
         "hooks": [
           {
-            "command": "ari hook context --output json",
+            "command": "ari hook call ari hook context --output json",
             "env": {
               "KNOSSOS_CHANNEL": "gemini"
             },
