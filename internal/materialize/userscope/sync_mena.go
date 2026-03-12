@@ -313,10 +313,14 @@ func walkMenaEntryFS(
 			content = mena.InjectCompanionHideFrontmatter(content)
 		}
 
-		// Rewrite stale .lego.md/.dro.md content references to materialized forms.
-		// Channel path rewriting for user scope is deferred (pass "" for identity).
+		// Rewrite stale .lego.md/.dro.md content references to materialized forms
+		// and substitute .claude/ path prefixes for the target channel directory.
 		if strings.HasSuffix(strippedName, ".md") {
-			content = mena.RewriteMenaContentPaths(content, "")
+			channelDir := ".claude"
+			if opts.Channel == "gemini" {
+				channelDir = ".gemini"
+			}
+			content = mena.RewriteMenaContentPaths(content, channelDir)
 		}
 
 		// Checksum of transformed content (what we'll write)
@@ -364,10 +368,14 @@ func syncMenaStandalone(
 		return err
 	}
 
-	// Rewrite stale .lego.md/.dro.md content references to materialized forms.
-	// Channel path rewriting for user scope is deferred (pass "" for identity).
+	// Rewrite stale .lego.md/.dro.md content references to materialized forms
+	// and substitute .claude/ path prefixes for the target channel directory.
 	if strings.HasSuffix(sf.FlatName, ".md") {
-		content = mena.RewriteMenaContentPaths(content, "")
+		channelDir := ".claude"
+		if opts.Channel == "gemini" {
+			channelDir = ".gemini"
+		}
+		content = mena.RewriteMenaContentPaths(content, channelDir)
 	}
 
 	sourceChecksum := checksum.Bytes(content)
