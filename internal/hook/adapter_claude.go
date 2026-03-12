@@ -45,15 +45,17 @@ func (a *ClaudeAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 	}
 
 	return &Env{
-		Event:          event,
-		ToolName:       stdin.ToolName,
-		ToolInput:      toolInput,
-		ToolResult:     toolResult,
-		SessionID:      stdin.SessionID,
-		ProjectDir:     projectDir,
-		CWD:            cwd,
-		ConversationID: stdin.ConversationID,
-		UserMessage:    stdin.Prompt,
+		Event:             event,
+		ToolName:          stdin.ToolName,
+		ToolInput:         toolInput,
+		ToolResult:        toolResult,
+		SessionID:         stdin.SessionID,
+		ProjectDir:        projectDir,
+		CWD:               cwd,
+		ConversationID:    stdin.ConversationID,
+		UserMessage:       stdin.Prompt,
+		Signature:         stdin.XKnossosSignature,
+		RawPayload:        data,
 	}, nil
 }
 

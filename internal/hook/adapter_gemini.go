@@ -69,6 +69,8 @@ func (a *GeminiAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 		CWD:            cwd,
 		ConversationID: payload.ConversationID,
 		UserMessage:    payload.Prompt,
+		Signature:      payload.XKnossosSignature,
+		RawPayload:     data,
 	}, nil
 }
 
