@@ -140,7 +140,7 @@ func TestGeminiCompiler_CompileAgent_ToolTranslation(t *testing.T) {
 	s := string(content)
 
 	// Verify Gemini tool names are present
-	for _, gemini := range []string{"read_file", "run_shell_command", "replace", "write_file", "glob", "grep"} {
+	for _, gemini := range []string{"read_file", "run_shell_command", "replace", "write_file", "glob", "search_files"} {
 		if !strings.Contains(s, gemini) {
 			t.Errorf("expected Gemini tool %q in output:\n%s", gemini, s)
 		}

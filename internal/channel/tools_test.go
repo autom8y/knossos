@@ -21,7 +21,7 @@ func TestCCToGeminiTool_Coverage(t *testing.T) {
 		{"Write", "write_file"},
 		{"Bash", "run_shell_command"},
 		{"Glob", "glob"},
-		{"Grep", "grep"},
+		{"Grep", "search_files"},
 	}
 
 	for _, tc := range required {
@@ -62,7 +62,7 @@ func TestTranslateTool_KnownMapping(t *testing.T) {
 		{"Edit", "replace"},
 		{"Write", "write_file"},
 		{"Glob", "glob"},
-		{"Grep", "grep"},
+		{"Grep", "search_files"},
 	}
 
 	for _, tc := range cases {

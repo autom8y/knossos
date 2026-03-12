@@ -12,7 +12,7 @@ var CCToGeminiTool = map[string]string{
 	"Write":     "write_file",
 	"Bash":      "run_shell_command",
 	"Glob":      "glob",
-	"Grep":      "grep",
+	"Grep":      "search_files",
 }
 
 // CCOnlyTools lists CC tools that have no Gemini equivalent.
