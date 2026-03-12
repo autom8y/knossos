@@ -7,6 +7,7 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/manifest"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // cmdContext holds shared state for manifest commands.
@@ -56,7 +57,9 @@ func (c *cmdContext) getSchemaValidator() (*manifest.SchemaValidator, error) {
 }
 
 // defaultManifestPath returns the default manifest path.
+// CC-specific: manifest.json is a Claude Code concept. Other channels
+// use different manifest formats/locations.
 func (c *cmdContext) defaultManifestPath() string {
 	resolver := c.GetResolver()
-	return resolver.ClaudeDir() + "/manifest.json"
+	return resolver.ChannelDir(paths.ClaudeChannel{}) + "/manifest.json"
 }

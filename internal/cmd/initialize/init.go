@@ -42,6 +42,9 @@ type initOutput struct {
 }
 
 // Text implements output.Textable for human-readable output.
+// CC-specific: output strings reference .claude/ paths because init currently
+// bootstraps the Claude Code channel by default. When channel parameterization
+// is added to init, these strings should reflect the target channel.
 func (o initOutput) Text() string {
 	if !o.Initialized {
 		return o.Message
@@ -166,6 +169,8 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		return printer.Print(result)
 	}
 
+	// CC-specific: init bootstraps the Claude Code channel by default.
+	// When channel parameterization is added, this should use resolver.ChannelDir(ch).
 	channelDir := filepath.Join(projectDir, ".claude")
 	if _, err := os.Stat(channelDir); err == nil && !force {
 		// .claude/ exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.

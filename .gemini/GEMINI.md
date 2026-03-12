@@ -38,7 +38,7 @@ Agents activate automatically based on description matching. Write prompts that 
 
 <!-- KNOSSOS:END commands -->
 
-<!-- KNOSSOS:START agent-configurations regenerate=true source=agents/*.md -->
+<!-- KNOSSOS:START agent-configurations source=agents/*.md regenerate=true -->
 ## Agents
 
 Prompts in `.gemini/agents/`:

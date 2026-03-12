@@ -108,8 +108,9 @@ func applyDefaults(content map[string]any) {
 	}
 	paths, _ := content["paths"].(map[string]any)
 
-	// Path defaults are CC-channel specific (the CC channel dir is ".claude/").
-	// These strings are wire defaults for the CC harness, not knossos core concepts.
+	// CC-channel-specific wire defaults. These are string constants consumed by
+	// the CC harness manifest format, not resolved paths. Other channels (Gemini,
+	// Codex) use different manifest schemas and do not share these defaults.
 	defaults := map[string]string{
 		"sessions": ".sos/sessions",
 		"agents":   ".claude/agents",

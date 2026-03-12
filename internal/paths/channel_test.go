@@ -24,7 +24,7 @@ func TestChannelByName(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt // capture loop variable for parallel tests
+
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			ch, err := paths.ChannelByName(tt.input)
@@ -80,11 +80,81 @@ func TestAllChannels(t *testing.T) {
 func TestClaudeChannel_BackwardCompat(t *testing.T) {
 	t.Parallel()
 	r := paths.NewResolver("/fake/root")
-	
+
 	claudeDirResult := r.ClaudeDir()
 	channelDir := r.ChannelDir(paths.ClaudeChannel{})
 
 	if claudeDirResult != channelDir {
 		t.Errorf("ClaudeDir() %s != ChannelDir(ClaudeChannel{}) %s", claudeDirResult, channelDir)
+	}
+}
+
+func TestContextFilePath(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		channel  paths.TargetChannel
+		root     string
+		wantPath string
+	}{
+		{"claude", paths.ClaudeChannel{}, "/project", "/project/.claude/CLAUDE.md"},
+		{"gemini", paths.GeminiChannel{}, "/project", "/project/.gemini/GEMINI.md"},
+		{"claude nested root", paths.ClaudeChannel{}, "/home/user/code/app", "/home/user/code/app/.claude/CLAUDE.md"},
+		{"gemini nested root", paths.GeminiChannel{}, "/home/user/code/app", "/home/user/code/app/.gemini/GEMINI.md"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := tt.channel.ContextFilePath(tt.root)
+			if got != tt.wantPath {
+				t.Errorf("ContextFilePath(%q) = %q, want %q", tt.root, got, tt.wantPath)
+			}
+		})
+	}
+}
+
+func TestSkillsDir(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		channel paths.TargetChannel
+		root    string
+		wantDir string
+	}{
+		{"claude", paths.ClaudeChannel{}, "/project", "/project/.claude/skills"},
+		{"gemini", paths.GeminiChannel{}, "/project", "/project/.gemini/skills"},
+		{"claude nested root", paths.ClaudeChannel{}, "/home/user/code/app", "/home/user/code/app/.claude/skills"},
+		{"gemini nested root", paths.GeminiChannel{}, "/home/user/code/app", "/home/user/code/app/.gemini/skills"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := tt.channel.SkillsDir(tt.root)
+			if got != tt.wantDir {
+				t.Errorf("SkillsDir(%q) = %q, want %q", tt.root, got, tt.wantDir)
+			}
+		})
+	}
+}
+
+// TestContextFilePath_ConsistentWithDirNameContextFile verifies that for CC and Gemini
+// channels, ContextFilePath produces the same result as manually joining DirName + ContextFile.
+// This will NOT hold for future channels like Codex (AGENTS.md at repo root).
+func TestContextFilePath_ConsistentWithDirNameContextFile(t *testing.T) {
+	t.Parallel()
+
+	root := "/fake/root"
+	for _, ch := range paths.AllChannels() {
+		expected := root + "/" + ch.DirName() + "/" + ch.ContextFile()
+		got := ch.ContextFilePath(root)
+		if got != expected {
+			t.Errorf("%s: ContextFilePath(%q) = %q, want %q (DirName/ContextFile)", ch.Name(), root, got, expected)
+		}
 	}
 }

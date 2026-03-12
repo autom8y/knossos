@@ -75,6 +75,9 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 			if cErr != nil {
 				return fmt.Errorf("agent compile failed for archetype agent %s: %w", agent.Name, cErr)
 			}
+			if len(compiled) == 0 {
+				continue // channel doesn't support file-per-agent
+			}
 			content = compiled
 		}
 
@@ -136,6 +139,9 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 				compiled, cErr := compileAgentContent(agentName, content, comp)
 				if cErr != nil {
 					return fmt.Errorf("agent compile failed for %s: %w", agentName, cErr)
+				}
+				if len(compiled) == 0 {
+					return nil // channel doesn't support file-per-agent
 				}
 				content = compiled
 			}
@@ -199,6 +205,9 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 				compiled, cErr := compileAgentContent(agentName, content, comp)
 				if cErr != nil {
 					return fmt.Errorf("agent compile failed for %s: %w", agentName, cErr)
+				}
+				if len(compiled) == 0 {
+					return nil // channel doesn't support file-per-agent
 				}
 				content = compiled
 			}

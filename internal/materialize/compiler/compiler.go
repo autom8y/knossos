@@ -9,7 +9,9 @@ type ChannelCompiler interface {
 	// Returns (dirName, filename, content, error).
 	CompileSkill(name, description, body string) (string, string, []byte, error)
 
-	// CompileAgent transforms agent content for the target channel.
+	// CompileAgent compiles agent content for the target channel.
+	// Returns (nil, nil) if the channel doesn't support file-per-agent output.
+	// Callers must check len(result) == 0 before writing.
 	CompileAgent(name string, frontmatter map[string]any, body string) ([]byte, error)
 
 	// ContextFilename returns the context file name (CLAUDE.md or GEMINI.md).

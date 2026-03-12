@@ -85,8 +85,11 @@ func contextSession(resolver *paths.Resolver) string {
 }
 
 func contextMena(resolver *paths.Resolver) string {
-	skillsDir := filepath.Join(resolver.ClaudeDir(), "skills")
-	commandsDir := filepath.Join(resolver.ClaudeDir(), "commands")
+	// Default channel for explain context; explain has no channel flag.
+	ch := paths.ClaudeChannel{}
+	channelDir := resolver.ChannelDir(ch)
+	skillsDir := filepath.Join(channelDir, "skills")
+	commandsDir := filepath.Join(channelDir, "commands")
 	skillCount := countAllFiles(skillsDir)
 	commandCount := countAllFiles(commandsDir)
 	total := skillCount + commandCount
@@ -94,13 +97,15 @@ func contextMena(resolver *paths.Resolver) string {
 }
 
 func contextDromena(resolver *paths.Resolver) string {
-	commandsDir := filepath.Join(resolver.ClaudeDir(), "commands")
+	ch := paths.ClaudeChannel{}
+	commandsDir := filepath.Join(resolver.ChannelDir(ch), "commands")
 	count := countFilesWithSuffix(commandsDir, ".dro.md")
 	return fmt.Sprintf("Your project has %d dromena.", count)
 }
 
 func contextLegomena(resolver *paths.Resolver) string {
-	skillsDir := filepath.Join(resolver.ClaudeDir(), "skills")
+	ch := paths.ClaudeChannel{}
+	skillsDir := filepath.Join(resolver.ChannelDir(ch), "skills")
 	count := countFilesWithSuffix(skillsDir, ".lego.md")
 	return fmt.Sprintf("Your project has %d legomena.", count)
 }

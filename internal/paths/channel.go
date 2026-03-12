@@ -10,17 +10,31 @@ type TargetChannel interface {
 	Name() string        // "claude" or "gemini"
 	DirName() string     // ".claude" or ".gemini"
 	ContextFile() string // "CLAUDE.md" or "GEMINI.md"
+	ContextFilePath(projectRoot string) string // full path to context file
+	SkillsDir(projectRoot string) string       // full path to skills directory
 }
 
 type ClaudeChannel struct{}
 func (ClaudeChannel) Name() string        { return "claude" }
 func (ClaudeChannel) DirName() string     { return ".claude" }
 func (ClaudeChannel) ContextFile() string { return "CLAUDE.md" }
+func (ClaudeChannel) ContextFilePath(projectRoot string) string {
+	return filepath.Join(projectRoot, ".claude", "CLAUDE.md")
+}
+func (ClaudeChannel) SkillsDir(projectRoot string) string {
+	return filepath.Join(projectRoot, ".claude", "skills")
+}
 
 type GeminiChannel struct{}
 func (GeminiChannel) Name() string        { return "gemini" }
 func (GeminiChannel) DirName() string     { return ".gemini" }
 func (GeminiChannel) ContextFile() string { return "GEMINI.md" }
+func (GeminiChannel) ContextFilePath(projectRoot string) string {
+	return filepath.Join(projectRoot, ".gemini", "GEMINI.md")
+}
+func (GeminiChannel) SkillsDir(projectRoot string) string {
+	return filepath.Join(projectRoot, ".gemini", "skills")
+}
 
 // AllChannels returns all supported target channels in projection order.
 func AllChannels() []TargetChannel {
