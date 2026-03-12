@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 func TestNewBackupManager(t *testing.T) {
@@ -35,7 +37,7 @@ func TestNewBackupManagerWithTarget(t *testing.T) {
 
 func TestBackupManager_CreateBackup(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(targetDir, 0755)
 
 	targetPath := filepath.Join(targetDir, "CLAUDE.md")
@@ -88,7 +90,7 @@ func TestBackupManager_CreateBackup_NotFound(t *testing.T) {
 
 func TestBackupManager_RestoreBackup_Latest(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupDir := filepath.Join(targetDir, "backups")
 	os.MkdirAll(backupDir, 0755)
 
@@ -122,7 +124,7 @@ func TestBackupManager_RestoreBackup_Latest(t *testing.T) {
 
 func TestBackupManager_RestoreBackup_ByTimestamp(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupDir := filepath.Join(targetDir, "backups")
 	os.MkdirAll(backupDir, 0755)
 
@@ -175,7 +177,7 @@ func TestBackupManager_RestoreBackup_NoBackups(t *testing.T) {
 
 func TestBackupManager_RestoreBackup_NotFound(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupDir := filepath.Join(targetDir, "backups")
 	os.MkdirAll(backupDir, 0755)
 
@@ -193,7 +195,7 @@ func TestBackupManager_RestoreBackup_NotFound(t *testing.T) {
 
 func TestBackupManager_CleanupOldBackups(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupDir := filepath.Join(targetDir, "backups")
 	os.MkdirAll(backupDir, 0755)
 
@@ -218,7 +220,7 @@ func TestBackupManager_CleanupOldBackups(t *testing.T) {
 
 func TestBackupManager_ListBackups(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupDir := filepath.Join(targetDir, "backups")
 	os.MkdirAll(backupDir, 0755)
 
@@ -454,7 +456,7 @@ func TestBackupManager_DeleteAllBackups(t *testing.T) {
 
 func TestBackupManager_BackupAndWrite(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupDir := filepath.Join(targetDir, "backups")
 	os.MkdirAll(targetDir, 0755)
 
@@ -491,7 +493,7 @@ func TestBackupManager_BackupAndWrite(t *testing.T) {
 
 func TestBackupManager_BackupAndWrite_NoExisting(t *testing.T) {
 	tmpDir := t.TempDir()
-	targetDir := filepath.Join(tmpDir, ".claude")
+	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	os.MkdirAll(targetDir, 0755)
 
 	targetPath := filepath.Join(targetDir, "CLAUDE.md")
