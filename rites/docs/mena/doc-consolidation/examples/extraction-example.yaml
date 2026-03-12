@@ -20,7 +20,7 @@ metadata:
   extraction_token_count: 1850  # ~78% reduction
 
 sources:
-  - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+  - path: ".channel/skills/doc-ecosystem/INDEX.lego.md"
     hash: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd"
     authority: primary
     sections_used:
@@ -42,7 +42,7 @@ sources:
       - heading: "Implementation Notes"
         line_range: [121, 150]
 
-  - path: ".claude/skills/standards/INDEX.lego.md"
+  - path: ".channel/skills/standards/INDEX.lego.md"
     hash: "c3d4e5f6789012345678901234567890123456789012345678901234cdef"
     authority: supplementary
     sections_used:
@@ -52,7 +52,7 @@ sources:
 canonical_sections:
   - id: "tier-overview"
     heading: "Configuration Tier Model"
-    authority_source: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+    authority_source: ".channel/skills/doc-ecosystem/INDEX.lego.md"
     content_summary: "Settings are organized into four tiers that merge during sync. Each tier serves a specific scope, from global defaults (skeleton) to personal preferences (user)."
     key_points:
       - "Three tiers in precedence order: project < rite < user"
@@ -66,7 +66,7 @@ canonical_sections:
           project:   .claude/settings.local.json
           rite:      .claude/settings.rite.json (shared)
           user:      ~/.config/claude/settings.json
-        source: ".claude/skills/doc-ecosystem/INDEX.lego.md:156"
+        source: ".channel/skills/doc-ecosystem/INDEX.lego.md:156"
     cross_references:
       - target: "merge-algorithm"
         relationship: depends_on
@@ -144,7 +144,7 @@ canonical_sections:
           skeleton: ["agent-a", "agent-b"]
           project:  ["agent-c"]
           result:   ["agent-c"]
-        source: ".claude/skills/doc-ecosystem/INDEX.lego.md:265"
+        source: ".channel/skills/doc-ecosystem/INDEX.lego.md:265"
     cross_references:
       - target: "merge-algorithm"
         relationship: depends_on
@@ -167,7 +167,7 @@ shared_concepts:
   - concept: "tier"
     definition: "A layer of configuration with defined precedence in the merge hierarchy. Tiers provide scope-specific overrides while maintaining a consistent base configuration."
     sources:
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: ".channel/skills/doc-ecosystem/INDEX.lego.md"
         treatment: "Defines the four-tier model with detailed examples and rationale"
       - path: "docs/design/TDD-0042-settings.md"
         treatment: "Technical implementation of tier loading and precedence order"
@@ -175,7 +175,7 @@ shared_concepts:
   - concept: "precedence"
     definition: "The order in which configuration sources are applied. Higher precedence sources override lower ones during merge operations."
     sources:
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: ".channel/skills/doc-ecosystem/INDEX.lego.md"
         treatment: "Conceptual explanation of why precedence matters"
       - path: "docs/design/TDD-0042-settings.md"
         treatment: "Algorithm description showing precedence in practice"
@@ -185,7 +185,7 @@ shared_concepts:
     sources:
       - path: "docs/design/TDD-0042-settings.md"
         treatment: "Authoritative definition with all three strategies"
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: ".channel/skills/doc-ecosystem/INDEX.lego.md"
         treatment: "User-facing examples of each strategy"
 
 conflicts:
@@ -194,7 +194,7 @@ conflicts:
     severity: significant
     description: "Sources disagree on the default array merge strategy"
     sources:
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: ".channel/skills/doc-ecosystem/INDEX.lego.md"
         position: "Default strategy is 'append' for user convenience"
         evidence: "Line 178: 'Arrays append by default for additive configuration...'"
       - path: "docs/design/TDD-0042-settings.md"
@@ -211,7 +211,7 @@ conflicts:
     severity: minor
     description: "Handling of undefined vs explicit null is not clearly documented"
     sources:
-      - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+      - path: ".channel/skills/doc-ecosystem/INDEX.lego.md"
         position: "Does not address null handling"
         evidence: "No mention of null in settings merge section"
       - path: "docs/design/TDD-0042-settings.md"

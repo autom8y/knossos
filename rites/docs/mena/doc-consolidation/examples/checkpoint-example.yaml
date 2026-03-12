@@ -18,7 +18,7 @@ status:
   last_activity: "2024-12-25T14:30:00Z"
 
 sources:
-  - path: ".claude/skills/doc-ecosystem/INDEX.lego.md"
+  - path: ".channel/skills/doc-ecosystem/INDEX.lego.md"
     hash: "a1b2c3d4e5f6789012345678901234567890123456789012345678901234abcd"
     last_read: "2024-12-25T10:30:00Z"
     status: current
@@ -28,7 +28,7 @@ sources:
     last_read: "2024-12-25T10:30:00Z"
     status: current
 
-  - path: ".claude/skills/standards/INDEX.lego.md"
+  - path: ".channel/skills/standards/INDEX.lego.md"
     hash: "c3d4e5f6789012345678901234567890123456789012345678901234cdef"
     last_read: "2024-12-25T10:30:00Z"
     status: current
