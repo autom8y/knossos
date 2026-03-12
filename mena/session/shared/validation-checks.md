@@ -96,7 +96,7 @@ Determine target agent:
   - --agent parameter if provided
   - Otherwise: SESSION_CONTEXT.last_agent
 
-Check .claude/agents/{agent}.md exists
+Check {channel_dir}/agents/{agent}.md exists
 If not found → Error with agent list
 ```
 

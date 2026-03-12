@@ -15,7 +15,7 @@ Commands that invoke agents or switch rites:
 |-------|--------|------|------|
 | Rite exists | `$KNOSSOS_HOME/rites/{rite}` exists | Directory exists | Error: Rite not found |
 | Rite matches session | Compare ACTIVE_RITE to session.active_rite | Match | Warning + prompt |
-| Agent exists | `.claude/agents/{agent}.md` exists | File exists | Error: Agent not found |
+| Agent exists | `{channel_dir}/agents/{agent}.md` exists | File exists | Error: Agent not found |
 
 ## Implementation
 
@@ -35,7 +35,7 @@ Commands that invoke agents or switch rites:
    c. If mismatch: Surface warning, offer switch or override
 
 4. For agent invocation:
-   a. Verify .claude/agents/{agent}.md exists
+   a. Verify {channel_dir}/agents/{agent}.md exists
    b. If missing: Error with available agents list
 ```
 

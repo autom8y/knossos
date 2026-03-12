@@ -7,9 +7,9 @@ Framework concepts that have no direct CC primitive equivalent. These are organi
 | Term | Definition | Managed By |
 |---|---|---|
 | **Rite** | Practice bundle grouping agents + mena + config for a domain (e.g., `10x-dev`, `hygiene`) | `ari rite` CLI |
-| **Materialization** | Source-to-`.claude/` projection pipeline. Copies agents, mena, hooks, settings into CC-readable locations. | `ari sync` |
+| **Materialization** | Source-to-channel projection pipeline. Copies agents, mena, hooks, settings into the channel directory for CC to read. | `ari sync` |
 | **Inscription** | CLAUDE.md generation from section templates + manifest. Assembles the always-loaded project instructions. | `internal/inscription/` |
-| **Mena** | Source directory for dromena + legomena. Contains .dro.md and .lego.md files that materialize to `.claude/commands/` and `.claude/skills/`. | `ari sync` |
+| **Mena** | Source directory for dromena + legomena. Contains .dro.md and .lego.md files that materialize to the channel's commands and skills directories. | `ari sync` |
 | **Session** | Tracked work context with state machine (ACTIVE/PARKED/ARCHIVED), managed by Moirai agent. | `ari session` CLI |
 | **Moirai** | Session lifecycle agent (the Fates). Sole authority for `*_CONTEXT.md` mutations. | Task tool invocation |
 | **Clew** | Append-only JSONL event log for session telemetry. Enterprise feature. | `internal/hook/clewcontract/` |

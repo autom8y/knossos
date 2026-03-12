@@ -12,7 +12,7 @@ Act as **Requirements Analyst**.
 Initiative: {initiative-name}
 Complexity: {complexity}
 
-Create a PRD following the template at `.claude/skills/documentation/templates/prd.md` -- template paths are illustrative; actual templates vary by rite.
+Create a PRD following the rite's documentation template (path varies by rite; use Skill("doc-artifacts") or equivalent to locate).
 
 Clarify any ambiguities with the user before drafting. When complete, save to:
 `.ledge/specs/PRD-{initiative-slug}.md`
@@ -28,9 +28,9 @@ Act as **Architect**.
 Initiative: {initiative-name}
 PRD Location: .ledge/specs/PRD-{slug}.md
 
-Create TDD following template at `.claude/skills/documentation/templates/tdd.md` -- template paths are illustrative; actual templates vary by rite.
+Create TDD following the rite's technical design template (path varies by rite; use Skill("doc-artifacts") or equivalent to locate).
 
-Identify architecture decisions and create ADRs using template at `.claude/skills/documentation/templates/adr.md` -- template paths are illustrative; actual templates vary by rite.
+Identify architecture decisions and create ADRs using the rite's ADR template (path varies by rite; use Skill("doc-artifacts") or equivalent to locate).
 
 When complete, save:
 - TDD to: .ledge/specs/TDD-{slug}.md
@@ -51,5 +51,5 @@ When complete, save:
 
 - All agent invocation happens via Claude Code's native Task tool
 - No direct shell execution of agent files
-- Agents are defined in `.claude/agents/{agent-name}.md`
-- Templates are in `.claude/skills/documentation/templates/`
+- Agents are defined in the channel directory under `agents/{agent-name}.md`
+- Templates are in the rite's documentation skill (path varies by rite)

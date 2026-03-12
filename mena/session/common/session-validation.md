@@ -182,7 +182,7 @@ Continue? [1/2/cancel]:
 
 **Implementation**:
 ```bash
-agent_file=".claude/agents/$target_agent.md"
+agent_file="${CHANNEL_DIR}/agents/$target_agent.md"
 if [[ ! -f "$agent_file" ]]; then
   ERROR: Agent not found
 fi
@@ -197,7 +197,7 @@ fi
 Agent '{agent}' not found in rite '{rite}'.
 
 Available agents:
-{list from .claude/agents/}
+{list from channel agents directory}
 
 Use /rite to see agent descriptions.
 ```

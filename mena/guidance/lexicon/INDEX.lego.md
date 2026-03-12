@@ -11,7 +11,7 @@ Knossos concepts mapped to Claude Code (CC) runtime primitives.
 
 | CC Primitive | Knossos Name | How CC Discovers It | Invocation |
 |---|---|---|---|
-| **Slash command** | Dromena | Directory listing of `.claude/commands/` | User types `/name` |
+| **Slash command** | Dromena | Directory listing of the channel's commands directory | User types `/name` |
 | **Skill tool** | Legomena | `<available_skills>` system-reminder | Model calls `Skill("name")` |
 | **Task tool** | Agent | `subagent_type` parameter matching agent name | Model calls `Task(subagent_type="name")` |
 
