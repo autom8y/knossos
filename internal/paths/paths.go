@@ -66,11 +66,6 @@ func (r *Resolver) ProjectRoot() string {
 	return r.projectRoot
 }
 
-// ClaudeDir returns the path to the .claude directory.
-func (r *Resolver) ClaudeDir() string {
-	return filepath.Join(r.projectRoot, ".claude")
-}
-
 // SOSDir returns the path to the .sos/ directory (Session Or State).
 func (r *Resolver) SOSDir() string {
 	return filepath.Join(r.projectRoot, ".sos")
@@ -184,12 +179,6 @@ func (r *Resolver) AgentFile(name string) string {
 // ContextFileForChannel returns the path to the context file for the given channel.
 func (r *Resolver) ContextFileForChannel(ch TargetChannel) string {
 	return ch.ContextFilePath(r.projectRoot)
-}
-
-// ClaudeMDFile returns the path to the .claude/CLAUDE.md file.
-// Deprecated: Use ContextFileForChannel for channel-aware paths.
-func (r *Resolver) ClaudeMDFile() string {
-	return r.ContextFileForChannel(ClaudeChannel{})
 }
 
 // KnossosDir returns the path to the .knossos/ directory (framework configuration).

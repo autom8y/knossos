@@ -28,7 +28,6 @@ func TestResolver_PathMethods(t *testing.T) {
 		want string
 	}{
 		{"ProjectRoot", r.ProjectRoot(), "/tmp/testroot"},
-		{"ClaudeDir", r.ClaudeDir(), "/tmp/testroot/.claude"},
 		{"SOSDir", r.SOSDir(), "/tmp/testroot/.sos"},
 		{"SessionsDir", r.SessionsDir(), "/tmp/testroot/.sos/sessions"},
 		{"LocksDir", r.LocksDir(), "/tmp/testroot/.sos/sessions/.locks"},
@@ -48,7 +47,6 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"AgentFile", r.AgentFile("potnia.md"), "/tmp/testroot/.claude/agents/potnia.md"},
 		{"ContextFileForChannel/claude", r.ContextFileForChannel(ClaudeChannel{}), "/tmp/testroot/.claude/CLAUDE.md"},
 		{"ContextFileForChannel/gemini", r.ContextFileForChannel(GeminiChannel{}), "/tmp/testroot/.gemini/GEMINI.md"},
-		{"ClaudeMDFile", r.ClaudeMDFile(), "/tmp/testroot/.claude/CLAUDE.md"},
 		{"KnossosDir", r.KnossosDir(), "/tmp/testroot/.knossos"},
 		{"RitesDir", r.RitesDir(), "/tmp/testroot/.knossos/rites"},
 		{"LedgeDir", r.LedgeDir(), "/tmp/testroot/.ledge"},

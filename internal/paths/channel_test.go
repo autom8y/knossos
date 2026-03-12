@@ -77,18 +77,6 @@ func TestAllChannels(t *testing.T) {
 	}
 }
 
-func TestClaudeChannel_BackwardCompat(t *testing.T) {
-	t.Parallel()
-	r := paths.NewResolver("/fake/root")
-
-	claudeDirResult := r.ClaudeDir()
-	channelDir := r.ChannelDir(paths.ClaudeChannel{})
-
-	if claudeDirResult != channelDir {
-		t.Errorf("ClaudeDir() %s != ChannelDir(ClaudeChannel{}) %s", claudeDirResult, channelDir)
-	}
-}
-
 func TestContextFilePath(t *testing.T) {
 	t.Parallel()
 
