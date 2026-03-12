@@ -75,8 +75,8 @@ SOURCE (versioned, canonical) generates PROJECTION (gitignored, ephemeral):
 | Source | Projection |
 |--------|------------|
 | `rites/` | `.claude/rites/` |
-| `rites/*/agents/` + `agents/` | `.claude/agents/` |
-| `rites/*/mena/` | `.claude/skills/` + `.claude/commands/` |
+| `rites/*/agents/` + `agents/` | `.channel/agents/` |
+| `rites/*/mena/` | `.channel/skills/` + `.channel/commands/` |
 | `internal/hook/` (Go) + `rites/*/hooks/` | `.claude/hooks/` |
 | `knossos/templates/` | `.claude/CLAUDE.md` (rendered) |
 | `rites/*/manifest.yaml` | `.knossos/ACTIVE_RITE` |

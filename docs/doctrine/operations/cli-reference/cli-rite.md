@@ -148,7 +148,7 @@ Additively borrows components from another rite without switching context. Usefu
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--dry-run` | bool | false | Preview injection without applying |
-| `--no-inscription` | bool | false | Skip CLAUDE.md updates |
+| `--no-inscription` | bool | false | Skip context file updates |
 
 **Examples**:
 ```bash
@@ -232,8 +232,8 @@ Performs a complete rite replacement (not additive). Releases any active invocat
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--dry-run` | bool | false | Preview changes without applying |
-| `-k, --keep-orphans` | bool | false | Keep orphaned agents in `.claude/agents/` (default: remove with backup) |
-| `--no-sync` | bool | false | Skip CLAUDE.md inscription sync |
+| `-k, --keep-orphans` | bool | false | Keep orphaned agents in `.channel/agents/` (default: remove with backup) |
+| `--no-sync` | bool | false | Skip context file inscription sync |
 
 **Examples**:
 ```bash

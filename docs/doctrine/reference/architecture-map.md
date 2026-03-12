@@ -50,9 +50,9 @@ last_verified: 2026-02-26
 
 ### Materialization (`ari sync materialize`)
 1. Load rite manifest (`rites/*/manifest.yaml`)
-2. Copy agents from `rites/*/agents/` + `agents/` → `.claude/agents/`
+2. Copy agents from `rites/*/agents/` + `agents/` → `.channel/agents/`
 3. Apply agent transforms (inject skills, hooks, memory from frontmatter)
-4. Copy mena from `rites/*/mena/` → `.claude/skills/` + `.claude/commands/`
+4. Copy mena from `rites/*/mena/` → `.channel/skills/` + `.channel/commands/`
 5. Render inscription from `knossos/templates/` → `.claude/CLAUDE.md`
 
 ### Session Lifecycle

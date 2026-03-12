@@ -51,7 +51,7 @@ The transformer—cross-session knowledge synthesizer that transforms raw sessio
 - **Source**: `agents/dionysus.md`, `ari land`
 
 ### Dromena
-Transient commands (`.dro.md` files materialized to `.claude/commands/`). Execute and exit. User-invoked actions. Part of the mena lifecycle model.
+Transient commands (`.dro.md` files materialized to `.channel/commands/`). Execute and exit. User-invoked actions. Part of the mena lifecycle model.
 - **Related**: Legomena, Mena, Commands
 - **Source**: `rites/*/mena/*.dro.md`
 
@@ -71,7 +71,7 @@ The `CLAUDE.md` file declaring available rites, agents, execution mode, and hook
 - **Source**: `knossos/templates/CLAUDE.md.tpl`
 
 ### Legomena
-Persistent reference knowledge (`.lego.md` files materialized to `.claude/skills/`). Stay in context. Consulted but never consumed. Part of the mena lifecycle model.
+Persistent reference knowledge (`.lego.md` files materialized to `.channel/skills/`). Stay in context. Consulted but never consumed. Part of the mena lifecycle model.
 - **Related**: Dromena, Mena, Skills
 - **Source**: `rites/*/mena/*.lego.md`
 
@@ -257,7 +257,7 @@ Tracked work context with lifecycle (create, park, resume, wrap). Managed by Moi
 ### Skill
 Reusable capability invoked via Skill tool. Defined in rite manifests. Legomena that persist in context.
 - **Related**: Rite, Tool, Legomena, Mena
-- **Source**: `rites/*/mena/*.lego.md`, materialized to `.claude/skills/`
+- **Source**: `rites/*/mena/*.lego.md`, materialized to `.channel/skills/`
 
 ### SOURCE
 The Knossos repository—canonical, versioned platform code that generates PROJECTIONS.
