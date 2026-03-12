@@ -115,9 +115,10 @@ func (c *GeminiCompiler) CompileAgent(name string, frontmatter map[string]any, b
 
 // extractStringSlice extracts the named field from a frontmatter map as a []string.
 // Handles []string (direct assignment), []any (YAML unmarshal of list), and string
-// (YAML unmarshal of single value like "tools: Read"). The single-string case is
-// critical: YAML parses "tools: Read" as string, not []string, causing Gemini CLI
-// to reject with "Expected array, received string" if not normalized here.
+// (YAML unmarshal of single value like "tools: Read" or comma-separated
+// "tools: Bash, Glob, Grep, Read"). CC agent sources use FlexibleStringSlice
+// format (comma-separated strings), which YAML parses as a bare string. Each
+// element is split on commas and trimmed of whitespace.
 // Returns (nil, false) if the field is absent or not a string-containing type.
 func extractStringSlice(fm map[string]any, key string) ([]string, bool) {
 	raw, ok := fm[key]
@@ -126,20 +127,37 @@ func extractStringSlice(fm map[string]any, key string) ([]string, bool) {
 	}
 	switch v := raw.(type) {
 	case string:
-		return []string{v}, true
+		return splitAndTrim(v), true
 	case []string:
 		return v, true
 	case []any:
 		result := make([]string, 0, len(v))
 		for _, item := range v {
 			if s, ok := item.(string); ok {
-				result = append(result, s)
+				result = append(result, splitAndTrim(s)...)
 			}
 		}
 		return result, true
 	default:
 		return nil, false
 	}
+}
+
+// splitAndTrim splits a comma-separated string and trims whitespace from each element.
+// Handles CC's FlexibleStringSlice format: "Bash, Glob, Grep, Read" -> ["Bash", "Glob", "Grep", "Read"].
+func splitAndTrim(s string) []string {
+	if !strings.Contains(s, ",") {
+		return []string{s}
+	}
+	parts := strings.Split(s, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			result = append(result, p)
+		}
+	}
+	return result
 }
 
 func (c *GeminiCompiler) ContextFilename() string {

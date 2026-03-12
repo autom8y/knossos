@@ -16,7 +16,11 @@ description: |
     Triggers: compliance, SOC 2, GDPR, HIPAA, PCI, audit preparation, regulatory.
 name: compliance-architect
 tools:
-    - Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
+    - run_shell_command
+    - glob
+    - grep
+    - read_file
+    - write_file
 ---
 
 # Compliance Architect

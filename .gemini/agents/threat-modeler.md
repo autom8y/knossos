@@ -16,7 +16,12 @@ description: |
     Triggers: threat model, attack surface, STRIDE, security design, trust boundaries.
 name: threat-modeler
 tools:
-    - Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
+    - run_shell_command
+    - replace
+    - glob
+    - grep
+    - read_file
+    - write_file
 ---
 
 # Threat Modeler

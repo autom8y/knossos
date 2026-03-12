@@ -16,7 +16,12 @@ description: |
     Triggers: security review, security approval, merge review, security signoff, code security.
 name: security-reviewer
 tools:
-    - Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
+    - run_shell_command
+    - glob
+    - grep
+    - read_file
+    - replace
+    - write_file
 ---
 
 # Security Reviewer

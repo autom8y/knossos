@@ -16,7 +16,12 @@ description: |
     Triggers: pentest, penetration testing, vulnerability assessment, security testing, exploit.
 name: penetration-tester
 tools:
-    - Bash, Edit, Glob, Grep, Read, Write, TodoWrite, Skill
+    - run_shell_command
+    - replace
+    - glob
+    - grep
+    - read_file
+    - write_file
 ---
 
 # Penetration Tester
