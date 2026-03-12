@@ -65,7 +65,7 @@ func RunSimulate(doc *PerspectiveDocument, prompt string) *SimulateOverlay {
 	toolMatchSet := make(map[string]SimulateMatch) // dedupe by tool name
 	for _, kw := range keywords {
 		// Exact tool name match (case-insensitive)
-		for tool := range knownCCTools {
+		for tool := range knownChannelTools {
 			if strings.EqualFold(kw, tool) {
 				toolMatchSet[tool] = SimulateMatch{Name: tool, MatchType: "exact", Relevance: "high"}
 			}

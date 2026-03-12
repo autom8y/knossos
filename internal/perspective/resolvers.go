@@ -13,9 +13,9 @@ import (
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
-// knownCCTools is the canonical set of harness-native tools. Mirrors agent.knownTools
+// knownChannelTools is the canonical set of harness-native tools. Mirrors agent.knownTools
 // (which is unexported). We replicate here to avoid depending on unexported state.
-var knownCCTools = map[string]bool{
+var knownChannelTools = map[string]bool{
 	"Bash":            true,
 	"Read":            true,
 	"Write":           true,
@@ -115,12 +115,12 @@ func resolveCapability(ctx *ParseContext) *LayerEnvelope {
 	}
 
 	// Classify tools
-	var ccNative, unknown []string
+	var channelNative, unknown []string
 	var mcpTools []MCPToolRef
 	for _, tool := range resolvedTools {
 		switch {
-		case knownCCTools[tool]:
-			ccNative = append(ccNative, tool)
+		case knownChannelTools[tool]:
+			channelNative = append(channelNative, tool)
 		case strings.HasPrefix(tool, "mcp:"):
 			ref := parseMCPToolRef(tool, ctx.RiteManifest)
 			mcpTools = append(mcpTools, ref)
@@ -147,7 +147,7 @@ func resolveCapability(ctx *ParseContext) *LayerEnvelope {
 
 	data := &CapabilityData{
 		Tools:             resolvedTools,
-		ChannelNativeTools: ccNative,
+		ChannelNativeTools: channelNative,
 		MCPTools:          mcpTools,
 		UnknownTools:      unknown,
 		ToolsFromDefaults: toolsFromDefaults,
@@ -1252,7 +1252,7 @@ func resolveHorizon(ctx *ParseContext, doc *PerspectiveDocument) *LayerEnvelope 
 	l3 := getLayerData[*CapabilityData](doc, "L3")
 	if l3 != nil {
 		agentTools := perceptionBuildSet(l3.Tools)
-		for tool := range knownCCTools {
+		for tool := range knownChannelTools {
 			if !agentTools[tool] {
 				data.ToolsNotAvailable = append(data.ToolsNotAvailable, tool)
 			}
