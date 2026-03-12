@@ -19,7 +19,7 @@ func createTestProject(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
 
-	// .claude/ directory
+	// channel directory
 	channelDir := filepath.Join(root, paths.ClaudeChannel{}.DirName())
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "agents"), 0755))
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "commands"), 0755))
@@ -422,7 +422,7 @@ func TestTourTextFileCountsRendered(t *testing.T) {
 		Directories: TourDirectories{
 			Channel: ChannelSection{
 				Exists: true,
-				Path:   ".claude/",
+				Path:   paths.ClaudeChannel{}.DirName() + "/",
 				Agents: DirCount{Count: 5},
 			},
 		},

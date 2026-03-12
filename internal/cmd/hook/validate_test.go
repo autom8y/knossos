@@ -129,7 +129,7 @@ func TestValidateCommand(t *testing.T) {
 		},
 		{
 			name:    "rm -rf .claude",
-			command: "rm -rf .claude/",
+			command: "rm -rf .claude/", // HA-TEST: SCAR-002 guard -- validates CC channel dir name is protected
 			blocked: true,
 			reason:  "Cannot rm -rf protected path: .claude. Load skill conventions for safe git workflow guidance.",
 		},

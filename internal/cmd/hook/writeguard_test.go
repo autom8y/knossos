@@ -42,7 +42,7 @@ func TestIsProtectedFile(t *testing.T) {
 		},
 		{
 			name:      "CLAUDE.md is not protected",
-			filePath:  ".claude/CLAUDE.md",
+			filePath:  ".claude/CLAUDE.md", // HA-TEST: CC channel path -- verifies writeguard does not protect non-context files
 			protected: false,
 		},
 		{
@@ -843,7 +843,7 @@ func TestIsWipPath(t *testing.T) {
 		{"docs/wip-notes.md", false},
 		{".wip/SPIKE-foo.md", false},          // legacy .wip/ no longer matches
 		{"/Users/tom/.wip/bar.md", false},      // legacy .wip/ no longer matches
-		{".claude/wip/report.md", false},        // legacy .claude/wip/ no longer matches
+		{".claude/wip/report.md", false},        // legacy .claude/wip/ no longer matches  // HA-TEST: legacy CC channel/wip/ path no longer matches isWipPath
 		{"", false},
 	}
 	for _, tt := range tests {

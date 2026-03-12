@@ -33,10 +33,10 @@ func TestInit_FreshDirectory(t *testing.T) {
 		t.Fatalf("runInit() returned error: %v", err)
 	}
 
-	// Verify .claude/ directory was created.
+	// Verify channel directory was created.
 	channelDir := filepath.Join(dir, paths.ClaudeChannel{}.DirName())
 	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
-		t.Error(".claude/ directory was not created")
+		t.Error("channel directory was not created")
 	}
 
 	// Verify KNOSSOS_MANIFEST.yaml was created in .knossos/.
@@ -276,7 +276,7 @@ func TestInit_NonKnossosClaudeDir(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 
-	// Pre-create .claude/ without KNOSSOS_MANIFEST.yaml (non-Knossos project).
+	// Pre-create channel dir without KNOSSOS_MANIFEST.yaml (non-Knossos project).
 	channelDir := filepath.Join(dir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
@@ -300,7 +300,7 @@ func TestInit_NonKnossosClaudeDir(t *testing.T) {
 	// Should error without --force.
 	err := runInit(ctx, "", "", false, nil)
 	if err == nil {
-		t.Fatal("runInit() should error for non-Knossos .claude/ without --force")
+		t.Fatal("runInit() should error for non-Knossos channel dir without --force")
 	}
 
 	// Should succeed with --force.
@@ -530,7 +530,7 @@ func TestWriteProjectGitignore_NewFile(t *testing.T) {
 	}
 	content := string(data)
 
-	for _, pattern := range []string{"# Knossos", "# End Knossos", ".knossos/", ".claude/CLAUDE.md", "**/.sos/*", "!**/.sos/land/", "**/.ledge/*", "!**/.ledge/shelf/"} {
+	for _, pattern := range []string{"# Knossos", "# End Knossos", ".knossos/", ".claude/CLAUDE.md", "**/.sos/*", "!**/.sos/land/", "**/.ledge/*", "!**/.ledge/shelf/"} { // HA-TEST: init writes CC-specific gitignore content
 		if !strings.Contains(content, pattern) {
 			t.Errorf(".gitignore missing pattern %q", pattern)
 		}
@@ -576,7 +576,7 @@ func TestWriteProjectGitignore_ReplaceExistingBlock(t *testing.T) {
 
 	// Pre-create .gitignore with stale Knossos block surrounded by user content.
 	gitignorePath := filepath.Join(dir, ".gitignore")
-	staleContent := "# My project\nnode_modules/\n\n# Knossos\n.knossos/\n.claude/CLAUDE.md\n# End Knossos\n\n# Custom rules\n*.log\n"
+	staleContent := "# My project\nnode_modules/\n\n# Knossos\n.knossos/\n.claude/CLAUDE.md\n# End Knossos\n\n# Custom rules\n*.log\n" // HA-TEST: stale gitignore fixture matches CC-specific init output
 	if err := os.WriteFile(gitignorePath, []byte(staleContent), 0644); err != nil {
 		t.Fatal(err)
 	}

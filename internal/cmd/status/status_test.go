@@ -46,12 +46,12 @@ func TestCollectClaude_Exists(t *testing.T) {
 }
 
 func TestCollectClaude_NotExists(t *testing.T) {
-	dir := t.TempDir() // no .claude/
+	dir := t.TempDir() // no channel dir
 	resolver := paths.NewResolver(dir)
 
 	health := collectChannel(resolver)
 	if health.Exists {
-		t.Error("expected Exists=false when .claude/ missing")
+		t.Error("expected Exists=false when channel dir missing")
 	}
 }
 
