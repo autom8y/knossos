@@ -13,19 +13,29 @@ type CollisionChecker struct {
 	manifestLoaded bool
 }
 
-// NewCollisionChecker creates a checker from rite manifest.
+// NewCollisionChecker creates a checker from the rite manifest for the given channel.
 // knossosDir is the project .knossos/ directory. Empty string = no collision checking.
-func NewCollisionChecker(knossosDir string) *CollisionChecker {
+// channel selects which provenance manifest to read (e.g., "gemini" reads
+// PROVENANCE_MANIFEST_GEMINI.yaml; empty/"claude" reads PROVENANCE_MANIFEST.yaml).
+func NewCollisionChecker(knossosDir string, channel ...string) *CollisionChecker {
 	c := &CollisionChecker{}
 	if knossosDir != "" {
-		c.loadRiteManifest(knossosDir)
+		ch := ""
+		if len(channel) > 0 {
+			ch = channel[0]
+		}
+		c.loadRiteManifestForChannel(knossosDir, ch)
 	}
 	return c
 }
 
 func (c *CollisionChecker) loadRiteManifest(knossosDir string) {
+	c.loadRiteManifestForChannel(knossosDir, "")
+}
+
+func (c *CollisionChecker) loadRiteManifestForChannel(knossosDir, channel string) {
 	c.riteEntries = make(map[string]bool)
-	manifestPath := provenance.ManifestPath(knossosDir)
+	manifestPath := provenance.ManifestPathForChannel(knossosDir, channel)
 	manifest, err := provenance.Load(manifestPath)
 	if err != nil {
 		// manifestLoaded stays false: no manifest file means checker is not effective.

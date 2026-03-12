@@ -22,6 +22,7 @@ type syncer struct {
 	embeddedRites	fs.FS
 	knossosHome	string
 	userClaudeDir	string
+	channel		string // "claude" or "gemini"
 }
 
 // SyncUserScope is the primary entry point for user-scope sync.
@@ -38,6 +39,7 @@ func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 		embeddedRites:	params.EmbeddedRites,
 		knossosHome:	params.KnossosHome,
 		userClaudeDir:	userClaudeDir,
+		channel:	params.Opts.Channel,
 	}
 	return s.syncUserScope(params.Opts)
 }
@@ -86,14 +88,14 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	// contamination via USER_PROVENANCE_MANIFEST.yaml.
 	// When no ACTIVE_RITE exists, there is no rite to protect against; proceed.
 	projectKnossosDir := s.resolver.KnossosDir()
-	collisionChecker := NewCollisionChecker(projectKnossosDir)
+	collisionChecker := NewCollisionChecker(projectKnossosDir, s.channel)
 	if !collisionChecker.IsEffective() {
 		// Attempt to use the main worktree's provenance manifest when we are
 		// running inside a linked git worktree. This avoids the blanket "skip all"
 		// behaviour when the main worktree has a valid rite provenance.
 		if mainDir, err := worktreeMainDir(s.resolver.ProjectRoot()); err == nil {
 			mainKnossosDir := filepath.Join(mainDir, ".knossos")
-			mainChecker := NewCollisionChecker(mainKnossosDir)
+			mainChecker := NewCollisionChecker(mainKnossosDir, s.channel)
 			if mainChecker.IsEffective() {
 				slog.Info("userscope: collision checker fell back to main worktree provenance", "path", mainKnossosDir)
 				collisionChecker = mainChecker
@@ -111,11 +113,20 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		}
 	}
 
-	// Determine which resource types to sync
+	// Determine which resource types to sync.
+	// Hooks are skipped for non-claude channels — Gemini hook translation happens
+	// at settings.local.json level (rite scope), not via file copying.
 	var resourcesToSync []SyncResource
 	if opts.Resource == ResourceAll || opts.Resource == "" {
-		resourcesToSync = []SyncResource{ResourceAgents, ResourceMena, ResourceHooks}
+		if opts.Channel == "gemini" {
+			resourcesToSync = []SyncResource{ResourceAgents, ResourceMena}
+		} else {
+			resourcesToSync = []SyncResource{ResourceAgents, ResourceMena, ResourceHooks}
+		}
 	} else {
+		if opts.Channel == "gemini" && opts.Resource == ResourceHooks {
+			return result, nil // No-op: hooks not supported for gemini user scope
+		}
 		resourcesToSync = []SyncResource{opts.Resource}
 	}
 
@@ -361,7 +372,7 @@ func (s *syncer) syncUserResource(
 
 			// New file, target doesn't exist - copy it
 			if !opts.DryRun {
-				if err := copyUserFile(path, targetPath); err != nil {
+				if err := s.writeResourceFile(resourceType, path, targetPath); err != nil {
 					return err
 				}
 				manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
@@ -380,7 +391,7 @@ func (s *syncer) syncUserResource(
 				delete(manifest.Entries, manifestKey)
 				// Re-create from source
 				if !opts.DryRun {
-					if err := copyUserFile(path, targetPath); err != nil {
+					if err := s.writeResourceFile(resourceType, path, targetPath); err != nil {
 						return err
 					}
 					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
@@ -400,7 +411,7 @@ func (s *syncer) syncUserResource(
 			// If target was deleted from disk, re-create unconditionally
 			if _, statErr := os.Stat(targetPath); os.IsNotExist(statErr) {
 				if !opts.DryRun {
-					if err := copyUserFile(path, targetPath); err != nil {
+					if err := s.writeResourceFile(resourceType, path, targetPath); err != nil {
 						return err
 					}
 					manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
@@ -420,7 +431,7 @@ func (s *syncer) syncUserResource(
 				if targetChecksum == entry.Checksum {
 					// Target unchanged, update from source
 					if !opts.DryRun {
-						if err := copyUserFile(path, targetPath); err != nil {
+						if err := s.writeResourceFile(resourceType, path, targetPath); err != nil {
 							return err
 						}
 						manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
@@ -433,7 +444,7 @@ func (s *syncer) syncUserResource(
 					if opts.OverwriteDiverged {
 						// Force overwrite
 						if !opts.DryRun {
-							if err := copyUserFile(path, targetPath); err != nil {
+							if err := s.writeResourceFile(resourceType, path, targetPath); err != nil {
 								return err
 							}
 							manifest.Entries[manifestKey] = provenance.NewKnossosEntry(
@@ -478,4 +489,14 @@ func (s *syncer) syncUserResource(
 	}
 
 	return result, nil
+}
+
+// writeResourceFile copies a source file to the target, applying channel-specific
+// compilation for agents when the syncer is configured for the gemini channel.
+// Hooks always use raw copy (copyUserFile) — gemini does not receive hook files.
+func (s *syncer) writeResourceFile(resourceType SyncResource, sourcePath, targetPath string) error {
+	if resourceType == ResourceAgents {
+		return s.copyAgentFile(sourcePath, targetPath)
+	}
+	return copyUserFile(sourcePath, targetPath)
 }

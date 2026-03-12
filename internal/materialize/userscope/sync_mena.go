@@ -8,10 +8,21 @@ import (
 	"strings"
 
 	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/materialize/mena"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
+
+// menaCompilerForChannel returns the appropriate ChannelCompiler for the given
+// channel string. Returns nil for claude/empty (no transformation needed).
+// Defined locally to avoid importing the parent materialize package (circular import).
+func menaCompilerForChannel(channel string) mena.ChannelCompiler {
+	if channel == "gemini" {
+		return &compiler.GeminiCompiler{}
+	}
+	return nil
+}
 
 // syncUserMena syncs mena files from KNOSSOS_HOME/mena and rites/shared/mena to
 // ~/.claude/{commands,skills} using the CollectMena pipeline for namespace flattening
@@ -68,7 +79,9 @@ func (s *syncer) syncUserMena(
 		sources = append(sources, mena.MenaSource{Path: sharedMenaDir})
 	}
 	collectOpts := mena.MenaProjectionOptions{
-		Filter: mena.ProjectAll,
+		Filter:   mena.ProjectAll,
+		Compiler: menaCompilerForChannel(s.channel),
+		Channel:  s.channel,
 	}
 	resolution, err := mena.CollectMena(sources, collectOpts)
 	if err != nil {
@@ -174,7 +187,9 @@ func (s *syncer) syncUserMenaFromEmbedded(
 		sources = append(sources, mena.MenaSource{Fsys: s.embeddedRites, FsysPath: "rites/shared/mena", IsEmbedded: true})
 	}
 	collectOpts := mena.MenaProjectionOptions{
-		Filter: mena.ProjectAll,
+		Filter:   mena.ProjectAll,
+		Compiler: menaCompilerForChannel(s.channel),
+		Channel:  s.channel,
 	}
 	resolution, err := mena.CollectMena(sources, collectOpts)
 	if err != nil {

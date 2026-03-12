@@ -29,6 +29,7 @@ type SyncOptions struct {
 	Recover           bool
 	OverwriteDiverged bool
 	KeepOrphans       bool
+	Channel           string // "claude" (default) or "gemini"
 }
 
 // SyncResource identifies a filterable resource type.

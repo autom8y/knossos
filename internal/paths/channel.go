@@ -2,6 +2,7 @@ package paths
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 )
 
@@ -39,4 +40,16 @@ func ChannelByName(name string) (TargetChannel, error) {
 
 func (r *Resolver) ChannelDir(ch TargetChannel) string {
 	return filepath.Join(r.projectRoot, ch.DirName())
+}
+
+// UserChannelDir returns the user-level directory for a specific channel.
+// For channel="" or "claude": ~/.claude
+// For channel="gemini": ~/.gemini
+func UserChannelDir(channel string) string {
+	homeDir, _ := os.UserHomeDir()
+	ch, err := ChannelByName(channel)
+	if err != nil {
+		return filepath.Join(homeDir, ".claude")
+	}
+	return filepath.Join(homeDir, ch.DirName())
 }

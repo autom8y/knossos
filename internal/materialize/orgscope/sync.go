@@ -8,8 +8,12 @@ import (
 	"path/filepath"
 	"time"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/frontmatter"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
@@ -20,6 +24,7 @@ type SyncOrgScopeParams struct {
 	OrgDir		string	// Override org data directory (for testing; empty = use paths.OrgDataDir)
 	UserClaudeDir	string	// Override user .claude directory (for testing; empty = use paths.UserClaudeDir)
 	DryRun		bool
+	Channel		string	// Target channel: "claude" (default) or "gemini"
 }
 
 // OrgScopeResult wraps org scope sync outcome.
@@ -68,7 +73,7 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 
 	userClaudeDir := params.UserClaudeDir
 	if userClaudeDir == "" {
-		userClaudeDir = paths.UserClaudeDir()
+		userClaudeDir = paths.UserChannelDir(params.Channel)
 	}
 
 	// Load or bootstrap ORG_PROVENANCE_MANIFEST.yaml
@@ -87,7 +92,7 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	// Sync agents
 	agentsDir := filepath.Join(orgDir, "agents")
 	if _, err := os.Stat(agentsDir); err == nil {
-		count, err := syncOrgResource(agentsDir, filepath.Join(userClaudeDir, "agents"), manifest, params.DryRun)
+		count, err := syncOrgResource(agentsDir, filepath.Join(userClaudeDir, "agents"), manifest, params.DryRun, params.Channel)
 		if err != nil {
 			slog.Warn("orgscope: error syncing agents", "error", err)
 		}
@@ -97,7 +102,7 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	// Sync mena (commands + skills)
 	menaDir := filepath.Join(orgDir, "mena")
 	if _, err := os.Stat(menaDir); err == nil {
-		count, err := syncOrgResource(menaDir, filepath.Join(userClaudeDir, "skills"), manifest, params.DryRun)
+		count, err := syncOrgResource(menaDir, filepath.Join(userClaudeDir, "skills"), manifest, params.DryRun, "")
 		if err != nil {
 			slog.Warn("orgscope: error syncing mena", "error", err)
 		}
@@ -116,8 +121,12 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 }
 
 // syncOrgResource copies files from an org source directory to a target directory,
-// tracking provenance. Returns the count of files synced.
-func syncOrgResource(sourceDir, targetDir string, manifest *provenance.ProvenanceManifest, dryRun bool) (int, error) {
+// tracking provenance. When channel is "gemini" and files are agent markdown files,
+// applies GeminiCompiler transformation before writing.
+// The sourceChecksum is always computed from the original source so subsequent
+// syncs correctly detect source changes.
+// Returns the count of files synced.
+func syncOrgResource(sourceDir, targetDir string, manifest *provenance.ProvenanceManifest, dryRun bool, channel string) (int, error) {
 	entries, err := os.ReadDir(sourceDir)
 	if err != nil {
 		return 0, err
@@ -144,6 +153,7 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 			continue
 		}
 
+		// Provenance checksum always tracks the source file, not the compiled output.
 		sourceChecksum := checksum.Bytes(sourceData)
 
 		// Check if target already exists and is org-owned with same checksum
@@ -159,7 +169,18 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 			continue
 		}
 
-		if err := os.WriteFile(targetPath, sourceData, 0644); err != nil {
+		// Apply gemini compilation for agent markdown files
+		writeData := sourceData
+		if channel == "gemini" {
+			compiled, compileErr := compileOrgAgentForGemini(name, sourceData)
+			if compileErr == nil {
+				writeData = compiled
+			} else {
+				slog.Warn("orgscope: agent gemini compile failed, using raw source", "path", sourcePath, "error", compileErr)
+			}
+		}
+
+		if err := os.WriteFile(targetPath, writeData, 0644); err != nil {
 			slog.Warn("orgscope: failed to write target", "path", targetPath, "error", err)
 			continue
 		}
@@ -175,4 +196,26 @@ func syncOrgResource(sourceDir, targetDir string, manifest *provenance.Provenanc
 	}
 
 	return count, nil
+}
+
+// compileOrgAgentForGemini parses an agent file's frontmatter and applies the
+// GeminiCompiler transformation (tool name translation + CC key stripping).
+// Only applies to markdown files — other file types are returned unchanged.
+func compileOrgAgentForGemini(name string, content []byte) ([]byte, error) {
+	if filepath.Ext(name) != ".md" {
+		return content, nil
+	}
+	yamlBytes, body, err := frontmatter.Parse(content)
+	if err != nil {
+		// No frontmatter — pass through unchanged
+		return content, nil
+	}
+	var fmMap map[string]any
+	if err := yaml.Unmarshal(yamlBytes, &fmMap); err != nil {
+		return nil, err
+	}
+	if fmMap == nil {
+		fmMap = make(map[string]any)
+	}
+	return (&compiler.GeminiCompiler{}).CompileAgent(name, fmMap, string(body))
 }

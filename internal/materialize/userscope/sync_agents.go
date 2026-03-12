@@ -6,7 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"gopkg.in/yaml.v3"
+
 	"github.com/autom8y/knossos/internal/checksum"
+	"github.com/autom8y/knossos/internal/frontmatter"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 )
@@ -212,4 +216,55 @@ func (s *syncer) syncUserResourceFromEmbedded(
 	}
 
 	return result, nil
+}
+
+// copyAgentFile copies an agent file to the target, applying gemini compilation
+// when the syncer is configured for the gemini channel. The source checksum
+// (used for provenance) is always computed from the original source file
+// so that subsequent syncs correctly detect source changes.
+func (s *syncer) copyAgentFile(sourcePath, targetPath string) error {
+	if err := ensureDirForFile(targetPath); err != nil {
+		return err
+	}
+
+	content, err := os.ReadFile(sourcePath)
+	if err != nil {
+		return err
+	}
+
+	if s.channel == "gemini" {
+		compiled, compileErr := compileAgentForGemini(filepath.Base(sourcePath), content)
+		if compileErr == nil {
+			content = compiled
+		} else {
+			slog.Warn("userscope: agent gemini compile failed, using raw source", "path", sourcePath, "error", compileErr)
+		}
+	}
+
+	info, err := os.Stat(sourcePath)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(targetPath, content, info.Mode())
+}
+
+// compileAgentForGemini parses an agent file's frontmatter and applies the
+// GeminiCompiler transformation (tool name translation + CC key stripping).
+// Returns the compiled bytes, or an error if parsing fails.
+func compileAgentForGemini(name string, content []byte) ([]byte, error) {
+	yamlBytes, body, err := frontmatter.Parse(content)
+	if err != nil {
+		// No frontmatter — pass through unchanged (body-only agents are valid)
+		return content, nil
+	}
+
+	var fmMap map[string]any
+	if err := yaml.Unmarshal(yamlBytes, &fmMap); err != nil {
+		return nil, err
+	}
+	if fmMap == nil {
+		fmMap = make(map[string]any)
+	}
+
+	return (&compiler.GeminiCompiler{}).CompileAgent(name, fmMap, string(body))
 }
