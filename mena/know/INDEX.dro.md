@@ -153,7 +153,7 @@ For EACH domain in the generation queue:
 
 1. Read the domain criteria file:
    ```
-   Read(".claude/skills/pinakes/domains/{domain}.md")
+   Read(".channel/skills/pinakes/domains/{domain}.md")
    ```
 
 2. Extract the full criteria content for injection into the theoros dispatch prompt.
@@ -570,8 +570,8 @@ This flow produces per-feature knowledge files in `.know/feat/`. It operates in 
    - Read pinakes INDEX to find the Domain Registry table
    - Verify `feature-census` and `feature-knowledge` domains are registered with scope `feature`
    - If not found: ERROR "Feature domains not registered in pinakes. Run `ari sync` to materialize."
-   - Read census criteria: `Read(".claude/skills/pinakes/domains/feature-census.md")`
-   - Read feature knowledge criteria: `Read(".claude/skills/pinakes/domains/feature-knowledge.md")`
+   - Read census criteria: `Read(".channel/skills/pinakes/domains/feature-census.md")`
+   - Read feature knowledge criteria: `Read(".channel/skills/pinakes/domains/feature-knowledge.md")`
    - Store both for injection into theoros dispatch prompts.
    - Pre-load architecture seed for theoros injection: `Read(".know/architecture.md")`
    - Store architecture content for injection into theoros dispatch prompts.
@@ -714,8 +714,8 @@ After the census theoros returns:
      - "./rites/*/manifest.yaml"
      - "./internal/*/"
      - "./docs/decisions/ADR-*.md"
-     - "./.claude/commands/*.md"
-     - "./.claude/agents/*.md"
+     - "./.channel/commands/*.md"
+     - "./.channel/agents/*.md"
      - "./INTERVIEW_SYNTHESIS.md"
      - "./.know/*.md"
    generator: theoros

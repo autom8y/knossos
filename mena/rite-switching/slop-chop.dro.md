@@ -39,4 +39,4 @@ Switch to the slop-chop rite and display the pantheon. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/skills/slop-chop-ref/slop-chop-ref.md`
+Full documentation: `.channel/skills/slop-chop-ref/slop-chop-ref.md`

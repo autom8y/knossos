@@ -9,7 +9,7 @@ description: "Evaluation criteria for agent prompt audits. Use when: theoros is 
 
 ## Scope
 
-**Target files**: `.claude/agents/*.md` (projected from `rites/*/agents/*.md`)
+**Target files**: `.channel/agents/*.md` (projected from `rites/*/agents/*.md`)
 
 **Evaluation focus**: Agent prompts that define subagent behavior when invoked via Task tool. Quality here determines agent autonomy, reliability, and ecosystem coordination.
 

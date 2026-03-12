@@ -64,4 +64,4 @@ Full docs: rites/forge/mena/forge-ref/INDEX.lego.md
 
 ## Reference
 
-Full documentation: `.claude/skills/forge-ref/SKILL.md`
+Full documentation: `.channel/skills/forge-ref/SKILL.md`

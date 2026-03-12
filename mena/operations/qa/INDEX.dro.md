@@ -81,7 +81,7 @@ VALIDATION_AGENT=$(grep -B1 "next: null" .knossos/ACTIVE_WORKFLOW.yaml | grep "a
 
 ## Reference
 
-Full documentation: `.claude/commands/qa.md`
+Full documentation: `.channel/commands/qa.md`
 
 ## Sigil
 

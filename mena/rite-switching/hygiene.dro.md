@@ -38,4 +38,4 @@ Switch to the code hygiene rite and display the pantheon. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/skills/hygiene-ref/SKILL.md`
+Full documentation: `.channel/skills/hygiene-ref/SKILL.md`

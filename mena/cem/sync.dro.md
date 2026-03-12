@@ -68,4 +68,4 @@ For all flags: `ari sync --help`
 
 ## Reference
 
-Full documentation: `.claude/skills/ecosystem-ref/SKILL.md`
+Full documentation: `.channel/skills/ecosystem-ref/SKILL.md`

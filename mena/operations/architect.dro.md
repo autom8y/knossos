@@ -80,4 +80,4 @@ Pairs with: `/build` (implementation from approved design)
 
 ## Reference
 
-Full documentation: `.claude/skills/architect-ref/SKILL.md`
+Full documentation: `.channel/skills/architect-ref/SKILL.md`

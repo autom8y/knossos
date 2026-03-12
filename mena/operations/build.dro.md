@@ -78,4 +78,4 @@ Pairs with: `/architect` (design) and `/qa` (validation)
 
 ## Reference
 
-Full documentation: `.claude/skills/build-ref/SKILL.md`
+Full documentation: `.channel/skills/build-ref/SKILL.md`

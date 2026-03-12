@@ -10,7 +10,7 @@ disable-model-invocation: true
 ## Context
 Auto-injected by SessionStart hook (project, rite, session, git).
 
-Available agents are listed in your session context (`available_agents` field). If not available, run `ls .claude/agents/` to discover them.
+Available agents are listed in your session context (`available_agents` field). If not available, run `ls .channel/agents/` to discover them.
 
 ## Your Task
 
@@ -21,14 +21,14 @@ Hand off work to a different agent with full context transfer. $ARGUMENTS
 1. Verify active session exists (check `status` in YAML frontmatter above)
 2. **CRITICAL: Validate target agent exists BEFORE any state changes**:
    ```bash
-   [ -f ".claude/agents/$AGENT_NAME.md" ] || { echo "Agent not found: $AGENT_NAME"; exit 1; }
+   [ -f ".channel/agents/$AGENT_NAME.md" ] || { echo "Agent not found: $AGENT_NAME"; exit 1; }
    ```
 
 ## Behavior
 
 1. **Parse and validate arguments** (BEFORE modifying any state):
    - Extract agent name (required)
-   - Verify agent file exists in `.claude/agents/`
+   - Verify agent file exists in `.channel/agents/`
    - Extract handoff notes (optional)
    - If validation fails, exit without modifying SESSION_CONTEXT
 
@@ -81,5 +81,5 @@ The handoff itself IS the phase transition — the target agent is now active. S
 
 ❌ handoff failed: {brief reason} · fix: {recovery}
 
-Infer recovery: agent not found → check name against `ls .claude/agents/`; no active session → `/sos start`; state conflict → `/go` to check status; uncertain → `/consult`.
+Infer recovery: agent not found → check name against `ls .channel/agents/`; no active session → `/sos start`; state conflict → `/go` to check status; uncertain → `/consult`.
 

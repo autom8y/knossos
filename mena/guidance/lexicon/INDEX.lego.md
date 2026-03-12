@@ -34,7 +34,7 @@ These conventions have zero CC runtime meaning. Do not use them in prompts:
 | `@skill-name` | CC has no `@` resolution | `Skill("skill-name")` or just name the skill |
 | `` `skill-name` `` in reference context | Backticks are formatting, not invocation | Plain text name or `Skill("name")` call |
 | `skill-name#fragment` | CC cannot resolve fragments | Name the sub-file directly |
-| `~/.claude/skills/path` | Absolute paths are fragile | Use skill name; CC resolves paths |
+| `~/.channel/skills/path` | Absolute paths are fragile | Use skill name; CC resolves paths |
 
 ## Frontmatter Quick Reference
 

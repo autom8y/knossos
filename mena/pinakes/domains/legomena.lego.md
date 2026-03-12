@@ -9,7 +9,7 @@ description: "Evaluation criteria for legomena (skill) audits. Use when: theoros
 
 ## Scope
 
-**Target files**: `.claude/skills/**/*.md`
+**Target files**: `.channel/skills/**/*.md`
 
 Projected from:
 
@@ -49,7 +49,7 @@ rites/*/mena/**/*.lego.md
 | D | 60-69% | 85-89% have required fields. Frequent file naming issues. |
 | F | < 60% | More than 15% missing `name` or `description`. File naming is chaotic or doesn't use `.md` convention. |
 
-**Evidence collection**: Use Glob to find all `.claude/skills/**/*.md` files. Read frontmatter. Check for `name` and `description`. Verify file path matches `{name}.md` or `{category}/{name}.md`. Calculate compliance percentage.
+**Evidence collection**: Use Glob to find all `.channel/skills/**/*.md` files. Read frontmatter. Check for `name` and `description`. Verify file path matches `{name}.md` or `{category}/{name}.md`. Calculate compliance percentage.
 
 ---
 
@@ -65,7 +65,7 @@ rites/*/mena/**/*.lego.md
 | D | 60-69% | INDEX pattern rarely used. Many monolithic skills (>500 lines). Companion files not clearly scoped. |
 | F | < 60% | No INDEX pattern. Monolithic skills dominate (>800 lines). No progressive disclosure strategy. |
 
-**Evidence collection**: Use Glob to identify INDEX.md files in `.claude/skills/`. Read each INDEX to check length and verify companion links. For multi-file skill sets, check that companions are linked from INDEX. Count lines in each skill file. Flag files >500 lines. Verify companion files have focused topics.
+**Evidence collection**: Use Glob to identify INDEX.md files in `.channel/skills/`. Read each INDEX to check length and verify companion links. For multi-file skill sets, check that companions are linked from INDEX. Count lines in each skill file. Flag files >500 lines. Verify companion files have focused topics.
 
 ---
 
@@ -81,7 +81,7 @@ rites/*/mena/**/*.lego.md
 | D | 60-69% | 70-79% document consumers. Many INDEX files lack usage guidance. Unclear which agents use which skills. |
 | F | < 60% | Consumer documentation is rare or absent. No "When to Use" tables. Skills exist in isolation without clear consumption patterns. |
 
-**Evidence collection**: Read each skill body. Search for sections like "Consumers", "Used by", "When to Use". In INDEX files, verify presence of scenario-to-file mapping tables. Cross-reference agent prompts (`.claude/agents/*.md`) to verify documented consumer relationships. Use Grep to find agent references to specific skills.
+**Evidence collection**: Read each skill body. Search for sections like "Consumers", "Used by", "When to Use". In INDEX files, verify presence of scenario-to-file mapping tables. Cross-reference agent prompts (`.channel/agents/*.md`) to verify documented consumer relationships. Use Grep to find agent references to specific skills.
 
 ---
 

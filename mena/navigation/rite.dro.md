@@ -44,7 +44,7 @@ When switching rites, agents that exist in the current project but not in the ta
 | Choice | Key | Effect |
 |--------|-----|--------|
 | Keep | k | Agent stays in project (survives swap) |
-| Promote | p | Agent moves to `~/.claude/agents/` (user-level) |
+| Promote | p | Agent moves to `~/.channel/agents/` (user-level) |
 | Remove | r | Agent removed |
 | Apply to all | a | Apply same choice to remaining orphans |
 

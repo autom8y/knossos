@@ -44,4 +44,4 @@ threat-modeling -> compliance-design -> penetration-testing -> security-review
 
 ## Reference
 
-Full documentation: `.claude/skills/security-ref/SKILL.md`
+Full documentation: `.channel/skills/security-ref/SKILL.md`

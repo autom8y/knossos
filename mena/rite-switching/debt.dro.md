@@ -38,4 +38,4 @@ Switch to the technical debt triage rite and display the pantheon. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/skills/debt-ref/SKILL.md`
+Full documentation: `.channel/skills/debt-ref/SKILL.md`

@@ -9,8 +9,8 @@ Common mistakes in agent prompts and how to fix them.
 | `@skill-name` | `skill-name` (plain text) or `Skill("skill-name")` | CC has no `@` resolution mechanism |
 | `` `skill-name` `` as invocation | Plain skill name or `Skill("name")` | Backticks are formatting, not invocation |
 | `doc-artifacts#tdd-template` | `doc-artifacts` skill, TDD section | CC cannot resolve `#fragment` references |
-| `~/.claude/skills/...` or `.claude/knowledge/...` | Skill name only | CC resolves paths from skill name |
-| `Read(~/.claude/skills/moirai/SKILL.md)` | `Skill("moirai")` or load by name | Hardcoded paths break on restructure |
+| `~/.channel/skills/...` or `.claude/knowledge/...` | Skill name only | CC resolves paths from skill name |
+| `Read(~/.channel/skills/moirai/SKILL.md)` | `Skill("moirai")` or load by name | Hardcoded paths break on restructure |
 
 ## Invocation Confusion
 
@@ -55,6 +55,6 @@ When compressing an agent prompt:
 4. Remove content that exists in linked skills (reference the skill instead)
 5. Remove duplicated templates/examples that exist in other files
 6. Replace `@skill`, backtick, `#fragment` syntax with plain names
-7. Replace stale paths (`.claude/knowledge/`, `~/.claude/skills/`) with skill names
+7. Replace stale paths (`.claude/knowledge/`, `~/.channel/skills/`) with skill names
 8. Verify remaining content is unique to this agent's specific role
 9. Check that `description` field has precise trigger phrases

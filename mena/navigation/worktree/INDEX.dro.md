@@ -123,7 +123,7 @@ ari worktree cleanup --older-than=7d
 
 ## Reference
 
-Full documentation: `.claude/commands/worktree.md`
+Full documentation: `.channel/commands/worktree.md`
 
 ## Sigil
 

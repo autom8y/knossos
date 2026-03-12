@@ -38,4 +38,4 @@ Switch to the documentation rite and display the pantheon. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/skills/docs-ref/SKILL.md`
+Full documentation: `.channel/skills/docs-ref/SKILL.md`

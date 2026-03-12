@@ -9,7 +9,7 @@ description: "Evaluation criteria for dromena (slash command) audits. Use when: 
 
 ## Scope
 
-**Target files**: `.claude/commands/**/*.md`
+**Target files**: `.channel/commands/**/*.md`
 
 Projected from:
 
@@ -33,7 +33,7 @@ rites/*/mena/**/*.dro.md
 | D | 60-69% | 90-94% have required fields. Many optional fields missing. |
 | F | < 60% | More than 10% of commands missing `name` or `description`. Critical metadata gaps. |
 
-**Evidence collection**: Use Glob to find all `.claude/commands/**/*.md` files. Read each file. Check frontmatter for required and optional fields. Calculate percentage compliance.
+**Evidence collection**: Use Glob to find all `.channel/commands/**/*.md` files. Read each file. Check frontmatter for required and optional fields. Calculate percentage compliance.
 
 ---
 

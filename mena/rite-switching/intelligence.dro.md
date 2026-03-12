@@ -44,4 +44,4 @@ instrumentation -> research -> experimentation -> synthesis
 
 ## Reference
 
-Full documentation: `.claude/skills/intelligence-ref/SKILL.md`
+Full documentation: `.channel/skills/intelligence-ref/SKILL.md`

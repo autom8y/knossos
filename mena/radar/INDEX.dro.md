@@ -73,7 +73,7 @@ Filter domains with `scope: radar` from the registry. The 7 radar signal domains
 
 For each radar signal domain, read its criteria file:
 ```
-Read(".claude/skills/pinakes/domains/{domain}.md")
+Read(".channel/skills/pinakes/domains/{domain}.md")
 ```
 
 Store all loaded criteria keyed by domain name. This content is injected into each theoros dispatch prompt in Phase 2.
@@ -329,8 +329,8 @@ Look up available challenge domains for the requested domain:
 
 For each that exists, read its criteria:
 ```
-Read(".claude/skills/pinakes/domains/adversarial-{domain}.md")   # if exists
-Read(".claude/skills/pinakes/domains/dialectic-{domain}.md")    # if exists
+Read(".channel/skills/pinakes/domains/adversarial-{domain}.md")   # if exists
+Read(".channel/skills/pinakes/domains/dialectic-{domain}.md")    # if exists
 ```
 
 ### Challenge Dispatch

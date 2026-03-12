@@ -44,4 +44,4 @@ market-research -> competitive-analysis -> business-modeling -> strategic-planni
 
 ## Reference
 
-Full documentation: `.claude/skills/strategy-ref/SKILL.md`
+Full documentation: `.channel/skills/strategy-ref/SKILL.md`

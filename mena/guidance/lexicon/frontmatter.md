@@ -39,7 +39,7 @@ description: |
 
 | Field | CC Behavior | Required |
 |---|---|---|
-| `name` | Becomes the `/name` slash command. CC discovers via `.claude/commands/` listing. | Yes |
+| `name` | Becomes the `/name` slash command. CC discovers via `.channel/commands/` listing. | Yes |
 | `allowed-tools` | Tools the command can use during execution. | No |
 | `disable-model-invocation` | **Critical**: When `true`, prevents CC from invoking this command autonomously. Use for commands with side effects (commits, pushes, deployments). | No |
 | `argument-hint` | Displayed to user as argument placeholder text. | No |

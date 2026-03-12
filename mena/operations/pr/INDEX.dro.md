@@ -60,7 +60,7 @@ Create a GitHub pull request with auto-generated description. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/commands/pr.md`
+Full documentation: `.channel/commands/pr.md`
 
 ## Sigil
 

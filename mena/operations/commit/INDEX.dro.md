@@ -101,7 +101,7 @@ Create a git commit with an AI-generated message. $ARGUMENTS
 
 ## Reference
 
-Full documentation: `.claude/commands/commit.md`
+Full documentation: `.channel/commands/commit.md`
 
 ## Attribution Policy
 
