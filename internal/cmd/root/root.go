@@ -137,7 +137,7 @@ func init() {
 		"Project root directory (overrides discovery)")
 	rootCmd.PersistentFlags().StringVarP(&globalOpts.SessionID, "session-id", "s", "",
 		"Session ID (overrides current)")
-	rootCmd.PersistentFlags().StringVar(&globalOpts.Channel, "channel", "claude",
+	rootCmd.PersistentFlags().StringVar(&globalOpts.Channel, "channel", "all",
 		"target channel: claude, gemini, or all")
 
 	// Add subcommands
