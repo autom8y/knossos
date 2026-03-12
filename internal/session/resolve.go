@@ -76,11 +76,6 @@ func SetHarnessSessionMap(resolver *paths.Resolver, harnessSessionID string, kno
 	return nil
 }
 
-// SetCCMap is a deprecated alias for SetHarnessSessionMap.
-func SetCCMap(resolver *paths.Resolver, ccSessionID string, knossosSessionID string) error {
-	return SetHarnessSessionMap(resolver, ccSessionID, knossosSessionID)
-}
-
 // ClearHarnessSessionMap removes a harness-to-Knossos session mapping.
 // Returns nil if the mapping doesn't exist.
 func ClearHarnessSessionMap(resolver *paths.Resolver, harnessSessionID string) error {
@@ -96,11 +91,6 @@ func ClearHarnessSessionMap(resolver *paths.Resolver, harnessSessionID string) e
 	}
 
 	return nil
-}
-
-// ClearCCMap is a deprecated alias for ClearHarnessSessionMap.
-func ClearCCMap(resolver *paths.Resolver, ccSessionID string) error {
-	return ClearHarnessSessionMap(resolver, ccSessionID)
 }
 
 // ClearHarnessSessionMapForSession scans the harness map directory and removes
@@ -134,11 +124,6 @@ func ClearHarnessSessionMapForSession(resolver *paths.Resolver, knossosSessionID
 		}
 	}
 	return nil
-}
-
-// ClearCCMapForSession is a deprecated alias for ClearHarnessSessionMapForSession.
-func ClearCCMapForSession(resolver *paths.Resolver, knossosSessionID string) error {
-	return ClearHarnessSessionMapForSession(resolver, knossosSessionID)
 }
 
 // sanitizeHarnessSessionID sanitizes a harness session ID for use as a filename.

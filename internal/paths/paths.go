@@ -100,12 +100,6 @@ func (r *Resolver) HarnessMapDir() string {
 	return newPath
 }
 
-// CCMapDir is a deprecated alias for HarnessMapDir. Use HarnessMapDir instead.
-// Retained for backward compatibility during migration.
-func (r *Resolver) CCMapDir() string {
-	return r.HarnessMapDir()
-}
-
 // WipDir returns the path to the .sos/wip/ directory (ephemeral working artifacts).
 func (r *Resolver) WipDir() string {
 	return filepath.Join(r.SOSDir(), "wip")

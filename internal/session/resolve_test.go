@@ -40,7 +40,7 @@ func TestResolveSession_ExplicitIDTakesPriority(t *testing.T) {
 	// Setup: active session + cc-map entry
 	createTestSession(t, sessionsDir, "session-20260209-120000-aaaaaaaa", "ACTIVE")
 
-	ccMapDir := resolver.CCMapDir()
+	ccMapDir := resolver.HarnessMapDir()
 	os.MkdirAll(ccMapDir, 0755)
 	os.WriteFile(filepath.Join(ccMapDir, "cc-test-id"), []byte("session-from-map"), 0644)
 
@@ -58,7 +58,7 @@ func TestResolveSession_CCMapLookup(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	ccMapDir := resolver.CCMapDir()
+	ccMapDir := resolver.HarnessMapDir()
 	os.MkdirAll(ccMapDir, 0755)
 	os.WriteFile(filepath.Join(ccMapDir, "cc-session-123"), []byte("session-mapped"), 0644)
 
@@ -148,7 +148,7 @@ func TestResolveSession_CCMapStaleEntry(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	ccMapDir := resolver.CCMapDir()
+	ccMapDir := resolver.HarnessMapDir()
 	os.MkdirAll(ccMapDir, 0755)
 	// Map points to non-existent session
 	os.WriteFile(filepath.Join(ccMapDir, "cc-stale"), []byte("session-nonexistent"), 0644)
@@ -163,18 +163,18 @@ func TestResolveSession_CCMapStaleEntry(t *testing.T) {
 	}
 }
 
-// --- SetCCMap Tests ---
+// --- SetHarnessSessionMap Tests ---
 
-func TestSetCCMap_CreatesDirectoryAndFile(t *testing.T) {
+func TestSetHarnessSessionMap_CreatesDirectoryAndFile(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	err := SetCCMap(resolver, "cc-new-session", "session-knossos-123")
+	err := SetHarnessSessionMap(resolver, "cc-new-session", "session-knossos-123")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	mapFile := filepath.Join(resolver.CCMapDir(), "cc-new-session")
+	mapFile := filepath.Join(resolver.HarnessMapDir(), "cc-new-session")
 	data, err := os.ReadFile(mapFile)
 	if err != nil {
 		t.Fatalf("failed to read map file: %v", err)
@@ -184,14 +184,14 @@ func TestSetCCMap_CreatesDirectoryAndFile(t *testing.T) {
 	}
 }
 
-func TestSetCCMap_OverwritesExisting(t *testing.T) {
+func TestSetHarnessSessionMap_OverwritesExisting(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	SetCCMap(resolver, "cc-test", "session-old")
-	SetCCMap(resolver, "cc-test", "session-new")
+	SetHarnessSessionMap(resolver, "cc-test", "session-old")
+	SetHarnessSessionMap(resolver, "cc-test", "session-new")
 
-	mapFile := filepath.Join(resolver.CCMapDir(), "cc-test")
+	mapFile := filepath.Join(resolver.HarnessMapDir(), "cc-test")
 	data, err := os.ReadFile(mapFile)
 	if err != nil {
 		t.Fatalf("failed to read map file: %v", err)
@@ -201,28 +201,28 @@ func TestSetCCMap_OverwritesExisting(t *testing.T) {
 	}
 }
 
-func TestSetCCMap_RejectsEmptyID(t *testing.T) {
+func TestSetHarnessSessionMap_RejectsEmptyID(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	err := SetCCMap(resolver, "", "session-knossos-123")
+	err := SetHarnessSessionMap(resolver, "", "session-knossos-123")
 	if err == nil {
 		t.Fatal("expected error for empty CC session ID")
 	}
 }
 
-func TestSetCCMap_SanitizesPathTraversal(t *testing.T) {
+func TestSetHarnessSessionMap_SanitizesPathTraversal(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
 	// Attempt path traversal attack
-	err := SetCCMap(resolver, "../../../etc/passwd", "session-test")
+	err := SetHarnessSessionMap(resolver, "../../../etc/passwd", "session-test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	// Should sanitize to just "passwd"
-	mapFile := filepath.Join(resolver.CCMapDir(), "passwd")
+	mapFile := filepath.Join(resolver.HarnessMapDir(), "passwd")
 	data, err := os.ReadFile(mapFile)
 	if err != nil {
 		t.Fatalf("failed to read map file: %v", err)
@@ -238,30 +238,30 @@ func TestSetCCMap_SanitizesPathTraversal(t *testing.T) {
 	}
 }
 
-// --- ClearCCMap Tests ---
+// --- ClearHarnessSessionMap Tests ---
 
-func TestClearCCMap_RemovesFile(t *testing.T) {
+func TestClearHarnessSessionMap_RemovesFile(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	SetCCMap(resolver, "cc-test", "session-123")
+	SetHarnessSessionMap(resolver, "cc-test", "session-123")
 
-	err := ClearCCMap(resolver, "cc-test")
+	err := ClearHarnessSessionMap(resolver, "cc-test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	mapFile := filepath.Join(resolver.CCMapDir(), "cc-test")
+	mapFile := filepath.Join(resolver.HarnessMapDir(), "cc-test")
 	if _, err := os.Stat(mapFile); !os.IsNotExist(err) {
 		t.Fatal("map file still exists after clear")
 	}
 }
 
-func TestClearCCMap_NoErrorOnMissing(t *testing.T) {
+func TestClearHarnessSessionMap_NoErrorOnMissing(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	err := ClearCCMap(resolver, "nonexistent")
+	err := ClearHarnessSessionMap(resolver, "nonexistent")
 	if err != nil {
 		t.Fatalf("unexpected error on missing file: %v", err)
 	}
