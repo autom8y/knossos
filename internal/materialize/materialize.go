@@ -100,11 +100,11 @@ type Materializer struct {
 	explicitSource    string // Optional explicit source from --source flag
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
-	claudeDirOverride string // If set, materialize to this directory instead of .claude/
+	channelDirOverride string // If set, materialize to this directory instead of .claude/
 	embeddedAgents      fs.FS   // Embedded cross-rite agents (fallback for user scope)
 	embeddedMena        fs.FS   // Embedded platform mena (fallback for user scope)
 	embeddedProcessions fs.FS   // Embedded procession templates (fallback for resolution)
-	userClaudeDir       string  // If set, user-scope sync writes here instead of paths.UserClaudeDir()
+	userChannelDir      string  // If set, user-scope sync writes here instead of paths.UserClaudeDir()
 	xdgDataDir          string  // If set, used for XDG mena path instead of config.XDGDataDir()
 	knossosHome         string  // If set, used for archetype/procession resolution instead of config.KnossosHome()
 }
@@ -190,10 +190,10 @@ func (m *Materializer) WithEmbeddedProcessions(fsys fs.FS) *Materializer {
 	return m
 }
 
-// getClaudeDir returns the target .claude/ directory, respecting any override.
-func (m *Materializer) getClaudeDir() string {
-	if m.claudeDirOverride != "" {
-		return m.claudeDirOverride
+// getChannelDir returns the target .claude/ directory, respecting any override.
+func (m *Materializer) getChannelDir() string {
+	if m.channelDirOverride != "" {
+		return m.channelDirOverride
 	}
 	return m.resolver.ClaudeDir()
 }
@@ -266,14 +266,14 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 
 	// Save existing override and restore it when done to prevent mutation leaking
-	originalOverride := m.claudeDirOverride
-	defer func() { m.claudeDirOverride = originalOverride }()
+	originalOverride := m.channelDirOverride
+	defer func() { m.channelDirOverride = originalOverride }()
 
 	if opts.Channel == "gemini" {
-		m.claudeDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
+		m.channelDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
 	}
 
-	claudeDir := m.getClaudeDir()
+	channelDir := m.getChannelDir()
 
 	// Dry-run: just return success
 	if opts.DryRun {
@@ -281,7 +281,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	}
 
 	// Ensure .claude/ directory exists
-	if err := paths.EnsureDir(claudeDir); err != nil {
+	if err := paths.EnsureDir(channelDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
 
@@ -299,7 +299,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
 	}
-	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, channelDir)
 	if err != nil {
 		slog.Warn("failed to detect provenance divergence", "error", err)
 	}
@@ -308,30 +308,30 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	// Remove stale settings.json created by the deleted writeDefaultSettings() function.
 	// Must run after prevManifest is loaded (needed for the provenance gate) and before
 	// materializeSettingsWithManifest() writes settings.local.json.
-	m.cleanupStaleBlanketSettings(claudeDir, prevManifest)
+	m.cleanupStaleBlanketSettings(channelDir, prevManifest)
 
 	// Generate rules from templates (if available)
-	if err := m.materializeRules(claudeDir, nil, collector, opts.Channel); err != nil {
+	if err := m.materializeRules(channelDir, nil, collector, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 	}
 
 	comp := compilerForChannel(opts.Channel)
 
 	// Generate minimal CLAUDE.md (no agents)
-	legacyBackupPath, err := m.materializeMinimalInscription(claudeDir, collector, opts.Channel, comp)
+	legacyBackupPath, err := m.materializeMinimalInscription(channelDir, collector, opts.Channel, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
 	result.LegacyBackupPath = legacyBackupPath
 
 	// Generate settings.local.json if needed (no manifest in minimal mode)
-	if err := m.materializeSettingsWithManifest(claudeDir, nil, collector, opts.Channel); err != nil {
+	if err := m.materializeSettingsWithManifest(channelDir, nil, collector, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
 	// Project platform mena + shared rite mena so cross-cutting mode still
 	// has core features (/know, /radar, /research, etc.).
-	if err := m.materializeMinimalMena(claudeDir, collector, opts.OverwriteDiverged, opts.Channel, comp); err != nil {
+	if err := m.materializeMinimalMena(channelDir, collector, opts.OverwriteDiverged, opts.Channel, comp); err != nil {
 		slog.Warn("failed to materialize mena in minimal mode", "error", err)
 		// Non-fatal: mena is a best-effort enhancement in minimal mode
 	}
@@ -339,10 +339,10 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	// Remove rite-specific state files (cross-cutting mode has no rite)
 	_ = os.Remove(filepath.Join(knossosDir, "ACTIVE_RITE"))
 	_ = os.Remove(filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"))
-	_ = os.Remove(filepath.Join(claudeDir, "INVOCATION_STATE.yaml"))
+	_ = os.Remove(filepath.Join(channelDir, "INVOCATION_STATE.yaml"))
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, claudeDir, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
+	if err := m.saveProvenanceManifest(manifestPath, channelDir, "", collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
 	}
 
@@ -358,18 +358,18 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// Save existing override and restore it when done to prevent mutation leaking
-	originalOverride := m.claudeDirOverride
-	defer func() { m.claudeDirOverride = originalOverride }()
+	originalOverride := m.channelDirOverride
+	defer func() { m.channelDirOverride = originalOverride }()
 
 	if opts.Channel == "gemini" {
-		m.claudeDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
+		m.channelDirOverride = filepath.Join(filepath.Dir(m.resolver.ClaudeDir()), ".gemini")
 	}
 
-	claudeDir := m.getClaudeDir()
+	channelDir := m.getChannelDir()
 
 	// Remove el-cheapo marker on normal sync (revert path)
 	if !opts.ElCheapo {
-		knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
+		knossosDir := filepath.Join(filepath.Dir(channelDir), ".knossos")
 		_ = os.Remove(filepath.Join(knossosDir, ".el-cheapo-active"))
 	}
 
@@ -419,7 +419,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// Dry-run: just detect orphans and return
 	if opts.DryRun {
-		orphans, err := m.detectOrphans(manifest, claudeDir, resolved, opts.Channel)
+		orphans, err := m.detectOrphans(manifest, channelDir, resolved, opts.Channel)
 		if err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
 		}
@@ -430,12 +430,12 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// Pre-validate CLAUDE.md generation before any disk writes.
 	// Template rendering is the most failure-prone step. Validating it first
 	// prevents partial state where agents are on disk but CLAUDE.md is stale.
-	if err := m.prevalidateInscription(manifest, claudeDir, resolved, modelOverride, opts.Channel); err != nil {
+	if err := m.prevalidateInscription(manifest, channelDir, resolved, modelOverride, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "CLAUDE.md pre-validation failed (no files written)", err)
 	}
 
 	// 2. Ensure .claude/ and .knossos/ directories exist
-	if err := paths.EnsureDir(claudeDir); err != nil {
+	if err := paths.EnsureDir(channelDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
 	knossosDir := m.getKnossosDir()
@@ -453,14 +453,14 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to load provenance manifest", err)
 	}
-	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, claudeDir)
+	divergenceReport, err := provenance.DetectDivergence(prevManifest, nil, channelDir)
 	if err != nil {
 		slog.Warn("failed to detect provenance divergence", "error", err)
 	}
 	collector := provenance.NewCollector()
 
 	// 2.5. Clear stale invocation state from previous rite
-	if err := m.clearInvocationState(claudeDir); err != nil {
+	if err := m.clearInvocationState(channelDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to clear invocation state", err)
 	}
 
@@ -468,11 +468,11 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// Must run after prevManifest is loaded (needed for the provenance gate) and before
 	// materializeSettingsWithManifest() writes settings.local.json.
 	if !opts.DryRun {
-		m.cleanupStaleBlanketSettings(claudeDir, prevManifest)
+		m.cleanupStaleBlanketSettings(channelDir, prevManifest)
 	}
 
 	// 3. Handle orphans before materializing agents
-	orphans, err := m.detectOrphans(manifest, claudeDir, resolved, opts.Channel)
+	orphans, err := m.detectOrphans(manifest, channelDir, resolved, opts.Channel)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to detect orphans", err)
 	}
@@ -480,14 +480,14 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	if len(orphans) > 0 {
 		if opts.RemoveAll {
-			backupPath, err := m.backupAndRemoveOrphans(orphans, claudeDir, knossosDir)
+			backupPath, err := m.backupAndRemoveOrphans(orphans, channelDir, knossosDir)
 			if err != nil {
 				return nil, errors.Wrap(errors.CodeGeneralError, "failed to remove orphans", err)
 			}
 			result.OrphanAction = "removed"
 			result.BackupPath = backupPath
 		} else if opts.PromoteAll {
-			if err := m.promoteOrphans(orphans, claudeDir); err != nil {
+			if err := m.promoteOrphans(orphans, channelDir); err != nil {
 				return nil, errors.Wrap(errors.CodeGeneralError, "failed to promote orphans", err)
 			}
 			result.OrphanAction = "promoted"
@@ -504,26 +504,26 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	mergedSkillPolicies := MergeSkillPolicies(sharedSkillPolicies, manifest.SkillPolicies)
 
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride, opts.Channel, comp); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, channelDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride, opts.Channel, comp); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
 	// 5. Generate commands/ and skills/ directories from rite + shared + dependencies + mena
 	if !opts.Soft {
-		if err := m.materializeMena(manifest, claudeDir, resolved, collector, opts.OverwriteDiverged, opts.Channel, comp); err != nil {
+		if err := m.materializeMena(manifest, channelDir, resolved, collector, opts.OverwriteDiverged, opts.Channel, comp); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize mena", err)
 		}
 	}
 
 	// 6. Generate rules/ directory from templates/rules
 	if !opts.Soft {
-		if err := m.materializeRules(claudeDir, resolved, collector, opts.Channel); err != nil {
+		if err := m.materializeRules(channelDir, resolved, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize rules", err)
 		}
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeInscription(manifest, claudeDir, resolved, collector, modelOverride, opts.Channel, comp)
+	legacyBackupPath, err := m.materializeInscription(manifest, channelDir, resolved, collector, modelOverride, opts.Channel, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -531,14 +531,14 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 8. Generate or update settings.local.json (hooks only; MCP servers moved to .mcp.json per SCAR-028)
 	if !opts.Soft {
-		if err := m.materializeSettingsWithManifest(claudeDir, manifest, collector, opts.Channel); err != nil {
+		if err := m.materializeSettingsWithManifest(channelDir, manifest, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 		}
 	}
 
 	// 8.1. Write MCP servers to .mcp.json at project root (SCAR-028)
 	if !opts.Soft {
-		projectRoot := filepath.Dir(claudeDir)
+		projectRoot := filepath.Dir(channelDir)
 		if err := m.materializeMcpJson(projectRoot, manifest, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize .mcp.json", err)
 		}
@@ -546,7 +546,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 
 	// 8.5. El-cheapo mode: inject model override and revert hook into settings
 	if opts.ElCheapo {
-		if err := m.injectElCheapoSettings(claudeDir); err != nil {
+		if err := m.injectElCheapoSettings(channelDir); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to inject el-cheapo settings", err)
 		}
 	}
@@ -580,7 +580,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// Provenance: merge and save manifest
-	if err := m.saveProvenanceManifest(manifestPath, claudeDir, activeRiteName, collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
+	if err := m.saveProvenanceManifest(manifestPath, channelDir, activeRiteName, collector, divergenceReport, prevManifest, opts.OverwriteDiverged); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to save provenance manifest", err)
 	}
 

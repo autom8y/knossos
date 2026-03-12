@@ -24,8 +24,8 @@ import (
 // When comp is non-nil, CompileAgent() is called after transformAgentContent()
 // to translate tool names for the target channel. The compiler is channel-aware:
 // ClaudeCompiler is a pass-through, GeminiCompiler translates tool names.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride, channel string, comp compiler.ChannelCompiler) error {
-	agentsDir := filepath.Join(claudeDir, "agents")
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, channelDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride, channel string, comp compiler.ChannelCompiler) error {
+	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
 	if err := paths.EnsureDir(agentsDir); err != nil {
@@ -302,8 +302,8 @@ func compileAgentContent(agentName string, content []byte, comp compiler.Channel
 // If a provenance manifest exists, uses manifest-based detection: files with
 // owner=user or files not in the provenance manifest are orphans.
 // Otherwise, falls back to rite manifest membership check (backward compatible).
-func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, channel string) ([]string, error) {
-	agentsDir := filepath.Join(claudeDir, "agents")
+func (m *Materializer) detectOrphans(manifest *RiteManifest, channelDir string, resolved *ResolvedRite, channel string) ([]string, error) {
+	agentsDir := filepath.Join(channelDir, "agents")
 	if _, err := os.Stat(agentsDir); os.IsNotExist(err) {
 		return []string{}, nil
 	}
@@ -323,7 +323,7 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, r
 
 	// If provenance manifest exists, use manifest-based orphan detection
 	if err == nil && provenanceManifest != nil {
-		return m.detectOrphansFromProvenance(expectedAgents, claudeDir, provenanceManifest)
+		return m.detectOrphansFromProvenance(expectedAgents, channelDir, provenanceManifest)
 	}
 
 	// Fallback: rite manifest membership check (backward compatible)
@@ -335,8 +335,8 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, claudeDir string, r
 //   - It is NOT in the provenance manifest, OR
 //   - It has owner=user in the provenance manifest, OR
 //   - It is knossos-owned BUT not in the expected agents set (rite + cross-rite)
-func (m *Materializer) detectOrphansFromProvenance(expectedAgents map[string]bool, claudeDir string, provenanceManifest *provenance.ProvenanceManifest) ([]string, error) {
-	agentsDir := filepath.Join(claudeDir, "agents")
+func (m *Materializer) detectOrphansFromProvenance(expectedAgents map[string]bool, channelDir string, provenanceManifest *provenance.ProvenanceManifest) ([]string, error) {
+	agentsDir := filepath.Join(channelDir, "agents")
 
 	orphans := []string{}
 	entries, err := os.ReadDir(agentsDir)
@@ -406,12 +406,12 @@ func (m *Materializer) detectOrphansLegacy(expectedAgents map[string]bool, agent
 }
 
 // backupAndRemoveOrphans creates a backup of orphan agents then removes them.
-func (m *Materializer) backupAndRemoveOrphans(orphans []string, claudeDir string, knossosDir string) (string, error) {
+func (m *Materializer) backupAndRemoveOrphans(orphans []string, channelDir string, knossosDir string) (string, error) {
 	if len(orphans) == 0 {
 		return "", nil
 	}
 
-	agentsDir := filepath.Join(claudeDir, "agents")
+	agentsDir := filepath.Join(channelDir, "agents")
 	backupDir := filepath.Join(knossosDir, ".orphan-backup", time.Now().Format("20060102-150405"))
 
 	if err := paths.EnsureDir(backupDir); err != nil {
@@ -441,12 +441,12 @@ func (m *Materializer) backupAndRemoveOrphans(orphans []string, claudeDir string
 }
 
 // promoteOrphans moves orphan agents to user-level ~/.claude/agents/.
-func (m *Materializer) promoteOrphans(orphans []string, claudeDir string) error {
+func (m *Materializer) promoteOrphans(orphans []string, channelDir string) error {
 	if len(orphans) == 0 {
 		return nil
 	}
 
-	agentsDir := filepath.Join(claudeDir, "agents")
+	agentsDir := filepath.Join(channelDir, "agents")
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return err

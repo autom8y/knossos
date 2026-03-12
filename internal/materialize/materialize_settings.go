@@ -19,8 +19,8 @@ import (
 // materializeSettingsWithManifest generates or updates settings.local.json.
 // Loads hooks.yaml and merges hook registrations into settings.
 // MCP servers are NOT written here — see materializeMcpJson (SCAR-028).
-func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *RiteManifest, collector provenance.Collector, channel string) error {
-	settingsPath := filepath.Join(claudeDir, "settings.local.json")
+func (m *Materializer) materializeSettingsWithManifest(channelDir string, _ *RiteManifest, collector provenance.Collector, channel string) error {
+	settingsPath := filepath.Join(channelDir, "settings.local.json")
 
 	// Load existing settings or create empty map
 	existingSettings, err := loadExistingSettings(settingsPath)
@@ -117,8 +117,8 @@ func (m *Materializer) materializeMcpJson(projectRoot string, manifest *RiteMani
 // injectElCheapoSettings layers el-cheapo mode on top of settings.local.json.
 // Called AFTER normal settings materialization. Injects model override and a
 // Stop hook that reverts the override on session exit.
-func (m *Materializer) injectElCheapoSettings(claudeDir string) error {
-	settingsPath := filepath.Join(claudeDir, "settings.local.json")
+func (m *Materializer) injectElCheapoSettings(channelDir string) error {
+	settingsPath := filepath.Join(channelDir, "settings.local.json")
 
 	existingSettings, err := loadExistingSettings(settingsPath)
 	if err != nil {
@@ -158,7 +158,7 @@ func (m *Materializer) injectElCheapoSettings(claudeDir string) error {
 	existingSettings["hooks"] = hooksMap
 
 	// 3. Write marker file for diagnostics and revert detection
-	knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
+	knossosDir := filepath.Join(filepath.Dir(channelDir), ".knossos")
 	_ = os.MkdirAll(knossosDir, 0755)
 	markerPath := filepath.Join(knossosDir, ".el-cheapo-active")
 	_ = os.WriteFile(markerPath, []byte("haiku\n"), 0644)
@@ -171,9 +171,9 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 	stateManager := sync.NewStateManager(m.resolver)
 
 	// During staged materialization, override the sync dir to target the staging directory.
-	if m.claudeDirOverride != "" {
+	if m.channelDirOverride != "" {
 		// During staged materialization, sync state goes alongside the staging directory.
-		stagingParent := filepath.Dir(m.claudeDirOverride)
+		stagingParent := filepath.Dir(m.channelDirOverride)
 		stateManager.SetSyncDir(filepath.Join(stagingParent, ".knossos", "sync"))
 	}
 
@@ -204,8 +204,8 @@ func (m *Materializer) trackState(manifest *RiteManifest, activeRiteName string)
 
 // clearInvocationState removes INVOCATION_STATE.yaml which becomes stale on rite switch.
 // The file tracks borrowed components from the previous rite's invocations.
-func (m *Materializer) clearInvocationState(claudeDir string) error {
-	knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
+func (m *Materializer) clearInvocationState(channelDir string) error {
+	knossosDir := filepath.Join(filepath.Dir(channelDir), ".knossos")
 	err := os.Remove(filepath.Join(knossosDir, "INVOCATION_STATE.yaml"))
 	if err != nil && !os.IsNotExist(err) {
 		return err
@@ -300,8 +300,8 @@ func (m *Materializer) writeActiveRite(riteName string) error {
 //
 // Both gates must pass: no provenance entry AND structural fingerprint match.
 // Returns true if the file was removed, false otherwise.
-func (m *Materializer) cleanupStaleBlanketSettings(claudeDir string, manifest *provenance.ProvenanceManifest) bool {
-	settingsPath := filepath.Join(claudeDir, "settings.json")
+func (m *Materializer) cleanupStaleBlanketSettings(channelDir string, manifest *provenance.ProvenanceManifest) bool {
+	settingsPath := filepath.Join(channelDir, "settings.json")
 
 	// Gate 1: File must exist
 	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
@@ -334,10 +334,10 @@ func (m *Materializer) cleanupStaleBlanketSettings(claudeDir string, manifest *p
 
 	// Both gates passed: safe to remove
 	if err := os.Remove(settingsPath); err != nil {
-		slog.Warn("failed to remove stale settings.json", "path", claudeDir, "error", err)
+		slog.Warn("failed to remove stale settings.json", "path", channelDir, "error", err)
 		return false
 	}
-	slog.Info("removed stale settings.json", "path", claudeDir)
+	slog.Info("removed stale settings.json", "path", channelDir)
 	return true
 }
 
@@ -431,12 +431,12 @@ func matchesStaleSettingsFingerprint(parsed map[string]any) bool {
 // saveProvenanceManifest merges collector entries with divergence report and previous manifest,
 // then writes the final manifest to disk. Delegates to provenance.Merge() for the algorithm.
 //
-// claudeDir is passed explicitly because Merge uses it to check whether files still exist
+// channelDir is passed explicitly because Merge uses it to check whether files still exist
 // on disk. knossosDir is the sibling .knossos/ directory — some tracked files (e.g.
 // ACTIVE_WORKFLOW.yaml) live there and Merge checks both directories.
 func (m *Materializer) saveProvenanceManifest(
 	manifestPath string,
-	claudeDir string,
+	channelDir string,
 	activeRite string,
 	collector provenance.Collector,
 	divergenceReport *provenance.DivergenceReport,
@@ -444,6 +444,6 @@ func (m *Materializer) saveProvenanceManifest(
 	overwriteDiverged bool,
 ) error {
 	knossosDir := m.resolver.KnossosDir()
-	finalManifest := provenance.Merge(claudeDir, knossosDir, activeRite, collector, divergenceReport, prevManifest, overwriteDiverged)
+	finalManifest := provenance.Merge(channelDir, knossosDir, activeRite, collector, divergenceReport, prevManifest, overwriteDiverged)
 	return provenance.Save(manifestPath, finalManifest)
 }

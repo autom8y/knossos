@@ -18,16 +18,16 @@ func (m *Materializer) syncOrgScope(opts SyncOptions) (*OrgScopeResult, error) {
 
 // syncOrgScopeSingleChannel syncs org resources to a single channel directory.
 func (m *Materializer) syncOrgScopeSingleChannel(opts SyncOptions) (*OrgScopeResult, error) {
-	// Resolve target directory: use m.userClaudeDir override (for testing) when set;
+	// Resolve target directory: use m.userChannelDir override (for testing) when set;
 	// otherwise resolve from the channel name (e.g., ~/.claude or ~/.gemini).
-	userClaudeDir := m.userClaudeDir
-	if userClaudeDir == "" {
-		userClaudeDir = paths.UserChannelDir(opts.Channel)
+	userChannelDir := m.userChannelDir
+	if userChannelDir == "" {
+		userChannelDir = paths.UserChannelDir(opts.Channel)
 	}
 
 	result, err := orgscope.SyncOrgScope(orgscope.SyncOrgScopeParams{
 		OrgName:       opts.OrgName,
-		UserClaudeDir: userClaudeDir,
+		UserClaudeDir: userChannelDir,
 		DryRun:        opts.DryRun,
 		Channel:       opts.Channel,
 	})

@@ -15,7 +15,7 @@ import (
 // Delegates to inscription.SyncInscription for the core merge/write logic,
 // then records provenance for the written file.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) materializeInscription(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride, channel string, comp compiler.ChannelCompiler) (string, error) {
+func (m *Materializer) materializeInscription(manifest *RiteManifest, channelDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride, channel string, comp compiler.ChannelCompiler) (string, error) {
 	// Build render context with full agent details
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
@@ -52,7 +52,7 @@ func (m *Materializer) materializeInscription(manifest *RiteManifest, claudeDir 
 
 	// Delegate to canonical SyncInscription
 	result, err := inscription.SyncInscription(inscription.SyncInscriptionOptions{
-		ClaudeDir:		claudeDir,
+		ClaudeDir:		channelDir,
 		RenderCtx:		renderCtx,
 		ActiveRite:		manifest.Name,
 		TemplateDir:		m.templatesDir,
@@ -87,7 +87,7 @@ func (m *Materializer) materializeInscription(manifest *RiteManifest, claudeDir 
 
 // materializeMinimalInscription generates CLAUDE.md for cross-cutting mode (no agents).
 // Delegates to inscription.SyncInscription without manifest updates.
-func (m *Materializer) materializeMinimalInscription(claudeDir string, collector provenance.Collector, channel string, comp compiler.ChannelCompiler) (string, error) {
+func (m *Materializer) materializeMinimalInscription(channelDir string, collector provenance.Collector, channel string, comp compiler.ChannelCompiler) (string, error) {
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
 		ActiveRite:		"",
@@ -105,7 +105,7 @@ func (m *Materializer) materializeMinimalInscription(claudeDir string, collector
 	}
 
 	result, err := inscription.SyncInscription(inscription.SyncInscriptionOptions{
-		ClaudeDir:		claudeDir,
+		ClaudeDir:		channelDir,
 		RenderCtx:		renderCtx,
 		TemplateDir:		m.templatesDir,
 		UpdateManifest:		false,
@@ -121,7 +121,7 @@ func (m *Materializer) materializeMinimalInscription(claudeDir string, collector
 // prevalidateInscription validates that CLAUDE.md generation will succeed without
 // writing any files. This is called BEFORE destructive operations (agent writes,
 // orphan removal) to prevent partial state when template rendering fails.
-func (m *Materializer) prevalidateInscription(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, modelOverride, channel string) error {
+func (m *Materializer) prevalidateInscription(manifest *RiteManifest, channelDir string, resolved *ResolvedRite, modelOverride, channel string) error {
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
 		agents = append(agents, inscription.AgentInfo{

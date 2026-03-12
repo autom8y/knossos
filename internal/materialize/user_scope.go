@@ -18,11 +18,11 @@ func (m *Materializer) syncUserScope(opts SyncOptions) (*UserScopeResult, error)
 
 // syncUserScopeSingleChannel syncs user resources to a single channel directory.
 func (m *Materializer) syncUserScopeSingleChannel(opts SyncOptions) (*UserScopeResult, error) {
-	// Resolve target directory: use m.userClaudeDir override (for testing) when set;
+	// Resolve target directory: use m.userChannelDir override (for testing) when set;
 	// otherwise resolve from the channel name (e.g., ~/.claude or ~/.gemini).
-	userClaudeDir := m.userClaudeDir
-	if userClaudeDir == "" {
-		userClaudeDir = paths.UserChannelDir(opts.Channel)
+	userChannelDir := m.userChannelDir
+	if userChannelDir == "" {
+		userChannelDir = paths.UserChannelDir(opts.Channel)
 	}
 
 	return userscope.SyncUserScope(userscope.SyncUserScopeParams{
@@ -31,7 +31,7 @@ func (m *Materializer) syncUserScopeSingleChannel(opts SyncOptions) (*UserScopeR
 		EmbeddedMena:   m.embeddedMena,
 		EmbeddedRites:  m.sourceResolver.EmbeddedFS,
 		KnossosHome:    m.sourceResolver.KnossosHome(),
-		UserClaudeDir:  userClaudeDir,
+		UserClaudeDir:  userChannelDir,
 		Opts: userscope.SyncOptions{
 			Resource:          opts.Resource,
 			DryRun:            opts.DryRun,
