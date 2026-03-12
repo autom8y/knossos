@@ -45,6 +45,12 @@ func (r *Resolver) ChannelDir(ch TargetChannel) string {
 // UserChannelDir returns the user-level directory for a specific channel.
 // For channel="" or "claude": ~/.claude
 // For channel="gemini": ~/.gemini
+//
+// On unrecognized channel names, falls back to ~/.claude intentionally.
+// All callers (ForChannel path helpers, user_scope, org_scope) pass validated
+// channel strings or empty string (which ChannelByName normalizes to "claude").
+// Returning an error here would require error handling in ~10 callers that
+// construct paths -- the fallback is the pragmatic choice (HA-3-030 scope).
 func UserChannelDir(channel string) string {
 	homeDir, _ := os.UserHomeDir()
 	ch, err := ChannelByName(channel)

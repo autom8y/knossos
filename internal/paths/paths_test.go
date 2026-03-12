@@ -249,8 +249,8 @@ func TestFindProjectRoot(t *testing.T) {
 		}
 	})
 
-	t.Run("prefers_claude_over_knossos", func(t *testing.T) {
-		// Both .claude/ and .knossos/ exist — .claude/ should win
+	t.Run("prefers_knossos_over_channels", func(t *testing.T) {
+		// Both .knossos/ and .claude/ exist — .knossos/ is checked first (platform dir)
 		root := t.TempDir()
 		os.MkdirAll(filepath.Join(root, ".claude"), 0755)
 		os.MkdirAll(filepath.Join(root, ".knossos"), 0755)
@@ -264,12 +264,33 @@ func TestFindProjectRoot(t *testing.T) {
 		}
 	})
 
-	t.Run("error_no_claude_or_knossos_dir", func(t *testing.T) {
-		// Temp dir with neither .claude/ nor .knossos/ anywhere in its ancestry
+	t.Run("finds_gemini_dir", func(t *testing.T) {
+		// Create a temp tree with only .gemini/ (no .claude/ or .knossos/)
+		root := t.TempDir()
+		geminiDir := filepath.Join(root, ".gemini")
+		if err := os.MkdirAll(geminiDir, 0755); err != nil {
+			t.Fatalf("MkdirAll: %v", err)
+		}
+		nested := filepath.Join(root, "a", "b")
+		if err := os.MkdirAll(nested, 0755); err != nil {
+			t.Fatalf("MkdirAll: %v", err)
+		}
+
+		got, err := FindProjectRoot(nested)
+		if err != nil {
+			t.Fatalf("FindProjectRoot(%q) returned error: %v", nested, err)
+		}
+		if got != root {
+			t.Errorf("FindProjectRoot(%q) = %q, want %q", nested, got, root)
+		}
+	})
+
+	t.Run("error_no_recognized_dir", func(t *testing.T) {
+		// Temp dir with no .knossos/, .claude/, or .gemini/ anywhere in its ancestry
 		isolated := t.TempDir()
 		_, err := FindProjectRoot(isolated)
 		if err == nil {
-			t.Error("FindProjectRoot() should return error when no .claude/ or .knossos/ exists")
+			t.Error("FindProjectRoot() should return error when no recognized directory exists")
 		}
 	})
 
@@ -532,6 +553,71 @@ func TestUserLevelPaths(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.got != tt.want {
 				t.Errorf("%s() = %q, want %q", tt.name, tt.got, tt.want)
+			}
+		})
+	}
+}
+
+// TestUserLevelForChannelPaths verifies the channel-parameterized ForChannel variants.
+func TestUserLevelForChannelPaths(t *testing.T) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatalf("UserHomeDir: %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		channel string
+		got     string
+		want    string
+	}{
+		// Claude channel (default behavior)
+		{"UserAgentsDirForChannel/claude", "claude", UserAgentsDirForChannel("claude"), filepath.Join(homeDir, ".claude", "agents")},
+		{"UserSkillsDirForChannel/claude", "claude", UserSkillsDirForChannel("claude"), filepath.Join(homeDir, ".claude", "skills")},
+		{"UserCommandsDirForChannel/claude", "claude", UserCommandsDirForChannel("claude"), filepath.Join(homeDir, ".claude", "commands")},
+		{"UserHooksDirForChannel/claude", "claude", UserHooksDirForChannel("claude"), filepath.Join(homeDir, ".claude", "hooks")},
+		{"UserProvenanceManifestForChannel/claude", "claude", UserProvenanceManifestForChannel("claude"), filepath.Join(homeDir, ".claude", "USER_PROVENANCE_MANIFEST.yaml")},
+		{"OrgProvenanceManifestForChannel/claude", "claude", OrgProvenanceManifestForChannel("claude"), filepath.Join(homeDir, ".claude", "ORG_PROVENANCE_MANIFEST.yaml")},
+		// Gemini channel
+		{"UserAgentsDirForChannel/gemini", "gemini", UserAgentsDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "agents")},
+		{"UserSkillsDirForChannel/gemini", "gemini", UserSkillsDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "skills")},
+		{"UserCommandsDirForChannel/gemini", "gemini", UserCommandsDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "commands")},
+		{"UserHooksDirForChannel/gemini", "gemini", UserHooksDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "hooks")},
+		{"UserProvenanceManifestForChannel/gemini", "gemini", UserProvenanceManifestForChannel("gemini"), filepath.Join(homeDir, ".gemini", "USER_PROVENANCE_MANIFEST.yaml")},
+		{"OrgProvenanceManifestForChannel/gemini", "gemini", OrgProvenanceManifestForChannel("gemini"), filepath.Join(homeDir, ".gemini", "ORG_PROVENANCE_MANIFEST.yaml")},
+		// Empty channel defaults to claude
+		{"UserAgentsDirForChannel/empty", "", UserAgentsDirForChannel(""), filepath.Join(homeDir, ".claude", "agents")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.got != tt.want {
+				t.Errorf("%s = %q, want %q", tt.name, tt.got, tt.want)
+			}
+		})
+	}
+}
+
+// TestForChannelBackwardCompat verifies deprecated functions return same result as ForChannel("claude").
+func TestForChannelBackwardCompat(t *testing.T) {
+	tests := []struct {
+		name       string
+		deprecated string
+		forChannel string
+	}{
+		{"UserAgentsDir", UserAgentsDir(), UserAgentsDirForChannel("claude")},
+		{"UserSkillsDir", UserSkillsDir(), UserSkillsDirForChannel("claude")},
+		{"UserCommandsDir", UserCommandsDir(), UserCommandsDirForChannel("claude")},
+		{"UserHooksDir", UserHooksDir(), UserHooksDirForChannel("claude")},
+		{"UserProvenanceManifest", UserProvenanceManifest(), UserProvenanceManifestForChannel("claude")},
+		{"OrgProvenanceManifest", OrgProvenanceManifest(), OrgProvenanceManifestForChannel("claude")},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.deprecated != tt.forChannel {
+				t.Errorf("%s() = %q, ForChannel(\"claude\") = %q -- backward compat broken",
+					tt.name, tt.deprecated, tt.forChannel)
 			}
 		})
 	}

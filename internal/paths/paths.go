@@ -21,9 +21,13 @@ func NewResolver(projectRoot string) *Resolver {
 	return &Resolver{projectRoot: projectRoot}
 }
 
-// FindProjectRoot walks up from the given directory looking for .claude/ or .knossos/.
+// FindProjectRoot walks up from the given directory looking for a knossos platform
+// directory (.knossos/) or any channel directory (.claude/, .gemini/).
 // If startDir is empty, uses the current working directory.
-// Returns an error if neither directory is found.
+// Returns an error if no recognized directory is found.
+//
+// Search order at each level: .knossos (platform dir, strongest signal),
+// then channel dirs (.claude, .gemini) in registration order.
 func FindProjectRoot(startDir string) (string, error) {
 	if startDir == "" {
 		var err error
@@ -35,15 +39,17 @@ func FindProjectRoot(startDir string) (string, error) {
 
 	dir := startDir
 	for {
-		// Check .claude/ first (CC projects)
-		claudeDir := filepath.Join(dir, ".claude")
-		if info, err := os.Stat(claudeDir); err == nil && info.IsDir() {
-			return dir, nil
-		}
-		// Fallback: .knossos/ (knossos-managed projects)
+		// Check .knossos/ first (platform directory, strongest signal)
 		knossosDir := filepath.Join(dir, ".knossos")
 		if info, err := os.Stat(knossosDir); err == nil && info.IsDir() {
 			return dir, nil
+		}
+		// Check all channel directories
+		for _, dirName := range []string{".claude", ".gemini"} {
+			channelDir := filepath.Join(dir, dirName)
+			if info, err := os.Stat(channelDir); err == nil && info.IsDir() {
+				return dir, nil
+			}
 		}
 
 		parent := filepath.Dir(dir)
@@ -392,34 +398,70 @@ func UserClaudeDir() string {
 	return filepath.Join(homeDir, ".claude")
 }
 
-// UserAgentsDir returns the user-level agents directory.
+// UserAgentsDirForChannel returns the user-level agents directory for a specific channel.
+func UserAgentsDirForChannel(channel string) string {
+	return filepath.Join(UserChannelDir(channel), "agents")
+}
+
+// UserAgentsDir returns the user-level agents directory for the default channel (claude).
+// Deprecated: Use UserAgentsDirForChannel for channel-aware paths.
 func UserAgentsDir() string {
-	return filepath.Join(UserClaudeDir(), "agents")
+	return UserAgentsDirForChannel("claude")
 }
 
-// UserSkillsDir returns the user-level skills directory.
+// UserSkillsDirForChannel returns the user-level skills directory for a specific channel.
+func UserSkillsDirForChannel(channel string) string {
+	return filepath.Join(UserChannelDir(channel), "skills")
+}
+
+// UserSkillsDir returns the user-level skills directory for the default channel (claude).
+// Deprecated: Use UserSkillsDirForChannel for channel-aware paths.
 func UserSkillsDir() string {
-	return filepath.Join(UserClaudeDir(), "skills")
+	return UserSkillsDirForChannel("claude")
 }
 
-// UserCommandsDir returns the user-level commands directory.
+// UserCommandsDirForChannel returns the user-level commands directory for a specific channel.
+func UserCommandsDirForChannel(channel string) string {
+	return filepath.Join(UserChannelDir(channel), "commands")
+}
+
+// UserCommandsDir returns the user-level commands directory for the default channel (claude).
+// Deprecated: Use UserCommandsDirForChannel for channel-aware paths.
 func UserCommandsDir() string {
-	return filepath.Join(UserClaudeDir(), "commands")
+	return UserCommandsDirForChannel("claude")
 }
 
-// UserHooksDir returns the user-level hooks directory.
+// UserHooksDirForChannel returns the user-level hooks directory for a specific channel.
+func UserHooksDirForChannel(channel string) string {
+	return filepath.Join(UserChannelDir(channel), "hooks")
+}
+
+// UserHooksDir returns the user-level hooks directory for the default channel (claude).
+// Deprecated: Use UserHooksDirForChannel for channel-aware paths.
 func UserHooksDir() string {
-	return filepath.Join(UserClaudeDir(), "hooks")
+	return UserHooksDirForChannel("claude")
+}
+
+// UserProvenanceManifestForChannel returns the user-level provenance manifest for a specific channel.
+func UserProvenanceManifestForChannel(channel string) string {
+	return filepath.Join(UserChannelDir(channel), "USER_PROVENANCE_MANIFEST.yaml")
 }
 
 // UserProvenanceManifest returns the path to the user-level provenance manifest.
+// Deprecated: Use UserProvenanceManifestForChannel for channel-aware paths.
 func UserProvenanceManifest() string {
-	return filepath.Join(UserClaudeDir(), "USER_PROVENANCE_MANIFEST.yaml")
+	return UserProvenanceManifestForChannel("claude")
+}
+
+// OrgProvenanceManifestForChannel returns the org-level provenance manifest for a specific channel.
+func OrgProvenanceManifestForChannel(channel string) string {
+	return filepath.Join(UserChannelDir(channel), "ORG_PROVENANCE_MANIFEST.yaml")
 }
 
 // OrgProvenanceManifest returns the path to the org-level provenance manifest.
+// Deprecated: Use OrgProvenanceManifestForChannel for channel-aware paths.
 func OrgProvenanceManifest() string {
-	return filepath.Join(UserClaudeDir(), "ORG_PROVENANCE_MANIFEST.yaml")
+	return OrgProvenanceManifestForChannel("claude")
 }
 
 // --- Session ID Helpers ---

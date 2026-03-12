@@ -21,8 +21,9 @@ import (
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
 // Cross-rite agents (pythia, moirai, etc.) are user-scope owned and NOT handled here.
-// When comp is non-nil and channel is not "claude", CompileAgent() is called after
-// transformAgentContent() to translate tool names for the target channel.
+// When comp is non-nil, CompileAgent() is called after transformAgentContent()
+// to translate tool names for the target channel. The compiler is channel-aware:
+// ClaudeCompiler is a pass-through, GeminiCompiler translates tool names.
 func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride, channel string, comp compiler.ChannelCompiler) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
@@ -67,8 +68,9 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		}
 		content = transformed
 
-		// Channel compilation: translate tool names for non-claude channels.
-		if comp != nil && channel != "claude" {
+		// Channel compilation: translate tool names for the target channel.
+		// The compiler is optional (nil for channels without translation needs).
+		if comp != nil {
 			compiled, cErr := compileAgentContent(agent.Name, content, comp)
 			if cErr != nil {
 				return fmt.Errorf("agent compile failed for archetype agent %s: %w", agent.Name, cErr)

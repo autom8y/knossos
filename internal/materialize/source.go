@@ -41,27 +41,34 @@ type UserResourcePaths struct {
 	Nested       bool   // true for mena, hooks
 }
 
-// ResolveUserResources resolves source/target paths for user-scope resources.
-func ResolveUserResources(knossosHome string) ([]UserResourcePaths, error) {
+// ResolveUserResourcesForChannel resolves source/target paths for user-scope resources
+// targeting a specific channel.
+func ResolveUserResourcesForChannel(knossosHome, channel string) ([]UserResourcePaths, error) {
 	return []UserResourcePaths{
 		{
 			ResourceType: ResourceAgents,
 			SourceDir:    filepath.Join(knossosHome, "agents"),
-			TargetDir:    paths.UserAgentsDir(),
+			TargetDir:    paths.UserAgentsDirForChannel(channel),
 			Nested:       false,
 		},
 		{
 			ResourceType: ResourceMena,
 			SourceDir:    filepath.Join(knossosHome, "mena"),
-			CommandsDir:  paths.UserCommandsDir(),
-			SkillsDir:    paths.UserSkillsDir(),
+			CommandsDir:  paths.UserCommandsDirForChannel(channel),
+			SkillsDir:    paths.UserSkillsDirForChannel(channel),
 			Nested:       true,
 		},
 		{
 			ResourceType: ResourceHooks,
 			SourceDir:    filepath.Join(knossosHome, "hooks"),
-			TargetDir:    paths.UserHooksDir(),
+			TargetDir:    paths.UserHooksDirForChannel(channel),
 			Nested:       true,
 		},
 	}, nil
+}
+
+// ResolveUserResources resolves source/target paths for user-scope resources.
+// Deprecated: Use ResolveUserResourcesForChannel for channel-aware paths.
+func ResolveUserResources(knossosHome string) ([]UserResourcePaths, error) {
+	return ResolveUserResourcesForChannel(knossosHome, "claude")
 }

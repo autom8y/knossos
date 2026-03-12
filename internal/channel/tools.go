@@ -33,6 +33,67 @@ var CCOnlyTools = map[string]bool{
 	"NotebookEdit": true, // No Gemini equivalent
 }
 
+// CanonicalTool maps knossos canonical tool names to per-channel wire names.
+// This is the harness-agnostic vocabulary: templates and platform code reference
+// canonical names; channel compilers resolve to wire names at projection time.
+//
+// The existing CCToGeminiTool map is retained for backward compatibility.
+// New code should prefer CanonicalToWireTool / WireToCanonicalTool.
+var CanonicalTool = map[string]map[string]string{
+	"read_file":      {"claude": "Read", "gemini": "read_file"},
+	"edit_file":      {"claude": "Edit", "gemini": "replace"},
+	"write_file":     {"claude": "Write", "gemini": "write_file"},
+	"list_files":     {"claude": "Glob", "gemini": "glob"},
+	"search_content": {"claude": "Grep", "gemini": "grep_search"},
+	"run_shell":      {"claude": "Bash", "gemini": "run_shell_command"},
+	"web_search":     {"claude": "WebSearch", "gemini": "google_web_search"},
+	"web_fetch":      {"claude": "WebFetch", "gemini": "web_fetch"},
+	"write_todos":    {"claude": "TodoWrite", "gemini": "write_todos"},
+	"activate_skill": {"claude": "Skill", "gemini": "activate_skill"},
+	"delegate":       {"claude": "Task"},
+}
+
+// wireToCanonical is the reverse index: wire name -> canonical name.
+// Computed once at init from CanonicalTool.
+var wireToCanonical map[string]string
+
+func init() {
+	wireToCanonical = make(map[string]string, len(CanonicalTool)*2)
+	for canonical, wires := range CanonicalTool {
+		for _, wire := range wires {
+			wireToCanonical[wire] = canonical
+		}
+	}
+}
+
+// CanonicalToWireTool returns the wire tool name for a given channel.
+//
+// Return semantics:
+//   - (wireName, true): resolved successfully.
+//   - (canonical, true): unknown canonical name -- passed through as-is.
+//   - ("", false): canonical is known but has no equivalent for this channel.
+func CanonicalToWireTool(canonical, channel string) (string, bool) {
+	wires, ok := CanonicalTool[canonical]
+	if !ok {
+		return canonical, true // unknown canonical -- pass through
+	}
+	wire, hasWire := wires[channel]
+	if !hasWire {
+		return "", false // no equivalent for this channel
+	}
+	return wire, true
+}
+
+// WireToCanonicalTool converts a channel-specific wire tool name to its
+// canonical knossos name. Returns (canonical, true) on hit, or
+// (wireName, false) if the wire name is not in any canonical mapping.
+func WireToCanonicalTool(wireName string) (string, bool) {
+	if canonical, ok := wireToCanonical[wireName]; ok {
+		return canonical, true
+	}
+	return wireName, false
+}
+
 // TranslateTool returns the Gemini equivalent for a CC tool name.
 //
 // Return semantics:
