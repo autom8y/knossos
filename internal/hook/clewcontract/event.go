@@ -1,4 +1,4 @@
-// Package clewcontract provides Clew Contract v2 event recording for Claude Code hooks.
+// Package clewcontract provides Clew Contract v2 event recording for harness hooks.
 // "Theseus has amnesia; the Clew remembers" - events.jsonl provides the factual route through decisions.
 package clewcontract
 
@@ -11,7 +11,7 @@ import (
 // EventType represents the type of clew event.
 type EventType string
 
-// Clew event types for tracking Claude Code activity.
+// Clew event types for tracking harness activity.
 const (
 	EventTypeToolCall          EventType = "tool.call"
 	EventTypeFileChange        EventType = "tool.file_change"
@@ -42,7 +42,7 @@ const (
 // ArtifactType represents the type of artifact created during a session.
 type ArtifactType string
 
-// Artifact types for tracking deliverables produced during Claude Code sessions.
+// Artifact types for tracking deliverables produced during coding sessions.
 const (
 	ArtifactTypePRD       ArtifactType = "prd"
 	ArtifactTypeTDD       ArtifactType = "tdd"

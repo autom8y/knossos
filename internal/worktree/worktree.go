@@ -1,4 +1,4 @@
-// Package worktree provides git worktree management for parallel Claude sessions.
+// Package worktree provides git worktree management for parallel coding sessions.
 // It enables isolated filesystem environments for running multiple sessions simultaneously.
 package worktree
 

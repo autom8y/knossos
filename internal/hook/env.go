@@ -1,4 +1,4 @@
-// Package hook provides hook infrastructure for Claude Code integration.
+// Package hook provides hook infrastructure for harness lifecycle integration.
 // It handles parsing hook environment variables, formatting output, and loading session context.
 package hook
 
@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-// EnvProjectDir is the only hook environment variable still set by Claude Code.
+// EnvProjectDir is the hook environment variable for the project directory.
 // All other hook data arrives via stdin JSON (see StdinPayload).
 const EnvProjectDir = "CLAUDE_PROJECT_DIR"
 

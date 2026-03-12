@@ -12,12 +12,12 @@ import (
 // SyncUserScopeParams provides all dependencies for user-scope sync.
 // Constructed by the core Sync() method from Materializer fields.
 type SyncUserScopeParams struct {
-	Resolver       *paths.Resolver // for ClaudeDir() (collision checker)
+	Resolver       *paths.Resolver // for ChannelDir() (collision checker)
 	EmbeddedAgents fs.FS           // fallback agent source
 	EmbeddedMena   fs.FS           // fallback mena source (platform mena/)
 	EmbeddedRites  fs.FS           // fallback rites source (for rites/shared/mena/)
 	KnossosHome    string          // explicit KNOSSOS_HOME path; falls back to config if empty
-	UserChannelDir string          // explicit ~/.claude path; falls back to paths.UserClaudeDir() if empty
+	UserChannelDir string          // explicit ~/.claude path; falls back to paths.UserChannelDir() if empty
 	Opts           SyncOptions     // sync configuration
 }
 

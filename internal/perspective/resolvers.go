@@ -13,7 +13,7 @@ import (
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
-// knownCCTools is the canonical set of CC-native tools. Mirrors agent.knownTools
+// knownCCTools is the canonical set of harness-native tools. Mirrors agent.knownTools
 // (which is unexported). We replicate here to avoid depending on unexported state.
 var knownCCTools = map[string]bool{
 	"Bash":            true,

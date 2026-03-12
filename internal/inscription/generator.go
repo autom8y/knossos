@@ -280,9 +280,9 @@ func (g *Generator) templateFuncs() template.FuncMap {
 		return ".claude"
 	}
 
-	// toolName translates a CC tool name to the channel-appropriate equivalent.
+	// toolName translates a canonical tool name to the channel-appropriate equivalent.
 	// For Gemini, translates known tools; unknown tools pass through.
-	// For Claude (or empty channel), returns the CC name unchanged.
+	// For Claude (or empty channel), returns the name unchanged.
 	// Used in templates as: `{{ toolName "Read" }}(".know/architecture.md")`
 	funcs["toolName"] = func(ccName string) string {
 		if g.Context != nil && g.Context.Channel == "gemini" {

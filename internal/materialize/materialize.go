@@ -280,7 +280,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return result, nil
 	}
 
-	// Ensure .claude/ directory exists
+	// Ensure channel directory exists
 	if err := paths.EnsureDir(channelDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
@@ -594,7 +594,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 // cannot be created, the subsequent sync steps will fail with actionable errors.
 func (m *Materializer) ensureProjectDirs() {
 	dirs := []string{
-		m.resolver.ClaudeDir(),   // .claude/
+		m.resolver.ClaudeDir(),   // channel dir
 		m.resolver.SessionsDir(), // .sos/sessions/ (implies .sos/)
 		m.resolver.KnossosDir(),  // .knossos/
 	}

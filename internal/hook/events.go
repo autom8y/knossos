@@ -87,7 +87,7 @@ func TranslateInboundEvent(wireEvent string) string {
 // for the target channel.
 // For "claude", returns the matcher unchanged.
 // For "gemini", translates each pipe-delimited tool name segment using the
-// channel.CCToGeminiTool mapping. Unknown tool names pass through unchanged.
+// channel.CanonicalTool mapping. Unknown tool names pass through unchanged.
 func TranslateMatcherForChannel(matcher, targetChannel string) string {
 	if targetChannel != "gemini" || matcher == "" {
 		return matcher

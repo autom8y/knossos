@@ -150,7 +150,7 @@ func reconstructFrontmatter(fmMap map[string]any, body []byte) ([]byte, error) {
 
 // geminiToolBodyRe matches backtick-delimited CC tool names in body text.
 // Anchored to backtick delimiters to avoid replacing English words (e.g., "Read" in prose).
-// Covers the tools that have Gemini equivalents in channel.CCToGeminiTool.
+// Covers the tools that have Gemini equivalents in channel.CanonicalTool.
 var geminiToolBodyRe = regexp.MustCompile("`(Read|Bash|Edit|Write|Glob|Grep)`")
 
 // applyGeminiBodySubstitutions applies targeted text replacements to agent body content
