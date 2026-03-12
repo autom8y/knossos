@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted (Implemented)
 
 ## Date
 
@@ -247,6 +247,32 @@ Implementation decomposes into five phases across 10 packages. PKG-006 (hook eve
 Full migration detail in `SPRINT-PLAN.md`. Each phase is independently testable — the adapter boundary means phases 1–2 can ship without touching hook command source.
 
 ---
+
+## Implementation Evidence
+
+The canonical vocabulary was implemented across 21 commits in 12 sprints:
+
+| Sprint | Commit | Scope |
+|--------|--------|-------|
+| Sprint 0 | `fdf5043` | PKG-001-004: Quick wins (47 files) |
+| D1 | `8b1c5b3` | ADR-0032 initial draft |
+| I1 | `6d22a96` | PKG-006: Canonical event vocabulary (63 files, 18 events) |
+| I1+ | `b82276a` | ADR amendment: worktree_create/worktree_remove added to canonical set |
+| I2 | `e1e3330` | PKG-007+008: Core pipeline generalization + tool canonicalization |
+| I3 | `01dc3b4` | PKG-010: CLI behavioral fixes |
+| R1 | `e444b48`→`57f51be` | 6-group claudeDir→channelDir rename wave |
+| R2 | `e103d04` | Remaining CC-specific renames + acid test audit |
+| I4 | `b702931` | TargetChannel interface extensions + cmd/ channel-parameterization |
+
+### N-Channel Readiness (Codex Spike Validation)
+
+Sprint I4 addressed 3 architecture gaps identified by the Codex third-channel spike:
+
+1. **ContextFilePath**: `TargetChannel` now provides `ContextFilePath(projectRoot)` — context file location is channel-derived, not assumed inside `DirName()`.
+2. **SkillsDir**: `TargetChannel` now provides `SkillsDir(projectRoot)` — skills directory is channel-derived.
+3. **CompileAgent nil convention**: Channels that don't support file-per-agent return `(nil, nil)` — pipeline gracefully skips.
+
+Adding a third channel now requires implementing 5 `TargetChannel` methods + 3 `ChannelCompiler` methods. Zero core pipeline changes.
 
 ## Machine-Readable Vocabulary Extract (APPENDIX)
 

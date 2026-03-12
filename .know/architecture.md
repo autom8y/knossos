@@ -7,7 +7,7 @@ source_scope:
   - "./internal/**/*.go"
   - "./go.mod"
 generator: theoros
-source_hash: "dbf81b8"
+source_hash: "b702931"
 confidence: 0.82
 format_version: "1.0"
 update_mode: "full"
@@ -75,14 +75,14 @@ Each sub-package owns one cobra command group. All follow the same pattern: a `N
 | `errors` | 2 | Structured `Error` type with code, message, details, exit code; 30 exit codes; `Wrap`, `New`, `IsHandled` | **Leaf** (no internal imports) |
 | `output` | 3 | `Printer` type with `text`/`json`/`yaml` format support; `Textable` interface; tabwriter for tables | **Leaf** (no internal imports) |
 | `config` | 2 | `KnossosHome()`, `XDGDataDir()`, `ActiveOrg()` — env var and filesystem resolution, singleton pattern | **Leaf** (no internal imports) |
-| `paths` | 2 | `Resolver` (project-relative paths), `FindProjectRoot()`, XDG user path functions; hub for directory structure | imports `errors` |
+| `paths` | 2 | `Resolver` (project-relative paths), `FindProjectRoot()`, XDG user path functions; hub for directory structure. `TargetChannel` interface has 5 methods: `Name()`, `DirName()`, `ContextFile()`, `ContextFilePath(projectRoot)`, `SkillsDir(projectRoot)`. `ChannelByName` derives from `AllChannels()`. `FindProjectRoot` searches for `.knossos`, `.claude`, `.gemini` markers. | imports `errors` |
 | `fileutil` | 2 | Atomic file writes, directory creation, path helpers | imports `errors` |
 | `checksum` | 2 | SHA256 with `sha256:` prefix convention | imports nothing internal |
 | `frontmatter` | 3 | `Parse()` for `---` delimited YAML; `FlexibleStringSlice` (accepts comma-string or YAML list) | imports nothing internal |
 | `registry` | 3 | Denial-recovery registry: stable `RefKey` constants → `RefEntry` values; **leaf** (no internal imports) | **Leaf** |
 | `lock` | 3 | Advisory file locking: `Manager`, `Lock`, `LockMetadata` v2; 5-min stale threshold; `Shared`/`Exclusive` types | imports `errors` |
 | `validation` | 4 | Schema validators for artifact, frontmatter, handoff, sails | imports `errors` |
-| `hook` | 3+1 | `StdinPayload`, `Env`, `ParseEnv()`; 14 `HookEvent` constants; `clewcontract/` sub-package (16-event JSONL ledger) | imports nothing internal (except `errors` for helpers) |
+| `hook` | 3+1 | `StdinPayload`, `Env`, `ParseEnv()`; 18 `HookEvent` constants (canonical snake_case names, e.g., `EventPreTool`, `EventSessionStart`); canonical vocabulary layer with `canonicalToWire`/`wireToCanonical` bidirectional translation tables (18 events), `CanonicalToWire()`/`WireToCanonical()` functions. Hook events use snake_case canonical names internally; adapters translate to/from wire format at the boundary. `clewcontract/` sub-package (16-event JSONL ledger) | imports nothing internal (except `errors` for helpers) |
 | `session` | 12+ | `Context` type (SESSION_CONTEXT.md), FSM (NONE/ACTIVE/PARKED/ARCHIVED), events JSONL, lock integration | imports `errors`, `fileutil`, `paths`, `lock`, `hook/clewcontract`, `validation` |
 | `manifest` | 5 | `Manifest`, load/parse/diff/merge; supports JSON+YAML, git refs | imports `errors`, `fileutil` |
 | `inscription` | 7 | CLAUDE.md region system: `Generator`, `Manifest`, `Marker`; knossos/satellite/regenerate owner types | imports `errors`, `fileutil`, `paths`, `frontmatter` |
@@ -90,6 +90,7 @@ Each sub-package owns one cobra command group. All follow the same pattern: a `N
 | `agent` | 6 | `AgentFrontmatter`, archetype detection, regeneration logic, MCP validation | imports `errors`, `frontmatter`, `paths` |
 | `rite` | 6 | `Rite`, `Discovery`, budget tracking, context loading, invoker; `RiteForm` enum | imports `errors`, `paths`, `config` |
 | `mena` | 4 | Mena source resolution, walk, type detection (`.dro.md`/`.lego.md`) | imports `errors`, `paths` |
+| `channel` | — | Tool canonicalization layer: `CanonicalTool` map (11 tools), `CanonicalToWireTool()`/`WireToCanonicalTool()` bidirectional translation functions. Translates between knossos canonical tool names (snake_case, e.g., `run_shell`) and channel wire names (e.g., `Bash` for CC, `run_shell_command` for Gemini). | imports `paths` |
 | `materialize` | 30+ | **Central hub**: `Materializer`, `RiteManifest`, `Agent`, `Options`, `Result`, `SyncOptions`, `SyncResult`; orchestrates full sync pipeline through 9 sub-packages | imports `errors`, `paths`, `fileutil`, `checksum`, `config`, `registry`, `provenance`, `inscription`, `frontmatter`, `sync` |
 | `materialize/source` | 2 | Source resolution: `SourceType` constants (`project`/`user`/`knossos`/`org`/`explicit`/`embedded`), `ResolvedRite`, `SourceResolver` | imports `errors`, `paths`, `config` |
 | `materialize/mena` | 5 | Mena projection to `commands/`+`skills/`: `MenaSource`, `MenaProjectionOptions`, `CollectMena`, `SyncMena`, `RouteMenaFile` | imports `errors`, `paths`, `fileutil`, `frontmatter` |

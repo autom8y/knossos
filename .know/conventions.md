@@ -267,6 +267,16 @@ The `paths.Resolver` struct centralizes all path resolution and is passed as a d
 
 Files with `.dro.md` extension are dromena (commands); `.lego.md` are legomena (skills). This double-extension convention is unique to this project and enforced by `internal/mena/types.go`. Extension stripping is done by `StripMenaExtension(filename string) string`.
 
+### Canonical Vocabulary Convention
+
+Internal event names use snake_case (`pre_tool`, `session_start`). Go constants use PascalCase (`EventPreTool`, `EventSessionStart`). Wire names per channel are translations, not canonical — CC receives `PreToolUse`, Gemini receives `BeforeTool`, but core code always uses the canonical form. See ADR-0032 for the full 18-event vocabulary table and bidirectional translation functions (`CanonicalToWire()`, `WireToCanonical()`).
+
+The same principle applies to tools: knossos canonical names are snake_case (`run_shell`, `read_file`). Channel adapters translate outbound to the wire name for that channel (`Bash` for CC, `run_shell_command` for Gemini). When reading inbound tool payloads, adapters translate to canonical before any core code touches the value.
+
+### Nil-Content Compiler Convention
+
+`ChannelCompiler.CompileAgent()` returns `(nil, nil)` when the channel doesn't support file-per-agent output (e.g., Codex, which uses a single `AGENTS.md` rather than per-agent files). Callers check `len(content) == 0` before writing. This allows the materialize pipeline to gracefully skip file creation for channels that don't need it, without treating the absence as an error.
+
 ### `FlexibleStringSlice`
 
 `internal/frontmatter.FlexibleStringSlice` is a custom YAML type that accepts both comma-separated strings and YAML list syntax. It is aliased (not re-implemented) in `internal/agent/types.go` as `type FlexibleStringSlice = frontmatter.FlexibleStringSlice`. Used for `tools:` and `allowedTools:` frontmatter fields.

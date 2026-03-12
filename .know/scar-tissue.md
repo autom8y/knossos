@@ -429,6 +429,18 @@ All 28 fix locations verified against current filesystem at HEAD (`dbf81b8`).
 **Fix pattern**: Refactor `SetEmbeddedAssets` to use DI (struct field or function parameter) when `common` package gets DI treatment.
 **Guard**: Test deliberately excluded from `t.Parallel()` adoption (commit `5ec4a18`). Documented exception.
 
+### SCAR-033: Config Canonicalization Timing
+
+**Category**: integration_failure
+**Discovered**: 2026-03-12 (harness-agnosticism initiative, Sprint I1)
+**Fix commit**: 6d22a96
+
+**What failed**: hooks.yaml was updated to use canonical event names (snake_case) BEFORE the translation-aware ari binary was rebuilt and installed. The running (old) binary read the new config but lacked the `CanonicalToWire()` translation layer, producing `settings.local.json` with canonical names (`pre_tool`, `session_start`) instead of CC wire names (`PreToolUse`, `SessionStart`). Claude Code rejected the invalid keys, breaking all hooks across projects.
+
+**Defensive pattern**: When canonicalizing config file formats (new field names, new value formats), the translation-aware binary MUST be built and installed BEFORE the canonicalized config is committed. Config changes and translation code are an atomic pair — deploy the code first, then the config.
+
+**Guard**: Include a `CGO_ENABLED=0 go build ./cmd/ari && cp ./ari $(which ari)` step before committing config format changes. Alternatively, add a version check in the config parser that rejects unrecognized event names with a clear "rebuild ari" message.
+
 ---
 
 ## Assessment Metadata
