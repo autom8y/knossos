@@ -24,10 +24,10 @@ to the specified session. The target session must exist and not be
 in ARCHIVED state.
 
 The harness session ID is obtained from the SessionStart hook output
-(harness_session_id field). Pass it via --cc-session-id.
+(harness_session_id field). Pass it via --harness-session-id.
 
 Examples:
-  ari session claim session-20260305-140000-abc12345 --cc-session-id <cc-id>
+  ari session claim session-20260305-140000-abc12345 --harness-session-id <harness-id>
 
 Context:
   Use after 'ari session fray' to bind a new CC instance to the child session.
@@ -39,9 +39,9 @@ Context:
 		},
 	}
 
-	cmd.Flags().StringVar(&ccSessionID, "cc-session-id", "",
-		"CC session ID (from SessionStart hook cc_session_id field)")
-	_ = cmd.MarkFlagRequired("cc-session-id")
+	cmd.Flags().StringVar(&ccSessionID, "harness-session-id", "",
+		"Harness session ID (from SessionStart hook harness_session_id field)")
+	_ = cmd.MarkFlagRequired("harness-session-id")
 
 	return cmd
 }

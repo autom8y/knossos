@@ -69,14 +69,14 @@ func TestContextOutput_Text(t *testing.T) {
 			},
 		},
 		{
-			name: "no session with cc_session_id",
+			name: "no session with harness_session_id",
 			output: ContextOutput{
 				HasSession:  false,
 				HarnessSessionID: "cc-abc123",
 			},
 			contains: []string{
 				"has_session: false\n",
-				"cc_session_id: \"cc-abc123\"\n",
+				"harness_session_id: \"cc-abc123\"\n",
 			},
 		},
 		{

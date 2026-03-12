@@ -21,7 +21,7 @@ Output is delimited by `---` markers. A comment header identifies the source.
 ---
 # Session Context (injected by ari hook context)
 session_id: session-20260306-122256-4fc1e1cc
-cc_session_id: "abc123"
+harness_session_id: "abc123"
 status: ACTIVE
 initiative: "Context-Session Alignment Remediation"
 active_rite: ecosystem
@@ -53,7 +53,7 @@ know_status: "Codebase knowledge: 5 domains (architecture: fresh, ...)"
 ---
 # Session Context (injected by ari hook context)
 has_session: false
-cc_session_id: "abc123"
+harness_session_id: "abc123"
 ---
 ```
 
@@ -149,7 +149,7 @@ The hook's `ContextOutput` struct adds environment-derived fields not stored in 
 
 | Field | YAML Key | Source | Description |
 |-------|----------|--------|-------------|
-| CC Session ID | `cc_session_id` | Hook env (stdin) | Claude Code's own session ID |
+| Harness Session ID | `harness_session_id` | Hook env (stdin) | Harness's own session ID |
 | Execution Mode | `execution_mode` | Computed | `native`, `orchestrated`, or `cross-cutting` |
 | Has Session | `has_session` | Computed | `true` if a session was resolved, `false` otherwise |
 | Git Branch | `git_branch` | `git rev-parse` | Current branch name |

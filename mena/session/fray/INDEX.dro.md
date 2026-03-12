@@ -17,8 +17,8 @@ Fork the current session into a parallel strand. $ARGUMENTS
 ### --claim Mode (Bind Only)
 
 If `--claim` is present:
-1. Extract `cc_session_id` from hook-injected YAML frontmatter
-2. Execute: `ari session claim {claim-session-id} --cc-session-id {cc-id}`
+1. Extract `harness_session_id` from hook-injected YAML frontmatter
+2. Execute: `ari session claim {claim-session-id} --harness-session-id {cc-id}`
 3. Display: `Claimed: bound to {session-id}`
 4. Sigil: `claimed -- next: /go`
 5. STOP (do not proceed to fray logic)

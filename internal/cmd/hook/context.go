@@ -39,7 +39,7 @@ type StrandOutput struct {
 // ContextOutput represents the output of the context hook.
 type ContextOutput struct {
 	SessionID       string               `json:"session_id,omitempty"`
-	HarnessSessionID string               `json:"cc_session_id,omitempty"` // TODO(PLS-Sprint4): rename JSON tag and YAML key when mena schemas are updated
+	HarnessSessionID string               `json:"harness_session_id,omitempty"`
 	FrayedFrom      string               `json:"frayed_from,omitempty"`
 	FrameRef        string               `json:"frame_ref,omitempty"`
 	ParkSource      string               `json:"park_source,omitempty"`
@@ -78,7 +78,7 @@ func (c ContextOutput) Text() string {
 		// No-session path: emit minimal frontmatter
 		b.WriteString("has_session: false\n")
 		if c.HarnessSessionID != "" {
-			fmt.Fprintf(&b, "cc_session_id: %q\n", c.HarnessSessionID)
+			fmt.Fprintf(&b, "harness_session_id: %q\n", c.HarnessSessionID)
 		}
 		b.WriteString("---\n")
 		return b.String()
@@ -87,7 +87,7 @@ func (c ContextOutput) Text() string {
 	// Required fields (always present when has_session=true)
 	fmt.Fprintf(&b, "session_id: %s\n", c.SessionID)
 	if c.HarnessSessionID != "" {
-		fmt.Fprintf(&b, "cc_session_id: %q\n", c.HarnessSessionID)
+		fmt.Fprintf(&b, "harness_session_id: %q\n", c.HarnessSessionID)
 	}
 	fmt.Fprintf(&b, "status: %s\n", c.Status)
 	fmt.Fprintf(&b, "initiative: %q\n", c.Initiative)
