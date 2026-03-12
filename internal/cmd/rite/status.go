@@ -28,7 +28,7 @@ func newStatusCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Shows detailed status of the current or specified rite (practice bundle).
 
 Includes agent installation status, workflow phases, manifest validity,
-CLAUDE.md sync status, and any orphaned agents.
+inscription sync status, and any orphaned agents.
 
 Examples:
   ari rite status
@@ -92,10 +92,10 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 		}
 	}
 
-	// Check CLAUDE.md sync - simple check if rite name appears in file
-	claudeMDSynced := false
+	// Check inscription sync - simple check if rite name appears in inscription file
+	inscriptionSynced := false
 	if content, err := os.ReadFile(resolver.ClaudeMDFile()); err == nil {
-		claudeMDSynced = strings.Contains(string(content), riteName)
+		inscriptionSynced = strings.Contains(string(content), riteName)
 	}
 
 	// Orphans are now handled by materialization, not status command
@@ -112,7 +112,7 @@ func runStatus(ctx *cmdContext, opts statusOptions) error {
 		EntryPoint:     t.EntryPoint,
 		Orphans:        orphans,
 		ManifestValid:  manifestValid,
-		ClaudeMDSynced: claudeMDSynced,
+		InscriptionSynced: inscriptionSynced,
 	}
 
 	return printer.Print(result)

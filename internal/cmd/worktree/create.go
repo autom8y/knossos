@@ -41,6 +41,7 @@ func (c CreateOutput) Text() string {
 	if c.Rite != "" && c.Rite != "none" {
 		fmt.Fprintf(&b, "  Rite: %s\n", c.Rite)
 	}
+	// "claude" is the CC CLI binary name (not a knossos concept).
 	fmt.Fprintf(&b, "\nTo start working: cd %s && claude\n", c.Path)
 	return b.String()
 }
@@ -109,7 +110,7 @@ func runCreate(ctx *cmdContext, name string, opts createOptions) error {
 		FromRef:      wt.FromRef,
 		Complexity:   wt.Complexity,
 		CreatedAt:    wt.CreatedAt.Format(time.RFC3339),
-		Instructions: fmt.Sprintf("cd %s && claude", wt.Path),
+		Instructions: fmt.Sprintf("cd %s && claude", wt.Path), // "claude" is the CC CLI binary name
 	}
 
 	return printer.Print(result)

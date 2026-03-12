@@ -43,6 +43,7 @@ func (c CloneOutput) Text() string {
 	if c.SessionCopied {
 		b.WriteString("  Session context: copied\n")
 	}
+	// "claude" is the CC CLI binary name (not a knossos concept).
 	fmt.Fprintf(&b, "\nTo start working: cd %s && claude\n", c.Path)
 	return b.String()
 }
@@ -112,7 +113,7 @@ func runClone(ctx *cmdContext, sourceIDOrName, newName string, opts cloneOptions
 		SourceName:    sourceName,
 		CreatedAt:     wt.CreatedAt.Format(time.RFC3339),
 		SessionCopied: opts.copySession,
-		Instructions:  fmt.Sprintf("cd %s && claude", wt.Path),
+		Instructions:  fmt.Sprintf("cd %s && claude", wt.Path), // "claude" is the CC CLI binary name
 	}
 
 	return printer.Print(result)

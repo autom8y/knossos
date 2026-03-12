@@ -316,7 +316,7 @@ type RiteSwapOutput struct {
 	SwitchedAt         string                   `json:"switched_at"`
 	AgentsInstalled    []string                 `json:"agents_installed"`
 	OrphansHandled     *OrphanHandleResult      `json:"orphans_handled,omitempty"`
-	ClaudeMDUpdated    bool                     `json:"claude_md_updated"`
+	InscriptionUpdated bool                     `json:"inscription_updated"`
 	ManifestPath       string                   `json:"manifest_path"`
 	InscriptionSynced  bool                     `json:"inscription_synced,omitempty"`
 	InscriptionVersion string                   `json:"inscription_version,omitempty"`
@@ -357,7 +357,7 @@ type RiteStatusOutput struct {
 	EntryPoint     string        `json:"entry_point"`
 	Orphans        []string      `json:"orphans,omitempty"`
 	ManifestValid  bool          `json:"manifest_valid"`
-	ClaudeMDSynced bool          `json:"claude_md_synced"`
+	InscriptionSynced bool         `json:"inscription_synced"`
 }
 
 // AgentStatus represents status of an individual agent.
@@ -405,11 +405,11 @@ func (s RiteStatusOutput) Rows() [][]string {
 	}
 	rows = append(rows, []string{"Manifest", manifestStatus})
 
-	claudeMDStatus := "Synced"
-	if !s.ClaudeMDSynced {
-		claudeMDStatus = "Out of sync"
+	inscriptionStatus := "Synced"
+	if !s.InscriptionSynced {
+		inscriptionStatus = "Out of sync"
 	}
-	rows = append(rows, []string{"CLAUDE.md", claudeMDStatus})
+	rows = append(rows, []string{"Inscription", inscriptionStatus})
 
 	return rows
 }
@@ -453,11 +453,11 @@ func (s RiteStatusOutput) Text() string {
 		status = "WARNING"
 		details = append(details, "manifest invalid")
 	}
-	if s.ClaudeMDSynced {
-		details = append(details, "CLAUDE.md synced")
+	if s.InscriptionSynced {
+		details = append(details, "inscription synced")
 	} else {
 		status = "WARNING"
-		details = append(details, "CLAUDE.md out of sync")
+		details = append(details, "inscription out of sync")
 	}
 	fmt.Fprintf(&b, "Status: %s (%s)\n", status, strings.Join(details, ", "))
 
@@ -471,7 +471,7 @@ type RiteSwitchOutput struct {
 	SwitchedAt         string                   `json:"switched_at"`
 	AgentsInstalled    []string                 `json:"agents_installed"`
 	OrphansHandled     *OrphanHandleResult      `json:"orphans_handled,omitempty"`
-	ClaudeMDUpdated    bool                     `json:"claude_md_updated"`
+	InscriptionUpdated bool                     `json:"inscription_updated"`
 	ManifestPath       string                   `json:"manifest_path"`
 	InscriptionSynced  bool                     `json:"inscription_synced,omitempty"`
 	InscriptionVersion string                   `json:"inscription_version,omitempty"`
@@ -496,11 +496,11 @@ func (s RiteSwitchOutput) Rows() [][]string {
 		rows = append(rows, []string{"Orphans Strategy", s.OrphansHandled.Strategy})
 	}
 
-	claudeMDStatus := "No"
-	if s.ClaudeMDUpdated {
-		claudeMDStatus = "Yes"
+	inscriptionStatus := "No"
+	if s.InscriptionUpdated {
+		inscriptionStatus = "Yes"
 	}
-	rows = append(rows, []string{"CLAUDE.md Updated", claudeMDStatus})
+	rows = append(rows, []string{"Inscription Updated", inscriptionStatus})
 
 	return rows
 }

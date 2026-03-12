@@ -756,7 +756,7 @@ func TestText_Smoke_NoPanic(t *testing.T) {
 		},
 		{
 			name:     "RiteStatusOutput",
-			textable: RiteStatusOutput{Rite: "eco", IsActive: true, Path: "p", Description: "d", WorkflowType: "orchestrated", EntryPoint: "potnia", ManifestValid: true, ClaudeMDSynced: true},
+			textable: RiteStatusOutput{Rite: "eco", IsActive: true, Path: "p", Description: "d", WorkflowType: "orchestrated", EntryPoint: "potnia", ManifestValid: true, InscriptionSynced: true},
 			wantNon:  true,
 		},
 		{
