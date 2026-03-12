@@ -1,6 +1,8 @@
 package materialize
 
 import (
+	"log/slog"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -68,6 +70,80 @@ func generateChannelGitignore(channelDir string, manifest *provenance.Provenance
 
 	gitignorePath := filepath.Join(channelDir, ".gitignore")
 	return fileutil.WriteIfChanged(gitignorePath, []byte(b.String()), 0644)
+}
+
+// untrackKnossosFiles removes knossos-owned files from the git index so that
+// the generated channel .gitignore takes effect for previously-tracked files.
+// Git only ignores untracked files; already-tracked files show in git status
+// regardless of .gitignore entries. This function bridges that gap by running
+// git rm --cached on knossos-owned tracked files (files remain on disk).
+//
+// Best-effort: returns the count of files untracked. Silently returns 0 if
+// git is unavailable, this is not a git repo, or no tracked files need removal.
+func untrackKnossosFiles(projectRoot, channelDir string, manifest *provenance.ProvenanceManifest) int {
+	if manifest == nil || len(manifest.Entries) == 0 {
+		return 0
+	}
+
+	// Compute channel prefix relative to project root (e.g., ".claude/")
+	relChannel, err := filepath.Rel(projectRoot, channelDir)
+	if err != nil {
+		return 0
+	}
+	channelPrefix := relChannel + "/"
+
+	// List tracked files under the channel directory.
+	// Fails silently if git is not installed or this is not a git repo.
+	cmd := exec.Command("git", "-C", projectRoot, "ls-files", relChannel)
+	output, err := cmd.Output()
+	if err != nil || len(output) == 0 {
+		return 0
+	}
+
+	tracked := make(map[string]bool)
+	for _, line := range strings.Split(strings.TrimSpace(string(output)), "\n") {
+		if line != "" {
+			tracked[line] = true
+		}
+	}
+
+	// Collect knossos-owned tracked files to untrack.
+	var toUntrack []string
+	for path, entry := range manifest.Entries {
+		if entry.Owner != provenance.OwnerKnossos || shouldExcludeFromGitignore(path) {
+			continue
+		}
+
+		if strings.HasSuffix(path, "/") {
+			// Directory entry — find all tracked files under it.
+			prefix := channelPrefix + path
+			for tp := range tracked {
+				if strings.HasPrefix(tp, prefix) {
+					toUntrack = append(toUntrack, tp)
+				}
+			}
+		} else {
+			if gitPath := channelPrefix + path; tracked[gitPath] {
+				toUntrack = append(toUntrack, gitPath)
+			}
+		}
+	}
+
+	if len(toUntrack) == 0 {
+		return 0
+	}
+
+	sort.Strings(toUntrack)
+
+	// Untrack via git rm --cached (files remain on disk).
+	args := append([]string{"-C", projectRoot, "rm", "--cached", "--quiet", "--"}, toUntrack...)
+	if err := exec.Command("git", args...).Run(); err != nil {
+		slog.Warn("failed to untrack knossos-owned files", "channel", relChannel, "count", len(toUntrack), "error", err)
+		return 0
+	}
+
+	slog.Info("untracked knossos-owned files from git index", "channel", relChannel, "count", len(toUntrack))
+	return len(toUntrack)
 }
 
 // shouldExcludeFromGitignore returns true for provenance entries that must not

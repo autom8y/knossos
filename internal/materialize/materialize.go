@@ -352,6 +352,9 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		slog.Warn("failed to generate channel .gitignore", "channel_dir", channelDir, "error", gitErr)
 	}
 
+	// Untrack knossos-owned files already in git index (non-fatal, best-effort)
+	untrackKnossosFiles(m.resolver.ProjectRoot(), channelDir, finalManifest)
+
 	return result, nil
 }
 
@@ -595,6 +598,9 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	if _, gitErr := generateChannelGitignore(channelDir, finalManifest); gitErr != nil {
 		slog.Warn("failed to generate channel .gitignore", "channel_dir", channelDir, "error", gitErr)
 	}
+
+	// Untrack knossos-owned files already in git index (non-fatal, best-effort)
+	untrackKnossosFiles(m.resolver.ProjectRoot(), channelDir, finalManifest)
 
 	return result, nil
 }
