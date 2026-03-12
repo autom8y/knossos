@@ -40,6 +40,10 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		}
 	}
 
+	// Compute channel directory for content path rewriting.
+	// When channelDir is ".claude" or empty, the rewrite is identity (no-op).
+	channelDir := channelDirName(opts.Channel)
+
 	// Collect and resolve mena entries (shared with user-scope pipeline)
 	resolution, err := CollectMena(sources, opts)
 	if err != nil {
@@ -75,7 +79,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 			sourceFileNames = collectFSFileNames(srcFS, hideCompanions)
 		}
 
-		if err := copyDirFS(srcFS, srcRoot, destDir, hideCompanions, opts.Compiler); err != nil {
+		if err := copyDirFS(srcFS, srcRoot, destDir, hideCompanions, opts.Compiler, channelDir); err != nil {
 			return nil, err
 		}
 
@@ -146,7 +150,7 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 			return nil, err
 		}
 		if strings.HasSuffix(destPath, ".md") {
-			data = RewriteMenaContentPaths(data)
+			data = RewriteMenaContentPaths(data, channelDir)
 		}
 
 		// Apply channel compiler transforms for standalone files

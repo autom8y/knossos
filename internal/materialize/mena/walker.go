@@ -32,12 +32,14 @@ func openMenaFS(src MenaSource) (fsys fs.FS, root string, err error) {
 
 // copyDirFS copies all files from fsys (rooted at root) to dst on disk, applying
 // StripMenaExtension to filenames. hideCompanions controls dromena-specific
-// INDEX.md promotion and companion-hide frontmatter injection.
+// INDEX.md promotion and companion-hide frontmatter injection. channelDir is
+// the dot-prefixed target channel directory (e.g., ".gemini") for content path
+// rewriting; empty or ".claude" preserves identity behavior.
 //
 // This is the unified replacement for the two previously separate functions:
 //   - copyDirWithStripping (filesystem)
 //   - copyDirFromFSWithStripping (embed.FS)
-func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool, comp ChannelCompiler) error {
+func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool, comp ChannelCompiler, channelDir string) error {
 	return fs.WalkDir(fsys, root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -77,10 +79,11 @@ func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool, comp ChannelCo
 			content = InjectCompanionHideFrontmatter(content)
 		}
 
-		// Rewrite stale .lego.md/.dro.md content references to materialized forms.
+		// Rewrite stale .lego.md/.dro.md content references to materialized forms
+		// and substitute .claude/ path prefixes for the target channel directory.
 		// Only markdown files contain link targets and backtick spans that need rewriting.
 		if strings.HasSuffix(base, ".md") {
-			content = RewriteMenaContentPaths(content)
+			content = RewriteMenaContentPaths(content, channelDir)
 		}
 
 		// Apply channel compiler transforms for primary mena files

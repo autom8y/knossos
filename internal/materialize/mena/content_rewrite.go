@@ -33,21 +33,70 @@ var reBacktickLego = regexp.MustCompile("`([^`]*?)\\.lego\\.md([^`]*?)`")
 // Example: `path/name.dro.md`
 var reBacktickDro = regexp.MustCompile("`([^`]*?)\\.dro\\.md([^`]*?)`")
 
+// channelDirName returns the dot-prefixed directory name for a channel.
+// Empty or "claude" returns ".claude"; "gemini" returns ".gemini".
+func channelDirName(channel string) string {
+	switch channel {
+	case "gemini":
+		return ".gemini"
+	default:
+		return ".claude"
+	}
+}
+
+// rewriteChannelPaths rewrites .claude/ path prefixes in non-fenced content
+// to the target channel directory. Processing is line-by-line to respect
+// exclusion zones (template blocks and HA-tagged lines).
+//
+// When channelDir is ".claude" or empty, this is a no-op identity transform.
+// When channelDir is ".gemini", .claude/skills/ becomes .gemini/skills/, etc.
+//
+// Only the three mena content subdirectories are rewritten:
+// .claude/skills/, .claude/commands/, .claude/agents/.
+// Other .claude/ paths (settings.json, CLAUDE.md) are NOT affected.
+func rewriteChannelPaths(s string, channelDir string) string {
+	if channelDir == "" || channelDir == ".claude" {
+		return s // Identity: no rewriting needed for claude channel
+	}
+
+	// Process line-by-line to respect exclusion zones
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		// Skip lines inside template blocks
+		if strings.Contains(line, "{{") && strings.Contains(line, "}}") {
+			continue
+		}
+		// Skip HA-tagged lines
+		if strings.Contains(line, "// HA-") {
+			continue
+		}
+		lines[i] = strings.ReplaceAll(line, ".claude/skills/", channelDir+"/skills/")
+		lines[i] = strings.ReplaceAll(lines[i], ".claude/commands/", channelDir+"/commands/")
+		lines[i] = strings.ReplaceAll(lines[i], ".claude/agents/", channelDir+"/agents/")
+	}
+	return strings.Join(lines, "\n")
+}
+
 // RewriteMenaContentPaths rewrites stale .lego.md/.dro.md content references
-// to their materialized forms. It applies the same extension-stripping logic
+// to their materialized forms and substitutes .claude/ path prefixes with the
+// target channel directory. It applies the same extension-stripping logic
 // that the materializer applies to filenames, but at the content level.
 //
 // Transformation rules:
 //   - INDEX.lego.md -> SKILL.md (in link targets and backtick spans)
 //   - {name}.lego.md -> {name}.md (in link targets and backtick spans)
 //   - {name}.dro.md -> {name}.md (in link targets and backtick spans)
+//   - .claude/{skills,commands,agents}/ -> {channelDir}/{skills,commands,agents}/
 //
 // Content inside fenced code blocks (``` regions) is never modified.
+// Lines containing template blocks ({{ }}) or HA-tags are not channel-rewritten.
 // YAML frontmatter passes through naturally as it does not contain markdown
 // link targets or backtick code spans with mena extensions.
 //
+// When channelDir is empty or ".claude", channel rewriting is identity (no-op).
+//
 // This is a pure function: no side effects, no file I/O.
-func RewriteMenaContentPaths(content []byte) []byte {
+func RewriteMenaContentPaths(content []byte, channelDir string) []byte {
 	if len(content) == 0 {
 		return content
 	}
@@ -68,7 +117,7 @@ func RewriteMenaContentPaths(content []byte) []byte {
 	for i := range segments {
 		if i%2 == 0 {
 			// Outside fenced block: apply rewrites
-			segments[i] = applyRewrites(segments[i])
+			segments[i] = applyRewrites(segments[i], channelDir)
 		}
 		// Odd segments (inside fenced blocks): pass through unchanged
 	}
@@ -127,7 +176,9 @@ func splitOnFences(s string) []string {
 
 // applyRewrites applies all mena path rewrite patterns to a non-fenced segment.
 // INDEX-specific patterns run before general patterns (ordering constraint).
-func applyRewrites(s string) string {
+// Channel path rewriting runs last (Pass 4) so extension rewrites that produce
+// .claude/skills/*.md paths get channel-rewritten too.
+func applyRewrites(s string, channelDir string) string {
 	// Pass 1: INDEX.lego.md -> SKILL.md (must precede general .lego.md pattern)
 	s = reLinkIndexLego.ReplaceAllString(s, "](${1}SKILL.md${2})")
 	s = reBacktickIndexLego.ReplaceAllString(s, "`${1}SKILL.md${2}`")
@@ -139,6 +190,10 @@ func applyRewrites(s string) string {
 	// Pass 3: {name}.dro.md -> {name}.md
 	s = reLinkDro.ReplaceAllString(s, "](${1}.md${2})")
 	s = reBacktickDro.ReplaceAllString(s, "`${1}.md${2}`")
+
+	// Pass 4: Channel path rewriting
+	// .claude/{skills,commands,agents}/ -> {channelDir}/{skills,commands,agents}/
+	s = rewriteChannelPaths(s, channelDir)
 
 	return s
 }

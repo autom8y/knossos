@@ -1,6 +1,7 @@
 package mena
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"testing"
@@ -162,7 +163,7 @@ func TestRewriteMenaContentPaths(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := string(RewriteMenaContentPaths([]byte(tt.input)))
+			got := string(RewriteMenaContentPaths([]byte(tt.input), ""))
 			if got != tt.want {
 				t.Errorf("rewriteMenaContentPaths(%q)\n  got:  %q\n  want: %q", tt.input, got, tt.want)
 			}
@@ -240,7 +241,7 @@ const ext = ".lego.md"
 More links after fenced content: [back](../schemas/report.lego.md)
 `
 
-	output := string(RewriteMenaContentPaths([]byte(corpus)))
+	output := string(RewriteMenaContentPaths([]byte(corpus), ""))
 
 	// Split the output on fence boundaries (same logic as the rewriter).
 	// Odd-indexed segments are inside fences and are exempt from the check.
@@ -292,12 +293,279 @@ func TestSCAR_ContentRewriteNotBypassed(t *testing.T) {
 	t.Parallel()
 	input := "See [the skill](foo.lego.md) for details."
 
-	output := string(RewriteMenaContentPaths([]byte(input)))
+	output := string(RewriteMenaContentPaths([]byte(input), ""))
 
 	if strings.Contains(output, "](foo.lego.md)") {
 		t.Errorf("SCAR regression: RewriteMenaContentPaths did not rewrite .lego.md link target\n  input:  %q\n  output: %q", input, output)
 	}
 	if !strings.Contains(output, "](foo.md)") {
 		t.Errorf("SCAR regression: expected ](foo.md) in output\n  input:  %q\n  output: %q", input, output)
+	}
+}
+
+// TestChannelDirName verifies the channelDirName helper mapping.
+func TestChannelDirName(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		channel string
+		want    string
+	}{
+		{"gemini", ".gemini"},
+		{"claude", ".claude"},
+		{"", ".claude"},
+		{"unknown", ".claude"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.channel+"_to_"+tt.want, func(t *testing.T) {
+			t.Parallel()
+			if got := channelDirName(tt.channel); got != tt.want {
+				t.Errorf("channelDirName(%q) = %q, want %q", tt.channel, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestRewriteChannelPaths verifies the channel path rewriting rule:
+// core substitution, context variants, exclusion zones, and non-match cases.
+func TestRewriteChannelPaths(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name       string
+		input      string
+		channelDir string
+		want       string
+	}{
+		// Section 3.1: Core substitution tests
+		{
+			name:       "claude_skills_to_gemini",
+			input:      ".claude/skills/pinakes/SKILL.md",
+			channelDir: ".gemini",
+			want:       ".gemini/skills/pinakes/SKILL.md",
+		},
+		{
+			name:       "claude_commands_to_gemini",
+			input:      ".claude/commands/spike.md",
+			channelDir: ".gemini",
+			want:       ".gemini/commands/spike.md",
+		},
+		{
+			name:       "claude_agents_to_gemini",
+			input:      ".claude/agents/potnia.md",
+			channelDir: ".gemini",
+			want:       ".gemini/agents/potnia.md",
+		},
+		{
+			name:       "claude_identity_noop",
+			input:      ".claude/skills/foo/SKILL.md",
+			channelDir: ".claude",
+			want:       ".claude/skills/foo/SKILL.md",
+		},
+		{
+			name:       "empty_channel_noop",
+			input:      ".claude/skills/foo/SKILL.md",
+			channelDir: "",
+			want:       ".claude/skills/foo/SKILL.md",
+		},
+
+		// Section 3.2: Context tests
+		{
+			name:       "backtick_path",
+			input:      "`Read(\".claude/skills/pinakes/domains/{domain}.md\")`",
+			channelDir: ".gemini",
+			want:       "`Read(\".gemini/skills/pinakes/domains/{domain}.md\")`",
+		},
+		{
+			name:       "link_target",
+			input:      "[ref](.claude/skills/doc/SKILL.md)",
+			channelDir: ".gemini",
+			want:       "[ref](.gemini/skills/doc/SKILL.md)",
+		},
+		{
+			name:       "prose_path",
+			input:      "Full documentation: .claude/skills/ref/SKILL.md",
+			channelDir: ".gemini",
+			want:       "Full documentation: .gemini/skills/ref/SKILL.md",
+		},
+		{
+			name:       "multiple_on_line",
+			input:      ".claude/skills/a.md and .claude/commands/b.md",
+			channelDir: ".gemini",
+			want:       ".gemini/skills/a.md and .gemini/commands/b.md",
+		},
+
+		// Section 3.3: Exclusion tests (rewriteChannelPaths level, not fenced)
+		{
+			name:       "template_block_preserved",
+			input:      "{{ if .claude/skills/foo }}",
+			channelDir: ".gemini",
+			want:       "{{ if .claude/skills/foo }}",
+		},
+		{
+			name:       "ha_tagged_preserved",
+			input:      ".claude/skills/foo // HA-4-001",
+			channelDir: ".gemini",
+			want:       ".claude/skills/foo // HA-4-001",
+		},
+
+		// Section 3.4: Non-match tests
+		{
+			name:       "bare_claude_dir",
+			input:      ".claude/settings.json",
+			channelDir: ".gemini",
+			want:       ".claude/settings.json",
+		},
+		{
+			name:       "claude_md_file",
+			input:      ".claude/CLAUDE.md",
+			channelDir: ".gemini",
+			want:       ".claude/CLAUDE.md",
+		},
+		{
+			name:       "dot_claude_no_slash",
+			input:      "the .claude directory",
+			channelDir: ".gemini",
+			want:       "the .claude directory",
+		},
+		{
+			name:       "gemini_already",
+			input:      ".gemini/skills/foo.md",
+			channelDir: ".gemini",
+			want:       ".gemini/skills/foo.md",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := rewriteChannelPaths(tt.input, tt.channelDir)
+			if got != tt.want {
+				t.Errorf("rewriteChannelPaths(%q, %q)\n  got:  %q\n  want: %q", tt.input, tt.channelDir, got, tt.want)
+			}
+		})
+	}
+}
+
+// TestRewriteChannelPathsFencedExclusion verifies that fenced code blocks are
+// not channel-rewritten. This tests the full RewriteMenaContentPaths pipeline
+// (which splits on fences before calling applyRewrites/rewriteChannelPaths).
+func TestRewriteChannelPathsFencedExclusion(t *testing.T) {
+	t.Parallel()
+	input := "```\n.claude/skills/foo.md\n```"
+	want := "```\n.claude/skills/foo.md\n```"
+
+	got := string(RewriteMenaContentPaths([]byte(input), ".gemini"))
+	if got != want {
+		t.Errorf("fenced block channel rewrite\n  got:  %q\n  want: %q", got, want)
+	}
+}
+
+// TestRewriteExtensionThenChannel verifies that Pass 1-3 (extension rewriting)
+// feeds into Pass 4 (channel rewriting). A source reference like
+// .claude/skills/foo.lego.md should first become .claude/skills/foo.md (Pass 2)
+// then .gemini/skills/foo.md (Pass 4).
+func TestRewriteExtensionThenChannel(t *testing.T) {
+	t.Parallel()
+	input := "[ref](.claude/skills/foo.lego.md)"
+	want := "[ref](.gemini/skills/foo.md)"
+
+	got := string(RewriteMenaContentPaths([]byte(input), ".gemini"))
+	if got != want {
+		t.Errorf("extension-then-channel ordering\n  got:  %q\n  want: %q", got, want)
+	}
+}
+
+// TestRewriteCorpusGemini processes a representative corpus with channelDir=".gemini"
+// and verifies that zero .claude/skills/, .claude/commands/, .claude/agents/ references
+// survive in non-fenced segments.
+func TestRewriteCorpusGemini(t *testing.T) {
+	t.Parallel()
+	corpus := `---
+name: channel-corpus-test
+description: "Corpus fixture for channel rewrite validation."
+---
+
+# Channel Corpus
+
+## Mena Paths
+
+- Skill ref: .claude/skills/pinakes/SKILL.md
+- Command ref: .claude/commands/spike.md
+- Agent ref: .claude/agents/potnia.md
+- Backtick: ` + "`" + `.claude/skills/doc/SKILL.md` + "`" + `
+- Link: [ref](.claude/skills/doc/SKILL.md)
+- User-level: ~/.claude/agents/potnia.md
+- Multiple: .claude/skills/a.md and .claude/commands/b.md
+
+## Non-Targets (must NOT be rewritten)
+
+- Config: .claude/settings.json
+- Inscription: .claude/CLAUDE.md
+- Bare: the .claude directory
+
+## Fenced (must be preserved)
+
+` + "```" + `
+.claude/skills/inside-fence.md
+.claude/commands/inside-fence.md
+` + "```" + `
+
+## After Fence
+
+- Post-fence ref: .claude/skills/after-fence.md
+`
+
+	output := string(RewriteMenaContentPaths([]byte(corpus), ".gemini"))
+
+	// Split on fences to check only non-fenced segments
+	segments := splitOnFences(output)
+
+	// channelPathPattern matches the three .claude/ content subdirectories
+	channelPathPattern := regexp.MustCompile(`\.claude/(skills|commands|agents)/`)
+
+	var violations []string
+	for i, seg := range segments {
+		if i%2 != 0 {
+			continue // Inside fenced block: skip
+		}
+		for lineNum, line := range strings.Split(seg, "\n") {
+			if channelPathPattern.MatchString(line) {
+				violations = append(violations,
+					fmt.Sprintf("segment %d line %d: %s", i, lineNum, line))
+			}
+		}
+	}
+
+	if len(violations) > 0 {
+		t.Errorf(".claude/ content path refs survived channel rewriting in non-fenced content (%d violations):", len(violations))
+		for _, v := range violations {
+			t.Errorf("  %s", v)
+		}
+	}
+
+	// Sanity: fenced block content preserved
+	if !strings.Contains(output, ".claude/skills/inside-fence.md") {
+		t.Error("fenced block content was incorrectly channel-rewritten")
+	}
+
+	// Sanity: non-target paths preserved
+	if !strings.Contains(output, ".claude/settings.json") {
+		t.Error(".claude/settings.json was incorrectly rewritten")
+	}
+	if !strings.Contains(output, ".claude/CLAUDE.md") {
+		t.Error(".claude/CLAUDE.md was incorrectly rewritten")
+	}
+}
+
+// TestRewriteCorpusClaude verifies that corpus processing with channelDir=".claude"
+// produces identical output to channelDir="" (identity transform).
+func TestRewriteCorpusClaude(t *testing.T) {
+	t.Parallel()
+	corpus := `.claude/skills/foo.md and .claude/commands/bar.md`
+
+	outputEmpty := string(RewriteMenaContentPaths([]byte(corpus), ""))
+	outputClaude := string(RewriteMenaContentPaths([]byte(corpus), ".claude"))
+
+	if outputEmpty != outputClaude {
+		t.Errorf("channelDir=\"\" and channelDir=\".claude\" should produce identical output\n  empty:  %q\n  claude: %q", outputEmpty, outputClaude)
 	}
 }

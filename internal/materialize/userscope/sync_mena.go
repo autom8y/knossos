@@ -314,8 +314,9 @@ func walkMenaEntryFS(
 		}
 
 		// Rewrite stale .lego.md/.dro.md content references to materialized forms.
+		// Channel path rewriting for user scope is deferred (pass "" for identity).
 		if strings.HasSuffix(strippedName, ".md") {
-			content = mena.RewriteMenaContentPaths(content)
+			content = mena.RewriteMenaContentPaths(content, "")
 		}
 
 		// Checksum of transformed content (what we'll write)
@@ -364,8 +365,9 @@ func syncMenaStandalone(
 	}
 
 	// Rewrite stale .lego.md/.dro.md content references to materialized forms.
+	// Channel path rewriting for user scope is deferred (pass "" for identity).
 	if strings.HasSuffix(sf.FlatName, ".md") {
-		content = mena.RewriteMenaContentPaths(content)
+		content = mena.RewriteMenaContentPaths(content, "")
 	}
 
 	sourceChecksum := checksum.Bytes(content)
