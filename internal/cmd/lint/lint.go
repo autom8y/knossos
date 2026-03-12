@@ -922,7 +922,7 @@ func checkSourcePathLeaks(body, relPath string, findings *[]Finding) {
 	if readLeaks > 0 {
 		*findings = append(*findings, Finding{
 			File: relPath, Severity: SevHigh, Rule: "source-path-read",
-			Message: fmt.Sprintf("body contains %d Read() call(s) with rites/ source paths — use materialized channel paths (e.g. .claude/skills/ or .claude/commands/)", readLeaks),
+			Message: fmt.Sprintf("body contains %d Read() call(s) with rites/ source paths — use materialized channel paths (e.g. {channel}/skills/ or {channel}/commands/)", readLeaks),
 		})
 	}
 	if refLeaks > 0 {

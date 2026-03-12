@@ -17,10 +17,10 @@ func newContextCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "context",
-		Short: "Show rite context for Claude injection",
+		Short: "Show rite context for harness injection",
 		Long: `Displays the context injection data for a rite (practice bundle).
 
-This context is injected into Claude sessions when the rite is active.
+This context is injected into harness sessions when the rite is active.
 The output can be formatted as markdown (default), JSON, or YAML.
 
 Examples:

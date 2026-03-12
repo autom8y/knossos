@@ -27,13 +27,13 @@ Examples:
   ari manifest show
   ari manifest show --schema
   ari manifest show --resolved
-  ari manifest show --path .claude/manifest.json -o json`,
+  ari manifest show --path {channel}/manifest.json -o json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runShow(ctx, opts)
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.path, "path", "", "Path to manifest file (default: .claude/manifest.json)")
+	cmd.Flags().StringVar(&opts.path, "path", "", "Path to manifest file (default: {channel}/manifest.json)")
 	cmd.Flags().BoolVar(&opts.schema, "schema", false, "Include schema version and validation status")
 	cmd.Flags().BoolVar(&opts.resolved, "resolved", false, "Show resolved values (with defaults applied)")
 

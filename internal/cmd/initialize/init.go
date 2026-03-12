@@ -53,39 +53,39 @@ func (o initOutput) Text() string {
 		return fmt.Sprintf(`Initialized project with rite '%s'
 
 What was created:
-  .claude/agents/     Agent prompts for the %s workflow
-  .claude/skills/     Reference knowledge agents can load
-  .claude/commands/   Slash commands (type / in Claude Code to see them)
-  .claude/CLAUDE.md   Project instructions (always in context)
-  .knossos/           Satellite project config (rite overrides)
-  .sos/               Session state and lifecycle
-  .ledge/             Work product artifacts
-    decisions/        ADRs and design decisions
-    specs/            PRDs and technical specs
-    reviews/          Audit reports and code reviews
-    spikes/           Exploration and research (git-ignored by default)
-    shelf/            Tracked work products (survives .gitignore)
+  {channel}/agents/     Agent prompts for the %s workflow
+  {channel}/skills/     Reference knowledge agents can load
+  {channel}/commands/   Slash commands (type / to see them)
+  {channel}/context     Project instructions (always in context)
+  .knossos/             Satellite project config (rite overrides)
+  .sos/                 Session state and lifecycle
+  .ledge/               Work product artifacts
+    decisions/          ADRs and design decisions
+    specs/              PRDs and technical specs
+    reviews/            Audit reports and code reviews
+    spikes/             Exploration and research (git-ignored by default)
+    shelf/              Tracked work products (survives .gitignore)
 
 Next steps:
-  1. Open this project in Claude Code
+  1. Open this project in your AI coding assistant
   2. Type /go to start a session
   3. Describe what you want to do — the agents will coordinate`, o.Rite, o.Rite)
 	}
 	return `Initialized project (minimal scaffold)
 
 What was created:
-  .claude/CLAUDE.md   Project instructions (always in context)
-  .knossos/           Satellite project config (rite overrides)
-  .sos/               Session state and lifecycle
-  .ledge/             Work product artifacts
-    decisions/        ADRs and design decisions
-    specs/            PRDs and technical specs
-    reviews/          Audit reports and code reviews
-    spikes/           Exploration and research (git-ignored by default)
-    shelf/            Tracked work products (survives .gitignore)
+  {channel}/context     Project instructions (always in context)
+  .knossos/             Satellite project config (rite overrides)
+  .sos/                 Session state and lifecycle
+  .ledge/               Work product artifacts
+    decisions/          ADRs and design decisions
+    specs/              PRDs and technical specs
+    reviews/            Audit reports and code reviews
+    spikes/             Exploration and research (git-ignored by default)
+    shelf/              Tracked work products (survives .gitignore)
 
 Next steps:
-  1. Open this project in Claude Code
+  1. Open this project in your AI coding assistant
   2. Run 'ari init --rite review' to add a workflow
   3. Available rites: review, slop-chop, 10x-dev, and more`
 }
@@ -174,7 +174,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 	channelDir := filepath.Join(projectDir, ".claude")
 	if _, err := os.Stat(channelDir); err == nil && !force {
 		// .claude/ exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.
-		errMsg := errors.New(errors.CodeUsageError, ".claude/ exists but is not Knossos-managed; use --force to initialize")
+		errMsg := errors.New(errors.CodeUsageError, "channel directory exists but is not Knossos-managed; use --force to initialize")
 		return common.PrintAndReturn(printer, errMsg)
 	}
 
