@@ -50,7 +50,7 @@ func TestSCAR002_StagedMaterializeAbsent(t *testing.T) {
 func TestSCAR002_MaterializeWithOptions_NoClaudeRename(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
 	templatesDir := filepath.Join(projectDir, "templates")
 
@@ -209,7 +209,7 @@ func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Setup a rite with one specialist agent.
