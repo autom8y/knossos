@@ -100,9 +100,9 @@ func (t TourOutput) Text() string {
 			b.WriteString("  settings.json  missing\n")
 		}
 		if c.ContextFile {
-			b.WriteString("  CLAUDE.md      present\n")
+			b.WriteString("  context file   present\n")
 		} else {
-			b.WriteString("  CLAUDE.md      missing\n")
+			b.WriteString("  context file   missing\n")
 		}
 		if c.ActiveRite != "" {
 			fmt.Fprintf(&b, "  ACTIVE_RITE    %s\n", c.ActiveRite)

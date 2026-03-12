@@ -20,7 +20,7 @@ const (
 	ExitFileNotFound     = 6  // Required file, session, or rite not found
 	ExitPermissionDenied = 7  // Cannot read/write file
 	ExitMergeConflict    = 8  // Three-way merge has conflicts
-	ExitProjectNotFound  = 9  // No .claude/ directory found
+	ExitProjectNotFound  = 9  // No channel directory found
 	ExitSessionExists    = 10 // Session already active (for create)
 	ExitMigrationFailed  = 11 // Schema migration failed
 	ExitValidationFailed = 12 // Rite validation checks failed
@@ -187,9 +187,9 @@ func exitCodeForCode(code string) int {
 
 // Common error constructors for convenience
 
-// ErrProjectNotFound returns an error for missing .claude/ directory.
+// ErrProjectNotFound returns an error for missing channel directory.
 func ErrProjectNotFound() *Error {
-	return New(CodeProjectNotFound, "No .claude/ directory found. Run from within a project or use --project-dir.")
+	return New(CodeProjectNotFound, "No channel directory found. Run from within a project or use --project-dir.")
 }
 
 // ErrSessionNotFound returns an error for missing session.

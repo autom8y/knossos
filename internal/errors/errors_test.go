@@ -297,8 +297,8 @@ func TestErrProjectNotFound(t *testing.T) {
 	if err.ExitCode != ExitProjectNotFound {
 		t.Errorf("ExitCode = %d, want %d", err.ExitCode, ExitProjectNotFound)
 	}
-	if !strings.Contains(err.Message, ".claude/") {
-		t.Errorf("Message should mention .claude/, got: %q", err.Message)
+	if !strings.Contains(err.Message, "channel directory") {
+		t.Errorf("Message should mention channel directory, got: %q", err.Message)
 	}
 }
 

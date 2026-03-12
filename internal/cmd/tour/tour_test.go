@@ -385,7 +385,7 @@ func TestTourTextStartsWithHeader(t *testing.T) {
 	tour := TourOutput{
 		ProjectRoot: "/tmp/test",
 		Directories: TourDirectories{
-			Channel: ChannelSection{Exists: true, Path: ".claude/"},
+			Channel: ChannelSection{Exists: true, Path: "channel/"},
 		},
 	}
 	text := tour.Text()
@@ -397,7 +397,7 @@ func TestTourTextNotFoundDirectories(t *testing.T) {
 	tour := TourOutput{
 		ProjectRoot: "/tmp/test",
 		Directories: TourDirectories{
-			Channel:  ChannelSection{Exists: false, Path: ".claude/"},
+			Channel:  ChannelSection{Exists: false, Path: "channel/"},
 			Knossos: KnossosSection{Exists: false, Path: ".knossos/"},
 			Know:    KnowSection{Exists: false, Path: ".know/"},
 			Ledge:   LedgeSection{Exists: false, Path: ".ledge/"},

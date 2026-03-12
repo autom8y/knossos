@@ -27,12 +27,12 @@ func collectTour(resolver *paths.Resolver) TourOutput {
 func collectChannel(resolver *paths.Resolver) ChannelSection {
 	channelDir := resolver.ClaudeDir()
 	if !dirExists(channelDir) {
-		return ChannelSection{Exists: false, Path: ".claude/"}
+		return ChannelSection{Exists: false, Path: "channel/"}
 	}
 
 	section := ChannelSection{
 		Exists: true,
-		Path:   ".claude/",
+		Path:   "channel/",
 	}
 
 	// Count .md files in agents/

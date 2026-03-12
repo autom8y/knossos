@@ -80,16 +80,27 @@ func budgetText(channelDir string) (string, error) {
 
 	// Category breakdown
 	b.WriteString("By category:\n")
+	// Category keys match tokenizer report keys; display labels are neutral.
+	categoryLabels := map[string]string{
+		"CLAUDE.md": "context file",
+		"agents":    "agents",
+		"skills":    "skills",
+		"commands":  "commands",
+		"rules":     "rules",
+		"settings":  "settings",
+		"workflow":  "workflow",
+	}
 	for _, cat := range []string{"CLAUDE.md", "agents", "skills", "commands", "rules", "settings", "workflow"} {
 		if tokens, ok := report.Categories[cat]; ok && tokens > 0 {
 			pct := float64(tokens) / float64(report.TotalTokens) * 100
-			fmt.Fprintf(&b, "  %-15s %6s tokens  (%4.1f%%)\n", cat, formatNum(tokens), pct)
+			label := categoryLabels[cat]
+			fmt.Fprintf(&b, "  %-15s %6s tokens  (%4.1f%%)\n", label, formatNum(tokens), pct)
 		}
 	}
 
-	// CLAUDE.md sections
+	// Context file sections
 	if len(report.Sections) > 0 {
-		b.WriteString("\nCLAUDE.md sections:\n")
+		b.WriteString("\nContext file sections:\n")
 		for _, s := range report.Sections {
 			fmt.Fprintf(&b, "  %-25s %6s tokens\n", s.Name, formatNum(s.Tokens))
 		}
