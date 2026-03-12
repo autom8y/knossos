@@ -104,7 +104,7 @@ type Materializer struct {
 	embeddedAgents      fs.FS   // Embedded cross-rite agents (fallback for user scope)
 	embeddedMena        fs.FS   // Embedded platform mena (fallback for user scope)
 	embeddedProcessions fs.FS   // Embedded procession templates (fallback for resolution)
-	userChannelDir      string  // If set, user-scope sync writes here instead of paths.UserClaudeDir()
+	userChannelDir      string  // If set, user-scope sync writes here instead of paths.UserChannelDir("claude")
 	xdgDataDir          string  // If set, used for XDG mena path instead of config.XDGDataDir()
 	knossosHome         string  // If set, used for archetype/procession resolution instead of config.KnossosHome()
 }

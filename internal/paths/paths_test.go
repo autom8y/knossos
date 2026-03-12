@@ -541,7 +541,7 @@ func TestUserLevelPaths(t *testing.T) {
 		got  string
 		want string
 	}{
-		{"UserClaudeDir", UserClaudeDir(), filepath.Join(homeDir, ".claude")},
+		{"UserChannelDir/claude", UserChannelDir("claude"), filepath.Join(homeDir, ".claude")},
 		{"UserAgentsDir", UserAgentsDir(), filepath.Join(homeDir, ".claude", "agents")},
 		{"UserSkillsDir", UserSkillsDir(), filepath.Join(homeDir, ".claude", "skills")},
 		{"UserCommandsDir", UserCommandsDir(), filepath.Join(homeDir, ".claude", "commands")},

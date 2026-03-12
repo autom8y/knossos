@@ -386,12 +386,6 @@ func EnsureStateDir() error {
 
 // --- User-Level Resource Paths ---
 
-// UserClaudeDir returns the user-level .claude directory.
-func UserClaudeDir() string {
-	homeDir, _ := os.UserHomeDir()
-	return filepath.Join(homeDir, ".claude")
-}
-
 // UserAgentsDirForChannel returns the user-level agents directory for a specific channel.
 func UserAgentsDirForChannel(channel string) string {
 	return filepath.Join(UserChannelDir(channel), "agents")
