@@ -20,7 +20,7 @@ type Frontmatter struct {
 	Summary string   `yaml:"summary"`
 	SeeAlso []string `yaml:"see_also"`
 	Aliases []string `yaml:"aliases"`
-	HarnessTerm string   `yaml:"cc_term"`
+	HarnessTerm string   `yaml:"harness_term"`
 }
 
 var (

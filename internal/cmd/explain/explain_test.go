@@ -175,7 +175,7 @@ func TestParseConceptValid(t *testing.T) {
 summary: Test summary line.
 see_also: [foo, bar]
 aliases: [test-alias]
-cc_term: test-cc
+harness_term: test-cc
 ---
 This is the description body.
 `)
@@ -235,7 +235,7 @@ func TestParseConceptWithCCTerm(t *testing.T) {
 	data := []byte(`---
 summary: Test summary.
 see_also: []
-cc_term: skills
+harness_term: skills
 ---
 Body text.
 `)

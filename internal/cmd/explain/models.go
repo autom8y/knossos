@@ -14,7 +14,7 @@ type ConceptEntry struct {
 	Description string   `json:"description"`
 	SeeAlso     []string `json:"see_also"`
 	Aliases     []string `json:"aliases"`
-	HarnessTerm string   `json:"cc_term,omitempty"`
+	HarnessTerm string   `json:"harness_term,omitempty"`
 }
 
 // ConceptOutput represents a single concept lookup result.
