@@ -7,15 +7,15 @@ Use the available agents and slash commands. Agents activate automatically when 
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
 ## Quick Start
 
-5-agent workflow (security):
+5-agent workflow (10x-dev):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates security initiative phases |
-| **threat-modeler** | Models threats and identifies security risks and attack vectors |
-| **compliance-architect** | Maps compliance requirements and designs control frameworks |
-| **penetration-tester** | Executes penetration tests and documents vulnerabilities |
-| **security-reviewer** | Performs final security review and grants deployment approval |
+| **potnia** | Coordinates development lifecycle phases and routes work to specialists |
+| **requirements-analyst** | Gathers requirements and produces PRD artifacts |
+| **architect** | Creates technical design documents and architecture decisions |
+| **principal-engineer** | Implements code according to design specifications |
+| **qa-adversary** | Validates implementation through adversarial testing |
 
 Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
@@ -43,11 +43,11 @@ Agents activate automatically based on description matching. Write prompts that 
 
 Prompts in `.gemini/agents/`:
 
-- `potnia.md` - Coordinates security initiative phases
-- `threat-modeler.md` - Models threats and identifies security risks and attack vectors
-- `compliance-architect.md` - Maps compliance requirements and designs control frameworks
-- `penetration-tester.md` - Executes penetration tests and documents vulnerabilities
-- `security-reviewer.md` - Performs final security review and grants deployment approval
+- `potnia.md` - Coordinates development lifecycle phases and routes work to specialists
+- `requirements-analyst.md` - Gathers requirements and produces PRD artifacts
+- `architect.md` - Creates technical design documents and architecture decisions
+- `principal-engineer.md` - Implements code according to design specifications
+- `qa-adversary.md` - Validates implementation through adversarial testing
 <!-- KNOSSOS:END agent-configurations -->
 
 <!-- KNOSSOS:START platform-infrastructure -->
