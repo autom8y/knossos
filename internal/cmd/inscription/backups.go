@@ -12,14 +12,14 @@ import (
 func newBackupsCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backups",
-		Short: "List available CLAUDE.md backups",
-		Long: `List all available CLAUDE.md backups.
+		Short: "List available context file backups",
+		Long: `List all available context file backups.
 
 Backups are created automatically before each sync operation.
 By default, the 5 most recent backups are retained.
 
 Backup files are stored in .knossos/backups/ with timestamp naming:
-  CLAUDE.md.YYYY-MM-DDTHH-MM-SSZ
+  {context-file}.YYYY-MM-DDTHH-MM-SSZ
 
 Examples:
   ari inscription backups           # List all backups

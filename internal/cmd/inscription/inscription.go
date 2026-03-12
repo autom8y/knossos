@@ -1,5 +1,5 @@
 // Package inscription implements the ari inscription commands.
-// These commands manage the CLAUDE.md inscription system for the Knossos platform.
+// These commands manage the context file inscription system for the Knossos platform.
 package inscription
 
 import (
@@ -27,10 +27,10 @@ func NewInscriptionCmd(outputFlag *string, verboseFlag *bool, projectDir *string
 
 	cmd := &cobra.Command{
 		Use:   "inscription",
-		Short: "Manage CLAUDE.md inscription system",
-		Long: `Manage the CLAUDE.md inscription system for the Knossos platform.
+		Short: "Manage context file inscription system",
+		Long: `Manage the context file inscription system for the Knossos platform.
 
-The inscription system synchronizes CLAUDE.md content with templates and
+The inscription system synchronizes context file content with templates and
 project state, managing ownership of different regions:
 
   - knossos: Managed by Knossos templates, always synced
@@ -38,9 +38,9 @@ project state, managing ownership of different regions:
   - regenerate: Generated from project state (ACTIVE_RITE, agents/)
 
 Examples:
-  ari inscription sync              # Sync CLAUDE.md with templates
+  ari inscription sync              # Sync context file with templates
   ari inscription sync --dry-run    # Preview changes without writing
-  ari inscription validate          # Check manifest and CLAUDE.md
+  ari inscription validate          # Check manifest and context file
   ari inscription backups           # List available backups
   ari inscription rollback          # Restore from backup`,
 	}

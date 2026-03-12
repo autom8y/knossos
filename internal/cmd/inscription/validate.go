@@ -11,13 +11,13 @@ import (
 func newValidateCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "validate",
-		Short: "Validate inscription manifest and CLAUDE.md",
-		Long: `Validate the KNOSSOS_MANIFEST.yaml and CLAUDE.md files.
+		Short: "Validate inscription manifest and context file",
+		Long: `Validate the KNOSSOS_MANIFEST.yaml and context file.
 
 This command checks:
   - Manifest schema version and required fields
   - Region definitions and ownership
-  - Marker syntax in CLAUDE.md
+  - Marker syntax in context file
   - Region consistency between manifest and file
   - Template directory presence
 

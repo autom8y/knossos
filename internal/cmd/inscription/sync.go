@@ -24,13 +24,13 @@ func newSyncCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "sync",
-		Short: "Synchronize CLAUDE.md with templates",
-		Long: `Synchronize CLAUDE.md with Knossos templates and project state.
+		Short: "Synchronize context file with templates",
+		Long: `Synchronize context file with Knossos templates and project state.
 
 This command:
   1. Loads the KNOSSOS_MANIFEST.yaml (or creates a default)
   2. Generates content for knossos-owned and regenerate regions
-  3. Merges with existing CLAUDE.md, preserving satellite regions
+  3. Merges with existing context file, preserving satellite regions
   4. Creates a backup and writes the updated file
   5. Updates manifest with new hashes and version
 
@@ -144,7 +144,7 @@ func (s SyncOutput) Text() string {
 	var b strings.Builder
 
 	if s.Success {
-		fmt.Fprintf(&b, "Synced CLAUDE.md (v%s)\n", s.InscriptionVersion)
+		fmt.Fprintf(&b, "Synced context file (v%s)\n", s.InscriptionVersion)
 		fmt.Fprintf(&b, "Regions updated: %d\n", len(s.RegionsSynced))
 
 		if len(s.RegionsSynced) > 0 {

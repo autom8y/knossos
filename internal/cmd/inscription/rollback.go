@@ -11,8 +11,8 @@ import (
 func newRollbackCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "rollback [timestamp]",
-		Short: "Restore CLAUDE.md from a backup",
-		Long: `Restore CLAUDE.md from a previous backup.
+		Short: "Restore context file from a backup",
+		Long: `Restore context file from a previous backup.
 
 If no timestamp is provided, restores from the most recent backup.
 Use 'ari inscription backups' to list available backups.
@@ -107,7 +107,7 @@ type RollbackOutput struct {
 // Text implements output.Textable for RollbackOutput.
 func (r RollbackOutput) Text() string {
 	if r.Success {
-		return fmt.Sprintf("Restored CLAUDE.md from backup: %s\n", r.RestoredFrom)
+		return fmt.Sprintf("Restored context file from backup: %s\n", r.RestoredFrom)
 	}
 	return "Rollback failed\n"
 }
