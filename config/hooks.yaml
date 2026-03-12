@@ -121,7 +121,7 @@ hooks:
     command: "ari hook worktree-seed --output json"
     timeout: 30
     priority: 5
-    description: "Creates and seeds git worktrees with rite configuration on CC WorktreeCreate"
+    description: "Creates and seeds git worktrees with rite configuration on worktree_create"
 
   # ===========================================================================
   # worktree_remove Hooks
@@ -131,7 +131,7 @@ hooks:
     command: "ari hook worktree-remove --output json"
     timeout: 10
     priority: 5
-    description: "Removes git worktrees on CC WorktreeRemove"
+    description: "Removes git worktrees on worktree_remove"
 
   # ===========================================================================
   # subagent_start Hooks
