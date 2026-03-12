@@ -165,9 +165,15 @@ func (r *Resolver) KnossosManifestFile() string {
 	return filepath.Join(r.KnossosDir(), "KNOSSOS_MANIFEST.yaml")
 }
 
+// AgentsDirForChannel returns the path to the agents/ directory for the given channel.
+func (r *Resolver) AgentsDirForChannel(ch TargetChannel) string {
+	return filepath.Join(r.ChannelDir(ch), "agents")
+}
+
 // AgentsDir returns the path to the .claude/agents/ directory.
+// Deprecated: Use AgentsDirForChannel for channel-aware paths.
 func (r *Resolver) AgentsDir() string {
-	return filepath.Join(r.ClaudeDir(), "agents")
+	return r.AgentsDirForChannel(ClaudeChannel{})
 }
 
 // AgentFile returns the path to a specific agent file.
@@ -175,9 +181,15 @@ func (r *Resolver) AgentFile(name string) string {
 	return filepath.Join(r.AgentsDir(), name)
 }
 
+// ContextFileForChannel returns the path to the context file for the given channel.
+func (r *Resolver) ContextFileForChannel(ch TargetChannel) string {
+	return ch.ContextFilePath(r.projectRoot)
+}
+
 // ClaudeMDFile returns the path to the .claude/CLAUDE.md file.
+// Deprecated: Use ContextFileForChannel for channel-aware paths.
 func (r *Resolver) ClaudeMDFile() string {
-	return filepath.Join(r.ClaudeDir(), "CLAUDE.md")
+	return r.ContextFileForChannel(ClaudeChannel{})
 }
 
 // KnossosDir returns the path to the .knossos/ directory (framework configuration).
