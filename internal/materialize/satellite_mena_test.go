@@ -113,13 +113,13 @@ func TestMaterializeMena_SatelliteLocalRite_SharedMenaResolvesFromKnossosHome(t 
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: shared dromenon should appear in .claude/commands/
+	// Verify: shared dromenon should appear in channel commands/
 	sharedCmd := filepath.Join(channelDir, "commands", "shared-cmd.md")
 	if _, err := os.Stat(sharedCmd); os.IsNotExist(err) {
 		t.Errorf("FAIL: shared dromenon not materialized; expected at %s", sharedCmd)
 	}
 
-	// Verify: shared legomenon should appear in .claude/skills/
+	// Verify: shared legomenon should appear in channel skills/
 	sharedSkill := filepath.Join(channelDir, "skills", "shared-skill", "SKILL.md")
 	if _, err := os.Stat(sharedSkill); os.IsNotExist(err) {
 		t.Errorf("FAIL: shared legomenon not materialized; expected at %s", sharedSkill)

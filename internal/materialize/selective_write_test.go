@@ -11,7 +11,7 @@ import (
 )
 
 // TestMaterializeAgents_PreservesUserAgents verifies that user-created agents
-// in .claude/agents/ survive materialization (selective write, not destructive nuke).
+// in channel agents/ survive materialization (selective write, not destructive nuke).
 func TestMaterializeAgents_PreservesUserAgents(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
@@ -84,7 +84,7 @@ func TestMaterializeAgents_KeepAllPreservesOrphans(t *testing.T) {
 }
 
 // TestSyncMena_PreservesUserCommands verifies that user-created commands
-// in .claude/commands/ survive destructive mode projection.
+// in channel commands/ survive destructive mode projection.
 func TestSyncMena_PreservesUserCommands(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
@@ -133,7 +133,7 @@ func TestSyncMena_PreservesUserCommands(t *testing.T) {
 }
 
 // TestSyncMena_PreservesUserSkills verifies that user-created skills
-// in .claude/skills/ survive destructive mode projection.
+// in channel skills/ survive destructive mode projection.
 func TestSyncMena_PreservesUserSkills(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()

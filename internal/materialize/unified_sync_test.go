@@ -128,7 +128,7 @@ func TestUnifiedSync_RiteOnly(t *testing.T) {
 	assert.Equal(t, "success", result.RiteResult.Status)
 	assert.Nil(t, result.UserResult)
 
-	// Verify .claude/ populated
+	// Verify channel dir populated
 	assert.FileExists(t, filepath.Join(channelDir, "agents", "test-agent.md"))
 	assert.FileExists(t, filepath.Join(channelDir, paths.ClaudeChannel{}.ContextFile()))
 	assert.FileExists(t, filepath.Join(projectDir, ".knossos", "ACTIVE_RITE"))
@@ -155,7 +155,7 @@ func TestUnifiedSync_UserOnly(t *testing.T) {
 	assert.NotNil(t, result.UserResult)
 	assert.Equal(t, "success", result.UserResult.Status)
 
-	// Verify ~/.claude/ populated
+	// Verify user channel dir populated
 	assert.FileExists(t, filepath.Join(userChannelDir, "agents", "user-agent.md"))
 	assert.FileExists(t, filepath.Join(userChannelDir, "commands", "test-command.md"))
 	assert.FileExists(t, filepath.Join(userChannelDir, "skills", "test-skill", "SKILL.md"))
@@ -189,7 +189,7 @@ func TestUnifiedSync_ScopeAll(t *testing.T) {
 	assert.Equal(t, "success", result.RiteResult.Status)
 	assert.Equal(t, "success", result.UserResult.Status)
 
-	// Verify both .claude/ and ~/.claude/ populated
+	// Verify both project and user channel dirs populated
 	assert.FileExists(t, filepath.Join(channelDir, "agents", "test-agent.md"))
 	assert.FileExists(t, filepath.Join(userChannelDir, "agents", "user-agent.md"))
 }
@@ -261,7 +261,7 @@ func TestUnifiedSync_CollisionDetection(t *testing.T) {
 		0644,
 	))
 
-	// First sync rite scope to populate .claude/
+	// First sync rite scope to populate channel dir
 	m := newTestMaterializer(projectDir, knossosHome, userChannelDir)
 
 	riteResult, err := m.Sync(SyncOptions{Scope: ScopeRite})
@@ -298,7 +298,7 @@ func TestUnifiedSync_RecoveryMode(t *testing.T) {
 
 	setupKnossosHome(t, knossosHome)
 
-	// Pre-create file in ~/.claude/ that matches KNOSSOS_HOME
+	// Pre-create file in user channel dir that matches KNOSSOS_HOME
 	agentsDir := filepath.Join(userChannelDir, "agents")
 	require.NoError(t, os.MkdirAll(agentsDir, 0755))
 	require.NoError(t, os.WriteFile(
@@ -654,7 +654,7 @@ func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 		0644,
 	))
 
-	// Pre-create .claude/ with an existing agent that should NOT be overwritten
+	// Pre-create channel dir with an existing agent that should NOT be overwritten
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "agents"), 0755))
 	require.NoError(t, os.WriteFile(
 		filepath.Join(channelDir, "agents", "existing-agent.md"),
@@ -685,7 +685,7 @@ func TestMaterializeWithOptions_PrevalidateBlocksPartialState(t *testing.T) {
 }
 
 // TestMinimalMode_ProjectsSharedMena verifies that MaterializeMinimal projects
-// shared rite mena (e.g., /know, /radar) to .claude/commands/ and .claude/skills/
+// shared rite mena (e.g., /know, /radar) to channel commands/ and skills/
 // so cross-cutting mode still has core features available.
 // Regression test for: shared mena missing in no-rite sync.
 func TestMinimalMode_ProjectsSharedMena(t *testing.T) {

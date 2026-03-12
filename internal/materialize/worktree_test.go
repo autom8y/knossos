@@ -114,7 +114,7 @@ hooks: []
 		t.Fatalf("failed to write agent: %v", err)
 	}
 
-	// The worktree has no .claude/ at all — ensureProjectDirs() will create it.
+	// The worktree has no channel dir at all — ensureProjectDirs() will create it.
 	worktreeResolver := paths.NewResolver(fix.WorktreeDir)
 	// Inject source resolver scoped to project + isolated knossos home only.
 	sr := NewSourceResolverWithPaths(fix.WorktreeDir, "", "", isolatedHome)

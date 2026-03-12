@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -254,14 +255,14 @@ func gitTrackedFiles(t *testing.T, projectRoot, path string) map[string]bool {
 
 func TestUntrackKnossosFiles_NilManifest(t *testing.T) {
 	t.Parallel()
-	count := untrackKnossosFiles("/tmp", "/tmp/.claude", nil)
+	count := untrackKnossosFiles("/tmp", "/tmp/"+paths.ClaudeChannel{}.DirName(), nil)
 	assert.Equal(t, 0, count)
 }
 
 func TestUntrackKnossosFiles_NoGitRepo(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	channelDir := filepath.Join(dir, ".claude")
+	channelDir := filepath.Join(dir, paths.ClaudeChannel{}.DirName())
 	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	manifest := testManifest(map[string]provenance.OwnerType{
@@ -275,13 +276,14 @@ func TestUntrackKnossosFiles_NoGitRepo(t *testing.T) {
 func TestUntrackKnossosFiles_TrackedFiles(t *testing.T) {
 	t.Parallel()
 	projectRoot := setupGitRepo(t)
-	channelDir := filepath.Join(projectRoot, ".claude")
+	channelDir := filepath.Join(projectRoot, paths.ClaudeChannel{}.DirName())
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "agents"), 0755))
 
 	// Create and commit both knossos-owned and user-owned files
 	require.NoError(t, os.WriteFile(filepath.Join(channelDir, "agents", "potnia.md"), []byte("knossos"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(channelDir, "agents", "custom.md"), []byte("user"), 0644))
-	runGit(t, projectRoot, "add", ".claude/agents/potnia.md", ".claude/agents/custom.md")
+	chDir := paths.ClaudeChannel{}.DirName()
+	runGit(t, projectRoot, "add", chDir+"/agents/potnia.md", chDir+"/agents/custom.md")
 	runGit(t, projectRoot, "commit", "-m", "initial")
 
 	manifest := testManifest(map[string]provenance.OwnerType{
@@ -293,9 +295,9 @@ func TestUntrackKnossosFiles_TrackedFiles(t *testing.T) {
 	assert.Equal(t, 1, count)
 
 	// Verify potnia is untracked from index
-	tracked := gitTrackedFiles(t, projectRoot, ".claude")
-	assert.False(t, tracked[".claude/agents/potnia.md"], "knossos-owned file should be untracked")
-	assert.True(t, tracked[".claude/agents/custom.md"], "user-owned file should remain tracked")
+	tracked := gitTrackedFiles(t, projectRoot, paths.ClaudeChannel{}.DirName())
+	assert.False(t, tracked[paths.ClaudeChannel{}.DirName()+"/agents/potnia.md"], "knossos-owned file should be untracked")
+	assert.True(t, tracked[paths.ClaudeChannel{}.DirName()+"/agents/custom.md"], "user-owned file should remain tracked")
 
 	// Verify files still exist on disk (git rm --cached doesn't delete)
 	assert.FileExists(t, filepath.Join(channelDir, "agents", "potnia.md"))
@@ -305,13 +307,13 @@ func TestUntrackKnossosFiles_TrackedFiles(t *testing.T) {
 func TestUntrackKnossosFiles_DirectoryEntries(t *testing.T) {
 	t.Parallel()
 	projectRoot := setupGitRepo(t)
-	channelDir := filepath.Join(projectRoot, ".claude")
+	channelDir := filepath.Join(projectRoot, paths.ClaudeChannel{}.DirName())
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "commands", "commit"), 0755))
 
 	// Create and commit files under a directory entry
 	require.NoError(t, os.WriteFile(filepath.Join(channelDir, "commands", "commit", "prompt.md"), []byte("test"), 0644))
 	require.NoError(t, os.WriteFile(filepath.Join(channelDir, "commands", "commit", "SKILL.md"), []byte("test"), 0644))
-	runGit(t, projectRoot, "add", ".claude/commands/")
+	runGit(t, projectRoot, "add", paths.ClaudeChannel{}.DirName()+"/commands/")
 	runGit(t, projectRoot, "commit", "-m", "initial")
 
 	// Directory entry in provenance (trailing slash)
@@ -323,7 +325,7 @@ func TestUntrackKnossosFiles_DirectoryEntries(t *testing.T) {
 	assert.Equal(t, 2, count)
 
 	// All files under the directory should be untracked
-	tracked := gitTrackedFiles(t, projectRoot, ".claude")
+	tracked := gitTrackedFiles(t, projectRoot, paths.ClaudeChannel{}.DirName())
 	assert.Empty(t, tracked, "all files under directory entry should be untracked")
 
 	// Files still exist on disk
@@ -334,7 +336,7 @@ func TestUntrackKnossosFiles_DirectoryEntries(t *testing.T) {
 func TestUntrackKnossosFiles_NoTrackedFiles(t *testing.T) {
 	t.Parallel()
 	projectRoot := setupGitRepo(t)
-	channelDir := filepath.Join(projectRoot, ".claude")
+	channelDir := filepath.Join(projectRoot, paths.ClaudeChannel{}.DirName())
 	require.NoError(t, os.MkdirAll(filepath.Join(channelDir, "agents"), 0755))
 
 	// Create files but don't commit them (untracked)
@@ -355,12 +357,12 @@ func TestUntrackKnossosFiles_NoTrackedFiles(t *testing.T) {
 func TestUntrackKnossosFiles_ExcludesOutliers(t *testing.T) {
 	t.Parallel()
 	projectRoot := setupGitRepo(t)
-	channelDir := filepath.Join(projectRoot, ".claude")
+	channelDir := filepath.Join(projectRoot, paths.ClaudeChannel{}.DirName())
 	require.NoError(t, os.MkdirAll(channelDir, 0755))
 
 	// Create and commit CLAUDE.md (an outlier — inscription deferred as commitable)
 	require.NoError(t, os.WriteFile(filepath.Join(channelDir, "CLAUDE.md"), []byte("inscription"), 0644))
-	runGit(t, projectRoot, "add", ".claude/CLAUDE.md")
+	runGit(t, projectRoot, "add", paths.ClaudeChannel{}.DirName()+"/"+paths.ClaudeChannel{}.ContextFile())
 	runGit(t, projectRoot, "commit", "-m", "initial")
 
 	manifest := testManifest(map[string]provenance.OwnerType{
@@ -371,6 +373,6 @@ func TestUntrackKnossosFiles_ExcludesOutliers(t *testing.T) {
 	assert.Equal(t, 0, count, "outlier entries should not be untracked")
 
 	// CLAUDE.md should still be tracked
-	tracked := gitTrackedFiles(t, projectRoot, ".claude")
-	assert.True(t, tracked[".claude/CLAUDE.md"], "CLAUDE.md should remain tracked")
+	tracked := gitTrackedFiles(t, projectRoot, paths.ClaudeChannel{}.DirName())
+	assert.True(t, tracked[paths.ClaudeChannel{}.DirName()+"/"+paths.ClaudeChannel{}.ContextFile()], "CLAUDE.md should remain tracked")
 }

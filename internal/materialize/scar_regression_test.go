@@ -20,7 +20,7 @@ import (
 
 // TestSCAR002_StagedMaterializeAbsent is a regression test for DEBT-023 / SCAR-002.
 //
-// Background: StagedMaterialize renamed .claude/ -> .claude.bak/ during materialization.
+// Background: StagedMaterialize renamed .claude/ -> .claude.bak/ during materialization. // HA-TEST: historical CC channel dir name
 // CC's file watcher lost track of its config directory when the rename happened, causing
 // hard freezes. The fix was to remove the function entirely (commit 95cf0bc).
 //
@@ -35,14 +35,14 @@ func TestSCAR002_StagedMaterializeAbsent(t *testing.T) {
 	_, exists := materializerType.MethodByName("StagedMaterialize")
 	assert.False(t, exists,
 		"SCAR-002 regression: StagedMaterialize must not exist on Materializer. "+
-			"This method renames .claude/ -> .claude.bak/ which causes CC file watcher freeze. "+
+			"This method renames channel dir which causes CC file watcher freeze. "+
 			"Use per-file atomic writes (writeIfChanged) instead. See commit 95cf0bc.")
 }
 
 // TestSCAR002_MaterializeWithOptions_NoClaudeRename is a behavioral regression for DEBT-023 / SCAR-002.
 //
-// Verifies that a full MaterializeWithOptions run does NOT rename or move the .claude/
-// directory. After materialization, .claude/ must exist at the original path, not as
+// Verifies that a full MaterializeWithOptions run does NOT rename or move the channel
+// directory. After materialization, channel dir must exist at the original path, not as
 // .claude.bak/ or any other renamed form.
 //
 // This test fails if directory-rename logic is re-introduced into the materialization
@@ -71,16 +71,16 @@ func TestSCAR002_MaterializeWithOptions_NoClaudeRename(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "success", result.Status)
 
-	// .claude/ must exist at original path — not renamed or moved.
+	// channel dir must exist at original path — not renamed or moved.
 	info, err := os.Stat(channelDir)
-	require.NoError(t, err, "SCAR-002 regression: .claude/ must exist after materialization")
-	assert.True(t, info.IsDir(), ".claude/ must be a directory")
+	require.NoError(t, err, "SCAR-002 regression: channel dir must exist after materialization")
+	assert.True(t, info.IsDir(), "channel dir must be a directory")
 
 	// Ensure no .claude.bak/ was created (the renamed form from the old StagedMaterialize).
 	backupDir := channelDir + ".bak"
 	_, bakErr := os.Stat(backupDir)
 	assert.True(t, os.IsNotExist(bakErr),
-		"SCAR-002 regression: .claude.bak/ must not exist after materialization; "+
+		"SCAR-002 regression: channel dir backup must not exist after materialization; "+
 			"directory rename pattern has been re-introduced")
 }
 
@@ -198,13 +198,13 @@ func parseHooksYAMLForSCAR008(t *testing.T, data []byte) ([]hooks.HookEntry, err
 // TestSCAR021_CrossRiteAgents_ProjectScopeExclusion is a labeled regression test for SCAR-021.
 //
 // Background: Global agents (pythia, moirai, context-engineer, theoros) were
-// materialized into project .claude/agents/ alongside rite agents, causing shadowing
+// materialized into project channel agents/ alongside rite agents, causing shadowing
 // issues and orphan accumulation across rite switches. Fix: materializeCrossRiteAgents()
 // was removed from the rite-scope pipeline. Cross-rite agents now exclusively use
 // user-scope (commit 7ef0213).
 //
 // This test verifies that cross-rite agents from a top-level agents/ directory are NOT
-// materialized into project-level .claude/agents/ during rite-scope sync.
+// materialized into project-level channel agents/ during rite-scope sync.
 func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
@@ -238,8 +238,8 @@ func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 	// Cross-rite agents must NOT be present at project level.
 	for _, name := range []string{"moirai", "pythia", "context-engineer", "theoros"} {
 		assert.NoFileExists(t, filepath.Join(agentsDir, name+".md"),
-			"SCAR-021 regression: cross-rite agent %q must NOT be materialized to project .claude/agents/. "+
-				"Cross-rite agents belong in user scope (~/.claude/agents/). "+
+			"SCAR-021 regression: cross-rite agent %q must NOT be materialized to project channel agents/. "+
+				"Cross-rite agents belong in user scope (user channel agents/). "+
 				"See commit 7ef0213.", name)
 	}
 }

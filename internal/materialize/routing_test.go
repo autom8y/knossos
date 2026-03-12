@@ -11,7 +11,7 @@ import (
 )
 
 // TestRoutingDroToCommands verifies that INDEX.dro.md files
-// are routed to .claude/commands/ with extension stripped
+// are routed to the channel commands directory with extension stripped
 func TestRoutingDroToCommands(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
@@ -47,16 +47,16 @@ This is a test command.
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: dromena INDEX promoted to parent level (.claude/commands/test-cmd.md)
+	// Verify: dromena INDEX promoted to parent level (channel commands/test-cmd.md)
 	commandsPath := filepath.Join(channelDir, "commands", "test-cmd.md")
 	skillsPath := filepath.Join(channelDir, "skills", "test-cmd", "SKILL.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
-		t.Errorf("Expected promoted dromena at .claude/commands/test-cmd.md, but it does not exist")
+		t.Errorf("Expected promoted dromena at %s, but it does not exist", commandsPath)
 	}
 
 	if _, err := os.Stat(skillsPath); err == nil {
-		t.Errorf("Dromena should NOT be in .claude/skills/test-cmd/, but it exists")
+		t.Errorf("Dromena should NOT be in channel skills dir, but it exists")
 	}
 
 	// Verify: old paths should NOT exist
@@ -71,7 +71,7 @@ This is a test command.
 }
 
 // TestRoutingLegoToSkills verifies that INDEX.lego.md files
-// are routed to .claude/skills/ with extension stripped
+// are routed to the channel skills directory with extension stripped
 func TestRoutingLegoToSkills(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
@@ -107,16 +107,16 @@ This is a test reference.
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: file should be in .claude/skills/ as SKILL.md (CC entrypoint), NOT in .claude/commands/
+	// Verify: file should be in channel skills/ as SKILL.md, NOT in channel commands/
 	skillsPath := filepath.Join(channelDir, "skills", "test-ref", "SKILL.md")
 	commandsPath := filepath.Join(channelDir, "commands", "test-ref", "SKILL.md")
 
 	if _, err := os.Stat(skillsPath); os.IsNotExist(err) {
-		t.Errorf("Expected legomena to be in .claude/skills/test-ref/SKILL.md (CC entrypoint), but it does not exist")
+		t.Errorf("Expected legomena to be in channel skills/test-ref/SKILL.md, but it does not exist")
 	}
 
 	if _, err := os.Stat(commandsPath); err == nil {
-		t.Errorf("Legomena should NOT be in .claude/commands/test-ref/, but it exists")
+		t.Errorf("Legomena should NOT be in channel commands dir, but it exists")
 	}
 
 	// Verify: old un-stripped name should NOT exist
@@ -127,7 +127,7 @@ This is a test reference.
 }
 
 // TestRoutingDefaultIsDro verifies that commands with plain INDEX.md
-// default to dromena routing (.claude/commands/) for backward compatibility
+// default to dromena routing (channel commands directory) for backward compatibility
 func TestRoutingDefaultIsDro(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
@@ -163,16 +163,16 @@ This command has a plain INDEX.md and should default to dromena routing.
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: plain INDEX.md defaults to dromena, promoted to .claude/commands/test-default.md
+	// Verify: plain INDEX.md defaults to dromena, promoted to channel commands directory
 	commandsPath := filepath.Join(channelDir, "commands", "test-default.md")
 	skillsPath := filepath.Join(channelDir, "skills", "test-default", "SKILL.md")
 
 	if _, err := os.Stat(commandsPath); os.IsNotExist(err) {
-		t.Errorf("Expected promoted default at .claude/commands/test-default.md, but it does not exist")
+		t.Errorf("Expected promoted default at %s, but it does not exist", commandsPath)
 	}
 
 	if _, err := os.Stat(skillsPath); err == nil {
-		t.Errorf("Default should NOT be in .claude/skills/test-default/, but it exists")
+		t.Errorf("Default should NOT be in channel skills dir, but it exists")
 	}
 }
 
@@ -223,28 +223,28 @@ This is a test reference with supporting files.
 		t.Fatalf("materializeMena failed: %v", err)
 	}
 
-	// Verify: ALL files should be in .claude/skills/ (following INDEX.lego.md)
+	// Verify: ALL files should be in channel skills/ (following INDEX.lego.md)
 	// INDEX.lego.md is renamed to SKILL.md (CC entrypoint convention)
 	skillsIndexPath := filepath.Join(channelDir, "skills", "test-with-files", "SKILL.md")
 	skillsBehaviorPath := filepath.Join(channelDir, "skills", "test-with-files", "behavior.md")
 	skillsExamplesPath := filepath.Join(channelDir, "skills", "test-with-files", "examples.md")
 
 	if _, err := os.Stat(skillsIndexPath); os.IsNotExist(err) {
-		t.Errorf("Expected SKILL.md (renamed from INDEX.lego.md, CC entrypoint) to be in .claude/skills/test-with-files/, but it does not exist")
+		t.Errorf("Expected SKILL.md (renamed from INDEX.lego.md) to be in channel skills/test-with-files/, but it does not exist")
 	}
 
 	if _, err := os.Stat(skillsBehaviorPath); os.IsNotExist(err) {
-		t.Errorf("Expected behavior.md to be in .claude/skills/test-with-files/, but it does not exist")
+		t.Errorf("Expected behavior.md to be in channel skills/test-with-files/, but it does not exist")
 	}
 
 	if _, err := os.Stat(skillsExamplesPath); os.IsNotExist(err) {
-		t.Errorf("Expected examples.md to be in .claude/skills/test-with-files/, but it does not exist")
+		t.Errorf("Expected examples.md to be in channel skills/test-with-files/, but it does not exist")
 	}
 
-	// Verify: files should NOT be in .claude/commands/
+	// Verify: files should NOT be in channel commands/
 	commandsIndexPath := filepath.Join(channelDir, "commands", "test-with-files", "INDEX.md")
 	if _, err := os.Stat(commandsIndexPath); err == nil {
-		t.Errorf("Files should NOT be in .claude/commands/test-with-files/, but INDEX.md exists")
+		t.Errorf("Files should NOT be in channel commands/test-with-files/, but INDEX.md exists")
 	}
 
 	// Verify: old un-stripped name should NOT exist
@@ -322,30 +322,30 @@ description: A default command
 	// Verify dromena promoted to parent level
 	droPath := filepath.Join(channelDir, "commands", "dro-cmd.md")
 	if _, err := os.Stat(droPath); os.IsNotExist(err) {
-		t.Errorf("Expected dro-cmd.md at .claude/commands/ (promoted), but it does not exist")
+		t.Errorf("Expected dro-cmd.md at channel commands/ (promoted), but it does not exist")
 	}
 
-	// Verify legomena is in .claude/skills/ as SKILL.md (CC entrypoint convention)
+	// Verify legomena is in channel skills/ as SKILL.md
 	legoPath := filepath.Join(channelDir, "skills", "lego-ref", "SKILL.md")
 	if _, err := os.Stat(legoPath); os.IsNotExist(err) {
-		t.Errorf("Expected lego-ref to be in .claude/skills/ as SKILL.md (CC entrypoint), but it does not exist")
+		t.Errorf("Expected lego-ref to be in channel skills/ as SKILL.md, but it does not exist")
 	}
 
 	// Verify default promoted to parent level
 	defaultPath := filepath.Join(channelDir, "commands", "default-cmd.md")
 	if _, err := os.Stat(defaultPath); os.IsNotExist(err) {
-		t.Errorf("Expected default-cmd.md at .claude/commands/ (promoted), but it does not exist")
+		t.Errorf("Expected default-cmd.md at channel commands/ (promoted), but it does not exist")
 	}
 
 	// Verify no cross-contamination
 	droInSkills := filepath.Join(channelDir, "skills", "dro-cmd", "SKILL.md")
 	if _, err := os.Stat(droInSkills); err == nil {
-		t.Errorf("dro-cmd should NOT be in .claude/skills/, but it exists")
+		t.Errorf("dro-cmd should NOT be in channel skills/, but it exists")
 	}
 
 	legoInCommands := filepath.Join(channelDir, "commands", "lego-ref", "SKILL.md")
 	if _, err := os.Stat(legoInCommands); err == nil {
-		t.Errorf("lego-ref should NOT be in .claude/commands/, but it exists")
+		t.Errorf("lego-ref should NOT be in channel commands/, but it exists")
 	}
 }
 

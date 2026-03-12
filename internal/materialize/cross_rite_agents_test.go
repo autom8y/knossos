@@ -11,13 +11,13 @@ import (
 )
 
 // TestCrossRiteAgents_NotMaterializedToProject verifies cross-rite agents from
-// top-level agents/ are NOT copied to project .claude/agents/.
-// Cross-rite agents are user-scope owned (synced to ~/.claude/agents/ by user-scope sync).
+// top-level agents/ are NOT copied to project channel agents/.
+// Cross-rite agents are user-scope owned (synced to user channel agents/ by user-scope sync).
 func TestCrossRiteAgents_NotMaterializedToProject(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Setup a rite with one agent
@@ -40,9 +40,9 @@ func TestCrossRiteAgents_NotMaterializedToProject(t *testing.T) {
 
 	// Verify cross-rite agents were NOT written to project level
 	assert.NoFileExists(t, filepath.Join(agentsDir, "moirai.md"),
-		"cross-rite agents should not be materialized to project .claude/agents/")
+		"cross-rite agents should not be materialized to project channel agents/")
 	assert.NoFileExists(t, filepath.Join(agentsDir, "pythia.md"),
-		"cross-rite agents should not be materialized to project .claude/agents/")
+		"cross-rite agents should not be materialized to project channel agents/")
 }
 
 // TestCrossRiteAgents_OrphanedOnRiteSwitch verifies that previously-materialized
@@ -51,7 +51,7 @@ func TestCrossRiteAgents_OrphanedOnRiteSwitch(t *testing.T) {
 	t.Parallel()
 	projectDir := t.TempDir()
 	ritesDir := filepath.Join(projectDir, ".knossos", "rites")
-	channelDir := filepath.Join(projectDir, ".claude")
+	channelDir := filepath.Join(projectDir, paths.ClaudeChannel{}.DirName())
 	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Setup a rite

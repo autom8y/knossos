@@ -507,7 +507,7 @@ func keysOfStandalone(m map[string]mena.MenaResolvedStandalone) []string {
 
 // TestSyncUserMena_IncludesSharedRiteMena verifies that syncUserMena includes
 // rites/shared/mena/ as a source so cross-rite overlay features (interview,
-// smell-detection, etc.) are available in user scope (~/.claude/).
+// smell-detection, etc.) are available in user scope (user channel dir).
 // Regression test for: shared mena missing from user-scope sync.
 func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
 	t.Parallel()
