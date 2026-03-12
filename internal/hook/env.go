@@ -49,6 +49,10 @@ type StdinPayload struct {
 	Source         string          `json:"source"`
 	StopHookActive bool            `json:"stop_hook_active"`
 	Trigger        string          `json:"trigger"`
+
+	// XKnossosSignature is the HMAC-SHA256 signature of the payload.
+	// Injected by Knossos client when calling hooks.
+	XKnossosSignature string `json:"x_knossos_signature"`
 }
 
 // Env holds parsed hook environment variables.
@@ -69,9 +73,16 @@ type Env struct {
 
 	// Message context
 	UserMessage string
+
+	// Authentication
+	Signature  string // HMAC signature from payload
+	RawPayload []byte // Full raw stdin payload for verification
 }
 
 // GetAdapter returns the appropriate LifecycleAdapter based on the KNOSSOS_CHANNEL env var.
+// NOTE (HA-1-011): When KNOSSOS_CHANNEL is unset, this implicitly defaults to ClaudeAdapter.
+// This is intentional for backward compatibility. Do NOT change the default behavior here;
+// it is tracked as a behavioral coupling item in the harness-agnosticism initiative (PKG-010).
 func GetAdapter() LifecycleAdapter {
 	if os.Getenv("KNOSSOS_CHANNEL") == "gemini" {
 		return &GeminiAdapter{}

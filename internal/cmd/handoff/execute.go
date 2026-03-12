@@ -35,7 +35,7 @@ event for the receiving agent.
 
 The handoff is recorded to events.jsonl for tracking purposes.
 This command delegates actual state mutations to Moirai
-when running within a Claude Code session.
+when running within an agentic session.
 
 Examples:
   ari handoff execute --artifact=TDD-user-auth --to=principal-engineer

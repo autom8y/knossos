@@ -32,7 +32,7 @@ func TestCollectClaude_Exists(t *testing.T) {
 	os.WriteFile(filepath.Join(root, ".claude", "agents", "architect.md"), []byte("# agent"), 0644)
 	os.WriteFile(filepath.Join(root, ".claude", "agents", "README.txt"), []byte("not an agent"), 0644) // should be excluded
 
-	health := collectClaude(resolver)
+	health := collectChannel(resolver)
 
 	if !health.Exists {
 		t.Error("expected Exists=true")
@@ -49,7 +49,7 @@ func TestCollectClaude_NotExists(t *testing.T) {
 	dir := t.TempDir() // no .claude/
 	resolver := paths.NewResolver(dir)
 
-	health := collectClaude(resolver)
+	health := collectChannel(resolver)
 	if health.Exists {
 		t.Error("expected Exists=false when .claude/ missing")
 	}
@@ -294,7 +294,7 @@ func TestReadSessionStatus_MissingFile(t *testing.T) {
 
 func TestHealthDashboard_Text(t *testing.T) {
 	dashboard := HealthDashboard{
-		Claude: ClaudeHealth{
+		Channel: ChannelHealth{
 			Exists:     true,
 			ActiveRite: "10x-dev",
 			AgentCount: 5,
@@ -329,7 +329,7 @@ func TestHealthDashboard_Text(t *testing.T) {
 	// Verify key sections present
 	for _, want := range []string{
 		"Project Health Dashboard",
-		".claude/",
+		"channel/",
 		"10x-dev",
 		"Agents:       5",
 		".knossos/",
@@ -349,7 +349,7 @@ func TestHealthDashboard_Text(t *testing.T) {
 
 func TestHealthDashboard_JSON(t *testing.T) {
 	dashboard := HealthDashboard{
-		Claude:  ClaudeHealth{Exists: true, ActiveRite: "10x-dev", AgentCount: 3},
+		Channel:  ChannelHealth{Exists: true, ActiveRite: "10x-dev", AgentCount: 3},
 		Knossos: KnossosHealth{Exists: false},
 		Know:    KnowHealth{Exists: true, DomainCount: 1, FreshCount: 1},
 		Ledge:   LedgeHealth{Exists: false},
@@ -368,31 +368,31 @@ func TestHealthDashboard_JSON(t *testing.T) {
 	}
 
 	// Verify top-level keys
-	for _, key := range []string{"claude", "knossos", "know", "ledge", "sos", "healthy"} {
+	for _, key := range []string{"channel", "knossos", "know", "ledge", "sos", "healthy"} {
 		if _, ok := parsed[key]; !ok {
 			t.Errorf("JSON output missing key %q", key)
 		}
 	}
 
-	// Verify claude section
-	claude := parsed["claude"].(map[string]any)
-	if claude["active_rite"] != "10x-dev" {
-		t.Errorf("expected active_rite=10x-dev, got %v", claude["active_rite"])
+	// Verify channel section
+	ch := parsed["channel"].(map[string]any)
+	if ch["active_rite"] != "10x-dev" {
+		t.Errorf("expected active_rite=10x-dev, got %v", ch["active_rite"])
 	}
 }
 
 func TestHealthDashboard_Unhealthy(t *testing.T) {
 	dashboard := HealthDashboard{
-		Claude:  ClaudeHealth{Exists: false},
+		Channel:  ChannelHealth{Exists: false},
 		Healthy: false,
-		Errors:  []string{".claude/ directory not found"},
+		Errors:  []string{"channel directory not found"},
 	}
 
 	text := dashboard.Text()
 	if !strings.Contains(text, "(not found)") {
-		t.Error("Text() should show (not found) for missing .claude/")
+		t.Error("Text() should show (not found) for missing channel directory")
 	}
-	if !strings.Contains(text, ".claude/ directory not found") {
+	if !strings.Contains(text, "channel directory not found") {
 		t.Error("Text() should show error message")
 	}
 }

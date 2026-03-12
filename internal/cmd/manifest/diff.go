@@ -23,8 +23,8 @@ func newDiffCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Compares two manifest files and shows differences.
 
 Paths can be:
-- Local file paths: .claude/manifest.json
-- Git refs: HEAD:.claude/manifest.json, origin/main:.claude/manifest.json`,
+- Local file paths: path/to/manifest.json
+- Git refs: HEAD:path/to/manifest.json, origin/main:path/to/manifest.json`,
 		Args:         common.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDiff(ctx, args[0], args[1], opts)

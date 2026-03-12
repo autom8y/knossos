@@ -185,7 +185,7 @@ func TestCleanupThroughlineIDs_SkipsNonSessionDirs(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create non-session dirs that should be skipped
-	for _, name := range []string{".locks", ".cc-map", ".audit", ".current-session"} {
+	for _, name := range []string{".locks", ".harness-map", ".audit", ".current-session"} {
 		dir := filepath.Join(sessionsDir, name)
 		require.NoError(t, os.MkdirAll(dir, 0755))
 		// Plant a decoy file that should NOT be removed
@@ -215,7 +215,7 @@ func TestCleanupThroughlineIDs_SkipsNonSessionDirs(t *testing.T) {
 	assert.Equal(t, 1, syncResult.RiteResult.ThroughlineIDsCleaned)
 
 	// Decoy files in non-session dirs should survive
-	for _, name := range []string{".locks", ".cc-map", ".audit", ".current-session"} {
+	for _, name := range []string{".locks", ".harness-map", ".audit", ".current-session"} {
 		_, err := os.Stat(filepath.Join(sessionsDir, name, ".throughline-ids.json"))
 		assert.NoError(t, err, "decoy in %s should survive cleanup", name)
 	}

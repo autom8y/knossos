@@ -15,7 +15,7 @@ func collectTour(resolver *paths.Resolver) TourOutput {
 	return TourOutput{
 		ProjectRoot: resolver.ProjectRoot(),
 		Directories: TourDirectories{
-			Claude:  collectClaude(resolver),
+			Channel: collectChannel(resolver),
 			Knossos: collectKnossos(resolver),
 			Know:    collectKnow(resolver),
 			Ledge:   collectLedge(resolver),
@@ -24,13 +24,13 @@ func collectTour(resolver *paths.Resolver) TourOutput {
 	}
 }
 
-func collectClaude(resolver *paths.Resolver) ClaudeSection {
+func collectChannel(resolver *paths.Resolver) ChannelSection {
 	claudeDir := resolver.ClaudeDir()
 	if !dirExists(claudeDir) {
-		return ClaudeSection{Exists: false, Path: ".claude/"}
+		return ChannelSection{Exists: false, Path: ".claude/"}
 	}
 
-	section := ClaudeSection{
+	section := ChannelSection{
 		Exists: true,
 		Path:   ".claude/",
 	}

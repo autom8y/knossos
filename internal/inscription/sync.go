@@ -10,9 +10,9 @@ import (
 	"github.com/autom8y/knossos/internal/fileutil"
 )
 
-// CLAUDEmdSyncOptions configures the core CLAUDE.md sync operation.
-// Both Pipeline.Sync() and the materialization pipeline delegate to SyncCLAUDEmd.
-type CLAUDEmdSyncOptions struct {
+// SyncInscriptionOptions configures the core inscription sync operation.
+// Both Pipeline.Sync() and the materialization pipeline delegate to SyncInscription.
+type SyncInscriptionOptions struct {
 	// ClaudeDir is the path to the .claude/ directory.
 	ClaudeDir string
 
@@ -37,8 +37,8 @@ type CLAUDEmdSyncOptions struct {
 	ContextFilename string
 }
 
-// CLAUDEmdSyncResult contains the result of a CLAUDE.md sync.
-type CLAUDEmdSyncResult struct {
+// SyncInscriptionResult contains the result of an inscription sync.
+type SyncInscriptionResult struct {
 	// Written is true if CLAUDE.md content changed and was written to disk.
 	Written bool
 
@@ -52,7 +52,7 @@ type CLAUDEmdSyncResult struct {
 	ManifestVersion string
 }
 
-// SyncCLAUDEmd is the single canonical path for CLAUDE.md generation.
+// SyncInscription is the single canonical path for inscription (context file) generation.
 // Both the standalone `ari inscription sync` and the materialization pipeline
 // delegate to this function for the core merge/write logic.
 //
@@ -60,11 +60,11 @@ type CLAUDEmdSyncResult struct {
 //  1. Loads or creates KNOSSOS_MANIFEST.yaml
 //  2. Creates a generator (from TemplateFS or TemplateDir)
 //  3. Generates all section content
-//  4. Detects and backs up legacy (pre-marker) CLAUDE.md files
-//  5. Merges generated content with existing CLAUDE.md
-//  6. Writes only if content changed (avoids CC file watcher triggers)
+//  4. Detects and backs up legacy (pre-marker) context files
+//  5. Merges generated content with existing context file
+//  6. Writes only if content changed (avoids harness file watcher triggers)
 //  7. Optionally updates manifest hashes and version
-func SyncCLAUDEmd(opts CLAUDEmdSyncOptions) (*CLAUDEmdSyncResult, error) {
+func SyncInscription(opts SyncInscriptionOptions) (*SyncInscriptionResult, error) {
 	// 1. Load or create KNOSSOS_MANIFEST.yaml in .knossos/
 	projectRoot := filepath.Dir(opts.ClaudeDir)
 	knossosManifestPath := filepath.Join(projectRoot, ".knossos", "KNOSSOS_MANIFEST.yaml")
@@ -153,7 +153,7 @@ func SyncCLAUDEmd(opts CLAUDEmdSyncOptions) (*CLAUDEmdSyncResult, error) {
 		}
 	}
 
-	return &CLAUDEmdSyncResult{
+	return &SyncInscriptionResult{
 		Written:          written,
 		MergeResult:      mergeResult,
 		LegacyBackupPath: legacyBackupPath,

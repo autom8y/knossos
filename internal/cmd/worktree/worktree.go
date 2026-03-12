@@ -28,8 +28,8 @@ func NewWorktreeCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *
 
 	cmd := &cobra.Command{
 		Use:   "worktree",
-		Short: "Manage git worktrees for parallel Claude sessions",
-		Long: `Manage git worktrees for running parallel Claude Code sessions
+		Short: "Manage git worktrees for parallel sessions",
+		Long: `Manage git worktrees for running parallel agentic sessions
 with filesystem isolation.
 
 Git worktrees allow multiple sessions to work on different features

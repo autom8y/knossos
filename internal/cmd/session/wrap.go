@@ -309,9 +309,9 @@ func runWrap(ctx *cmdContext, opts wrapOptions) error {
 		printer.VerboseLog("warn", "failed to remove moirai lock before archive", map[string]any{"error": removeErr.Error()})
 	}
 
-	// 3. CC map entries pointing to this session
-	if clearErr := session.ClearCCMapForSession(resolver, sessionID); clearErr != nil {
-		printer.VerboseLog("warn", "failed to clear CC map entries", map[string]any{"error": clearErr.Error()})
+	// 3. Harness map entries pointing to this session
+	if clearErr := session.ClearHarnessSessionMapForSession(resolver, sessionID); clearErr != nil {
+		printer.VerboseLog("warn", "failed to clear harness map entries", map[string]any{"error": clearErr.Error()})
 	}
 
 	// Move to archive if requested

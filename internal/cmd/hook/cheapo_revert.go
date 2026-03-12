@@ -31,8 +31,8 @@ func newCheapoRevertCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Reverts the el-cheapo model override by running a normal rite-scope sync.
 
 This hook is triggered on Stop events when el-cheapo mode was active.
-It re-materializes .claude/ without the model override, restoring
-original agent models and settings.`,
+It re-materializes the channel directory without the model override,
+restoring original agent models and settings.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
 				return runCheapoRevert(ctx)

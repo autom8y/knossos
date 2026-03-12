@@ -318,7 +318,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	comp := compilerForChannel(opts.Channel)
 
 	// Generate minimal CLAUDE.md (no agents)
-	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector, opts.Channel, comp)
+	legacyBackupPath, err := m.materializeMinimalInscription(claudeDir, collector, opts.Channel, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -430,7 +430,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// Pre-validate CLAUDE.md generation before any disk writes.
 	// Template rendering is the most failure-prone step. Validating it first
 	// prevents partial state where agents are on disk but CLAUDE.md is stale.
-	if err := m.prevalidateCLAUDEmd(manifest, claudeDir, resolved, modelOverride, opts.Channel); err != nil {
+	if err := m.prevalidateInscription(manifest, claudeDir, resolved, modelOverride, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "CLAUDE.md pre-validation failed (no files written)", err)
 	}
 
@@ -523,7 +523,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 7. Generate CLAUDE.md from inscription system
-	legacyBackupPath, err := m.materializeCLAUDEmd(manifest, claudeDir, resolved, collector, modelOverride, opts.Channel, comp)
+	legacyBackupPath, err := m.materializeInscription(manifest, claudeDir, resolved, collector, modelOverride, opts.Channel, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}

@@ -17,7 +17,7 @@ import (
 // ValidateBypassEnvVar is the environment variable to bypass validate hook.
 const ValidateBypassEnvVar = "ARI_VALIDATE_BYPASS"
 
-// BashToolInput represents the input from Claude Code Bash tool.
+// BashToolInput represents the input from a Bash tool invocation.
 type BashToolInput struct {
 	Command string `json:"command"`
 }
@@ -78,7 +78,7 @@ Output (stdout JSON):
 Performance: <5ms for passthrough path.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runValidate(ctx)
+				return runValidate(cmd, ctx)
 			})
 		},
 	}
@@ -86,20 +86,23 @@ Performance: <5ms for passthrough path.`,
 	return cmd
 }
 
-func runValidate(ctx *cmdContext) error {
+func runValidate(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runValidateCore(ctx, printer)
+	return runValidateCore(cmd, ctx, printer)
 }
 
 // runValidateCore contains the actual logic with injected printer for testing.
-func runValidateCore(ctx *cmdContext, printer *output.Printer) error {
-	// Check bypass env var
-	if os.Getenv(ValidateBypassEnvVar) == "1" {
-		return outputValidateAllow(printer)
+func runValidateCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
+	// Get hook environment
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return outputDenyAuth(printer)
 	}
 
-	// Get hook environment
-	hookEnv := ctx.getHookEnv()
+	// Check bypass env var
+	if os.Getenv(ValidateBypassEnvVar) == "1" {
 
 	// Verify this is a PreToolUse event
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
@@ -186,6 +189,19 @@ func validateCommand(command string) (bool, string) {
 	}
 
 	return false, ""
+}
+
+// outputDenyAuth outputs a deny decision when authentication fails.
+func outputDenyAuth(printer *output.Printer) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "invalid_signature",
+			AdditionalContext:        "Hook authentication failed. Ensure KNOSSOS_HOOK_SECRET is correctly configured.",
+		},
+	}
+	return printer.Print(result)
 }
 
 // outputValidateAllow outputs an allow decision in CC's hookSpecificOutput format.

@@ -48,22 +48,22 @@ func NewSyncCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 	cmd := &cobra.Command{
 		Use:   "sync",
 		Short: "Synchronize rite and user resources",
-		Long: `Sync generates and updates Claude Code configuration.
+		Long: `Sync generates and updates channel directory configuration.
 
-By default, syncs rite scope (project .claude/), org scope, and user scope (~/.claude/).
+By default, syncs rite scope (project channel directory), org scope, and user scope.
 Use --scope to limit to a specific scope.
 
 Rite Scope:
-  Generates .claude/ from the active rite (agents, mena, hooks, rules, CLAUDE.md).
+  Generates the channel directory from the active rite (agents, mena, hooks, rules, inscription).
   Requires a project context with ACTIVE_RITE (or --rite flag).
   Source resolution: project > user > org > knossos > embedded.
 
 Org Scope:
-  Syncs org-level agents and mena to ~/.claude/.
+  Syncs org-level agents and mena to the user channel directory.
   Requires an active org (KNOSSOS_ORG env var, ari org set, or --org flag).
 
 User Scope:
-  Syncs user-level resources from $KNOSSOS_HOME to ~/.claude/.
+  Syncs user-level resources from $KNOSSOS_HOME to the user channel directory.
   Works without a project context.
   Resources: agents, mena (commands + skills), hooks.
 
@@ -137,7 +137,7 @@ Examples:
 	cmd.Flags().BoolVar(&recoverMode, "recover", false, "Adopt existing untracked files into manifest")
 	cmd.Flags().BoolVar(&overwriteDiverged, "overwrite-diverged", false, "Overwrite locally modified files")
 	cmd.Flags().BoolVar(&keepOrphans, "keep-orphans", false, "Preserve orphaned knossos files")
-	cmd.Flags().BoolVar(&soft, "soft", false, "CC-safe mode: update only agents and CLAUDE.md (skip hooks/mena/rules)")
+	cmd.Flags().BoolVar(&soft, "soft", false, "Safe mode: update only agents and inscription (skip hooks/mena/rules)")
 	cmd.Flags().BoolVar(&budget, "budget", false, "Show context token budget after sync")
 	cmd.Flags().BoolVar(&elCheapo, "el-cheapo", false, "Force all agents to haiku model (ephemeral, reverted on session exit)")
 

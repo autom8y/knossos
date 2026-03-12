@@ -33,7 +33,7 @@ lifecycle events.
 
 Resolution chain (same as hook):
   1. --session-id flag (explicit)
-  2. CC session map (.cc-map/)
+  2. Harness session map (.harness-map/)
   3. Smart scan (single active session)
 
 Examples:

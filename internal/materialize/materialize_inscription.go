@@ -11,11 +11,11 @@ import (
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
-// materializeCLAUDEmd generates CLAUDE.md using the inscription system.
-// Delegates to inscription.SyncCLAUDEmd for the core merge/write logic,
+// materializeInscription generates CLAUDE.md using the inscription system.
+// Delegates to inscription.SyncInscription for the core merge/write logic,
 // then records provenance for the written file.
 // Returns the path to legacy backup if migration occurred, or empty string if no backup.
-func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride, channel string, comp compiler.ChannelCompiler) (string, error) {
+func (m *Materializer) materializeInscription(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, modelOverride, channel string, comp compiler.ChannelCompiler) (string, error) {
 	// Build render context with full agent details
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
@@ -50,8 +50,8 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		contextFilename = comp.ContextFilename()
 	}
 
-	// Delegate to canonical SyncCLAUDEmd
-	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
+	// Delegate to canonical SyncInscription
+	result, err := inscription.SyncInscription(inscription.SyncInscriptionOptions{
 		ClaudeDir:		claudeDir,
 		RenderCtx:		renderCtx,
 		ActiveRite:		manifest.Name,
@@ -85,9 +85,9 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 	return result.LegacyBackupPath, nil
 }
 
-// materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
-// Delegates to inscription.SyncCLAUDEmd without manifest updates.
-func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector, channel string, comp compiler.ChannelCompiler) (string, error) {
+// materializeMinimalInscription generates CLAUDE.md for cross-cutting mode (no agents).
+// Delegates to inscription.SyncInscription without manifest updates.
+func (m *Materializer) materializeMinimalInscription(claudeDir string, collector provenance.Collector, channel string, comp compiler.ChannelCompiler) (string, error) {
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
 		ActiveRite:		"",
@@ -104,7 +104,7 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 		contextFilename = comp.ContextFilename()
 	}
 
-	result, err := inscription.SyncCLAUDEmd(inscription.CLAUDEmdSyncOptions{
+	result, err := inscription.SyncInscription(inscription.SyncInscriptionOptions{
 		ClaudeDir:		claudeDir,
 		RenderCtx:		renderCtx,
 		TemplateDir:		m.templatesDir,
@@ -118,10 +118,10 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 	return result.LegacyBackupPath, nil
 }
 
-// prevalidateCLAUDEmd validates that CLAUDE.md generation will succeed without
+// prevalidateInscription validates that CLAUDE.md generation will succeed without
 // writing any files. This is called BEFORE destructive operations (agent writes,
 // orphan removal) to prevent partial state when template rendering fails.
-func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, modelOverride, channel string) error {
+func (m *Materializer) prevalidateInscription(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, modelOverride, channel string) error {
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
 		agents = append(agents, inscription.AgentInfo{

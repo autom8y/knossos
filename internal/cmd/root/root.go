@@ -84,8 +84,8 @@ func Execute() error {
 
 var rootCmd = &cobra.Command{
 	Use:   "ari",
-	Short: "Ariadne - Claude Code workflow harness",
-	Long: `Ariadne (ari) manages sessions, rites, manifests, and sync for Claude Code agentic workflows.
+	Short: "Ariadne - knossos workflow harness",
+	Long: `Ariadne (ari) manages sessions, rites, manifests, and sync for agentic workflows.
 
 The clew that makes the maze survivable.`,
 	SilenceUsage:              true,

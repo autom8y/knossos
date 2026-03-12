@@ -1,5 +1,5 @@
 // Package hook implements the ari hook commands.
-// This package provides the hook command group for Claude Code hook integration.
+// This package provides the hook command group for harness hook integration.
 package hook
 
 import (
@@ -51,17 +51,14 @@ func NewHookCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID *st
 
 	cmd := &cobra.Command{
 		Use:   "hook",
-		Short: "Claude Code hook infrastructure",
-		Long: `Hook command group for Claude Code hook integration.
+		Short: "Harness hook infrastructure",
+		Long: `Hook command group for harness hook integration.
 
-This command group provides infrastructure for Claude Code hooks,
+This command group provides infrastructure for lifecycle hooks,
 enabling Go-based hook implementations with consistent behavior.
 
-Hooks process Claude Code tool events and can modify, validate,
+Hooks process tool events and can modify, validate,
 or enrich tool operations. Use subcommands for specific hook types.
-
-Environment Variables:
-  CLAUDE_HOOK_*      Standard Claude Code hook environment variables
 
 Performance Targets:
   Early exit: <5ms   (when hooks disabled or no session)
@@ -88,6 +85,7 @@ Performance Targets:
 	// Add persistent flags for all hook subcommands
 	cmd.PersistentFlags().IntVar(&timeoutMs, "timeout", 100,
 		"Hook operation timeout in milliseconds (max 500)")
+	cmd.PersistentFlags().String("signature", "", "HMAC-SHA256 signature of the stdin payload")
 
 	// Add hook subcommands
 	cmd.AddCommand(newContextCmd(ctx))
@@ -126,8 +124,15 @@ func (c *cmdContext) getPrinter() *output.Printer {
 }
 
 // getHookEnv parses the hook environment variables.
-func (c *cmdContext) getHookEnv() *hook.Env {
-	return hook.ParseEnv()
+func (c *cmdContext) getHookEnv(cmd *cobra.Command) *hook.Env {
+	env := hook.ParseEnv()
+	if env != nil {
+		sig, _ := cmd.Flags().GetString("signature")
+		if sig != "" {
+			env.Signature = sig
+		}
+	}
+	return env
 }
 
 // withTimeout wraps a command execution function with context.WithTimeout.

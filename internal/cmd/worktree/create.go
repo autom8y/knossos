@@ -51,7 +51,7 @@ func newCreateCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create <name>",
 		Short: "Create a new worktree for parallel session",
-		Long: `Create a new git worktree for running a parallel Claude Code session.
+		Long: `Create a new git worktree for running a parallel agentic session.
 
 The worktree is created in .worktrees/{id}/ with isolated filesystem,
 allowing parallel work without conflicts.

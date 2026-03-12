@@ -96,16 +96,16 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 		}
 	}
 
-	// Step 2: Clean up orphaned CC map entries
-	ccMapDir := resolver.CCMapDir()
-	var ccMapOrphans []string
-	var removedCCMapOrphans []string
-	if entries, err := os.ReadDir(ccMapDir); err == nil {
+	// Step 2: Clean up orphaned harness map entries
+	harnessMapDir := resolver.HarnessMapDir()
+	var harnessMapOrphans []string
+	var removedHarnessMapOrphans []string
+	if entries, err := os.ReadDir(harnessMapDir); err == nil {
 		for _, entry := range entries {
 			if entry.IsDir() {
 				continue
 			}
-			mapFile := filepath.Join(ccMapDir, entry.Name())
+			mapFile := filepath.Join(harnessMapDir, entry.Name())
 			data, readErr := os.ReadFile(mapFile)
 			if readErr != nil {
 				continue
@@ -114,10 +114,10 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 			// Check if the mapped session still exists
 			sessionDir := resolver.SessionDir(knossosID)
 			if _, statErr := os.Stat(sessionDir); os.IsNotExist(statErr) {
-				ccMapOrphans = append(ccMapOrphans, entry.Name()+" -> "+knossosID)
+				harnessMapOrphans = append(harnessMapOrphans, entry.Name()+" -> "+knossosID)
 				if !opts.dryRun {
 					if removeErr := os.Remove(mapFile); removeErr == nil {
-						removedCCMapOrphans = append(removedCCMapOrphans, entry.Name())
+						removedHarnessMapOrphans = append(removedHarnessMapOrphans, entry.Name())
 					}
 				}
 			}
@@ -148,15 +148,15 @@ func runRecover(ctx *cmdContext, opts recoverOptions) error {
 		StaleLocks:            staleLocks,
 		RemovedLocks:          removedLocks,
 		ActiveSession:         activeID,
-		CCMapOrphans:          ccMapOrphans,
-		RemovedCCMapOrphans:   removedCCMapOrphans,
+		HarnessMapOrphans:        harnessMapOrphans,
+		RemovedHarnessMapOrphans: removedHarnessMapOrphans,
 		CurrentSessionCleaned: currentSessionCleaned,
 		DryRun:                opts.dryRun,
 	}
 
 	switch {
-	case len(staleLocks) == 0 && len(ccMapOrphans) == 0 && !currentSessionCleaned:
-		result.Summary = "All healthy. No stale locks, CC map orphans, or legacy cache files found."
+	case len(staleLocks) == 0 && len(harnessMapOrphans) == 0 && !currentSessionCleaned:
+		result.Summary = "All healthy. No stale locks, harness map orphans, or legacy cache files found."
 	case opts.dryRun:
 		result.Summary = "Issues found. Run without --dry-run to fix."
 	default:

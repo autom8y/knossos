@@ -14,15 +14,15 @@ type TourOutput struct {
 
 // TourDirectories holds all five directory sections.
 type TourDirectories struct {
-	Claude  ClaudeSection  `json:"claude"`
+	Channel ChannelSection  `json:"channel"`
 	Knossos KnossosSection `json:"knossos"`
 	Know    KnowSection    `json:"know"`
 	Ledge   LedgeSection   `json:"ledge"`
 	SOS     SOSSection     `json:"sos"`
 }
 
-// ClaudeSection represents .claude/ directory state for tour output.
-type ClaudeSection struct {
+// ChannelSection represents channel directory state for tour output.
+type ChannelSection struct {
 	Exists       bool     `json:"exists"`
 	Path         string   `json:"path"`
 	Agents       DirCount `json:"agents"`
@@ -85,12 +85,12 @@ func (t TourOutput) Text() string {
 
 	b.WriteString("=== Project Tour ===\n")
 
-	// .claude/
-	b.WriteString("\n.claude/\n")
-	if !t.Directories.Claude.Exists {
+	// Channel directory
+	b.WriteString("\nchannel/\n")
+	if !t.Directories.Channel.Exists {
 		b.WriteString("  (not found)\n")
 	} else {
-		c := t.Directories.Claude
+		c := t.Directories.Channel
 		fmt.Fprintf(&b, "  agents/        %d agents\n", c.Agents.Count)
 		fmt.Fprintf(&b, "  commands/      %d commands\n", c.Commands.Count)
 		fmt.Fprintf(&b, "  skills/        %d skills\n", c.Skills.Count)

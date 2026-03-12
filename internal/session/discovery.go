@@ -54,7 +54,7 @@ func FindActiveSession(sessionsDir string) (string, error) {
 
 // FindActiveSessions scans session directories and returns ALL active session IDs.
 // Unlike FindActiveSession (singular), this does not error on multiple active sessions.
-// Used by ResolveSession for CC-map-aware resolution where parallel sessions are valid.
+// Used by ResolveSession for harness-map-aware resolution where parallel sessions are valid.
 func FindActiveSessions(sessionsDir string) ([]string, error) {
 	entries, err := os.ReadDir(sessionsDir)
 	if err != nil {

@@ -34,13 +34,13 @@ func TestClaim_Success(t *testing.T) {
 	resolver := paths.NewResolver(projectDir)
 	ccID := "test-cc-session-abc123"
 
-	err := session.SetCCMap(resolver, ccID, sessionID)
+	err := session.SetHarnessSessionMap(resolver, ccID, sessionID)
 	if err != nil {
-		t.Fatalf("SetCCMap() error = %v", err)
+		t.Fatalf("SetHarnessSessionMap() error = %v", err)
 	}
 
 	// Verify the CC map file was written
-	mapFile := filepath.Join(resolver.CCMapDir(), ccID)
+	mapFile := filepath.Join(resolver.HarnessMapDir(), ccID)
 	data, err := os.ReadFile(mapFile)
 	if err != nil {
 		t.Fatalf("failed to read cc-map file: %v", err)
@@ -101,9 +101,9 @@ func TestClaim_ParkedSession(t *testing.T) {
 	ccID := "test-cc-parked-session"
 
 	// Claiming a PARKED session should succeed (binding, not lifecycle)
-	err := session.SetCCMap(resolver, ccID, sessionID)
+	err := session.SetHarnessSessionMap(resolver, ccID, sessionID)
 	if err != nil {
-		t.Fatalf("SetCCMap() for parked session error = %v", err)
+		t.Fatalf("SetHarnessSessionMap() for parked session error = %v", err)
 	}
 
 	// Round-trip should work
@@ -131,13 +131,13 @@ func TestClaim_Overwrite(t *testing.T) {
 	}
 
 	// Claim session 1
-	if err := session.SetCCMap(resolver, ccID, sessionID1); err != nil {
-		t.Fatalf("SetCCMap(1) error = %v", err)
+	if err := session.SetHarnessSessionMap(resolver, ccID, sessionID1); err != nil {
+		t.Fatalf("SetHarnessSessionMap(1) error = %v", err)
 	}
 
 	// Overwrite: claim session 2
-	if err := session.SetCCMap(resolver, ccID, ctx2.SessionID); err != nil {
-		t.Fatalf("SetCCMap(2) error = %v", err)
+	if err := session.SetHarnessSessionMap(resolver, ccID, ctx2.SessionID); err != nil {
+		t.Fatalf("SetHarnessSessionMap(2) error = %v", err)
 	}
 
 	// Resolve should return session 2
@@ -154,7 +154,7 @@ func TestClaim_EmptyCCSessionID(t *testing.T) {
 	projectDir, _ := setupClaimTest(t, session.StatusActive)
 	resolver := paths.NewResolver(projectDir)
 
-	err := session.SetCCMap(resolver, "", "session-anything")
+	err := session.SetHarnessSessionMap(resolver, "", "session-anything")
 	if err == nil {
 		t.Fatal("expected error for empty CC session ID, got nil")
 	}

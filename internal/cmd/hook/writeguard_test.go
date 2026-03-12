@@ -76,14 +76,14 @@ func TestParseFilePath(t *testing.T) {
 	}{
 		{
 			name:          "valid Write input",
-			toolInput:     `{"file_path": "/tmp/test.txt", "content": "hello"}`,
-			want:          "/tmp/test.txt",
+			toolInput:     `{"file_path": "tmp/test.txt", "content": "hello"}`,
+			want:          "tmp/test.txt",
 			expectWarning: false,
 		},
 		{
 			name:          "valid Edit input",
-			toolInput:     `{"file_path": "/tmp/test.txt", "old_string": "hello", "new_string": "world"}`,
-			want:          "/tmp/test.txt",
+			toolInput:     `{"file_path": "tmp/test.txt", "old_string": "hello", "new_string": "world"}`,
+			want:          "tmp/test.txt",
 			expectWarning: false,
 		},
 		{
@@ -116,6 +116,30 @@ func TestParseFilePath(t *testing.T) {
 			want:          "",
 			expectWarning: false,
 		},
+		{
+			name:          "path traversal - parent directory",
+			toolInput:     `{"file_path": "../../etc/passwd"}`,
+			want:          "",
+			expectWarning: true,
+		},
+		{
+			name:          "path traversal - absolute path",
+			toolInput:     `{"file_path": "/etc/passwd"}`,
+			want:          "",
+			expectWarning: true,
+		},
+		{
+			name:          "path traversal - indirect",
+			toolInput:     `{"file_path": "foo/../../etc/passwd"}`,
+			want:          "",
+			expectWarning: true,
+		},
+		{
+			name:          "normalized valid path",
+			toolInput:     `{"file_path": "foo/./bar.txt"}`,
+			want:          "foo/bar.txt",
+			expectWarning: false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -131,8 +155,9 @@ func TestParseFilePath(t *testing.T) {
 			// Check if warning was logged when expected
 			if tt.expectWarning {
 				stderrStr := stderr.String()
-				if !bytes.Contains([]byte(stderrStr), []byte("failed to parse tool input JSON")) {
-					t.Errorf("Expected warning log for malformed JSON, but got no warning. stderr: %s", stderrStr)
+				if !bytes.Contains([]byte(stderrStr), []byte("failed to parse tool input JSON")) &&
+					!bytes.Contains([]byte(stderrStr), []byte("blocked potential path traversal attempt")) {
+					t.Errorf("Expected warning log, but got no recognized warning. stderr: %s", stderrStr)
 				}
 			}
 		})

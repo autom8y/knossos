@@ -240,7 +240,7 @@ func newContextCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "context",
 		Short: "Inject session context on SessionStart",
-		Long: `Reads session context and outputs it for Claude Code injection.
+		Long: `Reads session context and outputs it for harness context injection.
 
 This hook is triggered on SessionStart events. It reads:
 - SESSION_CONTEXT.md if a session exists

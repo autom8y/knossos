@@ -175,7 +175,7 @@ func NewPipelineWithPaths(claudeMDPath, manifestPath, templateDir, backupDir str
 }
 
 // Sync performs the full sync pipeline.
-// This delegates to SyncCLAUDEmd for the core merge/write logic,
+// This delegates to SyncInscription for the core merge/write logic,
 // adding Pipeline-specific features (backup, dry-run).
 func (p *Pipeline) Sync(opts InscriptionSyncOptions) (*SyncResult, error) {
 	start := time.Now()
@@ -211,9 +211,9 @@ func (p *Pipeline) Sync(opts InscriptionSyncOptions) (*SyncResult, error) {
 		}
 	}
 
-	// Delegate to unified SyncCLAUDEmd
+	// Delegate to unified SyncInscription
 	claudeDir := filepath.Dir(p.ClaudeMDPath)
-	result, err := SyncCLAUDEmd(CLAUDEmdSyncOptions{
+	result, err := SyncInscription(SyncInscriptionOptions{
 		ClaudeDir:      claudeDir,
 		RenderCtx:      ctx,
 		ActiveRite:     opts.RiteName,

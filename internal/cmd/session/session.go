@@ -31,7 +31,7 @@ func NewSessionCmd(outputFlag *string, verboseFlag *bool, projectDir, sessionID 
 	cmd := &cobra.Command{
 		Use:   "session",
 		Short: "Manage workflow sessions",
-		Long: `Create, query, transition, and manage Claude Code workflow sessions.
+		Long: `Create, query, transition, and manage workflow sessions.
 
 Session lifecycle: NONE -> ACTIVE -> {PARKED, ARCHIVED}
   PARKED sessions can be resumed back to ACTIVE.

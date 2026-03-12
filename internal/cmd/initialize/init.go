@@ -104,7 +104,7 @@ func NewInitCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "Initialize a Knossos project",
-		Long: `Scaffolds .claude/ directory with CLAUDE.md, settings.local.json,
+		Long: `Scaffolds the channel directory with inscription, settings,
 and KNOSSOS_MANIFEST.yaml. Optionally activates a rite.
 
 Works without KNOSSOS_HOME set -- uses embedded rite definitions.
@@ -120,7 +120,7 @@ Examples:
 
 	cmd.Flags().StringVar(&riteName, "rite", "", "Rite to activate after scaffolding")
 	cmd.Flags().StringVar(&source, "source", "", "Explicit rite source path")
-	cmd.Flags().BoolVar(&force, "force", false, "Overwrite existing .claude/ directory")
+	cmd.Flags().BoolVar(&force, "force", false, "Overwrite existing channel directory")
 
 	// This command does NOT require an existing project -- it creates the project context.
 	common.SetNeedsProject(cmd, false, false)

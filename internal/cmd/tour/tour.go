@@ -26,7 +26,7 @@ func NewTourCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 		Short: "Walk project directory structure",
 		Long: `Display the knossos directory tree with file counts and contents.
 
-Shows each managed directory (.claude/, .knossos/, .know/, .ledge/, .sos/)
+Shows each managed directory (channel directory, .knossos/, .know/, .ledge/, .sos/)
 with subdirectory listings and file counts from the live filesystem.
 
 This is a read-only command -- it does not modify any state.

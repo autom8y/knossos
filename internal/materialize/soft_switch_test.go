@@ -76,8 +76,8 @@ agents:
 	}
 }
 
-// TestMaterializeWithOptions_SoftMode_CLAUDEmdUpdated verifies that CLAUDE.md is updated in soft mode.
-func TestMaterializeWithOptions_SoftMode_CLAUDEmdUpdated(t *testing.T) {
+// TestMaterializeWithOptions_SoftMode_InscriptionUpdated verifies that the inscription (context file) is updated in soft mode.
+func TestMaterializeWithOptions_SoftMode_InscriptionUpdated(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
 	claudeDir := filepath.Join(tmpDir, ".claude")

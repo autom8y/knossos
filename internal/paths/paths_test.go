@@ -32,7 +32,7 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"SOSDir", r.SOSDir(), "/tmp/testroot/.sos"},
 		{"SessionsDir", r.SessionsDir(), "/tmp/testroot/.sos/sessions"},
 		{"LocksDir", r.LocksDir(), "/tmp/testroot/.sos/sessions/.locks"},
-		{"CCMapDir", r.CCMapDir(), "/tmp/testroot/.sos/sessions/.cc-map"},
+		{"HarnessMapDir", r.HarnessMapDir(), "/tmp/testroot/.sos/sessions/.harness-map"},
 		{"ArchiveDir", r.ArchiveDir(), "/tmp/testroot/.sos/archive"},
 		{"SessionDir", r.SessionDir("s1"), "/tmp/testroot/.sos/sessions/s1"},
 		{"SessionContextFile", r.SessionContextFile("s1"), "/tmp/testroot/.sos/sessions/s1/SESSION_CONTEXT.md"},

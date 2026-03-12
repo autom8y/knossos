@@ -37,7 +37,7 @@ func newAutoparkCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "autopark",
 		Short: "Auto-park session on Stop event",
-		Long: `Automatically transitions active sessions to PARKED on Claude Code Stop.
+		Long: `Automatically transitions active sessions to PARKED on Stop event.
 
 This hook is triggered on Stop events. It:
 - Checks for an active session

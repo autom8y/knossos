@@ -31,10 +31,10 @@ func NewProvenanceCmd(outputFlag *string, verboseFlag *bool, projectDir *string)
 
 	cmd := &cobra.Command{
 		Use:   "provenance",
-		Short: "Inspect file provenance in .claude/",
-		Long: `Inspect the provenance manifest to see the origin and ownership state of files in .claude/.
+		Short: "Inspect file provenance in channel directory",
+		Long: `Inspect the provenance manifest to see the origin and ownership state of files in the channel directory.
 
-The provenance manifest tracks every file Knossos places in .claude/, recording:
+The provenance manifest tracks every file Knossos places in the channel directory, recording:
   - Owner: who owns the file (knossos, user, unknown)
   - Source: where the file came from (rite path, template path, mena path)
   - Status: whether the file matches the expected checksum (match, diverged)
@@ -62,7 +62,7 @@ func newShowCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "show",
 		Short: "Display provenance manifest",
-		Long: `Display the provenance manifest showing origin and ownership for all files in .claude/.
+		Long: `Display the provenance manifest showing origin and ownership for all files in the channel directory.
 
 The status column shows:
   - match:    File on disk matches the expected checksum

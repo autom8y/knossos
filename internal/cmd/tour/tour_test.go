@@ -104,13 +104,13 @@ func TestCollectTourFullProject(t *testing.T) {
 	tour := collectTour(resolver)
 
 	assert.Equal(t, root, tour.ProjectRoot)
-	assert.True(t, tour.Directories.Claude.Exists)
-	assert.Equal(t, 3, tour.Directories.Claude.Agents.Count)
-	assert.Equal(t, 1, tour.Directories.Claude.Commands.Count)
-	assert.Equal(t, 2, tour.Directories.Claude.Skills.Count)
-	assert.True(t, tour.Directories.Claude.SettingsJSON)
-	assert.True(t, tour.Directories.Claude.ClaudeMD)
-	assert.Equal(t, "10x-dev", tour.Directories.Claude.ActiveRite)
+	assert.True(t, tour.Directories.Channel.Exists)
+	assert.Equal(t, 3, tour.Directories.Channel.Agents.Count)
+	assert.Equal(t, 1, tour.Directories.Channel.Commands.Count)
+	assert.Equal(t, 2, tour.Directories.Channel.Skills.Count)
+	assert.True(t, tour.Directories.Channel.SettingsJSON)
+	assert.True(t, tour.Directories.Channel.ClaudeMD)
+	assert.Equal(t, "10x-dev", tour.Directories.Channel.ActiveRite)
 
 	assert.True(t, tour.Directories.Knossos.Exists)
 	assert.Equal(t, 1, tour.Directories.Knossos.Rites.Count)
@@ -139,8 +139,8 @@ func TestCollectTourEmptyProject(t *testing.T) {
 	resolver := paths.NewResolver(root)
 	tour := collectTour(resolver)
 
-	assert.True(t, tour.Directories.Claude.Exists)
-	assert.Equal(t, 0, tour.Directories.Claude.Agents.Count)
+	assert.True(t, tour.Directories.Channel.Exists)
+	assert.Equal(t, 0, tour.Directories.Channel.Agents.Count)
 	assert.False(t, tour.Directories.Knossos.Exists)
 	assert.False(t, tour.Directories.Know.Exists)
 	assert.False(t, tour.Directories.Ledge.Exists)
@@ -155,7 +155,7 @@ func TestCollectTourMissingKnossos(t *testing.T) {
 	resolver := paths.NewResolver(root)
 	tour := collectTour(resolver)
 
-	assert.True(t, tour.Directories.Claude.Exists)
+	assert.True(t, tour.Directories.Channel.Exists)
 	assert.False(t, tour.Directories.Knossos.Exists)
 	assert.True(t, tour.Directories.Know.Exists)
 }
@@ -168,7 +168,7 @@ func TestCollectTourMissingKnow(t *testing.T) {
 	resolver := paths.NewResolver(root)
 	tour := collectTour(resolver)
 
-	assert.True(t, tour.Directories.Claude.Exists)
+	assert.True(t, tour.Directories.Channel.Exists)
 	assert.False(t, tour.Directories.Know.Exists)
 	assert.True(t, tour.Directories.Ledge.Exists)
 }
@@ -181,7 +181,7 @@ func TestCollectTourMissingLedge(t *testing.T) {
 	resolver := paths.NewResolver(root)
 	tour := collectTour(resolver)
 
-	assert.True(t, tour.Directories.Claude.Exists)
+	assert.True(t, tour.Directories.Channel.Exists)
 	assert.False(t, tour.Directories.Ledge.Exists)
 	assert.True(t, tour.Directories.SOS.Exists)
 }
@@ -194,7 +194,7 @@ func TestCollectTourMissingSOS(t *testing.T) {
 	resolver := paths.NewResolver(root)
 	tour := collectTour(resolver)
 
-	assert.True(t, tour.Directories.Claude.Exists)
+	assert.True(t, tour.Directories.Channel.Exists)
 	assert.False(t, tour.Directories.SOS.Exists)
 }
 
@@ -210,7 +210,7 @@ func TestClaudeAgentCount(t *testing.T) {
 	writeFile(t, filepath.Join(agentsDir, "readme.txt"), "not an agent")
 
 	resolver := paths.NewResolver(root)
-	section := collectClaude(resolver)
+	section := collectChannel(resolver)
 	assert.Equal(t, 3, section.Agents.Count)
 }
 
@@ -220,7 +220,7 @@ func TestClaudeSettingsJSONPresent(t *testing.T) {
 	writeFile(t, filepath.Join(root, ".claude", "settings.json"), "{}")
 
 	resolver := paths.NewResolver(root)
-	section := collectClaude(resolver)
+	section := collectChannel(resolver)
 	assert.True(t, section.SettingsJSON)
 }
 
@@ -229,7 +229,7 @@ func TestClaudeSettingsJSONMissing(t *testing.T) {
 	root := createTestProject(t)
 
 	resolver := paths.NewResolver(root)
-	section := collectClaude(resolver)
+	section := collectChannel(resolver)
 	assert.False(t, section.SettingsJSON)
 }
 
@@ -239,7 +239,7 @@ func TestClaudeMDPresent(t *testing.T) {
 	writeFile(t, filepath.Join(root, ".claude", "CLAUDE.md"), "# Claude")
 
 	resolver := paths.NewResolver(root)
-	section := collectClaude(resolver)
+	section := collectChannel(resolver)
 	assert.True(t, section.ClaudeMD)
 }
 
@@ -249,7 +249,7 @@ func TestClaudeActiveRiteValue(t *testing.T) {
 	writeFile(t, filepath.Join(root, ".knossos", "ACTIVE_RITE"), "10x-dev")
 
 	resolver := paths.NewResolver(root)
-	section := collectClaude(resolver)
+	section := collectChannel(resolver)
 	assert.Equal(t, "10x-dev", section.ActiveRite)
 }
 
@@ -258,7 +258,7 @@ func TestClaudeNoActiveRite(t *testing.T) {
 	root := createTestProject(t)
 
 	resolver := paths.NewResolver(root)
-	section := collectClaude(resolver)
+	section := collectChannel(resolver)
 	assert.Empty(t, section.ActiveRite)
 }
 
@@ -385,7 +385,7 @@ func TestTourTextStartsWithHeader(t *testing.T) {
 	tour := TourOutput{
 		ProjectRoot: "/tmp/test",
 		Directories: TourDirectories{
-			Claude: ClaudeSection{Exists: true, Path: ".claude/"},
+			Channel: ChannelSection{Exists: true, Path: ".claude/"},
 		},
 	}
 	text := tour.Text()
@@ -397,7 +397,7 @@ func TestTourTextNotFoundDirectories(t *testing.T) {
 	tour := TourOutput{
 		ProjectRoot: "/tmp/test",
 		Directories: TourDirectories{
-			Claude:  ClaudeSection{Exists: false, Path: ".claude/"},
+			Channel:  ChannelSection{Exists: false, Path: ".claude/"},
 			Knossos: KnossosSection{Exists: false, Path: ".knossos/"},
 			Know:    KnowSection{Exists: false, Path: ".know/"},
 			Ledge:   LedgeSection{Exists: false, Path: ".ledge/"},
@@ -420,7 +420,7 @@ func TestTourTextFileCountsRendered(t *testing.T) {
 	tour := TourOutput{
 		ProjectRoot: "/tmp/test",
 		Directories: TourDirectories{
-			Claude: ClaudeSection{
+			Channel: ChannelSection{
 				Exists: true,
 				Path:   ".claude/",
 				Agents: DirCount{Count: 5},

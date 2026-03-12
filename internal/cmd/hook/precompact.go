@@ -26,7 +26,7 @@ func newPrecompactCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "precompact",
 		Short: "Rotate SESSION_CONTEXT.md on context compaction",
-		Long: `Rotates SESSION_CONTEXT.md when Claude Code compacts context window.
+		Long: `Rotates SESSION_CONTEXT.md when the harness compacts context window.
 
 This hook is triggered on PreCompact events. It:
 - Finds the active session directory

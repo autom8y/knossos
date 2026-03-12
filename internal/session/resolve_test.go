@@ -357,7 +357,7 @@ func TestFindActiveSessions_MixedStatuses(t *testing.T) {
 	}
 }
 
-// --- sanitizeCCSessionID Tests ---
+// --- sanitizeHarnessSessionID Tests ---
 
 func TestSanitizeCCSessionID(t *testing.T) {
 	tests := []struct {
@@ -419,7 +419,7 @@ func TestSanitizeCCSessionID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := sanitizeCCSessionID(tt.input)
+			result := sanitizeHarnessSessionID(tt.input)
 			if result != tt.expected {
 				t.Errorf("expected %q, got %q", tt.expected, result)
 			}

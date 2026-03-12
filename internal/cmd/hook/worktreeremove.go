@@ -28,12 +28,12 @@ func newWorktreeRemoveCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "worktree-remove",
 		Short: "Handle WorktreeRemove event: remove a git worktree",
-		Long: `Handles CC WorktreeRemove cleanup events.
+		Long: `Handles WorktreeRemove cleanup events.
 
-This hook is triggered when Claude Code removes a worktree. It runs
+This hook is triggered when the harness removes a worktree. It runs
 'git worktree remove' to clean up the linked worktree filesystem entry.
 
-Input (stdin JSON from CC):
+Input (stdin JSON):
   {"hook_event_name":"WorktreeRemove","worktree_path":"/absolute/path/to/worktree"}
 
 All output goes to STDERR. Exit 0 = success.`,

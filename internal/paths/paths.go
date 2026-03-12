@@ -80,9 +80,24 @@ func (r *Resolver) LocksDir() string {
 	return filepath.Join(r.SessionsDir(), ".locks")
 }
 
-// CCMapDir returns the path to the CC session map directory.
+// HarnessMapDir returns the path to the harness session map directory.
+// Migrates from legacy .cc-map if needed.
+func (r *Resolver) HarnessMapDir() string {
+	newPath := filepath.Join(r.SessionsDir(), ".harness-map")
+	oldPath := filepath.Join(r.SessionsDir(), ".cc-map")
+	// Idempotent migration: rename .cc-map -> .harness-map if old exists and new doesn't
+	if _, err := os.Stat(oldPath); err == nil {
+		if _, err := os.Stat(newPath); os.IsNotExist(err) {
+			_ = os.Rename(oldPath, newPath)
+		}
+	}
+	return newPath
+}
+
+// CCMapDir is a deprecated alias for HarnessMapDir. Use HarnessMapDir instead.
+// Retained for backward compatibility during migration.
 func (r *Resolver) CCMapDir() string {
-	return filepath.Join(r.SessionsDir(), ".cc-map")
+	return r.HarnessMapDir()
 }
 
 // WipDir returns the path to the .sos/wip/ directory (ephemeral working artifacts).

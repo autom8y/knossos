@@ -38,9 +38,9 @@ import (
 func TestArchiveBoundary_FullLifecycle(t *testing.T) {
 	projectDir := setupProjectDir(t)
 	sessionsDir := filepath.Join(projectDir, ".sos", "sessions")
-	ccMapDir := filepath.Join(sessionsDir, ".cc-map")
-	if err := os.MkdirAll(ccMapDir, 0755); err != nil {
-		t.Fatalf("Failed to create cc-map dir: %v", err)
+	harnessMapDir := filepath.Join(sessionsDir, ".harness-map")
+	if err := os.MkdirAll(harnessMapDir, 0755); err != nil {
+		t.Fatalf("Failed to create harness-map dir: %v", err)
 	}
 
 	// Step 1: Create session
@@ -79,10 +79,10 @@ func TestArchiveBoundary_FullLifecycle(t *testing.T) {
 		t.Fatalf("Failed to write moirai lock: %v", err)
 	}
 
-	// Pre-populate CC map entry for this session
-	ccMapEntry := filepath.Join(ccMapDir, "cc-lifecycle-test-session")
-	if err := os.WriteFile(ccMapEntry, []byte(sessionID), 0644); err != nil {
-		t.Fatalf("Failed to write CC map entry: %v", err)
+	// Pre-populate harness map entry for this session
+	harnessMapEntry := filepath.Join(harnessMapDir, "cc-lifecycle-test-session")
+	if err := os.WriteFile(harnessMapEntry, []byte(sessionID), 0644); err != nil {
+		t.Fatalf("Failed to write harness map entry: %v", err)
 	}
 
 	// Step 4: Wrap session (with archive enabled)
@@ -122,9 +122,9 @@ func TestArchiveBoundary_FullLifecycle(t *testing.T) {
 		t.Errorf("Fix 4 regression: moirai lock was not removed before archive move, found at %s", archivedMoiraiLock)
 	}
 
-	// Step 9: Verify CC map entry removed (Fix 4)
-	if _, statErr := os.Stat(ccMapEntry); !os.IsNotExist(statErr) {
-		t.Errorf("Fix 4 regression: CC map entry still exists at %s", ccMapEntry)
+	// Step 9: Verify harness map entry removed (Fix 4)
+	if _, statErr := os.Stat(harnessMapEntry); !os.IsNotExist(statErr) {
+		t.Errorf("Fix 4 regression: harness map entry still exists at %s", harnessMapEntry)
 	}
 
 	// Step 10: Verify second wrap attempt returns lifecycle violation (Fix 2)

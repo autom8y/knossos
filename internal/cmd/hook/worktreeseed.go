@@ -35,25 +35,25 @@ func newWorktreeSeedCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "worktree-seed",
 		Short: "Handle WorktreeCreate event: create and seed a git worktree",
-		Long: `Handles CC WorktreeCreate delegation events.
+		Long: `Handles WorktreeCreate delegation events.
 
-This hook is called by Claude Code when it wants to create a new git worktree.
+This hook is called by the harness when it wants to create a new git worktree.
 As a delegation hook, this command MUST:
   1. Create the git worktree (git worktree add)
-  2. Print the absolute worktree path to STDOUT (CC reads this)
+  2. Print the absolute worktree path to STDOUT (harness reads this)
   3. Send all other output to STDERR
 
-Input (stdin JSON from CC):
+Input (stdin JSON):
   {"hook_event_name":"WorktreeCreate","session_id":"...","name":"feature-x","cwd":"/project"}
 
-Output (stdout -- read by CC as the worktree path):
+Output (stdout -- read by the harness as the worktree path):
   /absolute/path/to/worktree
 
-The worktree is created at CLAUDE_PROJECT_DIR/.claude/worktrees/{name}.
+The worktree is created at $PROJECT_DIR/.knossos/worktrees/{name}.
 If the main worktree has an ACTIVE_RITE, ari sync runs in the new worktree
-to seed .claude/ with the rite configuration.
+to seed the channel directory with the rite configuration.
 
-Exit 0 = success; non-zero = failure (CC will not proceed).`,
+Exit 0 = success; non-zero = failure (harness will not proceed).`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runWorktreeSeed(ctx)
 		},

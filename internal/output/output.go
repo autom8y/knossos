@@ -536,8 +536,8 @@ type RecoverOutput struct {
 	StaleLocks            []string `json:"stale_locks,omitempty"`
 	RemovedLocks          []string `json:"removed_locks,omitempty"`
 	ActiveSession         string   `json:"active_session,omitempty"`
-	CCMapOrphans          []string `json:"cc_map_orphans,omitempty"`
-	RemovedCCMapOrphans   []string `json:"removed_cc_map_orphans,omitempty"`
+	HarnessMapOrphans        []string `json:"harness_map_orphans,omitempty"`
+	RemovedHarnessMapOrphans []string `json:"removed_harness_map_orphans,omitempty"`
 	CurrentSessionCleaned bool     `json:"current_session_cleaned,omitempty"`
 	DryRun                bool     `json:"dry_run"`
 	Summary               string   `json:"summary"`
@@ -566,11 +566,11 @@ func (f FrayOutput) Text() string {
 	return b.String()
 }
 
-// ClaimOutput represents session claim (CC binding) result.
+// ClaimOutput represents session claim (harness binding) result.
 type ClaimOutput struct {
-	SessionID   string `json:"session_id"`
-	CCSessionID string `json:"cc_session_id"`
-	Status      string `json:"status"`
+	SessionID        string `json:"session_id"`
+	HarnessSessionID string `json:"harness_session_id"`
+	Status           string `json:"status"`
 }
 
 // Text implements Textable for ClaimOutput.

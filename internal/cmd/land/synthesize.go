@@ -37,7 +37,7 @@ This command validates prerequisites, enumerates archived sessions in .sos/archi
 and prints an inventory of available data. The inventory is used to construct a Task
 tool invocation for the Dionysus agent, which performs the actual synthesis.
 
-The Dionysus agent is invoked via Claude Code's Task tool, not directly from the CLI.
+The Dionysus agent is invoked via the Task tool, not directly from the CLI.
 Run this command first to confirm archives exist, then delegate to Dionysus:
 
   Task("dionysus", { domain: "scar-tissue", sessions: [...] })

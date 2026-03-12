@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -19,7 +20,7 @@ import (
 	"github.com/autom8y/knossos/internal/registry"
 )
 
-// ToolInput represents the input from Claude Code PreToolUse hook.
+// ToolInput represents the input from a PreToolUse hook.
 type ToolInput struct {
 	ToolName string `json:"tool_name"`
 	FilePath string `json:"file_path"`
@@ -103,7 +104,7 @@ Output (stdout JSON):
 Performance: <5ms for passthrough path.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ctx.withTimeout(func() error {
-				return runWriteguard(ctx)
+				return runWriteguard(cmd, ctx)
 			})
 		},
 	}
@@ -111,15 +112,20 @@ Performance: <5ms for passthrough path.`,
 	return cmd
 }
 
-func runWriteguard(ctx *cmdContext) error {
+func runWriteguard(cmd *cobra.Command, ctx *cmdContext) error {
 	printer := ctx.getPrinter()
-	return runWriteguardCore(ctx, printer)
+	return runWriteguardCore(cmd, ctx, printer)
 }
 
 // runWriteguardCore contains the actual logic with injected printer for testing.
-func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
+func runWriteguardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer) error {
 	// Get hook environment
-	hookEnv := ctx.getHookEnv()
+	hookEnv := ctx.getHookEnv(cmd)
+
+	// Authentication Check: Verify signature of raw payload
+	if !hook.Verify(hookEnv.RawPayload, hookEnv.Signature) {
+		return outputDenyAuth(printer)
+	}
 
 	// Verify this is a PreToolUse event
 	if hookEnv.Event != "" && hookEnv.Event != hook.EventPreToolUse {
@@ -214,7 +220,7 @@ func runWriteguardCore(ctx *cmdContext, printer *output.Printer) error {
 	return outputAllow(printer)
 }
 
-// parseFilePath extracts file_path from JSON tool input.
+// parseFilePath extracts file_path from JSON tool input and hardens it against traversal.
 func parseFilePath(printer *output.Printer, toolInput string) string {
 	if toolInput == "" {
 		return ""
@@ -227,10 +233,22 @@ func parseFilePath(printer *output.Printer, toolInput string) string {
 		return ""
 	}
 
-	if fp, ok := input["file_path"].(string); ok {
-		return fp
+	fp, ok := input["file_path"].(string)
+	if !ok || fp == "" {
+		return ""
 	}
-	return ""
+
+	// Hardening: Normalize path and block traversal
+	cleaned := filepath.Clean(fp)
+
+	// Block absolute paths or those that attempt to climb above current directory
+	if filepath.IsAbs(cleaned) || strings.HasPrefix(cleaned, "..") {
+		printer.VerboseLog("warn", "blocked potential path traversal attempt",
+			map[string]any{"raw": fp, "cleaned": cleaned})
+		return ""
+	}
+
+	return cleaned
 }
 
 // isSessionContext returns true if filePath targets a SESSION_CONTEXT.md file.
@@ -407,6 +425,19 @@ func outputBlockArchived(printer *output.Printer, sessionID string) error {
 			PermissionDecision:       "deny",
 			PermissionDecisionReason: "Session " + sessionID + " is archived (terminal state). Context files cannot be mutated after archiving.",
 			AdditionalContext:        "Session " + sessionID + " was previously wrapped with '" + registry.Ref(registry.CLISessionWrap) + "' and is now immutable. Archived session data is preserved at .sos/archive/" + sessionID + "/",
+		},
+	}
+	return printer.Print(result)
+}
+
+// outputDenyAuth outputs a deny decision when authentication fails.
+func outputDenyAuth(printer *output.Printer) error {
+	result := hook.PreToolUseOutput{
+		HookSpecificOutput: hook.HookSpecificOutput{
+			HookEventName:            "PreToolUse",
+			PermissionDecision:       "deny",
+			PermissionDecisionReason: "invalid_signature",
+			AdditionalContext:        "Hook authentication failed. Ensure KNOSSOS_HOOK_SECRET is correctly configured.",
 		},
 	}
 	return printer.Print(result)

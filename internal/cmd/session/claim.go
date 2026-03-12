@@ -16,15 +16,15 @@ func newClaimCmd(ctx *cmdContext) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "claim <session-id>",
-		Short: "Bind this CC instance to a knossos session",
-		Long: `Bind the current Claude Code instance to a specific knossos session.
+		Short: "Bind this harness instance to a knossos session",
+		Long: `Bind the current harness instance to a specific knossos session.
 
-Writes a CC-map entry so that subsequent SessionStart hooks resolve
+Writes a harness-map entry so that subsequent SessionStart hooks resolve
 to the specified session. The target session must exist and not be
 in ARCHIVED state.
 
-The CC session ID is obtained from the SessionStart hook output
-(cc_session_id field). Pass it via --cc-session-id.
+The harness session ID is obtained from the SessionStart hook output
+(harness_session_id field). Pass it via --cc-session-id.
 
 Examples:
   ari session claim session-20260305-140000-abc12345 --cc-session-id <cc-id>
@@ -66,14 +66,14 @@ func runClaim(ctx *cmdContext, targetSessionID, ccSessionID string) error {
 			fmt.Sprintf("cannot claim archived session %s (terminal state)", targetSessionID))
 	}
 
-	// Write CC map entry
-	if err := sess.SetCCMap(resolver, ccSessionID, targetSessionID); err != nil {
-		return errors.Wrap(errors.CodeGeneralError, "failed to write CC map", err)
+	// Write harness session map entry
+	if err := sess.SetHarnessSessionMap(resolver, ccSessionID, targetSessionID); err != nil {
+		return errors.Wrap(errors.CodeGeneralError, "failed to write harness session map", err)
 	}
 
 	return printer.Print(output.ClaimOutput{
-		SessionID:   targetSessionID,
-		CCSessionID: ccSessionID,
-		Status:      string(sessCtx.Status),
+		SessionID:        targetSessionID,
+		HarnessSessionID: ccSessionID,
+		Status:           string(sessCtx.Status),
 	})
 }

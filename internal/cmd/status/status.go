@@ -21,7 +21,7 @@ import (
 
 // HealthDashboard is the unified output for ari status.
 type HealthDashboard struct {
-	Claude  ClaudeHealth  `json:"claude"`
+	Channel ChannelHealth  `json:"channel"`
 	Knossos KnossosHealth `json:"knossos"`
 	Know    KnowHealth    `json:"know"`
 	Ledge   LedgeHealth   `json:"ledge"`
@@ -30,8 +30,8 @@ type HealthDashboard struct {
 	Errors  []string      `json:"errors,omitempty"`
 }
 
-// ClaudeHealth reports .claude/ directory state.
-type ClaudeHealth struct {
+// ChannelHealth reports channel directory state.
+type ChannelHealth struct {
 	Exists      bool   `json:"exists"`
 	ActiveRite  string `json:"active_rite,omitempty"`
 	AgentCount  int    `json:"agent_count"`
@@ -81,21 +81,21 @@ func (h HealthDashboard) Text() string {
 
 	b.WriteString("=== Project Health Dashboard ===\n")
 
-	// .claude/
-	b.WriteString("\n.claude/\n")
-	if !h.Claude.Exists {
+	// Channel directory
+	b.WriteString("\nchannel/\n")
+	if !h.Channel.Exists {
 		b.WriteString("  (not found)\n")
 	} else {
-		if h.Claude.ActiveRite != "" {
-			fmt.Fprintf(&b, "  Active Rite:  %s\n", h.Claude.ActiveRite)
+		if h.Channel.ActiveRite != "" {
+			fmt.Fprintf(&b, "  Active Rite:  %s\n", h.Channel.ActiveRite)
 		} else {
 			b.WriteString("  Active Rite:  (none)\n")
 		}
-		fmt.Fprintf(&b, "  Agents:       %d\n", h.Claude.AgentCount)
-		if h.Claude.LastSync != "" {
-			sync := h.Claude.LastSync
-			if h.Claude.LastSyncAge != "" {
-				sync += " (" + h.Claude.LastSyncAge + ")"
+		fmt.Fprintf(&b, "  Agents:       %d\n", h.Channel.AgentCount)
+		if h.Channel.LastSync != "" {
+			sync := h.Channel.LastSync
+			if h.Channel.LastSyncAge != "" {
+				sync += " (" + h.Channel.LastSyncAge + ")"
 			}
 			fmt.Fprintf(&b, "  Last Sync:    %s\n", sync)
 		} else {
@@ -191,7 +191,7 @@ func NewStatusCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *co
 		Use:   "status",
 		Short: "Show unified project health dashboard",
 		Long: `Display a unified health overview of all Knossos directory trees:
-.claude/, .knossos/, .know/, .ledge/, and .sos/.
+channel directory, .knossos/, .know/, .ledge/, and .sos/.
 
 Reports active rite, agent count, sync recency, knowledge freshness,
 artifact counts, and session state in a single view.
@@ -228,9 +228,9 @@ Examples:
 func collect(resolver *paths.Resolver, projectDir string) HealthDashboard {
 	var errs []string
 
-	claude := collectClaude(resolver)
-	if !claude.Exists {
-		errs = append(errs, ".claude/ directory not found")
+	channel := collectChannel(resolver)
+	if !channel.Exists {
+		errs = append(errs, "channel directory not found")
 	}
 
 	knossos := collectKnossos(resolver)
@@ -239,7 +239,7 @@ func collect(resolver *paths.Resolver, projectDir string) HealthDashboard {
 	sos := collectSOS(resolver)
 
 	return HealthDashboard{
-		Claude:  claude,
+		Channel: channel,
 		Knossos: knossos,
 		Know:    knowHealth,
 		Ledge:   ledge,
@@ -249,14 +249,14 @@ func collect(resolver *paths.Resolver, projectDir string) HealthDashboard {
 	}
 }
 
-// collectClaude gathers .claude/ health data.
-func collectClaude(resolver *paths.Resolver) ClaudeHealth {
+// collectChannel gathers channel directory health data.
+func collectChannel(resolver *paths.Resolver) ChannelHealth {
 	claudeDir := resolver.ClaudeDir()
 	if _, err := os.Stat(claudeDir); os.IsNotExist(err) {
-		return ClaudeHealth{Exists: false}
+		return ChannelHealth{Exists: false}
 	}
 
-	health := ClaudeHealth{Exists: true}
+	health := ChannelHealth{Exists: true}
 
 	// Active rite
 	health.ActiveRite = resolver.ReadActiveRite()
