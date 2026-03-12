@@ -53,13 +53,13 @@ func TestMaterializeWithOptions_GeminiChannel(t *testing.T) {
 	}
 
 	// Should write to .gemini
-	geminiDir := filepath.Join(tmpDir, ".gemini")
+	geminiDir := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName())
 	if _, err := os.Stat(geminiDir); os.IsNotExist(err) {
 		t.Errorf("expected %s to be created", geminiDir)
 	}
 
 	// Should NOT write to .claude
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if _, err := os.Stat(channelDir); !os.IsNotExist(err) {
 		t.Errorf("expected %s to NOT be created", channelDir)
 	}
@@ -86,13 +86,13 @@ func TestMaterializeWithOptions_DefaultChannel(t *testing.T) {
 	}
 
 	// Should write to .claude
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
 		t.Errorf("expected %s to be created", channelDir)
 	}
 
 	// Should NOT write to .gemini
-	geminiDir := filepath.Join(tmpDir, ".gemini")
+	geminiDir := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName())
 	if _, err := os.Stat(geminiDir); !os.IsNotExist(err) {
 		t.Errorf("expected %s to NOT be created", geminiDir)
 	}
@@ -148,12 +148,12 @@ func TestSync_ChannelAll_ProjectsBoth(t *testing.T) {
 	}
 
 	// Both directories should exist
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if _, err := os.Stat(channelDir); os.IsNotExist(err) {
 		t.Errorf("expected %s to be created", channelDir)
 	}
 
-	geminiDir := filepath.Join(tmpDir, ".gemini")
+	geminiDir := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName())
 	if _, err := os.Stat(geminiDir); os.IsNotExist(err) {
 		t.Errorf("expected %s to be created", geminiDir)
 	}
@@ -211,7 +211,7 @@ func TestMaterializeWithOptions_ClaudeUnchanged(t *testing.T) {
 	createTestRite(t, tmpDir)
 
 	// Pre-create a file in .claude to test it's untouched
-	channelDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -246,7 +246,7 @@ func TestMaterializeWithOptions_ClaudeUnchanged(t *testing.T) {
 	}
 
 	// .gemini should also exist now
-	geminiDir := filepath.Join(tmpDir, ".gemini")
+	geminiDir := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName())
 	if _, err := os.Stat(geminiDir); os.IsNotExist(err) {
 		t.Errorf("expected %s to be created", geminiDir)
 	}
@@ -490,7 +490,7 @@ func TestSync_ChannelAll_CompilerTransforms(t *testing.T) {
 	}
 
 	// Claude: .claude/commands/test-cmd.md should exist with raw markdown body
-	claudeCmd := filepath.Join(tmpDir, ".claude", "commands", "test-cmd.md")
+	claudeCmd := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName(), "commands", "test-cmd.md")
 	claudeData, err := os.ReadFile(claudeCmd)
 	if err != nil {
 		t.Fatalf("expected claude command at %s: %v", claudeCmd, err)
@@ -500,7 +500,7 @@ func TestSync_ChannelAll_CompilerTransforms(t *testing.T) {
 	}
 
 	// Gemini: .gemini/commands/test-cmd.toml should exist with TOML-encoded content
-	geminiCmd := filepath.Join(tmpDir, ".gemini", "commands", "test-cmd.toml")
+	geminiCmd := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName(), "commands", "test-cmd.toml")
 	geminiData, err := os.ReadFile(geminiCmd)
 	if err != nil {
 		t.Fatalf("expected gemini command at %s: %v", geminiCmd, err)
@@ -514,23 +514,23 @@ func TestSync_ChannelAll_CompilerTransforms(t *testing.T) {
 	}
 
 	// Claude should NOT have a .toml command
-	claudeToml := filepath.Join(tmpDir, ".claude", "commands", "test-cmd.toml")
+	claudeToml := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName(), "commands", "test-cmd.toml")
 	if _, err := os.Stat(claudeToml); !os.IsNotExist(err) {
 		t.Errorf("claude should not have a TOML command at %s", claudeToml)
 	}
 
 	// Gemini should NOT have a .md command (promoted dromena)
-	geminiMd := filepath.Join(tmpDir, ".gemini", "commands", "test-cmd.md")
+	geminiMd := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName(), "commands", "test-cmd.md")
 	if _, err := os.Stat(geminiMd); !os.IsNotExist(err) {
 		t.Errorf("gemini should not have a markdown command at %s", geminiMd)
 	}
 
 	// Gemini should use GEMINI.md, not CLAUDE.md
-	geminiContext := filepath.Join(tmpDir, ".gemini", "GEMINI.md")
+	geminiContext := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName(), paths.GeminiChannel{}.ContextFile())
 	if _, err := os.Stat(geminiContext); os.IsNotExist(err) {
 		t.Errorf("expected GEMINI.md at %s", geminiContext)
 	}
-	claudeInGemini := filepath.Join(tmpDir, ".gemini", "CLAUDE.md")
+	claudeInGemini := filepath.Join(tmpDir, paths.GeminiChannel{}.DirName(), paths.ClaudeChannel{}.ContextFile())
 	if _, err := os.Stat(claudeInGemini); !os.IsNotExist(err) {
 		t.Errorf("CLAUDE.md should not exist in .gemini/ directory")
 	}
@@ -563,7 +563,7 @@ func TestSync_ChannelAll_ClaudeRegression(t *testing.T) {
 		t.Fatalf("Sync(channel=claude) failed: %v", err)
 	}
 
-	claudeOnly := collectDirContents(t, filepath.Join(tmpDir1, ".claude"))
+	claudeOnly := collectDirContents(t, filepath.Join(tmpDir1, paths.ClaudeChannel{}.DirName()))
 
 	// --- Pass 2: channel=all ---
 	tmpDir2 := t.TempDir()
@@ -587,7 +587,7 @@ func TestSync_ChannelAll_ClaudeRegression(t *testing.T) {
 		t.Fatalf("Sync(channel=all) failed: %v", err)
 	}
 
-	claudeFromAll := collectDirContents(t, filepath.Join(tmpDir2, ".claude"))
+	claudeFromAll := collectDirContents(t, filepath.Join(tmpDir2, paths.ClaudeChannel{}.DirName()))
 
 	// Compare: same files, same bytes
 	if len(claudeOnly) == 0 {
@@ -658,8 +658,8 @@ func TestSync_ChannelAll_Idempotent(t *testing.T) {
 		t.Fatalf("Sync #1 failed: %v", err)
 	}
 
-	claudeFirst := collectDirContents(t, filepath.Join(tmpDir, ".claude"))
-	geminiFirst := collectDirContents(t, filepath.Join(tmpDir, ".gemini"))
+	claudeFirst := collectDirContents(t, filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName()))
+	geminiFirst := collectDirContents(t, filepath.Join(tmpDir, paths.GeminiChannel{}.DirName()))
 
 	// Also capture provenance manifests
 	claudeManifestFirst, err := os.ReadFile(filepath.Join(knossosDir, provenance.ManifestFileName))
@@ -677,8 +677,8 @@ func TestSync_ChannelAll_Idempotent(t *testing.T) {
 		t.Fatalf("Sync #2 failed: %v", err)
 	}
 
-	claudeSecond := collectDirContents(t, filepath.Join(tmpDir, ".claude"))
-	geminiSecond := collectDirContents(t, filepath.Join(tmpDir, ".gemini"))
+	claudeSecond := collectDirContents(t, filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName()))
+	geminiSecond := collectDirContents(t, filepath.Join(tmpDir, paths.GeminiChannel{}.DirName()))
 
 	claudeManifestSecond, err := os.ReadFile(filepath.Join(knossosDir, provenance.ManifestFileName))
 	if err != nil {
