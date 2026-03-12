@@ -81,10 +81,10 @@ func TestClaudeChannel_BackwardCompat(t *testing.T) {
 	t.Parallel()
 	r := paths.NewResolver("/fake/root")
 	
-	claudeDir := r.ClaudeDir()
+	claudeDirResult := r.ClaudeDir()
 	channelDir := r.ChannelDir(paths.ClaudeChannel{})
-	
-	if claudeDir != channelDir {
-		t.Errorf("ClaudeDir() %s != ChannelDir(ClaudeChannel{}) %s", claudeDir, channelDir)
+
+	if claudeDirResult != channelDir {
+		t.Errorf("ClaudeDir() %s != ChannelDir(ClaudeChannel{}) %s", claudeDirResult, channelDir)
 	}
 }

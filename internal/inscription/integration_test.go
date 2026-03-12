@@ -17,8 +17,8 @@ import (
 func TestInscription_SyncCleanProject(t *testing.T) {
 	// Setup: Create a temp project directory with no CLAUDE.md
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	agentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(tmpDir, ".claude")
+	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
 	}
@@ -56,7 +56,7 @@ Produces: Test reports
 	}
 
 	// Verify CLAUDE.md was created
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if _, err := os.Stat(claudeMDPath); os.IsNotExist(err) {
 		t.Fatal("Sync() should create CLAUDE.md on clean project")
 	}
@@ -94,8 +94,8 @@ Produces: Test reports
 func TestInscription_SyncWithSatelliteSections(t *testing.T) {
 	// Setup: Create project with existing CLAUDE.md containing satellite section
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
 
@@ -117,7 +117,7 @@ This is custom satellite content that MUST be preserved.
 It contains project-specific documentation.
 <!-- KNOSSOS:END project-custom -->
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(existingContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}
@@ -177,8 +177,8 @@ section_order:
 func TestInscription_SyncOverwritesKnossosRegions(t *testing.T) {
 	// Setup: Create project with modified knossos region
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
 
@@ -194,7 +194,7 @@ USER MODIFIED CONTENT - This should be overwritten!
 Users sometimes edit knossos regions by mistake.
 <!-- KNOSSOS:END execution-mode -->
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(existingContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}
@@ -262,8 +262,8 @@ section_order:
 func TestInscription_SyncRegenerateWithUserEdits(t *testing.T) {
 	// Setup: Create project with modified regenerate region
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	agentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(tmpDir, ".claude")
+	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
 	}
@@ -284,7 +284,7 @@ func TestInscription_SyncRegenerateWithUserEdits(t *testing.T) {
 USER CUSTOMIZED QUICK START - Added project-specific tips
 <!-- KNOSSOS:END quick-start -->
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(existingContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}
@@ -352,8 +352,8 @@ section_order:
 func TestInscription_RollbackAfterSync(t *testing.T) {
 	// Setup: Create project with existing CLAUDE.md
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
 
@@ -368,7 +368,7 @@ func TestInscription_RollbackAfterSync(t *testing.T) {
 Original execution mode content before sync.
 <!-- KNOSSOS:END execution-mode -->
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(originalContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}
@@ -435,9 +435,9 @@ section_order:
 func TestInscription_DryRunNoChanges(t *testing.T) {
 	// Setup: Create project with existing CLAUDE.md
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
 
@@ -452,7 +452,7 @@ func TestInscription_DryRunNoChanges(t *testing.T) {
 Content before dry-run that should NOT change.
 <!-- KNOSSOS:END execution-mode -->
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(originalContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}
@@ -533,8 +533,8 @@ section_order:
 func TestInscription_IdempotentSync(t *testing.T) {
 	// Setup: Create a clean project
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	agentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(tmpDir, ".claude")
+	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
 	}
@@ -556,7 +556,7 @@ func TestInscription_IdempotentSync(t *testing.T) {
 	}
 
 	// Read content after first sync
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	content1, err := os.ReadFile(claudeMDPath)
 	if err != nil {
 		t.Fatalf("Failed to read CLAUDE.md after first sync: %v", err)
@@ -626,8 +626,8 @@ func TestInscription_IdempotentSync(t *testing.T) {
 func TestInscription_RiteSwitchTriggersSync(t *testing.T) {
 	// Setup: Create project with existing content
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	agentsDir := filepath.Join(claudeDir, "agents")
+	channelDir := filepath.Join(tmpDir, ".claude")
+	agentsDir := filepath.Join(channelDir, "agents")
 	if err := os.MkdirAll(agentsDir, 0755); err != nil {
 		t.Fatalf("Failed to create agents directory: %v", err)
 	}
@@ -648,7 +648,7 @@ func TestInscription_RiteSwitchTriggersSync(t *testing.T) {
 This project uses a 3-agent workflow (old-rite):
 <!-- KNOSSOS:END quick-start -->
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(existingContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}
@@ -711,8 +711,8 @@ section_order:
 // TestInscription_MalformedMarkersHandled tests graceful handling of malformed markers.
 func TestInscription_MalformedMarkersHandled(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
 
@@ -729,7 +729,7 @@ Content without an END marker - this is malformed!
 
 Also no END marker
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(malformedContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}
@@ -769,8 +769,8 @@ section_order:
 // TestInscription_LargeFile tests handling of large CLAUDE.md files.
 func TestInscription_LargeFile(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
 
@@ -789,7 +789,7 @@ func TestInscription_LargeFile(t *testing.T) {
 
 	sb.WriteString("<!-- KNOSSOS:END execution-mode -->\n")
 
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(sb.String()), 0644); err != nil {
 		t.Fatalf("Failed to create large CLAUDE.md: %v", err)
 	}
@@ -831,9 +831,9 @@ section_order:
 // TestInscription_ConcurrentBackups tests backup cleanup with multiple syncs.
 func TestInscription_ConcurrentBackups(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatalf("Failed to create .claude directory: %v", err)
 	}
 
@@ -845,7 +845,7 @@ func TestInscription_ConcurrentBackups(t *testing.T) {
 Initial content.
 <!-- KNOSSOS:END execution-mode -->
 `
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if err := os.WriteFile(claudeMDPath, []byte(initialContent), 0644); err != nil {
 		t.Fatalf("Failed to create CLAUDE.md: %v", err)
 	}

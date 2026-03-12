@@ -194,8 +194,8 @@ func TestFindProjectRoot(t *testing.T) {
 	t.Run("finds_claude_dir", func(t *testing.T) {
 		// Create a temp tree: root/.claude/ and root/a/b/c/
 		root := t.TempDir()
-		claudeDir := filepath.Join(root, ".claude")
-		if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		channelDir := filepath.Join(root, ".claude")
+		if err := os.MkdirAll(channelDir, 0755); err != nil {
 			t.Fatalf("MkdirAll: %v", err)
 		}
 		nested := filepath.Join(root, "a", "b", "c")
@@ -214,8 +214,8 @@ func TestFindProjectRoot(t *testing.T) {
 
 	t.Run("finds_claude_dir_at_start", func(t *testing.T) {
 		root := t.TempDir()
-		claudeDir := filepath.Join(root, ".claude")
-		if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		channelDir := filepath.Join(root, ".claude")
+		if err := os.MkdirAll(channelDir, 0755); err != nil {
 			t.Fatalf("MkdirAll: %v", err)
 		}
 

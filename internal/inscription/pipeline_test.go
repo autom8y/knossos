@@ -51,8 +51,8 @@ func TestNewPipelineWithPaths(t *testing.T) {
 
 func TestPipeline_Validate_NoManifest(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	pipeline := NewPipeline(tmpDir)
 
@@ -81,8 +81,8 @@ func TestPipeline_Validate_NoManifest(t *testing.T) {
 
 func TestPipeline_Validate_WithManifest(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	// Create a valid manifest
 	manifestContent := `schema_version: "1.0"
@@ -115,8 +115,8 @@ regions:
 
 func TestPipeline_Validate_InvalidManifest(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	// Create an invalid manifest (missing required fields)
 	manifestContent := `regions:
@@ -140,8 +140,8 @@ func TestPipeline_Validate_InvalidManifest(t *testing.T) {
 
 func TestPipeline_DryRun(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	// Create manifest
 	manifestContent := `schema_version: "1.0"
@@ -186,13 +186,13 @@ section_order:
 
 func TestPipeline_Sync_CreatesBackup(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
-	os.MkdirAll(claudeDir, 0755)
+	os.MkdirAll(channelDir, 0755)
 
 	// Create existing CLAUDE.md
 	existingContent := "# CLAUDE.md\n\nOriginal content"
-	os.WriteFile(filepath.Join(claudeDir, "CLAUDE.md"), []byte(existingContent), 0644)
+	os.WriteFile(filepath.Join(channelDir, "CLAUDE.md"), []byte(existingContent), 0644)
 
 	// Create manifest
 	manifestContent := `schema_version: "1.0"
@@ -226,13 +226,13 @@ section_order:
 
 func TestPipeline_Sync_NoBackupOption(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 	backupsDir := filepath.Join(tmpDir, ".knossos", "backups")
-	os.MkdirAll(claudeDir, 0755)
+	os.MkdirAll(channelDir, 0755)
 
 	// Create existing CLAUDE.md
 	existingContent := "# CLAUDE.md\n\nOriginal content"
-	os.WriteFile(filepath.Join(claudeDir, "CLAUDE.md"), []byte(existingContent), 0644)
+	os.WriteFile(filepath.Join(channelDir, "CLAUDE.md"), []byte(existingContent), 0644)
 
 	// Create manifest
 	manifestContent := `schema_version: "1.0"
@@ -270,8 +270,8 @@ section_order:
 
 func TestPipeline_Sync_DryRunDoesNotWrite(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	// Create manifest
 	manifestContent := `schema_version: "1.0"
@@ -297,7 +297,7 @@ section_order:
 	}
 
 	// Check CLAUDE.md was NOT created
-	claudeMDPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMDPath := filepath.Join(channelDir, "CLAUDE.md")
 	if _, err := os.Stat(claudeMDPath); err == nil {
 		t.Error("Sync() with DryRun should not create CLAUDE.md")
 	}
@@ -305,8 +305,8 @@ section_order:
 
 func TestPipeline_Sync_UpdatesManifestVersion(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	// Create manifest with version 5
 	manifestContent := `schema_version: "1.0"
@@ -356,8 +356,8 @@ func TestPipeline_ListBackups(t *testing.T) {
 
 func TestPipeline_GetDiff(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	os.MkdirAll(claudeDir, 0755)
+	channelDir := filepath.Join(tmpDir, ".claude")
+	os.MkdirAll(channelDir, 0755)
 
 	// Create existing CLAUDE.md with old content
 	existingContent := `# CLAUDE.md
@@ -368,7 +368,7 @@ func TestPipeline_GetDiff(t *testing.T) {
 Old content here
 <!-- KNOSSOS:END execution-mode -->
 `
-	os.WriteFile(filepath.Join(claudeDir, "CLAUDE.md"), []byte(existingContent), 0644)
+	os.WriteFile(filepath.Join(channelDir, "CLAUDE.md"), []byte(existingContent), 0644)
 
 	// Create manifest
 	manifestContent := `schema_version: "1.0"
@@ -792,8 +792,8 @@ func TestBuildRenderContext_IsKnossosProject(t *testing.T) {
 			tmpDir := t.TempDir()
 
 			// Create minimal structure needed for buildRenderContext
-			claudeDir := filepath.Join(tmpDir, ".claude")
-			os.MkdirAll(claudeDir, 0755)
+			channelDir := filepath.Join(tmpDir, ".claude")
+			os.MkdirAll(channelDir, 0755)
 
 			pipeline := NewPipeline(tmpDir)
 
