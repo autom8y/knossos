@@ -67,13 +67,13 @@ type SectionTokenCount struct {
 
 // CalculateBudget walks a .claude/ directory and counts tokens for all context files.
 // knossosDir is the sibling .knossos/ directory used for workflow state.
-func (c *Counter) CalculateBudget(claudeDir string) (*BudgetReport, error) {
+func (c *Counter) CalculateBudget(channelDir string) (*BudgetReport, error) {
 	report := &BudgetReport{
 		Categories: make(map[string]int),
 	}
 
 	// ACTIVE_WORKFLOW.yaml lives in .knossos/ (knossos platform state, not CC namespace)
-	knossosDir := filepath.Join(filepath.Dir(claudeDir), ".knossos")
+	knossosDir := filepath.Join(filepath.Dir(channelDir), ".knossos")
 
 	// Walk relevant subdirectories and files
 	entries := []struct {
@@ -81,18 +81,18 @@ func (c *Counter) CalculateBudget(claudeDir string) (*BudgetReport, error) {
 		path     string
 		isDir    bool
 	}{
-		{"CLAUDE.md", filepath.Join(claudeDir, "CLAUDE.md"), false},
-		{"agents", filepath.Join(claudeDir, "agents"), true},
-		{"commands", filepath.Join(claudeDir, "commands"), true},
-		{"skills", filepath.Join(claudeDir, "skills"), true},
-		{"rules", filepath.Join(claudeDir, "rules"), true},
-		{"settings", filepath.Join(claudeDir, "settings.local.json"), false},
+		{"CLAUDE.md", filepath.Join(channelDir, "CLAUDE.md"), false},
+		{"agents", filepath.Join(channelDir, "agents"), true},
+		{"commands", filepath.Join(channelDir, "commands"), true},
+		{"skills", filepath.Join(channelDir, "skills"), true},
+		{"rules", filepath.Join(channelDir, "rules"), true},
+		{"settings", filepath.Join(channelDir, "settings.local.json"), false},
 		{"workflow", filepath.Join(knossosDir, "ACTIVE_WORKFLOW.yaml"), false},
 	}
 
 	for _, entry := range entries {
 		if entry.isDir {
-			tokens, files := c.countDir(entry.path, claudeDir)
+			tokens, files := c.countDir(entry.path, channelDir)
 			if tokens > 0 {
 				report.Categories[entry.category] = tokens
 				report.Files = append(report.Files, files...)
@@ -105,7 +105,7 @@ func (c *Counter) CalculateBudget(claudeDir string) (*BudgetReport, error) {
 			}
 			report.Categories[entry.category] = tokens
 			report.Files = append(report.Files, FileTokenCount{
-				Path:   relPath(entry.path, claudeDir),
+				Path:   relPath(entry.path, channelDir),
 				Tokens: tokens,
 			})
 			report.TotalTokens += tokens
@@ -113,7 +113,7 @@ func (c *Counter) CalculateBudget(claudeDir string) (*BudgetReport, error) {
 	}
 
 	// Parse CLAUDE.md sections
-	claudeMdPath := filepath.Join(claudeDir, "CLAUDE.md")
+	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
 	if sections := c.parseSections(claudeMdPath); len(sections) > 0 {
 		report.Sections = sections
 	}

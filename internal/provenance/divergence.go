@@ -23,7 +23,7 @@ type DivergenceReport struct {
 // and identifies knossos-owned files that have been modified by the user.
 // Returns a DivergenceReport containing promoted entries, carried-forward entries, and removed files.
 // Algorithm per TDD Section 6.
-func DetectDivergence(previous *ProvenanceManifest, current map[string]*ProvenanceEntry, claudeDir string) (*DivergenceReport, error) {
+func DetectDivergence(previous *ProvenanceManifest, current map[string]*ProvenanceEntry, channelDir string) (*DivergenceReport, error) {
 	report := &DivergenceReport{
 		Promoted:       make(map[string]*ProvenanceEntry),
 		CarriedForward: make(map[string]*ProvenanceEntry),
@@ -44,7 +44,7 @@ func DetectDivergence(previous *ProvenanceManifest, current map[string]*Provenan
 		}
 
 		// Knossos-owned entries: check for divergence
-		currentChecksum, err := computeCurrentChecksum(claudeDir, path)
+		currentChecksum, err := computeCurrentChecksum(channelDir, path)
 		if err != nil {
 			// Error computing checksum: treat as missing/removed
 			promotedEntry := *entry
@@ -83,10 +83,10 @@ func DetectDivergence(previous *ProvenanceManifest, current map[string]*Provenan
 }
 
 // computeCurrentChecksum computes the checksum of the file or directory at the given path.
-// relativePath is relative to claudeDir.
+// relativePath is relative to channelDir.
 // Returns empty string if the file/directory doesn't exist or can't be read.
-func computeCurrentChecksum(claudeDir string, relativePath string) (string, error) {
-	fullPath := filepath.Join(claudeDir, relativePath)
+func computeCurrentChecksum(channelDir string, relativePath string) (string, error) {
+	fullPath := filepath.Join(channelDir, relativePath)
 
 	if strings.HasSuffix(relativePath, "/") {
 		// Directory-level entry (mena). Use checksum.Dir().

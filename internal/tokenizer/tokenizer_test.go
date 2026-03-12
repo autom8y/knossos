@@ -50,7 +50,7 @@ func TestCalculateBudget(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a mock .claude/ directory
-	claudeDir := t.TempDir()
+	channelDir := t.TempDir()
 
 	// CLAUDE.md with sections
 	claudeMd := `<!-- KNOSSOS:START quick-start -->
@@ -64,24 +64,24 @@ This project uses a multi-agent workflow.
 - analyst
 <!-- KNOSSOS:END agents -->
 `
-	require.NoError(t, os.WriteFile(filepath.Join(claudeDir, "CLAUDE.md"), []byte(claudeMd), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(channelDir, "CLAUDE.md"), []byte(claudeMd), 0644))
 
 	// agents/
-	agentsDir := filepath.Join(claudeDir, "agents")
+	agentsDir := filepath.Join(channelDir, "agents")
 	require.NoError(t, os.MkdirAll(agentsDir, 0755))
 	require.NoError(t, os.WriteFile(filepath.Join(agentsDir, "orchestrator.md"), []byte("You are the orchestrator agent."), 0644))
 
 	// skills/
-	skillsDir := filepath.Join(claudeDir, "skills", "nav")
+	skillsDir := filepath.Join(channelDir, "skills", "nav")
 	require.NoError(t, os.MkdirAll(skillsDir, 0755))
 	require.NoError(t, os.WriteFile(filepath.Join(skillsDir, "worktree.md"), []byte("Worktree management skill content."), 0644))
 
 	// rules/
-	rulesDir := filepath.Join(claudeDir, "rules")
+	rulesDir := filepath.Join(channelDir, "rules")
 	require.NoError(t, os.MkdirAll(rulesDir, 0755))
 	require.NoError(t, os.WriteFile(filepath.Join(rulesDir, "go.md"), []byte("Use gofmt."), 0644))
 
-	report, err := c.CalculateBudget(claudeDir)
+	report, err := c.CalculateBudget(channelDir)
 	require.NoError(t, err)
 
 	assert.Greater(t, report.TotalTokens, 0)
@@ -110,8 +110,8 @@ func TestCalculateBudget_Empty(t *testing.T) {
 	c, err := New()
 	require.NoError(t, err)
 
-	claudeDir := t.TempDir()
-	report, err := c.CalculateBudget(claudeDir)
+	channelDir := t.TempDir()
+	report, err := c.CalculateBudget(channelDir)
 	require.NoError(t, err)
 	assert.Equal(t, 0, report.TotalTokens)
 }

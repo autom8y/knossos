@@ -222,13 +222,13 @@ func TestLoadOrBootstrapExistingFile(t *testing.T) {
 // TestDivergenceChecksumMatch tests that unchanged knossos files stay knossos.
 func TestDivergenceChecksumMatch(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create a file with known content
-	testFilePath := filepath.Join(claudeDir, "test.md")
+	testFilePath := filepath.Join(channelDir, "test.md")
 	testContent := []byte("test content")
 	if err := os.WriteFile(testFilePath, testContent, 0644); err != nil {
 		t.Fatal(err)
@@ -253,7 +253,7 @@ func TestDivergenceChecksumMatch(t *testing.T) {
 		},
 	}
 
-	report, err := DetectDivergence(previous, nil, claudeDir)
+	report, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}
@@ -270,13 +270,13 @@ func TestDivergenceChecksumMatch(t *testing.T) {
 // TestDivergenceChecksumMismatch tests that modified knossos files are promoted to user.
 func TestDivergenceChecksumMismatch(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create a file with modified content
-	testFilePath := filepath.Join(claudeDir, "test.md")
+	testFilePath := filepath.Join(channelDir, "test.md")
 	testContent := []byte("modified content")
 	if err := os.WriteFile(testFilePath, testContent, 0644); err != nil {
 		t.Fatal(err)
@@ -301,7 +301,7 @@ func TestDivergenceChecksumMismatch(t *testing.T) {
 		},
 	}
 
-	report, err := DetectDivergence(previous, nil, claudeDir)
+	report, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}
@@ -325,7 +325,7 @@ func TestDivergenceChecksumMismatch(t *testing.T) {
 // TestDivergenceUserOwnedCarriedForward tests that user-owned entries are carried forward unchanged.
 func TestDivergenceUserOwnedCarriedForward(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
@@ -340,7 +340,7 @@ func TestDivergenceUserOwnedCarriedForward(t *testing.T) {
 		},
 	}
 
-	report, err := DetectDivergence(previous, nil, claudeDir)
+	report, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}
@@ -364,7 +364,7 @@ func TestDivergenceUserOwnedCarriedForward(t *testing.T) {
 // TestDivergenceUnknownOwnedCarriedForward tests that unknown-owned entries are carried forward.
 func TestDivergenceUnknownOwnedCarriedForward(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
+	channelDir := filepath.Join(tmpDir, ".claude")
 
 	now := time.Now().UTC()
 	previous := &ProvenanceManifest{
@@ -379,7 +379,7 @@ func TestDivergenceUnknownOwnedCarriedForward(t *testing.T) {
 		},
 	}
 
-	report, err := DetectDivergence(previous, nil, claudeDir)
+	report, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}
@@ -400,8 +400,8 @@ func TestDivergenceUnknownOwnedCarriedForward(t *testing.T) {
 // TestDivergenceFileMissing tests that deleted knossos files are promoted to user with empty checksum.
 func TestDivergenceFileMissing(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -421,7 +421,7 @@ func TestDivergenceFileMissing(t *testing.T) {
 		},
 	}
 
-	report, err := DetectDivergence(previous, nil, claudeDir)
+	report, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}
@@ -448,8 +448,8 @@ func TestDivergenceFileMissing(t *testing.T) {
 // TestDivergenceNewFile tests that new files in current sync are NOT in divergence report.
 func TestDivergenceNewFile(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+	channelDir := filepath.Join(tmpDir, ".claude")
+	if err := os.MkdirAll(channelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -460,7 +460,7 @@ func TestDivergenceNewFile(t *testing.T) {
 		Entries:	map[string]*ProvenanceEntry{},
 	}
 
-	report, err := DetectDivergence(previous, nil, claudeDir)
+	report, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}
@@ -477,8 +477,8 @@ func TestDivergenceNewFile(t *testing.T) {
 // TestMenaDirectoryChecksum tests that directory-level checksums work correctly.
 func TestMenaDirectoryChecksum(t *testing.T) {
 	tmpDir := t.TempDir()
-	claudeDir := filepath.Join(tmpDir, ".claude")
-	menaDir := filepath.Join(claudeDir, "commands", "commit")
+	channelDir := filepath.Join(tmpDir, ".claude")
+	menaDir := filepath.Join(channelDir, "commands", "commit")
 	if err := os.MkdirAll(menaDir, 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -513,7 +513,7 @@ func TestMenaDirectoryChecksum(t *testing.T) {
 		},
 	}
 
-	report, err := DetectDivergence(previous, nil, claudeDir)
+	report, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}
@@ -528,7 +528,7 @@ func TestMenaDirectoryChecksum(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	report2, err := DetectDivergence(previous, nil, claudeDir)
+	report2, err := DetectDivergence(previous, nil, channelDir)
 	if err != nil {
 		t.Fatalf("DetectDivergence failed: %v", err)
 	}

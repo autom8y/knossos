@@ -150,13 +150,13 @@ func (s ScopeType) String() string {
 }
 
 // UserManifestPath returns the full path to USER_PROVENANCE_MANIFEST.yaml within the user .claude directory.
-func UserManifestPath(userClaudeDir string) string {
-	return filepath.Join(userClaudeDir, UserManifestFileName)
+func UserManifestPath(userChannelDir string) string {
+	return filepath.Join(userChannelDir, UserManifestFileName)
 }
 
 // OrgManifestPath returns the full path to ORG_PROVENANCE_MANIFEST.yaml within the user .claude directory.
-func OrgManifestPath(userClaudeDir string) string {
-	return filepath.Join(userClaudeDir, OrgManifestFileName)
+func OrgManifestPath(userChannelDir string) string {
+	return filepath.Join(userChannelDir, OrgManifestFileName)
 }
 
 // NewKnossosEntry constructs a ProvenanceEntry for a knossos-managed file.

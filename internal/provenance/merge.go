@@ -11,7 +11,7 @@ import (
 // This is the 4-step merge algorithm that determines provenance ownership in .claude/.
 //
 // knossosDir is the .knossos/ sibling directory — some tracked files (e.g. ACTIVE_WORKFLOW.yaml)
-// live there rather than in claudeDir. When checking file existence in Step 0, both directories
+// live there rather than in channelDir. When checking file existence in Step 0, both directories
 // are searched.
 //
 // Steps:
@@ -21,7 +21,7 @@ import (
 //  2. Layer collector entries (pipeline-written), EXCEPT where divergence promoted to user
 //  3. Promote prev untracked entries not written this sync → user
 func Merge(
-	claudeDir string,
+	channelDir string,
 	knossosDir string,
 	activeRite string,
 	collector Collector,
@@ -32,11 +32,11 @@ func Merge(
 	finalEntries := make(map[string]*ProvenanceEntry)
 
 	// fileExists checks whether a manifest entry path exists on disk.
-	// Files may live in claudeDir (most entries) or knossosDir (e.g. ACTIVE_WORKFLOW.yaml).
+	// Files may live in channelDir (most entries) or knossosDir (e.g. ACTIVE_WORKFLOW.yaml).
 	fileExists := func(path string) bool {
 		// Normalise directory entries (strip trailing slash before stat)
 		cleanPath := strings.TrimSuffix(path, "/")
-		if _, err := os.Stat(filepath.Join(claudeDir, cleanPath)); err == nil {
+		if _, err := os.Stat(filepath.Join(channelDir, cleanPath)); err == nil {
 			return true
 		}
 		if knossosDir != "" {
