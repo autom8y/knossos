@@ -122,6 +122,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, claudeDir string,
 		KnossosDir:        m.resolver.KnossosDir(),
 		OverwriteDiverged: overwriteDiverged,
 		RiteName:          manifest.Name,
+		ActiveDeps:        append([]string{"shared"}, manifest.Dependencies...),
 		Compiler:          comp,
 		Channel:           channel,
 	}

@@ -136,7 +136,12 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 			return nil, err
 		}
-		data, err := os.ReadFile(sf.SrcPath)
+		var data []byte
+		if sf.isEmbedded && sf.fsys != nil {
+			data, err = fs.ReadFile(sf.fsys, sf.SrcPath)
+		} else {
+			data, err = os.ReadFile(sf.SrcPath)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -203,6 +208,13 @@ func SyncMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaProjection
 		cleanStaleMenaEntries(opts, result)
 	}
 
+	// Pass 6: Reconcile untracked entries — files on disk with no provenance.
+	// These are artifacts from before provenance tracking that were never registered.
+	// Only runs in destructive mode (rite-scope sync).
+	if opts.Mode == MenaProjectionDestructive {
+		reconcileUntrackedEntries(opts, result)
+	}
+
 	return result, nil
 }
 
@@ -211,11 +223,14 @@ func recordMenaProvenance(collector provenance.Collector, projectRoot, targetTyp
 	hash, err := checksum.Dir(destDir)
 	if err != nil {
 		// Directory may not exist if INDEX.md was promoted and there were no companions.
+		// Try .md first, then .toml (gemini channel compiles to .toml).
 		promotedFile := destDir + ".md"
 		if data, readErr := os.ReadFile(promotedFile); readErr == nil {
 			hash = checksum.Content(string(data))
+		} else if data, readErr := os.ReadFile(destDir + ".toml"); readErr == nil {
+			hash = checksum.Content(string(data))
 		} else {
-			return	// best-effort: skip if both fail
+			return // best-effort: skip if all fail
 		}
 	}
 
@@ -288,12 +303,10 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 			continue
 		}
 
-		// Scope stale cleanup to the current rite only. Entries from other
-		// rites (or from shared/platform sources) are left untouched so that
-		// rite switches do not delete cross-rite mena files.
-		if opts.RiteName != "" && !isFromRite(entry.SourcePath, opts.RiteName) {
-			continue
-		}
+		// No rite scoping needed — the projected set from SyncMena contains all
+		// entries from all active sources (platform + shared + deps + current rite).
+		// Any knossos-owned entry not in the projected set is genuinely stale,
+		// regardless of which rite originally projected it.
 
 		// Stale knossos-owned entry -- remove it
 		absPath := filepath.Join(claudeDir, key)
@@ -313,12 +326,15 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 				}
 			}
 		}
-		promotedFile := absPath + ".md"
-		if _, statErr := os.Stat(promotedFile); statErr == nil {
-			if rmErr := os.Remove(promotedFile); rmErr != nil {
-				result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale promoted file %s.md: %v", key, rmErr))
-			} else {
-				slog.Info("removed stale promoted file", "key", key+".md")
+		// Try promoted file variants: .md (claude) and .toml (gemini)
+		for _, ext := range []string{".md", ".toml"} {
+			promotedFile := absPath + ext
+			if _, statErr := os.Stat(promotedFile); statErr == nil {
+				if rmErr := os.Remove(promotedFile); rmErr != nil {
+					result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove stale promoted file %s%s: %v", key, ext, rmErr))
+				} else {
+					slog.Info("removed stale promoted file", "key", key+ext)
+				}
 			}
 		}
 	}
@@ -338,6 +354,146 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 // both relative (rites/10x-dev/mena/) and absolute paths.
 func isFromRite(sourcePath, riteName string) bool {
 	return strings.Contains(sourcePath, "rites/"+riteName+"/mena/")
+}
+
+// isFromActiveChain checks whether a source path belongs to the active rite,
+// any of its dependencies, or a non-rite source (platform/procession mena).
+// Entries from rites outside the chain are considered stale on rite switch.
+func isFromActiveChain(sourcePath, riteName string, deps []string) bool {
+	if isFromRite(sourcePath, riteName) {
+		return true
+	}
+	for _, dep := range deps {
+		if isFromRite(sourcePath, dep) {
+			return true
+		}
+	}
+	// Non-rite sources (platform mena, procession mena) are always active
+	return !strings.Contains(sourcePath, "rites/")
+}
+
+// reconcileUntrackedEntries removes files in commands/ and skills/ that are
+// not in the current projection AND not tracked in provenance. These are
+// artifacts from before provenance tracking was introduced, or from rites
+// whose provenance was lost. Only removes files that have knossos-style
+// mena frontmatter (name: + description: fields), preserving user-created entries.
+func reconcileUntrackedEntries(opts MenaProjectionOptions, result *MenaProjectionResult) {
+	// Build projected set
+	projected := make(map[string]bool)
+	for _, name := range result.CommandsProjected {
+		projected[name] = true
+	}
+	for _, name := range result.SkillsProjected {
+		projected[name] = true
+	}
+
+	// Load provenance manifest to check tracking status
+	claudeDir := filepath.Dir(opts.TargetCommandsDir)
+	knossosDir := opts.KnossosDir
+	if knossosDir == "" {
+		knossosDir = filepath.Join(filepath.Dir(claudeDir), ".knossos")
+	}
+	manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)
+	manifest, err := provenance.Load(manifestPath)
+	if err != nil {
+		return // No manifest = can't determine tracking status
+	}
+
+	for _, pair := range []struct{ dir, prefix string }{
+		{opts.TargetCommandsDir, "commands/"},
+		{opts.TargetSkillsDir, "skills/"},
+	} {
+		entries, readErr := os.ReadDir(pair.dir)
+		if readErr != nil {
+			continue
+		}
+		for _, e := range entries {
+			name := e.Name()
+			// Strip extensions to get the command/skill name
+			baseName := strings.TrimSuffix(strings.TrimSuffix(name, ".md"), ".toml")
+
+			// Skip if in current projection
+			if projected[baseName] || projected[baseName+"/"] || projected[baseName+".md"] || projected[name] {
+				continue
+			}
+
+			// Skip .gitkeep and hidden files
+			if strings.HasPrefix(name, ".") {
+				continue
+			}
+
+			// Check if tracked in provenance (try multiple key formats)
+			tracked := false
+			for _, keyVariant := range []string{
+				pair.prefix + name,
+				pair.prefix + name + "/",
+				pair.prefix + baseName + ".md",
+				pair.prefix + baseName + "/",
+			} {
+				if _, ok := manifest.Entries[keyVariant]; ok {
+					tracked = true
+					break
+				}
+			}
+			if tracked {
+				continue // Already handled by cleanStaleMenaEntries
+			}
+
+			// Untracked entry — check if it has knossos mena frontmatter
+			absPath := filepath.Join(pair.dir, name)
+			if e.IsDir() {
+				// Directory: check for INDEX file with mena frontmatter
+				if hasMenaFrontmatter(absPath) {
+					if rmErr := os.RemoveAll(absPath); rmErr != nil {
+						result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove untracked mena directory %s: %v", pair.prefix+name, rmErr))
+					} else {
+						slog.Info("removed untracked mena entry", "key", pair.prefix+name)
+					}
+				}
+			} else {
+				// File: check for mena frontmatter
+				if hasMenaFrontmatterFile(absPath) {
+					if rmErr := os.Remove(absPath); rmErr != nil {
+						result.Warnings = append(result.Warnings, fmt.Sprintf("failed to remove untracked mena file %s: %v", pair.prefix+name, rmErr))
+					} else {
+						slog.Info("removed untracked mena entry", "key", pair.prefix+name)
+					}
+				}
+			}
+		}
+	}
+}
+
+// hasMenaFrontmatter checks if a directory contains an INDEX file with
+// knossos-style mena frontmatter (name: and description: fields).
+func hasMenaFrontmatter(dirPath string) bool {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return false
+	}
+	for _, e := range entries {
+		if !e.IsDir() && strings.HasPrefix(e.Name(), "INDEX") {
+			return true // INDEX file presence is sufficient
+		}
+	}
+	// Check for promoted file (standalone command)
+	return false
+}
+
+// hasMenaFrontmatterFile checks if a standalone file has knossos-style
+// mena frontmatter by looking for name: and description: in YAML frontmatter.
+func hasMenaFrontmatterFile(filePath string) bool {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return false
+	}
+	content := string(data)
+	// Quick heuristic: mena-generated files have YAML frontmatter with name: and description:
+	if !strings.HasPrefix(content, "---") {
+		return false
+	}
+	// Check for both required frontmatter fields
+	return strings.Contains(content, "\nname:") && strings.Contains(content, "\ndescription:")
 }
 
 // CleanEmptyDirs removes empty subdirectories within a directory.

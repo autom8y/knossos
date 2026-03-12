@@ -24,7 +24,7 @@ func CollectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaResolut
 
 	for srcIdx, src := range sources {
 		if src.IsEmbedded {
-			collectMenaEntriesFS(src.Fsys, src.FsysPath, "", collected, srcIdx)
+			collectMenaEntriesFS(src.Fsys, src.FsysPath, "", collected, standalones, srcIdx)
 		} else {
 			if src.Path == "" {
 				continue
@@ -104,10 +104,12 @@ func CollectMena(sources []MenaSource, opts MenaProjectionOptions) (*MenaResolut
 		}
 
 		resolution.Standalones[key] = MenaResolvedStandalone{
-			SrcPath:  sf.srcPath,
-			RelPath:  sf.relPath,
-			FlatName: strippedRel,
-			MenaType: menaType,
+			SrcPath:    sf.srcPath,
+			RelPath:    sf.relPath,
+			FlatName:   strippedRel,
+			MenaType:   menaType,
+			isEmbedded: sf.isEmbedded,
+			fsys:       sf.fsys,
 		}
 	}
 
@@ -155,34 +157,42 @@ func collectMenaEntriesDir(dirPath string, prefix string, collected map[string]m
 }
 
 // collectMenaEntriesFS recursively collects mena entries from an embedded filesystem.
-func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected map[string]menaCollectedEntry, srcIdx int) {
+func collectMenaEntriesFS(fsys fs.FS, fsysPath string, prefix string, collected map[string]menaCollectedEntry, standalones map[string]menaStandaloneFile, srcIdx int) {
 	entries, err := fs.ReadDir(fsys, fsysPath)
 	if err != nil {
 		return // Path doesn't exist in embedded FS
 	}
 	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue // Embedded rite mena doesn't have standalone files
-		}
 		name := entry.Name()
 		if prefix != "" {
 			name = prefix + "/" + entry.Name()
 		}
-		childPath := fsysPath + "/" + entry.Name()
-		if fsHasIndexFile(fsys, childPath) {
-			ce := menaCollectedEntry{
-				source: MenaSource{
-					Fsys:       fsys,
-					FsysPath:   childPath,
-					IsEmbedded: true,
-				},
-				name:        name,
-				sourceIndex: srcIdx,
+		if entry.IsDir() {
+			childPath := fsysPath + "/" + entry.Name()
+			if fsHasIndexFile(fsys, childPath) {
+				ce := menaCollectedEntry{
+					source: MenaSource{
+						Fsys:       fsys,
+						FsysPath:   childPath,
+						IsEmbedded: true,
+					},
+					name:        name,
+					sourceIndex: srcIdx,
+				}
+				ce.menaType = detectEntryMenaType(ce)
+				collected[name] = ce
+			} else {
+				collectMenaEntriesFS(fsys, childPath, name, collected, standalones, srcIdx)
 			}
-			ce.menaType = detectEntryMenaType(ce)
-			collected[name] = ce
 		} else {
-			collectMenaEntriesFS(fsys, childPath, name, collected, srcIdx)
+			// Standalone file in a grouping directory (embedded FS)
+			standalones[name] = menaStandaloneFile{
+				srcPath:     fsysPath + "/" + entry.Name(),
+				relPath:     name,
+				sourceIndex: srcIdx,
+				isEmbedded:  true,
+				fsys:        fsys,
+			}
 		}
 	}
 }

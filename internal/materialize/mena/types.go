@@ -4,6 +4,8 @@
 package mena
 
 import (
+	"io/fs"
+
 	"github.com/autom8y/knossos/internal/materialize/compiler"
 	menapkg "github.com/autom8y/knossos/internal/mena"
 	"github.com/autom8y/knossos/internal/provenance"
@@ -66,9 +68,14 @@ type MenaProjectionOptions struct {
 	OverwriteDiverged bool
 
 	// RiteName is the name of the rite being synced. When non-empty,
-	// stale mena cleanup is scoped to entries originating from this rite,
-	// preventing cross-rite entry deletion during rite switches.
+	// stale mena cleanup removes entries from rites NOT in the active
+	// dependency chain ({RiteName} ∪ ActiveDeps).
 	RiteName string
+
+	// ActiveDeps is the rite dependency chain (e.g., ["shared", "dep1"]).
+	// Used with RiteName to determine which rite sources are active.
+	// Entries from rites outside this chain are cleaned as stale.
+	ActiveDeps []string
 
 	// Compiler handles channel-specific format transforms.
 	Compiler ChannelCompiler
@@ -98,6 +105,8 @@ type menaStandaloneFile struct {
 	srcPath     string
 	relPath     string // e.g., "navigation/rite.dro.md"
 	sourceIndex int    // index into sources array (higher = higher priority)
+	isEmbedded  bool   // true for standalone files from embedded FS
+	fsys        fs.FS  // non-nil for embedded FS standalones (used for reading)
 }
 
 // MenaResolution holds the resolved mena entries after collection and namespace flattening.
@@ -117,10 +126,12 @@ type MenaResolvedEntry struct {
 
 // MenaResolvedStandalone represents a resolved standalone mena file with flat name and type.
 type MenaResolvedStandalone struct {
-	SrcPath  string
-	RelPath  string // original relative path (e.g., "operations/architect.dro.md")
-	FlatName string // after resolveNamespace + strip (e.g., "architect.md")
-	MenaType string // "dro" or "lego"
+	SrcPath    string
+	RelPath    string // original relative path (e.g., "operations/architect.dro.md")
+	FlatName   string // after resolveNamespace + strip (e.g., "architect.md")
+	MenaType   string // "dro" or "lego"
+	isEmbedded bool   // true for standalone files from embedded FS
+	fsys       fs.FS  // non-nil for embedded FS standalones (used for reading)
 }
 
 // Re-export moved utility functions from internal/mena/ leaf package.
