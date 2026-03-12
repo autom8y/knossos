@@ -19,9 +19,11 @@ tools:
     - run_shell_command
     - replace
     - glob
-    - grep
+    - grep_search
     - read_file
     - write_file
+    - write_todos
+    - activate_skill
 ---
 
 # Penetration Tester

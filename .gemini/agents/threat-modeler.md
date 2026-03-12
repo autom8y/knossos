@@ -19,9 +19,13 @@ tools:
     - run_shell_command
     - replace
     - glob
-    - grep
+    - grep_search
     - read_file
     - write_file
+    - google_web_search
+    - web_fetch
+    - write_todos
+    - activate_skill
 ---
 
 # Threat Modeler

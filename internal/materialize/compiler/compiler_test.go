@@ -140,7 +140,7 @@ func TestGeminiCompiler_CompileAgent_ToolTranslation(t *testing.T) {
 	s := string(content)
 
 	// Verify Gemini tool names are present
-	for _, gemini := range []string{"read_file", "run_shell_command", "replace", "write_file", "glob", "search_files"} {
+	for _, gemini := range []string{"read_file", "run_shell_command", "replace", "write_file", "glob", "grep_search"} {
 		if !strings.Contains(s, gemini) {
 			t.Errorf("expected Gemini tool %q in output:\n%s", gemini, s)
 		}
@@ -169,15 +169,16 @@ func TestGeminiCompiler_CompileAgent_CCOnlyToolsDropped(t *testing.T) {
 	}
 	s := string(content)
 
-	// tools: Read->read_file, Skill dropped, Task dropped -> only read_file
+	// tools: Read->read_file, Skill->activate_skill, Task dropped
 	if !strings.Contains(s, "read_file") {
 		t.Errorf("expected read_file in tools: %s", s)
 	}
-	// Skill and Task should NOT appear
-	for _, dropped := range []string{"Skill", "Task"} {
-		if strings.Contains(s, "- "+dropped) {
-			t.Errorf("dropped CC-only tool %q still present in output:\n%s", dropped, s)
-		}
+	if !strings.Contains(s, "activate_skill") {
+		t.Errorf("expected activate_skill in tools (Skill is now mapped): %s", s)
+	}
+	// Task is the only truly CC-only tool in this list
+	if strings.Contains(s, "- Task") {
+		t.Errorf("CC-only tool Task still present in output:\n%s", s)
 	}
 
 	// disallowedTools is stripped entirely — Gemini CLI doesn't accept it as a key.
@@ -232,9 +233,10 @@ func TestGeminiCompiler_CompileAgent_AllCCOnlyToolsDropped(t *testing.T) {
 	t.Parallel()
 	c := &compiler.GeminiCompiler{}
 
+	// Only Task and NotebookEdit are truly CC-only now
 	fm := map[string]any{
 		"name":            "test-agent",
-		"disallowedTools": []any{"Task", "TodoWrite", "Skill"},
+		"disallowedTools": []any{"Task", "NotebookEdit"},
 	}
 	content, err := c.CompileAgent("test-agent", fm, "# body")
 	if err != nil {
@@ -242,9 +244,9 @@ func TestGeminiCompiler_CompileAgent_AllCCOnlyToolsDropped(t *testing.T) {
 	}
 	s := string(content)
 
-	// When all disallowedTools are CC-only, the field should be absent
+	// disallowedTools is stripped by Gemini key whitelist regardless
 	if strings.Contains(s, "disallowedTools:") {
-		t.Errorf("expected disallowedTools to be absent when all were dropped: %s", s)
+		t.Errorf("expected disallowedTools to be absent (stripped by Gemini key whitelist): %s", s)
 	}
 }
 

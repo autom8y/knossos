@@ -183,7 +183,7 @@ func applyGeminiBodySubstitutions(body []byte) []byte {
 		case "Glob":
 			return "`glob`"
 		case "Grep":
-			return "`search_files`"
+			return "`grep_search`"
 		}
 		return match
 	})

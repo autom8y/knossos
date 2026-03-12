@@ -15,13 +15,17 @@ func TestCCToGeminiTool_Coverage(t *testing.T) {
 		key      string
 		expected string
 	}{
-		{"Read", "read_file"},       // agent frontmatter name
-		{"ReadFiles", "read_file"},  // hook wire-protocol name
+		{"Read", "read_file"},              // agent frontmatter name
+		{"ReadFiles", "read_file"},         // hook wire-protocol name
 		{"Edit", "replace"},
 		{"Write", "write_file"},
 		{"Bash", "run_shell_command"},
 		{"Glob", "glob"},
-		{"Grep", "search_files"},
+		{"Grep", "grep_search"},
+		{"WebSearch", "google_web_search"},
+		{"WebFetch", "web_fetch"},
+		{"TodoWrite", "write_todos"},
+		{"Skill", "activate_skill"},
 	}
 
 	for _, tc := range required {
@@ -40,10 +44,18 @@ func TestCCToGeminiTool_Coverage(t *testing.T) {
 func TestCCOnlyTools_AllPresent(t *testing.T) {
 	t.Parallel()
 
-	required := []string{"Task", "TodoWrite", "Skill", "WebSearch", "WebFetch", "NotebookEdit"}
+	required := []string{"Task", "NotebookEdit"}
 	for _, tool := range required {
 		if !channel.CCOnlyTools[tool] {
 			t.Errorf("CCOnlyTools missing %q", tool)
+		}
+	}
+
+	// Verify tools that WERE CC-only but now have Gemini equivalents are NOT in CCOnlyTools.
+	promoted := []string{"WebSearch", "WebFetch", "TodoWrite", "Skill"}
+	for _, tool := range promoted {
+		if channel.CCOnlyTools[tool] {
+			t.Errorf("CCOnlyTools still contains %q — should be in CCToGeminiTool", tool)
 		}
 	}
 }
@@ -62,7 +74,11 @@ func TestTranslateTool_KnownMapping(t *testing.T) {
 		{"Edit", "replace"},
 		{"Write", "write_file"},
 		{"Glob", "glob"},
-		{"Grep", "search_files"},
+		{"Grep", "grep_search"},
+		{"WebSearch", "google_web_search"},
+		{"WebFetch", "web_fetch"},
+		{"TodoWrite", "write_todos"},
+		{"Skill", "activate_skill"},
 	}
 
 	for _, tc := range cases {
@@ -80,7 +96,7 @@ func TestTranslateTool_KnownMapping(t *testing.T) {
 func TestTranslateTool_CCOnlyDropped(t *testing.T) {
 	t.Parallel()
 
-	ccOnly := []string{"Task", "TodoWrite", "Skill", "WebSearch", "WebFetch", "NotebookEdit"}
+	ccOnly := []string{"Task", "NotebookEdit"}
 	for _, tool := range ccOnly {
 		got, ok := channel.TranslateTool(tool)
 		if ok {
@@ -112,12 +128,13 @@ func TestTranslateTool_UnknownPassthrough(t *testing.T) {
 func TestTranslateFrontmatterTools_MixedInput(t *testing.T) {
 	t.Parallel()
 
-	input := []string{"Read", "Bash", "Task", "Skill", "Edit", "CustomTool"}
-	// Expected: Read->read_file, Bash->run_shell_command, Task dropped, Skill dropped,
-	//           Edit->replace, CustomTool passes through
+	input := []string{"Read", "Bash", "Task", "Skill", "Edit", "CustomTool", "WebSearch"}
+	// Expected: Read->read_file, Bash->run_shell_command, Task dropped,
+	//           Skill->activate_skill, Edit->replace, CustomTool passes through,
+	//           WebSearch->google_web_search
 	got := channel.TranslateFrontmatterTools(input)
 
-	expected := []string{"read_file", "run_shell_command", "replace", "CustomTool"}
+	expected := []string{"read_file", "run_shell_command", "activate_skill", "replace", "CustomTool", "google_web_search"}
 	if len(got) != len(expected) {
 		t.Fatalf("TranslateFrontmatterTools: len=%d, want %d; got %v", len(got), len(expected), got)
 	}
@@ -154,7 +171,7 @@ func TestTranslateFrontmatterTools_EmptyInput(t *testing.T) {
 func TestTranslateFrontmatterTools_AllCCOnly(t *testing.T) {
 	t.Parallel()
 
-	got := channel.TranslateFrontmatterTools([]string{"Task", "TodoWrite", "Skill"})
+	got := channel.TranslateFrontmatterTools([]string{"Task", "NotebookEdit"})
 	if len(got) != 0 {
 		t.Errorf("expected empty slice when all tools are CC-only, got %v", got)
 	}

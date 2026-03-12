@@ -3,28 +3,34 @@ package channel
 // CCToGeminiTool maps CC-canonical tool names to Gemini equivalents.
 // Both agent-frontmatter names (Read) and hook wire-protocol names (ReadFiles)
 // are included so this is the single source of truth per ADR-0031.
-// Neither key set includes CC-only tools (Task, TodoWrite, etc.) — those are
-// in CCOnlyTools and have no Gemini equivalent.
+//
+// Source of truth for Gemini tool names:
+//
+//	google-gemini/gemini-cli → packages/core/src/tools/definitions/base-declarations.ts
 var CCToGeminiTool = map[string]string{
-	"Read":      "read_file",       // agent frontmatter name
-	"ReadFiles": "read_file",       // hook wire-protocol name
-	"Edit":      "replace",
-	"Write":     "write_file",
-	"Bash":      "run_shell_command",
-	"Glob":      "glob",
-	"Grep":      "search_files",
+	// File system tools
+	"Read":      "read_file",          // agent frontmatter name
+	"ReadFiles": "read_file",          // hook wire-protocol name
+	"Edit":      "replace",            // EDIT_TOOL_NAME
+	"Write":     "write_file",         // WRITE_FILE_TOOL_NAME
+	"Glob":      "glob",              // GLOB_TOOL_NAME
+	"Grep":      "grep_search",       // GREP_TOOL_NAME
+	// Shell
+	"Bash": "run_shell_command",       // SHELL_TOOL_NAME
+	// Web
+	"WebSearch": "google_web_search",  // WEB_SEARCH_TOOL_NAME
+	"WebFetch":  "web_fetch",          // WEB_FETCH_TOOL_NAME
+	// Task management
+	"TodoWrite": "write_todos",        // WRITE_TODOS_TOOL_NAME
+	// Skills
+	"Skill": "activate_skill",         // ACTIVATE_SKILL_TOOL_NAME
 }
 
 // CCOnlyTools lists CC tools that have no Gemini equivalent.
 // These are silently dropped from Gemini agent frontmatter (tools and disallowedTools).
-// Dropping is correct: you cannot allow or disallow a tool that does not exist.
 var CCOnlyTools = map[string]bool{
-	"Task":         true,
-	"TodoWrite":    true,
-	"Skill":        true,
-	"WebSearch":    true,
-	"WebFetch":     true,
-	"NotebookEdit": true,
+	"Task":         true, // Gemini uses implicit description-based agent routing
+	"NotebookEdit": true, // No Gemini equivalent
 }
 
 // TranslateTool returns the Gemini equivalent for a CC tool name.

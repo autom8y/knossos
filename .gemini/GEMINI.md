@@ -1,7 +1,7 @@
 <!-- KNOSSOS:START execution-mode -->
 ## Execution Mode
 
-Use the available agents and slash commands. Delegate complex work to specialists via Task tool.
+Use the available agents and slash commands. Agents activate automatically when your prompt matches their description.
 <!-- KNOSSOS:END execution-mode -->
 
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
@@ -17,30 +17,31 @@ Use the available agents and slash commands. Delegate complex work to specialist
 | **penetration-tester** | Executes penetration tests and documents vulnerabilities |
 | **security-reviewer** | Performs final security review and grants deployment approval |
 
-Delegate to specialists via Task tool.
+Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
 
 <!-- KNOSSOS:START agent-routing -->
 ## Agent Routing
 
-Delegate to specialists via Task tool.<!-- KNOSSOS:END agent-routing -->
+Agents activate automatically based on description matching. Write prompts that align with specialist descriptions for effective routing.
+<!-- KNOSSOS:END agent-routing -->
 
 <!-- KNOSSOS:START commands -->
-## CC Primitives
+## Gemini Primitives
 
-| CC Primitive | Invocation | Source |
+| Primitive | Invocation | Source |
 |---|---|---|
-| Slash command | User types `/name` | `.claude/commands/` |
-| Skill tool | Model calls `Skill("name")` | `.claude/skills/` |
-| Task tool | Model calls `Task(subagent_type)` | `.claude/agents/` |
-| Hook | Auto-fires on lifecycle events | `.claude/settings.json` |
-Agents cannot spawn other agents — only the main thread has Task tool access.
+| Slash command | User types `/name` | `.gemini/commands/` |
+| Skill | Loaded into context | `.gemini/skills/` |
+| Agent | Activates on description match | `.gemini/agents/` |
+| Hook | Auto-fires on lifecycle events | `.gemini/settings.local.json` |
+
 <!-- KNOSSOS:END commands -->
 
 <!-- KNOSSOS:START agent-configurations regenerate=true source=agents/*.md -->
 ## Agents
 
-Prompts in `.claude/agents/`:
+Prompts in `.gemini/agents/`:
 
 - `potnia.md` - Coordinates security initiative phases
 - `threat-modeler.md` - Models threats and identifies security risks and attack vectors
@@ -60,12 +61,12 @@ CLI reference: `ari --help`.
 
 Persistent knowledge in `.know/`. Generate with `/know --all` if not present.
 
-- `Read(".know/architecture.md")` — package structure, layers, data flow (read before code changes)
-- `Read(".know/scar-tissue.md")` — past bugs, defensive patterns
-- `Read(".know/design-constraints.md")` — frozen areas, structural tensions
-- `Read(".know/conventions.md")` — error handling, file organization, domain idioms
-- `Read(".know/test-coverage.md")` — test gaps, coverage patterns
-- `Read(".know/feat/INDEX.md")` — feature catalog and taxonomy (generate with `/know --scope=feature`)
+- `read_file(".know/architecture.md")` — package structure, layers, data flow (read before code changes)
+- `read_file(".know/scar-tissue.md")` — past bugs, defensive patterns
+- `read_file(".know/design-constraints.md")` — frozen areas, structural tensions
+- `read_file(".know/conventions.md")` — error handling, file organization, domain idioms
+- `read_file(".know/test-coverage.md")` — test gaps, coverage patterns
+- `read_file(".know/feat/INDEX.md")` — feature catalog and taxonomy (generate with `/know --scope=feature`)
 Work product artifacts in `.ledge/`:
 
 - `.ledge/decisions/` — ADRs and design decisions
