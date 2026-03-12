@@ -125,13 +125,13 @@ func TestIsFromActiveChain(t *testing.T) {
 func TestReconcileUntrackedEntries(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir
+	channelDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")
 	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatalf("mkdir knossos: %v", err)
 	}
-	commandsDir := filepath.Join(claudeDir, "commands")
-	skillsDir := filepath.Join(claudeDir, "skills")
+	commandsDir := filepath.Join(channelDir, "commands")
+	skillsDir := filepath.Join(channelDir, "skills")
 	if err := os.MkdirAll(commandsDir, 0755); err != nil {
 		t.Fatalf("mkdir commands: %v", err)
 	}
@@ -199,13 +199,13 @@ func TestReconcileUntrackedEntries(t *testing.T) {
 func TestCleanStaleMena_CrossRiteCleaned(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir
+	channelDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")
 	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatalf("mkdir knossos: %v", err)
 	}
-	commandsDir := filepath.Join(claudeDir, "commands")
-	skillsDir := filepath.Join(claudeDir, "skills")
+	commandsDir := filepath.Join(channelDir, "commands")
+	skillsDir := filepath.Join(channelDir, "skills")
 
 	// Create entries from ecosystem rite on disk
 	riteASkillDir := filepath.Join(skillsDir, "ecosystem-ref")
@@ -298,13 +298,13 @@ func TestCleanStaleMena_CrossRiteCleaned(t *testing.T) {
 func TestCleanStaleMena_DependencyPreserved(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir
+	channelDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")
 	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatalf("mkdir knossos: %v", err)
 	}
-	commandsDir := filepath.Join(claudeDir, "commands")
-	skillsDir := filepath.Join(claudeDir, "skills")
+	commandsDir := filepath.Join(channelDir, "commands")
+	skillsDir := filepath.Join(channelDir, "skills")
 
 	// Create entries from shared rite (dependency)
 	sharedSkillDir := filepath.Join(skillsDir, "smell-detection")
@@ -363,13 +363,13 @@ func TestCleanStaleMena_DependencyPreserved(t *testing.T) {
 func TestCleanStaleMena_SameRiteStaleRemoved(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir
+	channelDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")
 	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatalf("mkdir knossos: %v", err)
 	}
-	commandsDir := filepath.Join(claudeDir, "commands")
-	skillsDir := filepath.Join(claudeDir, "skills")
+	commandsDir := filepath.Join(channelDir, "commands")
+	skillsDir := filepath.Join(channelDir, "skills")
 
 	// Create a stale entry from rite A on disk
 	staleDir := filepath.Join(skillsDir, "old-skill")

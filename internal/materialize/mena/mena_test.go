@@ -518,7 +518,7 @@ func TestDetectMenaType(t *testing.T) {
 func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir	// provenance manifest lives here
+	channelDir := tmpDir	// provenance manifest lives here
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 
@@ -539,7 +539,7 @@ func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000", ""),
 		},
 	}
-	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
+	if err := provenance.Save(filepath.Join(channelDir, provenance.ManifestFileName), manifest); err != nil {
 		t.Fatalf("save provenance: %v", err)
 	}
 
@@ -589,7 +589,7 @@ func TestSyncMena_NamespaceCollision_YieldsToUserEntry(t *testing.T) {
 func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir
+	channelDir := tmpDir
 	commandsDir := filepath.Join(tmpDir, "commands")
 	skillsDir := filepath.Join(tmpDir, "skills")
 
@@ -610,7 +610,7 @@ func TestSyncMena_NamespaceCollision_OverwriteDivergedReclaims(t *testing.T) {
 			"commands/my-cmd.md": provenance.NewUserEntry(provenance.ScopeRite, "sha256:0000000000000000000000000000000000000000000000000000000000000000", ""),
 		},
 	}
-	if err := provenance.Save(filepath.Join(claudeDir, provenance.ManifestFileName), manifest); err != nil {
+	if err := provenance.Save(filepath.Join(channelDir, provenance.ManifestFileName), manifest); err != nil {
 		t.Fatalf("save provenance: %v", err)
 	}
 

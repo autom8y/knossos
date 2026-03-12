@@ -27,7 +27,7 @@ func (m *Materializer) syncOrgScopeSingleChannel(opts SyncOptions) (*OrgScopeRes
 
 	result, err := orgscope.SyncOrgScope(orgscope.SyncOrgScopeParams{
 		OrgName:       opts.OrgName,
-		UserClaudeDir: userChannelDir,
+		UserChannelDir: userChannelDir,
 		DryRun:        opts.DryRun,
 		Channel:       opts.Channel,
 	})

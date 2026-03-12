@@ -22,7 +22,7 @@ import (
 type SyncOrgScopeParams struct {
 	OrgName		string	// Explicit org name (empty = use config.ActiveOrg())
 	OrgDir		string	// Override org data directory (for testing; empty = use paths.OrgDataDir)
-	UserClaudeDir	string	// Override user .claude directory (for testing; empty = use paths.UserClaudeDir)
+	UserChannelDir	string	// Override user .claude directory (for testing; empty = use paths.UserChannelDir)
 	DryRun		bool
 	Channel		string	// Target channel: "claude" (default) or "gemini"
 }
@@ -71,13 +71,13 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 		}, nil
 	}
 
-	userClaudeDir := params.UserClaudeDir
-	if userClaudeDir == "" {
-		userClaudeDir = paths.UserChannelDir(params.Channel)
+	userChannelDir := params.UserChannelDir
+	if userChannelDir == "" {
+		userChannelDir = paths.UserChannelDir(params.Channel)
 	}
 
 	// Load or bootstrap ORG_PROVENANCE_MANIFEST.yaml
-	manifestPath := provenance.OrgManifestPath(userClaudeDir)
+	manifestPath := provenance.OrgManifestPath(userChannelDir)
 	manifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	// Sync agents
 	agentsDir := filepath.Join(orgDir, "agents")
 	if _, err := os.Stat(agentsDir); err == nil {
-		count, err := syncOrgResource(agentsDir, filepath.Join(userClaudeDir, "agents"), manifest, params.DryRun, params.Channel)
+		count, err := syncOrgResource(agentsDir, filepath.Join(userChannelDir, "agents"), manifest, params.DryRun, params.Channel)
 		if err != nil {
 			slog.Warn("orgscope: error syncing agents", "error", err)
 		}
@@ -102,7 +102,7 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 	// Sync mena (commands + skills)
 	menaDir := filepath.Join(orgDir, "mena")
 	if _, err := os.Stat(menaDir); err == nil {
-		count, err := syncOrgResource(menaDir, filepath.Join(userClaudeDir, "skills"), manifest, params.DryRun, "")
+		count, err := syncOrgResource(menaDir, filepath.Join(userChannelDir, "skills"), manifest, params.DryRun, "")
 		if err != nil {
 			slog.Warn("orgscope: error syncing mena", "error", err)
 		}

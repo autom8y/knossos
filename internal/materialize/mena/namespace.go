@@ -130,8 +130,8 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 		knossosDir := opts.KnossosDir
 		if knossosDir == "" {
 			// Fallback: derive from TargetCommandsDir (.claude/commands/ -> parent -> sibling .knossos/)
-			claudeDir := filepath.Dir(opts.TargetCommandsDir)
-			knossosDir = filepath.Join(filepath.Dir(claudeDir), ".knossos")
+			channelDir := filepath.Dir(opts.TargetCommandsDir)
+			knossosDir = filepath.Join(filepath.Dir(channelDir), ".knossos")
 		}
 		manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)
 		oldManifest, loadErr := provenance.Load(manifestPath)

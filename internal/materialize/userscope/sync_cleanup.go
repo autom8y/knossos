@@ -68,7 +68,7 @@ func isExecutableFile(path string) bool {
 }
 
 // removeUserOrphan removes an orphaned knossos-owned entry.
-func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userClaudeDir string) {
+func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userChannelDir string) {
 	entry := manifest.Entries[key]
 	if entry == nil || entry.Owner != provenance.OwnerKnossos {
 		return	// Safety: only remove knossos-owned orphans
@@ -81,7 +81,7 @@ func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userC
 		strings.HasPrefix(key, "skills/"),
 		strings.HasPrefix(key, "agents/"),
 		strings.HasPrefix(key, "hooks/"):
-		targetPath = filepath.Join(userClaudeDir, key)
+		targetPath = filepath.Join(userChannelDir, key)
 	}
 
 	if targetPath == "" {
@@ -103,13 +103,13 @@ func removeUserOrphan(key string, manifest *provenance.ProvenanceManifest, userC
 // The v1 JSON manifests were superseded by USER_PROVENANCE_MANIFEST.yaml.
 // The .v2-backup files were created by this function during v1-to-v2 migration
 // and serve no rollback purpose now that migration is complete.
-func cleanupOldManifests(userClaudeDir string) {
+func cleanupOldManifests(userChannelDir string) {
 	oldManifests := []string{
-		filepath.Join(userClaudeDir, "USER_AGENT_MANIFEST.json"),
-		filepath.Join(userClaudeDir, "USER_MENA_MANIFEST.json"),
-		filepath.Join(userClaudeDir, "USER_HOOKS_MANIFEST.json"),
-		filepath.Join(userClaudeDir, "USER_COMMAND_MANIFEST.json"),
-		filepath.Join(userClaudeDir, "USER_SKILL_MANIFEST.json"),
+		filepath.Join(userChannelDir, "USER_AGENT_MANIFEST.json"),
+		filepath.Join(userChannelDir, "USER_MENA_MANIFEST.json"),
+		filepath.Join(userChannelDir, "USER_HOOKS_MANIFEST.json"),
+		filepath.Join(userChannelDir, "USER_COMMAND_MANIFEST.json"),
+		filepath.Join(userChannelDir, "USER_SKILL_MANIFEST.json"),
 	}
 	for _, path := range oldManifests {
 		// Remove the original JSON manifest if still present.

@@ -279,11 +279,11 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 	// Load existing provenance manifest to identify knossos-owned entries.
 	// Manifest lives in .knossos/ (migrated from .claude/).
 	// Uses channel-keyed path so gemini reads its own manifest, not claude's.
-	claudeDir := filepath.Dir(opts.TargetCommandsDir)
+	channelDir := filepath.Dir(opts.TargetCommandsDir)
 	knossosDir := opts.KnossosDir
 	if knossosDir == "" {
 		// Fallback: derive from TargetCommandsDir (.claude/commands/ -> parent -> sibling .knossos/)
-		knossosDir = filepath.Join(filepath.Dir(claudeDir), ".knossos")
+		knossosDir = filepath.Join(filepath.Dir(channelDir), ".knossos")
 	}
 	manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)
 	manifest, err := provenance.Load(manifestPath)
@@ -309,7 +309,7 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 		// regardless of which rite originally projected it.
 
 		// Stale knossos-owned entry -- remove it
-		absPath := filepath.Join(claudeDir, key)
+		absPath := filepath.Join(channelDir, key)
 		absPath = strings.TrimRight(absPath, "/")
 		if info, err := os.Stat(absPath); err == nil {
 			if info.IsDir() {
@@ -388,10 +388,10 @@ func reconcileUntrackedEntries(opts MenaProjectionOptions, result *MenaProjectio
 	}
 
 	// Load provenance manifest to check tracking status
-	claudeDir := filepath.Dir(opts.TargetCommandsDir)
+	channelDir := filepath.Dir(opts.TargetCommandsDir)
 	knossosDir := opts.KnossosDir
 	if knossosDir == "" {
-		knossosDir = filepath.Join(filepath.Dir(claudeDir), ".knossos")
+		knossosDir = filepath.Join(filepath.Dir(channelDir), ".knossos")
 	}
 	manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)
 	manifest, err := provenance.Load(manifestPath)

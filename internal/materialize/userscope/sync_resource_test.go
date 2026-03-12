@@ -11,26 +11,26 @@ import (
 )
 
 // setupAgentSync creates a minimal filesystem layout for testing syncUserResource
-// with ResourceAgents. Returns (knossosHome, userClaudeDir).
+// with ResourceAgents. Returns (knossosHome, userChannelDir).
 func setupAgentSync(t *testing.T, agentFiles map[string]string) (string, string) {
 	t.Helper()
 	tmpDir := t.TempDir()
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
 	agentsSourceDir := filepath.Join(knossosHome, "agents")
-	agentsTargetDir := filepath.Join(userClaudeDir, "agents")
+	agentsTargetDir := filepath.Join(userChannelDir, "agents")
 	os.MkdirAll(agentsSourceDir, 0755)
 	os.MkdirAll(agentsTargetDir, 0755)
 
 	for name, content := range agentFiles {
 		os.WriteFile(filepath.Join(agentsSourceDir, name), []byte(content), 0644)
 	}
-	return knossosHome, userClaudeDir
+	return knossosHome, userChannelDir
 }
 
 func TestSyncUserResource_AddsNewAgent(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"pythia.md": "# Pythia Agent\nPrompt content.\n",
 	})
 
@@ -40,7 +40,7 @@ func TestSyncUserResource_AddsNewAgent(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -50,7 +50,7 @@ func TestSyncUserResource_AddsNewAgent(t *testing.T) {
 	}
 
 	// Verify file was copied
-	targetPath := filepath.Join(userClaudeDir, "agents", "pythia.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "pythia.md")
 	got, err := os.ReadFile(targetPath)
 	if err != nil {
 		t.Fatalf("read target: %v", err)
@@ -71,12 +71,12 @@ func TestSyncUserResource_AddsNewAgent(t *testing.T) {
 
 func TestSyncUserResource_SkipsUserOwned(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"my-agent.md": "# New Source Content\n",
 	})
 
 	// Pre-create user-modified version at target
-	targetPath := filepath.Join(userClaudeDir, "agents", "my-agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "my-agent.md")
 	os.WriteFile(targetPath, []byte("# User Modified Content\n"), 0644)
 
 	manifest := &provenance.ProvenanceManifest{
@@ -90,7 +90,7 @@ func TestSyncUserResource_SkipsUserOwned(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -111,13 +111,13 @@ func TestSyncUserResource_SkipsUserOwned(t *testing.T) {
 
 func TestSyncUserResource_UpdatesKnossosOwned(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Updated Source Content\n",
 	})
 
 	// Pre-create old version at target
 	oldContent := []byte("# Old Content\n")
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, oldContent, 0644)
 	oldChecksum := checksum.Bytes(oldContent)
 
@@ -134,7 +134,7 @@ func TestSyncUserResource_UpdatesKnossosOwned(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -153,12 +153,12 @@ func TestSyncUserResource_UpdatesKnossosOwned(t *testing.T) {
 func TestSyncUserResource_UnchangedKnossosOwned(t *testing.T) {
 	t.Parallel()
 	content := "# Same Content\n"
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent.md": content,
 	})
 
 	// Pre-create same version at target
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, []byte(content), 0644)
 	sourceChecksum := checksum.Bytes([]byte(content))
 
@@ -174,7 +174,7 @@ func TestSyncUserResource_UnchangedKnossosOwned(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -186,12 +186,12 @@ func TestSyncUserResource_UnchangedKnossosOwned(t *testing.T) {
 
 func TestSyncUserResource_SkipsDiverged(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# New Source Content\n",
 	})
 
 	// Pre-create a locally modified version (diverged from both old and new source)
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, []byte("# Locally Modified\n"), 0644)
 
 	// Manifest says knossos owns it with a different checksum than both source and target
@@ -207,7 +207,7 @@ func TestSyncUserResource_SkipsDiverged(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -225,11 +225,11 @@ func TestSyncUserResource_SkipsDiverged(t *testing.T) {
 
 func TestSyncUserResource_OverwritesDiverged(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# New Source\n",
 	})
 
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, []byte("# Locally Modified\n"), 0644)
 
 	manifest := &provenance.ProvenanceManifest{
@@ -244,7 +244,7 @@ func TestSyncUserResource_OverwritesDiverged(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{
 		OverwriteDiverged: true,
 	})
 	if err != nil {
@@ -263,7 +263,7 @@ func TestSyncUserResource_OverwritesDiverged(t *testing.T) {
 
 func TestSyncUserResource_CollisionSkipped(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"pythia.md": "# Pythia\n",
 	})
 
@@ -276,7 +276,7 @@ func TestSyncUserResource_CollisionSkipped(t *testing.T) {
 	}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -286,7 +286,7 @@ func TestSyncUserResource_CollisionSkipped(t *testing.T) {
 	}
 
 	// File should NOT be copied
-	targetPath := filepath.Join(userClaudeDir, "agents", "pythia.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "pythia.md")
 	if _, err := os.Stat(targetPath); !os.IsNotExist(err) {
 		t.Error("colliding file should not be copied to target")
 	}
@@ -294,12 +294,12 @@ func TestSyncUserResource_CollisionSkipped(t *testing.T) {
 
 func TestSyncUserResource_OrphanRemoval(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"keeper.md": "# Keeper\n",
 	})
 
 	// Pre-create an orphan file (in manifest but not in source anymore)
-	orphanPath := filepath.Join(userClaudeDir, "agents", "orphan.md")
+	orphanPath := filepath.Join(userChannelDir, "agents", "orphan.md")
 	os.WriteFile(orphanPath, []byte("# Orphan\n"), 0644)
 
 	manifest := &provenance.ProvenanceManifest{
@@ -314,7 +314,7 @@ func TestSyncUserResource_OrphanRemoval(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	_, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	_, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -331,7 +331,7 @@ func TestSyncUserResource_OrphanRemoval(t *testing.T) {
 
 func TestSyncUserResource_DryRun(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"new-agent.md": "# New Agent\n",
 	})
 
@@ -341,7 +341,7 @@ func TestSyncUserResource_DryRun(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{
 		DryRun: true,
 	})
 	if err != nil {
@@ -353,7 +353,7 @@ func TestSyncUserResource_DryRun(t *testing.T) {
 	}
 
 	// File should NOT be created
-	targetPath := filepath.Join(userClaudeDir, "agents", "new-agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "new-agent.md")
 	if _, err := os.Stat(targetPath); !os.IsNotExist(err) {
 		t.Error("dry-run should not create files")
 	}
@@ -366,7 +366,7 @@ func TestSyncUserResource_DryRun(t *testing.T) {
 
 func TestSyncUserResource_RecreateDeletion_KnossosOwned(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Agent Content\n",
 	})
 
@@ -384,7 +384,7 @@ func TestSyncUserResource_RecreateDeletion_KnossosOwned(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -394,7 +394,7 @@ func TestSyncUserResource_RecreateDeletion_KnossosOwned(t *testing.T) {
 	}
 
 	// File should be re-created
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
 		t.Error("expected deleted knossos-owned file to be re-created")
 	}
@@ -402,7 +402,7 @@ func TestSyncUserResource_RecreateDeletion_KnossosOwned(t *testing.T) {
 
 func TestSyncUserResource_RecreateDeletion_UserOwned(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Source Content\n",
 	})
 
@@ -418,7 +418,7 @@ func TestSyncUserResource_RecreateDeletion_UserOwned(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -431,12 +431,12 @@ func TestSyncUserResource_RecreateDeletion_UserOwned(t *testing.T) {
 
 func TestSyncUserResource_NewFileTargetExists_Untracked(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent.md": "# Source Content\n",
 	})
 
 	// Pre-create a file at the target (not in manifest — untracked)
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, []byte("# User Pre-existing\n"), 0644)
 
 	manifest := &provenance.ProvenanceManifest{
@@ -445,7 +445,7 @@ func TestSyncUserResource_NewFileTargetExists_Untracked(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -474,8 +474,8 @@ func TestSyncUserResource_SourceMissing_NoEmbedded(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 	// Note: knossosHome/agents does NOT exist
 
 	manifest := &provenance.ProvenanceManifest{
@@ -484,7 +484,7 @@ func TestSyncUserResource_SourceMissing_NoEmbedded(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{} // no embeddedAgents
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -512,7 +512,7 @@ func TestSyncUserResource_InvalidResourceType(t *testing.T) {
 
 func TestSyncUserResource_MultipleAgents(t *testing.T) {
 	t.Parallel()
-	knossosHome, userClaudeDir := setupAgentSync(t, map[string]string{
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
 		"agent-a.md": "# Agent A\n",
 		"agent-b.md": "# Agent B\n",
 		"agent-c.md": "# Agent C\n",
@@ -524,7 +524,7 @@ func TestSyncUserResource_MultipleAgents(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -541,7 +541,7 @@ func TestSyncUserResource_Hooks_NestedStructure(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
 
 	// Create nested hooks structure
 	hooksDir := filepath.Join(knossosHome, "hooks")
@@ -549,7 +549,7 @@ func TestSyncUserResource_Hooks_NestedStructure(t *testing.T) {
 	os.WriteFile(filepath.Join(hooksDir, "pre-commit.sh"), []byte("#!/bin/sh\ncheck"), 0644)
 	os.WriteFile(filepath.Join(hooksDir, "lib", "helpers.sh"), []byte("#!/bin/sh\nhelp"), 0644)
 
-	os.MkdirAll(filepath.Join(userClaudeDir, "hooks"), 0755)
+	os.MkdirAll(filepath.Join(userChannelDir, "hooks"), 0755)
 
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
@@ -557,7 +557,7 @@ func TestSyncUserResource_Hooks_NestedStructure(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserResource(ResourceHooks, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceHooks, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}
@@ -567,7 +567,7 @@ func TestSyncUserResource_Hooks_NestedStructure(t *testing.T) {
 	}
 
 	// Verify nested path preserved
-	libHelper := filepath.Join(userClaudeDir, "hooks", "lib", "helpers.sh")
+	libHelper := filepath.Join(userChannelDir, "hooks", "lib", "helpers.sh")
 	if _, err := os.Stat(libHelper); os.IsNotExist(err) {
 		t.Error("expected nested hook file to be created")
 	}
@@ -583,8 +583,8 @@ func TestSyncUserResource_Hooks_NestedStructure(t *testing.T) {
 func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
 		"agents/pythia.md": &fstest.MapFile{Data: []byte("# Embedded Pythia\n")},
@@ -599,7 +599,7 @@ func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
 
 	result, err := s.syncUserResourceFromEmbedded(
 		ResourceAgents, embeddedFS, "agents",
-		userClaudeDir, manifest, checker, SyncOptions{},
+		userChannelDir, manifest, checker, SyncOptions{},
 	)
 	if err != nil {
 		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
@@ -610,7 +610,7 @@ func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
 	}
 
 	// Verify files written
-	got, err := os.ReadFile(filepath.Join(userClaudeDir, "agents", "pythia.md"))
+	got, err := os.ReadFile(filepath.Join(userChannelDir, "agents", "pythia.md"))
 	if err != nil {
 		t.Fatalf("read target: %v", err)
 	}
@@ -622,11 +622,11 @@ func TestSyncUserResourceFromEmbedded_AddsNewAgent(t *testing.T) {
 func TestSyncUserResourceFromEmbedded_SkipsUserOwned(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	// Pre-create user file
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, []byte("# User Content\n"), 0644)
 
 	embeddedFS := fstest.MapFS{
@@ -646,7 +646,7 @@ func TestSyncUserResourceFromEmbedded_SkipsUserOwned(t *testing.T) {
 
 	result, err := s.syncUserResourceFromEmbedded(
 		ResourceAgents, embeddedFS, "agents",
-		userClaudeDir, manifest, checker, SyncOptions{},
+		userChannelDir, manifest, checker, SyncOptions{},
 	)
 	if err != nil {
 		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
@@ -666,11 +666,11 @@ func TestSyncUserResourceFromEmbedded_SkipsUserOwned(t *testing.T) {
 func TestSyncUserResourceFromEmbedded_UpdatesKnossosOwned(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	oldContent := []byte("# Old Embedded Content\n")
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, oldContent, 0644)
 	oldChecksum := checksum.Bytes(oldContent)
 
@@ -692,7 +692,7 @@ func TestSyncUserResourceFromEmbedded_UpdatesKnossosOwned(t *testing.T) {
 
 	result, err := s.syncUserResourceFromEmbedded(
 		ResourceAgents, embeddedFS, "agents",
-		userClaudeDir, manifest, checker, SyncOptions{},
+		userChannelDir, manifest, checker, SyncOptions{},
 	)
 	if err != nil {
 		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
@@ -711,8 +711,8 @@ func TestSyncUserResourceFromEmbedded_UpdatesKnossosOwned(t *testing.T) {
 func TestSyncUserResourceFromEmbedded_CollisionSkipped(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
 		"agents/pythia.md": &fstest.MapFile{Data: []byte("# Pythia\n")},
@@ -729,7 +729,7 @@ func TestSyncUserResourceFromEmbedded_CollisionSkipped(t *testing.T) {
 
 	result, err := s.syncUserResourceFromEmbedded(
 		ResourceAgents, embeddedFS, "agents",
-		userClaudeDir, manifest, checker, SyncOptions{},
+		userChannelDir, manifest, checker, SyncOptions{},
 	)
 	if err != nil {
 		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
@@ -743,8 +743,8 @@ func TestSyncUserResourceFromEmbedded_CollisionSkipped(t *testing.T) {
 func TestSyncUserResourceFromEmbedded_RecreatesDeleted(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
 		"agents/agent.md": &fstest.MapFile{Data: []byte("# Content\n")},
@@ -765,7 +765,7 @@ func TestSyncUserResourceFromEmbedded_RecreatesDeleted(t *testing.T) {
 
 	result, err := s.syncUserResourceFromEmbedded(
 		ResourceAgents, embeddedFS, "agents",
-		userClaudeDir, manifest, checker, SyncOptions{},
+		userChannelDir, manifest, checker, SyncOptions{},
 	)
 	if err != nil {
 		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
@@ -779,8 +779,8 @@ func TestSyncUserResourceFromEmbedded_RecreatesDeleted(t *testing.T) {
 func TestSyncUserResourceFromEmbedded_DryRun(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
 		"agents/agent.md": &fstest.MapFile{Data: []byte("# Content\n")},
@@ -794,7 +794,7 @@ func TestSyncUserResourceFromEmbedded_DryRun(t *testing.T) {
 
 	result, err := s.syncUserResourceFromEmbedded(
 		ResourceAgents, embeddedFS, "agents",
-		userClaudeDir, manifest, checker, SyncOptions{DryRun: true},
+		userChannelDir, manifest, checker, SyncOptions{DryRun: true},
 	)
 	if err != nil {
 		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
@@ -805,7 +805,7 @@ func TestSyncUserResourceFromEmbedded_DryRun(t *testing.T) {
 	}
 
 	// File should not exist
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	if _, err := os.Stat(targetPath); !os.IsNotExist(err) {
 		t.Error("dry-run should not create files")
 	}
@@ -814,11 +814,11 @@ func TestSyncUserResourceFromEmbedded_DryRun(t *testing.T) {
 func TestSyncUserResourceFromEmbedded_UntrackedUserFile(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	// Pre-create untracked file
-	targetPath := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetPath := filepath.Join(userChannelDir, "agents", "agent.md")
 	os.WriteFile(targetPath, []byte("# User Pre-existing\n"), 0644)
 
 	embeddedFS := fstest.MapFS{
@@ -833,7 +833,7 @@ func TestSyncUserResourceFromEmbedded_UntrackedUserFile(t *testing.T) {
 
 	result, err := s.syncUserResourceFromEmbedded(
 		ResourceAgents, embeddedFS, "agents",
-		userClaudeDir, manifest, checker, SyncOptions{},
+		userChannelDir, manifest, checker, SyncOptions{},
 	)
 	if err != nil {
 		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
@@ -856,9 +856,9 @@ func TestSyncUserResource_FallsBackToEmbedded(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
 	// knossosHome/agents does NOT exist (no filesystem source)
-	os.MkdirAll(filepath.Join(userClaudeDir, "agents"), 0755)
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
 
 	embeddedFS := fstest.MapFS{
 		"agents/pythia.md": &fstest.MapFile{Data: []byte("# Embedded\n")},
@@ -870,7 +870,7 @@ func TestSyncUserResource_FallsBackToEmbedded(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{embeddedAgents: embeddedFS}
 
-	result, err := s.syncUserResource(ResourceAgents, knossosHome, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserResource: %v", err)
 	}

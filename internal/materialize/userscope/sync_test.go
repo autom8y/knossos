@@ -56,9 +56,9 @@ func TestCollectMena_CompanionHiding(t *testing.T) {
 	os.WriteFile(filepath.Join(droDir, "examples.md"), []byte("# Examples\n"), 0644)
 
 	// Set up target dirs
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	commandsDir := filepath.Join(userClaudeDir, "commands")
-	skillsDir := filepath.Join(userClaudeDir, "skills")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	commandsDir := filepath.Join(userChannelDir, "commands")
+	skillsDir := filepath.Join(userChannelDir, "skills")
 	os.MkdirAll(commandsDir, 0755)
 	os.MkdirAll(skillsDir, 0755)
 
@@ -68,7 +68,7 @@ func TestCollectMena_CompanionHiding(t *testing.T) {
 	collisionChecker := &CollisionChecker{}
 	s := &syncer{}
 
-	result, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, collisionChecker, SyncOptions{})
+	result, err := s.syncUserMena(tmpDir, userChannelDir, manifest, collisionChecker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -172,9 +172,9 @@ func TestSyncUserMena_CollisionSkipsRiteContent(t *testing.T) {
 	os.MkdirAll(droDir, 0755)
 	os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\n---\n# Cmd\n"), 0644)
 
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "commands"), 0755)
-	os.MkdirAll(filepath.Join(userClaudeDir, "skills"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "commands"), 0755)
+	os.MkdirAll(filepath.Join(userChannelDir, "skills"), 0755)
 
 	// Create collision checker that reports collision for commands/my-cmd.md
 	// (promoted dromena INDEX.md form — rite scope also promotes)
@@ -188,7 +188,7 @@ func TestSyncUserMena_CollisionSkipsRiteContent(t *testing.T) {
 	}
 	s := &syncer{}
 
-	result, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserMena(tmpDir, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -212,11 +212,11 @@ func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
 	os.MkdirAll(droDir, 0755)
 	os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\n---\n# New Content\n"), 0644)
 
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "commands"), 0755)
-	os.MkdirAll(filepath.Join(userClaudeDir, "skills"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "commands"), 0755)
+	os.MkdirAll(filepath.Join(userChannelDir, "skills"), 0755)
 	// Promoted dro INDEX.md lives at commands/my-cmd.md (parent level)
-	promotedFile := filepath.Join(userClaudeDir, "commands", "my-cmd.md")
+	promotedFile := filepath.Join(userChannelDir, "commands", "my-cmd.md")
 	os.WriteFile(promotedFile, []byte("# User Modified\n"), 0644)
 
 	manifest := &provenance.ProvenanceManifest{
@@ -230,7 +230,7 @@ func TestSyncUserMena_PreservesUserOwned(t *testing.T) {
 	checker := &CollisionChecker{}
 	s := &syncer{}
 
-	_, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	_, err := s.syncUserMena(tmpDir, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
@@ -252,9 +252,9 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 	os.MkdirAll(droDir, 0755)
 	os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\n---\n# Cmd\n"), 0644)
 
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	os.MkdirAll(filepath.Join(userClaudeDir, "commands"), 0755)
-	os.MkdirAll(filepath.Join(userClaudeDir, "skills"), 0755)
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "commands"), 0755)
+	os.MkdirAll(filepath.Join(userChannelDir, "skills"), 0755)
 
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
@@ -263,7 +263,7 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 	s := &syncer{}
 
 	// First sync
-	result1, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result1, err := s.syncUserMena(tmpDir, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("First sync failed: %v", err)
 	}
@@ -272,7 +272,7 @@ func TestSyncUserMena_Idempotent(t *testing.T) {
 	}
 
 	// Second sync - should produce zero changes
-	result2, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result2, err := s.syncUserMena(tmpDir, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("Second sync failed: %v", err)
 	}
@@ -297,10 +297,10 @@ func TestWipeKnossosOwnedMenaEntries(t *testing.T) {
 	os.WriteFile(filepath.Join(menaDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\n---\n# Cmd\n"), 0644)
 
 	// Create target files: knossos-produced command + genuinely user-created command + agent
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	knossosFile := filepath.Join(userClaudeDir, "commands", "my-cmd", "INDEX.md")
-	userFile := filepath.Join(userClaudeDir, "commands", "user-custom", "INDEX.md")
-	agentFile := filepath.Join(userClaudeDir, "agents", "my-agent.md")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	knossosFile := filepath.Join(userChannelDir, "commands", "my-cmd", "INDEX.md")
+	userFile := filepath.Join(userChannelDir, "commands", "user-custom", "INDEX.md")
+	agentFile := filepath.Join(userChannelDir, "agents", "my-agent.md")
 	os.MkdirAll(filepath.Dir(knossosFile), 0755)
 	os.MkdirAll(filepath.Dir(userFile), 0755)
 	os.MkdirAll(filepath.Dir(agentFile), 0755)
@@ -327,7 +327,7 @@ func TestWipeKnossosOwnedMenaEntries(t *testing.T) {
 	}
 
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, false)
+	wipeKnossosOwnedMenaEntries(knossosHome, userChannelDir, manifest, false)
 
 	// Knossos-produced commands entry should be removed (even though owner: user)
 	if _, exists := manifest.Entries["commands/my-cmd/INDEX.md"]; exists {
@@ -367,9 +367,9 @@ func TestWipeKnossosOwnedMenaEntries_OldStylePaths(t *testing.T) {
 	os.WriteFile(filepath.Join(opsDir, "architect.dro.md"), []byte("---\nname: architect\n---\n# Architect\n"), 0644)
 
 	// Create target files at OLD non-flattened paths (what old pipeline produced)
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	oldSpikeFile := filepath.Join(userClaudeDir, "commands", "operations", "spike", "INDEX.md")
-	oldArchFile := filepath.Join(userClaudeDir, "commands", "operations", "architect.md")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	oldSpikeFile := filepath.Join(userChannelDir, "commands", "operations", "spike", "INDEX.md")
+	oldArchFile := filepath.Join(userChannelDir, "commands", "operations", "architect.md")
 	os.MkdirAll(filepath.Dir(oldSpikeFile), 0755)
 	os.WriteFile(oldSpikeFile, []byte("# Old Spike\n"), 0644)
 	os.WriteFile(oldArchFile, []byte("# Old Architect\n"), 0644)
@@ -389,7 +389,7 @@ func TestWipeKnossosOwnedMenaEntries_OldStylePaths(t *testing.T) {
 	}
 
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, false)
+	wipeKnossosOwnedMenaEntries(knossosHome, userChannelDir, manifest, false)
 
 	// Both old-style entries should be wiped
 	if _, exists := manifest.Entries["commands/operations/spike/INDEX.md"]; exists {
@@ -420,13 +420,13 @@ func TestWipeKnossosOwnedMenaEntries_UntrackedOrphans(t *testing.T) {
 	os.WriteFile(filepath.Join(spikeDir, "INDEX.dro.md"), []byte("---\nname: spike\n---\n# Spike\n"), 0644)
 
 	// Create untracked file on disk at old-style path (NOT in manifest)
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	orphanFile := filepath.Join(userClaudeDir, "commands", "operations", "spike.md")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	orphanFile := filepath.Join(userChannelDir, "commands", "operations", "spike.md")
 	os.MkdirAll(filepath.Dir(orphanFile), 0755)
 	os.WriteFile(orphanFile, []byte("# Old Spike\n"), 0644)
 
 	// Also create a genuinely user-created file (NOT matching any knossos pattern)
-	userFile := filepath.Join(userClaudeDir, "commands", "my-custom-cmd.md")
+	userFile := filepath.Join(userChannelDir, "commands", "my-custom-cmd.md")
 	os.WriteFile(userFile, []byte("# My Custom\n"), 0644)
 
 	// Empty manifest — no entries tracked
@@ -435,7 +435,7 @@ func TestWipeKnossosOwnedMenaEntries_UntrackedOrphans(t *testing.T) {
 	}
 
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, false)
+	wipeKnossosOwnedMenaEntries(knossosHome, userChannelDir, manifest, false)
 
 	// Untracked orphan should be removed
 	if _, err := os.Stat(orphanFile); !os.IsNotExist(err) {
@@ -459,8 +459,8 @@ func TestWipeKnossosOwnedMenaEntries_DryRun(t *testing.T) {
 	os.WriteFile(filepath.Join(menaDir, "INDEX.dro.md"), []byte("---\nname: my-cmd\n---\n# Cmd\n"), 0644)
 
 	// Create target file
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	knossosFile := filepath.Join(userClaudeDir, "commands", "my-cmd", "INDEX.md")
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	knossosFile := filepath.Join(userChannelDir, "commands", "my-cmd", "INDEX.md")
 	os.MkdirAll(filepath.Dir(knossosFile), 0755)
 	os.WriteFile(knossosFile, []byte("# Old\n"), 0644)
 
@@ -474,7 +474,7 @@ func TestWipeKnossosOwnedMenaEntries_DryRun(t *testing.T) {
 	}
 
 	knossosHome := filepath.Join(tmpDir, "knossos")
-	wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, true)
+	wipeKnossosOwnedMenaEntries(knossosHome, userChannelDir, manifest, true)
 
 	// Manifest entry should still exist
 	if _, exists := manifest.Entries["commands/my-cmd/INDEX.md"]; !exists {
@@ -530,32 +530,32 @@ func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
 	os.WriteFile(filepath.Join(sharedSkillDir, "INDEX.lego.md"),
 		[]byte("---\nname: shared-ref\ndescription: Shared reference\n---\n# Ref\n"), 0644)
 
-	userClaudeDir := filepath.Join(t.TempDir(), ".claude")
+	userChannelDir := filepath.Join(t.TempDir(), ".claude")
 	manifest := &provenance.ProvenanceManifest{
 		Entries: map[string]*provenance.ProvenanceEntry{},
 	}
 	checker := NewCollisionChecker(t.TempDir()) // no rite manifest → not effective → no collisions
 
 	s := &syncer{}
-	result, err := s.syncUserMena(tmpDir, userClaudeDir, manifest, checker, SyncOptions{})
+	result, err := s.syncUserMena(tmpDir, userChannelDir, manifest, checker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMena failed: %v", err)
 	}
 
 	// Platform dro mena should be promoted to parent level (commands/nav-cmd.md)
-	navCmd := filepath.Join(userClaudeDir, "commands", "nav-cmd.md")
+	navCmd := filepath.Join(userChannelDir, "commands", "nav-cmd.md")
 	if _, err := os.Stat(navCmd); os.IsNotExist(err) {
 		t.Errorf("Expected promoted platform dromenon at %s", navCmd)
 	}
 
 	// Shared rite dro mena should ALSO be promoted
-	knowCmd := filepath.Join(userClaudeDir, "commands", "know.md")
+	knowCmd := filepath.Join(userChannelDir, "commands", "know.md")
 	if _, err := os.Stat(knowCmd); os.IsNotExist(err) {
 		t.Errorf("Expected promoted shared dromenon /know at %s", knowCmd)
 	}
 
 	// Shared lego mena should have INDEX.md renamed to SKILL.md
-	sharedSkill := filepath.Join(userClaudeDir, "skills", "shared-ref", "SKILL.md")
+	sharedSkill := filepath.Join(userChannelDir, "skills", "shared-ref", "SKILL.md")
 	if _, err := os.Stat(sharedSkill); os.IsNotExist(err) {
 		t.Errorf("Expected shared legomenon SKILL.md at %s", sharedSkill)
 	}
@@ -570,7 +570,7 @@ func TestSyncUserMena_IncludesSharedRiteMena(t *testing.T) {
 // fallback path includes rites/shared/mena/ entries alongside platform mena.
 func TestSyncUserMena_EmbeddedIncludesSharedRiteMena(t *testing.T) {
 	t.Parallel()
-	userClaudeDir := t.TempDir()
+	userChannelDir := t.TempDir()
 
 	// Build an embedded FS with platform mena + shared rite mena
 	embeddedMena := fstest.MapFS{
@@ -591,19 +591,19 @@ func TestSyncUserMena_EmbeddedIncludesSharedRiteMena(t *testing.T) {
 	manifest, _ := provenance.LoadOrBootstrap(filepath.Join(t.TempDir(), "manifest.yaml"))
 	collisionChecker := NewCollisionChecker(t.TempDir())
 
-	result, err := s.syncUserMenaFromEmbedded(userClaudeDir, manifest, collisionChecker, SyncOptions{})
+	result, err := s.syncUserMenaFromEmbedded(userChannelDir, manifest, collisionChecker, SyncOptions{})
 	if err != nil {
 		t.Fatalf("syncUserMenaFromEmbedded failed: %v", err)
 	}
 
 	// Platform dro should be promoted
-	commitCmd := filepath.Join(userClaudeDir, "commands", "commit.md")
+	commitCmd := filepath.Join(userChannelDir, "commands", "commit.md")
 	if _, statErr := os.Stat(commitCmd); os.IsNotExist(statErr) {
 		t.Errorf("Expected platform dromenon /commit at %s", commitCmd)
 	}
 
 	// Shared lego should be projected with SKILL.md rename
-	smellSkill := filepath.Join(userClaudeDir, "skills", "smell-detection", "SKILL.md")
+	smellSkill := filepath.Join(userChannelDir, "skills", "smell-detection", "SKILL.md")
 	if _, statErr := os.Stat(smellSkill); os.IsNotExist(statErr) {
 		t.Errorf("Expected shared legomenon smell-detection at %s", smellSkill)
 	}

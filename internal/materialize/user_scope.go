@@ -31,7 +31,7 @@ func (m *Materializer) syncUserScopeSingleChannel(opts SyncOptions) (*UserScopeR
 		EmbeddedMena:   m.embeddedMena,
 		EmbeddedRites:  m.sourceResolver.EmbeddedFS,
 		KnossosHome:    m.sourceResolver.KnossosHome(),
-		UserClaudeDir:  userChannelDir,
+		UserChannelDir: userChannelDir,
 		Opts: userscope.SyncOptions{
 			Resource:          opts.Resource,
 			DryRun:            opts.DryRun,

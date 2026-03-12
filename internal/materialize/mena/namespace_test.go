@@ -16,8 +16,8 @@ import (
 func TestResolveNamespace_DirAndFileDeduplicated(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir
-	commandsDir := filepath.Join(claudeDir, "commands")
+	channelDir := tmpDir
+	commandsDir := filepath.Join(channelDir, "commands")
 
 	// Create both forms on disk: commands/my-cmd/ (dir) and commands/my-cmd.md (promoted)
 	if err := os.MkdirAll(filepath.Join(commandsDir, "my-cmd"), 0755); err != nil {
@@ -77,9 +77,9 @@ func TestResolveNamespace_DirAndFileDeduplicated(t *testing.T) {
 func TestResolveNamespace_DirAndFileDeduplicated_KnossosOwned(t *testing.T) {
 	t.Parallel()
 	tmpDir := t.TempDir()
-	claudeDir := tmpDir
+	channelDir := tmpDir
 	knossosDir := filepath.Join(tmpDir, ".knossos")
-	commandsDir := filepath.Join(claudeDir, "commands")
+	commandsDir := filepath.Join(channelDir, "commands")
 
 	if err := os.MkdirAll(knossosDir, 0755); err != nil {
 		t.Fatalf("mkdir knossos: %v", err)

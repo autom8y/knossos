@@ -21,16 +21,16 @@ type syncer struct {
 	embeddedMena	fs.FS
 	embeddedRites	fs.FS
 	knossosHome	string
-	userClaudeDir	string
+	userChannelDir	string
 	channel		string // "claude" or "gemini"
 }
 
 // SyncUserScope is the primary entry point for user-scope sync.
 // It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to ~/.claude/ directories.
 func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
-	userClaudeDir := params.UserClaudeDir
-	if userClaudeDir == "" {
-		userClaudeDir = paths.UserClaudeDir()
+	userChannelDir := params.UserChannelDir
+	if userChannelDir == "" {
+		userChannelDir = paths.UserClaudeDir()
 	}
 	s := &syncer{
 		resolver:	params.Resolver,
@@ -38,7 +38,7 @@ func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 		embeddedMena:	params.EmbeddedMena,
 		embeddedRites:	params.EmbeddedRites,
 		knossosHome:	params.KnossosHome,
-		userClaudeDir:	userClaudeDir,
+		userChannelDir:	userChannelDir,
 		channel:	params.Opts.Channel,
 	}
 	return s.syncUserScope(params.Opts)
@@ -65,10 +65,10 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	}
 
 	// Resolve user ~/.claude/ directory
-	userClaudeDir := s.userClaudeDir
+	userChannelDir := s.userChannelDir
 
 	// Load or bootstrap USER_PROVENANCE_MANIFEST.yaml
-	manifestPath := provenance.UserManifestPath(userClaudeDir)
+	manifestPath := provenance.UserManifestPath(userChannelDir)
 	manifest, err := provenance.LoadOrBootstrap(manifestPath)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	// Wipe stale knossos-produced mena entries before sync.
 	// One-time migration from old non-flattening pipeline; subsequent runs are no-ops.
 	if knossosHome != "" {
-		wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir, manifest, opts.DryRun)
+		wipeKnossosOwnedMenaEntries(knossosHome, userChannelDir, manifest, opts.DryRun)
 	}
 
 	// Initialize collision checker with project .knossos/ directory.
@@ -135,7 +135,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		resourceResult, err := s.syncUserResource(
 			resourceType,
 			knossosHome,
-			userClaudeDir,
+			userChannelDir,
 			manifest,
 			collisionChecker,
 			opts,
@@ -165,7 +165,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		}
 
 		// Clean up old JSON manifests
-		cleanupOldManifests(userClaudeDir)
+		cleanupOldManifests(userChannelDir)
 	}
 
 	return result, nil
@@ -175,7 +175,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 func (s *syncer) syncUserResource(
 	resourceType SyncResource,
 	knossosHome string,
-	userClaudeDir string,
+	userChannelDir string,
 	manifest *provenance.ProvenanceManifest,
 	collisionChecker *CollisionChecker,
 	opts SyncOptions,
@@ -183,7 +183,7 @@ func (s *syncer) syncUserResource(
 	// Mena uses dedicated CollectMena-based pipeline for namespace flattening
 	// and companion hiding parity with rite-scope.
 	if resourceType == ResourceMena {
-		return s.syncUserMena(knossosHome, userClaudeDir, manifest, collisionChecker, opts)
+		return s.syncUserMena(knossosHome, userChannelDir, manifest, collisionChecker, opts)
 	}
 
 	// Resolve paths based on resource type
@@ -194,11 +194,11 @@ func (s *syncer) syncUserResource(
 	switch resourceType {
 	case ResourceAgents:
 		sourceDir = filepath.Join(knossosHome, "agents")
-		targetDirs = []string{filepath.Join(userClaudeDir, "agents")}
+		targetDirs = []string{filepath.Join(userChannelDir, "agents")}
 		nested = false
 	case ResourceHooks:
 		sourceDir = filepath.Join(knossosHome, "hooks")
-		targetDirs = []string{filepath.Join(userClaudeDir, "hooks")}
+		targetDirs = []string{filepath.Join(userChannelDir, "hooks")}
 		nested = true
 	default:
 		return nil, ErrInvalidResourceType()
@@ -226,7 +226,7 @@ func (s *syncer) syncUserResource(
 		if resourceType == ResourceAgents && s.embeddedAgents != nil {
 			return s.syncUserResourceFromEmbedded(
 				resourceType, s.embeddedAgents, "agents",
-				userClaudeDir, manifest, collisionChecker, opts,
+				userChannelDir, manifest, collisionChecker, opts,
 			)
 		}
 		// Hooks: no embedded fallback (KNOSSOS_HOME-only)
@@ -474,7 +474,7 @@ func (s *syncer) syncUserResource(
 	if !opts.DryRun && !opts.KeepOrphans {
 		for key, seen := range snapshot {
 			if !seen {
-				removeUserOrphan(key, manifest, userClaudeDir)
+				removeUserOrphan(key, manifest, userChannelDir)
 			}
 		}
 	}

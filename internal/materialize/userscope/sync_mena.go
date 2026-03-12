@@ -29,14 +29,14 @@ func menaCompilerForChannel(channel string) mena.ChannelCompiler {
 // and companion hiding parity with the rite-scope pipeline (SyncMena).
 func (s *syncer) syncUserMena(
 	knossosHome string,
-	userClaudeDir string,
+	userChannelDir string,
 	manifest *provenance.ProvenanceManifest,
 	collisionChecker *CollisionChecker,
 	opts SyncOptions,
 ) (*UserResourceResult, error) {
 	sourceDir := filepath.Join(knossosHome, "mena")
-	commandsDir := filepath.Join(userClaudeDir, "commands")
-	skillsDir := filepath.Join(userClaudeDir, "skills")
+	commandsDir := filepath.Join(userChannelDir, "commands")
+	skillsDir := filepath.Join(userChannelDir, "skills")
 
 	result := &UserResourceResult{
 		Source:	sourceDir,
@@ -53,7 +53,7 @@ func (s *syncer) syncUserMena(
 	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
 		// Try embedded mena fallback
 		if s.embeddedMena != nil {
-			return s.syncUserMenaFromEmbedded(userClaudeDir, manifest, collisionChecker, opts)
+			return s.syncUserMenaFromEmbedded(userChannelDir, manifest, collisionChecker, opts)
 		}
 		return result, nil	// No source = no-op
 	}
@@ -129,7 +129,7 @@ func (s *syncer) syncUserMena(
 	if !opts.DryRun && !opts.KeepOrphans {
 		for key, seen := range snapshot {
 			if !seen {
-				removeUserOrphan(key, manifest, userClaudeDir)
+				removeUserOrphan(key, manifest, userChannelDir)
 			}
 		}
 	}
@@ -149,13 +149,13 @@ func (s *syncer) syncUserMena(
 // syncUserMenaFromEmbedded syncs mena from the embedded filesystem
 // when KNOSSOS_HOME is unavailable.
 func (s *syncer) syncUserMenaFromEmbedded(
-	userClaudeDir string,
+	userChannelDir string,
 	manifest *provenance.ProvenanceManifest,
 	collisionChecker *CollisionChecker,
 	opts SyncOptions,
 ) (*UserResourceResult, error) {
-	commandsDir := filepath.Join(userClaudeDir, "commands")
-	skillsDir := filepath.Join(userClaudeDir, "skills")
+	commandsDir := filepath.Join(userChannelDir, "commands")
+	skillsDir := filepath.Join(userChannelDir, "skills")
 
 	result := &UserResourceResult{
 		Source:	"embedded:mena",
@@ -565,7 +565,7 @@ func syncUserMenaFile(
 // This is a one-time migration from the old non-flattening user-scope pipeline.
 // On subsequent runs with clean entries, this is a no-op.
 // Only touches owner=knossos entries. User content is NEVER destroyed.
-func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *provenance.ProvenanceManifest, dryRun bool) {
+func wipeKnossosOwnedMenaEntries(knossosHome, userChannelDir string, manifest *provenance.ProvenanceManifest, dryRun bool) {
 	// Collect mena entries to identify knossos-producible manifest key patterns.
 	// The old pipeline used non-flattened paths; the new pipeline uses flattened paths.
 	// Any existing manifest entry matching either pattern is knossos-produced, not user-created.
@@ -620,7 +620,7 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 			continue
 		}
 		if !dryRun {
-			targetPath := filepath.Join(userClaudeDir, key)
+			targetPath := filepath.Join(userChannelDir, key)
 			_ = os.Remove(targetPath)
 			delete(manifest.Entries, key)
 		}
@@ -631,12 +631,12 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 	// Remove any file on disk whose path matches a knossos-producible pattern.
 	if !dryRun {
 		for _, dir := range []string{"commands", "skills"} {
-			targetDir := filepath.Join(userClaudeDir, dir)
+			targetDir := filepath.Join(userChannelDir, dir)
 			_ = filepath.WalkDir(targetDir, func(path string, d os.DirEntry, wErr error) error {
 				if wErr != nil || d.IsDir() {
 					return nil
 				}
-				relPath, err := filepath.Rel(userClaudeDir, path)
+				relPath, err := filepath.Rel(userChannelDir, path)
 				if err != nil {
 					return nil
 				}
@@ -651,8 +651,8 @@ func wipeKnossosOwnedMenaEntries(knossosHome, userClaudeDir string, manifest *pr
 			})
 		}
 		// Clean empty parent directories
-		mena.CleanEmptyDirs(filepath.Join(userClaudeDir, "commands"))
-		mena.CleanEmptyDirs(filepath.Join(userClaudeDir, "skills"))
+		mena.CleanEmptyDirs(filepath.Join(userChannelDir, "commands"))
+		mena.CleanEmptyDirs(filepath.Join(userChannelDir, "skills"))
 	}
 }
 

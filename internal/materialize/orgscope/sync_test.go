@@ -52,15 +52,15 @@ func TestSyncOrgScope_SyncsAgents(t *testing.T) {
 	}
 
 	// Create a fake user .claude dir
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	if err := os.MkdirAll(userClaudeDir, 0755); err != nil {
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	if err := os.MkdirAll(userChannelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	result, err := SyncOrgScope(SyncOrgScopeParams{
 		OrgName:       "test-org",
 		OrgDir:        orgDir,
-		UserClaudeDir: userClaudeDir,
+		UserChannelDir: userChannelDir,
 	})
 	if err != nil {
 		t.Fatalf("SyncOrgScope failed: %v", err)
@@ -73,13 +73,13 @@ func TestSyncOrgScope_SyncsAgents(t *testing.T) {
 	}
 
 	// Verify the agent was actually written
-	targetAgent := filepath.Join(userClaudeDir, "agents", "test-agent.md")
+	targetAgent := filepath.Join(userChannelDir, "agents", "test-agent.md")
 	if _, err := os.Stat(targetAgent); os.IsNotExist(err) {
 		t.Error("Expected agent file to exist at target")
 	}
 
 	// Verify provenance manifest was created
-	manifestPath := filepath.Join(userClaudeDir, "ORG_PROVENANCE_MANIFEST.yaml")
+	manifestPath := filepath.Join(userChannelDir, "ORG_PROVENANCE_MANIFEST.yaml")
 	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
 		t.Error("Expected ORG_PROVENANCE_MANIFEST.yaml to be created")
 	}
@@ -99,15 +99,15 @@ func TestSyncOrgScope_SyncsMena(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	if err := os.MkdirAll(userClaudeDir, 0755); err != nil {
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	if err := os.MkdirAll(userChannelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	result, err := SyncOrgScope(SyncOrgScopeParams{
 		OrgName:       "test-org",
 		OrgDir:        orgDir,
-		UserClaudeDir: userClaudeDir,
+		UserChannelDir: userChannelDir,
 	})
 	if err != nil {
 		t.Fatalf("SyncOrgScope failed: %v", err)
@@ -117,7 +117,7 @@ func TestSyncOrgScope_SyncsMena(t *testing.T) {
 	}
 
 	// Verify the mena was written to skills/
-	targetMena := filepath.Join(userClaudeDir, "skills", "standards.lego.md")
+	targetMena := filepath.Join(userChannelDir, "skills", "standards.lego.md")
 	if _, err := os.Stat(targetMena); os.IsNotExist(err) {
 		t.Error("Expected mena file to exist at target skills/")
 	}
@@ -137,15 +137,15 @@ func TestSyncOrgScope_DryRun(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	if err := os.MkdirAll(userClaudeDir, 0755); err != nil {
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	if err := os.MkdirAll(userChannelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	result, err := SyncOrgScope(SyncOrgScopeParams{
 		OrgName:       "dry-org",
 		OrgDir:        orgDir,
-		UserClaudeDir: userClaudeDir,
+		UserChannelDir: userChannelDir,
 		DryRun:        true,
 	})
 	if err != nil {
@@ -159,7 +159,7 @@ func TestSyncOrgScope_DryRun(t *testing.T) {
 	}
 
 	// Verify target was NOT created (dry run)
-	targetAgent := filepath.Join(userClaudeDir, "agents", "agent.md")
+	targetAgent := filepath.Join(userChannelDir, "agents", "agent.md")
 	if _, err := os.Stat(targetAgent); err == nil {
 		t.Error("Expected agent file to NOT exist in dry-run mode")
 	}
@@ -179,15 +179,15 @@ func TestSyncOrgScope_Idempotent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	userClaudeDir := filepath.Join(tmpDir, "user-claude")
-	if err := os.MkdirAll(userClaudeDir, 0755); err != nil {
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	if err := os.MkdirAll(userChannelDir, 0755); err != nil {
 		t.Fatal(err)
 	}
 
 	params := SyncOrgScopeParams{
 		OrgName:       "test-org",
 		OrgDir:        orgDir,
-		UserClaudeDir: userClaudeDir,
+		UserChannelDir: userChannelDir,
 	}
 
 	// First sync

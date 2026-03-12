@@ -22,13 +22,13 @@ func (s *syncer) syncUserResourceFromEmbedded(
 	resourceType SyncResource,
 	embeddedFS fs.FS,
 	embeddedRoot string,
-	userClaudeDir string,
+	userChannelDir string,
 	manifest *provenance.ProvenanceManifest,
 	collisionChecker *CollisionChecker,
 	opts SyncOptions,
 ) (*UserResourceResult, error) {
 	prefix := resourcePrefixForType(resourceType)
-	targetDir := filepath.Join(userClaudeDir, string(resourceType))
+	targetDir := filepath.Join(userChannelDir, string(resourceType))
 
 	result := &UserResourceResult{
 		Source:	"embedded:" + embeddedRoot,
