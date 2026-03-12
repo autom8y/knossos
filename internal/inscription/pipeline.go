@@ -214,7 +214,7 @@ func (p *Pipeline) Sync(opts InscriptionSyncOptions) (*SyncResult, error) {
 	// Delegate to unified SyncInscription
 	channelDir := filepath.Dir(p.ClaudeMDPath)
 	result, err := SyncInscription(SyncInscriptionOptions{
-		ClaudeDir:      channelDir,
+		ChannelDir:     channelDir,
 		RenderCtx:      ctx,
 		ActiveRite:     opts.RiteName,
 		TemplateDir:    p.TemplateDir,

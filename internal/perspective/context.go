@@ -47,7 +47,7 @@ type ParseContext struct {
 	AgentSourcePath string // absolute path to agent source file
 	ProjectRoot     string
 	KnossosDir      string
-	ClaudeDir       string
+	ChannelDir      string
 	RiteName        string
 }
 
@@ -57,7 +57,7 @@ func NewParseContext(opts PerspectiveOptions) (*ParseContext, error) {
 	ctx := &ParseContext{
 		ProjectRoot: opts.ProjectRoot,
 		KnossosDir:  filepath.Join(opts.ProjectRoot, ".knossos"),
-		ClaudeDir:   filepath.Join(opts.ProjectRoot, ".claude"),
+		ChannelDir:  filepath.Join(opts.ProjectRoot, ".claude"),
 	}
 
 	// 1. Resolve rite name
@@ -127,7 +127,7 @@ func NewParseContext(opts PerspectiveOptions) (*ParseContext, error) {
 	ctx.Orchestrator = loadManifestAsMap(orchestratorPath)
 
 	// 10. List materialized skills directories
-	ctx.MaterializedSkillsDirs = listSkillsDirs(filepath.Join(ctx.ClaudeDir, "skills"))
+	ctx.MaterializedSkillsDirs = listSkillsDirs(filepath.Join(ctx.ChannelDir, "skills"))
 
 	// 11. Load provenance manifest
 	provPath := provenance.ManifestPath(ctx.KnossosDir)

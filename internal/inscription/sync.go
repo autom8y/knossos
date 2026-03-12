@@ -13,8 +13,8 @@ import (
 // SyncInscriptionOptions configures the core inscription sync operation.
 // Both Pipeline.Sync() and the materialization pipeline delegate to SyncInscription.
 type SyncInscriptionOptions struct {
-	// ClaudeDir is the path to the .claude/ directory.
-	ClaudeDir string
+	// ChannelDir is the path to the channel directory (e.g. .claude/ or .gemini/).
+	ChannelDir string
 
 	// RenderCtx provides template rendering data (agents, rite name, vars).
 	RenderCtx *RenderContext
@@ -66,7 +66,7 @@ type SyncInscriptionResult struct {
 //  7. Optionally updates manifest hashes and version
 func SyncInscription(opts SyncInscriptionOptions) (*SyncInscriptionResult, error) {
 	// 1. Load or create KNOSSOS_MANIFEST.yaml in .knossos/
-	projectRoot := filepath.Dir(opts.ClaudeDir)
+	projectRoot := filepath.Dir(opts.ChannelDir)
 	knossosManifestPath := filepath.Join(projectRoot, ".knossos", "KNOSSOS_MANIFEST.yaml")
 
 	loader := NewManifestLoader(projectRoot)
@@ -114,7 +114,7 @@ func SyncInscription(opts SyncInscriptionOptions) (*SyncInscriptionResult, error
 	if contextFilename == "" {
 		contextFilename = "CLAUDE.md"
 	}
-	claudeMdPath := filepath.Join(opts.ClaudeDir, contextFilename)
+	claudeMdPath := filepath.Join(opts.ChannelDir, contextFilename)
 	existingContent := ""
 	legacyBackupPath := ""
 

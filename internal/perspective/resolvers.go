@@ -250,7 +250,7 @@ func resolveMemory(ctx *ParseContext) *LayerEnvelope {
 	var gaps []Gap
 
 	// Check seed file
-	seedPath := filepath.Join(ctx.ClaudeDir, "agent-memory", agentName, "MEMORY.md")
+	seedPath := filepath.Join(ctx.ChannelDir, "agent-memory", agentName, "MEMORY.md")
 	seed := &MemorySeed{Path: seedPath}
 	if info, err := os.Stat(seedPath); err == nil {
 		seed.Exists = true
@@ -280,7 +280,7 @@ func resolveMemory(ctx *ParseContext) *LayerEnvelope {
 			runtime.ContentLineCount = &lc
 		}
 	case "local":
-		localPath := filepath.Join(ctx.ClaudeDir, "agent-memory-local", agentName, "MEMORY.md")
+		localPath := filepath.Join(ctx.ChannelDir, "agent-memory-local", agentName, "MEMORY.md")
 		runtime.ResolvedPath = localPath
 		runtime.PathResolvable = true
 		runtime.ContentAccessible = fileExists(localPath)
@@ -300,7 +300,7 @@ func resolveMemory(ctx *ParseContext) *LayerEnvelope {
 	data.RuntimeMemory = runtime
 
 	// Check agent-memory-local directory
-	localPath := filepath.Join(ctx.ClaudeDir, "agent-memory-local", agentName, "MEMORY.md")
+	localPath := filepath.Join(ctx.ChannelDir, "agent-memory-local", agentName, "MEMORY.md")
 	local := &AgentMemoryLocal{Path: localPath}
 	if fileExists(localPath) {
 		local.Exists = true
@@ -358,7 +358,7 @@ func resolveProvenance(ctx *ParseContext) *LayerEnvelope {
 	}
 
 	// Compute divergence: checksum the materialized agent file and compare
-	materializedPath := filepath.Join(ctx.ClaudeDir, "agents", agentName+".md")
+	materializedPath := filepath.Join(ctx.ChannelDir, "agents", agentName+".md")
 	currentChecksum, _ := checksum.File(materializedPath)
 	diverged := currentChecksum != "" && currentChecksum != entry.Checksum
 
@@ -546,7 +546,7 @@ func resolvePerception(ctx *ParseContext, capData *CapabilityData, conData *Cons
 			ReadFrom:        "manifest",
 		},
 		{
-			Path:            filepath.Join(ctx.ClaudeDir, "skills"),
+			Path:            filepath.Join(ctx.ChannelDir, "skills"),
 			FieldsExtracted: []string{"materialized_skill_dirs"},
 			ReadFrom:        "materialized",
 		},

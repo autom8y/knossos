@@ -52,7 +52,7 @@ func (m *Materializer) materializeInscription(manifest *RiteManifest, channelDir
 
 	// Delegate to canonical SyncInscription
 	result, err := inscription.SyncInscription(inscription.SyncInscriptionOptions{
-		ClaudeDir:		channelDir,
+		ChannelDir:		channelDir,
 		RenderCtx:		renderCtx,
 		ActiveRite:		manifest.Name,
 		TemplateDir:		m.templatesDir,
@@ -105,7 +105,7 @@ func (m *Materializer) materializeMinimalInscription(channelDir string, collecto
 	}
 
 	result, err := inscription.SyncInscription(inscription.SyncInscriptionOptions{
-		ClaudeDir:		channelDir,
+		ChannelDir:		channelDir,
 		RenderCtx:		renderCtx,
 		TemplateDir:		m.templatesDir,
 		UpdateManifest:		false,
