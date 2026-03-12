@@ -1,5 +1,4 @@
 ---
-color: orange
 description: |
     Threat analysis specialist who maps attack surfaces, applies STRIDE/DREAD methodology, and produces threat models with prioritized mitigations.
 
@@ -15,12 +14,9 @@ description: |
     </example>
 
     Triggers: threat model, attack surface, STRIDE, security design, trust boundaries.
-maxTurns: 150
-model: opus
 name: threat-modeler
-skills:
-    - security-ref
-tools: Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
+tools:
+    - Bash, Edit, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 ---
 
 # Threat Modeler

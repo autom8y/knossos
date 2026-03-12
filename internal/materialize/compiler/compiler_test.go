@@ -180,12 +180,9 @@ func TestGeminiCompiler_CompileAgent_CCOnlyToolsDropped(t *testing.T) {
 		}
 	}
 
-	// disallowedTools: Bash->run_shell_command, Write->write_file, Edit->replace,
-	//                  Glob->glob, Grep->grep, Task dropped
-	for _, gemini := range []string{"run_shell_command", "write_file", "replace", "glob", "grep"} {
-		if !strings.Contains(s, gemini) {
-			t.Errorf("expected Gemini tool %q in disallowedTools: %s", gemini, s)
-		}
+	// disallowedTools is stripped entirely — Gemini CLI doesn't accept it as a key.
+	if strings.Contains(s, "disallowedTools") {
+		t.Errorf("disallowedTools should be stripped for Gemini (unrecognized key): %s", s)
 	}
 }
 
@@ -248,6 +245,61 @@ func TestGeminiCompiler_CompileAgent_AllCCOnlyToolsDropped(t *testing.T) {
 	// When all disallowedTools are CC-only, the field should be absent
 	if strings.Contains(s, "disallowedTools:") {
 		t.Errorf("expected disallowedTools to be absent when all were dropped: %s", s)
+	}
+}
+
+func TestGeminiCompiler_CompileAgent_SingleStringTools(t *testing.T) {
+	t.Parallel()
+	c := &compiler.GeminiCompiler{}
+
+	// YAML parses "tools: Read" as a bare string, not a list.
+	// CompileAgent must normalize to a proper YAML array.
+	fm := map[string]any{
+		"name":  "test-agent",
+		"tools": "Read",
+	}
+	content, err := c.CompileAgent("test-agent", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	if !strings.Contains(s, "- read_file") {
+		t.Errorf("expected tools to be YAML array with read_file, got: %s", s)
+	}
+}
+
+func TestGeminiCompiler_CompileAgent_StripsUnrecognizedKeys(t *testing.T) {
+	t.Parallel()
+	c := &compiler.GeminiCompiler{}
+
+	fm := map[string]any{
+		"name":        "test-agent",
+		"description": "A test agent",
+		"tools":       []any{"Read"},
+		"color":       "cyan",
+		"maxTurns":    150,
+		"model":       "opus",
+		"skills":      []any{"security-ref"},
+		"hooks":       map[string]any{"PreToolUse": "check"},
+		"memory":      map[string]any{"type": "user"},
+	}
+	content, err := c.CompileAgent("test-agent", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	// Only name, description, tools should survive
+	for _, kept := range []string{"name:", "description:", "tools:"} {
+		if !strings.Contains(s, kept) {
+			t.Errorf("expected key %q in output: %s", kept, s)
+		}
+	}
+	for _, stripped := range []string{"color:", "maxTurns:", "model:", "skills:", "hooks:", "memory:"} {
+		if strings.Contains(s, stripped) {
+			t.Errorf("CC-only key %q should be stripped for Gemini: %s", stripped, s)
+		}
 	}
 }
 

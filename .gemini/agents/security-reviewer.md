@@ -1,5 +1,4 @@
 ---
-color: red
 description: |
     Security review specialist who reviews PRs with security implications and provides merge approval or rejection with actionable feedback.
 
@@ -15,15 +14,9 @@ description: |
     </example>
 
     Triggers: security review, security approval, merge review, security signoff, code security.
-disallowedTools:
-    - Task
-maxTurns: 100
-memory: project
-model: opus
 name: security-reviewer
-skills:
-    - security-ref
-tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
+tools:
+    - Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 ---
 
 # Security Reviewer

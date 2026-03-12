@@ -1,5 +1,4 @@
 ---
-color: cyan
 description: |
     Compliance specialist who maps regulatory requirements to technical controls, evidence collection mechanisms, and gap remediation plans.
 
@@ -15,12 +14,9 @@ description: |
     </example>
 
     Triggers: compliance, SOC 2, GDPR, HIPAA, PCI, audit preparation, regulatory.
-maxTurns: 150
-model: opus
 name: compliance-architect
-skills:
-    - security-ref
-tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
+tools:
+    - Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 ---
 
 # Compliance Architect

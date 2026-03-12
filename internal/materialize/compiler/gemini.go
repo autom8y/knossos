@@ -62,11 +62,20 @@ func (c *GeminiCompiler) CompileSkill(name, description, body string) (string, s
 	return name, "SKILL.md", buf.Bytes(), nil
 }
 
+// geminiAgentKeys are the only frontmatter keys Gemini CLI accepts for local agents.
+// All other keys (color, maxTurns, model, skills, hooks, memory, disallowedTools)
+// must be stripped or Gemini CLI rejects the agent with "Unrecognized key(s)".
+var geminiAgentKeys = map[string]bool{
+	"name":        true,
+	"description": true,
+	"tools":       true,
+}
+
 // CompileAgent translates CC agent frontmatter for Gemini consumption.
 //
 // Transformations applied:
 //  1. tools field: CC names translated to Gemini equivalents; CC-only tools dropped.
-//  2. disallowedTools field: same translation and drop logic.
+//  2. All CC-specific frontmatter keys stripped (Gemini only accepts name, description, tools).
 //
 // The agent body is passed through unchanged — body-level substitutions are
 // handled upstream by transformAgentContent() before CompileAgent is called.
@@ -81,13 +90,12 @@ func (c *GeminiCompiler) CompileAgent(name string, frontmatter map[string]any, b
 		}
 	}
 
-	// Translate disallowedTools field
-	if disallowed, ok := extractStringSlice(frontmatter, "disallowedTools"); ok {
-		translated := channel.TranslateFrontmatterTools(disallowed)
-		if len(translated) == 0 {
-			delete(frontmatter, "disallowedTools")
-		} else {
-			frontmatter["disallowedTools"] = translated
+	// Strip all keys Gemini doesn't recognize. CC-specific keys like color,
+	// maxTurns, model, skills, hooks, disallowedTools, memory cause Gemini CLI
+	// to reject the agent with "Unrecognized key(s) in object".
+	for key := range frontmatter {
+		if !geminiAgentKeys[key] {
+			delete(frontmatter, key)
 		}
 	}
 
@@ -106,14 +114,19 @@ func (c *GeminiCompiler) CompileAgent(name string, frontmatter map[string]any, b
 }
 
 // extractStringSlice extracts the named field from a frontmatter map as a []string.
-// Handles both []string (from direct assignment) and []any (from YAML unmarshal).
-// Returns (nil, false) if the field is absent or not a string-containing slice.
+// Handles []string (direct assignment), []any (YAML unmarshal of list), and string
+// (YAML unmarshal of single value like "tools: Read"). The single-string case is
+// critical: YAML parses "tools: Read" as string, not []string, causing Gemini CLI
+// to reject with "Expected array, received string" if not normalized here.
+// Returns (nil, false) if the field is absent or not a string-containing type.
 func extractStringSlice(fm map[string]any, key string) ([]string, bool) {
 	raw, ok := fm[key]
 	if !ok {
 		return nil, false
 	}
 	switch v := raw.(type) {
+	case string:
+		return []string{v}, true
 	case []string:
 		return v, true
 	case []any:

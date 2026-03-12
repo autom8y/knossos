@@ -1,5 +1,4 @@
 ---
-color: green
 description: |
     Offensive security specialist who probes systems for vulnerabilities, develops proof-of-concept exploits, and provides actionable remediation guidance.
 
@@ -15,19 +14,9 @@ description: |
     </example>
 
     Triggers: pentest, penetration testing, vulnerability assessment, security testing, exploit.
-hooks:
-    PreToolUse:
-        - hooks:
-            - command: ari hook agent-guard --agent penetration-tester --allow-path .ledge/ --allow-path .know/ --allow-path .claude/agent-memory/ --allow-path .claude/agent-memory-local/ --allow-path .sos/wip/complaints/ --output json
-              timeout: 3
-              type: command
-          matcher: Write
-maxTurns: 200
-model: opus
 name: penetration-tester
-skills:
-    - security-ref
-tools: Bash, Edit, Glob, Grep, Read, Write, TodoWrite, Skill
+tools:
+    - Bash, Edit, Glob, Grep, Read, Write, TodoWrite, Skill
 ---
 
 # Penetration Tester
