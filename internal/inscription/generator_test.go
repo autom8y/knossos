@@ -572,3 +572,263 @@ func TestRenderContext_Fields(t *testing.T) {
 		t.Error("RenderContext ProjectRoot not set")
 	}
 }
+
+// --- Channel-conditional rendering tests (Layer 2 of agent parity fix) ---
+
+func TestGenerator_GeminiChannel_ExecutionMode_NoTaskTool(t *testing.T) {
+	t.Parallel()
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"execution-mode": {Owner: OwnerKnossos},
+		},
+	}
+	ctx := &RenderContext{Channel: "gemini", IsKnossosProject: false}
+	gen := NewGenerator("", manifest, ctx)
+
+	content, err := gen.GenerateSection("execution-mode")
+	if err != nil {
+		t.Fatalf("GenerateSection() error = %v", err)
+	}
+
+	if strings.Contains(content, "Task tool") {
+		t.Errorf("Gemini execution-mode should not contain 'Task tool', got:\n%s", content)
+	}
+	if !strings.Contains(content, "description") {
+		t.Errorf("Gemini execution-mode should describe description-based routing, got:\n%s", content)
+	}
+}
+
+func TestGenerator_GeminiChannel_Commands_NoTaskRow(t *testing.T) {
+	t.Parallel()
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"commands": {Owner: OwnerKnossos},
+		},
+	}
+	ctx := &RenderContext{Channel: "gemini", IsKnossosProject: false}
+	gen := NewGenerator("", manifest, ctx)
+
+	content, err := gen.GenerateSection("commands")
+	if err != nil {
+		t.Fatalf("GenerateSection() error = %v", err)
+	}
+
+	if strings.Contains(content, "Task tool") {
+		t.Errorf("Gemini commands should not contain 'Task tool', got:\n%s", content)
+	}
+	if !strings.Contains(content, ".gemini/commands/") {
+		t.Errorf("Gemini commands should reference .gemini/commands/, got:\n%s", content)
+	}
+	if !strings.Contains(content, ".gemini/agents/") {
+		t.Errorf("Gemini commands should reference .gemini/agents/, got:\n%s", content)
+	}
+	if !strings.Contains(content, "Gemini Primitives") {
+		t.Errorf("Gemini commands should have 'Gemini Primitives' header, got:\n%s", content)
+	}
+}
+
+func TestGenerator_GeminiChannel_AgentRouting_NoTaskTool(t *testing.T) {
+	t.Parallel()
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"agent-routing": {Owner: OwnerKnossos},
+		},
+	}
+	ctx := &RenderContext{Channel: "gemini"}
+	gen := NewGenerator("", manifest, ctx)
+
+	content, err := gen.GenerateSection("agent-routing")
+	if err != nil {
+		t.Fatalf("GenerateSection() error = %v", err)
+	}
+
+	if strings.Contains(content, "Task tool") {
+		t.Errorf("Gemini agent-routing should not contain 'Task tool', got:\n%s", content)
+	}
+	if !strings.Contains(content, "description matching") {
+		t.Errorf("Gemini agent-routing should mention description matching, got:\n%s", content)
+	}
+}
+
+func TestGenerator_GeminiChannel_AgentConfigurations_GeminiPath(t *testing.T) {
+	t.Parallel()
+	ctx := &RenderContext{
+		Channel: "gemini",
+		Agents: []AgentInfo{
+			{Name: "potnia", File: "potnia.md", Role: "Orchestrator"},
+		},
+	}
+	gen := NewGenerator("", nil, ctx)
+
+	content, err := gen.generateAgentConfigsContent()
+	if err != nil {
+		t.Fatalf("generateAgentConfigsContent() error = %v", err)
+	}
+
+	if !strings.Contains(content, ".gemini/agents/") {
+		t.Errorf("Gemini agent-configurations should reference .gemini/agents/, got:\n%s", content)
+	}
+	if strings.Contains(content, ".claude/agents/") {
+		t.Errorf("Gemini agent-configurations should not reference .claude/agents/, got:\n%s", content)
+	}
+}
+
+func TestGenerator_GeminiChannel_QuickStart_NoTaskTool(t *testing.T) {
+	t.Parallel()
+	ctx := &RenderContext{
+		Channel:    "gemini",
+		ActiveRite: "security",
+		AgentCount: 3,
+		Agents:     []AgentInfo{{Name: "security-reviewer", File: "security-reviewer.md", Role: "Reviews"}},
+	}
+	gen := NewGenerator("", nil, ctx)
+
+	content, err := gen.generateQuickStartContent()
+	if err != nil {
+		t.Fatalf("generateQuickStartContent() error = %v", err)
+	}
+
+	if strings.Contains(content, "Task tool") {
+		t.Errorf("Gemini quick-start should not contain 'Task tool', got:\n%s", content)
+	}
+	if !strings.Contains(content, "description") {
+		t.Errorf("Gemini quick-start should mention description-based activation, got:\n%s", content)
+	}
+}
+
+func TestGenerator_ClaudeChannel_Unchanged(t *testing.T) {
+	t.Parallel()
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"execution-mode": {Owner: OwnerKnossos},
+			"commands":       {Owner: OwnerKnossos},
+			"agent-routing":  {Owner: OwnerKnossos},
+		},
+	}
+	claudeCtx := &RenderContext{Channel: "claude", IsKnossosProject: false}
+	emptyCtx := &RenderContext{IsKnossosProject: false} // zero-value Channel
+
+	for _, ctx := range []*RenderContext{claudeCtx, emptyCtx} {
+		gen := NewGenerator("", manifest, ctx)
+
+		em, err := gen.GenerateSection("execution-mode")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(em, "Task tool") {
+			t.Errorf("Claude execution-mode should contain 'Task tool' (channel=%q), got:\n%s", ctx.Channel, em)
+		}
+
+		cmds, err := gen.GenerateSection("commands")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(cmds, "CC Primitives") {
+			t.Errorf("Claude commands should have 'CC Primitives' header (channel=%q), got:\n%s", ctx.Channel, cmds)
+		}
+		if strings.Contains(cmds, "Gemini Primitives") {
+			t.Errorf("Claude commands should not have 'Gemini Primitives' header (channel=%q), got:\n%s", ctx.Channel, cmds)
+		}
+	}
+}
+
+func TestGenerator_ChannelDir_TemplateFunction(t *testing.T) {
+	t.Parallel()
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"test": {Owner: OwnerKnossos},
+		},
+	}
+
+	// Gemini channel: should return .gemini
+	geminiCtx := &RenderContext{Channel: "gemini"}
+	gen := NewGenerator("", manifest, geminiCtx)
+	gen.SetSectionTemplate("test", `{{ channelDir }}/agents/`)
+	content, err := gen.GenerateSection("test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if content != ".gemini/agents/" {
+		t.Errorf("channelDir for gemini = %q, want .gemini/agents/", content)
+	}
+
+	// Claude channel: should return .claude
+	claudeCtx := &RenderContext{Channel: "claude"}
+	gen = NewGenerator("", manifest, claudeCtx)
+	gen.SetSectionTemplate("test", `{{ channelDir }}/agents/`)
+	content, err = gen.GenerateSection("test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if content != ".claude/agents/" {
+		t.Errorf("channelDir for claude = %q, want .claude/agents/", content)
+	}
+
+	// Empty channel: should default to .claude
+	emptyCtx := &RenderContext{}
+	gen = NewGenerator("", manifest, emptyCtx)
+	gen.SetSectionTemplate("test", `{{ channelDir }}/agents/`)
+	content, err = gen.GenerateSection("test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if content != ".claude/agents/" {
+		t.Errorf("channelDir for empty channel = %q, want .claude/agents/", content)
+	}
+}
+
+func TestGenerator_ToolName_TemplateFunction(t *testing.T) {
+	t.Parallel()
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"test": {Owner: OwnerKnossos},
+		},
+	}
+
+	// Gemini: Read -> read_file
+	geminiCtx := &RenderContext{Channel: "gemini"}
+	gen := NewGenerator("", manifest, geminiCtx)
+	gen.SetSectionTemplate("test", `{{ toolName "Read" }}`)
+	content, err := gen.GenerateSection("test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if content != "read_file" {
+		t.Errorf("toolName(Read) for gemini = %q, want read_file", content)
+	}
+
+	// Claude: Read -> Read (unchanged)
+	claudeCtx := &RenderContext{Channel: "claude"}
+	gen = NewGenerator("", manifest, claudeCtx)
+	gen.SetSectionTemplate("test", `{{ toolName "Read" }}`)
+	content, err = gen.GenerateSection("test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if content != "Read" {
+		t.Errorf("toolName(Read) for claude = %q, want Read", content)
+	}
+}
+
+func TestGenerator_PlatformInfrastructure_GeminiNoTaskMutate(t *testing.T) {
+	t.Parallel()
+	manifest := &Manifest{
+		Regions: map[string]*Region{
+			"platform-infrastructure": {Owner: OwnerKnossos},
+		},
+	}
+	ctx := &RenderContext{Channel: "gemini", IsKnossosProject: true}
+	gen := NewGenerator("", manifest, ctx)
+
+	content, err := gen.GenerateSection("platform-infrastructure")
+	if err != nil {
+		t.Fatalf("GenerateSection() error = %v", err)
+	}
+
+	if strings.Contains(content, "Task(moirai") {
+		t.Errorf("Gemini platform-infrastructure should not contain 'Task(moirai', got:\n%s", content)
+	}
+	if !strings.Contains(content, "moirai") {
+		t.Errorf("Gemini platform-infrastructure should still mention moirai agent, got:\n%s", content)
+	}
+}

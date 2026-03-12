@@ -111,14 +111,172 @@ func TestGeminiCompiler_SkillFormat(t *testing.T) {
 func TestGeminiCompiler_AgentFormat(t *testing.T) {
 	t.Parallel()
 	c := &compiler.GeminiCompiler{}
-	
+
 	fm := map[string]any{"name": "test-agent", "role": "tester"}
 	agentContent, err := c.CompileAgent("test-agent", fm, "# body")
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	if !bytes.Contains(agentContent, []byte("name: test-agent")) || !bytes.Contains(agentContent, []byte("# body")) {
 		t.Errorf("unexpected agent content: %s", string(agentContent))
+	}
+}
+
+// --- Gemini agent tool translation tests (Layer 1 of agent parity fix) ---
+
+func TestGeminiCompiler_CompileAgent_ToolTranslation(t *testing.T) {
+	t.Parallel()
+	c := &compiler.GeminiCompiler{}
+
+	fm := map[string]any{
+		"name":  "test-agent",
+		"tools": []any{"Read", "Bash", "Edit", "Write", "Glob", "Grep"},
+	}
+	content, err := c.CompileAgent("test-agent", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	// Verify Gemini tool names are present
+	for _, gemini := range []string{"read_file", "run_shell_command", "replace", "write_file", "glob", "grep"} {
+		if !strings.Contains(s, gemini) {
+			t.Errorf("expected Gemini tool %q in output:\n%s", gemini, s)
+		}
+	}
+
+	// Verify CC tool names are NOT present in the tools list
+	for _, cc := range []string{"- Read\n", "- Bash\n", "- Edit\n", "- Write\n", "- Glob\n", "- Grep\n"} {
+		if strings.Contains(s, cc) {
+			t.Errorf("unexpected CC tool %q still in output:\n%s", cc, s)
+		}
+	}
+}
+
+func TestGeminiCompiler_CompileAgent_CCOnlyToolsDropped(t *testing.T) {
+	t.Parallel()
+	c := &compiler.GeminiCompiler{}
+
+	fm := map[string]any{
+		"name":            "potnia",
+		"tools":           []any{"Read", "Skill", "Task"},
+		"disallowedTools": []any{"Bash", "Write", "Edit", "Glob", "Grep", "Task"},
+	}
+	content, err := c.CompileAgent("potnia", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	// tools: Read->read_file, Skill dropped, Task dropped -> only read_file
+	if !strings.Contains(s, "read_file") {
+		t.Errorf("expected read_file in tools: %s", s)
+	}
+	// Skill and Task should NOT appear
+	for _, dropped := range []string{"Skill", "Task"} {
+		if strings.Contains(s, "- "+dropped) {
+			t.Errorf("dropped CC-only tool %q still present in output:\n%s", dropped, s)
+		}
+	}
+
+	// disallowedTools: Bash->run_shell_command, Write->write_file, Edit->replace,
+	//                  Glob->glob, Grep->grep, Task dropped
+	for _, gemini := range []string{"run_shell_command", "write_file", "replace", "glob", "grep"} {
+		if !strings.Contains(s, gemini) {
+			t.Errorf("expected Gemini tool %q in disallowedTools: %s", gemini, s)
+		}
+	}
+}
+
+func TestGeminiCompiler_CompileAgent_UnknownToolPassthrough(t *testing.T) {
+	t.Parallel()
+	c := &compiler.GeminiCompiler{}
+
+	fm := map[string]any{
+		"name":  "test-agent",
+		"tools": []any{"Read", "CustomTool"},
+	}
+	content, err := c.CompileAgent("test-agent", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	if !strings.Contains(s, "read_file") {
+		t.Errorf("expected read_file in output: %s", s)
+	}
+	if !strings.Contains(s, "CustomTool") {
+		t.Errorf("expected CustomTool to pass through: %s", s)
+	}
+}
+
+func TestGeminiCompiler_CompileAgent_EmptyToolsField(t *testing.T) {
+	t.Parallel()
+	c := &compiler.GeminiCompiler{}
+
+	fm := map[string]any{
+		"name": "test-agent",
+		// No tools field
+	}
+	content, err := c.CompileAgent("test-agent", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	// Should not have a tools key since none was specified
+	if strings.Contains(s, "tools:") {
+		t.Errorf("unexpected tools field in output: %s", s)
+	}
+}
+
+func TestGeminiCompiler_CompileAgent_AllCCOnlyToolsDropped(t *testing.T) {
+	t.Parallel()
+	c := &compiler.GeminiCompiler{}
+
+	fm := map[string]any{
+		"name":            "test-agent",
+		"disallowedTools": []any{"Task", "TodoWrite", "Skill"},
+	}
+	content, err := c.CompileAgent("test-agent", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	// When all disallowedTools are CC-only, the field should be absent
+	if strings.Contains(s, "disallowedTools:") {
+		t.Errorf("expected disallowedTools to be absent when all were dropped: %s", s)
+	}
+}
+
+func TestClaudeCompiler_CompileAgent_Passthrough(t *testing.T) {
+	t.Parallel()
+	c := &compiler.ClaudeCompiler{}
+
+	// Claude compiler must NOT translate tool names
+	fm := map[string]any{
+		"name":            "test-agent",
+		"tools":           []any{"Read", "Bash", "Task"},
+		"disallowedTools": []any{"Write", "Edit"},
+	}
+	content, err := c.CompileAgent("test-agent", fm, "# body")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+
+	// CC names must be present unchanged
+	for _, cc := range []string{"Read", "Bash", "Task", "Write", "Edit"} {
+		if !strings.Contains(s, cc) {
+			t.Errorf("CC tool %q should be preserved by ClaudeCompiler: %s", cc, s)
+		}
+	}
+	// Gemini names must NOT appear
+	for _, gemini := range []string{"read_file", "run_shell_command", "write_file", "replace"} {
+		if strings.Contains(s, gemini) {
+			t.Errorf("Gemini tool %q should NOT appear from ClaudeCompiler: %s", gemini, s)
+		}
 	}
 }

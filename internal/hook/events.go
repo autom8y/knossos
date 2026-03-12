@@ -1,6 +1,10 @@
 package hook
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/autom8y/knossos/internal/channel"
+)
 
 // ccToGeminiEvent maps CC-canonical event names to Gemini wire names.
 // Events not in this map have no Gemini equivalent and must be skipped.
@@ -25,23 +29,15 @@ func init() {
 	}
 }
 
-// ccToGeminiTool maps CC tool names to Gemini tool names.
-// Used by TranslateMatcherForChannel to rewrite matcher patterns.
-var ccToGeminiTool = map[string]string{
-	"Edit":      "replace",
-	"Write":     "write_file",
-	"Bash":      "run_shell_command",
-	"ReadFiles": "read_file",
-	"Glob":      "glob",
-	"Grep":      "grep",
-}
+// Tool name mapping is provided by internal/channel.CCToGeminiTool (single source of truth).
+// Both hook wire-protocol names (ReadFiles) and agent frontmatter names (Read) are covered.
 
 // TranslateEventForChannel returns the channel-appropriate event name.
 // For "claude", returns (ccEvent, false) -- passthrough, no translation needed.
 // For "gemini", returns (geminiEvent, false) if the event has a Gemini equivalent,
 // or ("", true) if the event has no Gemini equivalent (caller should skip it).
-func TranslateEventForChannel(ccEvent, channel string) (string, bool) {
-	if channel != "gemini" {
+func TranslateEventForChannel(ccEvent, targetChannel string) (string, bool) {
+	if targetChannel != "gemini" {
 		return ccEvent, false
 	}
 	geminiEvent, ok := ccToGeminiEvent[ccEvent]
@@ -68,16 +64,19 @@ func TranslateInboundEvent(wireEvent string) string {
 // for the target channel.
 // For "claude", returns the matcher unchanged.
 // For "gemini", translates each pipe-delimited tool name segment using the
-// ccToGeminiTool mapping. Unknown tool names pass through unchanged.
-func TranslateMatcherForChannel(matcher, channel string) string {
-	if channel != "gemini" || matcher == "" {
+// channel.CCToGeminiTool mapping. Unknown tool names pass through unchanged.
+func TranslateMatcherForChannel(matcher, targetChannel string) string {
+	if targetChannel != "gemini" || matcher == "" {
 		return matcher
 	}
 
 	segments := strings.Split(matcher, "|")
 	translated := make([]string, len(segments))
 	for i, seg := range segments {
-		if geminiTool, ok := ccToGeminiTool[seg]; ok {
+		// Use the shared channel map directly (not TranslateTool) so that CC-only
+		// tools appearing in hook matchers pass through unchanged rather than being
+		// dropped. A matcher for a nonexistent tool is harmless — the hook never fires.
+		if geminiTool, ok := channel.CCToGeminiTool[seg]; ok {
 			translated[i] = geminiTool
 		} else {
 			// Unknown tool name passes through unchanged (defensive)

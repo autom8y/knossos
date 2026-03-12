@@ -7,16 +7,15 @@ Use the available agents and slash commands. Delegate complex work to specialist
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
 ## Quick Start
 
-6-agent workflow (ecosystem):
+5-agent workflow (security):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates ecosystem infrastructure phases |
-| **ecosystem-analyst** | Traces sync pipeline/knossos problems to root causes and produces gap analysis |
-| **context-architect** | Designs context solutions, schemas, and ecosystem patterns |
-| **integration-engineer** | Implements sync pipeline and knossos changes with integration tests |
-| **documentation-engineer** | Creates migration runbooks and compatibility documentation |
-| **compatibility-tester** | Validates ecosystem changes across satellite configurations |
+| **potnia** | Coordinates security initiative phases |
+| **threat-modeler** | Models threats and identifies security risks and attack vectors |
+| **compliance-architect** | Maps compliance requirements and designs control frameworks |
+| **penetration-tester** | Executes penetration tests and documents vulnerabilities |
+| **security-reviewer** | Performs final security review and grants deployment approval |
 
 Delegate to specialists via Task tool.
 <!-- KNOSSOS:END quick-start -->
@@ -43,12 +42,11 @@ Agents cannot spawn other agents — only the main thread has Task tool access.
 
 Prompts in `.claude/agents/`:
 
-- `potnia.md` - Coordinates ecosystem infrastructure phases
-- `ecosystem-analyst.md` - Traces sync pipeline/knossos problems to root causes and produces gap analysis
-- `context-architect.md` - Designs context solutions, schemas, and ecosystem patterns
-- `integration-engineer.md` - Implements sync pipeline and knossos changes with integration tests
-- `documentation-engineer.md` - Creates migration runbooks and compatibility documentation
-- `compatibility-tester.md` - Validates ecosystem changes across satellite configurations
+- `potnia.md` - Coordinates security initiative phases
+- `threat-modeler.md` - Models threats and identifies security risks and attack vectors
+- `compliance-architect.md` - Maps compliance requirements and designs control frameworks
+- `penetration-tester.md` - Executes penetration tests and documents vulnerabilities
+- `security-reviewer.md` - Performs final security review and grants deployment approval
 <!-- KNOSSOS:END agent-configurations -->
 
 <!-- KNOSSOS:START platform-infrastructure -->

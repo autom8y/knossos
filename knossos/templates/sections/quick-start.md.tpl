@@ -9,6 +9,8 @@
 {{include "partials/agent-table.md.tpl"}}
 {{ if .IsKnossosProject -}}
 Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.
+{{- else if eq .Channel "gemini" -}}
+Agents activate when your prompt matches their description.
 {{- else -}}
 Delegate to specialists via Task tool.
 {{- end }}

@@ -40,6 +40,18 @@ func (m *Materializer) materializeSettingsWithManifest(claudeDir string, _ *Rite
 	// MCP servers are now written to .mcp.json (see materializeMcpJson).
 	delete(existingSettings, "mcpServers")
 
+	// Gemini agent activation gate: inject experimental.enableAgents=true.
+	// Without this flag, Gemini CLI ignores .gemini/agents/ entirely.
+	// The merge is additive: other experimental flags the user has set are preserved.
+	if channel == "gemini" {
+		experimental, _ := existingSettings["experimental"].(map[string]any)
+		if experimental == nil {
+			experimental = make(map[string]any)
+		}
+		experimental["enableAgents"] = true
+		existingSettings["experimental"] = experimental
+	}
+
 	// Write settings (only if content changed, to avoid triggering Claude Code file watcher)
 	err = saveSettings(settingsPath, existingSettings)
 	if err != nil {

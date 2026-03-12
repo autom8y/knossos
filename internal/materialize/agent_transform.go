@@ -7,6 +7,8 @@ import (
 	"maps"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/autom8y/knossos/internal/frontmatter"
 	"gopkg.in/yaml.v3"
@@ -37,6 +39,7 @@ type TransformContext struct {
 	AgentDefaults      map[string]any
 	SkillPolicies      []SkillPolicy
 	ModelOverride      string // If set, forces model field in agent frontmatter (el-cheapo mode)
+	Channel            string // Target channel ("claude", "gemini", ""). Empty == "claude" behavior.
 }
 
 // transformAgentContent projects agent source into CC-consumable form.
@@ -97,6 +100,12 @@ func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error
 		fmMap["model"] = ctx.ModelOverride
 	}
 
+	// Channel body substitution: replace CC-specific patterns in body text for Gemini.
+	// Runs after all frontmatter transforms so only the body is affected.
+	if ctx.Channel == "gemini" {
+		body = applyGeminiBodySubstitutions(body)
+	}
+
 	return reconstructFrontmatter(fmMap, body)
 }
 
@@ -137,6 +146,58 @@ func reconstructFrontmatter(fmMap map[string]any, body []byte) ([]byte, error) {
 	result = append(result, []byte("---\n")...)
 	result = append(result, body...)
 	return result, nil
+}
+
+// geminiToolBodyRe matches backtick-delimited CC tool names in body text.
+// Anchored to backtick delimiters to avoid replacing English words (e.g., "Read" in prose).
+// Covers the tools that have Gemini equivalents in channel.CCToGeminiTool.
+var geminiToolBodyRe = regexp.MustCompile("`(Read|Bash|Edit|Write|Glob|Grep)`")
+
+// applyGeminiBodySubstitutions applies targeted text replacements to agent body content
+// for the Gemini channel. This handles CC-specific patterns in body text that are not
+// captured by frontmatter translation.
+//
+// Replacements applied:
+//  1. Backtick-delimited tool names: `Read` -> `read_file`, etc.
+//  2. Path references: .claude/ -> .gemini/ (only within backtick-delimited strings)
+//  3. CC-specific phrases: "Task tool" -> "delegation" (in specialist anti-pattern warnings)
+//
+// Note: potnia archetype body is adapted at the archetype template level (orchestrator.md.tpl),
+// not here. This function handles the ~5 non-archetype agents with scattered CC references.
+func applyGeminiBodySubstitutions(body []byte) []byte {
+	s := string(body)
+
+	// 1. Translate backtick-delimited tool names to Gemini equivalents.
+	s = geminiToolBodyRe.ReplaceAllStringFunc(s, func(match string) string {
+		// match is like "`Read`" — extract the tool name
+		tool := match[1 : len(match)-1]
+		switch tool {
+		case "Read":
+			return "`read_file`"
+		case "Bash":
+			return "`run_shell_command`"
+		case "Edit":
+			return "`replace`"
+		case "Write":
+			return "`write_file`"
+		case "Glob":
+			return "`glob`"
+		case "Grep":
+			return "`grep`"
+		}
+		return match
+	})
+
+	// 2. Replace `.claude/` path references in backtick-delimited contexts.
+	// Only replace within backtick strings to avoid modifying prose.
+	s = strings.ReplaceAll(s, "`.claude/", "`.gemini/")
+
+	// 3. Replace "Task tool" phrase in specialist anti-pattern sections.
+	// This phrase appears in body text as "Using Task tool (you don't have it)" or
+	// "Direct delegation: Using Task tool". It's safe to replace as a phrase.
+	s = strings.ReplaceAll(s, "Task tool", "delegation")
+
+	return []byte(s)
 }
 
 // loadSharedManifest loads and parses the shared rite manifest (rites/shared/manifest.yaml).

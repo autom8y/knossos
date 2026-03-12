@@ -4,7 +4,7 @@
 ## Agents
 
 {{- if .Agents }}
-Prompts in `.claude/agents/`:
+Prompts in `{{ channelDir }}/agents/`:
 
 {{- range .Agents }}
 - `{{ .File }}` - {{ .Role }}

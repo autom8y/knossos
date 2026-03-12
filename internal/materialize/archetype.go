@@ -15,6 +15,7 @@ type OrchestratorData struct {
 	RiteName          string
 	Description       string
 	Color             string
+	Channel           string   // Target channel ("claude", "gemini", ""). Empty == "claude" behavior.
 	Skills            []string // All skills including orchestrator-templates
 	ContractMustNot   []string // contract.must_not entries; defaults applied if empty
 	PhaseRouting      string   // Pre-formatted markdown table rows (| specialist | route when |)
@@ -55,9 +56,16 @@ func defaultContractMustNot() []string {
 // The render callback controls template resolution. Production callers pass
 // Materializer.renderArchetypeResolved (DI-aware); tests may pass RenderArchetype.
 func renderArchetypeAgent(projectRoot string, agent Agent, manifest *RiteManifest, render func(string, string, any) ([]byte, error)) ([]byte, error) {
+	return renderArchetypeAgentForChannel(projectRoot, agent, manifest, render, "")
+}
+
+// renderArchetypeAgentForChannel is the channel-aware variant of renderArchetypeAgent.
+// Channel-specific content in the template uses {{ if eq .Channel "gemini" }} conditionals.
+func renderArchetypeAgentForChannel(projectRoot string, agent Agent, manifest *RiteManifest, render func(string, string, any) ([]byte, error), channel string) ([]byte, error) {
 	switch agent.Archetype {
 	case "orchestrator":
 		data := buildOrchestratorData(agent, manifest)
+		data.Channel = channel
 		return render(projectRoot, "orchestrator.md.tpl", data)
 	default:
 		return nil, fmt.Errorf("unknown archetype: %s", agent.Archetype)

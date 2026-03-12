@@ -11,15 +11,19 @@ import (
 
 	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/fileutil"
+	"github.com/autom8y/knossos/internal/materialize/compiler"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
+	"gopkg.in/yaml.v3"
 )
 
-// materializeAgents copies rite-scoped agent files to .claude/agents/.
+// materializeAgents copies rite-scoped agent files to .claude/agents/ (or .gemini/agents/).
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
 // Cross-rite agents (pythia, moirai, etc.) are user-scope owned and NOT handled here.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride, channel string) error {
+// When comp is non-nil and channel is not "claude", CompileAgent() is called after
+// transformAgentContent() to translate tool names for the target channel.
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claudeDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride, channel string, comp compiler.ChannelCompiler) error {
 	agentsDir := filepath.Join(claudeDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
@@ -49,7 +53,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		}
 		archetypeAgents[agent.Name+".md"] = true
 
-		content, err := renderArchetypeAgent(m.resolver.ProjectRoot(), agent, manifest, m.renderArchetypeResolved)
+		content, err := renderArchetypeAgentForChannel(m.resolver.ProjectRoot(), agent, manifest, m.renderArchetypeResolved, channel)
 		if err != nil {
 			return fmt.Errorf("archetype render failed for %s: %w", agent.Name, err)
 		}
@@ -57,11 +61,20 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 		// Run through the same transform pipeline as source-copied agents.
 		// Transform failure is an error, not a warning: knossos-only frontmatter fields
 		// (type, upstream, downstream, contract) must never reach CC-visible agent files.
-		transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, ModelOverride: modelOverride})
+		transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, ModelOverride: modelOverride, Channel: channel})
 		if tErr != nil {
 			return fmt.Errorf("agent transform failed for archetype agent %s: %w", agent.Name, tErr)
 		}
 		content = transformed
+
+		// Channel compilation: translate tool names for non-claude channels.
+		if comp != nil && channel != "claude" {
+			compiled, cErr := compileAgentContent(agent.Name, content, comp)
+			if cErr != nil {
+				return fmt.Errorf("agent compile failed for archetype agent %s: %w", agent.Name, cErr)
+			}
+			content = compiled
+		}
 
 		destPath := filepath.Join(agentsDir, agent.Name+".md")
 		written, err := fileutil.WriteIfChanged(destPath, content, 0644)
@@ -110,11 +123,20 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			// Transform failure is an error, not a warning: knossos-only frontmatter fields
 			// (type, upstream, downstream, contract) must never reach CC-visible agent files.
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies})
+			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, Channel: channel})
 			if tErr != nil {
 				return fmt.Errorf("agent transform failed for %s: %w", agentName, tErr)
 			}
 			content = transformed
+
+			// Channel compilation: translate tool names for non-claude channels.
+			if comp != nil && channel != "claude" {
+				compiled, cErr := compileAgentContent(agentName, content, comp)
+				if cErr != nil {
+					return fmt.Errorf("agent compile failed for %s: %w", agentName, cErr)
+				}
+				content = compiled
+			}
 			destPath := filepath.Join(agentsDir, path)
 			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
 				return err
@@ -164,11 +186,20 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 			// Transform failure is an error, not a warning: knossos-only frontmatter fields
 			// (type, upstream, downstream, contract) must never reach CC-visible agent files.
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies})
+			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, Channel: channel})
 			if tErr != nil {
 				return fmt.Errorf("agent transform failed for %s: %w", agentName, tErr)
 			}
 			content = transformed
+
+			// Channel compilation: translate tool names for non-claude channels.
+			if comp != nil && channel != "claude" {
+				compiled, cErr := compileAgentContent(agentName, content, comp)
+				if cErr != nil {
+					return fmt.Errorf("agent compile failed for %s: %w", agentName, cErr)
+				}
+				content = compiled
+			}
 
 			// Compute relative path
 			relPath, err := filepath.Rel(sourceAgentsDir, path)
@@ -211,6 +242,53 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, claud
 	}
 
 	return writeErr
+}
+
+// compileAgentContent parses the frontmatter from transformed agent content,
+// calls comp.CompileAgent() to perform channel-specific translation (e.g. tool
+// name mapping for Gemini), and returns the re-serialized content.
+//
+// This is called after transformAgentContent() has already stripped knossos-only
+// fields and normalized defaults. The frontmatter at this point is clean and
+// ready for channel translation.
+func compileAgentContent(agentName string, content []byte, comp compiler.ChannelCompiler) ([]byte, error) {
+	// Parse frontmatter separator
+	if len(content) < 4 || string(content[:4]) != "---\n" {
+		// No frontmatter — pass through unchanged (compiler has nothing to translate)
+		return comp.CompileAgent(agentName, nil, string(content))
+	}
+
+	// Find closing ---
+	rest := content[4:]
+	end := -1
+	for i := 0; i < len(rest)-3; i++ {
+		if rest[i] == '-' && rest[i+1] == '-' && rest[i+2] == '-' && (i+3 == len(rest) || rest[i+3] == '\n') {
+			end = i
+			break
+		}
+	}
+	if end == -1 {
+		// Malformed frontmatter — pass through unchanged
+		return content, nil
+	}
+
+	yamlBytes := rest[:end]
+	bodyOffset := end + 3
+	if bodyOffset < len(rest) && rest[bodyOffset] == '\n' {
+		bodyOffset++
+	}
+	body := string(rest[bodyOffset:])
+
+	var fmMap map[string]any
+	if err := yaml.Unmarshal(yamlBytes, &fmMap); err != nil {
+		// Invalid YAML — pass through unchanged
+		return content, nil
+	}
+	if fmMap == nil {
+		fmMap = make(map[string]any)
+	}
+
+	return comp.CompileAgent(agentName, fmMap, body)
 }
 
 // NOTE: listCrossRiteAgents and materializeCrossRiteAgents were removed.

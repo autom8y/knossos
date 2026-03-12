@@ -146,7 +146,9 @@ func compilerForChannel(channel string) compiler.ChannelCompiler {
 	if channel == "gemini" {
 		return &compiler.GeminiCompiler{}
 	}
-	return &compiler.ClaudeCompiler{}
+	// Claude and empty channel require no compilation pass: agent files are written
+	// as-is after transformAgentContent(). Returning nil skips the compile step.
+	return nil
 }
 
 // WithSourceResolver replaces the materializer's source resolver.
@@ -316,7 +318,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	comp := compilerForChannel(opts.Channel)
 
 	// Generate minimal CLAUDE.md (no agents)
-	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector, comp)
+	legacyBackupPath, err := m.materializeMinimalCLAUDEmd(claudeDir, collector, opts.Channel, comp)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize CLAUDE.md", err)
 	}
@@ -413,12 +415,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		modelOverride = "haiku"
 	}
 
-	var comp compiler.ChannelCompiler
-	if opts.Channel == "gemini" {
-		comp = &compiler.GeminiCompiler{}
-	} else {
-		comp = &compiler.ClaudeCompiler{}
-	}
+	comp := compilerForChannel(opts.Channel)
 
 	// Dry-run: just detect orphans and return
 	if opts.DryRun {
@@ -433,7 +430,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	// Pre-validate CLAUDE.md generation before any disk writes.
 	// Template rendering is the most failure-prone step. Validating it first
 	// prevents partial state where agents are on disk but CLAUDE.md is stale.
-	if err := m.prevalidateCLAUDEmd(manifest, claudeDir, resolved, modelOverride); err != nil {
+	if err := m.prevalidateCLAUDEmd(manifest, claudeDir, resolved, modelOverride, opts.Channel); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "CLAUDE.md pre-validation failed (no files written)", err)
 	}
 
@@ -507,7 +504,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	mergedSkillPolicies := MergeSkillPolicies(sharedSkillPolicies, manifest.SkillPolicies)
 
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride, opts.Channel); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, claudeDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride, opts.Channel, comp); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 

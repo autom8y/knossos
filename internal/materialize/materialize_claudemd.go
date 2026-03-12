@@ -36,6 +36,7 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 		ProjectRoot:		projectRoot,
 		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 		ModelOverride:		modelOverride,
+		Channel:		channel,
 	}
 
 	// Resolve template source: embedded FS or filesystem directory
@@ -86,7 +87,7 @@ func (m *Materializer) materializeCLAUDEmd(manifest *RiteManifest, claudeDir str
 
 // materializeMinimalCLAUDEmd generates CLAUDE.md for cross-cutting mode (no agents).
 // Delegates to inscription.SyncCLAUDEmd without manifest updates.
-func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector, comp compiler.ChannelCompiler) (string, error) {
+func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector provenance.Collector, channel string, comp compiler.ChannelCompiler) (string, error) {
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
 		ActiveRite:		"",
@@ -95,6 +96,7 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 		KnossosVars:		make(map[string]string),
 		ProjectRoot:		projectRoot,
 		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
+		Channel:		channel,
 	}
 
 	contextFilename := "CLAUDE.md"
@@ -119,7 +121,7 @@ func (m *Materializer) materializeMinimalCLAUDEmd(claudeDir string, collector pr
 // prevalidateCLAUDEmd validates that CLAUDE.md generation will succeed without
 // writing any files. This is called BEFORE destructive operations (agent writes,
 // orphan removal) to prevent partial state when template rendering fails.
-func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, modelOverride string) error {
+func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir string, resolved *ResolvedRite, modelOverride, channel string) error {
 	agents := make([]inscription.AgentInfo, 0, len(manifest.Agents))
 	for _, agent := range manifest.Agents {
 		agents = append(agents, inscription.AgentInfo{
@@ -138,6 +140,7 @@ func (m *Materializer) prevalidateCLAUDEmd(manifest *RiteManifest, claudeDir str
 		ProjectRoot:		projectRoot,
 		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 		ModelOverride:		modelOverride,
+		Channel:		channel,
 	}
 
 	// Resolve template source

@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/autom8y/knossos/internal/channel"
 	"github.com/autom8y/knossos/internal/errors"
 )
 
@@ -48,6 +49,10 @@ type RenderContext struct {
 	// ModelOverride is the active model override (e.g., "haiku" for el-cheapo mode).
 	// Empty string means no override active.
 	ModelOverride string
+
+	// Channel is the target channel ("claude" or "gemini").
+	// Empty string is treated as "claude" — all templates default to CC behavior.
+	Channel string
 }
 
 // Generator handles content generation for CLAUDE.md regions.
@@ -266,6 +271,28 @@ func (g *Generator) templateFuncs() template.FuncMap {
 	funcs["agents"] = g.loadAgentTable
 	funcs["term"] = g.lookupTerminology
 
+	// channelDir returns the channel-appropriate dot-directory name.
+	// Used in templates as: `{{ channelDir }}/agents/`
+	funcs["channelDir"] = func() string {
+		if g.Context != nil && g.Context.Channel == "gemini" {
+			return ".gemini"
+		}
+		return ".claude"
+	}
+
+	// toolName translates a CC tool name to the channel-appropriate equivalent.
+	// For Gemini, translates known tools; unknown tools pass through.
+	// For Claude (or empty channel), returns the CC name unchanged.
+	// Used in templates as: `{{ toolName "Read" }}(".know/architecture.md")`
+	funcs["toolName"] = func(ccName string) string {
+		if g.Context != nil && g.Context.Channel == "gemini" {
+			if gemini, ok := channel.CCToGeminiTool[ccName]; ok {
+				return gemini
+			}
+		}
+		return ccName
+	}
+
 	// Note: Sprig already provides join, lower, upper, title, and many more
 
 	return funcs
@@ -404,6 +431,8 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	// Footer
 	if g.Context.IsKnossosProject {
 		sb.WriteString("Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.")
+	} else if g.Context.Channel == "gemini" {
+		sb.WriteString("Agents activate when your prompt matches their description.")
 	} else {
 		sb.WriteString("Delegate to specialists via Task tool.")
 	}
@@ -443,7 +472,11 @@ func (g *Generator) generateAgentConfigsContent() (string, error) {
 
 	var sb strings.Builder
 	sb.WriteString("## Agents\n\n")
-	sb.WriteString("Prompts in `.claude/agents/`:\n\n")
+	if g.Context != nil && g.Context.Channel == "gemini" {
+		sb.WriteString("Prompts in `.gemini/agents/`:\n\n")
+	} else {
+		sb.WriteString("Prompts in `.claude/agents/`:\n\n")
+	}
 
 	if hasRiteAgents {
 		for _, agent := range g.Context.Agents {
@@ -509,10 +542,29 @@ All agents forced to **` + g.Context.ModelOverride + `** (el-cheapo mode). Ephem
 }
 
 func (g *Generator) getDefaultExecutionModeContent() string {
+	isGemini := g.Context != nil && g.Context.Channel == "gemini"
 	if g.Context != nil && !g.Context.IsKnossosProject {
+		if isGemini {
+			return `## Execution Mode
+
+Use the available agents and slash commands. Agents activate automatically when your prompt matches their description.`
+		}
 		return `## Execution Mode
 
 Use the available agents and slash commands. Delegate complex work to specialists via Task tool.`
+	}
+	if isGemini {
+		return `## Execution Mode
+
+Three operating modes:
+
+| Mode | Session | Rite | Behavior |
+|------|---------|------|----------|
+| **Native** | No | - | Direct execution, no tracking |
+| **Cross-Cutting** | Yes | No | Direct execution + session tracking |
+| **Orchestrated** | Yes | Yes (ACTIVE) | Potnia consulted via description matching |
+
+Use ` + "`/go`" + ` to start any session. Use ` + "`/consult`" + ` for mode selection.`
 	}
 	return `## Execution Mode
 
@@ -528,11 +580,23 @@ Use ` + "`/go`" + ` to start any session. Use ` + "`/consult`" + ` for mode sele
 }
 
 func (g *Generator) getDefaultAgentRoutingContent() string {
+	isGemini := g.Context != nil && g.Context.Channel == "gemini"
 	if g.Context != nil && !g.Context.IsKnossosProject {
+		if isGemini {
+			return `## Agent Routing
+
+Agents activate automatically based on description matching. Write prompts that align with specialist descriptions for effective routing.`
+		}
 		return `## Agent Routing
 
 Delegate to specialists via Task tool.
 Agents cannot spawn agents — only the main thread has Task tool access.`
+	}
+	if isGemini {
+		return `## Agent Routing
+
+Agents activate automatically based on description matching. Write prompts that align with specialist descriptions for effective routing.
+Without a session, execute directly. Routing guidance: ` + "`/consult`" + `.`
 	}
 	return `## Agent Routing
 
@@ -542,7 +606,18 @@ Without a session, execute directly or use ` + "`/task`" + `. Routing guidance: 
 }
 
 func (g *Generator) getDefaultCommandsContent() string {
+	isGemini := g.Context != nil && g.Context.Channel == "gemini"
 	if g.Context != nil && !g.Context.IsKnossosProject {
+		if isGemini {
+			return `## Gemini Primitives
+
+| Primitive | Invocation | Source |
+|---|---|---|
+| Slash command | User types ` + "`/name`" + ` | ` + "`.gemini/commands/`" + ` |
+| Skill | Loaded into context | ` + "`.gemini/skills/`" + ` |
+| Agent | Activates on description match | ` + "`.gemini/agents/`" + ` |
+| Hook | Auto-fires on lifecycle events | ` + "`.gemini/settings.local.json`" + ` |`
+		}
 		return `## CC Primitives
 
 | CC Primitive | Invocation | Source |
@@ -553,6 +628,17 @@ func (g *Generator) getDefaultCommandsContent() string {
 | Hook | Auto-fires on lifecycle events | ` + "`.claude/settings.json`" + ` |
 
 Agents cannot spawn other agents — only the main thread has Task tool access.`
+	}
+	if isGemini {
+		return `## Gemini Primitives
+
+| Primitive | Knossos Name | Invocation | Source |
+|---|---|---|---|
+| Slash command | **Dromena** | User types ` + "`/name`" + ` | ` + "`.gemini/commands/`" + ` |
+| Skill | **Legomena** | Loaded into context | ` + "`.gemini/skills/`" + ` |
+| Agent | **Agent** | Activates on description match | ` + "`.gemini/agents/`" + ` |
+| Hook | **Hook** | Auto-fires on lifecycle events | ` + "`.gemini/settings.local.json`" + ` |
+| GEMINI.md | **Inscription** | Always in context | ` + "`knossos/templates/`" + ` |`
 	}
 	return `## CC Primitives
 
@@ -568,10 +654,21 @@ Agents cannot spawn other agents — only the main thread has Task tool access.`
 }
 
 func (g *Generator) getDefaultPlatformInfrastructureContent() string {
+	isGemini := g.Context != nil && g.Context.Channel == "gemini"
 	if g.Context != nil && !g.Context.IsKnossosProject {
+		// Non-knossos: same content for both channels
 		return `## Platform
 
 CLI reference: ` + "`ari --help`" + `.`
+	}
+	if isGemini {
+		return `## Platform
+
+**Entry**: ` + "`/go`" + ` — detects session state, resumes parked work, or routes new tasks.
+
+**Sessions**: ` + "`/sos`" + ` (start, park, resume, wrap), ` + "`/handoff`" + `, ` + "`/fray`" + `. Mutate ` + "`*_CONTEXT.md`" + ` only via the moirai agent.
+
+**Hooks**: Auto-inject session context on start; autopark on stop. CLI reference: ` + "`ari --help`" + `.`
 	}
 	return `## Platform
 
@@ -594,6 +691,11 @@ No active rite. Use ` + "`/go`" + ` to get started, or ` + "`ari sync --rite=<na
 }
 
 func (g *Generator) getDefaultAgentConfigsContent() string {
+	if g.Context != nil && g.Context.Channel == "gemini" {
+		return `## Agents
+
+Prompts in ` + "`.gemini/agents/`" + `.`
+	}
 	return `## Agents
 
 Prompts in ` + "`.claude/agents/`" + `.`
