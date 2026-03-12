@@ -32,3 +32,6 @@ ari
 
 # Knossos internal state (ephemeral, not tracked — any depth)
 **/.knossos/
+
+# Inscription system backups (created when overwriting existing channel docs)
+*.legacy-backup
