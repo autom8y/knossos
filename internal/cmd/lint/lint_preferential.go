@@ -24,6 +24,7 @@ var adapterWhitelist = []string{
 	"channel/tools",
 	"hook/events",
 	"paths/channel.go",
+	"cmd/lint/lint_preferential", // HA-SELF: lint rule references harness names in its own patterns
 }
 
 // goIdentifierExclusions are Go identifiers that legitimately reference
@@ -39,12 +40,12 @@ var goIdentifierExclusions = []string{
 // Case-insensitive to catch "claude", "Claude", "CLAUDE", etc.
 var goHarnessPattern = regexp.MustCompile(`(?i)\bclaude\b|\bgemini\b`)
 
-// haTagPattern matches HA-NNN tags in comments that document
-// legitimate harness-specific references.
-var haTagPattern = regexp.MustCompile(`//\s*HA-\d+`)
+// haTagPattern matches HA-XXX tags in comments that document
+// legitimate harness-specific references (HA-001, HA-CLI, HA-CC, etc).
+var haTagPattern = regexp.MustCompile(`//\s*HA-[A-Z0-9]+`)
 
-// haTagMdPattern matches HA-NNN tags in markdown comments.
-var haTagMdPattern = regexp.MustCompile(`<!--\s*HA-\d+`)
+// haTagMdPattern matches HA-XXX tags in markdown comments.
+var haTagMdPattern = regexp.MustCompile(`<!--\s*HA-[A-Z0-9]+`)
 
 // menaChannelPathPattern matches .claude/ or .gemini/ path references
 // that should use .channel/ placeholder.
