@@ -67,7 +67,7 @@ func SetVersion(v, c, d string) {
 	commit = c
 	date = d
 
-	// Enable --version flag on root command (clean one-liner like `claude --version`)
+	// Enable --version flag on root command (clean one-liner like `claude --version`) // HA-CLI: "claude" is the CC CLI binary name (external program)
 	rootCmd.Version = v
 	rootCmd.SetVersionTemplate("{{.Version}}\n")
 }
