@@ -56,6 +56,7 @@ Each worktree is a fully independent working copy:
 ```
 
 Output:
+<!-- HA-CC: "claude" is the CC CLI binary name; replace with your harness's launch command -->
 ```json
 {
   "worktree_id": "wt-20260105-100000-abc1234",
@@ -66,6 +67,7 @@ Output:
 
 ### Work in the Worktree
 
+<!-- HA-CC: "claude" is the CC CLI binary name; replace with your harness's launch command -->
 ```bash
 # Open new terminal
 cd /Users/you/project/worktrees/wt-20260105-100000-abc1234
@@ -89,6 +91,7 @@ claude
 
 ## Worktree Lifecycle
 
+<!-- HA-CC: "claude" in the state diagram is the CC CLI binary name; replace with your harness's launch command -->
 ```mermaid
 stateDiagram-v2
     [*] --> Created: /worktree create
@@ -107,7 +110,7 @@ stateDiagram-v2
 
 | State | Description | Next Actions |
 |-------|-------------|--------------|
-| **Created** | Worktree exists but no Claude session | Start session with `claude` |
+| **Created** | Worktree exists but no AI coding session | Start session with your harness's launch command |
 | **Active** | Claude session in progress | Work, park, wrap, or remove |
 | **Parked** | Session paused, preserving state | Resume, remove, or let cleanup collect |
 | **Merged** | Changes merged to main branch | Auto-removed after merge |
@@ -255,6 +258,7 @@ ari worktree merge <id> --include-claude --yes
 
 Run two features simultaneously in separate terminals:
 
+<!-- HA-CC: "claude" is the CC CLI binary name; replace with your harness's launch command -->
 ```bash
 # Terminal 1: Auth feature
 /worktree create "auth" --rite=10x-dev
@@ -269,6 +273,7 @@ cd worktrees/wt-xxx-payments && claude
 
 ### Pattern 2: Hotfix While Feature in Progress
 
+<!-- HA-CC: "claude" is the CC CLI binary name; replace with your harness's launch command -->
 ```bash
 # Main terminal: Feature work (parked)
 /park "switching to hotfix"

@@ -4,9 +4,9 @@ last_verified: 2026-02-26
 
 # CLI Reference: hook
 
-> Claude Code hook infrastructure.
+> Knossos hook infrastructure.
 
-Hooks process Claude Code tool events and can modify, validate, or enrich tool operations. The hook system provides Go-based implementations with consistent behavior.
+Hooks process harness tool events and can modify, validate, or enrich tool operations. The hook system provides Go-based implementations with consistent behavior.
 
 **Family**: hook
 **Commands**: 6
@@ -26,7 +26,7 @@ ari hook clew [flags]
 ```
 
 **Description**:
-Records tool events to `events.jsonl` as part of the [clew](../../reference/GLOSSARY.md#clew) contract. This hook is called by Claude Code on PostToolUse events.
+Records tool events to `events.jsonl` as part of the [clew](../../reference/GLOSSARY.md#clew) contract. This hook is called by the harness on PostToolUse events.
 
 **Flags**:
 | Flag | Type | Default | Description |
@@ -35,7 +35,7 @@ Records tool events to `events.jsonl` as part of the [clew](../../reference/GLOS
 
 **Examples**:
 ```bash
-# Called by Claude Code hooks system
+# Called by the harness hooks system
 ari hook clew
 ```
 
@@ -63,7 +63,7 @@ Injects session context into Claude sessions at startup. Provides initiative, co
 
 **Examples**:
 ```bash
-# Called by Claude Code hooks system
+# Called by the harness hooks system
 ari hook context
 ```
 
@@ -82,7 +82,7 @@ ari hook autopark [flags]
 ```
 
 **Description**:
-Automatically parks the active session when Claude Code stops. Preserves session state for later resumption.
+Automatically parks the active session when the harness stops. Preserves session state for later resumption.
 
 **Flags**:
 | Flag | Type | Default | Description |
@@ -91,7 +91,7 @@ Automatically parks the active session when Claude Code stops. Preserves session
 
 **Examples**:
 ```bash
-# Called by Claude Code hooks system
+# Called by the harness hooks system
 ari hook autopark
 ```
 
@@ -119,7 +119,7 @@ Routes slash commands (e.g., `/commit`, `/wrap`) to appropriate skill handlers o
 
 **Examples**:
 ```bash
-# Called by Claude Code hooks system
+# Called by the harness hooks system
 ari hook route
 ```
 
@@ -144,7 +144,7 @@ Validates bash commands on PreToolUse to enforce security rules and prevent dang
 
 **Examples**:
 ```bash
-# Called by Claude Code hooks system
+# Called by the harness hooks system
 ari hook validate
 ```
 
@@ -169,7 +169,7 @@ Intercepts Write/Edit operations targeting `*_CONTEXT.md` files and instructs us
 
 **Examples**:
 ```bash
-# Called by Claude Code hooks system
+# Called by the harness hooks system
 ari hook writeguard
 ```
 
@@ -190,7 +190,8 @@ ari hook writeguard
 
 **Environment Variables**:
 - `USE_ARI_HOOKS=0` — Emergency kill switch to disable ari hook implementations (default: enabled)
-- `CLAUDE_HOOK_*` — Standard Claude Code hook variables
+<!-- HA-CC: CLAUDE_HOOK_* are CC-specific environment variable names injected by the CC hooks system -->
+- `CLAUDE_HOOK_*` — Standard harness hook variables (CC-specific prefix)
 
 ---
 

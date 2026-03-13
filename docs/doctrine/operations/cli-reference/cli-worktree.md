@@ -4,7 +4,7 @@ last_verified: 2026-02-26
 
 # CLI Reference: worktree
 
-> Manage git worktrees for parallel Claude sessions.
+> Manage git worktrees for parallel AI coding sessions.
 
 [Worktrees](../../reference/GLOSSARY.md#worktree) enable parallel AI coding assistant sessions with filesystem isolation. Each worktree has its own channel directory with independent sessions, rites, and state.
 
@@ -411,6 +411,7 @@ flowchart TD
 
 ## Parallel Session Pattern
 
+<!-- HA-CC: "claude" is the CC CLI binary name; replace with your harness's launch command -->
 ```bash
 # Terminal 1 (main project)
 cd /path/to/roster

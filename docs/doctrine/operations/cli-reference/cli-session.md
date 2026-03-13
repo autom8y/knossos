@@ -163,7 +163,7 @@ ari session park --reason="Budget threshold reached"
 
 **Related Commands**:
 - [`ari session resume`](#ari-session-resume) — Resume parked session
-- `/park` skill — Claude Code skill equivalent
+- `/park` skill — harness skill equivalent
 
 ---
 
@@ -190,7 +190,7 @@ ari session resume -s session-20260108-143052-a1b2
 
 **Related Commands**:
 - [`ari session park`](#ari-session-park) — Suspend session
-- `/resume` skill — Claude Code skill equivalent
+- `/resume` skill — harness skill equivalent
 
 ---
 
@@ -226,7 +226,7 @@ ari session wrap --no-archive
 
 **Related Commands**:
 - [`ari sails check`](cli-sails.md#ari-sails-check) — Check quality gate before wrap
-- `/wrap` skill — Claude Code skill equivalent
+- `/wrap` skill — harness skill equivalent
 
 ---
 
