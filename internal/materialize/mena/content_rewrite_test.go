@@ -214,7 +214,7 @@ description: "Corpus fixture for rewriter validation."
 - INDEX: ` + "`" + `INDEX.lego.md` + "`" + `
 - Path with template var: ` + "`" + `mena/pinakes/domains/{domain}.lego.md` + "`" + `
 - Dro span: ` + "`" + `mena/navigation/rite.dro.md` + "`" + `
-- Materialized YAML example: ` + "`" + `.claude/skills/*/INDEX.lego.md` + "`" + ` // HA-TEST: Claude channel dir name in content rewrite fixture
+- Materialized YAML example: ` + "`" + `.claude/skills/*/INDEX.lego.md` + "`" + `
 - Mixed link and backtick: [ref](foo.lego.md) see ` + "`" + `bar.lego.md` + "`" + `
 
 ## Fenced Blocks (must be fully preserved)
@@ -226,7 +226,7 @@ description: "Corpus fixture for rewriter validation."
 
 ` + "```" + `yaml
 skills:
-  - .claude/skills/*/INDEX.lego.md // HA-TEST: Claude channel dir name in content rewrite fixture
+  - .claude/skills/*/INDEX.lego.md
 ` + "```" + `
 
 ## Go Code Example (fenced, must be preserved)
@@ -538,30 +538,30 @@ description: "Corpus fixture for channel rewrite validation."
 
 ## Mena Paths
 
-- Skill ref: .claude/skills/pinakes/SKILL.md // HA-TEST: Claude channel dir name in content rewrite fixture
-- Command ref: .claude/commands/spike.md // HA-TEST: Claude channel dir name in content rewrite fixture
-- Agent ref: .claude/agents/potnia.md // HA-TEST: Claude channel dir name in content rewrite fixture
-- Backtick: ` + "`" + `.claude/skills/doc/SKILL.md` + "`" + ` // HA-TEST: Claude channel dir name in content rewrite fixture
-- Link: [ref](.claude/skills/doc/SKILL.md) // HA-TEST: Claude channel dir name in content rewrite fixture
-- User-level: ~/.claude/agents/potnia.md // HA-TEST: Claude channel dir name in content rewrite fixture
-- Multiple: .claude/skills/a.md and .claude/commands/b.md // HA-TEST: Claude channel dir name in content rewrite fixture
+- Skill ref: .claude/skills/pinakes/SKILL.md
+- Command ref: .claude/commands/spike.md
+- Agent ref: .claude/agents/potnia.md
+- Backtick: ` + "`" + `.claude/skills/doc/SKILL.md` + "`" + `
+- Link: [ref](.claude/skills/doc/SKILL.md)
+- User-level: ~/.claude/agents/potnia.md
+- Multiple: .claude/skills/a.md and .claude/commands/b.md
 
 ## Non-Targets (must NOT be rewritten)
 
-- Config: .claude/settings.json // HA-TEST: Claude channel dir name in content rewrite fixture
-- Inscription: .claude/CLAUDE.md // HA-TEST: Claude channel dir name in content rewrite fixture
+- Config: .claude/settings.json
+- Inscription: .claude/CLAUDE.md
 - Bare: the .claude directory
 
 ## Fenced (must be preserved)
 
 ` + "```" + `
-.claude/skills/inside-fence.md // HA-TEST: Claude channel dir name in content rewrite fixture
-.claude/commands/inside-fence.md // HA-TEST: Claude channel dir name in content rewrite fixture
+.claude/skills/inside-fence.md
+.claude/commands/inside-fence.md
 ` + "```" + `
 
 ## After Fence
 
-- Post-fence ref: .claude/skills/after-fence.md // HA-TEST: Claude channel dir name in content rewrite fixture
+- Post-fence ref: .claude/skills/after-fence.md
 `
 
 	output := string(RewriteMenaContentPaths([]byte(corpus), ".gemini"))
