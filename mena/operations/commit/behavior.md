@@ -362,9 +362,10 @@ Do NOT retry automatically or bypass hooks.
 
 ### Hook Registration
 
-<!-- HA-CC: .claude/settings.local.json is the CC-specific projected hook configuration file -->
+<!-- HA-CC: .claude/settings.local.json is CC-projected hook configuration -->
 The `commit-tracker.sh` hook is registered in `.claude/settings.local.json`:
 
+<!-- HA-CC: .claude/hooks/commit-tracker.sh is the CC channel hook path -->
 ```json
 {
   "PostToolUse": [
