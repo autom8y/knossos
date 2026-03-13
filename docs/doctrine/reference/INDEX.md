@@ -172,7 +172,7 @@ Documentation for each canonical rite (practice bundle).
 
 **Path:** [`../guides/worktree-guide.md`](../guides/worktree-guide.md)
 
-Comprehensive guide to running parallel Claude Code sessions with filesystem isolation.
+Comprehensive guide to running parallel AI coding sessions with filesystem isolation.
 
 **Topics:**
 - Worktree creation and lifecycle
@@ -384,7 +384,7 @@ If you notice implementation drift from doctrine:
 | **Principle** | Architectural revelation (one of eight) | `philosophy/design-principles.md` |
 | **Myth** | Mythological element mapped to implementation | `philosophy/mythology-concordance.md` |
 | **SOURCE** | Canonical code in Knossos repository | `philosophy/mythology-concordance.md` |
-| **PROJECTION** | Materialized `.claude/` directories | `philosophy/mythology-concordance.md` |
+| **PROJECTION** | Materialized channel directories | `philosophy/mythology-concordance.md` |
 | **ADR** | Architecture Decision Record | `../../decisions/` |
 | **Rite** | Practice bundle (agents, skills, hooks, workflows) | `../rites/` |
 | **Clew** | Session state + event log (the thread) | `philosophy/knossos-doctrine.md` Section VI |

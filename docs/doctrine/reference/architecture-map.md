@@ -12,7 +12,7 @@ last_verified: 2026-02-26
 
 | Package | Entry Point | Purpose |
 |---------|-------------|---------|
-| `internal/materialize/` | `ari sync materialize` | Generates `.claude/` projections from SOURCE |
+| `internal/materialize/` | `ari sync materialize` | Generates channel directory projections from SOURCE |
 | `internal/materialize/agent_transform.go` | Called during materialize | Injects CC-OPP capabilities (skills, hooks, memory) into agent prompts |
 | `internal/session/` | `ari session *` | Session FSM (ACTIVE/PARKED/ARCHIVED), lifecycle management |
 | `internal/hook/` | `ari hook *` | Hook infrastructure — context injection, clew recording, write guards |
@@ -53,7 +53,7 @@ last_verified: 2026-02-26
 2. Copy agents from `rites/*/agents/` + `agents/` → `.channel/agents/`
 3. Apply agent transforms (inject skills, hooks, memory from frontmatter)
 4. Copy mena from `rites/*/mena/` → `.channel/skills/` + `.channel/commands/`
-5. Render inscription from `knossos/templates/` → `.claude/CLAUDE.md`
+5. Render inscription from `knossos/templates/` → channel context file
 
 ### Session Lifecycle
 1. `session create` → Clotho domain → ACTIVE state
@@ -61,9 +61,9 @@ last_verified: 2026-02-26
 3. `session wrap` → Atropos domain → quality gates → ARCHIVED state
 
 ### Agent-Guard Enforcement
-1. CC fires PreToolUse hook with tool name + agent context (JSON on stdin)
+1. The harness fires PreToolUse hook with tool name + agent context (JSON on stdin)
 2. `ari hook agent-guard` checks agent frontmatter for `disallowedTools`
-3. Returns block/allow decision to CC runtime
+3. Returns block/allow decision to the harness runtime
 
 ---
 

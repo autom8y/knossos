@@ -23,6 +23,7 @@ The CC-OPP uplift adds four capability dimensions to Knossos agents, declared vi
 
 ## Memory
 
+<!-- HA-CC: ~/.claude/projects/ is the CC-specific user-scope memory directory path -->
 Agents with memory get a persistent auto-memory directory at `~/.claude/projects/{project}/memory/`. They self-curate observations across sessions.
 
 **Tiering:**

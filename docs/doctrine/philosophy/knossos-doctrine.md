@@ -76,7 +76,7 @@ Ariadne is faithful because she is intelligent. The thread remembers because a t
 
 ### The Navigator: Theseus
 
-**Theseus** enters the labyrinth for one reason: to slay the Minotaur. He does not enter to map the corridors, to admire the architecture, or to understand the Minotaur's genealogy. He enters to act. In Knossos, the main Claude Code thread is Theseus -- the agentic intelligence that makes decisions, summons help, and creates artifacts.
+**Theseus** enters the labyrinth for one reason: to slay the Minotaur. He does not enter to map the corridors, to admire the architecture, or to understand the Minotaur's genealogy. He enters to act. In Knossos, the main AI harness agent is Theseus -- the agentic intelligence that makes decisions, summons help, and creates artifacts.
 
 But Theseus does not travel alone. He summons **heroes** -- specialist agents invoked via the Task tool to lend their strength. An architect for design. An engineer for implementation. An adversary for challenge. These heroes arrive for specific labors and depart when done. They did not walk the whole labyrinth; they were summoned mid-journey to the place where their strength was needed.
 
@@ -547,7 +547,7 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **The Inscription** | context file | The labyrinth's entrance, declaring what heroes and rites are available |
 | **Ariadne** | CLI binary (`ari`) | The intelligence that navigates complexity and guarantees return |
 | **The Clew** | Session state + events.jsonl | The provenance trail, identity through transformation |
-| **Theseus** | Main Claude Code thread | The navigator who summons heroes |
+| **Theseus** | Main AI harness agent | The navigator who summons heroes |
 | **Heroes** | Specialist agents (Task tool) | Summoned champions for specific labors |
 | **Clotho** | Session bootstrap agent | The Fate who spins the clew into existence |
 | **Lachesis** | State mutation agent | The Fate who measures and tracks |

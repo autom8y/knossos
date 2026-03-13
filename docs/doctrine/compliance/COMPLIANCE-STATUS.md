@@ -72,7 +72,7 @@ ari
 ├── sync (8)         # Artifact materialization
 ├── hook (11)        # Hook infrastructure + agent-guard
 ├── handoff (4)      # Agent transition protocol
-├── inscription (5)  # CLAUDE.md management
+├── inscription (5)  # context file management
 ├── artifact (4)     # Registry management
 ├── validate (3)     # Schema enforcement
 ├── manifest (4)     # Manifest operations

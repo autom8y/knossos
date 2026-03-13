@@ -22,7 +22,7 @@ The **Coda** is the philosophical foundation—the "why" behind every design dec
 |------|-----------|----------|
 | **Knossos** | The platform | The labyrinth itself |
 | **Ariadne** | CLI binary (`ari`) | The intelligent navigator ensuring return |
-| **Theseus** | Claude Code agent | The navigator with amnesia |
+| **Theseus** | AI harness agent | The navigator with amnesia |
 | **Moirai** | Session lifecycle | The Fates who spin, measure, and cut |
 | **White Sails** | Confidence signal | Honest return indicator |
 | **Rites** | Practice bundles | Invokable ceremonies |
@@ -77,7 +77,7 @@ docs/doctrine/
 
 **Canonical Identity** (per ADR-0009 Amendment):
 - **SOURCE** = Knossos repository (what Knossos IS)
-- **PROJECTION** = `.claude/` directories (materialized by `ari sync materialize`)
+- **PROJECTION** = channel directories (materialized by `ari sync materialize`)
 
 **Completed**:
 - `operations/cli-reference/` - CLI reference (84+ commands across 20 families)
