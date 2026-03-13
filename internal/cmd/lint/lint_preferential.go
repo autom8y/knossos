@@ -123,7 +123,86 @@ func lintPreferentialLanguageGo(projectRoot string, report *LintReport) {
 	})
 }
 
+// lintPreferentialLanguageMena scans mena content (.md files in mena/ and
+// rites/*/mena/) for channel-specific path references (.claude/ or .gemini/)
+// that should use the .channel/ placeholder.
+func lintPreferentialLanguageMena(projectRoot string, report *LintReport) {
+	var dirs []string
+
+	// Platform mena
+	dirs = append(dirs, filepath.Join(projectRoot, "mena"))
+
+	// All rites/*/mena/ directories and rites/*/ for agent files
+	riteDir := filepath.Join(projectRoot, "rites")
+	rites, _ := os.ReadDir(riteDir)
+	for _, r := range rites {
+		if r.IsDir() {
+			dirs = append(dirs, filepath.Join(riteDir, r.Name(), "mena"))
+			dirs = append(dirs, filepath.Join(riteDir, r.Name()))
+		}
+	}
+
+	// Track mena dirs to avoid double-scanning
+	menaDirs := make(map[string]bool)
+	for _, dir := range dirs {
+		if strings.HasSuffix(dir, "mena") {
+			menaDirs[dir] = true
+		}
+	}
+
+	for _, dir := range dirs {
+		isMenaRoot := menaDirs[dir]
+		_ = filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return nil
+			}
+			if d.IsDir() {
+				// When walking a rite root (not a mena dir), skip mena/
+				// subdirectory since it is walked separately.
+				if !isMenaRoot && d.Name() == "mena" && path != dir {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if !strings.HasSuffix(path, ".md") {
+				return nil
+			}
+
+			relPath := mustRel(projectRoot, path)
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return nil
+			}
+
+			report.Summary.Files++
+			lines := strings.Split(string(data), "\n")
+			for i, line := range lines {
+				if !menaChannelPathPattern.MatchString(line) {
+					continue
+				}
+				// Exclude HA-tagged lines (markdown comment style)
+				if haTagMdPattern.MatchString(line) {
+					continue
+				}
+				// Exclude lines already using .channel/ (may have both in explanation)
+				if strings.Contains(line, ".channel/") {
+					continue
+				}
+
+				report.Legomena = append(report.Legomena, Finding{
+					File:     fmt.Sprintf("%s:%d", relPath, i+1),
+					Severity: prefLangSeverity,
+					Rule:     rulePreferentialLanguage,
+					Message:  fmt.Sprintf("channel-specific path reference: %s", strings.TrimSpace(line)),
+				})
+			}
+			return nil
+		})
+	}
+}
+
 // lintPreferentialLanguage runs both Go source and mena content scans.
 func lintPreferentialLanguage(projectRoot string, report *LintReport) {
 	lintPreferentialLanguageGo(projectRoot, report)
+	lintPreferentialLanguageMena(projectRoot, report)
 }

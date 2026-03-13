@@ -228,6 +228,130 @@ func TestHasGoIdentifierExclusion(t *testing.T) {
 	}
 }
 
+func TestLintPreferentialLanguageMena(t *testing.T) {
+	t.Run("clean .channel/ reference passes", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		menaDir := filepath.Join(projectRoot, "mena", "example")
+		os.MkdirAll(menaDir, 0755)
+		os.WriteFile(
+			filepath.Join(menaDir, "INDEX.lego.md"),
+			[]byte("---\nname: example\n---\n\nRead(\".channel/skills/foo\")\n"),
+			0644,
+		)
+		report := &LintReport{}
+		lintPreferentialLanguageMena(projectRoot, report)
+		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
+		if len(prefFindings) != 0 {
+			t.Errorf("expected 0 findings, got %d: %+v", len(prefFindings), prefFindings)
+		}
+	})
+
+	t.Run(".claude/ path flagged", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		menaDir := filepath.Join(projectRoot, "mena", "example")
+		os.MkdirAll(menaDir, 0755)
+		os.WriteFile(
+			filepath.Join(menaDir, "INDEX.lego.md"),
+			[]byte("---\nname: example\n---\n\nRead(\".claude/skills/foo\")\n"),
+			0644,
+		)
+		report := &LintReport{}
+		lintPreferentialLanguageMena(projectRoot, report)
+		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
+		if len(prefFindings) != 1 {
+			t.Fatalf("expected 1 finding, got %d: %+v", len(prefFindings), prefFindings)
+		}
+		if prefFindings[0].Severity != SevMedium {
+			t.Errorf("expected severity MED, got %s", prefFindings[0].Severity)
+		}
+	})
+
+	t.Run(".gemini/ path flagged", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		menaDir := filepath.Join(projectRoot, "mena", "example")
+		os.MkdirAll(menaDir, 0755)
+		os.WriteFile(
+			filepath.Join(menaDir, "INDEX.lego.md"),
+			[]byte("---\nname: example\n---\n\nSee .gemini/agents/ for details\n"),
+			0644,
+		)
+		report := &LintReport{}
+		lintPreferentialLanguageMena(projectRoot, report)
+		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
+		if len(prefFindings) != 1 {
+			t.Fatalf("expected 1 finding, got %d: %+v", len(prefFindings), prefFindings)
+		}
+	})
+
+	t.Run("HA-tagged markdown excluded", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		menaDir := filepath.Join(projectRoot, "mena", "example")
+		os.MkdirAll(menaDir, 0755)
+		os.WriteFile(
+			filepath.Join(menaDir, "INDEX.lego.md"),
+			[]byte("---\nname: example\n---\n\n<!-- HA-005 --> .claude/settings.local.json is Claude-only\n"),
+			0644,
+		)
+		report := &LintReport{}
+		lintPreferentialLanguageMena(projectRoot, report)
+		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
+		if len(prefFindings) != 0 {
+			t.Errorf("HA-tagged markdown should be excluded, got %d findings: %+v", len(prefFindings), prefFindings)
+		}
+	})
+
+	t.Run("line with both .channel/ and .claude/ excluded", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		menaDir := filepath.Join(projectRoot, "mena", "example")
+		os.MkdirAll(menaDir, 0755)
+		os.WriteFile(
+			filepath.Join(menaDir, "INDEX.lego.md"),
+			[]byte("---\nname: example\n---\n\n.channel/ (was .claude/) is the canonical placeholder\n"),
+			0644,
+		)
+		report := &LintReport{}
+		lintPreferentialLanguageMena(projectRoot, report)
+		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
+		if len(prefFindings) != 0 {
+			t.Errorf("line with .channel/ should be excluded, got %d findings: %+v", len(prefFindings), prefFindings)
+		}
+	})
+
+	t.Run("non-.md file excluded", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		menaDir := filepath.Join(projectRoot, "mena", "example")
+		os.MkdirAll(menaDir, 0755)
+		os.WriteFile(
+			filepath.Join(menaDir, "config.yaml"),
+			[]byte("path: .claude/settings\n"),
+			0644,
+		)
+		report := &LintReport{}
+		lintPreferentialLanguageMena(projectRoot, report)
+		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
+		if len(prefFindings) != 0 {
+			t.Errorf("non-.md files should be excluded, got %d findings: %+v", len(prefFindings), prefFindings)
+		}
+	})
+
+	t.Run("rites/*/mena/ scanned", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		riteMenaDir := filepath.Join(projectRoot, "rites", "10x-dev", "mena", "example")
+		os.MkdirAll(riteMenaDir, 0755)
+		os.WriteFile(
+			filepath.Join(riteMenaDir, "INDEX.lego.md"),
+			[]byte("---\nname: example\n---\n\nSee .claude/commands/ for details\n"),
+			0644,
+		)
+		report := &LintReport{}
+		lintPreferentialLanguageMena(projectRoot, report)
+		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
+		if len(prefFindings) != 1 {
+			t.Fatalf("expected 1 finding from rites/*/mena/, got %d: %+v", len(prefFindings), prefFindings)
+		}
+	})
+}
+
 // filterByRule extracts findings with the specified rule name.
 func filterByRule(findings []Finding, rule string) []Finding {
 	var result []Finding
