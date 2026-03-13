@@ -38,7 +38,7 @@ type Manifest struct {
 }
 
 // Load reads and parses a manifest from the given path.
-// Supports both filesystem paths and git refs (e.g., "HEAD:.claude/manifest.json").
+// Supports both filesystem paths and git refs (e.g., "HEAD:.channel/manifest.json").
 func Load(path string) (*Manifest, error) {
 	// Check if this is a git ref
 	if isGitRef(path) {
@@ -89,7 +89,7 @@ func Load(path string) (*Manifest, error) {
 }
 
 // LoadFromGitRef loads a manifest from a git reference.
-// Ref format: "commit:path" (e.g., "HEAD:.claude/manifest.json")
+// Ref format: "commit:path" (e.g., "HEAD:.channel/manifest.json")
 func LoadFromGitRef(ref string) (*Manifest, error) {
 	parts := strings.SplitN(ref, ":", 2)
 	if len(parts) != 2 {

@@ -4,9 +4,9 @@ last_verified: 2026-02-26
 
 # Worktree Guide
 
-> Git worktrees for running parallel Claude Code sessions with filesystem isolation.
+> Git worktrees for running parallel AI coding assistant sessions with filesystem isolation.
 
-Git worktrees enable running multiple independent Claude sessions simultaneously, each with its own rite configuration, session state, and working files. This guide covers creation, lifecycle management, and production patterns.
+Git worktrees enable running multiple independent sessions simultaneously, each with its own rite configuration, session state, and working files. This guide covers creation, lifecycle management, and production patterns.
 
 ---
 
@@ -14,7 +14,7 @@ Git worktrees enable running multiple independent Claude sessions simultaneously
 
 ### The Problem
 
-Claude Code sessions are designed for single-terminal execution. Each terminal tracks one active session in `.sos/sessions/.current-session`. Running multiple features simultaneously creates conflicts:
+The AI coding assistant sessions are designed for single-terminal execution. Each terminal tracks one active session in `.sos/sessions/.current-session`. Running multiple features simultaneously creates conflicts:
 
 - Session state corruption from concurrent modifications
 - Branch conflicts when features touch overlapping files
@@ -26,15 +26,15 @@ Git worktrees provide true filesystem isolation:
 
 ```
 project/
-├── .claude/                    # Main worktree sessions
+├── {channel_dir}/              # Main worktree sessions
 ├── src/
 └── worktrees/
-    ├── wt-20260105-100000-abc/ # Feature A (its own .claude/, session, rite)
+    ├── wt-20260105-100000-abc/ # Feature A (its own channel dir, session, rite)
     └── wt-20260105-100500-def/ # Feature B (completely independent)
 ```
 
 Each worktree is a fully independent working copy:
-- Own `.claude/` directory with agents, sessions, rites
+- Own channel directory with agents, sessions, rites
 - Own branch/commit state (detached HEAD by default)
 - Own working files (no conflicts with main worktree)
 
@@ -211,38 +211,38 @@ git merge $(git -C worktrees/wt-xxx rev-parse HEAD)
 The worktree-manager script provides higher-level merge operations:
 
 ```bash
-# Preview changes (excludes .claude/ by default)
-.claude/hooks/lib/worktree-manager.sh diff wt-xxx [--to=BRANCH]
+# Preview changes (excludes channel directory by default)
+{channel_dir}/hooks/lib/worktree-manager.sh diff wt-xxx [--to=BRANCH]
 
 # Merge with auto-cleanup
-.claude/hooks/lib/worktree-manager.sh merge wt-xxx [--to=BRANCH]
+{channel_dir}/hooks/lib/worktree-manager.sh merge wt-xxx [--to=BRANCH]
 
 # Cherry-pick specific commits
-.claude/hooks/lib/worktree-manager.sh cherry-pick wt-xxx <commit...>
+{channel_dir}/hooks/lib/worktree-manager.sh cherry-pick wt-xxx <commit...>
 ```
 
 **Flags for merge:**
 - `--to=BRANCH` — Target branch (default: main)
-- `--include-claude` — Include .claude/ directory (requires --yes)
+- `--include-claude` — Include channel directory (requires --yes)
 - `--no-cleanup` — Keep worktree after merge
 - `--force` — Discard uncommitted changes
 - `--dry-run` — Preview without executing
 
 ---
 
-## .claude/ Exclusion
+## Channel Directory Exclusion
 
-By default, merge and cherry-pick operations exclude `.claude/` directory:
+By default, merge and cherry-pick operations exclude the channel directory:
 
-| Operation | .claude/ Behavior |
-|-----------|-------------------|
+| Operation | Channel Directory Behavior |
+|-----------|---------------------------|
 | `diff` | Excluded from output |
 | `merge` | Excluded from merge commit |
 | `cherry-pick` | Excluded from applied commits |
 
 **Rationale**: Session artifacts (session IDs, sprint context, agent state) are worktree-specific and should not propagate to main branch.
 
-To include `.claude/` (rare):
+To include the channel directory (rare):
 ```bash
 ari worktree merge <id> --include-claude --yes
 ```
@@ -418,14 +418,14 @@ git worktree prune
 
 ```
 project/
-├── .claude/
+├── {channel_dir}/
 │   ├── sessions/
 │   │   └── .current-session      # Tracks main worktree session
 │   └── ACTIVE_RITE
 ├── worktrees/
 │   ├── .gitignore                # Contains '*' to ignore worktrees
 │   └── wt-20260105-100000-abc/
-│       ├── .claude/
+│       ├── {channel_dir}/
 │       │   ├── .worktree-meta.json    # Worktree metadata
 │       │   ├── sessions/
 │       │   │   └── .current-session   # Tracks THIS worktree's session
@@ -478,7 +478,7 @@ cat worktree/.git
 ### Don't
 
 - Create worktrees within worktrees (blocked by design)
-- Include `.claude/` in merges without explicit reason
+- Include the channel directory in merges without explicit reason
 - Leave uncommitted changes in stale worktrees
 - Assume worktree branches exist (they're detached HEAD)
 - Forget to prune orphaned git refs periodically

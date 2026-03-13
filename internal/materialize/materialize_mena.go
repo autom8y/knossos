@@ -12,7 +12,7 @@ import (
 	"github.com/autom8y/knossos/internal/provenance"
 )
 
-// materializeMena copies mena files to .claude/commands/ or .claude/skills/
+// materializeMena copies mena files to the channel commands or skills directory
 // based on the filename convention (.dro.md for dromena, .lego.md for legomena).
 // Sources: mena/ (platform), rites/shared/mena/ (cross-rite overlay), rites/{rite}/mena/
 // Priority order (later sources override earlier): platform < shared < dependencies < current rite
@@ -132,7 +132,7 @@ func (m *Materializer) materializeMena(manifest *RiteManifest, channelDir string
 }
 
 // materializeMinimalMena projects platform mena and shared rite mena into
-// .claude/commands/ and .claude/skills/ without requiring an active rite.
+// channel commands and skills directories without requiring an active rite.
 // Called from MaterializeMinimal so that cross-cutting mode still gets core
 // features like /know, /radar, /research.
 func (m *Materializer) materializeMinimalMena(channelDir string, collector provenance.Collector, overwriteDiverged bool, channel string, comp compiler.ChannelCompiler) error {

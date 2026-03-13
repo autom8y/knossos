@@ -17,7 +17,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// materializeAgents copies rite-scoped agent files to .claude/agents/ (or .gemini/agents/).
+// materializeAgents copies rite-scoped agent files to the channel agents directory.
 // Uses selective write: only knossos-managed agents (from manifest) are replaced.
 // User-created agents not in the manifest are preserved.
 // Cross-rite agents (pythia, moirai, etc.) are user-scope owned and NOT handled here.
@@ -33,7 +33,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 	}
 
 	// Build managed agent set from rite manifest only.
-	// Cross-rite agents are user-scope owned (synced to ~/.claude/agents/).
+	// Cross-rite agents are user-scope owned (synced to the user channel agents dir).
 	managedAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {
 		managedAgents[agent.Name+".md"] = true
@@ -304,8 +304,8 @@ func compileAgentContent(agentName string, content []byte, comp compiler.Channel
 
 // NOTE: listCrossRiteAgents and materializeCrossRiteAgents were removed.
 // Cross-rite agents (pythia, moirai, context-engineer, theoros) are
-// user-scope owned: synced from KNOSSOS_HOME/agents/ to ~/.claude/agents/
-// by user-scope sync. They are NOT copied to project .claude/agents/.
+// user-scope owned: synced from KNOSSOS_HOME/agents/ to the user channel agents dir
+// by user-scope sync. They are NOT copied to the project channel agents dir.
 
 // detectOrphans finds agent files that are not in the incoming rite's manifest.
 // If a provenance manifest exists, uses manifest-based detection: files with
@@ -319,7 +319,7 @@ func (m *Materializer) detectOrphans(manifest *RiteManifest, channelDir string, 
 
 	// Build expected agent set from rite manifest only.
 	// Cross-rite agents (pythia, moirai, etc.) are user-scope owned — they
-	// live at ~/.claude/agents/ and are NOT expected at project level.
+	// live at the user channel agents dir and are NOT expected at project level.
 	expectedAgents := make(map[string]bool)
 	for _, agent := range manifest.Agents {
 		expectedAgents[agent.Name+".md"] = true
@@ -363,7 +363,7 @@ func (m *Materializer) detectOrphansFromProvenance(expectedAgents map[string]boo
 			continue
 		}
 
-		// Construct relative path within .claude/
+		// Construct relative path within channel dir
 		relativePath := filepath.Join("agents", entry.Name())
 
 		// Check if file is in provenance manifest
@@ -449,7 +449,7 @@ func (m *Materializer) backupAndRemoveOrphans(orphans []string, channelDir strin
 	return backupDir, nil
 }
 
-// promoteOrphans moves orphan agents to user-level ~/.claude/agents/.
+// promoteOrphans moves orphan agents to the user-level channel agents dir.
 func (m *Materializer) promoteOrphans(orphans []string, channelDir string) error {
 	if len(orphans) == 0 {
 		return nil

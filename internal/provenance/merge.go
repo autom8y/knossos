@@ -8,7 +8,7 @@ import (
 )
 
 // Merge combines collector entries, divergence report, and previous manifest into a final manifest.
-// This is the 4-step merge algorithm that determines provenance ownership in .claude/.
+// This is the 4-step merge algorithm that determines provenance ownership in the channel dir.
 //
 // knossosDir is the .knossos/ sibling directory — some tracked files (e.g. ACTIVE_WORKFLOW.yaml)
 // live there rather than in channelDir. When checking file existence in Step 0, both directories

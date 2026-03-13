@@ -35,9 +35,9 @@ var NewSourceResolverWithPaths = source.NewSourceResolverWithPaths
 type UserResourcePaths struct {
 	ResourceType SyncResource
 	SourceDir    string // $KNOSSOS_HOME/{agents,mena,hooks}
-	TargetDir    string // ~/.claude/{agents,hooks} (single target)
-	CommandsDir  string // ~/.claude/commands/ (mena only)
-	SkillsDir    string // ~/.claude/skills/ (mena only)
+	TargetDir    string // ~/{channel}/{agents,hooks} (single target)
+	CommandsDir  string // ~/{channel}/commands/ (mena only)
+	SkillsDir    string // ~/{channel}/skills/ (mena only)
 	Nested       bool   // true for mena, hooks
 }
 

@@ -166,7 +166,7 @@ func (m *Manager) Clone(sourceIDOrName, newName string, opts CloneOptions) (*Wor
 		_ = copySessionContext(source.Path, wtPath) // Non-fatal
 	}
 
-	// Materialize .claude/ and set up rite for the new worktree
+	// Materialize channel dir and set up rite for the new worktree
 	m.setupWorktreeEcosystem(wtPath, rite)
 
 	return &wt, nil
@@ -651,9 +651,9 @@ func copySessionContext(sourcePath, targetPath string) error {
 	return nil
 }
 
-// setupWorktreeEcosystem materializes .claude/ and switches rite for a worktree.
+// setupWorktreeEcosystem materializes the channel dir and switches rite for a worktree.
 func (m *Manager) setupWorktreeEcosystem(wtPath, riteName string) {
-	// Materialize .claude/ directory
+	// Materialize channel directory
 	resolver := paths.NewResolver(wtPath)
 	mat := materialize.NewMaterializer(resolver)
 	if embRites := assets.Rites(); embRites != nil {

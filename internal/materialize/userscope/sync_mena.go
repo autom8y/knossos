@@ -25,7 +25,7 @@ func menaCompilerForChannel(channel string) mena.ChannelCompiler {
 }
 
 // syncUserMena syncs mena files from KNOSSOS_HOME/mena and rites/shared/mena to
-// ~/.claude/{commands,skills} using the CollectMena pipeline for namespace flattening
+// user channel {commands,skills} dirs using the CollectMena pipeline for namespace flattening
 // and companion hiding parity with the rite-scope pipeline (SyncMena).
 func (s *syncer) syncUserMena(
 	knossosHome string,
@@ -314,7 +314,7 @@ func walkMenaEntryFS(
 		}
 
 		// Rewrite stale .lego.md/.dro.md content references to materialized forms
-		// and substitute .claude/ path prefixes for the target channel directory.
+		// and substitute source channel path prefixes for the target channel directory.
 		if strings.HasSuffix(strippedName, ".md") {
 			channelDir := ".claude"
 			if opts.Channel == "gemini" {
@@ -369,7 +369,7 @@ func syncMenaStandalone(
 	}
 
 	// Rewrite stale .lego.md/.dro.md content references to materialized forms
-	// and substitute .claude/ path prefixes for the target channel directory.
+	// and substitute source channel path prefixes for the target channel directory.
 	if strings.HasSuffix(sf.FlatName, ".md") {
 		channelDir := ".claude"
 		if opts.Channel == "gemini" {

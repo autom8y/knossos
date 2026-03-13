@@ -1,4 +1,4 @@
-// Package materialize generates .claude/ directories from templates and rite manifests.
+// Package materialize generates channel directories from templates and rite manifests.
 package materialize
 
 import (

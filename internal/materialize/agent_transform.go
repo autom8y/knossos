@@ -159,7 +159,7 @@ var geminiToolBodyRe = regexp.MustCompile("`(Read|Bash|Edit|Write|Glob|Grep)`")
 //
 // Replacements applied:
 //  1. Backtick-delimited tool names: `Read` -> `read_file`, etc.
-//  2. Path references: .claude/ -> .gemini/ (only within backtick-delimited strings)
+//  2. Path references: .claude/ -> channel dir (only within backtick-delimited strings)
 //  3. CC-specific phrases: "Task tool" -> "delegation" (in specialist anti-pattern warnings)
 //
 // Note: potnia archetype body is adapted at the archetype template level (orchestrator.md.tpl),
@@ -188,7 +188,7 @@ func applyGeminiBodySubstitutions(body []byte) []byte {
 		return match
 	})
 
-	// 2. Replace `.claude/` path references in backtick-delimited contexts.
+	// 2. Replace `.claude/` path references in backtick-delimited contexts (channel rewrite).
 	// Only replace within backtick strings to avoid modifying prose.
 	s = strings.ReplaceAll(s, "`.claude/", "`.gemini/")
 

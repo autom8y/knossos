@@ -184,7 +184,7 @@ The write guard hook checks for a valid `.moirai-lock` file and allows writes wh
 - Acquire: `ari session lock --agent moirai`
 - Release: `ari session unlock --agent moirai`
 
-Lock file: `.sos/sessions/${SESSION_ID}/.moirai-lock`
+Lock file: `.sos/sessions/{session-id}/.moirai-lock`
 Stale threshold: 300 seconds. **Always release lock, even on error.**
 
 ---

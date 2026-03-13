@@ -85,7 +85,7 @@ func untrackKnossosFiles(projectRoot, channelDir string, manifest *provenance.Pr
 		return 0
 	}
 
-	// Compute channel prefix relative to project root (e.g., ".claude/")
+	// Compute channel prefix relative to project root (e.g., ".channel/")
 	relChannel, err := filepath.Rel(projectRoot, channelDir)
 	if err != nil {
 		return 0

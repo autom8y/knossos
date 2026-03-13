@@ -1,29 +1,29 @@
 ---
-name: claude-md-architecture
-description: "CLAUDE.md architecture first principles. Use when: modifying CLAUDE.md content, deciding where content belongs, making ari sync placement decisions. Triggers: CLAUDE.md architecture, CLAUDE.md sync, content placement, section ownership."
+name: inscription-architecture
+description: "Context file architecture first principles. Use when: modifying context file content, deciding where content belongs, making ari sync placement decisions. Triggers: inscription architecture, context file sync, content placement, section ownership."
 ---
 
-# CLAUDE.md Architecture
+# Inscription Architecture
 
-> First principles for what belongs in CLAUDE.md and why.
+> First principles for what belongs in the context file and why.
 
-## Purpose of CLAUDE.md
+## Purpose of the Context File
 
-CLAUDE.md is the **entry point** for Claude Code. It answers three questions:
+The context file is the **entry point** for the harness. It answers three questions:
 
 1. **What is this project?** (Rite, agents, capabilities)
 2. **What patterns are available?** (Skills, hooks, workflows)
 3. **Where do I go for guidance?** (Routing, help resources)
 
-CLAUDE.md is a **behavioral contract**, not a knowledge base, session log, or scratchpad.
+The context file is a **behavioral contract**, not a knowledge base, session log, or scratchpad.
 
 ## Quick Reference
 
 ### The Stability Rule
 
 ```
-CLAUDE.md contains: STABLE content (changes weeks/months)
-CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
+The context file contains: STABLE content (changes weeks/months)
+The context file excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 ```
 
 ### Section Ownership
@@ -33,13 +33,13 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 | Knossos | SYNC | Skills docs, hooks docs, workflow patterns |
 | Satellite | PRESERVE | Project extensions, custom sections |
 | Rite | REGENERATE | Quick Start, Agent Configurations |
-| Session | NOT IN CLAUDE.md | Current task, git state, handoff context |
+| Session | NOT IN context file | Current task, git state, handoff context |
 
 ### The Decay Test
 
-> "If I don't update this for a month, is CLAUDE.md incorrect?"
+> "If I don't update this for a month, is the context file incorrect?"
 
-- **No** (still accurate) → Belongs in CLAUDE.md
+- **No** (still accurate) → Belongs in the context file
 - **Yes** (becomes stale) → Does not belong
 
 ## Companion Reference
@@ -49,16 +49,16 @@ CLAUDE.md excludes: DYNAMIC + EPHEMERAL content (changes daily/hourly)
 | 6 foundational principles, layering model | [first-principles.md](first-principles.md) | Core architecture understanding |
 | Section ownership, sync behaviors, marker syntax | [ownership-model.md](ownership-model.md) | Making sync/placement decisions |
 | 5-question validation checklist | [boundary-test.md](boundary-test.md) | Validating proposed changes |
-| 11 anti-patterns — what NOT to put in CLAUDE.md | [anti-patterns.md](anti-patterns.md) | Content exclusion decisions |
+| 11 anti-patterns — what NOT to put in the context file | [anti-patterns.md](anti-patterns.md) | Content exclusion decisions |
 | Descriptive vs prescriptive tone examples | [content-tone-guide.md](content-tone-guide.md) | Writing section content |
 
 ## Decision Flowchart
 
 ```
-New content to add to CLAUDE.md?
+New content to add to the context file?
            |
            v
-  Stable for 1 month? ----NO----> NOT in CLAUDE.md
+  Stable for 1 month? ----NO----> NOT in context file
            |                      (Use SESSION_CONTEXT or hooks)
           YES
            |

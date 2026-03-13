@@ -4,9 +4,9 @@ last_verified: 2026-02-26
 
 # CLI Reference: sync
 
-> Synchronize .claude/ configuration with remotes.
+> Synchronize channel directory configuration with remotes.
 
-The sync system tracks changes to configuration files, enabling pulling updates from remotes, pushing local changes, and materializing the `.claude/` directory from [SOURCE](../../reference/GLOSSARY.md#source).
+The sync system tracks changes to configuration files, enabling pulling updates from remotes, pushing local changes, and materializing the channel directory from [SOURCE](../../reference/GLOSSARY.md#source).
 
 **Family**: sync
 **Commands**: 8
@@ -51,7 +51,7 @@ ari sync status -o json
 
 ### ari sync materialize
 
-Generate .claude/ directory from SOURCE.
+Generate the channel directory from SOURCE.
 
 **Synopsis**:
 ```bash
@@ -59,10 +59,10 @@ ari sync materialize [flags]
 ```
 
 **Description**:
-Generates the complete `.claude/` directory structure from [SOURCE](../../reference/GLOSSARY.md#source) templates and rite manifests. This is an idempotent operation—safe to run multiple times.
+Generates the complete channel directory structure from [SOURCE](../../reference/GLOSSARY.md#source) templates and rite manifests. This is an idempotent operation—safe to run multiple times.
 
 **Sources**:
-- `templates/` — Hooks, CLAUDE.md sections
+- `templates/` — Hooks, context file sections
 - `rites/{active}/` — Agents, skills from active rite
 - `rites/shared/` — Shared skills
 
@@ -71,7 +71,7 @@ Generates the complete `.claude/` directory structure from [SOURCE](../../refere
 |------|------|---------|-------------|
 | `--dry-run` | bool | false | Preview changes without applying |
 | `-f, --force` | bool | false | Force regeneration, overwriting local changes |
-| `--keep-orphans` | bool | true | Preserve orphan agents in `.claude/agents/` |
+| `--keep-orphans` | bool | true | Preserve orphan agents in the channel agents directory |
 | `--rite` | string | current | Rite to materialize |
 
 **Examples**:
@@ -93,11 +93,11 @@ ari sync materialize
 ```
 
 **Orphan Handling**:
-When switching rites, agents from the previous rite become "orphans" and are removed by default (with backup). Use `--keep-orphans` to preserve them in `.claude/agents/`.
+When switching rites, agents from the previous rite become "orphans" and are removed by default (with backup). Use `--keep-orphans` to preserve them in the channel agents directory.
 
 **Related Commands**:
 - [`ari sync --rite`](cli-rite.md#ari-rite-swap) — Switch rites (replaces `ari rite swap`)
-- [`ari inscription sync`](cli-inscription.md#ari-inscription-sync) — Sync CLAUDE.md only
+- [`ari inscription sync`](cli-inscription.md#ari-inscription-sync) — Sync context file only
 
 ---
 
@@ -120,7 +120,7 @@ Pulls changes from the remote source with three-way conflict detection. If remot
 - Local path: `/path/to/source` or `./relative`
 - HTTP(S): `https://example.com/config`
 - GitHub: `org/repo` (uses raw.githubusercontent.com)
-- Git ref: `HEAD:.claude/path`
+- Git ref: `HEAD:{channel_dir}/path`
 
 **Flags**:
 | Flag | Type | Default | Description |
@@ -232,7 +232,7 @@ ari sync diff --full
 
 **Related Commands**:
 - [`ari sync status`](#ari-sync-status) — Quick status check
-- [`ari inscription diff`](cli-inscription.md#ari-inscription-diff) — CLAUDE.md diff
+- [`ari inscription diff`](cli-inscription.md#ari-inscription-diff) — context file diff
 
 ---
 
@@ -378,7 +378,7 @@ All sync commands support these global flags:
 ```mermaid
 flowchart LR
     A[SOURCE knossos/] --> B[ari sync materialize]
-    B --> C[PROJECTION .claude/]
+    B --> C[PROJECTION channel/]
 
     subgraph SOURCE
         D[rites/]
@@ -391,7 +391,7 @@ flowchart LR
         H[agents/]
         I[skills/]
         J[hooks/]
-        K[CLAUDE.md]
+        K[context file]
     end
 
     D --> H

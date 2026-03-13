@@ -17,10 +17,10 @@ last_verified: 2026-02-26
 | [session](cli-session.md) | 15 | Create, list, park, resume, wrap sessions |
 | [rite](cli-rite.md) | 10 | List, invoke, release, swap rites |
 | [worktree](cli-worktree.md) | 11 | Parallel sessions with filesystem isolation |
-| [sync](cli-sync.md) | 8 | Synchronize .claude/ with remotes |
+| [sync](cli-sync.md) | 8 | Synchronize channel directory with remotes |
 | [hook](cli-hook.md) | 11 | Hook infrastructure + agent-guard |
 | [handoff](cli-handoff.md) | 4 | Agent handoffs between phases |
-| [inscription](cli-inscription.md) | 5 | CLAUDE.md inscription system |
+| [inscription](cli-inscription.md) | 5 | Context file inscription system |
 | [artifact](cli-artifact.md) | 4 | Register and query workflow artifacts |
 | [validate](cli-validate.md) | 3 | Validate artifacts and handoffs |
 | [manifest](cli-manifest.md) | 4 | Show, validate, diff manifests |
@@ -131,8 +131,8 @@ ari rite swap docs     # Switch to docs rite
 - `ari rite pantheon` — See agents
 
 ### Configuration
-- `ari sync materialize` — Generate .claude/
-- `ari inscription sync` — Update CLAUDE.md
+- `ari sync materialize` — Generate channel directory
+- `ari inscription sync` — Update context file
 - `ari manifest show` — View config
 
 ### Quality & Validation

@@ -49,7 +49,7 @@ func runPantheon(ctx *cmdContext) error {
 		return errors.New(errors.CodeFileNotFound, "no active rite (use 'ari sync --rite=<name>' to activate)")
 	}
 
-	// Read agents from .claude/agents/
+	// Read agents from the channel agents directory
 	agentsDir := filepath.Join(resolver.ChannelDir(paths.ClaudeChannel{}), "agents")
 	entries, err := os.ReadDir(agentsDir)
 	if err != nil {

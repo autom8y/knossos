@@ -1,5 +1,5 @@
 // Package userscope implements the user-scope sync pipeline for the
-// materialize system. It syncs resources from KNOSSOS_HOME to ~/.claude/.
+// materialize system. It syncs resources from KNOSSOS_HOME to the user channel dir.
 package userscope
 
 import (

@@ -49,7 +49,7 @@ func formatBudgetReport(channelDir string, out map[string]any) error {
 				"tokens": s.Tokens,
 			}
 		}
-		budget["claude_md_sections"] = sectionList
+		budget["context_file_sections"] = sectionList
 	}
 
 	if len(report.Warnings) > 0 {

@@ -1,4 +1,4 @@
-// Package provenance provides unified file-level provenance tracking for .claude/.
+// Package provenance provides unified file-level provenance tracking for the channel dir.
 // The provenance manifest records the origin and ownership state of all files
 // materialized by the knossos pipeline, enabling divergence detection and safe
 // ownership transitions.
@@ -26,7 +26,7 @@ const OrgManifestFileName = "ORG_PROVENANCE_MANIFEST.yaml"
 // Starts at "2.0" for the provenance manifest (independent of inscription's "1.0").
 const CurrentSchemaVersion = "2.0"
 
-// ProvenanceManifest is the unified file-level provenance tracker for .claude/.
+// ProvenanceManifest is the unified file-level provenance tracker for the channel dir.
 // Stored at .knossos/PROVENANCE_MANIFEST.yaml.
 type ProvenanceManifest struct {
 	// SchemaVersion is the manifest format version. Currently "1.0".
@@ -39,13 +39,13 @@ type ProvenanceManifest struct {
 	// Empty string for minimal (cross-cutting) materializations.
 	ActiveRite string `yaml:"active_rite,omitempty"`
 
-	// Entries maps relative paths within .claude/ to their provenance records.
+	// Entries maps relative paths within the channel dir to their provenance records.
 	// Keys use forward slashes. Directory entries end with "/" (mena only).
 	// Examples: "agents/orchestrator.md", "commands/commit/", "CLAUDE.md"
 	Entries map[string]*ProvenanceEntry `yaml:"entries"`
 }
 
-// ProvenanceEntry tracks the origin and state of a single file or directory in .claude/.
+// ProvenanceEntry tracks the origin and state of a single file or directory in the channel dir.
 type ProvenanceEntry struct {
 	// Owner determines sync behavior for this entry.
 	Owner OwnerType `yaml:"owner"`
@@ -83,7 +83,7 @@ type ProvenanceEntry struct {
 	LastSynced time.Time `yaml:"last_synced"`
 }
 
-// OwnerType represents who owns a file in .claude/.
+// OwnerType represents who owns a file in the channel dir.
 //
 // NOTE: inscription.OwnerType is a distinct type with different semantics (region
 // ownership for CLAUDE.md: knossos/satellite/regenerate). This type covers file

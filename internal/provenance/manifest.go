@@ -48,7 +48,7 @@ func Load(path string) (*ProvenanceManifest, error) {
 // Save writes the manifest to disk, but only if structural content has changed.
 // Uses a stable comparison (excluding LastSync timestamp) to avoid triggering
 // CC's file watcher on no-op syncs. The watcher crash is a known issue when
-// atomic writes (temp file + rename) happen in .claude/ unnecessarily.
+// atomic writes (temp file + rename) happen in the channel dir unnecessarily.
 func Save(path string, manifest *ProvenanceManifest) error {
 	// Validate before saving
 	if err := validateManifest(manifest); err != nil {
@@ -63,7 +63,7 @@ func Save(path string, manifest *ProvenanceManifest) error {
 
 	// Compare structural content only (exclude volatile last_sync timestamp).
 	// This prevents timestamp-only changes from triggering atomic writes
-	// which create temp files in .claude/ and trigger CC's file watcher.
+	// which create temp files in the channel dir and trigger the harness file watcher.
 	existing, readErr := os.ReadFile(path)
 	if readErr == nil {
 		// Parse existing manifest to compare structurally

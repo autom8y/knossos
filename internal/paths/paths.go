@@ -165,7 +165,7 @@ func (r *Resolver) AgentsDirForChannel(ch TargetChannel) string {
 	return filepath.Join(r.ChannelDir(ch), "agents")
 }
 
-// AgentsDir returns the path to the .claude/agents/ directory.
+// AgentsDir returns the path to the channel agents directory.
 // Deprecated: Use AgentsDirForChannel for channel-aware paths.
 func (r *Resolver) AgentsDir() string {
 	return r.AgentsDirForChannel(ClaudeChannel{})

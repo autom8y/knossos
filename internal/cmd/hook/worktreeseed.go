@@ -135,7 +135,7 @@ func runWorktreeSeedCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pr
 	// Step 6: Read ACTIVE_RITE from the main worktree (best-effort).
 	riteName := paths.NewResolver(projectRoot).ReadActiveRite()
 
-	// Step 7: If a rite is active, run ari sync in the new worktree to seed .claude/.
+	// Step 7: If a rite is active, run ari sync in the new worktree to seed the channel dir.
 	if riteName != "" {
 		fmt.Fprintf(stderr, "worktree-seed: seeding worktree with rite %q\n", riteName)
 		if err := seedWorktreeRite(worktreePath, riteName, ctx); err != nil {
@@ -158,7 +158,7 @@ func runWorktreeSeedCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pr
 
 // seedWorktreeRite runs ari sync (rite scope only) in the given worktree directory
 // using the materialize package directly (no subprocess). This seeds the worktree's
-// .claude/ directory with the specified rite.
+// channel directory with the specified rite.
 func seedWorktreeRite(worktreePath, riteName string, ctx *cmdContext) error {
 	resolver := paths.NewResolver(worktreePath)
 	m := NewWiredMaterializer(resolver)

@@ -44,7 +44,7 @@ The repository will bear the name `knossos` when it proves capable of self-hosti
 
 At the entrance to every sacred precinct, words were carved in stone -- dedications, warnings, instructions for the uninitiated. No traveler entered without reading what the builders had written.
 
-**CLAUDE.md** is the Inscription. It is the labyrinth speaking to those who would enter, declaring:
+**The context file** (the Inscription) is the labyrinth speaking to those who would enter, declaring:
 
 - What heroes may be summoned within these walls
 - What rites govern this place
@@ -116,7 +116,7 @@ But Minos imprisoned Daedalus for knowing the labyrinth's secrets too well. The 
 
 **Icarus** flew too close to the sun on wings his father built. The wings were not flawed. The constraints were not hidden. Daedalus warned him explicitly. Icarus exceeded the constraint surface anyway -- and fell.
 
-In Knossos, Icarus is the SCAR catalog: SCAR-002 renamed `.claude/` and froze Claude Code solid; SCAR-005 called `os.RemoveAll` on directories containing user content and destroyed it; SCAR-018 set `context: fork` on a dromenon that needed the Task tool and silently degraded parallel dispatch to sequential reads; SCAR-026 wired delegation hints into writeguard infrastructure and was reverted because the coupling was unsound. Each of these was an ambitious change that ignored the constraint surface -- the CC file watcher, the user content boundary, the Task tool restriction. Each fell.
+In Knossos, Icarus is the SCAR catalog: SCAR-002 renamed the channel directory and froze the harness solid; SCAR-005 called `os.RemoveAll` on directories containing user content and destroyed it; SCAR-018 set `context: fork` on a dromenon that needed the Task tool and silently degraded parallel dispatch to sequential reads; SCAR-026 wired delegation hints into writeguard infrastructure and was reverted because the coupling was unsound. Each of these was an ambitious change that ignored the constraint surface -- the harness file watcher, the user content boundary, the Task tool restriction. Each fell.
 
 The forge-rite builds tools. Icarus is the reminder that tools used without respecting constraints will fail. The SCAR catalog is not a list of bad ideas. It is a record of good ideas deployed without sufficient respect for where the wax melts.
 
@@ -525,7 +525,7 @@ The clew records every transition.
 
 ### Key Hooks
 
-- **context-injection**: SessionStart hook that reads the Inscription (CLAUDE.md) and prepares the traveler
+- **context-injection**: SessionStart hook that reads the Inscription (context file) and prepares the traveler
 - **clew**: PostToolUse hook that records events to events.jsonl
 - **writeguard**: PreToolUse hook that protects context files from direct modification
 - **autopark**: PostToolUse hook that suggests parking when budget depletes
@@ -543,8 +543,8 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 
 | Myth | Component | Philosophical Function |
 |------|-----------|------------------------|
-| **Knossos** | The platform (roster/.claude/) | The labyrinth itself—complexity incarnate |
-| **The Inscription** | CLAUDE.md | The labyrinth's entrance, declaring what heroes and rites are available |
+| **Knossos** | The platform (roster/channel directory) | The labyrinth itself—complexity incarnate |
+| **The Inscription** | context file | The labyrinth's entrance, declaring what heroes and rites are available |
 | **Ariadne** | CLI binary (`ari`) | The intelligence that navigates complexity and guarantees return |
 | **The Clew** | Session state + events.jsonl | The provenance trail, identity through transformation |
 | **Theseus** | Main Claude Code thread | The navigator who summons heroes |
@@ -615,7 +615,7 @@ Slaying the Minotaur matters less than returning to Athens. A merged PR with hon
 
 ### 8. The Inscription Prepares
 
-CLAUDE.md is not documentation—it is the labyrinth speaking. Keep the Inscription current, and travelers arrive prepared.
+The context file is not documentation—it is the labyrinth speaking. Keep the Inscription current, and travelers arrive prepared.
 
 ### 9. The Palace Observes Xenia
 
@@ -629,7 +629,7 @@ In Knossos, the provenance owner trichotomy is a xenic contract:
 | `user` | Guest's possessions | The palace must preserve these as inviolable |
 | `untracked` | Unclaimed goods | Must be attributed before the host may act on them |
 
-Platform resources are guests in user space; user resources are guests in platform space. Both observe rules of respectful coexistence. Satellite regions in CLAUDE.md, user-owned agents, and `OwnerUser` provenance entries are the guest's possessions within the host's palace—the palace must not disturb them.
+Platform resources are guests in user space; user resources are guests in platform space. Both observe rules of respectful coexistence. Satellite regions in the context file, user-owned agents, and `OwnerUser` provenance entries are the guest's possessions within the host's palace—the palace must not disturb them.
 
 SCAR-005 (`os.RemoveAll` destroying user content) was a violation of xenia. The selective-write architecture and the regression tests in `selective_write_test.go` are the restoration of the sacred contract. The `writeIfChanged()` pattern in materialize—reading existing content before writing, skipping unchanged files—is xenic diligence: the host does not disturb what does not need disturbing.
 

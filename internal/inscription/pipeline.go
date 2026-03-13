@@ -536,7 +536,7 @@ func (p *Pipeline) buildRenderContext(manifest *Manifest) (*RenderContext, error
 		ctx.ActiveRite = paths.NewResolver(p.ProjectRoot).ReadActiveRite()
 	}
 
-	// Load agent information from .claude/agents/
+	// Load agent information from the channel agents directory
 	agentsDir := filepath.Join(p.ProjectRoot, ".claude", "agents")
 	allAgents, err := p.loadAgents(agentsDir)
 	if err != nil {

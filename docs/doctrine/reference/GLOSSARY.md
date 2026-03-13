@@ -11,7 +11,7 @@ last_verified: 2026-02-26
 | Term | Definition |
 |------|------------|
 | **SOURCE** | The Knossos repository—versioned, canonical platform code |
-| **PROJECTION** | `.claude/` directories—gitignored, materialized by `ari sync materialize` |
+| **PROJECTION** | channel directories—gitignored, materialized by `ari sync materialize` |
 
 ## Mythology Terms
 
@@ -66,8 +66,8 @@ Specialist agents invoked via Task tool for specific labors, defined in rite man
 - **Source**: `rites/[rite-name]/agents/`
 
 ### Inscription
-The `CLAUDE.md` file declaring available rites, agents, execution mode, and hooks. Words carved at the labyrinth entrance. Mentions Potnia for routing, Exousia for authority contracts, `/go` for cold-start entry, and the Fates for session lifecycle.
-- **Related**: CLAUDE.md, Knossos Sections, Potnia, Exousia, `/go`
+The context file declaring available rites, agents, execution mode, and hooks. Words carved at the labyrinth entrance. Mentions Potnia for routing, Exousia for authority contracts, `/go` for cold-start entry, and the Fates for session lifecycle.
+- **Related**: Context File, Knossos Sections, Potnia, Exousia, `/go`
 - **Source**: `knossos/templates/CLAUDE.md.tpl`
 
 ### Legomena
@@ -76,7 +76,7 @@ Persistent reference knowledge (`.lego.md` files materialized to `.channel/skill
 - **Source**: `rites/*/mena/*.lego.md`
 
 ### Knossos
-The labyrinth—the Knossos repository itself (SOURCE), not the `.claude/` directories it generates (PROJECTION).
+The labyrinth—the Knossos repository itself (SOURCE), not the channel directories it generates (PROJECTION).
 - **Related**: SOURCE, Platform, Repository
 - **Source**: Repository root
 
@@ -182,7 +182,7 @@ Session complexity level (TRIVIAL, LOW, MEDIUM, HIGH, EXTREME). Determines workf
 ### Execution Mode
 Operating mode (Native, Cross-Cutting, Orchestrated) determining session tracking and agent delegation patterns.
 - **Related**: Session, Orchestration, Workflow
-- **Source**: Declared in `CLAUDE.md`
+- **Source**: Declared in context file
 
 ### Forge
 The `forge-rite` for platform development—building agents, tools, infrastructure. Daedalus's domain.

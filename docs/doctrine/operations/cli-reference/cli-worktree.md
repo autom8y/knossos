@@ -6,7 +6,7 @@ last_verified: 2026-02-26
 
 > Manage git worktrees for parallel Claude sessions.
 
-[Worktrees](../../reference/GLOSSARY.md#worktree) enable parallel Claude Code sessions with filesystem isolation. Each worktree has its own `.claude/` directory with independent sessions, rites, and state.
+[Worktrees](../../reference/GLOSSARY.md#worktree) enable parallel AI coding assistant sessions with filesystem isolation. Each worktree has its own channel directory with independent sessions, rites, and state.
 
 **Family**: worktree
 **Commands**: 10
@@ -26,7 +26,7 @@ ari worktree create <name> [flags]
 ```
 
 **Description**:
-Creates a git worktree for parallel session work. The worktree is created in `.worktrees/{id}/` with full ecosystem initialization including fresh `.claude/` directory, rite materialization, and optional session creation.
+Creates a git worktree for parallel session work. The worktree is created in `.worktrees/{id}/` with full ecosystem initialization including a fresh channel directory, rite materialization, and optional session creation.
 
 **Arguments**:
 - `name` (string, required): Descriptive name for the worktree
@@ -55,7 +55,7 @@ ari worktree create migration --complexity=MIGRATION
 
 **What Happens**:
 1. Git worktree created with detached HEAD (no branch pollution)
-2. `.claude/` directory materialized from roster
+2. Channel directory materialized from roster
 3. Rite activated via sync materialize
 4. Initial session created (optional)
 5. Worktree metadata saved to `.knossos/.worktree-meta.json`

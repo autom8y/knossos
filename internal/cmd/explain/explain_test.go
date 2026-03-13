@@ -230,7 +230,7 @@ Body text.
 	assert.Empty(t, entry.Aliases)
 }
 
-func TestParseConceptWithCCTerm(t *testing.T) {
+func TestParseConceptWithHarnessTerm(t *testing.T) {
 	// TC-E44: With cc_term
 	data := []byte(`---
 summary: Test summary.
@@ -244,7 +244,7 @@ Body text.
 	assert.Equal(t, "legomena (skills)", entry.DisplayName)
 }
 
-func TestParseConceptWithoutCCTerm(t *testing.T) {
+func TestParseConceptWithoutHarnessTerm(t *testing.T) {
 	// TC-E45: Without cc_term
 	data := []byte(`---
 summary: Test summary.

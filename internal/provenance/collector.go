@@ -8,7 +8,7 @@ import "sync"
 // to retrieve all recorded entries for manifest construction.
 type Collector interface {
 	// Record adds or updates a provenance entry for the given relative path.
-	// relativePath is relative to .claude/ (e.g., "agents/orchestrator.md").
+	// relativePath is relative to the channel dir (e.g., "agents/orchestrator.md").
 	// Duplicate paths overwrite previous entries (last-writer-wins, matching
 	// the materialize pipeline's priority semantics).
 	Record(relativePath string, entry *ProvenanceEntry)

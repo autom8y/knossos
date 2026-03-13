@@ -4,9 +4,9 @@ last_verified: 2026-02-26
 
 # CLI Reference: inscription
 
-> Manage the CLAUDE.md inscription system.
+> Manage the context file inscription system.
 
-The [inscription](../../reference/GLOSSARY.md#inscription) system synchronizes CLAUDE.md content with templates and project state, managing ownership of different regions.
+The [inscription](../../reference/GLOSSARY.md#inscription) system synchronizes the context file content with templates and project state, managing ownership of different regions.
 
 **Family**: inscription
 **Commands**: 5
@@ -28,7 +28,7 @@ The [inscription](../../reference/GLOSSARY.md#inscription) system synchronizes C
 
 ### ari inscription sync
 
-Synchronize CLAUDE.md with templates.
+Synchronize the context file with templates.
 
 **Synopsis**:
 ```bash
@@ -36,7 +36,7 @@ ari inscription sync [flags]
 ```
 
 **Description**:
-Synchronizes CLAUDE.md with Knossos templates. Regenerates managed sections while preserving satellite-owned content.
+Synchronizes the context file with Knossos templates. Regenerates managed sections while preserving satellite-owned content.
 
 **Flags**:
 | Flag | Type | Default | Description |
@@ -59,7 +59,7 @@ ari inscription sync --dry-run
 
 ### ari inscription validate
 
-Validate inscription manifest and CLAUDE.md.
+Validate inscription manifest and context file.
 
 **Synopsis**:
 ```bash
@@ -67,7 +67,7 @@ ari inscription validate [flags]
 ```
 
 **Description**:
-Checks that the inscription manifest is valid and CLAUDE.md sections are properly delimited.
+Checks that the inscription manifest is valid and context file sections are properly delimited.
 
 **Examples**:
 ```bash
@@ -108,7 +108,7 @@ ari inscription diff
 
 ### ari inscription backups
 
-List available CLAUDE.md backups.
+List available context file backups.
 
 **Synopsis**:
 ```bash
@@ -134,7 +134,7 @@ ari inscription backups -o json
 
 ### ari inscription rollback
 
-Restore CLAUDE.md from backup.
+Restore the context file from backup.
 
 **Synopsis**:
 ```bash
@@ -142,7 +142,7 @@ ari inscription rollback [flags]
 ```
 
 **Description**:
-Restores CLAUDE.md from a previous backup. Use after a sync operation causes issues.
+Restores the context file from a previous backup. Use after a sync operation causes issues.
 
 **Examples**:
 ```bash

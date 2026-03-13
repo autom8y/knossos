@@ -290,7 +290,7 @@ func (m *Materializer) writeActiveRite(riteName string) error {
 	return nil
 }
 
-// cleanupStaleBlanketSettings removes .claude/settings.json if it matches a known
+// cleanupStaleBlanketSettings removes channel settings.json if it matches a known
 // stale fingerprint from the deleted writeDefaultSettings() function AND has no
 // provenance entry (indicating it was not created by the current pipeline).
 //

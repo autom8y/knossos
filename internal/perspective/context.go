@@ -39,7 +39,7 @@ type ParseContext struct {
 	Workflow    map[string]any // parsed workflow.yaml
 	Orchestrator map[string]any // parsed orchestrator.yaml
 
-	// Materialized skills directories (dir names under .claude/skills/)
+	// Materialized skills directories (dir names under channel skills/)
 	MaterializedSkillsDirs []string
 
 	// Resolved paths

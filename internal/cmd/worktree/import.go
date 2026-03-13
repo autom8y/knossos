@@ -35,8 +35,8 @@ func (i ImportOutput) Text() string {
 	}
 	fmt.Fprintf(&b, "  From archive: %s\n", i.FromArchive)
 	fmt.Fprintf(&b, "  Original ID: %s\n", i.OriginalID)
-	// "claude" is the CC CLI binary name (not a knossos concept).
-	fmt.Fprintf(&b, "\nTo start working: cd %s && claude\n", i.Path)
+	// "claude" is the CC CLI binary name (not a knossos concept). // HA-CLI: CC binary reference
+	fmt.Fprintf(&b, "\nTo start working: cd %s && claude\n", i.Path) // HA-CLI: CC binary reference
 	return b.String()
 }
 
@@ -92,7 +92,7 @@ func runImport(ctx *cmdContext, archivePath string) error {
 		FromArchive:  archivePath,
 		OriginalID:   wt.FromRef, // FromRef contains the original git ref
 		CreatedAt:    time.Now().UTC().Format(time.RFC3339),
-		Instructions: fmt.Sprintf("cd %s && claude", wt.Path), // "claude" is the CC CLI binary name
+		Instructions: fmt.Sprintf("cd %s && claude", wt.Path), // "claude" is the CC CLI binary name // HA-CLI: CC binary reference
 	}
 
 	return printer.Print(result)

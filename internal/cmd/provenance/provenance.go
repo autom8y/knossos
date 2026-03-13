@@ -110,7 +110,7 @@ func runShow(ctx *cmdContext, scopeFilter string) error {
 		}
 	}
 
-	// Load user-scope manifest (from ~/.claude/)
+	// Load user-scope manifest (from user channel dir)
 	if scopeFilter == "" || scopeFilter == "user" {
 		homeDir, err := os.UserHomeDir()
 		if err == nil {

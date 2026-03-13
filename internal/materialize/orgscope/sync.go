@@ -1,5 +1,5 @@
 // Package orgscope implements the org-scope sync pipeline for the materialize
-// system. It syncs resources from an org directory to ~/.claude/.
+// system. It syncs resources from an org directory to the user channel dir.
 package orgscope
 
 import (

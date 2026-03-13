@@ -26,7 +26,7 @@ type syncer struct {
 }
 
 // SyncUserScope is the primary entry point for user-scope sync.
-// It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to ~/.claude/ directories.
+// It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to the user channel directories.
 func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 	userChannelDir := params.UserChannelDir
 	if userChannelDir == "" {
@@ -45,12 +45,12 @@ func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 }
 
 // syncUserScope implements the full user-scope sync logic.
-// It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to ~/.claude/ directories.
+// It syncs resources from KNOSSOS_HOME/{agents,mena,hooks} to the user channel directories.
 //
 // Note: This file uses os.WriteFile rather than writeIfChanged because user-scope
-// targets (~/.claude/) are outside CC's project-level file watcher scope. The
+// targets (user channel dir) are outside the harness project-level file watcher scope. The
 // writeIfChanged optimization prevents unnecessary file watcher triggers in the
-// project .claude/ directory, but that concern does not apply here.
+// project channel directory, but that concern does not apply here.
 func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	result := &UserScopeResult{
 		Status:		"success",
@@ -64,7 +64,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 		return nil, ErrKnossosHomeNotSet()
 	}
 
-	// Resolve user ~/.claude/ directory
+	// Resolve user channel directory
 	userChannelDir := s.userChannelDir
 
 	// Load or bootstrap USER_PROVENANCE_MANIFEST.yaml
@@ -171,7 +171,7 @@ func (s *syncer) syncUserScope(opts SyncOptions) (*UserScopeResult, error) {
 	return result, nil
 }
 
-// syncUserResource syncs a single resource type from KNOSSOS_HOME to ~/.claude/.
+// syncUserResource syncs a single resource type from KNOSSOS_HOME to the user channel dir.
 func (s *syncer) syncUserResource(
 	resourceType SyncResource,
 	knossosHome string,

@@ -44,7 +44,7 @@ func (c *Counter) CountFile(path string) (int, error) {
 	return c.Count(string(data)), nil
 }
 
-// BudgetReport contains token counts for a .claude/ directory.
+// BudgetReport contains token counts for a channel directory.
 type BudgetReport struct {
 	TotalTokens int                    `json:"total_tokens"`
 	Categories  map[string]int         `json:"categories"`
@@ -65,7 +65,7 @@ type SectionTokenCount struct {
 	Tokens int    `json:"tokens"`
 }
 
-// CalculateBudget walks a .claude/ directory and counts tokens for all context files.
+// CalculateBudget walks a channel directory and counts tokens for all context files.
 // knossosDir is the sibling .knossos/ directory used for workflow state.
 func (c *Counter) CalculateBudget(channelDir string) (*BudgetReport, error) {
 	report := &BudgetReport{
@@ -113,8 +113,8 @@ func (c *Counter) CalculateBudget(channelDir string) (*BudgetReport, error) {
 	}
 
 	// Parse CLAUDE.md sections
-	claudeMdPath := filepath.Join(channelDir, "CLAUDE.md")
-	if sections := c.parseSections(claudeMdPath); len(sections) > 0 {
+	contextFilePath := filepath.Join(channelDir, "CLAUDE.md")
+	if sections := c.parseSections(contextFilePath); len(sections) > 0 {
 		report.Sections = sections
 	}
 
@@ -165,8 +165,8 @@ func (c *Counter) countDir(dir, base string) (int, []FileTokenCount) {
 }
 
 // parseSections extracts KNOSSOS regions from CLAUDE.md and counts tokens per section.
-func (c *Counter) parseSections(claudeMdPath string) []SectionTokenCount {
-	data, err := os.ReadFile(claudeMdPath)
+func (c *Counter) parseSections(contextFilePath string) []SectionTokenCount {
+	data, err := os.ReadFile(contextFilePath)
 	if err != nil {
 		return nil
 	}

@@ -26,7 +26,7 @@ func (m *Materializer) knownRuleTemplateNames(_ *ResolvedRite) map[string]bool {
 	return names
 }
 
-// materializeRules copies rule files from templates/rules to .claude/rules/
+// materializeRules copies rule files from templates/rules to channel rules directory
 // Platform rules are overwritten from templates; user-created rules are preserved.
 // On rite switch, stale knossos-managed rules are removed before writing new ones.
 // Provenance is determined by template filename: any .md file whose name matches

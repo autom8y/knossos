@@ -22,11 +22,11 @@ This is not documentation. This is doctrine.
 
 **Knossos** is the labyrinth itself—the palace-complex where the Minotaur dwells. In our architecture, Knossos is the platform: the repository, the configuration, the accumulated complexity of an evolving system.
 
-The repository currently named `roster` will become `knossos` when it proves itself capable of self-hosting. Until then, **roster/.claude/ IS Knossos**. The name is certain; only the renaming awaits its conditions.
+The repository currently named `roster` will become `knossos` when it proves itself capable of self-hosting. Until then, **roster's channel directory IS Knossos**. The name is certain; only the renaming awaits its conditions.
 
 ### The Inscription
 
-At the entrance to every labyrinth, there are words carved in stone. **CLAUDE.md** is the Inscription—the labyrinth speaking to those who would enter. It tells Theseus:
+At the entrance to every labyrinth, there are words carved in stone. **The context file** (the Inscription) is the labyrinth speaking to those who would enter. It tells Theseus:
 
 - What heroes may be summoned
 - What rites are available
@@ -391,7 +391,7 @@ The clew records every transition.
 
 ### Key Hooks
 
-- **context-injection**: SessionStart hook that reads the Inscription (CLAUDE.md) and prepares the traveler
+- **context-injection**: SessionStart hook that reads the Inscription (context file) and prepares the traveler
 - **clew**: PostToolUse hook that records events to events.jsonl
 - **writeguard**: PreToolUse hook that protects context files from direct modification
 - **autopark**: PostToolUse hook that suggests parking when budget depletes
@@ -409,11 +409,11 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 
 | Myth | Component | Philosophical Function |
 |------|-----------|------------------------|
-| **Knossos** | The platform (roster/.claude/) | The labyrinth itself—complexity incarnate |
-| **The Inscription** | CLAUDE.md | The labyrinth's entrance, declaring what heroes and rites are available |
+| **Knossos** | The platform (roster/channel directory) | The labyrinth itself—complexity incarnate |
+| **The Inscription** | context file | The labyrinth's entrance, declaring what heroes and rites are available |
 | **Ariadne** | CLI binary (`ari`) | The clew that ensures return |
 | **The Clew** | Session state + events.jsonl | The provenance trail, identity through transformation |
-| **Theseus** | Main Claude Code thread | The navigator who summons heroes |
+| **Theseus** | Main harness thread | The navigator who summons heroes |
 | **Heroes** | Specialist agents (Task tool) | Summoned champions for specific labors |
 | **Clotho** | Session bootstrap agent | The Fate who spins the clew into existence |
 | **Lachesis** | State mutation agent | The Fate who measures and tracks |
@@ -469,7 +469,7 @@ Slaying the Minotaur matters less than returning to Athens. A merged PR with hon
 
 ### 8. The Inscription Prepares
 
-CLAUDE.md is not documentation—it is the labyrinth speaking. Keep the Inscription current, and travelers arrive prepared.
+The context file is not documentation—it is the labyrinth speaking. Keep the Inscription current, and travelers arrive prepared.
 
 ### 9. The Halves of the Rite: Dromena and Legomena
 
@@ -541,14 +541,14 @@ This section documents known divergences between the doctrine and the current im
 | Concept | Status | Gap |
 |---------|--------|-----|
 | Three separate Moirai | Pending | Event-driven activation not yet implemented |
-| The Inscription seeding | Partial | CLAUDE.md exists but dynamic seeding is basic |
+| The Inscription seeding | Partial | Context file exists but dynamic seeding is basic |
 | Naxos cleanup | Not implemented | Orphaned session detection missing |
 | Dionysus integration | Implemented | Cross-session knowledge synthesis via `agents/dionysus.md` and `ari land` |
 
 ### Prioritized Alignment Work
 
 1. **High Priority**: Split Moirai into event-driven agents
-2. **High Priority**: Enhance CLAUDE.md seeding (The Inscription)
+2. **High Priority**: Enhance context file seeding (The Inscription)
 3. **Medium Priority**: Implement Naxos detection (orphaned sessions)
 4. **Low Priority**: Rename files from thread→clew in codebase
 

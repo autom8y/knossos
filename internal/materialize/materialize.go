@@ -1,4 +1,4 @@
-// Package materialize generates .claude/ directories from templates and rite manifests.
+// Package materialize generates channel directories from templates and rite manifests.
 package materialize
 
 import (
@@ -64,8 +64,8 @@ type RiteManifest struct {
 	Description   string                    `yaml:"description"`
 	EntryAgent    string                    `yaml:"entry_agent"`
 	Agents        []Agent                   `yaml:"agents"`
-	Dromena       []string                  `yaml:"dromena"`  // Invokable commands (project to .claude/commands/)
-	Legomena      []string                  `yaml:"legomena"` // Reference knowledge (project to .claude/skills/)
+	Dromena       []string                  `yaml:"dromena"`  // Invokable commands (project to channel commands/)
+	Legomena      []string                  `yaml:"legomena"` // Reference knowledge (project to channel skills/)
 	Commands      []string                  `yaml:"commands"` // Backward compat: populates from dromena+legomena if empty
 	Skills        []string                  `yaml:"skills"`   // Deprecated: use Legomena instead
 	Hooks         []string                  `yaml:"hooks"`
@@ -93,14 +93,14 @@ type Agent struct {
 	Archetype string `yaml:"archetype,omitempty"` // Template name: "orchestrator", etc.
 }
 
-// Materializer handles .claude/ directory generation.
+// Materializer handles channel directory generation.
 type Materializer struct {
 	resolver          *paths.Resolver
 	sourceResolver    *SourceResolver
 	explicitSource    string // Optional explicit source from --source flag
 	templatesDir      string
 	embeddedTemplates fs.FS  // Embedded templates filesystem
-	channelDirOverride string // If set, materialize to this directory instead of .claude/
+	channelDirOverride string // If set, materialize to this directory instead of the default channel dir
 	embeddedAgents      fs.FS   // Embedded cross-rite agents (fallback for user scope)
 	embeddedMena        fs.FS   // Embedded platform mena (fallback for user scope)
 	embeddedProcessions fs.FS   // Embedded procession templates (fallback for resolution)
@@ -190,7 +190,7 @@ func (m *Materializer) WithEmbeddedProcessions(fsys fs.FS) *Materializer {
 	return m
 }
 
-// getChannelDir returns the target .claude/ directory, respecting any override.
+// getChannelDir returns the target channel directory, respecting any override.
 func (m *Materializer) getChannelDir() string {
 	if m.channelDirOverride != "" {
 		return m.channelDirOverride
@@ -254,7 +254,7 @@ func copyDirFromFS(fsys fs.FS, dst string) error {
 	})
 }
 
-// MaterializeMinimal generates minimal .claude/ infrastructure without a rite.
+// MaterializeMinimal generates minimal channel directory infrastructure without a rite.
 // This is suitable for cross-cutting mode (session tracking without orchestrated workflows).
 // It creates: CLAUDE.md (base sections), hooks, KNOSSOS_MANIFEST.yaml
 // It does NOT create: agents/, skills/, ACTIVE_RITE
@@ -358,7 +358,7 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 	return result, nil
 }
 
-// MaterializeWithOptions generates the .claude/ directory with configurable orphan handling.
+// MaterializeWithOptions generates the channel directory with configurable orphan handling.
 func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Options) (*Result, error) {
 	result := &Result{
 		Status:          "success",
@@ -443,7 +443,7 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 		return nil, errors.Wrap(errors.CodeGeneralError, "CLAUDE.md pre-validation failed (no files written)", err)
 	}
 
-	// 2. Ensure .claude/ and .knossos/ directories exist
+	// 2. Ensure channel dir and .knossos/ directories exist
 	if err := paths.EnsureDir(channelDir); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to create .claude directory", err)
 	}
@@ -625,7 +625,7 @@ func (m *Materializer) ensureProjectDirs() {
 func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
 	// Pre-flight: ensure framework directories exist before any scope dispatch.
 	// This is idempotent and handles worktrees, fresh clones, and any env where
-	// the gitignored directories (.claude/, .sos/, .knossos/) are absent.
+	// the gitignored directories (channel dir, .sos/, .knossos/) are absent.
 	m.ensureProjectDirs()
 
 	result := &SyncResult{}

@@ -35,8 +35,8 @@ func RouteMenaFile(filename string) string {
 }
 
 // DetectMenaType determines content type from file extension convention.
-// Files with .dro.md extension are dromena (invokable, project to .claude/commands/).
-// Files with .lego.md extension are legomena (reference, project to .claude/skills/).
+// Files with .dro.md extension are dromena (invokable, project to channel commands/).
+// Files with .lego.md extension are legomena (reference, project to channel skills/).
 // Returns "dro" as default for backward compatibility.
 func DetectMenaType(filename string) string {
 	if strings.Contains(filename, ".dro.") {

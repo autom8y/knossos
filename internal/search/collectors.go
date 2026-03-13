@@ -149,7 +149,7 @@ func enrichRiteEntry(e *SearchEntry, orch *orchestratorFile) {
 	}
 }
 
-// CollectAgents returns entries from .claude/agents/ directory.
+// CollectAgents returns entries from the channel agents directory.
 // Returns an empty slice if resolver is nil, has no project root, or the
 // directory is missing.
 func CollectAgents(resolver *paths.Resolver) []SearchEntry {
@@ -218,7 +218,7 @@ type dronemaMeta struct {
 	Description string `yaml:"description"`
 }
 
-// CollectDromena returns entries from .claude/commands/ directory.
+// CollectDromena returns entries from the channel commands directory.
 // Walks recursively for .md files and parses frontmatter.
 // Returns an empty slice if resolver is nil, has no project root, or the
 // directory is missing.

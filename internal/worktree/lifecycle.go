@@ -128,7 +128,7 @@ func (m *Manager) Create(opts CreateOptions) (*Worktree, error) {
 		return nil, err
 	}
 
-	// Materialize .claude/ and set up rite for the new worktree
+	// Materialize channel dir and set up rite for the new worktree
 	m.setupWorktreeEcosystem(wtPath, rite)
 
 	return &wt, nil
