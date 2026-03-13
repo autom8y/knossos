@@ -33,7 +33,7 @@ func TestLintPreferentialLanguageGo(t *testing.T) {
 		os.MkdirAll(internalDir, 0755)
 		os.WriteFile(
 			filepath.Join(internalDir, "bad.go"),
-			[]byte("package example\n\nvar dir = \".claude/agents\"\n"),
+			[]byte("package example\n\nvar dir = \".claude/agents\"\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -117,11 +117,11 @@ func TestLintPreferentialLanguageGo(t *testing.T) {
 
 	t.Run("adapter whitelisted file excluded", func(t *testing.T) {
 		projectRoot := t.TempDir()
-		adapterDir := filepath.Join(projectRoot, "internal", "compiler", "claude")
+		adapterDir := filepath.Join(projectRoot, "internal", "compiler", "claude") // HA-TEST: lint rule test fixture
 		os.MkdirAll(adapterDir, 0755)
 		os.WriteFile(
 			filepath.Join(adapterDir, "compiler.go"),
-			[]byte("package claude\n\nvar name = \"claude\"\n"),
+			[]byte("package claude\n\nvar name = \"claude\"\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -155,7 +155,7 @@ func TestLintPreferentialLanguageGo(t *testing.T) {
 		os.MkdirAll(internalDir, 0755)
 		os.WriteFile(
 			filepath.Join(internalDir, "foo_test.go"),
-			[]byte("package example\n\nvar testDir = \".claude/agents\"\n"),
+			[]byte("package example\n\nvar testDir = \".claude/agents\"\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -172,7 +172,7 @@ func TestLintPreferentialLanguageGo(t *testing.T) {
 		os.MkdirAll(internalDir, 0755)
 		os.WriteFile(
 			filepath.Join(internalDir, "multi.go"),
-			[]byte("package example\n\nvar a = \"claude\"\nvar b = \"gemini\"\nvar c = \".claude/settings\"\n"),
+			[]byte("package example\n\nvar a = \"claude\"\nvar b = \"gemini\"\nvar c = \".claude/settings\"\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -255,7 +255,7 @@ func TestLintPreferentialLanguageMena(t *testing.T) {
 		os.MkdirAll(menaDir, 0755)
 		os.WriteFile(
 			filepath.Join(menaDir, "INDEX.lego.md"),
-			[]byte("---\nname: example\n---\n\nRead(\".claude/skills/foo\")\n"),
+			[]byte("---\nname: example\n---\n\nRead(\".claude/skills/foo\")\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -292,7 +292,7 @@ func TestLintPreferentialLanguageMena(t *testing.T) {
 		os.MkdirAll(menaDir, 0755)
 		os.WriteFile(
 			filepath.Join(menaDir, "INDEX.lego.md"),
-			[]byte("---\nname: example\n---\n\n<!-- HA-005 --> .claude/settings.local.json is Claude-only\n"),
+			[]byte("---\nname: example\n---\n\n<!-- HA-005 --> .claude/settings.local.json is Claude-only\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -309,7 +309,7 @@ func TestLintPreferentialLanguageMena(t *testing.T) {
 		os.MkdirAll(menaDir, 0755)
 		os.WriteFile(
 			filepath.Join(menaDir, "INDEX.lego.md"),
-			[]byte("---\nname: example\n---\n\n.channel/ (was .claude/) is the canonical placeholder\n"),
+			[]byte("---\nname: example\n---\n\n.channel/ (was .claude/) is the canonical placeholder\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -326,7 +326,7 @@ func TestLintPreferentialLanguageMena(t *testing.T) {
 		os.MkdirAll(menaDir, 0755)
 		os.WriteFile(
 			filepath.Join(menaDir, "config.yaml"),
-			[]byte("path: .claude/settings\n"),
+			[]byte("path: .claude/settings\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -343,7 +343,7 @@ func TestLintPreferentialLanguageMena(t *testing.T) {
 		os.MkdirAll(riteMenaDir, 0755)
 		os.WriteFile(
 			filepath.Join(riteMenaDir, "INDEX.lego.md"),
-			[]byte("---\nname: example\n---\n\nSee .claude/commands/ for details\n"),
+			[]byte("---\nname: example\n---\n\nSee .claude/commands/ for details\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		report := &LintReport{}
@@ -408,7 +408,7 @@ func TestRunLint_CheckFlag(t *testing.T) {
 		os.MkdirAll(internalDir, 0755)
 		os.WriteFile(
 			filepath.Join(internalDir, "bad.go"),
-			[]byte("package example\n\nvar dir = \".claude/agents\"\n"),
+			[]byte("package example\n\nvar dir = \".claude/agents\"\n"), // HA-TEST: lint rule test fixture
 			0644,
 		)
 		outputFormat := "text"
