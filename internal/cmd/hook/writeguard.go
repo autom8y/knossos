@@ -139,10 +139,7 @@ func runWriteguardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Prin
 	}
 
 	// Parse file path from tool input
-	filePath, blocked := parseFilePath(printer, hookEnv.ToolInput)
-	if blocked {
-		return outputBlockTraversal(printer)
-	}
+	filePath, _ := parseFilePath(printer, hookEnv.ToolInput)
 	if filePath == "" {
 		return outputAllow(printer)
 	}
@@ -223,9 +220,12 @@ func runWriteguardCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Prin
 	return outputAllow(printer)
 }
 
-// parseFilePath extracts file_path from JSON tool input and hardens it against traversal.
-// Returns (path, blocked). path is empty on parse error or if field missing.
-// blocked is true if a traversal attempt was detected.
+// parseFilePath extracts file_path from JSON tool input and normalizes it.
+// Returns (path, false). path is empty on parse error or if field missing.
+// The second return value is retained for API compatibility but is always false;
+// path traversal blocking was removed because CC sends absolute paths for
+// Write/Edit tools, and the actual security boundaries are CC's sandbox
+// (filesystem access) and isProtectedFile (context-file protection).
 func parseFilePath(printer *output.Printer, toolInput string) (string, bool) {
 	if toolInput == "" {
 		return "", false
@@ -243,30 +243,8 @@ func parseFilePath(printer *output.Printer, toolInput string) (string, bool) {
 		return "", false
 	}
 
-	// Hardening: Normalize path and block traversal
 	cleaned := filepath.Clean(fp)
-
-	// Block absolute paths or those that attempt to climb above current directory
-	if filepath.IsAbs(cleaned) || strings.HasPrefix(cleaned, "..") {
-		printer.VerboseLog("warn", "blocked potential path traversal attempt",
-			map[string]any{"raw": fp, "cleaned": cleaned})
-		return "", true
-	}
-
 	return cleaned, false
-}
-
-// outputBlockTraversal outputs a deny decision for path traversal attempts.
-func outputBlockTraversal(printer *output.Printer) error {
-	result := hook.PreToolUseOutput{
-		HookSpecificOutput: hook.HookSpecificOutput{
-			HookEventName:            "PreToolUse",
-			PermissionDecision:       "deny",
-			PermissionDecisionReason: "Blocked potential path traversal attempt",
-			AdditionalContext:        "File paths must be relative and remain within the project workspace.",
-		},
-	}
-	return printer.Print(result)
 }
 
 // isSessionContext returns true if filePath targets a SESSION_CONTEXT.md file.

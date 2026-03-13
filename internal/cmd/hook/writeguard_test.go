@@ -117,22 +117,22 @@ func TestParseFilePath(t *testing.T) {
 			expectWarning: false,
 		},
 		{
-			name:          "path traversal - parent directory",
-			toolInput:     `{"file_path": "../../etc/passwd"}`,
-			want:          "",
-			expectWarning: true,
+			name:          "absolute path passthrough",
+			toolInput:     `{"file_path": "/Users/tom/project/src/main.go"}`,
+			want:          "/Users/tom/project/src/main.go",
+			expectWarning: false,
 		},
 		{
-			name:          "path traversal - absolute path",
-			toolInput:     `{"file_path": "/etc/passwd"}`,
-			want:          "",
-			expectWarning: true,
+			name:          "parent-relative path passthrough",
+			toolInput:     `{"file_path": "../sibling-repo/Dockerfile"}`,
+			want:          "../sibling-repo/Dockerfile",
+			expectWarning: false,
 		},
 		{
-			name:          "path traversal - indirect",
-			toolInput:     `{"file_path": "foo/../../etc/passwd"}`,
-			want:          "",
-			expectWarning: true,
+			name:          "absolute path to protected file passthrough",
+			toolInput:     `{"file_path": "/Users/tom/project/.sos/sessions/s1/SESSION_CONTEXT.md"}`,
+			want:          "/Users/tom/project/.sos/sessions/s1/SESSION_CONTEXT.md",
+			expectWarning: false,
 		},
 		{
 			name:          "normalized valid path",
@@ -147,16 +147,18 @@ func TestParseFilePath(t *testing.T) {
 			var stdout, stderr bytes.Buffer
 			printer := output.NewPrinter(output.FormatJSON, &stdout, &stderr, true) // verbose=true to capture warnings
 
-			result := parseFilePath(printer, tt.toolInput)
+			result, blocked := parseFilePath(printer, tt.toolInput)
 			if result != tt.want {
 				t.Errorf("parseFilePath(%q) = %q, want %q", tt.toolInput, result, tt.want)
 			}
+			if blocked {
+				t.Errorf("parseFilePath(%q) returned blocked=true, want false", tt.toolInput)
+			}
 
-			// Check if warning was logged when expected
+			// Check if warning was logged when expected (JSON parse failures only)
 			if tt.expectWarning {
 				stderrStr := stderr.String()
-				if !bytes.Contains([]byte(stderrStr), []byte("failed to parse tool input JSON")) &&
-					!bytes.Contains([]byte(stderrStr), []byte("blocked potential path traversal attempt")) {
+				if !bytes.Contains([]byte(stderrStr), []byte("failed to parse tool input JSON")) {
 					t.Errorf("Expected warning log, but got no recognized warning. stderr: %s", stderrStr)
 				}
 			}
