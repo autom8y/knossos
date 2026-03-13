@@ -1,14 +1,14 @@
 ---
 domain: "scar-tissue"
-generated_at: "2026-03-10T20:00:00Z"
+generated_at: "2026-03-13T12:00:00Z"
 expires_after: "14d"
 source_scope: [".sos/archive/**"]
 generator: "dionysus"
-source_hash: "5ec4a18"
+source_hash: "59a0de2"
 confidence: 0.85
 format_version: "1.0"
-sessions_synthesized: 43
-last_session: "session-20260310-192540-28b102b0"
+sessions_synthesized: 48
+last_session: "session-20260312-183235-bbbf5231"
 ---
 
 ## Blocker Catalog
@@ -36,14 +36,15 @@ last_session: "session-20260310-192540-28b102b0"
 ## Friction Signals
 
 - **Recurring**: Patterns across 2+ sessions
-  - Session parking at requirements phase: 30/43 sessions never progressed past requirements, seen across all rites
+  - Session parking at requirements phase: 32/48 sessions never progressed past requirements, seen across all rites
   - Duplicate/retry sessions for same initiative: session-20260302-151610-273eeb4a and session-20260302-151730-bffc2248 (canonical dotfile path remediation started twice within 1 minute)
-  - Auto-parked on Stop: frequent auto-parking pattern, seen in 25+ sessions
+  - Auto-parked on Stop: frequent auto-parking pattern, seen in 30+ sessions
   - GITHUB_TOKEN suppression: documented in session-20260303-163517-f43d2334, broader pattern of CI infrastructure friction
   - Framework agnosticism bleed: 75 findings in session-20260304-001522-1c07b3bd indicating systemic ecosystem coupling in distributed binary
   - Phase skipping pattern: 3 sessions (003107, 132132, 135856) skipped formal requirements/design phases because spike + framing documents provided sufficient coverage
   - Materialization bypass bugs: content rewriting implemented in primary path but missed bypass paths (engine.go standalone, userscope walker, userscope standalone) in session-20260304-154410-af90596d
   - t.Setenv friction: sessions 20260310-174131 and 20260310-192540 both target t.Setenv elimination, indicating systemic test parallelization blocker
+  - Cross-rite session transitions: session-20260312-183235-bbbf5231 transitioned hygiene -> 10x-dev -> docs across sprints, indicating initiative scope crossing rite boundaries
 
 - **One-time**: Isolated friction events
   - Pre-existing Go test failures during hygiene audit: session-20260304-001522-1c07b3bd
@@ -55,7 +56,7 @@ last_session: "session-20260310-192540-28b102b0"
 
 | Sails Color | Sessions | Common Failure Proofs |
 |------------|---------|---------------------|
-| GRAY | 43 | All proofs UNKNOWN (no CI proof infrastructure captured) |
+| GRAY | 48 | All proofs UNKNOWN (no CI proof infrastructure captured) |
 | WHITE | 0 | N/A |
 | BLACK | 0 | N/A |
 
@@ -72,3 +73,7 @@ last_session: "session-20260310-192540-28b102b0"
 - Comprehensive Debt Remediation 44 items: session-20260303-003107-55293519 parked at design phase, Waves 1-4 pending execution
 - Procession completion: 11 workstreams across 4 waves, session-20260310-122716-65d5c100 parked at requirements
 - External DI Remediation and t.Parallel() Adoption: 4 workstreams (WS-A through WS-D) across 361+ tests, session-20260310-192540-28b102b0 parked at requirements
+- Cassandra P0 Complaint Schema and Filing Infrastructure: session-20260311-012734-9847ff6f parked at requirements
+- multi-channel-integration: session-20260311-231845-47df6625 parked at design
+- security-remediation: session-20260312-113227-1c6e9313 parked at requirements
+- harness-agnosticism: session-20260312-123128-56a5e48f parked at requirements
