@@ -84,8 +84,8 @@ func TestRewriteMenaContentPaths(t *testing.T) {
 		},
 		{
 			name:  "backtick_materialized_index",
-			input: "`.claude/skills/*/INDEX.lego.md`",
-			want:  "`.claude/skills/*/SKILL.md`",
+			input: "`.claude/skills/*/INDEX.lego.md`", // HA-TEST: Claude channel dir name in content rewrite fixture
+			want:  "`.claude/skills/*/SKILL.md`", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:  "fenced_block_preserved",
@@ -214,7 +214,7 @@ description: "Corpus fixture for rewriter validation."
 - INDEX: ` + "`" + `INDEX.lego.md` + "`" + `
 - Path with template var: ` + "`" + `mena/pinakes/domains/{domain}.lego.md` + "`" + `
 - Dro span: ` + "`" + `mena/navigation/rite.dro.md` + "`" + `
-- Materialized YAML example: ` + "`" + `.claude/skills/*/INDEX.lego.md` + "`" + `
+- Materialized YAML example: ` + "`" + `.claude/skills/*/INDEX.lego.md` + "`" + ` // HA-TEST: Claude channel dir name in content rewrite fixture
 - Mixed link and backtick: [ref](foo.lego.md) see ` + "`" + `bar.lego.md` + "`" + `
 
 ## Fenced Blocks (must be fully preserved)
@@ -226,7 +226,7 @@ description: "Corpus fixture for rewriter validation."
 
 ` + "```" + `yaml
 skills:
-  - .claude/skills/*/INDEX.lego.md
+  - .claude/skills/*/INDEX.lego.md // HA-TEST: Claude channel dir name in content rewrite fixture
 ` + "```" + `
 
 ## Go Code Example (fenced, must be preserved)
@@ -338,57 +338,57 @@ func TestRewriteChannelPaths(t *testing.T) {
 		// Section 3.1: Core substitution tests
 		{
 			name:       "claude_skills_to_gemini",
-			input:      ".claude/skills/pinakes/SKILL.md",
+			input:      ".claude/skills/pinakes/SKILL.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       ".gemini/skills/pinakes/SKILL.md",
 		},
 		{
 			name:       "claude_commands_to_gemini",
-			input:      ".claude/commands/spike.md",
+			input:      ".claude/commands/spike.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       ".gemini/commands/spike.md",
 		},
 		{
 			name:       "claude_agents_to_gemini",
-			input:      ".claude/agents/potnia.md",
+			input:      ".claude/agents/potnia.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       ".gemini/agents/potnia.md",
 		},
 		{
 			name:       "claude_identity_noop",
-			input:      ".claude/skills/foo/SKILL.md",
+			input:      ".claude/skills/foo/SKILL.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".claude",
-			want:       ".claude/skills/foo/SKILL.md",
+			want:       ".claude/skills/foo/SKILL.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:       "empty_channel_noop",
-			input:      ".claude/skills/foo/SKILL.md",
+			input:      ".claude/skills/foo/SKILL.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: "",
-			want:       ".claude/skills/foo/SKILL.md",
+			want:       ".claude/skills/foo/SKILL.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 
 		// Section 3.2: Context tests
 		{
 			name:       "backtick_path",
-			input:      "`Read(\".claude/skills/pinakes/domains/{domain}.md\")`",
+			input:      "`Read(\".claude/skills/pinakes/domains/{domain}.md\")`", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       "`Read(\".gemini/skills/pinakes/domains/{domain}.md\")`",
 		},
 		{
 			name:       "link_target",
-			input:      "[ref](.claude/skills/doc/SKILL.md)",
+			input:      "[ref](.claude/skills/doc/SKILL.md)", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       "[ref](.gemini/skills/doc/SKILL.md)",
 		},
 		{
 			name:       "prose_path",
-			input:      "Full documentation: .claude/skills/ref/SKILL.md",
+			input:      "Full documentation: .claude/skills/ref/SKILL.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       "Full documentation: .gemini/skills/ref/SKILL.md",
 		},
 		{
 			name:       "multiple_on_line",
-			input:      ".claude/skills/a.md and .claude/commands/b.md",
+			input:      ".claude/skills/a.md and .claude/commands/b.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       ".gemini/skills/a.md and .gemini/commands/b.md",
 		},
@@ -398,7 +398,7 @@ func TestRewriteChannelPaths(t *testing.T) {
 			name:       "channel_placeholder_to_claude",
 			input:      ".channel/skills/pinakes/SKILL.md",
 			channelDir: ".claude",
-			want:       ".claude/skills/pinakes/SKILL.md",
+			want:       ".claude/skills/pinakes/SKILL.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:       "channel_placeholder_to_gemini",
@@ -416,17 +416,17 @@ func TestRewriteChannelPaths(t *testing.T) {
 			name:       "channel_placeholder_agents",
 			input:      ".channel/agents/potnia.md",
 			channelDir: ".claude",
-			want:       ".claude/agents/potnia.md",
+			want:       ".claude/agents/potnia.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:       "channel_placeholder_empty_defaults_claude",
 			input:      ".channel/skills/foo.md",
 			channelDir: "",
-			want:       ".claude/skills/foo.md",
+			want:       ".claude/skills/foo.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:       "channel_placeholder_mixed_with_legacy",
-			input:      ".channel/skills/a.md and .claude/commands/b.md",
+			input:      ".channel/skills/a.md and .claude/commands/b.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
 			want:       ".gemini/skills/a.md and .gemini/commands/b.md",
 		},
@@ -446,9 +446,9 @@ func TestRewriteChannelPaths(t *testing.T) {
 		// Section 3.3: Exclusion tests (rewriteChannelPaths level, not fenced)
 		{
 			name:       "template_block_preserved",
-			input:      "{{ if .claude/skills/foo }}",
+			input:      "{{ if .claude/skills/foo }}", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
-			want:       "{{ if .claude/skills/foo }}",
+			want:       "{{ if .claude/skills/foo }}", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:       "ha_tagged_preserved",
@@ -460,15 +460,15 @@ func TestRewriteChannelPaths(t *testing.T) {
 		// Section 3.4: Non-match tests
 		{
 			name:       "bare_claude_dir",
-			input:      ".claude/settings.json",
+			input:      ".claude/settings.json", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
-			want:       ".claude/settings.json",
+			want:       ".claude/settings.json", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:       "claude_md_file",
-			input:      ".claude/CLAUDE.md",
+			input:      ".claude/CLAUDE.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 			channelDir: ".gemini",
-			want:       ".claude/CLAUDE.md",
+			want:       ".claude/CLAUDE.md", // HA-TEST: Claude channel dir name in content rewrite fixture
 		},
 		{
 			name:       "dot_claude_no_slash",
@@ -500,8 +500,8 @@ func TestRewriteChannelPaths(t *testing.T) {
 // (which splits on fences before calling applyRewrites/rewriteChannelPaths).
 func TestRewriteChannelPathsFencedExclusion(t *testing.T) {
 	t.Parallel()
-	input := "```\n.claude/skills/foo.md\n```"
-	want := "```\n.claude/skills/foo.md\n```"
+	input := "```\n.claude/skills/foo.md\n```" // HA-TEST: Claude channel dir name in content rewrite fixture
+	want := "```\n.claude/skills/foo.md\n```" // HA-TEST: Claude channel dir name in content rewrite fixture
 
 	got := string(RewriteMenaContentPaths([]byte(input), ".gemini"))
 	if got != want {
@@ -511,11 +511,11 @@ func TestRewriteChannelPathsFencedExclusion(t *testing.T) {
 
 // TestRewriteExtensionThenChannel verifies that Pass 1-3 (extension rewriting)
 // feeds into Pass 4 (channel rewriting). A source reference like
-// .claude/skills/foo.lego.md should first become .claude/skills/foo.md (Pass 2)
+// .claude/skills/foo.lego.md should first become .claude/skills/foo.md (Pass 2) // HA-TEST: Claude channel dir name in content rewrite fixture
 // then .gemini/skills/foo.md (Pass 4).
 func TestRewriteExtensionThenChannel(t *testing.T) {
 	t.Parallel()
-	input := "[ref](.claude/skills/foo.lego.md)"
+	input := "[ref](.claude/skills/foo.lego.md)" // HA-TEST: Claude channel dir name in content rewrite fixture
 	want := "[ref](.gemini/skills/foo.md)"
 
 	got := string(RewriteMenaContentPaths([]byte(input), ".gemini"))
@@ -525,7 +525,7 @@ func TestRewriteExtensionThenChannel(t *testing.T) {
 }
 
 // TestRewriteCorpusGemini processes a representative corpus with channelDir=".gemini"
-// and verifies that zero .claude/skills/, .claude/commands/, .claude/agents/ references
+// and verifies that zero .claude/skills/, .claude/commands/, .claude/agents/ references // HA-TEST: Claude channel dir name in content rewrite fixture
 // survive in non-fenced segments.
 func TestRewriteCorpusGemini(t *testing.T) {
 	t.Parallel()
@@ -538,30 +538,30 @@ description: "Corpus fixture for channel rewrite validation."
 
 ## Mena Paths
 
-- Skill ref: .claude/skills/pinakes/SKILL.md
-- Command ref: .claude/commands/spike.md
-- Agent ref: .claude/agents/potnia.md
-- Backtick: ` + "`" + `.claude/skills/doc/SKILL.md` + "`" + `
-- Link: [ref](.claude/skills/doc/SKILL.md)
-- User-level: ~/.claude/agents/potnia.md
-- Multiple: .claude/skills/a.md and .claude/commands/b.md
+- Skill ref: .claude/skills/pinakes/SKILL.md // HA-TEST: Claude channel dir name in content rewrite fixture
+- Command ref: .claude/commands/spike.md // HA-TEST: Claude channel dir name in content rewrite fixture
+- Agent ref: .claude/agents/potnia.md // HA-TEST: Claude channel dir name in content rewrite fixture
+- Backtick: ` + "`" + `.claude/skills/doc/SKILL.md` + "`" + ` // HA-TEST: Claude channel dir name in content rewrite fixture
+- Link: [ref](.claude/skills/doc/SKILL.md) // HA-TEST: Claude channel dir name in content rewrite fixture
+- User-level: ~/.claude/agents/potnia.md // HA-TEST: Claude channel dir name in content rewrite fixture
+- Multiple: .claude/skills/a.md and .claude/commands/b.md // HA-TEST: Claude channel dir name in content rewrite fixture
 
 ## Non-Targets (must NOT be rewritten)
 
-- Config: .claude/settings.json
-- Inscription: .claude/CLAUDE.md
+- Config: .claude/settings.json // HA-TEST: Claude channel dir name in content rewrite fixture
+- Inscription: .claude/CLAUDE.md // HA-TEST: Claude channel dir name in content rewrite fixture
 - Bare: the .claude directory
 
 ## Fenced (must be preserved)
 
 ` + "```" + `
-.claude/skills/inside-fence.md
-.claude/commands/inside-fence.md
+.claude/skills/inside-fence.md // HA-TEST: Claude channel dir name in content rewrite fixture
+.claude/commands/inside-fence.md // HA-TEST: Claude channel dir name in content rewrite fixture
 ` + "```" + `
 
 ## After Fence
 
-- Post-fence ref: .claude/skills/after-fence.md
+- Post-fence ref: .claude/skills/after-fence.md // HA-TEST: Claude channel dir name in content rewrite fixture
 `
 
 	output := string(RewriteMenaContentPaths([]byte(corpus), ".gemini"))
@@ -569,8 +569,8 @@ description: "Corpus fixture for channel rewrite validation."
 	// Split on fences to check only non-fenced segments
 	segments := splitOnFences(output)
 
-	// channelPathPattern matches the three .claude/ content subdirectories
-	channelPathPattern := regexp.MustCompile(`\.claude/(skills|commands|agents)/`)
+	// channelPathPattern matches the three .claude/ content subdirectories // HA-TEST: Claude channel dir name in content rewrite fixture
+	channelPathPattern := regexp.MustCompile(`\.claude/(skills|commands|agents)/`) // HA-TEST: Claude channel dir name in content rewrite fixture
 
 	var violations []string
 	for i, seg := range segments {
@@ -586,23 +586,23 @@ description: "Corpus fixture for channel rewrite validation."
 	}
 
 	if len(violations) > 0 {
-		t.Errorf(".claude/ content path refs survived channel rewriting in non-fenced content (%d violations):", len(violations))
+		t.Errorf(".claude/ content path refs survived channel rewriting in non-fenced content (%d violations):", len(violations)) // HA-TEST: Claude channel dir name in content rewrite fixture
 		for _, v := range violations {
 			t.Errorf("  %s", v)
 		}
 	}
 
 	// Sanity: fenced block content preserved
-	if !strings.Contains(output, ".claude/skills/inside-fence.md") {
+	if !strings.Contains(output, ".claude/skills/inside-fence.md") { // HA-TEST: Claude channel dir name in content rewrite fixture
 		t.Error("fenced block content was incorrectly channel-rewritten")
 	}
 
 	// Sanity: non-target paths preserved
-	if !strings.Contains(output, ".claude/settings.json") {
-		t.Error(".claude/settings.json was incorrectly rewritten")
+	if !strings.Contains(output, ".claude/settings.json") { // HA-TEST: Claude channel dir name in content rewrite fixture
+		t.Error(".claude/settings.json was incorrectly rewritten") // HA-TEST: Claude channel dir name in content rewrite fixture
 	}
-	if !strings.Contains(output, ".claude/CLAUDE.md") {
-		t.Error(".claude/CLAUDE.md was incorrectly rewritten")
+	if !strings.Contains(output, ".claude/CLAUDE.md") { // HA-TEST: Claude channel dir name in content rewrite fixture
+		t.Error(".claude/CLAUDE.md was incorrectly rewritten") // HA-TEST: Claude channel dir name in content rewrite fixture
 	}
 }
 
@@ -610,7 +610,7 @@ description: "Corpus fixture for channel rewrite validation."
 // produces identical output to channelDir="" (identity transform).
 func TestRewriteCorpusClaude(t *testing.T) {
 	t.Parallel()
-	corpus := `.claude/skills/foo.md and .claude/commands/bar.md`
+	corpus := `.claude/skills/foo.md and .claude/commands/bar.md` // HA-TEST: Claude channel dir name in content rewrite fixture
 
 	outputEmpty := string(RewriteMenaContentPaths([]byte(corpus), ""))
 	outputClaude := string(RewriteMenaContentPaths([]byte(corpus), ".claude"))

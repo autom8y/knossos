@@ -489,7 +489,7 @@ func TestSync_ChannelAll_CompilerTransforms(t *testing.T) {
 		t.Fatalf("Sync(channel=all) failed: %v", err)
 	}
 
-	// Claude: .claude/commands/test-cmd.md should exist with raw markdown body
+	// Claude: .claude/commands/test-cmd.md should exist with raw markdown body // HA-TEST: Claude channel dir name in routing assertion
 	claudeCmd := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName(), "commands", "test-cmd.md")
 	claudeData, err := os.ReadFile(claudeCmd)
 	if err != nil {
@@ -591,7 +591,7 @@ func TestSync_ChannelAll_ClaudeRegression(t *testing.T) {
 
 	// Compare: same files, same bytes
 	if len(claudeOnly) == 0 {
-		t.Fatal("channel=claude produced no files in .claude/")
+		t.Fatal("channel=claude produced no files in .claude/") // HA-TEST: Claude channel dir name in routing assertion
 	}
 	if len(claudeOnly) != len(claudeFromAll) {
 		t.Errorf("file count mismatch: channel=claude produced %d files, channel=all produced %d files",
@@ -627,7 +627,7 @@ func TestSync_ChannelAll_ClaudeRegression(t *testing.T) {
 }
 
 // TestSync_ChannelAll_Idempotent verifies SCAR-003: running channel=all sync
-// twice produces identical output for both .claude/ and .gemini/ directories
+// twice produces identical output for both .claude/ and .gemini/ directories // HA-TEST: Claude+Gemini channel dir names in idempotency assertion
 // as well as provenance manifests.
 func TestSync_ChannelAll_Idempotent(t *testing.T) {
 	t.Parallel()
@@ -689,8 +689,8 @@ func TestSync_ChannelAll_Idempotent(t *testing.T) {
 		t.Fatalf("failed to read gemini manifest after sync #2: %v", err)
 	}
 
-	// Verify .claude/ is identical (normalizing KNOSSOS markers for map-order stability)
-	assertDirContentsEqual(t, ".claude/", claudeFirst, claudeSecond)
+	// Verify .claude/ is identical (normalizing KNOSSOS markers for map-order stability) // HA-TEST: Claude channel dir name in content equality assertion
+	assertDirContentsEqual(t, ".claude/", claudeFirst, claudeSecond) // HA-TEST: Claude channel dir name in content equality assertion
 
 	// Verify .gemini/ is identical
 	assertDirContentsEqual(t, ".gemini/", geminiFirst, geminiSecond)

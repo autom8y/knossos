@@ -127,7 +127,7 @@ func TestCheckSkillAtRefs(t *testing.T) {
 func TestCheckSourcePathLeaks(t *testing.T) {
 	t.Run("clean body produces no findings", func(t *testing.T) {
 		var findings []Finding
-		body := "Read the domain criteria:\n```\nRead(\".claude/skills/pinakes/domains/arch.md\")\n```"
+		body := "Read the domain criteria:\n```\nRead(\".claude/skills/pinakes/domains/arch.md\")\n```" // HA-TEST: lint rule body contains Claude skill path
 		checkSourcePathLeaks(body, "test.md", &findings)
 		if len(findings) != 0 {
 			t.Errorf("expected 0 findings, got %d", len(findings))
@@ -190,7 +190,7 @@ func TestCheckSourcePathLeaks(t *testing.T) {
 
 	t.Run("materialization documentation excluded", func(t *testing.T) {
 		var findings []Finding
-		body := "**Target files**: .claude/skills/**/*.md (projected from rites/*/mena/**/*.lego.md)"
+		body := "**Target files**: .claude/skills/**/*.md (projected from rites/*/mena/**/*.lego.md)" // HA-TEST: lint rule body contains Claude skill path
 		checkSourcePathLeaks(body, "test.md", &findings)
 		if len(findings) != 0 {
 			t.Errorf("expected 0 findings for materialization docs, got %d", len(findings))
