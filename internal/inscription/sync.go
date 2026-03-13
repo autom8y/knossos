@@ -114,16 +114,16 @@ func SyncInscription(opts SyncInscriptionOptions) (*SyncInscriptionResult, error
 	if contextFilename == "" {
 		contextFilename = "CLAUDE.md"
 	}
-	claudeMdPath := filepath.Join(opts.ChannelDir, contextFilename)
+	contextFilePath := filepath.Join(opts.ChannelDir, contextFilename)
 	existingContent := ""
 	legacyBackupPath := ""
 
-	if data, err := os.ReadFile(claudeMdPath); err == nil {
+	if data, err := os.ReadFile(contextFilePath); err == nil {
 		existingContent = string(data)
 
 		// Detect legacy context file (no KNOSSOS markers) and backup before overwriting
 		if !strings.Contains(existingContent, "<!-- KNOSSOS:START") && len(existingContent) > 0 {
-			legacyBackupPath = claudeMdPath + ".legacy-backup"
+			legacyBackupPath = contextFilePath + ".legacy-backup"
 			if err := os.WriteFile(legacyBackupPath, data, 0644); err != nil {
 				return nil, errors.Wrap(errors.CodeGeneralError, "failed to backup legacy context file", err)
 			}
@@ -139,7 +139,7 @@ func SyncInscription(opts SyncInscriptionOptions) (*SyncInscriptionResult, error
 	}
 
 	// 6. Write only if content changed
-	written, err := fileutil.WriteIfChanged(claudeMdPath, []byte(mergeResult.Content), 0644)
+	written, err := fileutil.WriteIfChanged(contextFilePath, []byte(mergeResult.Content), 0644)
 	if err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to write context file", err)
 	}
