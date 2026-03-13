@@ -269,6 +269,57 @@ validate_channel_output() {
     fi
 }
 
+# validate_structural_parity checks assertion 8 (--channel all only):
+# agent, command, and skill counts between channels must be within tolerance,
+# and no cross-contamination of channel-specific path literals.
+validate_structural_parity() {
+    echo "--- Assertion 8: Structural parity between channels ---"
+    local claude_agents gemini_agents claude_cmds gemini_cmds claude_skills gemini_skills
+
+    claude_agents=$(find "$E2E_TMPDIR/.claude/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    gemini_agents=$(find "$E2E_TMPDIR/.gemini/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    claude_cmds=$(find "$E2E_TMPDIR/.claude/commands" -type f 2>/dev/null | wc -l | tr -d ' ')
+    gemini_cmds=$(find "$E2E_TMPDIR/.gemini/commands" -type f 2>/dev/null | wc -l | tr -d ' ')
+    claude_skills=$(find "$E2E_TMPDIR/.claude/skills" -type f 2>/dev/null | wc -l | tr -d ' ')
+    gemini_skills=$(find "$E2E_TMPDIR/.gemini/skills" -type f 2>/dev/null | wc -l | tr -d ' ')
+
+    # Tolerance: allow up to 2 file difference (for channel-specific items)
+    local tolerance=2
+
+    local agent_diff=$((claude_agents - gemini_agents))
+    if [[ ${agent_diff#-} -le $tolerance ]]; then
+        pass "Agent parity: claude=$claude_agents, gemini=$gemini_agents (within tolerance=$tolerance)"
+    else
+        fail "Agent parity violation: claude=$claude_agents, gemini=$gemini_agents (tolerance=$tolerance)"
+    fi
+
+    local cmd_diff=$((claude_cmds - gemini_cmds))
+    if [[ ${cmd_diff#-} -le $tolerance ]]; then
+        pass "Command parity: claude=$claude_cmds, gemini=$gemini_cmds (within tolerance=$tolerance)"
+    else
+        fail "Command parity violation: claude=$claude_cmds, gemini=$gemini_cmds (tolerance=$tolerance)"
+    fi
+
+    local skill_diff=$((claude_skills - gemini_skills))
+    if [[ ${skill_diff#-} -le $tolerance ]]; then
+        pass "Skill parity: claude=$claude_skills, gemini=$gemini_skills (within tolerance=$tolerance)"
+    else
+        fail "Skill parity violation: claude=$claude_skills, gemini=$gemini_skills (tolerance=$tolerance)"
+    fi
+
+    # Cross-contamination check
+    if grep -r '\.claude/' "$E2E_TMPDIR/.gemini/" --include="*.md" -l 2>/dev/null | head -1 | grep -q .; then
+        fail "Cross-contamination: .claude/ path literal found in .gemini/ output"
+    else
+        pass "No .claude/ path literals in .gemini/ output"
+    fi
+    if grep -r '\.gemini/' "$E2E_TMPDIR/.claude/" --include="*.md" -l 2>/dev/null | head -1 | grep -q .; then
+        fail "Cross-contamination: .gemini/ path literal found in .claude/ output"
+    else
+        pass "No .gemini/ path literals in .claude/ output"
+    fi
+}
+
 # ---------------------------------------------------------------------------
 # Environment detection
 # ---------------------------------------------------------------------------
@@ -405,6 +456,7 @@ case "$CHANNEL" in
         validate_sync "gemini"
         validate_channel_output "claude"
         validate_channel_output "gemini"
+        validate_structural_parity
         ;;
 esac
 
