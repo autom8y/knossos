@@ -159,6 +159,7 @@ func NewLintCmd(outputFlag *string, verboseFlag *bool, projectDir *string) *cobr
 	}
 
 	var scope string
+	var check string
 
 	cmd := &cobra.Command{
 		Use:   "lint",
@@ -173,45 +174,62 @@ Checks agents, dromena (.dro.md), and legomena (.lego.md) for:
 - Dromena context:fork + Task tool conflicts (SCAR-018)
 - Workflow commands must be model-invocable
 - Legomena missing Triggers keyword in description
+- Preferential harness-specific language in Go source and mena content
 
 Examples:
-  ari lint                    # Lint all sources
-  ari lint --scope=agents     # Agents only
-  ari lint --scope=dromena    # Dromena only
-  ari lint --scope=legomena   # Legomena only`,
+  ari lint                                    # Lint all sources
+  ari lint --scope=agents                     # Agents only
+  ari lint --scope=dromena                    # Dromena only
+  ari lint --scope=legomena                   # Legomena only
+  ari lint --check=preferential-language      # Run only the preferential-language check`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runLint(ctx, scope)
+			return runLint(ctx, scope, check)
 		},
 	}
 
 	cmd.Flags().StringVar(&scope, "scope", "", "Limit to: agents, dromena, or legomena")
+	cmd.Flags().StringVar(&check, "check", "", "Run only a specific check: preferential-language")
 
 	common.SetNeedsProject(cmd, true, true)
 
 	return cmd
 }
 
-func runLint(ctx *cmdContext, scope string) error {
+func runLint(ctx *cmdContext, scope, check string) error {
 	printer := ctx.GetPrinter(output.FormatText)
 	resolver := ctx.GetResolver()
 	projectRoot := resolver.ProjectRoot()
-	sources := buildAllMenaSources(projectRoot)
 
 	report := &LintReport{}
 
-	if scope == "" || scope == "agents" {
-		lintAgents(projectRoot, report)
+	// Validate --check value
+	if check != "" && check != rulePreferentialLanguage {
+		return fmt.Errorf("unknown check: %s (available: preferential-language)", check)
 	}
-	if scope == "" || scope == "dromena" {
-		lintDromena(projectRoot, sources, report)
-		lintMenaNamespace(projectRoot, sources, report)
+
+	// Run standard rules unless --check overrides
+	if check == "" {
+		sources := buildAllMenaSources(projectRoot)
+
+		if scope == "" || scope == "agents" {
+			lintAgents(projectRoot, report)
+		}
+		if scope == "" || scope == "dromena" {
+			lintDromena(projectRoot, sources, report)
+			lintMenaNamespace(projectRoot, sources, report)
+		}
+		if scope == "" || scope == "legomena" {
+			lintLegomena(projectRoot, sources, report)
+		}
+		// Session artifact boundary check runs for all scopes (it checks shared mena dirs)
+		if scope == "" {
+			lintSessionArtifactsInSharedMena(projectRoot, report)
+		}
 	}
-	if scope == "" || scope == "legomena" {
-		lintLegomena(projectRoot, sources, report)
-	}
-	// Session artifact boundary check runs for all scopes (it checks shared mena dirs)
-	if scope == "" {
-		lintSessionArtifactsInSharedMena(projectRoot, report)
+
+	// Preferential language check — runs when check is "" or "preferential-language"
+	if check == "" || check == rulePreferentialLanguage {
+		lintPreferentialLanguage(projectRoot, report)
 	}
 
 	// Compute summary
@@ -228,6 +246,14 @@ func runLint(ctx *cmdContext, scope string) error {
 		case SevLow:
 			report.Summary.Low++
 		}
+	}
+
+	// When --check is set explicitly, return non-zero on violations
+	if check != "" && report.Summary.Total > 0 {
+		if err := printer.Print(*report); err != nil {
+			return err
+		}
+		return fmt.Errorf("%d %s violations found", report.Summary.Total, check)
 	}
 
 	return printer.Print(*report)
