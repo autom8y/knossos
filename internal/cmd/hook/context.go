@@ -246,7 +246,7 @@ This hook is triggered on SessionStart events. It reads:
 - SESSION_CONTEXT.md if a session exists
 - ACTIVE_RITE file for rite context
 
-Output is formatted as YAML frontmatter suitable for Claude context.
+Output is formatted as YAML frontmatter suitable for agent context.
 
 Performance: <100ms target execution time.`,
 		RunE: func(cmd *cobra.Command, args []string) error {

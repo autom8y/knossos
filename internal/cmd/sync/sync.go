@@ -196,7 +196,7 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 
 	// Budget report (appended to sync output)
 	if showBudget {
-		channelDir := filepath.Join(projectDir, ".claude")
+		channelDir := filepath.Join(projectDir, ".claude") // HA-FS: actual CC channel directory path
 		budgetData := map[string]any{}
 		if err := formatBudgetReport(channelDir, budgetData); err != nil {
 			printer.VerboseLog("warn", "budget calculation failed", map[string]any{"error": err.Error()})
@@ -211,7 +211,7 @@ func runSync(ctx *cmdContext, opts materialize.SyncOptions, showBudget bool, cmd
 
 	// Print human-readable budget text after structured output
 	if showBudget {
-		channelDir := filepath.Join(projectDir, ".claude")
+		channelDir := filepath.Join(projectDir, ".claude") // HA-FS: actual CC channel directory path
 		text, err := budgetText(channelDir)
 		if err == nil {
 			printer.PrintText(text)

@@ -161,7 +161,7 @@ stateFile := resolveStateFile(ctx, hookEnv)
 }
 
 // resolveStateFile determines the temp file path for counter state.
-// Key resolution: ARI_SESSION_KEY > CLAUDE_SESSION_ID > ppid-{PPID}
+// Key resolution: ARI_SESSION_KEY > CLAUDE_SESSION_ID > ppid-{PPID} // HA-CC: CLAUDE_SESSION_ID is a CC wire protocol env var
 func resolveStateFile(ctx *cmdContext, hookEnv *hook.Env) string {
 	var key string
 

@@ -460,7 +460,7 @@ func (m *Materializer) promoteOrphans(orphans []string, channelDir string) error
 	if err != nil {
 		return err
 	}
-	userAgentsDir := filepath.Join(homeDir, ".claude", "agents")
+	userAgentsDir := filepath.Join(homeDir, ".claude", "agents") // HA-FS: user-scope CC agents directory path
 
 	if err := paths.EnsureDir(userAgentsDir); err != nil {
 		return err

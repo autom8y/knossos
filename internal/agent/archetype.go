@@ -57,7 +57,7 @@ type Archetype struct {
 
 // ArchetypeDefaults contains default frontmatter values for an archetype.
 type ArchetypeDefaults struct {
-	// Model is the default Claude model (e.g., "opus", "sonnet").
+	// Model is the default model (e.g., "opus", "sonnet").
 	Model string
 
 	// Tools is the default tool list.

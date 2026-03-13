@@ -586,9 +586,9 @@ func outputBlockUnknown(printer *output.Printer) error {
 	return printer.Print(result)
 }
 
-// outputBlock outputs a block decision in CC's hookSpecificOutput format.
+// outputBlock outputs a block decision in the harness hookSpecificOutput format.
 // Includes additionalContext with the exact Moirai Task invocation pattern
-// so Claude knows how to delegate instead of retrying the blocked write.
+// so the agent knows how to delegate instead of retrying the blocked write.
 func outputBlock(printer *output.Printer, filePath string) error {
 	var contextType string
 	var moiraiOp string

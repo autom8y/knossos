@@ -90,8 +90,7 @@ func runWorktreeSeedCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pr
 		}
 	}
 
-	// Step 2: Resolve the main project root from CLAUDE_PROJECT_DIR env var.
-	// CC sets CLAUDE_PROJECT_DIR to the main project root.
+	// HA-CC: CLAUDE_PROJECT_DIR is the CC wire protocol env var for the project root.
 	projectRoot := os.Getenv("CLAUDE_PROJECT_DIR")
 	if projectRoot == "" {
 		// Fallback to CWD from payload, then os.Getwd().

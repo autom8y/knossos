@@ -50,7 +50,7 @@ func newClewCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Records tool events to events.jsonl for Clew Contract v2.
 
 This hook is triggered on PostToolUse events. It:
-- Reads CLAUDE_HOOK_TOOL_INPUT environment variable
+- Reads tool input JSON from stdin (CC sends hook data as JSON on stdin, not via env vars)
 - Parses the tool input JSON
 - Calls RecordToolEvent to write to events.jsonl
 - Returns JSON: {"recorded": true} or {"recorded": false, "reason": "..."}

@@ -40,6 +40,7 @@ type BackupInfo struct {
 }
 
 // NewBackupManager creates a new backup manager.
+// HA-FS: TargetPath targets the actual CC channel context file (SCAR-002: never rename .claude/)
 func NewBackupManager(projectRoot string) *BackupManager {
 	return &BackupManager{
 		BackupDir:  filepath.Join(projectRoot, ".knossos", "backups"),

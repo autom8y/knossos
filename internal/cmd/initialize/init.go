@@ -169,8 +169,7 @@ func runInit(ctx *cmdContext, riteName, source string, force bool, cmd *cobra.Co
 		return printer.Print(result)
 	}
 
-	// Channel-specific: init bootstraps the default channel by default.
-	// When channel parameterization is added, this should use resolver.ChannelDir(ch).
+	// HA-CC: bootstraps the default channel directory by name; channel parameterization pending.
 	channelDir := filepath.Join(projectDir, ".claude")
 	if _, err := os.Stat(channelDir); err == nil && !force {
 		// Channel directory exists but no KNOSSOS_MANIFEST.yaml in .knossos/ -- not Knossos-managed.
@@ -453,6 +452,7 @@ func writeLedgeGitignore(ledgeDir string) {
 
 // knossosGitignoreBlock is the canonical gitignore block for Knossos-managed projects.
 // Delimited by marker comments for idempotent detection and update.
+// HA-FS: .claude/CLAUDE.md in the string below is an actual gitignore filesystem path (SCAR-002: never rename .claude/)
 const knossosGitignoreBlock = `# Knossos
 .knossos/
 .claude/CLAUDE.md

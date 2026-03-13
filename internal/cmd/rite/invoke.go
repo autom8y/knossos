@@ -39,7 +39,7 @@ Examples:
 	}
 
 	cmd.Flags().BoolVar(&opts.dryRun, "dry-run", false, "Preview injection without applying")
-	cmd.Flags().BoolVar(&opts.noInscription, "no-inscription", false, "Skip CLAUDE.md updates")
+	cmd.Flags().BoolVar(&opts.noInscription, "no-inscription", false, "Skip channel context file updates")
 
 	return cmd
 }

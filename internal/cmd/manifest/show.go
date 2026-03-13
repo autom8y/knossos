@@ -108,9 +108,8 @@ func applyDefaults(content map[string]any) {
 	}
 	paths, _ := content["paths"].(map[string]any)
 
-	// CC-channel-specific wire defaults. These are string constants consumed by
-	// the CC harness manifest format, not resolved paths. Other channels (Gemini,
-	// Codex) use different manifest schemas and do not share these defaults.
+	// HA-CC: CC channel default display paths — these are CC wire format path strings,
+	// not resolved filesystem paths. Other channels use different manifest schemas.
 	defaults := map[string]string{
 		"sessions": ".sos/sessions",
 		"agents":   ".claude/agents",

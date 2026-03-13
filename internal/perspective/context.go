@@ -57,7 +57,7 @@ func NewParseContext(opts PerspectiveOptions) (*ParseContext, error) {
 	ctx := &ParseContext{
 		ProjectRoot: opts.ProjectRoot,
 		KnossosDir:  filepath.Join(opts.ProjectRoot, ".knossos"),
-		ChannelDir:  filepath.Join(opts.ProjectRoot, ".claude"),
+		ChannelDir:  filepath.Join(opts.ProjectRoot, ".claude"), // HA-FS: actual CC channel directory path (SCAR-002)
 	}
 
 	// 1. Resolve rite name

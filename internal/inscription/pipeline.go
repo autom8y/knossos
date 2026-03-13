@@ -152,6 +152,7 @@ type ValidationIssue struct {
 }
 
 // NewPipeline creates a new pipeline for the given project root.
+// HA-FS: InscriptionPath targets the actual CC channel context file (SCAR-002: never rename .claude/)
 func NewPipeline(projectRoot string) *Pipeline {
 	return &Pipeline{
 		InscriptionPath: filepath.Join(projectRoot, ".claude", "CLAUDE.md"),
@@ -537,7 +538,7 @@ func (p *Pipeline) buildRenderContext(manifest *Manifest) (*RenderContext, error
 	}
 
 	// Load agent information from the channel agents directory
-	agentsDir := filepath.Join(p.ProjectRoot, ".claude", "agents")
+	agentsDir := filepath.Join(p.ProjectRoot, ".claude", "agents") // HA-FS: actual CC channel agents directory path
 	allAgents, err := p.loadAgents(agentsDir)
 	if err != nil {
 		return ctx, nil

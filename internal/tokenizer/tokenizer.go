@@ -1,5 +1,5 @@
 // Package tokenizer provides token counting for context budget estimation.
-// Uses tiktoken-go with cl100k_base encoding (closest approximation to Claude's tokenizer).
+// Uses tiktoken-go with cl100k_base encoding (closest approximation to the AI harness tokenizer).
 package tokenizer
 
 import (
@@ -59,7 +59,7 @@ type FileTokenCount struct {
 	Tokens int    `json:"tokens"`
 }
 
-// SectionTokenCount is a per-section token count for CLAUDE.md.
+// SectionTokenCount is a per-section token count for the channel context file.
 type SectionTokenCount struct {
 	Name   string `json:"name"`
 	Tokens int    `json:"tokens"`
@@ -81,7 +81,7 @@ func (c *Counter) CalculateBudget(channelDir string) (*BudgetReport, error) {
 		path     string
 		isDir    bool
 	}{
-		{"CLAUDE.md", filepath.Join(channelDir, "CLAUDE.md"), false},
+		{"CLAUDE.md", filepath.Join(channelDir, "CLAUDE.md"), false}, // HA-CC: "CLAUDE.md" is the CC channel context filename; key used as category label
 		{"agents", filepath.Join(channelDir, "agents"), true},
 		{"commands", filepath.Join(channelDir, "commands"), true},
 		{"skills", filepath.Join(channelDir, "skills"), true},
@@ -112,8 +112,8 @@ func (c *Counter) CalculateBudget(channelDir string) (*BudgetReport, error) {
 		}
 	}
 
-	// Parse CLAUDE.md sections
-	contextFilePath := filepath.Join(channelDir, "CLAUDE.md")
+	// Parse channel context file sections
+	contextFilePath := filepath.Join(channelDir, "CLAUDE.md") // HA-CC: CC channel context filename
 	if sections := c.parseSections(contextFilePath); len(sections) > 0 {
 		report.Sections = sections
 	}
@@ -124,9 +124,9 @@ func (c *Counter) CalculateBudget(channelDir string) (*BudgetReport, error) {
 	})
 
 	// Warnings
-	if claudeMd, ok := report.Categories["CLAUDE.md"]; ok && claudeMd > 3000 {
+	if contextFile, ok := report.Categories["CLAUDE.md"]; ok && contextFile > 3000 { // HA-CC: "CLAUDE.md" category key matches CC channel context filename
 		report.Warnings = append(report.Warnings,
-			"CLAUDE.md exceeds recommended 3000 tokens")
+			"context file exceeds recommended 3000 tokens")
 	}
 	if report.TotalTokens > 10000 {
 		report.Warnings = append(report.Warnings,
@@ -164,7 +164,7 @@ func (c *Counter) countDir(dir, base string) (int, []FileTokenCount) {
 	return total, files
 }
 
-// parseSections extracts KNOSSOS regions from CLAUDE.md and counts tokens per section.
+// parseSections extracts KNOSSOS regions from the channel context file and counts tokens per section.
 func (c *Counter) parseSections(contextFilePath string) []SectionTokenCount {
 	data, err := os.ReadFile(contextFilePath)
 	if err != nil {

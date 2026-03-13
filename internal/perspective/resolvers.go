@@ -271,7 +271,7 @@ func resolveMemory(ctx *ParseContext) *LayerEnvelope {
 	switch scope {
 	case "user":
 		homeDir, _ := os.UserHomeDir()
-		runtimePath := filepath.Join(homeDir, ".claude", "memory", "MEMORY.md")
+		runtimePath := filepath.Join(homeDir, ".claude", "memory", "MEMORY.md") // HA-FS: user-scope CC agent memory path
 		runtime.ResolvedPath = runtimePath
 		runtime.PathResolvable = true
 		runtime.ContentAccessible = fileExists(runtimePath)

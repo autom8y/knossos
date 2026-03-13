@@ -10,7 +10,7 @@ func newDiffCmd(ctx *cmdContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "diff [region]",
 		Short: "Show differences between current and generated content",
-		Long: `Show differences between the current CLAUDE.md and what would be generated.
+		Long: `Show differences between the current context file and what would be generated.
 
 If a region name is provided, shows the diff for just that region.
 Otherwise, shows diffs for all non-satellite regions.

@@ -57,8 +57,7 @@ func (c *cmdContext) getSchemaValidator() (*manifest.SchemaValidator, error) {
 }
 
 // defaultManifestPath returns the default manifest path.
-// CC-specific: manifest.json is a Claude Code concept. Other channels
-// use different manifest formats/locations.
+// HA-CC: manifest.json is a CC-specific concept; other channels use different manifest formats/locations.
 func (c *cmdContext) defaultManifestPath() string {
 	resolver := c.GetResolver()
 	return resolver.ChannelDir(paths.ClaudeChannel{}) + "/manifest.json"

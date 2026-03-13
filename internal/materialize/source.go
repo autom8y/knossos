@@ -69,6 +69,7 @@ func ResolveUserResourcesForChannel(knossosHome, channel string) ([]UserResource
 
 // ResolveUserResources resolves source/target paths for user-scope resources.
 // Deprecated: Use ResolveUserResourcesForChannel for channel-aware paths.
+// HA-CC: "claude" is the default CC channel name; this deprecated wrapper hard-codes it.
 func ResolveUserResources(knossosHome string) ([]UserResourcePaths, error) {
 	return ResolveUserResourcesForChannel(knossosHome, "claude")
 }

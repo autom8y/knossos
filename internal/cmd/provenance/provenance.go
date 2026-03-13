@@ -98,7 +98,7 @@ func runShow(ctx *cmdContext, scopeFilter string) error {
 	// Load rite-scope manifest (from project .knossos/)
 	if scopeFilter == "" || scopeFilter == "rite" {
 		knossosDir := filepath.Join(resolver.ProjectRoot(), ".knossos")
-		channelDir := filepath.Join(resolver.ProjectRoot(), ".claude")
+		channelDir := filepath.Join(resolver.ProjectRoot(), ".claude") // HA-FS: actual CC channel directory path (SCAR-002)
 		manifestPath := provenance.ManifestPath(knossosDir)
 		manifest, err := provenance.LoadOrBootstrap(manifestPath)
 		if err == nil && len(manifest.Entries) > 0 {
@@ -114,7 +114,7 @@ func runShow(ctx *cmdContext, scopeFilter string) error {
 	if scopeFilter == "" || scopeFilter == "user" {
 		homeDir, err := os.UserHomeDir()
 		if err == nil {
-			userChannelDir := filepath.Join(homeDir, ".claude")
+			userChannelDir := filepath.Join(homeDir, ".claude") // HA-FS: actual user-scope CC channel directory path
 			userManifestPath := provenance.UserManifestPath(userChannelDir)
 			userManifest, loadErr := provenance.LoadOrBootstrap(userManifestPath)
 			if loadErr == nil && len(userManifest.Entries) > 0 {

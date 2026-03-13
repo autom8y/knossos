@@ -80,7 +80,7 @@ func budgetText(channelDir string) (string, error) {
 
 	// Category breakdown
 	b.WriteString("By category:\n")
-	// Category keys match tokenizer report keys; display labels are neutral.
+	// HA-CC: "CLAUDE.md" is the tokenizer category key for the CC context file; display label is channel-neutral.
 	categoryLabels := map[string]string{
 		"CLAUDE.md": "context file",
 		"agents":    "agents",
@@ -90,7 +90,7 @@ func budgetText(channelDir string) (string, error) {
 		"settings":  "settings",
 		"workflow":  "workflow",
 	}
-	for _, cat := range []string{"CLAUDE.md", "agents", "skills", "commands", "rules", "settings", "workflow"} {
+	for _, cat := range []string{"CLAUDE.md", "agents", "skills", "commands", "rules", "settings", "workflow"} { // HA-CC: "CLAUDE.md" matches tokenizer category key
 		if tokens, ok := report.Categories[cat]; ok && tokens > 0 {
 			pct := float64(tokens) / float64(report.TotalTokens) * 100
 			label := categoryLabels[cat]

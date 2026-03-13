@@ -29,7 +29,7 @@ type AgentFrontmatter struct {
 	Color   string              `yaml:"color,omitempty" json:"color,omitempty"`
 	Aliases []string            `yaml:"aliases,omitempty" json:"aliases,omitempty"`
 
-	// CC-native fields (camelCase matches Claude Code's expected frontmatter schema)
+	// CC-native fields (camelCase matches the CC harness expected frontmatter schema)
 	MaxTurns        int                 `yaml:"maxTurns,omitempty" json:"maxTurns,omitempty"`
 	Skills          []string            `yaml:"skills,omitempty" json:"skills,omitempty"`
 	DisallowedTools FlexibleStringSlice `yaml:"disallowedTools,omitempty" json:"disallowedTools,omitempty"`
@@ -51,7 +51,7 @@ type AgentFrontmatter struct {
 	SchemaVersion string `yaml:"schema_version,omitempty" json:"schema_version,omitempty"`
 }
 
-// Known Claude Code tools. This list is used for tool reference validation.
+// Known CC harness tools. This list is used for tool reference validation.
 var knownTools = map[string]bool{
 	"Bash":            true,
 	"Read":            true,
@@ -211,7 +211,7 @@ func (f *AgentFrontmatter) MCPServers() []string {
 	return servers
 }
 
-// validateToolReference checks that a tool name is a known Claude Code tool
+// validateToolReference checks that a tool name is a known CC harness tool
 // or a valid MCP tool reference.
 func validateToolReference(tool string) error {
 	// Check known tools
