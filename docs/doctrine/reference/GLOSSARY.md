@@ -284,7 +284,7 @@ Status reports and demos demanded by Minos. Periodic demonstration of progress.
 - **Source**: `internal/tribute/`
 
 ### Worktree
-Git worktree for parallel Claude sessions with filesystem isolation. Enables multiple simultaneous rites.
+Git worktree for parallel AI coding sessions with filesystem isolation. Enables multiple simultaneous rites.
 - **Related**: Parallel Sessions, Isolation, Git
 - **Command**: `ari worktree create`, `ari worktree cleanup`
 

@@ -19,7 +19,7 @@ This index organizes doctrine content by audience and purpose. Use this as your 
 | Map mythology to implementation | [Mythology Concordance](#mythology-concordance) |
 | Use the Ariadne CLI | [CLI Reference](#cli-reference) |
 | Choose a rite for my work | [Rite Catalog](#rite-catalog) |
-| Run parallel Claude sessions | [Worktree Guide](#worktree-guide) |
+| Run parallel AI coding sessions | [Worktree Guide](#worktree-guide) |
 | See architectural decisions | [Architecture](#architecture) |
 | Check compliance status | [Compliance](#compliance) |
 
