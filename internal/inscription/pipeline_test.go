@@ -12,8 +12,9 @@ import (
 func TestNewPipeline(t *testing.T) {
 	pipeline := NewPipeline("/project")
 
-	if pipeline.InscriptionPath != "/project/.claude/CLAUDE.md" {
-		t.Errorf("NewPipeline() InscriptionPath = %q, want '/project/.claude/CLAUDE.md'", pipeline.InscriptionPath)
+	wantInscriptionPath := "/project/" + paths.ClaudeChannel{}.DirName() + "/" + paths.ClaudeChannel{}.ContextFile()
+	if pipeline.InscriptionPath != wantInscriptionPath {
+		t.Errorf("NewPipeline() InscriptionPath = %q, want %q", pipeline.InscriptionPath, wantInscriptionPath)
 	}
 	if pipeline.ManifestPath != "/project/.knossos/KNOSSOS_MANIFEST.yaml" {
 		t.Errorf("NewPipeline() ManifestPath = %q, want '/project/.knossos/KNOSSOS_MANIFEST.yaml'", pipeline.ManifestPath)

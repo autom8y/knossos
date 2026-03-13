@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"slices"
 	"testing"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 func TestTriggerType_Constants(t *testing.T) {
@@ -38,7 +40,7 @@ func TestDefaultTriggerConfig(t *testing.T) {
 	}
 
 	// Verify default sacred paths
-	expectedPaths := []string{".claude/", "*_CONTEXT.md", "CLAUDE.md", ".ledge/decisions/", ".ledge/specs/"}
+	expectedPaths := []string{".claude/", "*_CONTEXT.md", "CLAUDE.md", ".ledge/decisions/", ".ledge/specs/"} // HA-TEST: CC channel dir is a sacred path value in default config
 	for _, expected := range expectedPaths {
 		found := slices.Contains(config.SacredPaths, expected)
 		if !found {
@@ -112,14 +114,14 @@ func TestCheckTriggers_SacredPath_ClaudeDir(t *testing.T) {
 	event := Event{
 		Type: EventTypeToolCall,
 		Tool: "Write",
-		Path: "/project/.claude/agents/my-agent.md",
+		Path: "/project/" + paths.ClaudeChannel{}.DirName() + "/agents/my-agent.md",
 	}
 
 	config := DefaultTriggerConfig()
 	result := CheckTriggers(eventsPath, event, config)
 
 	if !result.Triggered {
-		t.Error("Expected trigger for .claude/ path")
+		t.Error("Expected trigger for channel path")
 	}
 	if result.Type != TriggerSacredPath {
 		t.Errorf("Type = %v, want %v", result.Type, TriggerSacredPath)
@@ -197,7 +199,7 @@ func TestCheckTriggers_SacredPath_ReadDoesNotTrigger(t *testing.T) {
 	event := Event{
 		Type: EventTypeToolCall,
 		Tool: "Read",
-		Path: "/project/.claude/agents/my-agent.md",
+		Path: "/project/" + paths.ClaudeChannel{}.DirName() + "/agents/my-agent.md",
 	}
 
 	config := DefaultTriggerConfig()
@@ -562,9 +564,9 @@ func TestMatchSacredPattern(t *testing.T) {
 		expected bool
 	}{
 		// Directory patterns
-		{"/project/.claude/agents/foo.md", ".claude/", true},
-		{"/project/.claude/hooks/bar.sh", ".claude/", true},
-		{"/project/src/main.go", ".claude/", false},
+		{"/project/.claude/agents/foo.md", ".claude/", true}, // HA-TEST: CC channel path matches the CC sacred path pattern
+		{"/project/.claude/hooks/bar.sh", ".claude/", true}, // HA-TEST: CC channel path matches the CC sacred path pattern
+		{"/project/src/main.go", ".claude/", false}, // HA-TEST: non-CC path does not match CC sacred path pattern
 
 		// Wildcard patterns
 		{"/project/SESSION_CONTEXT.md", "*_CONTEXT.md", true},
@@ -640,7 +642,7 @@ func TestCheckTriggers_Priority_SacredPathFirst(t *testing.T) {
 	currentEvent := Event{
 		Type: EventTypeToolCall,
 		Tool: "Write",
-		Path: "/project/.claude/config.json",
+		Path: "/project/" + paths.ClaudeChannel{}.DirName() + "/config.json",
 	}
 
 	eventsPath := filepath.Join(sessionDir, EventsFileName)

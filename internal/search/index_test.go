@@ -198,7 +198,7 @@ func TestSearchExcludesZeroScore(t *testing.T) {
 // TestBuildIntegration runs Build against real CLI and concept data (no project).
 func TestBuildIntegration(t *testing.T) {
 	root := &cobra.Command{Use: "ari", Short: "Ariadne CLI"}
-	root.AddCommand(&cobra.Command{Use: "sync", Short: "Sync resources to .claude/"})
+	root.AddCommand(&cobra.Command{Use: "sync", Short: "Sync resources to channel dir"})
 	root.AddCommand(&cobra.Command{Use: "explain", Short: "Explain a knossos concept"})
 
 	idx := Build(root, nil)

@@ -43,8 +43,8 @@ func TestResolver_PathMethods(t *testing.T) {
 		{"KnossosManifestFile", r.KnossosManifestFile(), "/tmp/testroot/.knossos/KNOSSOS_MANIFEST.yaml"},
 		{"AgentsDirForChannel/claude", r.AgentsDirForChannel(ClaudeChannel{}), "/tmp/testroot/.claude/agents"},
 		{"AgentsDirForChannel/gemini", r.AgentsDirForChannel(GeminiChannel{}), "/tmp/testroot/.gemini/agents"},
-		{"AgentsDir", r.AgentsDir(), "/tmp/testroot/.claude/agents"},
-		{"AgentFile", r.AgentFile("potnia.md"), "/tmp/testroot/.claude/agents/potnia.md"},
+		{"AgentsDir", r.AgentsDir(), "/tmp/testroot/" + ClaudeChannel{}.DirName() + "/agents"},
+		{"AgentFile", r.AgentFile("potnia.md"), "/tmp/testroot/" + ClaudeChannel{}.DirName() + "/agents/potnia.md"},
 		{"ContextFileForChannel/claude", r.ContextFileForChannel(ClaudeChannel{}), "/tmp/testroot/.claude/CLAUDE.md"},
 		{"ContextFileForChannel/gemini", r.ContextFileForChannel(GeminiChannel{}), "/tmp/testroot/.gemini/GEMINI.md"},
 		{"KnossosDir", r.KnossosDir(), "/tmp/testroot/.knossos"},
@@ -194,7 +194,7 @@ func TestSessionIDFromDir(t *testing.T) {
 // TestFindProjectRoot verifies project root discovery by walking up directories.
 func TestFindProjectRoot(t *testing.T) {
 	t.Run("finds_claude_dir", func(t *testing.T) {
-		// Create a temp tree: root/.claude/ and root/a/b/c/
+		// Create a temp tree: root/{channel}/ and root/a/b/c/
 		root := t.TempDir()
 		channelDir := filepath.Join(root, ".claude")
 		if err := os.MkdirAll(channelDir, 0755); err != nil {
@@ -231,7 +231,7 @@ func TestFindProjectRoot(t *testing.T) {
 	})
 
 	t.Run("finds_knossos_dir", func(t *testing.T) {
-		// Create a temp tree with only .knossos/ (no .claude/)
+		// Create a temp tree with only .knossos/ (no channel dir)
 		root := t.TempDir()
 		knossosDir := filepath.Join(root, ".knossos")
 		if err := os.MkdirAll(knossosDir, 0755); err != nil {
@@ -252,7 +252,7 @@ func TestFindProjectRoot(t *testing.T) {
 	})
 
 	t.Run("prefers_knossos_over_channels", func(t *testing.T) {
-		// Both .knossos/ and .claude/ exist — .knossos/ is checked first (platform dir)
+		// Both .knossos/ and channel dir exist — .knossos/ is checked first (platform dir)
 		root := t.TempDir()
 		os.MkdirAll(filepath.Join(root, ".claude"), 0755)
 		os.MkdirAll(filepath.Join(root, ".knossos"), 0755)
@@ -267,7 +267,7 @@ func TestFindProjectRoot(t *testing.T) {
 	})
 
 	t.Run("finds_gemini_dir", func(t *testing.T) {
-		// Create a temp tree with only .gemini/ (no .claude/ or .knossos/)
+		// Create a temp tree with only .gemini/ (no CC channel dir or .knossos/)
 		root := t.TempDir()
 		geminiDir := filepath.Join(root, ".gemini")
 		if err := os.MkdirAll(geminiDir, 0755); err != nil {
@@ -288,7 +288,7 @@ func TestFindProjectRoot(t *testing.T) {
 	})
 
 	t.Run("error_no_recognized_dir", func(t *testing.T) {
-		// Temp dir with no .knossos/, .claude/, or .gemini/ anywhere in its ancestry
+		// Temp dir with no .knossos/, channel dir, or .gemini/ anywhere in its ancestry
 		isolated := t.TempDir()
 		_, err := FindProjectRoot(isolated)
 		if err == nil {

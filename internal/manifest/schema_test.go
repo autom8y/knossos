@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/autom8y/knossos/internal/manifest"
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 func TestNewSchemaValidator(t *testing.T) {
@@ -92,7 +93,7 @@ func TestDetectSchemaFromPath(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			path:       "/project/.claude/manifest.json",
+			path:       "/project/" + paths.ClaudeChannel{}.DirName() + "/manifest.json",
 			wantSchema: manifest.SchemaManifest,
 		},
 		{

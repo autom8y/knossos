@@ -49,7 +49,7 @@ func TestCalculateBudget(t *testing.T) {
 	c, err := New()
 	require.NoError(t, err)
 
-	// Create a mock .claude/ directory
+	// Create a mock channel directory
 	channelDir := t.TempDir()
 
 	// CLAUDE.md with sections

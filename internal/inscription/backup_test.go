@@ -16,8 +16,9 @@ func TestNewBackupManager(t *testing.T) {
 	if bm.BackupDir != "/project/.knossos/backups" {
 		t.Errorf("NewBackupManager() BackupDir = %q", bm.BackupDir)
 	}
-	if bm.TargetPath != "/project/.claude/CLAUDE.md" {
-		t.Errorf("NewBackupManager() TargetPath = %q", bm.TargetPath)
+	wantTarget := "/project/" + paths.ClaudeChannel{}.DirName() + "/" + paths.ClaudeChannel{}.ContextFile()
+	if bm.TargetPath != wantTarget {
+		t.Errorf("NewBackupManager() TargetPath = %q, want %q", bm.TargetPath, wantTarget)
 	}
 	if bm.MaxBackups != 5 {
 		t.Errorf("NewBackupManager() MaxBackups = %d", bm.MaxBackups)

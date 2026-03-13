@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/autom8y/knossos/internal/paths"
 	"testing"
 )
 
@@ -668,8 +670,8 @@ func TestGenerator_GeminiChannel_AgentConfigurations_GeminiPath(t *testing.T) {
 	if !strings.Contains(content, ".gemini/agents/") {
 		t.Errorf("Gemini agent-configurations should reference .gemini/agents/, got:\n%s", content)
 	}
-	if strings.Contains(content, ".claude/agents/") {
-		t.Errorf("Gemini agent-configurations should not reference .claude/agents/, got:\n%s", content)
+	if strings.Contains(content, ".claude/agents/") { // HA-TEST: CC channel path -- verifying Gemini output excludes CC-specific paths
+		t.Errorf("Gemini agent-configurations should not reference channel agents/, got:\n%s", content)
 	}
 }
 
@@ -760,11 +762,12 @@ func TestGenerator_ChannelDir_TemplateFunction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if content != ".claude/agents/" {
-		t.Errorf("channelDir for claude = %q, want .claude/agents/", content)
+	wantClaudeDir := paths.ClaudeChannel{}.DirName() + "/agents/"
+	if content != wantClaudeDir {
+		t.Errorf("channelDir for claude = %q, want %q", content, wantClaudeDir)
 	}
 
-	// Empty channel: should default to .claude
+	// Empty channel: should default to claude channel
 	emptyCtx := &RenderContext{}
 	gen = NewGenerator("", manifest, emptyCtx)
 	gen.SetSectionTemplate("test", `{{ channelDir }}/agents/`)
@@ -772,8 +775,9 @@ func TestGenerator_ChannelDir_TemplateFunction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if content != ".claude/agents/" {
-		t.Errorf("channelDir for empty channel = %q, want .claude/agents/", content)
+	wantEmptyDir := paths.ClaudeChannel{}.DirName() + "/agents/"
+	if content != wantEmptyDir {
+		t.Errorf("channelDir for empty channel = %q, want %q", content, wantEmptyDir)
 	}
 }
 

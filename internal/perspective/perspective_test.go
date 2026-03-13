@@ -140,7 +140,7 @@ func withRiteManifest(content string) testContextOpt {
 	}
 }
 
-// withSkillsDirs creates skill directories under .claude/skills/.
+// withSkillsDirs creates skill directories under channel skills/.
 func withSkillsDirs(names []string) testContextOpt {
 	return func(cfg *testContextConfig) {
 		for _, name := range names {

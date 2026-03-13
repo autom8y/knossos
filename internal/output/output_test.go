@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 // newTestPrinter returns a Printer writing to a buffer for inspection.
@@ -610,7 +612,7 @@ func TestJSON_RiteInfoOutput_ValidJSON(t *testing.T) {
 			{Name: "potnia", File: "potnia.md", Role: "orchestrator"},
 		},
 		Skills: []RiteSkillInfo{
-			{Ref: "conventions", Path: ".claude/skills/conventions", External: false},
+			{Ref: "conventions", Path: paths.ClaudeChannel{}.DirName() + "/skills/conventions", External: false},
 		},
 		Workflow: &RiteWorkflowInfo{
 			Type:       "orchestrated",

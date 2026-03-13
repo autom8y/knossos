@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/autom8y/knossos/internal/paths"
 )
 
 func TestRegistry_SessionRegistryPath(t *testing.T) {
@@ -19,7 +21,7 @@ func TestRegistry_SessionRegistryPath(t *testing.T) {
 func TestRegistry_ProjectRegistryPath(t *testing.T) {
 	registry := NewRegistry("/test/project")
 	path := registry.ProjectRegistryPath()
-	expected := "/test/project/.claude/artifacts/registry.yaml"
+	expected := "/test/project/" + paths.ClaudeChannel{}.DirName() + "/artifacts/registry.yaml"
 	if path != expected {
 		t.Errorf("Expected %s, got %s", expected, path)
 	}

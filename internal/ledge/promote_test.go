@@ -13,7 +13,7 @@ func setupTestProject(t *testing.T) (string, *paths.Resolver) {
 	t.Helper()
 	dir := t.TempDir()
 
-	// Create .claude/ so FindProjectRoot works
+	// Create channel dir so FindProjectRoot works
 	os.MkdirAll(filepath.Join(dir, ".claude"), 0755)
 
 	// Create ledge categories
