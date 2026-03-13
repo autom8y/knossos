@@ -132,6 +132,7 @@ For sessions exceeding 5 minutes, emit progress checkpoints after completing maj
 
 ## Example: Integration Test
 
+<!-- HA-CC: This test fixture uses .claude/settings.local.json — the CC-specific projected hook configuration file. The test validates CC settings merge behavior and cannot be made channel-neutral without changing what it verifies. -->
 ```bash
 #!/bin/bash
 # test-settings-merge.sh - Validates array concatenation in settings merge
