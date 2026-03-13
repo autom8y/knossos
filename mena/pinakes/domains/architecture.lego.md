@@ -119,7 +119,7 @@ Before beginning observation, identify the primary language(s) in the project:
 **What to observe**: How configuration and data move through the system. Input (config files, CLI flags, environment variables) -> processing (parsing, merging, transforming) -> output (file writes, CLI output, side effects). The knowledge reference must document the primary data paths.
 
 **Evidence to collect**:
-- Trace the sync pipeline: knossos source files -> materialization -> .claude/ output
+- Trace the sync pipeline: knossos source files -> materialization -> channel directory output
 - Trace the session pipeline: session events -> event file -> event readers
 - Trace the hook pipeline: CC lifecycle event -> stdin JSON -> ari hook handler -> side effects
 - Note configuration merge points (manifest + rite + agent frontmatter cascades)

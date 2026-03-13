@@ -1,6 +1,6 @@
 # Tool Selection
 
-**Default**: Use Claude Code native tools for file operations. Use shell CLI for git, GitHub, and project commands.
+**Default**: Use the harness's native tools for file operations. Use shell CLI for git, GitHub, and project commands.
 
 ## Decision Tree
 

@@ -6,7 +6,7 @@
 
 ```
 /
-├── .claude/                    # Claude Code configuration
+├── .channel/                   # Channel configuration
 │   └── CLAUDE.md              # Main entry point (this references other docs)
 │
 ├── .ledge/                    # Documentation root

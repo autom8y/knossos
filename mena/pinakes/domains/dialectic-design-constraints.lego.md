@@ -115,7 +115,7 @@ Each undocumented constraint must follow this structure:
 - Scan for `//go:build` tags and what they imply about supported platforms
 - Look for `runtime.GOOS` switches that restrict behavior on specific OSes
 - Look for environment variable reads without defaults (implicitly required)
-- Look for hard-coded paths that assume specific filesystem layouts (e.g., `~/.claude/`, `KNOSSOS_HOME`)
+- Look for hard-coded paths that assume specific filesystem layouts (e.g., `~/.channel/`, `KNOSSOS_HOME`)
 - Look for `CGO_ENABLED` or other build-time assumptions in code or comments
 - For each undocumented constraint: what the code requires, file evidence, whether design-constraints.md mentions it
 

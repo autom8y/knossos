@@ -1,11 +1,11 @@
 ---
 name: lexicon
-description: "Knossos-to-CC primitive mapping. Use when: understanding dromena vs legomena distinction, mapping knossos concepts to CC runtime, checking frontmatter schema. Triggers: lexicon, CC primitives, invocation mapping, frontmatter reference, knossos terminology."
+description: "Knossos-to-harness primitive mapping. Use when: understanding dromena vs legomena distinction, mapping knossos concepts to harness runtime, checking frontmatter schema. Triggers: lexicon, harness primitives, invocation mapping, frontmatter reference, knossos terminology."
 ---
 
 # Framework Lexicon
 
-Knossos concepts mapped to Claude Code (CC) runtime primitives.
+Knossos concepts mapped to harness runtime primitives.
 
 ## The Three Invocation Primitives
 

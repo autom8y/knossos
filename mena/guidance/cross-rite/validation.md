@@ -233,8 +233,8 @@ ari hook handoff-validate --route=sre --json
 The `handoff-validate` hook is implemented as an Ariadne CLI command. Implementation details:
 
 1. **Route configuration**: Each route defines required and optional checks
-2. **Path resolution**: Uses project-relative paths, respects `.claude/` conventions
+2. **Path resolution**: Uses project-relative paths, respects channel directory conventions
 3. **Artifact parsing**: Reads HANDOFF artifacts from session directory
 4. **Integration**: Called by `/sos wrap` quality gate phase
 
-For hook implementation details, see `.claude/hooks/` and Ariadne CLI source.
+For hook implementation details, see the channel hooks directory and Ariadne CLI source.

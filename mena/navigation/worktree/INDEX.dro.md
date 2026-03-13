@@ -1,6 +1,6 @@
 ---
 name: worktree
-description: Manage isolated worktrees for parallel Claude sessions
+description: Manage isolated worktrees for parallel AI coding sessions
 argument-hint: "<create|list|remove|cleanup|status> [args]"
 allowed-tools: Bash, Read
 model: sonnet
@@ -10,7 +10,7 @@ context: fork
 
 ## Context
 
-Git worktrees provide true filesystem isolation for parallel Claude sessions. Each worktree has its own `.claude/` directory (CC primitives), `.knossos/` (framework state), and `.sos/` (session state).
+Git worktrees provide true filesystem isolation for parallel AI coding sessions. Each worktree has its own channel directory (harness primitives), `.knossos/` (framework state), and `.sos/` (session state).
 
 ## Pre-flight
 

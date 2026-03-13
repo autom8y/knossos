@@ -5,7 +5,7 @@ description: "Evaluation criteria for legomena (skill) audits. Use when: theoros
 
 # Legomena Audit Criteria
 
-> The theoros evaluates skills against these standards to ensure Claude Code autonomously loads the right knowledge at the right time.
+> The theoros evaluates skills against these standards to ensure the harness autonomously loads the right knowledge at the right time.
 
 ## Scope
 

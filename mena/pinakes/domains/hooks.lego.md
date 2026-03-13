@@ -9,6 +9,7 @@ description: "Evaluation criteria for CC hook wiring audits. Use when: theoros i
 
 ## Scope
 
+<!-- HA-CC: .claude/settings.local.json is the CC-specific projected hook configuration file -->
 **Target files**: `.claude/settings.local.json` (projected hook configuration)
 
 **Supporting context**: `internal/hook/` (Go hook implementations), `knossos/templates/rules/internal-hook.md` (hook development rules)
@@ -29,6 +30,7 @@ description: "Evaluation criteria for CC hook wiring audits. Use when: theoros i
 | D | 60-69% | 4 lifecycle events have hooks. Some critical events missing. |
 | F | < 60% | Fewer than 4 lifecycle events have hooks. Critical safety gaps. |
 
+<!-- HA-CC: .claude/settings.local.json is the CC-specific projected hook configuration file -->
 **Evidence collection**: Read `.claude/settings.local.json`. Extract all keys under `hooks`. Count distinct lifecycle events. List which events have hooks and which don't. Compare against the 9 known CC lifecycle events.
 
 ---

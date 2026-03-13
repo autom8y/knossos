@@ -9,7 +9,7 @@ description: "Ecosystem guidance and navigation that matches user intent to appr
 
 ## Purpose
 
-The `/consult` command provides ecosystem guidance, matches user intent to appropriate rites and workflows, and delivers actionable command-flows. It serves as the meta-navigator for the entire Claude Code ecosystem.
+The `/consult` command provides ecosystem guidance, matches user intent to appropriate rites and workflows, and delivers actionable command-flows. It serves as the meta-navigator for the entire Knossos ecosystem.
 
 This command acts as an intelligent routing layer that:
 - Understands user goals and translates them into concrete workflows

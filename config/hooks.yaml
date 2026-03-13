@@ -1,5 +1,5 @@
 # Ari Hook Configuration
-# Canonical source of truth for Claude Code hook registrations.
+# Canonical source of truth for harness hook registrations.
 # Materialization reads this file and generates settings.local.json hooks section.
 #
 # Schema version: 2.0

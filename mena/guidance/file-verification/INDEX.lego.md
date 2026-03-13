@@ -34,7 +34,7 @@ Construct absolute paths before writing:
 /full/path/to/repository/src/module/file.ext
 
 # For configuration
-/full/path/to/repository/.claude/config/file.json
+/full/path/to/repository/.channel/config/file.json
 ```
 
 **NEVER use**:

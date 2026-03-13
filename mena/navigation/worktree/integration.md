@@ -9,11 +9,11 @@
 ```
 ~/Code/project/                     # Main working tree
   .git/                             # Shared git database
-  .claude/                          # Main ecosystem
+  .channel/                         # Main ecosystem
   worktrees/                        # Worktree container
     .gitignore                      # Ignore all worktrees from git
     wt-20251224-143052-abc/         # Per-session worktree
-      .claude/                      # Independent ecosystem
+      .channel/                     # Independent ecosystem
         .worktree-meta.json         # Worktree metadata
         agents/                     # Rite agents (isolated)
         sessions/                   # Single session

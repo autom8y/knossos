@@ -49,7 +49,7 @@ When complete, save:
 
 ## Notes
 
-- All agent invocation happens via Claude Code's native Task tool
+- All agent invocation happens via the harness's native Task tool
 - No direct shell execution of agent files
 - Agents are defined in the channel directory under `agents/{agent-name}.md`
 - Templates are in the rite's documentation skill (path varies by rite)

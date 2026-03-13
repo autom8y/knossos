@@ -90,7 +90,7 @@ Each assumption finding must follow this structure:
 **What to evaluate**: Does the architecture document assume a specific OS, filesystem layout, environment variables, working directory, shell environment, or permission model without making these explicit?
 
 **Evidence to collect**:
-- Look for implicit filesystem path assumptions (e.g., `~/.claude/` assumed to exist)
+- Look for implicit filesystem path assumptions (e.g., `~/.channel/` assumed to exist)
 - Look for shell or environment variable dependencies assumed available
 - Look for OS-specific behavior assumed (e.g., symlinks, file permissions, temp directories)
 - Check whether Go version, build toolchain, or CGO_ENABLED constraints are documented vs. assumed

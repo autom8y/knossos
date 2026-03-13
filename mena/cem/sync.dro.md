@@ -59,7 +59,7 @@ For all flags: `ari sync --help`
 /sync --scope=rite           # Sync only rite content
 /sync --rite=hygiene         # Switch to hygiene rite
 
-# Bootstrap NEW project (creates .claude/ if missing)
+# Bootstrap NEW project (creates channel directory if missing)
 /sync --rite=10x-dev --source=knossos
 
 # Cross-cutting mode (no rite, just base infrastructure)
