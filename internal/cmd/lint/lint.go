@@ -351,7 +351,7 @@ var archetypeMaxTurns = map[string]int{
 }
 
 func lintAgents(projectRoot string, report *LintReport) {
-	// Lint agents from rite sources (not .claude/ — we lint sources)
+	// Lint agents from rite sources (not the channel directory — we lint sources)
 	agentDirs := findAgentDirs(projectRoot)
 
 	for _, dir := range agentDirs {

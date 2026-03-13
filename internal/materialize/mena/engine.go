@@ -281,12 +281,12 @@ func cleanStaleMenaEntries(opts MenaProjectionOptions, result *MenaProjectionRes
 	}
 
 	// Load existing provenance manifest to identify knossos-owned entries.
-	// Manifest lives in .knossos/ (migrated from .claude/).
+	// Manifest lives in .knossos/ (migrated from the legacy channel directory).
 	// Uses channel-keyed path so gemini reads its own manifest, not claude's.
 	channelDir := filepath.Dir(opts.TargetCommandsDir)
 	knossosDir := opts.KnossosDir
 	if knossosDir == "" {
-		// Fallback: derive from TargetCommandsDir (.claude/commands/ -> parent -> sibling .knossos/)
+		// Fallback: derive from TargetCommandsDir (channel/commands/ -> parent -> sibling .knossos/)
 		knossosDir = filepath.Join(filepath.Dir(channelDir), ".knossos")
 	}
 	manifestPath := provenance.ManifestPathForChannel(knossosDir, opts.Channel)

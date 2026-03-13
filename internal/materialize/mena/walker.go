@@ -80,7 +80,7 @@ func copyDirFS(fsys fs.FS, root, dst string, hideCompanions bool, comp ChannelCo
 		}
 
 		// Rewrite stale .lego.md/.dro.md content references to materialized forms
-		// and substitute .claude/ path prefixes for the target channel directory.
+		// and substitute legacy channel path prefixes for the target channel directory.
 		// Only markdown files contain link targets and backtick spans that need rewriting.
 		if strings.HasSuffix(base, ".md") {
 			content = RewriteMenaContentPaths(content, channelDir)

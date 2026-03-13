@@ -66,7 +66,7 @@ func newValidateCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Validates bash commands for potentially dangerous operations.
 
 This hook is triggered on PreToolUse events for Bash tools. It:
-- Blocks rm -rf on protected paths (.claude/, .git/, etc.)
+- Blocks rm -rf on protected channel and system paths (.claude/, .gemini/, .git/, etc.)
 - Blocks force push to main/master branches
 - Blocks --no-verify on commits
 - Blocks destructive git commands (reset --hard, clean -fd)

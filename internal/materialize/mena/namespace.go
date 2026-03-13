@@ -126,10 +126,10 @@ func resolveNamespace(collected map[string]menaCollectedEntry, standalones map[s
 	// Uses provenance manifest to distinguish knossos-owned (safe to overwrite) from user-owned.
 	if opts.TargetCommandsDir != "" {
 		// Load existing provenance manifest to identify ownership.
-		// Manifest lives in .knossos/ (migrated from .claude/).
+		// Manifest lives in .knossos/ (migrated from the legacy channel directory).
 		knossosDir := opts.KnossosDir
 		if knossosDir == "" {
-			// Fallback: derive from TargetCommandsDir (.claude/commands/ -> parent -> sibling .knossos/)
+			// Fallback: derive from TargetCommandsDir (channel/commands/ -> parent -> sibling .knossos/)
 			channelDir := filepath.Dir(opts.TargetCommandsDir)
 			knossosDir = filepath.Join(filepath.Dir(channelDir), ".knossos")
 		}
