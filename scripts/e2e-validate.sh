@@ -7,7 +7,7 @@
 #   ari version
 #   ari init
 #   ari sync --rite 10x-dev
-#   .claude/ structure assertions
+#   channel directory structure assertions
 #
 # DELIBERATE SHORTCUTS (prototype -- not production):
 #   - No test framework; plain bash with pass/fail output
@@ -22,12 +22,20 @@
 #   Requires GNU coreutils `timeout` on macOS (brew install coreutils) or Linux timeout.
 #   If `timeout` is not available, brew operations run without time limit.
 #
+# Channel Handling:
+#   --channel claude      Validate Claude channel output (default)
+#   --channel gemini      Validate Gemini channel output
+#   --channel all         Validate both channels + structural parity
+#
 # Usage:
 #   ./scripts/e2e-validate.sh
 #   ./scripts/e2e-validate.sh --version v0.3.0
 #   ./scripts/e2e-validate.sh --skip-install
 #   ./scripts/e2e-validate.sh --version v0.3.0 --skip-install
 #   ./scripts/e2e-validate.sh --brew-timeout 600 --ari-timeout 120
+#   ./scripts/e2e-validate.sh --channel claude
+#   ./scripts/e2e-validate.sh --channel gemini
+#   ./scripts/e2e-validate.sh --channel all
 
 set -euo pipefail
 
@@ -41,6 +49,7 @@ TAP="autom8y/tap"
 FORMULA="autom8y/tap/ari"
 BREW_TIMEOUT=300   # seconds for brew tap + install (can stall in CI)
 ARI_TIMEOUT=60     # seconds for ari init + sync
+CHANNEL="claude"   # default: backward-compatible
 
 # ---------------------------------------------------------------------------
 # Argument parsing
@@ -63,6 +72,10 @@ while [[ $# -gt 0 ]]; do
             ARI_TIMEOUT="${2:?--ari-timeout requires a value}"
             shift 2
             ;;
+        --channel)
+            CHANNEL="${2:?--channel requires a value (claude|gemini|all)}"
+            shift 2
+            ;;
         -h|--help)
             sed -n '/^# e2e-validate/,/^$/p' "$0"
             exit 0
@@ -73,6 +86,12 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Validate channel value
+case "$CHANNEL" in
+    claude|gemini|all) ;;
+    *) echo "ERROR: --channel must be claude, gemini, or all" >&2; exit 1 ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -171,6 +190,86 @@ assert_dir_exists() {
 }
 
 # ---------------------------------------------------------------------------
+# Channel helper functions
+# ---------------------------------------------------------------------------
+
+# channel_dir returns the channel directory name
+channel_dir() {
+    case "$1" in
+        claude) echo ".claude" ;;
+        gemini) echo ".gemini" ;;
+    esac
+}
+
+# context_file returns the context file name (CLAUDE.md or GEMINI.md)
+context_file() {
+    case "$1" in
+        claude) echo "CLAUDE.md" ;;
+        gemini) echo "GEMINI.md" ;;
+    esac
+}
+
+# has_settings_local returns 0 (true) if the channel has settings.local.json
+has_settings_local() {
+    case "$1" in
+        claude) return 0 ;;
+        gemini) return 1 ;;  # Gemini does NOT have settings.local.json
+    esac
+}
+
+# validate_sync runs ari sync for a specific channel
+validate_sync() {
+    local ch="$1"
+    echo "--- Assertion 5($ch): ari sync --rite 10x-dev --channel $ch ---"
+    pushd "$E2E_TMPDIR" > /dev/null
+    run_with_timeout "$ARI_TIMEOUT" \
+        "ari sync --rite 10x-dev --channel $ch exits 0 within ${ARI_TIMEOUT}s" \
+        ari sync --rite 10x-dev --channel "$ch"
+    popd > /dev/null
+}
+
+# validate_channel_output checks assertions 6-7 for a specific channel
+validate_channel_output() {
+    local ch="$1"
+    local chdir
+    chdir=$(channel_dir "$ch")
+    local ctxfile
+    ctxfile=$(context_file "$ch")
+
+    echo "--- Assertion 6($ch): $chdir/$ctxfile exists and non-empty ---"
+    assert_file_exists_nonempty \
+        "$chdir/$ctxfile exists and non-empty" \
+        "$E2E_TMPDIR/$chdir/$ctxfile"
+
+    # Verify KNOSSOS section markers
+    local content
+    content=$(cat "$E2E_TMPDIR/$chdir/$ctxfile")
+    assert_contains "$chdir/$ctxfile contains KNOSSOS section markers" \
+        "$content" "KNOSSOS:START"
+
+    echo "--- Assertion 7($ch): $chdir/ directory structure ---"
+    assert_dir_exists "$chdir/agents/ exists" "$E2E_TMPDIR/$chdir/agents"
+    assert_dir_exists "$chdir/commands/ exists" "$E2E_TMPDIR/$chdir/commands"
+    assert_dir_exists "$chdir/skills/ exists" "$E2E_TMPDIR/$chdir/skills"
+
+    # settings.local.json: Claude-only
+    if has_settings_local "$ch"; then
+        assert_file_exists_nonempty \
+            "$chdir/settings.local.json exists and non-empty" \
+            "$E2E_TMPDIR/$chdir/settings.local.json"
+    fi
+
+    # Agent count
+    local agent_count
+    agent_count=$(find "$E2E_TMPDIR/$chdir/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$agent_count" -gt 0 ]]; then
+        pass "$chdir/agents/ contains $agent_count agent file(s)"
+    else
+        fail "$chdir/agents/ is empty -- rite sync did not materialize agents"
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # Environment detection
 # ---------------------------------------------------------------------------
 echo ""
@@ -180,6 +279,7 @@ echo "========================================================"
 echo ""
 echo "Platform:  $(uname -s)/$(uname -m)"
 echo "Date:      $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+echo "Channel:   $CHANNEL"
 
 # Detect timeout binary (gtimeout on macOS via coreutils, timeout on Linux).
 TIMEOUT_BIN=""
@@ -289,40 +389,24 @@ run_with_timeout "$ARI_TIMEOUT" "ari init exits 0 within ${ARI_TIMEOUT}s" ari in
 popd > /dev/null
 
 # ---------------------------------------------------------------------------
-# ASSERTION 5: ari sync --rite 10x-dev exits 0
+# ASSERTION 5-7: Channel-specific validation
 # ---------------------------------------------------------------------------
-echo "--- Assertion 5: ari sync --rite 10x-dev ---"
-pushd "$E2E_TMPDIR" > /dev/null
-run_with_timeout "$ARI_TIMEOUT" "ari sync --rite 10x-dev exits 0 within ${ARI_TIMEOUT}s" \
-    ari sync --rite 10x-dev
-popd > /dev/null
-
-# ---------------------------------------------------------------------------
-# ASSERTION 6: .claude/CLAUDE.md exists and is non-empty
-# ---------------------------------------------------------------------------
-echo "--- Assertion 6: .claude/CLAUDE.md exists and non-empty ---"
-assert_file_exists_nonempty ".claude/CLAUDE.md exists and non-empty" "$E2E_TMPDIR/.claude/CLAUDE.md"
-
-# Bonus: verify it contains KNOSSOS section markers (smoke test for real content)
-CLAUDE_MD_CONTENT=$(cat "$E2E_TMPDIR/.claude/CLAUDE.md")
-assert_contains ".claude/CLAUDE.md contains KNOSSOS section markers" "$CLAUDE_MD_CONTENT" "KNOSSOS:START"
-
-# ---------------------------------------------------------------------------
-# ASSERTION 7: .claude/ contains expected structure
-# ---------------------------------------------------------------------------
-echo "--- Assertion 7: .claude/ directory structure ---"
-assert_dir_exists ".claude/agents/ exists" "$E2E_TMPDIR/.claude/agents"
-assert_dir_exists ".claude/commands/ exists" "$E2E_TMPDIR/.claude/commands"
-assert_dir_exists ".claude/skills/ exists" "$E2E_TMPDIR/.claude/skills"
-assert_file_exists_nonempty ".claude/settings.local.json exists and non-empty" "$E2E_TMPDIR/.claude/settings.local.json"
-
-# Verify at least one agent file exists (ensures rite content actually materialized)
-AGENT_COUNT=$(find "$E2E_TMPDIR/.claude/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-if [[ "$AGENT_COUNT" -gt 0 ]]; then
-    pass ".claude/agents/ contains $AGENT_COUNT agent file(s)"
-else
-    fail ".claude/agents/ is empty -- rite sync did not materialize agents"
-fi
+case "$CHANNEL" in
+    claude)
+        validate_sync "claude"
+        validate_channel_output "claude"
+        ;;
+    gemini)
+        validate_sync "gemini"
+        validate_channel_output "gemini"
+        ;;
+    all)
+        validate_sync "claude"
+        validate_sync "gemini"
+        validate_channel_output "claude"
+        validate_channel_output "gemini"
+        ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Summary
