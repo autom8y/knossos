@@ -3,7 +3,10 @@ package lint
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/autom8y/knossos/internal/cmd/common"
 )
 
 func TestLintPreferentialLanguageGo(t *testing.T) {
@@ -348,6 +351,115 @@ func TestLintPreferentialLanguageMena(t *testing.T) {
 		prefFindings := filterByRule(report.Legomena, rulePreferentialLanguage)
 		if len(prefFindings) != 1 {
 			t.Fatalf("expected 1 finding from rites/*/mena/, got %d: %+v", len(prefFindings), prefFindings)
+		}
+	})
+}
+
+func TestRunLint_CheckFlag(t *testing.T) {
+	t.Run("unknown check value returns error", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		outputFormat := "text"
+		verbose := false
+		ctx := &cmdContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectRoot,
+			},
+		}
+		err := runLint(ctx, "", "unknown-rule")
+		if err == nil {
+			t.Fatal("expected error for unknown check value")
+		}
+		if !strings.Contains(err.Error(), "unknown check") {
+			t.Errorf("expected 'unknown check' in error, got: %s", err.Error())
+		}
+	})
+
+	t.Run("check=preferential-language with no violations returns nil", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		// Create internal/ with a clean file
+		internalDir := filepath.Join(projectRoot, "internal", "example")
+		os.MkdirAll(internalDir, 0755)
+		os.WriteFile(
+			filepath.Join(internalDir, "clean.go"),
+			[]byte("package example\n\nfunc Hello() string { return \"hello\" }\n"),
+			0644,
+		)
+		outputFormat := "text"
+		verbose := false
+		ctx := &cmdContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectRoot,
+			},
+		}
+		err := runLint(ctx, "", rulePreferentialLanguage)
+		if err != nil {
+			t.Errorf("expected nil error for clean project, got: %v", err)
+		}
+	})
+
+	t.Run("check=preferential-language with violations returns error", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		// Create internal/ with a violating file
+		internalDir := filepath.Join(projectRoot, "internal", "example")
+		os.MkdirAll(internalDir, 0755)
+		os.WriteFile(
+			filepath.Join(internalDir, "bad.go"),
+			[]byte("package example\n\nvar dir = \".claude/agents\"\n"),
+			0644,
+		)
+		outputFormat := "text"
+		verbose := false
+		ctx := &cmdContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectRoot,
+			},
+		}
+		err := runLint(ctx, "", rulePreferentialLanguage)
+		if err == nil {
+			t.Fatal("expected error for project with violations")
+		}
+		if !strings.Contains(err.Error(), "violations found") {
+			t.Errorf("expected 'violations found' in error, got: %s", err.Error())
+		}
+	})
+
+	t.Run("check=preferential-language only runs this rule", func(t *testing.T) {
+		projectRoot := t.TempDir()
+		// Create an agent file with missing frontmatter (would trigger agent rules)
+		agentDir := filepath.Join(projectRoot, "rites", "test", "agents")
+		os.MkdirAll(agentDir, 0755)
+		os.WriteFile(
+			filepath.Join(agentDir, "bad-agent.md"),
+			[]byte("# No frontmatter agent\nThis has no YAML frontmatter.\n"),
+			0644,
+		)
+		// Also create internal/ with a clean file
+		internalDir := filepath.Join(projectRoot, "internal", "example")
+		os.MkdirAll(internalDir, 0755)
+		os.WriteFile(
+			filepath.Join(internalDir, "clean.go"),
+			[]byte("package example\n\nfunc Hello() string { return \"hello\" }\n"),
+			0644,
+		)
+		outputFormat := "text"
+		verbose := false
+		ctx := &cmdContext{
+			BaseContext: common.BaseContext{
+				Output:     &outputFormat,
+				Verbose:    &verbose,
+				ProjectDir: &projectRoot,
+			},
+		}
+		// With --check=preferential-language, agent issues should NOT appear
+		err := runLint(ctx, "", rulePreferentialLanguage)
+		if err != nil {
+			t.Errorf("expected nil error (no preferential-language violations), got: %v", err)
 		}
 	})
 }
