@@ -1,0 +1,91 @@
+# Orchestrator configuration for ui
+
+# Rite metadata
+rite:
+  name: ui
+  domain: UI/UX development
+  color: pink
+
+# Frontmatter customization
+frontmatter:
+  role: "Coordinates UI development phases"
+  description: |
+    Stateless advisor that routes work through UI specialists. Does not execute—provides structured directives for the main agent to invoke specialists. Use when: UI development spans multiple phases or requires coordination across design systems, rendering, styling, implementation, and accessibility. Triggers: coordinate, orchestrate, UI workflow, design system, component development, accessibility validation.
+
+# Specialist routing conditions (when to route to each)
+# Specialist names come from workflow.yaml phases
+routing:
+  design-system-architect: "New design system, token taxonomy needed, component architecture overhaul"
+  rendering-architect: "Design system exists, new feature/page needs rendering strategy and performance budgets"
+  stylist: "Rendering manifest exists, CSS architecture and token-to-CSS mapping needed"
+  component-engineer: "Style architecture exists, components ready for implementation with state management and testing"
+  accessibility-engineer: "Implementation complete, WCAG 2.2 AA validation needed across four testing layers"
+
+# Workflow position descriptors
+workflow_position:
+  upstream: "User request for UI development work, SessionStart hook context"
+  downstream: "Specialists execute; artifacts flow to session context (design-system-spec -> rendering-manifest -> style-architecture -> component-implementation -> accessibility-report)"
+
+# Handoff criteria between phases (checklist items)
+handoff_criteria:
+  foundation:
+    - "Token taxonomy defined in DTCG format with three tiers (global, alias, component)"
+    - "Token naming follows semantic convention at alias and component tiers"
+    - "Component catalog classifies all components by behavioral tier (primitive/composite/pattern)"
+    - "Slot vs. prop boundaries documented for each component"
+    - "Lifecycle status assigned in machine-readable metadata"
+    - "Governance gates defined with automated checks"
+    - "Breaking change classification rules documented"
+    - "design-system-spec committed to repository"
+  strategy:
+    - "Per-route rendering mode declared with justification for anything above SSG"
+    - "Hydration strategy documented per interactive region"
+    - "Performance budget allocated (365KB JS gzipped total, per-route if applicable)"
+    - "CLS mitigation requirements specified (aspect-ratio, min-height, font-display)"
+    - "Streaming boundaries and loading placeholder dimensions specified"
+    - "Progressive enhancement requirements explicit (what must work without JS)"
+    - "rendering-manifest committed to repository"
+  styling:
+    - "CSS architecture documented (cascade layers, custom property scoping, nesting strategy)"
+    - "Token-to-CSS mapping complete (all DTCG tokens resolved to custom properties)"
+    - "Layout patterns defined per component type (flexbox/grid, container queries)"
+    - "Responsive strategy documented (fluid typography, breakpoint rationale)"
+    - "Animation standards specified (allowed properties, timing tokens, reduced-motion fallbacks)"
+    - "Theming implementation documented (custom property layers, dark mode, multi-brand)"
+    - "All color combinations validated against WCAG contrast ratios per theme variant"
+    - "style-architecture committed to repository"
+  implementation:
+    - "Components implemented with headless logic separation"
+    - "State classified by origin for every stateful value"
+    - "Static analysis passes at 100%"
+    - "Integration tests pass for user-meaningful behaviors"
+    - "Component isolation fixtures exist (default, loading, error, empty, edge-case)"
+    - "Test output in structured formats (CTRF, SARIF)"
+    - "Semantic HTML elements used (not div soup)"
+    - "component-implementation committed to repository"
+  validation:
+    - "Static lint layer passes (zero tolerance for missing alt, labels, invalid ARIA)"
+    - "Automated audit passes via axe-core (contrast, landmarks, ARIA validity)"
+    - "Interaction testing passes (keyboard nav, focus management, APG patterns)"
+    - "Manual review protocol documented (alt text quality, reading order, screen reader accuracy)"
+    - "Internationalization constraints verified (logical properties, text expansion)"
+    - "All findings in structured format with location and severity"
+    - "accessibility-report committed to repository"
+    - "No WCAG 2.2 AA violations remain (zero tolerance)"
+
+# Skills references for this rite
+skills:
+  - orchestrator-templates
+  - cross-rite-handoff
+
+# Rite-specific anti-patterns
+antipatterns:
+  - "Framework endorsement without justification (stack-agnostic by default)"
+  - "Deferring a11y violations to backlog (always blocking, zero tolerance)"
+  - "Treating performance budgets as optimization targets (they are architectural constraints)"
+  - "Skipping validation phase (every complexity level runs accessibility-engineer)"
+  - "Single rendering strategy for all routes (per-route strategy required)"
+  - "Div soup with ARIA compensation (semantic HTML first)"
+
+# Cross-rite protocol
+cross_rite_protocol: "Surface cross-rite concerns in state_update.blockers. Route to: 10x-dev for backend API design, docs for documentation gaps, debt-triage for performance debt, security for auth UI/PII. Recommend user invoke Skill(cross-rite-handoff). Do NOT attempt cross-rite routing directly."

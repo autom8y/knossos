@@ -1,0 +1,139 @@
+name: ui
+version: "1.0.0"
+workflow_type: sequential
+description: UI development lifecycle (Foundation -> Strategy -> Styling -> Implementation -> Validation)
+
+# entry_point: The first specialist in the domain workflow (not the CC routing agent).
+# The CC routing agent is manifest.yaml:entry_agent (always potnia for orchestrated rites).
+# For UI rite, entry varies by work type:
+#   SYSTEM  -> design-system-architect (all 5 phases)
+#   MODULE  -> rendering-architect (strategy + styling + implementation + validation)
+#   TASK    -> component-engineer (implementation + validation)
+entry_point:
+  agent: design-system-architect
+  by_work_type:
+    new_design_system: design-system-architect
+    design_system_overhaul: design-system-architect
+    new_feature: rendering-architect
+    new_page: rendering-architect
+    styling_overhaul: stylist
+    component_modification: component-engineer
+    component_addition: component-engineer
+    a11y_remediation: accessibility-engineer
+  artifact_templates:
+    design-system-architect:
+      type: design-system-spec
+      path_template: .ledge/specs/DSS-{slug}.md
+    rendering-architect:
+      type: rendering-manifest
+      path_template: .ledge/specs/RM-{slug}.md
+    stylist:
+      type: style-architecture
+      path_template: .ledge/specs/SA-{slug}.md
+    component-engineer:
+      type: component-implementation
+      path_template: null
+    accessibility-engineer:
+      type: accessibility-report
+      path_template: .ledge/reviews/A11Y-{slug}.md
+
+phases:
+  - name: foundation
+    agent: design-system-architect
+    produces: design-system-spec
+    next: strategy
+    condition: "complexity >= SYSTEM"
+
+  - name: strategy
+    agent: rendering-architect
+    produces: rendering-manifest
+    next: styling
+    condition: "complexity >= MODULE"
+
+  - name: styling
+    agent: stylist
+    produces: style-architecture
+    next: implementation
+    condition: "complexity >= MODULE"
+
+  - name: implementation
+    agent: component-engineer
+    produces: component-implementation
+    next: validation
+
+  - name: validation
+    agent: accessibility-engineer
+    produces: accessibility-report
+    next: null
+
+complexity_levels:
+  - name: TASK
+    scope: "Single component, <200 LOC"
+    phases: [implementation, validation]
+
+  - name: MODULE
+    scope: "Feature area or page, 3-10 components"
+    phases: [strategy, styling, implementation, validation]
+
+  - name: SYSTEM
+    scope: "Design system overhaul, cross-cutting changes"
+    phases: [foundation, strategy, styling, implementation, validation]
+
+# Agent roles for command mapping:
+# /ui              → potnia (full pipeline, complexity-routed)
+# /ui-foundation   → design-system-architect (foundation only)
+# /ui-strategy     → rendering-architect (strategy only)
+# /ui-styling      → stylist (styling only)
+# /ui-build        → component-engineer (implementation only)
+# /ui-a11y         → accessibility-engineer (validation only)
+
+# Rite-specific commands (synced on rite swap):
+commands:
+  - name: ui
+    file: ui.md
+    description: "UI development lifecycle from design system through accessible delivery"
+    primary_agent: potnia
+    workflow_phase: all
+
+back_routes:
+  - source_phase: validation
+    trigger: "fail(a11y_violations_css)"
+    target_phase: styling
+    target_agent: stylist
+    requires_user_confirmation: false
+    condition: "Violations are CSS-level (contrast in theme, missing focus styles, reduced-motion, target sizing)"
+
+  - source_phase: validation
+    trigger: "fail(a11y_violations_component)"
+    target_phase: implementation
+    target_agent: component-engineer
+    requires_user_confirmation: false
+    condition: "Violations require component behavior changes (ARIA, keyboard, semantic HTML)"
+
+  - source_phase: implementation
+    trigger: "budget_exceeded"
+    target_phase: strategy
+    target_agent: rendering-architect
+    requires_user_confirmation: false
+    condition: "Implementation exceeds JS budget, rendering strategy needs revision"
+
+  - source_phase: styling
+    trigger: "css_perf_conflict"
+    target_phase: strategy
+    target_agent: rendering-architect
+    requires_user_confirmation: false
+    condition: "CSS performance analysis reveals CLS or rendering cost issues requiring strategy revision"
+
+  - source_phase: styling
+    trigger: "token_gap"
+    target_phase: foundation
+    target_agent: design-system-architect
+    requires_user_confirmation: true
+    condition: "Missing tokens prevent CSS mapping (spacing scale, color semantics)"
+
+  - source_phase: strategy
+    trigger: "token_gap"
+    target_phase: foundation
+    target_agent: design-system-architect
+    requires_user_confirmation: true
+    condition: "Missing tokens or component definitions needed for rendering decisions"
