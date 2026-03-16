@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 
 	"github.com/stretchr/testify/assert"
@@ -75,11 +76,21 @@ func TestMaterializeSettingsWithManifest_StaleMcpServersRemoved(t *testing.T) {
 	assert.NotNil(t, settings["hooks"], "hooks must be preserved")
 }
 
+// newMCPTestMaterializer creates a Materializer with a paths.Resolver rooted at projectRoot.
+// Ensures .knossos/ directory exists for ownership tracking.
+func newMCPTestMaterializer(t *testing.T, projectRoot string) *Materializer {
+	t.Helper()
+	knossosDir := filepath.Join(projectRoot, ".knossos")
+	require.NoError(t, os.MkdirAll(knossosDir, 0755))
+	return &Materializer{resolver: paths.NewResolver(projectRoot)}
+}
+
 // TestMaterializeMcpJson_WritesToProjectRoot tests that MCP servers from
 // the rite manifest are written to .mcp.json at project root (SCAR-028).
 func TestMaterializeMcpJson_WritesToProjectRoot(t *testing.T) {
 	t.Parallel()
 	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
 	manifest := &RiteManifest{
 		Name: "test-rite",
 		MCPServers: []MCPServer{
@@ -99,7 +110,7 @@ func TestMaterializeMcpJson_WritesToProjectRoot(t *testing.T) {
 		},
 	}
 
-	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
+	err := m.materializeMcpJsonFromResolved(projectRoot, manifest, manifest.MCPServers, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// Verify .mcp.json was created
@@ -136,6 +147,7 @@ func TestMaterializeMcpJson_WritesToProjectRoot(t *testing.T) {
 func TestMaterializeMcpJson_PreservesExistingSatelliteServers(t *testing.T) {
 	t.Parallel()
 	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
 	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
 
 	// Create existing .mcp.json with a user-owned satellite server
@@ -159,7 +171,7 @@ func TestMaterializeMcpJson_PreservesExistingSatelliteServers(t *testing.T) {
 		},
 	}
 
-	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
+	err = m.materializeMcpJsonFromResolved(projectRoot, manifest, manifest.MCPServers, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// Verify both servers exist
@@ -185,8 +197,9 @@ func TestMaterializeMcpJson_PreservesExistingSatelliteServers(t *testing.T) {
 func TestMaterializeMcpJson_NilManifest(t *testing.T) {
 	t.Parallel()
 	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
 
-	err := (&Materializer{}).materializeMcpJson(projectRoot, nil, provenance.NullCollector{}, "")
+	err := m.materializeMcpJsonFromResolved(projectRoot, nil, nil, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// .mcp.json should NOT be created
@@ -199,9 +212,10 @@ func TestMaterializeMcpJson_NilManifest(t *testing.T) {
 func TestMaterializeMcpJson_EmptyMCPServers(t *testing.T) {
 	t.Parallel()
 	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
 	manifest := &RiteManifest{Name: "test-rite"}
 
-	err := (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
+	err := m.materializeMcpJsonFromResolved(projectRoot, manifest, manifest.MCPServers, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	// .mcp.json should NOT be created
@@ -215,6 +229,7 @@ func TestMaterializeMcpJson_EmptyMCPServers(t *testing.T) {
 func TestMaterializeMcpJson_UpdatesExistingRiteServer(t *testing.T) {
 	t.Parallel()
 	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
 	mcpJsonPath := filepath.Join(projectRoot, ".mcp.json")
 
 	// Create existing .mcp.json with old github config
@@ -241,7 +256,7 @@ func TestMaterializeMcpJson_UpdatesExistingRiteServer(t *testing.T) {
 		},
 	}
 
-	err = (&Materializer{}).materializeMcpJson(projectRoot, manifest, provenance.NullCollector{}, "")
+	err = m.materializeMcpJsonFromResolved(projectRoot, manifest, manifest.MCPServers, provenance.NullCollector{}, "")
 	require.NoError(t, err)
 
 	data, err = os.ReadFile(mcpJsonPath)
@@ -283,4 +298,194 @@ func TestSCAR028_MCPServers_NotInSettingsLocalJson(t *testing.T) {
 
 	assert.Nil(t, settings["mcpServers"],
 		"SCAR-028: mcpServers must NEVER be in settings.local.json — CC reads from .mcp.json")
+}
+
+// TestMaterializeMcpJsonWithPools_ResolvesAndWrites tests end-to-end pool resolution to .mcp.json.
+func TestMaterializeMcpJsonWithPools_ResolvesAndWrites(t *testing.T) {
+	t.Parallel()
+	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
+
+	poolsConfig := &MCPPoolsConfig{
+		SchemaVersion: "1.0",
+		Pools: map[string]MCPPool{
+			"browser-local": {
+				Server: MCPServerConfig{
+					Name:    "browserbase",
+					Command: "npx",
+					Args:    []string{"-y", "stagehand-mcp-local"},
+					Env:     map[string]string{"STAGEHAND_ENV": "${STAGEHAND_ENV}"},
+				},
+			},
+		},
+	}
+
+	manifest := &RiteManifest{
+		Name:     "ui",
+		MCPPools: []MCPPoolRef{{Pool: "browser-local"}},
+	}
+
+	err := func() error {
+		resolved, err := resolveAllMCPServers(manifest, poolsConfig)
+		if err != nil {
+			return err
+		}
+		return m.materializeMcpJsonFromResolved(projectRoot, manifest, resolved, provenance.NullCollector{}, "")
+	}()
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(filepath.Join(projectRoot, ".mcp.json"))
+	require.NoError(t, err)
+
+	var mcpFile map[string]any
+	require.NoError(t, json.Unmarshal(data, &mcpFile))
+
+	mcpServers, ok := mcpFile["mcpServers"].(map[string]any)
+	require.True(t, ok)
+	assert.Contains(t, mcpServers, "browserbase", "pool-resolved server must be in .mcp.json")
+
+	browserbase, ok := mcpServers["browserbase"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "npx", browserbase["command"])
+}
+
+// TestMaterializeMcpJsonWithPools_DirectServerOverridesPool tests name collision:
+// direct mcp_servers win over pool-resolved servers.
+func TestMaterializeMcpJsonWithPools_DirectServerOverridesPool(t *testing.T) {
+	t.Parallel()
+	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
+
+	poolsConfig := &MCPPoolsConfig{
+		SchemaVersion: "1.0",
+		Pools: map[string]MCPPool{
+			"browser-local": {
+				Server: MCPServerConfig{
+					Name:    "browserbase",
+					Command: "npx",
+					Args:    []string{"-y", "stagehand-mcp-local"},
+				},
+			},
+		},
+	}
+
+	manifest := &RiteManifest{
+		Name:     "ui",
+		MCPPools: []MCPPoolRef{{Pool: "browser-local"}},
+		MCPServers: []MCPServer{
+			{Name: "browserbase", Command: "custom-command", Args: []string{"--custom"}},
+		},
+	}
+
+	err := func() error {
+		resolved, err := resolveAllMCPServers(manifest, poolsConfig)
+		if err != nil {
+			return err
+		}
+		return m.materializeMcpJsonFromResolved(projectRoot, manifest, resolved, provenance.NullCollector{}, "")
+	}()
+	require.NoError(t, err)
+
+	data, _ := os.ReadFile(filepath.Join(projectRoot, ".mcp.json"))
+	var mcpFile map[string]any
+	require.NoError(t, json.Unmarshal(data, &mcpFile))
+
+	mcpServers := mcpFile["mcpServers"].(map[string]any)
+	browserbase := mcpServers["browserbase"].(map[string]any)
+	assert.Equal(t, "custom-command", browserbase["command"], "direct server must override pool server on name collision")
+}
+
+// TestMaterializeMcpJsonWithPools_NilPoolsConfig tests graceful degradation
+// when no mcp-pools.yaml exists.
+func TestMaterializeMcpJsonWithPools_NilPoolsConfig(t *testing.T) {
+	t.Parallel()
+	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
+
+	manifest := &RiteManifest{
+		Name: "ecosystem",
+		MCPServers: []MCPServer{
+			{Name: "go-semantic", Command: "go-semantic-mcp"},
+		},
+	}
+
+	err := m.materializeMcpJsonFromResolved(projectRoot, manifest, manifest.MCPServers, provenance.NullCollector{}, "")
+	require.NoError(t, err)
+
+	data, _ := os.ReadFile(filepath.Join(projectRoot, ".mcp.json"))
+	var mcpFile map[string]any
+	require.NoError(t, json.Unmarshal(data, &mcpFile))
+
+	mcpServers := mcpFile["mcpServers"].(map[string]any)
+	assert.Contains(t, mcpServers, "go-semantic", "direct servers must work without pools config")
+}
+
+// TestMaterializeMcpJsonWithPools_WritesOwnership tests that ownership file
+// is written alongside .mcp.json.
+func TestMaterializeMcpJsonWithPools_WritesOwnership(t *testing.T) {
+	t.Parallel()
+	projectRoot := t.TempDir()
+	m := newMCPTestMaterializer(t, projectRoot)
+
+	manifest := &RiteManifest{
+		Name: "ui",
+		MCPServers: []MCPServer{
+			{Name: "browserbase", Command: "npx"},
+		},
+	}
+
+	err := m.materializeMcpJsonFromResolved(projectRoot, manifest, manifest.MCPServers, provenance.NullCollector{}, "")
+	require.NoError(t, err)
+
+	ownership := loadMCPOwnership(filepath.Join(projectRoot, ".knossos"))
+	require.NotNil(t, ownership)
+	assert.Equal(t, "ui", ownership.Rite)
+	assert.Equal(t, []string{"browserbase"}, ownership.Servers)
+}
+
+// TestSCAR_MCPPoolResolution_NeverWritesToSettingsLocalJson is a SCAR regression
+// test verifying that pool-resolved servers still go to .mcp.json only.
+func TestSCAR_MCPPoolResolution_NeverWritesToSettingsLocalJson(t *testing.T) {
+	t.Parallel()
+	tempDir := t.TempDir()
+
+	poolsConfig := &MCPPoolsConfig{
+		SchemaVersion: "1.0",
+		Pools: map[string]MCPPool{
+			"browser-local": {
+				Server: MCPServerConfig{Name: "browserbase", Command: "npx"},
+			},
+		},
+	}
+
+	manifest := &RiteManifest{
+		Name:     "ui",
+		MCPPools: []MCPPoolRef{{Pool: "browser-local"}},
+	}
+
+	// Write settings (hooks only)
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
+	require.NoError(t, err)
+
+	settingsPath := filepath.Join(tempDir, "settings.local.json")
+	data, err := os.ReadFile(settingsPath)
+	require.NoError(t, err)
+
+	var settings map[string]any
+	require.NoError(t, json.Unmarshal(data, &settings))
+	assert.Nil(t, settings["mcpServers"],
+		"SCAR-028: pool-resolved MCP servers must NOT be in settings.local.json")
+
+	// Write MCP servers to .mcp.json
+	m := newMCPTestMaterializer(t, tempDir)
+	resolved, resolveErr := resolveAllMCPServers(manifest, poolsConfig)
+	require.NoError(t, resolveErr)
+	err = m.materializeMcpJsonFromResolved(tempDir, manifest, resolved, provenance.NullCollector{}, "")
+	require.NoError(t, err)
+
+	// Re-read settings — must still have no mcpServers
+	data, err = os.ReadFile(settingsPath)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(data, &settings))
+	assert.Nil(t, settings["mcpServers"])
 }

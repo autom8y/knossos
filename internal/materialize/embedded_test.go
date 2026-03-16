@@ -182,7 +182,7 @@ func TestMaterializeAgents_FromEmbedded(t *testing.T) {
 		TemplatesDir: "knossos/templates",
 	}
 
-	if err := m.materializeAgents(manifest, "rites/test-rite", channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil); err != nil {
+	if err := m.materializeAgents(manifest, "rites/test-rite", channelDir, resolved, provenance.NullCollector{}, nil, nil, nil, "", "", nil); err != nil {
 		t.Fatalf("materializeAgents from embedded failed: %v", err)
 	}
 

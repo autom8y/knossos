@@ -11,6 +11,7 @@ import (
 
 	"github.com/autom8y/knossos/internal/checksum"
 	"github.com/autom8y/knossos/internal/fileutil"
+	"github.com/autom8y/knossos/internal/materialize/hooks"
 	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
 	"github.com/autom8y/knossos/internal/sync"
@@ -72,14 +73,24 @@ func (m *Materializer) materializeSettingsWithManifest(channelDir string, _ *Rit
 	return nil
 }
 
-// materializeMcpJson writes MCP server declarations from the rite manifest
+// materializeMcpJsonFromResolved writes pre-resolved MCP server declarations
 // to .mcp.json at project root. CC reads MCP servers from this file, NOT
 // from settings.local.json (SCAR-028).
 //
-// Uses union merge semantics: rite servers are added/updated; existing
-// satellite servers not in the manifest are preserved.
-func (m *Materializer) materializeMcpJson(projectRoot string, manifest *RiteManifest, collector provenance.Collector, channel string) error {
-	if manifest == nil || len(manifest.MCPServers) == 0 {
+// Takes pre-resolved servers (from resolveAllMCPServers in step 3.8) to avoid
+// duplicate resolution — the same servers are used for agent frontmatter injection.
+//
+// Pipeline:
+//  1. Validate env vars (non-blocking warnings)
+//  2. Union merge into existing .mcp.json (satellite servers preserved)
+//  3. Write .knossos/mcp-ownership.json for rite-transition pruning
+func (m *Materializer) materializeMcpJsonFromResolved(projectRoot string, manifest *RiteManifest, allServers []MCPServer, collector provenance.Collector, channel string) error {
+	// Validate env vars (non-blocking)
+	if len(allServers) > 0 {
+		hooks.ValidateMCPEnvVars(toHookServers(allServers))
+	}
+
+	if len(allServers) == 0 {
 		return nil
 	}
 
@@ -91,13 +102,38 @@ func (m *Materializer) materializeMcpJson(projectRoot string, manifest *RiteMani
 		return err
 	}
 
+	// Detect new MCP servers (not already in .mcp.json) for restart warning
+	existingMCPMap, _ := existing["mcpServers"].(map[string]any)
+	var newServerNames []string
+	for _, s := range allServers {
+		if existingMCPMap == nil || existingMCPMap[s.Name] == nil {
+			newServerNames = append(newServerNames, s.Name)
+		}
+	}
+
 	// Merge rite MCP servers into the mcpServers key (union merge)
-	existing = mergeMCPServers(existing, manifest.MCPServers)
+	existing = mergeMCPServers(existing, allServers)
 
 	// Write (only if content changed)
 	err = saveSettings(mcpJsonPath, existing)
 	if err != nil {
 		return err
+	}
+
+	// Warn: new MCP servers require session restart to take effect
+	if len(newServerNames) > 0 {
+		slog.Warn("new MCP servers added to .mcp.json — restart Claude Code session to activate",
+			"servers", newServerNames)
+	}
+
+	// Write ownership file for rite-transition pruning
+	knossosDir := m.getKnossosDir()
+	serverNames := make([]string, len(allServers))
+	for i, s := range allServers {
+		serverNames[i] = s.Name
+	}
+	if writeErr := writeMCPOwnership(knossosDir, manifest.Name, serverNames); writeErr != nil {
+		slog.Warn("failed to write MCP ownership", "error", writeErr)
 	}
 
 	// Record provenance

@@ -18,8 +18,8 @@ description: |
 
   Triggers: accessibility, WCAG, a11y validation, keyboard navigation, screen reader, focus management, semantic HTML.
 type: validator
-tools: Bash, Glob, Grep, Read, Edit, Write, Skill
-model: opus
+tools: Bash, Glob, Grep, Read, Edit, Write, Skill, mcp:browserbase
+model: sonnet
 color: red
 maxTurns: 150
 skills:

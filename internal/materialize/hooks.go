@@ -7,8 +7,12 @@ import (
 
 // Type aliases for backward compatibility.
 type (
-	HooksConfig = hooks.HooksConfig
-	HookEntry   = hooks.HookEntry
+	HooksConfig    = hooks.HooksConfig
+	HookEntry      = hooks.HookEntry
+	MCPPoolsConfig = hooks.MCPPoolsConfig
+	MCPPool        = hooks.MCPPool
+	MCPPoolRef     = hooks.MCPPoolRef
+	MCPServerConfig = hooks.MCPServerConfig
 )
 
 // Re-export functions (used by core tests and other core code).
@@ -25,4 +29,13 @@ func (m *Materializer) loadHooksConfig() *HooksConfig {
 		projectRoot = m.resolver.ProjectRoot()
 	}
 	return hooks.LoadHooksConfig(projectRoot)
+}
+
+// loadMCPPoolsConfig delegates to hooks.LoadMCPPoolsConfig with the Materializer's project root.
+func (m *Materializer) loadMCPPoolsConfig() *MCPPoolsConfig {
+	var projectRoot string
+	if m.resolver != nil {
+		projectRoot = m.resolver.ProjectRoot()
+	}
+	return hooks.LoadMCPPoolsConfig(projectRoot)
 }

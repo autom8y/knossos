@@ -70,18 +70,33 @@ type RiteManifest struct {
 	Skills        []string                  `yaml:"skills"`   // Deprecated: use Legomena instead
 	Hooks         []string                  `yaml:"hooks"`
 	Dependencies  []string                  `yaml:"dependencies"`
-	MCPServers    []MCPServer               `yaml:"mcp_servers,omitempty"` // MCP server declarations
+	MCPServers    []MCPServer               `yaml:"mcp_servers,omitempty"`  // MCP server declarations
+	MCPPools      []MCPPoolRef              `yaml:"mcp_pools,omitempty"`   // Pool references from config/mcp-pools.yaml
 	HookDefaults  *HookDefaults             `yaml:"hook_defaults,omitempty"`
 	AgentDefaults map[string]any            `yaml:"agent_defaults,omitempty"` // Manifest-level defaults merged into agent frontmatter during sync
 	SkillPolicies []SkillPolicy             `yaml:"skill_policies,omitempty"` // Capability-driven skill wiring rules evaluated per-agent during sync
 	ArchetypeData map[string]map[string]any `yaml:"archetype_data,omitempty"` // Per-archetype template data keyed by archetype name
 }
 
-// MCPServerNames returns the list of MCP server names declared in the manifest.
+// MCPServerNames returns the list of MCP server names declared directly in the manifest.
 func (m *RiteManifest) MCPServerNames() []string {
 	names := make([]string, len(m.MCPServers))
 	for i, server := range m.MCPServers {
 		names[i] = server.Name
+	}
+	return names
+}
+
+// AllMCPServerNames returns all MCP server names: direct mcp_servers + resolved pool servers.
+// The poolsConfig may be nil (no pools file found), in which case only direct names are returned.
+func (m *RiteManifest) AllMCPServerNames(poolsConfig *MCPPoolsConfig) []string {
+	names := m.MCPServerNames()
+	if poolsConfig != nil {
+		for _, ref := range m.MCPPools {
+			if pool, ok := poolsConfig.Pools[ref.Pool]; ok {
+				names = append(names, pool.Server.Name)
+			}
+		}
 	}
 	return names
 }
@@ -512,8 +527,15 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	sharedSkillPolicies := m.loadSharedSkillPolicies(resolved)
 	mergedSkillPolicies := MergeSkillPolicies(sharedSkillPolicies, manifest.SkillPolicies)
 
+	// 3.8. Resolve MCP pool servers (needed for both agent frontmatter injection and .mcp.json)
+	poolsConfig := m.loadMCPPoolsConfig()
+	resolvedMCPServers, mcpResolveErr := resolveAllMCPServers(manifest, poolsConfig)
+	if mcpResolveErr != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to resolve MCP pool servers", mcpResolveErr)
+	}
+
 	// 4. Generate agents/ directory from rite
-	if err := m.materializeAgents(manifest, ritePath, channelDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, modelOverride, opts.Channel, comp); err != nil {
+	if err := m.materializeAgents(manifest, ritePath, channelDir, resolved, collector, mergedWriteGuardDefaults, mergedSkillPolicies, resolvedMCPServers, modelOverride, opts.Channel, comp); err != nil {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize agents", err)
 	}
 
@@ -546,9 +568,10 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	}
 
 	// 8.1. Write MCP servers to .mcp.json at project root (SCAR-028)
+	// Uses pre-resolved pool servers from step 3.8 (shared with agent frontmatter injection).
 	if !opts.Soft {
 		projectRoot := filepath.Dir(channelDir)
-		if err := m.materializeMcpJson(projectRoot, manifest, collector, opts.Channel); err != nil {
+		if err := m.materializeMcpJsonFromResolved(projectRoot, manifest, resolvedMCPServers, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize .mcp.json", err)
 		}
 	}
@@ -766,6 +789,7 @@ func (m *Materializer) syncRiteScope(opts SyncOptions) (*RiteScopeResult, error)
 		result.RiteSwitched = true
 		result.PreviousRite = previousRite
 		result.ThroughlineIDsCleaned = m.cleanupThroughlineIDs()
+		result.MCPServersPruned = m.pruneStaleMCPServers(m.resolver.ProjectRoot())
 	}
 
 	return result, nil
@@ -820,6 +844,7 @@ func (m *Materializer) syncRiteScopeAllChannels(opts SyncOptions) (*RiteScopeRes
 		wrapper.RiteSwitched = firstResult.RiteSwitched
 		wrapper.PreviousRite = firstResult.PreviousRite
 		wrapper.ThroughlineIDsCleaned = firstResult.ThroughlineIDsCleaned
+		wrapper.MCPServersPruned = firstResult.MCPServersPruned
 	}
 
 	// If any channel failed but at least one succeeded, mark as partial

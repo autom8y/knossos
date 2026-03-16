@@ -534,7 +534,7 @@ func TestMaterializeAgents_ArchetypeRendersFromTemplate(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -607,7 +607,7 @@ func TestMaterializeAgents_NonArchetypeAgentCopiedFromSource(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -664,7 +664,7 @@ func TestMaterializeAgents_ArchetypeGoesThruTransformPipeline(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "test-arch")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -721,7 +721,7 @@ func TestMaterializeAgents_NoArchetypeNoChange(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "plain")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}
@@ -764,7 +764,7 @@ func TestMaterializeAgents_UnknownArchetypeErrors(t *testing.T) {
 		Source:       RiteSource{Type: SourceProject, Path: filepath.Join(projectDir, ".knossos", "rites", "bad")},
 	}
 
-	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, nil, "", "", nil)
 	if err == nil {
 		t.Fatal("expected error for unknown archetype, got nil")
 	}
@@ -811,7 +811,7 @@ func TestMaterializeAgents_ArchetypeProvenanceRecorded(t *testing.T) {
 	// Use a real collector to capture provenance records
 	collector := provenance.NewCollector()
 
-	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, collector, nil, nil, "", "", nil)
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, collector, nil, nil, nil, "", "", nil)
 	if err != nil {
 		t.Fatalf("materializeAgents() error = %v", err)
 	}

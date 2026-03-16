@@ -18,7 +18,7 @@ description: |
 
   Triggers: component implementation, state management, testing pyramid, headless logic, integration tests.
 type: engineer
-tools: Bash, Glob, Grep, Read, Edit, Write, Skill
+tools: Bash, Glob, Grep, Read, Edit, Write, Skill, mcp:browserbase
 model: sonnet
 color: green
 maxTurns: 150

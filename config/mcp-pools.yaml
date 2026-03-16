@@ -1,0 +1,39 @@
+# MCP Server Pool Definitions
+# Named pools of MCP servers that rites reference via mcp_pools in their manifest.
+# The materialization pipeline resolves pool names → server configs at sync time.
+#
+# Schema version: 1.0
+#
+# Resolution order (first match wins):
+#   1. config/mcp-pools.yaml in $KNOSSOS_HOME
+#   2. config/mcp-pools.yaml in projectRoot
+#
+# Pool server names appear in .mcp.json after sync.
+# Agents reference them via "mcp:<server-name>" in their tools frontmatter.
+# Rites can override pool args/env via args_append and env_merge in their manifest.
+
+schema_version: "1.0"
+
+pools:
+  browser-local:
+    description: "Local browser automation via Stagehand MCP (headless Chrome)"
+    server:
+      name: browserbase
+      command: npx
+      args:
+        - "-y"
+        - stagehand-mcp-local
+      env:
+        STAGEHAND_ENV: "${STAGEHAND_ENV}"
+
+  browser-cloud:
+    description: "Cloud browser automation via BrowserBase MCP"
+    server:
+      name: browserbase
+      command: npx
+      args:
+        - "-y"
+        - "@browserbasehq/mcp-browserbase"
+      env:
+        BROWSERBASE_API_KEY: "${BROWSERBASE_API_KEY}"
+        BROWSERBASE_PROJECT_ID: "${BROWSERBASE_PROJECT_ID}"

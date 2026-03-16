@@ -38,8 +38,9 @@ type TransformContext struct {
 	WriteGuardDefaults *WriteGuardDefaults
 	AgentDefaults      map[string]any
 	SkillPolicies      []SkillPolicy
-	ModelOverride      string // If set, forces model field in agent frontmatter (el-cheapo mode)
-	Channel            string // Target channel ("claude", "gemini", ""). Empty == "claude" behavior.
+	ModelOverride      string      // If set, forces model field in agent frontmatter (el-cheapo mode)
+	Channel            string      // Target channel ("claude", "gemini", ""). Empty == "claude" behavior.
+	ResolvedMCPServers []MCPServer // Pool-resolved MCP servers for mcpServers frontmatter injection
 }
 
 // transformAgentContent projects agent source into CC-consumable form.
@@ -72,6 +73,14 @@ func transformAgentContent(content []byte, ctx *TransformContext) ([]byte, error
 	// Apply skill policies (step 3.5 — after tools resolved from agent_defaults)
 	if len(ctx.SkillPolicies) > 0 {
 		fmMap, body = applySkillPolicies(fmMap, body, ctx.SkillPolicies)
+	}
+
+	// Inject mcpServers frontmatter from resolved pool configs (step 3.7).
+	// CC subagents do NOT inherit parent MCP servers — they need explicit
+	// mcpServers entries. Scans tools for mcp: prefixes and generates inline
+	// definitions from resolved pool configs.
+	if len(ctx.ResolvedMCPServers) > 0 {
+		injectMCPServers(fmMap, ctx.ResolvedMCPServers)
 	}
 
 	// Capture write-guard value before stripping
@@ -131,6 +140,99 @@ func mergeHooksIntoMap(fmMap map[string]any, generatedHooks map[string]any) {
 
 	maps.Copy(existingMap, generatedHooks)
 	fmMap["hooks"] = existingMap
+}
+
+// injectMCPServers scans the tools field for mcp: prefixed entries and generates
+// inline mcpServers entries from resolved pool configs. CC subagents do NOT inherit
+// parent MCP servers — they need explicit mcpServers entries in their frontmatter.
+//
+// Output format follows CC's native schema: each entry is a single-key map
+// {serverName: {type: "stdio", command: ..., args: [...], env: {...}}}.
+// Preserves any existing mcpServers entries from the agent source.
+func injectMCPServers(fmMap map[string]any, resolvedServers []MCPServer) {
+	// Extract mcp: server names from tools
+	toolsRaw, ok := fmMap["tools"]
+	if !ok {
+		return
+	}
+
+	var mcpServerNames []string
+	switch tools := toolsRaw.(type) {
+	case string:
+		for _, t := range strings.Split(tools, ",") {
+			t = strings.TrimSpace(t)
+			if strings.HasPrefix(t, "mcp:") {
+				mcpServerNames = append(mcpServerNames, strings.TrimPrefix(t, "mcp:"))
+			}
+		}
+	case []any:
+		for _, t := range tools {
+			if s, ok := t.(string); ok && strings.HasPrefix(s, "mcp:") {
+				mcpServerNames = append(mcpServerNames, strings.TrimPrefix(s, "mcp:"))
+			}
+		}
+	}
+
+	if len(mcpServerNames) == 0 {
+		return
+	}
+
+	// Build server lookup map
+	serverMap := make(map[string]MCPServer)
+	for _, s := range resolvedServers {
+		serverMap[s.Name] = s
+	}
+
+	// Build CC-native mcpServers entries
+	var injected []any
+	for _, name := range mcpServerNames {
+		server, found := serverMap[name]
+		if !found {
+			slog.Warn("agent references MCP server not found in resolved pools", "server", name)
+			continue
+		}
+
+		// Build inline definition: {serverName: {type, command, args, env}}
+		config := make(map[string]any)
+
+		if server.Command != "" {
+			config["type"] = "stdio"
+			config["command"] = server.Command
+			if len(server.Args) > 0 {
+				config["args"] = server.Args
+			}
+		} else if server.URL != "" {
+			if server.Type != "" {
+				config["type"] = server.Type
+			} else {
+				config["type"] = "http"
+			}
+			config["url"] = server.URL
+			if len(server.Headers) > 0 {
+				config["headers"] = server.Headers
+			}
+		}
+
+		if len(server.Env) > 0 {
+			config["env"] = server.Env
+		}
+
+		// CC format: single-key map {name: config}
+		injected = append(injected, map[string]any{name: config})
+	}
+
+	if len(injected) == 0 {
+		return
+	}
+
+	// Merge with existing mcpServers (preserve agent-defined entries)
+	if existing, ok := fmMap["mcpServers"]; ok {
+		if existingList, ok := existing.([]any); ok {
+			injected = append(existingList, injected...)
+		}
+	}
+
+	fmMap["mcpServers"] = injected
 }
 
 // reconstructFrontmatter serializes a frontmatter map and body back into markdown content.

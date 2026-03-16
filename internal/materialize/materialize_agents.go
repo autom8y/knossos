@@ -24,7 +24,7 @@ import (
 // When comp is non-nil, CompileAgent() is called after transformAgentContent()
 // to translate tool names for the target channel. The compiler is channel-aware:
 // ClaudeCompiler is a pass-through, GeminiCompiler translates tool names.
-func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, channelDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, modelOverride, channel string, comp compiler.ChannelCompiler) error {
+func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, channelDir string, resolved *ResolvedRite, collector provenance.Collector, writeGuardDefaults *WriteGuardDefaults, skillPolicies []SkillPolicy, resolvedMCPServers []MCPServer, modelOverride, channel string, comp compiler.ChannelCompiler) error {
 	agentsDir := filepath.Join(channelDir, "agents")
 
 	// Ensure agents directory exists (selective — do NOT RemoveAll)
@@ -62,7 +62,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 		// Run through the same transform pipeline as source-copied agents.
 		// Transform failure is an error, not a warning: knossos-only frontmatter fields
 		// (type, upstream, downstream, contract) must never reach CC-visible agent files.
-		transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, ModelOverride: modelOverride, Channel: channel})
+		transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agent.Name, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, ModelOverride: modelOverride, Channel: channel, ResolvedMCPServers: resolvedMCPServers})
 		if tErr != nil {
 			return fmt.Errorf("agent transform failed for archetype agent %s: %w", agent.Name, tErr)
 		}
@@ -128,7 +128,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 			// Transform failure is an error, not a warning: knossos-only frontmatter fields
 			// (type, upstream, downstream, contract) must never reach CC-visible agent files.
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, Channel: channel})
+			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, Channel: channel, ResolvedMCPServers: resolvedMCPServers})
 			if tErr != nil {
 				return fmt.Errorf("agent transform failed for %s: %w", agentName, tErr)
 			}
@@ -194,7 +194,7 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 			// Transform failure is an error, not a warning: knossos-only frontmatter fields
 			// (type, upstream, downstream, contract) must never reach CC-visible agent files.
 			agentName := strings.TrimSuffix(filepath.Base(path), ".md")
-			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, Channel: channel})
+			transformed, tErr := transformAgentContent(content, &TransformContext{AgentName: agentName, WriteGuardDefaults: writeGuardDefaults, AgentDefaults: manifest.AgentDefaults, SkillPolicies: skillPolicies, Channel: channel, ResolvedMCPServers: resolvedMCPServers})
 			if tErr != nil {
 				return fmt.Errorf("agent transform failed for %s: %w", agentName, tErr)
 			}

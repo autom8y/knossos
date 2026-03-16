@@ -86,6 +86,7 @@ type RiteScopeResult struct {
 	RiteSwitched          bool     `json:"rite_switched,omitempty"`          // true if rite changed from previous
 	PreviousRite          string   `json:"previous_rite,omitempty"`          // previous ACTIVE_RITE name
 	ThroughlineIDsCleaned int      `json:"throughline_ids_cleaned,omitempty"` // count of .throughline-ids.json files removed
+	MCPServersPruned      int      `json:"mcp_servers_pruned,omitempty"`      // count of stale MCP servers removed on rite switch
 	ElCheapoMode          bool     `json:"el_cheapo_mode,omitempty"`          // true if el-cheapo model override active
 	ChannelResults        map[string]*RiteScopeResult `json:"channel_results,omitempty"` // per-channel results when channel=all
 }
