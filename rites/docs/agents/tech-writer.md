@@ -21,7 +21,7 @@ description: |
 type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, WebFetch, WebSearch, Skill
 model: sonnet
-color: blue
+color: pink
 maxTurns: 200
 skills:
   - doc-consolidation

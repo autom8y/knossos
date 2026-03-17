@@ -98,7 +98,7 @@ rendering-manifest ──> STYLIST ──> component-engineer
 - Token taxonomy or naming conventions (design-system-architect -- you consume tokens, not define them)
 - Rendering mode or hydration strategy (rendering-architect domain)
 - Component behavior, state management, or testing (component-engineer domain)
-- WCAG compliance approach (accessibility-engineer -- though you enforce contrast and focus styles in CSS)
+- WCAG compliance approach (a11y-engineer -- though you enforce contrast and focus styles in CSS)
 - Which CSS methodology to use (user decision -- present framework, not answer) [EX-07]
 - Visual regression approval -- requires explicit human review, no auto-approval [EX-06]
 

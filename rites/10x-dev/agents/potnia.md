@@ -5,7 +5,7 @@ description: |
 type: orchestrator
 tools: Read
 model: opus
-color: blue
+color: cyan
 maxTurns: 40
 skills:
   - orchestrator-templates

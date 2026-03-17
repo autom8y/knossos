@@ -478,3 +478,57 @@ model: sonnet
 		t.Errorf("original model should be preserved when no override:\n%s", output)
 	}
 }
+
+func TestInjectMCPServers_ToolNameSuffix(t *testing.T) {
+	t.Parallel()
+	// Agent references mcp:duckdb/execute_query, mcp:duckdb/list_tables, mcp:duckdb/list_columns
+	// Should resolve to a single "duckdb" mcpServers entry
+	fmMap := map[string]any{
+		"tools": "Read, Glob, mcp:duckdb/execute_query, mcp:duckdb/list_tables, mcp:duckdb/list_columns",
+	}
+	servers := []MCPServer{
+		{Name: "duckdb", Command: "uvx", Args: []string{"mcp-server-motherduck"}},
+	}
+
+	injectMCPServers(fmMap, servers)
+
+	injected, ok := fmMap["mcpServers"].([]any)
+	if !ok {
+		t.Fatal("mcpServers not injected")
+	}
+	if len(injected) != 1 {
+		t.Fatalf("expected 1 mcpServers entry (deduplicated), got %d", len(injected))
+	}
+	entry, ok := injected[0].(map[string]any)
+	if !ok {
+		t.Fatal("mcpServers entry is not a map")
+	}
+	if _, hasDuckdb := entry["duckdb"]; !hasDuckdb {
+		t.Errorf("mcpServers entry should be keyed by 'duckdb', got keys: %v", entry)
+	}
+}
+
+func TestInjectMCPServers_SimpleNameStillWorks(t *testing.T) {
+	t.Parallel()
+	// Agent references mcp:browserbase (no tool suffix) — existing pattern, must not regress
+	fmMap := map[string]any{
+		"tools": "Read, mcp:browserbase",
+	}
+	servers := []MCPServer{
+		{Name: "browserbase", Command: "npx", Args: []string{"-y", "@autom8y/mcp-stagehand"}},
+	}
+
+	injectMCPServers(fmMap, servers)
+
+	injected, ok := fmMap["mcpServers"].([]any)
+	if !ok {
+		t.Fatal("mcpServers not injected")
+	}
+	if len(injected) != 1 {
+		t.Fatalf("expected 1 mcpServers entry, got %d", len(injected))
+	}
+	entry := injected[0].(map[string]any)
+	if _, has := entry["browserbase"]; !has {
+		t.Errorf("mcpServers entry should be keyed by 'browserbase', got: %v", entry)
+	}
+}

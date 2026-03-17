@@ -16,15 +16,17 @@ schema_version: "1.0"
 
 pools:
   browser-local:
-    description: "Local browser automation via Stagehand MCP (headless Chrome)"
+    description: "Local browser automation via Stagehand MCP (headless Chrome + Anthropic CUA)"
     server:
       name: browserbase
       command: npx
       args:
         - "-y"
-        - stagehand-mcp-local
+        - "@autom8y/mcp-stagehand"
       env:
         STAGEHAND_ENV: "${STAGEHAND_ENV}"
+        CUA_MODEL: "anthropic/claude-sonnet-4-6"
+        CUA_API_KEY: "${ANTHROPIC_API_KEY}"
 
   browser-cloud:
     description: "Cloud browser automation via BrowserBase MCP"

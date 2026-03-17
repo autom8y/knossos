@@ -19,7 +19,7 @@ description: |
 type: specialist
 tools: Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
-color: blue
+color: pink
 maxTurns: 200
 skills:
   - rnd-ref

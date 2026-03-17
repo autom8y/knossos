@@ -34,7 +34,7 @@ phases:
     description: Build components with state management, testing, structured output
 
   - name: validation
-    agent: accessibility-engineer
+    agent: a11y-engineer
     produces: accessibility-report
     description: Validate WCAG 2.2 AA across four testing layers
 
@@ -54,7 +54,7 @@ agents:
   - name: component-engineer
     role: Implements components with state management, testing, and structured output
 
-  - name: accessibility-engineer
+  - name: a11y-engineer
     role: Validates WCAG 2.2 AA compliance and gates accessibility quality
 
   - name: frontend-fanatic

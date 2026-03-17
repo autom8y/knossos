@@ -7,16 +7,17 @@ Use the available agents and slash commands. Agents activate automatically when 
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
 ## Quick Start
 
-6-agent workflow (ecosystem):
+7-agent workflow (ui):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates ecosystem infrastructure phases |
-| **ecosystem-analyst** | Traces sync pipeline/knossos problems to root causes and produces gap analysis |
-| **context-architect** | Designs context solutions, schemas, and ecosystem patterns |
-| **integration-engineer** | Implements sync pipeline and knossos changes with integration tests |
-| **documentation-engineer** | Creates migration runbooks and compatibility documentation |
-| **compatibility-tester** | Validates ecosystem changes across satellite configurations |
+| **potnia** | Coordinates UI development phases and routes work to specialists |
+| **design-system-architect** | Defines token taxonomy, component architecture, and governance pipeline |
+| **rendering-architect** | Determines per-route rendering strategy, hydration, and performance budgets |
+| **stylist** | Translates design tokens into CSS architecture, layout patterns, and visual implementation |
+| **component-engineer** | Implements components with state management, testing, and structured output |
+| **a11y-engineer** | Validates WCAG 2.2 AA compliance and gates accessibility quality |
+| **frontend-fanatic** | Browser-first visual auditing and UX evaluation through a designer's lens |
 
 Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
@@ -44,12 +45,13 @@ Agents activate automatically based on description matching. Write prompts that 
 
 Prompts in `.gemini/agents/`:
 
-- `potnia.md` - Coordinates ecosystem infrastructure phases
-- `ecosystem-analyst.md` - Traces sync pipeline/knossos problems to root causes and produces gap analysis
-- `context-architect.md` - Designs context solutions, schemas, and ecosystem patterns
-- `integration-engineer.md` - Implements sync pipeline and knossos changes with integration tests
-- `documentation-engineer.md` - Creates migration runbooks and compatibility documentation
-- `compatibility-tester.md` - Validates ecosystem changes across satellite configurations
+- `potnia.md` - Coordinates UI development phases and routes work to specialists
+- `design-system-architect.md` - Defines token taxonomy, component architecture, and governance pipeline
+- `rendering-architect.md` - Determines per-route rendering strategy, hydration, and performance budgets
+- `stylist.md` - Translates design tokens into CSS architecture, layout patterns, and visual implementation
+- `component-engineer.md` - Implements components with state management, testing, and structured output
+- `a11y-engineer.md` - Validates WCAG 2.2 AA compliance and gates accessibility quality
+- `frontend-fanatic.md` - Browser-first visual auditing and UX evaluation through a designer's lens
 <!-- KNOSSOS:END agent-configurations -->
 
 <!-- KNOSSOS:START platform-infrastructure -->

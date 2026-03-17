@@ -21,7 +21,7 @@ description: |
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: opus
-color: blue
+color: purple
 maxTurns: 150
 memory: "project"
 skills:

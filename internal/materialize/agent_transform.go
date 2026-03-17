@@ -157,18 +157,35 @@ func injectMCPServers(fmMap map[string]any, resolvedServers []MCPServer) {
 	}
 
 	var mcpServerNames []string
+	seen := make(map[string]bool)
+
+	// addServer extracts the server name from mcp:server or mcp:server/tool references,
+	// stripping the optional /tool suffix and deduplicating. CC uses the mcp:server/tool
+	// syntax to restrict which tools an agent can call, but for mcpServers injection we
+	// only need the server name.
+	addServer := func(ref string) {
+		name := strings.TrimPrefix(ref, "mcp:")
+		if idx := strings.IndexByte(name, '/'); idx >= 0 {
+			name = name[:idx]
+		}
+		if !seen[name] {
+			seen[name] = true
+			mcpServerNames = append(mcpServerNames, name)
+		}
+	}
+
 	switch tools := toolsRaw.(type) {
 	case string:
 		for _, t := range strings.Split(tools, ",") {
 			t = strings.TrimSpace(t)
 			if strings.HasPrefix(t, "mcp:") {
-				mcpServerNames = append(mcpServerNames, strings.TrimPrefix(t, "mcp:"))
+				addServer(t)
 			}
 		}
 	case []any:
 		for _, t := range tools {
 			if s, ok := t.(string); ok && strings.HasPrefix(s, "mcp:") {
-				mcpServerNames = append(mcpServerNames, strings.TrimPrefix(s, "mcp:"))
+				addServer(s)
 			}
 		}
 	}

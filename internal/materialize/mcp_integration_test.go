@@ -313,7 +313,7 @@ func TestMaterializeMcpJsonWithPools_ResolvesAndWrites(t *testing.T) {
 				Server: MCPServerConfig{
 					Name:    "browserbase",
 					Command: "npx",
-					Args:    []string{"-y", "stagehand-mcp-local"},
+					Args:    []string{"-y", "@autom8y/mcp-stagehand"},
 					Env:     map[string]string{"STAGEHAND_ENV": "${STAGEHAND_ENV}"},
 				},
 			},
@@ -363,7 +363,7 @@ func TestMaterializeMcpJsonWithPools_DirectServerOverridesPool(t *testing.T) {
 				Server: MCPServerConfig{
 					Name:    "browserbase",
 					Command: "npx",
-					Args:    []string{"-y", "stagehand-mcp-local"},
+					Args:    []string{"-y", "@autom8y/mcp-stagehand"},
 				},
 			},
 		},

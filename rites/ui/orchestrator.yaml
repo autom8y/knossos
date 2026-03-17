@@ -19,7 +19,7 @@ routing:
   rendering-architect: "Design system exists, new feature/page needs rendering strategy and performance budgets"
   stylist: "Rendering manifest exists, CSS architecture and token-to-CSS mapping needed"
   component-engineer: "Style architecture exists, components ready for implementation with state management and testing"
-  accessibility-engineer: "Implementation complete, WCAG 2.2 AA validation needed across four testing layers"
+  a11y-engineer: "Implementation complete, WCAG 2.2 AA validation needed across four testing layers"
   frontend-fanatic: "Visual/aesthetic quality evaluation needed, post-styling or post-implementation design review, UX critique, first-impression audit, user requests design feedback"
 
 # Workflow position descriptors
@@ -80,7 +80,7 @@ handoff_criteria:
     - "Interactive flows completed and evaluated"
     - "Every finding references a named HCI principle"
     - "Findings table complete with severity, facet, Norman level, and routing"
-    - "Potential a11y issues routed to accessibility-engineer"
+    - "Potential a11y issues routed to a11y-engineer"
     - "aesthetic-audit-report committed to repository"
 
 # Skills references for this rite
@@ -93,7 +93,7 @@ antipatterns:
   - "Framework endorsement without justification (stack-agnostic by default)"
   - "Deferring a11y violations to backlog (always blocking, zero tolerance)"
   - "Treating performance budgets as optimization targets (they are architectural constraints)"
-  - "Skipping validation phase (every complexity level runs accessibility-engineer)"
+  - "Skipping validation phase (every complexity level runs a11y-engineer)"
   - "Single rendering strategy for all routes (per-route strategy required)"
   - "Div soup with ARIA compensation (semantic HTML first)"
   - "Aesthetic findings blocking workflow (frontend-fanatic findings are always advisory, never blocking)"

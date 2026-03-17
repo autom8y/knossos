@@ -1,6 +1,6 @@
 ---
 name: ui-ref
-description: "UI rite self-reference: agent roster, workflow phases, commands, and quick-start guide. Use when: orienting to the ui rite, routing work to the correct specialist, understanding phase flow, looking up available commands. Triggers: ui rite, agents, workflow, potnia, design-system-architect, rendering-architect, stylist, component-engineer, accessibility-engineer."
+description: "UI rite self-reference: agent roster, workflow phases, commands, and quick-start guide. Use when: orienting to the ui rite, routing work to the correct specialist, understanding phase flow, looking up available commands. Triggers: ui rite, agents, workflow, potnia, design-system-architect, rendering-architect, stylist, component-engineer, a11y-engineer."
 ---
 
 # UI Rite Reference
@@ -16,7 +16,7 @@ description: "UI rite self-reference: agent roster, workflow phases, commands, a
 | **rendering-architect** | Determines per-route rendering strategy, hydration patterns, and performance budgets | New feature/page, performance work |
 | **stylist** | Translates design tokens into CSS architecture, layout patterns, and visual implementation | Styling overhaul, CSS architecture |
 | **component-engineer** | Implements components with state management, testing, and structured output | Component modification, component addition |
-| **accessibility-engineer** | Validates WCAG 2.2 AA compliance across four testing layers and gates accessibility quality | A11y remediation, accessibility validation |
+| **a11y-engineer** | Validates WCAG 2.2 AA compliance across four testing layers and gates accessibility quality | A11y remediation, accessibility validation |
 
 ## Workflow Phases
 
@@ -46,14 +46,14 @@ Phases are conditional on complexity level:
 | Styling overhaul | stylist |
 | Component modification | component-engineer |
 | Component addition | component-engineer |
-| A11y remediation | accessibility-engineer |
+| A11y remediation | a11y-engineer |
 
 ## Back-Routes (Automatic)
 
 | Trigger | From | To |
 |---------|------|----|
-| A11y violations in CSS (contrast, focus styles) | accessibility-engineer | stylist |
-| A11y violations requiring component changes (ARIA, keyboard) | accessibility-engineer | component-engineer |
+| A11y violations in CSS (contrast, focus styles) | a11y-engineer | stylist |
+| A11y violations requiring component changes (ARIA, keyboard) | a11y-engineer | component-engineer |
 | Implementation exceeds JS budget | component-engineer | rendering-architect |
 | CSS performance reveals CLS or rendering cost issues | stylist | rendering-architect |
 | Missing tokens prevent CSS mapping | stylist | design-system-architect (user confirmation required) |
@@ -73,7 +73,7 @@ Phases are conditional on complexity level:
 **For a new component** (TASK complexity):
 1. Invoke potnia via `/ui` or Task tool
 2. potnia routes to `component-engineer` for implementation
-3. `accessibility-engineer` validates WCAG 2.2 AA
+3. `a11y-engineer` validates WCAG 2.2 AA
 4. Back-routes fire automatically if violations found
 
 **For a new feature or page** (MODULE complexity):
@@ -81,7 +81,7 @@ Phases are conditional on complexity level:
 2. `rendering-architect` produces rendering manifest (per-route strategy, hydration, budgets)
 3. `stylist` produces CSS architecture and token mapping
 4. `component-engineer` implements with state management and tests
-5. `accessibility-engineer` validates
+5. `a11y-engineer` validates
 
 **For a new design system** (SYSTEM complexity):
 1. `design-system-architect` produces design-system-spec (token taxonomy, component classification, governance pipeline)
@@ -95,7 +95,7 @@ Phases are conditional on complexity level:
 | rendering-architect | Rendering Manifest (RM-{slug}.md) | `.ledge/specs/` |
 | stylist | Style Architecture (SA-{slug}.md) | `.ledge/specs/` |
 | component-engineer | Component implementation | In codebase |
-| accessibility-engineer | Accessibility Report (A11Y-{slug}.md) | `.ledge/reviews/` |
+| a11y-engineer | Accessibility Report (A11Y-{slug}.md) | `.ledge/reviews/` |
 
 ## Skills Available to Agents
 

@@ -30,7 +30,7 @@ description: |
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: sonnet
-color: blue
+color: orange
 maxTurns: 200
 ---
 

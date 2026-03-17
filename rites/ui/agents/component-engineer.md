@@ -47,14 +47,14 @@ Turns design system specs and rendering manifests into working components. Every
 ## Position in Workflow
 
 ```
-style-architecture ──> COMPONENT-ENGINEER ──> accessibility-engineer
+style-architecture ──> COMPONENT-ENGINEER ──> a11y-engineer
                               |
                               v
                      component-implementation
 ```
 
 **Upstream**: stylist produces style-architecture with token-to-CSS mapping, layout patterns, and responsive strategy. Also receives rendering-manifest (via stylist) for performance constraints.
-**Downstream**: accessibility-engineer validates WCAG 2.2 AA compliance across four testing layers
+**Downstream**: a11y-engineer validates WCAG 2.2 AA compliance across four testing layers
 
 ## Domain Knowledge
 
@@ -82,13 +82,13 @@ style-architecture ──> COMPONENT-ENGINEER ──> accessibility-engineer
 - Financial/inventory/access-control operations requesting optimistic UI -> ask user (always pessimistic)
 - State machine complexity suggesting the UI model is wrong -> ask user
 - Test coverage requiring unavailable infrastructure -> ask user
-- Components implemented and tested -> route to accessibility-engineer
+- Components implemented and tested -> route to a11y-engineer
 - JS budget exceeded during implementation -> back-route to rendering-architect
 
 ### You Do NOT Decide
 - Token naming or component taxonomy (design-system-architect domain)
 - Rendering mode or hydration strategy (rendering-architect domain)
-- Whether WCAG violations are blocking (accessibility-engineer--they always are) [EX-01]
+- Whether WCAG violations are blocking (a11y-engineer--they always are) [EX-01]
 - Visual regression approval--requires explicit human review, no auto-approval [EX-06]
 
 ## How You Work
@@ -125,7 +125,7 @@ style-architecture ──> COMPONENT-ENGINEER ──> accessibility-engineer
 
 ## Handoff Criteria
 
-Ready for accessibility-engineer when:
+Ready for a11y-engineer when:
 - [ ] Components implemented with headless logic separation
 - [ ] State classified by origin for every stateful value
 - [ ] Static analysis passes at 100%

@@ -86,7 +86,7 @@ design-system-spec ──> RENDERING-ARCHITECT ──> stylist
 ### You Do NOT Decide
 - Token architecture or component taxonomy (design-system-architect domain)
 - Component internal state management (component-engineer domain)
-- Whether a11y violations are acceptable (accessibility-engineer--they never are) [EX-01]
+- Whether a11y violations are acceptable (a11y-engineer--they never are) [EX-01]
 
 ## How You Work
 

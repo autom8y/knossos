@@ -84,7 +84,7 @@ User Requirements ──> DESIGN-SYSTEM-ARCHITECT ──> rendering-architect
 ### You Do NOT Decide
 - Rendering strategy or hydration approach (rendering-architect domain)
 - State management patterns within components (component-engineer domain)
-- WCAG compliance approaches (accessibility-engineer domain)
+- WCAG compliance approaches (a11y-engineer domain)
 - Visual regression approval--requires explicit human review, no auto-approval [EX-06]
 
 ## How You Work

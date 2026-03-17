@@ -80,7 +80,7 @@ func TestPruneStaleMCPServers_RemovesPreviousRiteServers(t *testing.T) {
 	require.NoError(t, writeMCPOwnership(knossosDir, "ui", []string{"browserbase"}))
 
 	// Write .mcp.json with the previous rite's server
-	mcpJSON := `{"mcpServers":{"browserbase":{"command":"npx","args":["-y","stagehand-mcp-local"]},"github":{"command":"npx","args":["-y","@modelcontextprotocol/server-github"]}}}`
+	mcpJSON := `{"mcpServers":{"browserbase":{"command":"npx","args":["-y","@autom8y/mcp-stagehand"]},"github":{"command":"npx","args":["-y","@modelcontextprotocol/server-github"]}}}`
 	require.NoError(t, os.WriteFile(filepath.Join(projectRoot, ".mcp.json"), []byte(mcpJSON), 0644))
 
 	m := &Materializer{

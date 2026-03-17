@@ -19,7 +19,7 @@ entry_point:
     styling_overhaul: stylist
     component_modification: component-engineer
     component_addition: component-engineer
-    a11y_remediation: accessibility-engineer
+    a11y_remediation: a11y-engineer
     aesthetic_audit: frontend-fanatic
   artifact_templates:
     design-system-architect:
@@ -34,7 +34,7 @@ entry_point:
     component-engineer:
       type: component-implementation
       path_template: null
-    accessibility-engineer:
+    a11y-engineer:
       type: accessibility-report
       path_template: .ledge/reviews/A11Y-{slug}.md
     frontend-fanatic:
@@ -66,7 +66,7 @@ phases:
     next: validation
 
   - name: validation
-    agent: accessibility-engineer
+    agent: a11y-engineer
     produces: accessibility-report
     next: null
 
@@ -89,7 +89,7 @@ complexity_levels:
 # /ui-strategy     → rendering-architect (strategy only)
 # /ui-styling      → stylist (styling only)
 # /ui-build        → component-engineer (implementation only)
-# /ui-a11y         → accessibility-engineer (validation only)
+# /ui-a11y         → a11y-engineer (validation only)
 
 # Rite-specific commands (synced on rite swap):
 commands:

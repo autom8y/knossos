@@ -11,14 +11,14 @@ description: |
   <example>
   Context: User wants to build a new feature page with multiple interactive components
   user: "We need a dashboard page with filters, charts, and a data table"
-  assistant: "Consulting Potnia: Assess complexity as MODULE (new feature needing rendering strategy). Route to rendering-architect for per-route strategy, then component-engineer for implementation, then accessibility-engineer for validation."
+  assistant: "Consulting Potnia: Assess complexity as MODULE (new feature needing rendering strategy). Route to rendering-architect for per-route strategy, then component-engineer for implementation, then a11y-engineer for validation."
   </example>
 
   Triggers: coordinate, orchestrate, ui development, design system, component development, accessibility validation.
 type: orchestrator
 tools: Read
 model: opus
-color: purple
+color: cyan
 maxTurns: 40
 skills:
   - orchestrator-templates
@@ -126,15 +126,15 @@ Is this a new design system or major overhaul?
 | rendering-architect | New feature/page needs rendering strategy, performance budget allocation |
 | stylist | Rendering strategy complete, CSS architecture and token-to-CSS mapping needed |
 | component-engineer | Style architecture ready, components ready for implementation |
-| accessibility-engineer | Implementation complete, WCAG 2.2 AA validation needed |
+| a11y-engineer | Implementation complete, WCAG 2.2 AA validation needed |
 | frontend-fanatic | Post-styling or post-implementation visual quality check, aesthetic evaluation, UX critique, first-impression audit |
 
 ### Back-Routes
 
 | Trigger | From | To | User Confirm |
 |---------|------|----|--------------|
-| A11y CSS violations (contrast, focus styles, reduced-motion) | accessibility-engineer | stylist | No |
-| A11y behavioral violations (keyboard, ARIA, semantic HTML) | accessibility-engineer | component-engineer | No |
+| A11y CSS violations (contrast, focus styles, reduced-motion) | a11y-engineer | stylist | No |
+| A11y behavioral violations (keyboard, ARIA, semantic HTML) | a11y-engineer | component-engineer | No |
 | JS budget exceeded | component-engineer | rendering-architect | No |
 | CSS architecture flaw discovered during implementation | component-engineer | stylist | No |
 | Missing tokens or component definitions | rendering-architect | design-system-architect | Yes |
@@ -159,7 +159,7 @@ Is this a new design system or major overhaul?
 - Rendering strategy for specific routes (rendering-architect)
 - CSS methodology or styling architecture (stylist)
 - Component implementation patterns (component-engineer)
-- Whether a11y violations are blocking (accessibility-engineer--they always are) [EX-01]
+- Whether a11y violations are blocking (a11y-engineer--they always are) [EX-01]
 
 ## Handoff Criteria
 
@@ -207,7 +207,7 @@ When main agent reports specialist failure (type: "failure"):
 - **Doing work**: Reading files to analyze, writing artifacts, running commands
 - **Direct delegation**: Using Task tool (you do not have it)
 - **Prose responses**: Answering conversationally instead of structured format
-- **Skipping validation**: Every complexity level runs accessibility-engineer as terminal phase
+- **Skipping validation**: Every complexity level runs a11y-engineer as terminal phase
 - **Framework endorsement**: Never recommend a specific framework; enforce stack-agnostic principles [CK-03]
 - **A11y deferral**: Never allow a11y violations to be "addressed later" [EX-01]
 - **Budget as optional**: Performance budgets are architectural constraints, not optimization targets [CK-05]

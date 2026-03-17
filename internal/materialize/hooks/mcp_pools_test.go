@@ -28,7 +28,7 @@ pools:
     server:
       name: browserbase
       command: npx
-      args: ["-y", "stagehand-mcp-local"]
+      args: ["-y", "@autom8y/mcp-stagehand"]
       env:
         STAGEHAND_ENV: "${STAGEHAND_ENV}"
   browser-cloud:
@@ -51,7 +51,7 @@ pools:
 	require.True(t, ok)
 	assert.Equal(t, "browserbase", localPool.Server.Name)
 	assert.Equal(t, "npx", localPool.Server.Command)
-	assert.Equal(t, []string{"-y", "stagehand-mcp-local"}, localPool.Server.Args)
+	assert.Equal(t, []string{"-y", "@autom8y/mcp-stagehand"}, localPool.Server.Args)
 	assert.Equal(t, "${STAGEHAND_ENV}", localPool.Server.Env["STAGEHAND_ENV"])
 }
 
@@ -115,7 +115,7 @@ func TestResolvePoolServers_BasicResolution(t *testing.T) {
 				Server: MCPServerConfig{
 					Name:    "browserbase",
 					Command: "npx",
-					Args:    []string{"-y", "stagehand-mcp-local"},
+					Args:    []string{"-y", "@autom8y/mcp-stagehand"},
 					Env:     map[string]string{"STAGEHAND_ENV": "${STAGEHAND_ENV}"},
 				},
 			},
@@ -129,7 +129,7 @@ func TestResolvePoolServers_BasicResolution(t *testing.T) {
 
 	assert.Equal(t, "browserbase", servers[0].Name)
 	assert.Equal(t, "npx", servers[0].Command)
-	assert.Equal(t, []string{"-y", "stagehand-mcp-local"}, servers[0].Args)
+	assert.Equal(t, []string{"-y", "@autom8y/mcp-stagehand"}, servers[0].Args)
 	assert.Equal(t, "${STAGEHAND_ENV}", servers[0].Env["STAGEHAND_ENV"])
 }
 
@@ -141,7 +141,7 @@ func TestResolvePoolServers_ArgsAppend(t *testing.T) {
 				Server: MCPServerConfig{
 					Name:    "browserbase",
 					Command: "npx",
-					Args:    []string{"-y", "stagehand-mcp-local"},
+					Args:    []string{"-y", "@autom8y/mcp-stagehand"},
 				},
 			},
 		},
@@ -155,7 +155,7 @@ func TestResolvePoolServers_ArgsAppend(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, servers, 1)
 
-	assert.Equal(t, []string{"-y", "stagehand-mcp-local", "--headless", "--timeout", "30"}, servers[0].Args)
+	assert.Equal(t, []string{"-y", "@autom8y/mcp-stagehand", "--headless", "--timeout", "30"}, servers[0].Args)
 }
 
 func TestResolvePoolServers_EnvMerge(t *testing.T) {
@@ -200,7 +200,7 @@ func TestResolvePoolServers_EnvMerge_RewritesArgs(t *testing.T) {
 					Name:    "browserbase",
 					Command: "npx",
 					Args: []string{
-						"-y", "stagehand-mcp-local",
+						"-y", "@autom8y/mcp-stagehand",
 						"--modelName", "${STAGEHAND_MODEL_NAME}",
 						"--modelApiKey", "${STAGEHAND_MODEL_API_KEY}",
 					},
@@ -230,7 +230,7 @@ func TestResolvePoolServers_EnvMerge_RewritesArgs(t *testing.T) {
 
 	// Args should also be rewritten
 	assert.Equal(t, []string{
-		"-y", "stagehand-mcp-local",
+		"-y", "@autom8y/mcp-stagehand",
 		"--modelName", "${STAGEHAND_MODEL_NAME}",
 		"--modelApiKey", "${ANTHROPIC_API_KEY}",
 	}, servers[0].Args, "args referencing overridden env var should be rewritten")
@@ -286,7 +286,7 @@ func TestResolvePoolServers_DoesNotMutatePoolDefinition(t *testing.T) {
 				Server: MCPServerConfig{
 					Name:    "browserbase",
 					Command: "npx",
-					Args:    []string{"-y", "stagehand-mcp-local"},
+					Args:    []string{"-y", "@autom8y/mcp-stagehand"},
 					Env:     map[string]string{"STAGEHAND_ENV": "${STAGEHAND_ENV}"},
 				},
 			},
@@ -304,7 +304,7 @@ func TestResolvePoolServers_DoesNotMutatePoolDefinition(t *testing.T) {
 
 	// Original pool must be unchanged
 	pool := pools.Pools["browser-local"]
-	assert.Equal(t, []string{"-y", "stagehand-mcp-local"}, pool.Server.Args, "pool args must not be mutated")
+	assert.Equal(t, []string{"-y", "@autom8y/mcp-stagehand"}, pool.Server.Args, "pool args must not be mutated")
 	assert.NotContains(t, pool.Server.Env, "NEW_VAR", "pool env must not be mutated")
 }
 
