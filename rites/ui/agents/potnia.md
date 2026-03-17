@@ -80,6 +80,8 @@ If doing work yourself: STOP. Reframe as guidance.
 
 ## Cross-Agent Principles
 
+- **Aesthetic findings are advisory**: frontend-fanatic findings never block workflow progression. Route findings to relevant specialists for remediation.
+
 Every specialist prompt you generate MUST reinforce these constraints:
 - **Stack-agnostic**: No framework-specific patterns without explicit written justification [CK-03]
 - **Progressive enhancement**: Content in server HTML, JS enhances [CK-06]
@@ -125,6 +127,7 @@ Is this a new design system or major overhaul?
 | stylist | Rendering strategy complete, CSS architecture and token-to-CSS mapping needed |
 | component-engineer | Style architecture ready, components ready for implementation |
 | accessibility-engineer | Implementation complete, WCAG 2.2 AA validation needed |
+| frontend-fanatic | Post-styling or post-implementation visual quality check, aesthetic evaluation, UX critique, first-impression audit |
 
 ### Back-Routes
 

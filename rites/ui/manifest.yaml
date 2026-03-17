@@ -57,6 +57,9 @@ agents:
   - name: accessibility-engineer
     role: Validates WCAG 2.2 AA compliance and gates accessibility quality
 
+  - name: frontend-fanatic
+    role: Browser-first visual auditing and UX evaluation through a designer's lens
+
 dromena:
   - ui-ref
   - component-audit
@@ -68,6 +71,7 @@ legomena:
   - ui-quality
   - ui-architecture
   - ui-ref
+  - aesthetic-evaluation
 
 hooks: []
 

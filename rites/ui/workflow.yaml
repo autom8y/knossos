@@ -20,6 +20,7 @@ entry_point:
     component_modification: component-engineer
     component_addition: component-engineer
     a11y_remediation: accessibility-engineer
+    aesthetic_audit: frontend-fanatic
   artifact_templates:
     design-system-architect:
       type: design-system-spec
@@ -36,6 +37,9 @@ entry_point:
     accessibility-engineer:
       type: accessibility-report
       path_template: .ledge/reviews/A11Y-{slug}.md
+    frontend-fanatic:
+      type: aesthetic-audit-report
+      path_template: .ledge/reviews/AE-{slug}.md
 
 phases:
   - name: foundation
@@ -94,6 +98,11 @@ commands:
     description: "UI development lifecycle from design system through accessible delivery"
     primary_agent: potnia
     workflow_phase: all
+
+# Out-of-workflow agents:
+# frontend-fanatic: Cross-cutting aesthetic evaluator. Not a sequential phase.
+#   Invokable by potnia after styling, after implementation, or on user request.
+#   Findings are advisory, never blocking. Routes to stylist/component-engineer.
 
 back_routes:
   - source_phase: validation
