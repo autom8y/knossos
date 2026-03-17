@@ -24,7 +24,7 @@ pools:
         - "-y"
         - "@autom8y/mcp-stagehand"
       env:
-        STAGEHAND_ENV: "${STAGEHAND_ENV}"
+        STAGEHAND_ENV: "LOCAL"
         CUA_MODEL: "anthropic/claude-sonnet-4-6"
         CUA_API_KEY: "${ANTHROPIC_API_KEY}"
 
