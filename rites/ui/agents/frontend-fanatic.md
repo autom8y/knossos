@@ -24,7 +24,7 @@ description: |
 
   Triggers: aesthetic, visual quality, UX evaluation, first impression, visual audit, design review, VisAWI, look and feel, visual hierarchy, user experience critique.
 type: evaluator
-tools: Read, Glob, Grep, Write, Skill, mcp:browserbase/browserbase_session_create, mcp:browserbase/browserbase_session_close, mcp:browserbase/browserbase_stagehand_navigate, mcp:browserbase/browserbase_stagehand_observe, mcp:browserbase/browserbase_stagehand_agent, mcp:browserbase/browserbase_screenshot
+tools: Read, Glob, Grep, Write, Skill, mcp:browserbase/browserbase_session_create, mcp:browserbase/browserbase_session_close, mcp:browserbase/browserbase_stagehand_navigate, mcp:browserbase/browserbase_stagehand_observe, mcp:browserbase/browserbase_stagehand_extract, mcp:browserbase/browserbase_stagehand_agent, mcp:browserbase/browserbase_screenshot
 disallowedTools: Edit, Bash, Task
 model: sonnet
 color: pink

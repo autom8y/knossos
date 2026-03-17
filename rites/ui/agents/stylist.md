@@ -23,7 +23,7 @@ description: |
 
   Triggers: CSS architecture, styling, layout, responsive, animation, theming, dark mode, CSS methodology.
 type: builder
-tools: Glob, Grep, Read, Write, Skill, mcp:browserbase/browserbase_session_create, mcp:browserbase/browserbase_session_close, mcp:browserbase/browserbase_stagehand_navigate, mcp:browserbase/browserbase_stagehand_observe, mcp:browserbase/browserbase_screenshot
+tools: Glob, Grep, Read, Write, Skill, mcp:browserbase/browserbase_session_create, mcp:browserbase/browserbase_session_close, mcp:browserbase/browserbase_stagehand_navigate, mcp:browserbase/browserbase_stagehand_observe, mcp:browserbase/browserbase_stagehand_extract, mcp:browserbase/browserbase_screenshot
 model: sonnet
 color: yellow
 maxTurns: 80
