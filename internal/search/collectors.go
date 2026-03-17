@@ -80,11 +80,11 @@ func CollectConcepts() []SearchEntry {
 }
 
 // CollectRites returns entries from the rite discovery system.
-// Only project-scoped rites are collected; user/org rites are excluded so
-// that results reflect the active project context rather than the host system.
+// Uses the full discovery chain (project + org + platform tiers) so that
+// org-level rites are included when an org is active — they are part of
+// the project context, not host-system noise.
 // Returns an empty slice if resolver is nil or has no project root.
-// CollectRites collects rite entries from the discovery chain. If disc is nil,
-// a default discovery is built from the resolver using project + platform tiers.
+// If disc is nil, a default discovery is built from the resolver.
 func CollectRites(resolver *paths.Resolver, disc ...*rite.Discovery) []SearchEntry {
 	if resolver == nil || resolver.ProjectRoot() == "" {
 		return nil
@@ -94,9 +94,7 @@ func CollectRites(resolver *paths.Resolver, disc ...*rite.Discovery) []SearchEnt
 	if len(disc) > 0 && disc[0] != nil {
 		d = disc[0]
 	} else {
-		// Default: project + platform tiers (excludes user/org for project-scoped results).
-		activeRite := resolver.ReadActiveRite()
-		d = rite.NewDiscoveryWithPaths(resolver.RitesDir(), "", "", rite.PlatformRitesDir(), activeRite)
+		d = rite.NewDiscovery(resolver)
 	}
 	rites, err := d.List()
 	if err != nil {
