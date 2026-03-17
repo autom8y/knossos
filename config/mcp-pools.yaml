@@ -26,7 +26,6 @@ pools:
       env:
         STAGEHAND_ENV: "LOCAL"
         CUA_MODEL: "anthropic/claude-sonnet-4-6"
-        CUA_API_KEY: "${ANTHROPIC_API_KEY}"
 
   browser-cloud:
     description: "Cloud browser automation via BrowserBase MCP"

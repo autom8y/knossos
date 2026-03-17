@@ -77,13 +77,6 @@ hooks: []
 
 mcp_pools:
   - pool: browser-local
-    args_append:
-      - "--modelName"
-      - "${STAGEHAND_MODEL_NAME}"
-      - "--modelApiKey"
-      - "${STAGEHAND_MODEL_API_KEY}"
-    env_merge:
-      STAGEHAND_MODEL_API_KEY: "${ANTHROPIC_API_KEY}"
 
 dependencies:
   - shared

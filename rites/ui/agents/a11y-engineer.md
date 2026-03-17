@@ -18,7 +18,7 @@ description: |
 
   Triggers: accessibility, WCAG, a11y validation, keyboard navigation, screen reader, focus management, semantic HTML.
 type: validator
-tools: Bash, Glob, Grep, Read, Edit, Write, Skill, mcp:browserbase
+tools: Bash, Glob, Grep, Read, Edit, Write, Skill, mcp:browserbase/browserbase_session_create, mcp:browserbase/browserbase_session_close, mcp:browserbase/browserbase_stagehand_navigate, mcp:browserbase/browserbase_stagehand_observe, mcp:browserbase/browserbase_screenshot
 model: sonnet
 color: red
 maxTurns: 150

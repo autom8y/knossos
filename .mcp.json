@@ -3,18 +3,12 @@
     "browserbase": {
       "args": [
         "-y",
-        "@autom8y/mcp-stagehand",
-        "--modelName",
-        "${STAGEHAND_MODEL_NAME}",
-        "--modelApiKey",
-        "${STAGEHAND_MODEL_API_KEY}"
+        "@autom8y/mcp-stagehand"
       ],
       "command": "npx",
       "env": {
-        "CUA_API_KEY": "${ANTHROPIC_API_KEY}",
         "CUA_MODEL": "anthropic/claude-sonnet-4-6",
-        "STAGEHAND_ENV": "LOCAL",
-        "STAGEHAND_MODEL_API_KEY": "${ANTHROPIC_API_KEY}"
+        "STAGEHAND_ENV": "LOCAL"
       }
     },
     "github": {
