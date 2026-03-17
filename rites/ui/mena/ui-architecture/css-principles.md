@@ -124,3 +124,99 @@ CSS custom properties (`var(--token-name)`) are the runtime bridge between desig
 **Specificity escalation**: adding specificity to override other specificity rather than refactoring. The correct response to a specificity conflict is to restructure, not to escalate.
 
 **`outline: none` without replacement**: always a WCAG violation.
+
+## Cascade Fundamentals
+
+The cascade is the algorithm that resolves conflicting CSS declarations into a single winner per property per element. Most developers reduce it to "specificity wars." In reality, specificity is criterion 5 of 7. Four higher-priority mechanisms override it entirely.
+
+### The 7-Criterion Sorting Algorithm
+
+When multiple declarations target the same property on the same element, the cascade resolves them in strict descending priority. A later criterion is only consulted when all preceding criteria tie.
+
+| Priority | Criterion | What It Resolves |
+|----------|-----------|-----------------|
+| 1 | **Origin and Importance** | Which source (UA, user, author) and whether `!important` |
+| 2 | **Context** | Encapsulation boundaries (Shadow DOM vs. light DOM) |
+| 3 | **Element-Attached Styles** | Inline `style` attribute vs. rule-based declarations |
+| 4 | **Cascade Layers** | `@layer` ordering within an origin |
+| 5 | **Specificity** | Selector weight as (A, B, C) tuple |
+| 6 | **Scope Proximity** | Distance from `@scope` root to matched element (Level 6) |
+| 7 | **Order of Appearance** | Last declaration in document order wins |
+
+Agent enforcement rule: when debugging a style override, identify WHICH cascade criterion is producing the winner before changing code. Most "specificity fixes" are actually layer or source-order problems.
+
+### Specificity Is Lexicographic, Not Arithmetic
+
+Specificity is a three-component tuple `(A, B, C)` compared left-to-right like dictionary ordering:
+- **A**: count of ID selectors
+- **B**: count of class selectors, attribute selectors, pseudo-classes
+- **C**: count of type (element) selectors, pseudo-elements
+
+The "1000/100/10/1 point system" taught in most tutorials is formally incorrect. `(1, 0, 0)` always beats `(0, N, 0)` regardless of N -- there is no number of classes that overrides a single ID. The CSS 2.1 spec's mention of "a large base" was technically correct (the base would need to be infinite) but spawned a generation of wrong mental models.
+
+### `!important` Is an Origin Shift, Not a Specificity Boost
+
+`!important` does not "add specificity." It moves the declaration to a different cascade origin. The full origin priority order (highest to lowest):
+
+1. Transition declarations
+2. Important UA declarations
+3. Important user declarations
+4. **Important author declarations** (weakest form of important)
+5. Animation declarations
+6. Normal author declarations
+7. Normal user declarations
+8. Normal UA declarations
+
+Author `!important` is the weakest important origin. UA `!important` (browser accessibility defaults) always wins -- by design, so users can enforce high-contrast modes and font sizes.
+
+Agent enforcement rule: `!important` in author code is almost always a cascade-level misunderstanding. Use `@layer` ordering or restructure specificity instead.
+
+### @layer Makes Specificity Irrelevant Across Boundaries
+
+Within a layer, normal specificity rules apply. Across layers, layer order always wins:
+
+```css
+@layer components, utilities;
+
+@layer components {
+  #sidebar .nav .item a.link { color: blue; }  /* (1, 3, 1) -- loses */
+}
+@layer utilities {
+  .text-red { color: red; }  /* (0, 1, 0) -- wins */
+}
+```
+
+The `(0, 1, 0)` utility beats the `(1, 3, 1)` component because layer ordering (criterion 4) outranks specificity (criterion 5). Unlayered styles sit in an implicit final layer with the highest normal priority.
+
+`!important` reverses layer order: earliest-declared layers win for important rules. A reset layer's `!important` beats a utilities layer's `!important` -- semantically correct for defensive base styles.
+
+### Selector Performance: Inside the Braces
+
+Modern browser engines have made selector matching negligible through four optimizations: rule hashing (bucket by rightmost selector), Bloom filter ancestor matching (near-O(1) rejection), style sharing (reuse computed styles for identical siblings), and fast-path matching (inlined loop for common combinators).
+
+Empirical benchmarks converge: property cost dominates selector cost. Expensive properties like `box-shadow` and `filter` cause up to 112x paint time increase. Selector complexity variance across an entire stylesheet is typically under 2ms.
+
+Agent enforcement rule: do not refactor selectors for "performance." Focus paint-cost optimization on expensive properties and DOM tree size. The only selector performance concern is `:has()` anchored to very broad selectors (`body`, `:root`, `*`) on massive DOMs.
+
+### Specificity-Adjusting Pseudo-Classes
+
+| Pseudo-class | Specificity Behavior |
+|-------------|---------------------|
+| `:is()` | Takes specificity of the most specific argument |
+| `:not()` | Takes specificity of the most specific argument |
+| `:has()` | Takes specificity of the most specific argument |
+| `:where()` | Always `(0, 0, 0)` regardless of arguments |
+
+`:where()` is the library escape hatch -- wrap selectors in `:where()` to produce zero-specificity defaults that any consumer can trivially override. Use for resets, design system defaults, and third-party component libraries.
+
+### The Specificity Ceiling Principle
+
+The lower the maximum allowed specificity in a codebase, the more predictable the system. Common ceilings:
+
+| Architecture | Ceiling | Resolution Mechanism |
+|-------------|---------|---------------------|
+| BEM flat | `(0, 1, 0)` | Order of appearance |
+| Utility-first + @layer | `(0, 1, 0)` | Layer ordering |
+| Component-scoped | `(0, 2, 1)` | Scoped selectors, limited nesting |
+
+`@layer` makes strict ceiling enforcement less critical by providing an orthogonal precedence mechanism, but a low ceiling within each layer still produces the most maintainable CSS.

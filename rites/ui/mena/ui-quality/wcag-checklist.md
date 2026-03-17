@@ -89,3 +89,84 @@ Use native HTML elements for their intended purpose. ARIA is a repair mechanism 
 - Design layouts accommodating 2× text expansion (German/Finnish text is 30–200% longer than English)
 - Never hard-code text strings in markup — all user-visible text must be externalizable
 - All ARIA labels and screen reader text must be localizable
+
+## CSS-Accessibility Architecture
+
+CSS properties can silently alter the accessibility tree, and user-preference media queries demand architectural responses. These patterns are not optional enhancements -- they map directly to WCAG criteria and forced-colors compliance.
+
+### Focus Management Architecture
+
+| Property | Forced Colors | Border-Radius | Verdict |
+|----------|---------------|---------------|---------|
+| `outline` | Preserved | Follows radius (Chrome 94+, Firefox 88+, Safari 16.4+) | Use this |
+| `box-shadow` | **Stripped entirely** | Follows radius | Never use alone for focus |
+| `border` | Preserved | Follows radius | Shifts layout -- avoid |
+
+**Agent Rule**: Never use `box-shadow` as the sole focus indicator. It is removed in forced-colors mode (Windows High Contrast), making focus invisible for users who need it most.
+
+**Two-color focus pattern** (W3C C40): A dark inner outline + light outer shadow guarantees 3:1 contrast against ANY background. At least one of two colors with 9:1 mutual contrast will always meet 3:1 against any solid background.
+
+```css
+:focus-visible {
+  outline: 3px solid #000000;
+  box-shadow: 0 0 0 6px #FFFFFF;
+}
+```
+
+`outline-offset` is a design tool: positive values add breathing room, negative values create inset rings for colored backgrounds.
+
+### Motion Architecture
+
+**Agent Rule**: Use no-motion-first architecture. Default to no animation; enhance with `prefers-reduced-motion: no-preference`. This is safer because users with unsupported browsers get no animations, and "no-preference" does not equal consent.
+
+Use `0.01s` duration under reduced-motion, never `0s`. Zero duration breaks JS `animationend`/`transitionend` callbacks.
+
+```css
+:root { --animation-duration: 0.3s; }
+@media (prefers-reduced-motion: reduce) {
+  :root { --animation-duration: 0.01s; }
+}
+```
+
+### CSS Properties That Break the Accessibility Tree
+
+| CSS Pattern | Semantic Effect | Fix |
+|-------------|----------------|-----|
+| `list-style: none` | Strips list semantics in Safari (intentional WebKit decision) | `role="list"` or `list-style-type: ""` |
+| `display: flex/grid` on `<table>` | Strips table semantics | Explicit ARIA table roles |
+| `display: contents` | Removes element from accessibility tree | Avoid on semantic elements |
+| `order`, `grid-row` visual reorder | Does NOT change tab/reading order | Source order must match visual order |
+
+**Agent Rule**: When generating styled lists with `list-style: none`, always add `role="list"`. When applying CSS display overrides on `<table>`, always add `role="table"`, `role="row"`, `role="cell"`.
+
+### Forced-Colors Mode
+
+When `forced-colors: active`, the browser overrides author colors with system colors. `box-shadow` is removed entirely. System color keywords for custom decorations: `Canvas`, `CanvasText`, `Highlight`, `HighlightText`, `ButtonFace`, `ButtonText`, `GrayText`.
+
+**Agent Rule**: In `@media (forced-colors: active)`, adjust structural tokens only (border-width, outline-width). Do not set color tokens -- the UA handles those. Use system color keywords only for custom decorative elements.
+
+### The CSS-Only Trap
+
+Five component categories CANNOT be accessible without JavaScript:
+
+| Component | Why CSS-Only Fails |
+|-----------|--------------------|
+| Tooltips | No Esc dismissal, inaccessible on touch |
+| Modals | No focus trapping, no Esc close, no focus return |
+| Tabs | Checkbox hack misrepresents semantics to AT and speech recognition |
+| Carousels | No slide position announcement, no keyboard control |
+| Dropdowns | No `aria-expanded` toggle, no Esc close |
+
+**Agent Rule**: If the interaction pattern appears in the WAI-ARIA APG, it requires JavaScript. The checkbox hack is never acceptable -- it misrepresents semantics to screen readers and speech recognition software. Exception: native `<details>`/`<summary>` IS accessible without JS.
+
+### Responsive Accessibility Constraints
+
+Three INDEPENDENT WCAG criteria that are commonly conflated:
+
+| Criterion | Constraint | CSS Rule |
+|-----------|-----------|----------|
+| 1.4.4 Resize Text | Text scales to 200% without loss | Never use `px` for font sizes; use `rem`/`em` |
+| 1.4.10 Reflow | No horizontal scrolling at 320px viewport | No fixed-width containers; use flexbox/grid |
+| 1.4.12 Text Spacing | Content functions with increased spacing | No fixed `height` on text containers; no `overflow: hidden` on text |
+
+**Agent Rule**: These are three independent checks. Meeting Reflow does not satisfy Resize Text or Text Spacing. Flag any `px` font-size, any `overflow: hidden` on text-containing elements, and any fixed `height` on elements with text content.
