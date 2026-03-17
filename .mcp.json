@@ -1,16 +1,5 @@
 {
   "mcpServers": {
-    "browserbase": {
-      "args": [
-        "-y",
-        "@autom8y/mcp-stagehand"
-      ],
-      "command": "npx",
-      "env": {
-        "CUA_MODEL": "anthropic/claude-sonnet-4-6",
-        "STAGEHAND_ENV": "LOCAL"
-      }
-    },
     "github": {
       "args": [
         "-y",

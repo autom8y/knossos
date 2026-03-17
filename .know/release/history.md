@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-17T15:07:45Z"
+generated_at: "2026-03-17T15:28:00Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "9340b49"
+source_hash: "1aa1bb74"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -208,3 +208,28 @@ max_incremental_cycles: 0
 - 3 pre-existing non-blocking failures: ariadne-tests.yml (golangci-lint schema), verify-doctrine.yml (missing ariadne/ dir), validate-orchestrators.yml
 - 4 Dependabot vulnerability alerts on main (informational, non-blocking)
 - Headline: UI rite agent fixes, frontend-fanatic evaluator agent, Gemini command configs, MCP cleanup
+
+### v0.10.2 — 2026-03-17
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-17 |
+| Version | v0.10.1 -> v0.10.2 (patch) |
+| Commits | 2 (1 feat, 1 chore) |
+| Complexity | PATCH |
+| Tag SHA | 035c862b00fcf8733f2eb07afbd849e319693145 |
+| Commit SHA | 1aa1bb74 |
+| release.yml | GREEN (116s, run 23201952714) |
+| e2e-distribution.yml | GREEN (56s, run 23202036777) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.10.2, 4s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twenty-second consecutive PASS verdict (v0.3.2 -> ... -> v0.10.1 -> v0.10.2)
+- Total chain: ~172s (within historical baseline ~150-190s)
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 3 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml, validate-orchestrators.yml
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking)
+- Headline: agent-color-duplicate lint rule, cached release knowledge update
