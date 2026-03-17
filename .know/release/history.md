@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-17T15:28:00Z"
+generated_at: "2026-03-17T17:10:00Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "1aa1bb74"
+source_hash: "78d47f3e"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -233,3 +233,30 @@ max_incremental_cycles: 0
 - 3 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml, validate-orchestrators.yml
 - 4 Dependabot vulnerability alerts on main (informational, non-blocking)
 - Headline: agent-color-duplicate lint rule, cached release knowledge update
+
+### v0.11.0 — 2026-03-17
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-17 |
+| Version | v0.10.2 -> v0.11.0 (minor) |
+| Commits | 4 (1 feat, 2 fix, 1 chore) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 204d3b8647ad02c65391e270b521c34cbe9c76da |
+| Commit SHA | 78d47f3e |
+| release.yml | GREEN (108s, run 23206617631) |
+| e2e-distribution.yml | GREEN (51s, run 23206689751) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.11.0, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twenty-third consecutive PASS verdict (v0.3.2 -> ... -> v0.10.2 -> v0.11.0)
+- Total chain: ~156s (within historical baseline ~150-190s)
+- Dispatch latency: 3s (release published → e2e triggered)
+- macOS E2E: GREEN (21s), Linux E2E: GREEN (48s)
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 3 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml, validate-orchestrators.yml
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking)
+- Headline: UI rite extract/observe/act agents, CUA browser tools fix, MCP scoping, browser-local pool fix
