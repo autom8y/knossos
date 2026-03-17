@@ -21,7 +21,7 @@ description: |
 type: reviewer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: sonnet
-color: red
+color: blue
 maxTurns: 100
 skills:
   - doc-reviews

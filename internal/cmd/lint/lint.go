@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -385,6 +386,10 @@ func lintAgents(projectRoot string, report *LintReport) {
 		if err != nil {
 			continue
 		}
+
+		// Track colors per rite for within-rite duplicate detection
+		colorMap := make(map[string][]string) // color → []agentFileNames
+
 		for _, entry := range entries {
 			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".md") {
 				continue
@@ -393,8 +398,46 @@ func lintAgents(projectRoot string, report *LintReport) {
 			path := filepath.Join(dir, entry.Name())
 			relPath := mustRel(projectRoot, path)
 			lintAgentFile(path, relPath, report)
+
+			// Collect color for duplicate check
+			if color := extractAgentColor(path); color != "" {
+				colorMap[color] = append(colorMap[color], entry.Name())
+			}
+		}
+
+		// Check for duplicate colors within this rite
+		riteRelDir := mustRel(projectRoot, dir)
+		for color, agents := range colorMap {
+			if len(agents) > 1 {
+				sort.Strings(agents)
+				report.Agents = append(report.Agents, Finding{
+					File:     riteRelDir,
+					Severity: SevMedium,
+					Rule:     "agent-color-duplicate",
+					Message:  fmt.Sprintf("color %q used by %d agents: %s (each agent should have a unique color within a rite)", color, len(agents), strings.Join(agents, ", ")),
+				})
+			}
 		}
 	}
+}
+
+// extractAgentColor reads the color field from an agent file's frontmatter.
+func extractAgentColor(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	yamlBytes, _, err := frontmatter.Parse(data)
+	if err != nil {
+		return ""
+	}
+	var fm struct {
+		Color string `yaml:"color"`
+	}
+	if err := yaml.Unmarshal(yamlBytes, &fm); err != nil {
+		return ""
+	}
+	return fm.Color
 }
 
 func findAgentDirs(projectRoot string) []string {

@@ -19,7 +19,7 @@ description: |
 type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
-color: yellow
+color: green
 maxTurns: 200
 skills:
   - debt-catalog

@@ -21,7 +21,7 @@ description: |
 type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, Skill
 model: opus
-color: cyan
+color: blue
 maxTurns: 50
 maxTurns-override: true
 skills:

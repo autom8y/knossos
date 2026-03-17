@@ -22,7 +22,7 @@ description: |
 type: specialist
 tools: Read, Write, Glob, Grep, TodoWrite
 model: sonnet
-color: cyan
+color: blue
 maxTurns: 30
 maxTurns-override: true
 skills:

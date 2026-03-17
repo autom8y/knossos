@@ -21,7 +21,7 @@ description: |
 type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, WebFetch, TodoWrite, WebSearch, Skill
 model: opus
-color: cyan
+color: purple
 maxTurns: 150
 skills:
   - doc-artifacts

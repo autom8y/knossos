@@ -19,7 +19,7 @@ description: |
 type: analyst
 tools: Glob, Grep, Read, Write, TodoWrite, Skill
 model: opus
-color: cyan
+color: blue
 maxTurns: 150
 skills:
   - rnd-ref

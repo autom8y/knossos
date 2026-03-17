@@ -26,7 +26,7 @@ type: specialist
 maxTurns: 150
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: opus
-color: cyan
+color: blue
 memory: "project"
 ---
 

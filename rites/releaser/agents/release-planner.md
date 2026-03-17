@@ -19,7 +19,7 @@ description: |
 type: specialist
 tools: Read, Write, Glob, Grep, TodoWrite
 model: sonnet
-color: orange
+color: purple
 maxTurns: 25
 maxTurns-override: true
 skills:

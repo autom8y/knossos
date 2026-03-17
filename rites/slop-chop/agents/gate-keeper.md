@@ -7,7 +7,7 @@ description: |
 type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
-color: cyan
+color: blue
 maxTurns: 60
 maxTurns-override: true
 skills:

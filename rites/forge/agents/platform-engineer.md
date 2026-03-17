@@ -29,7 +29,7 @@ description: |
   </example>
 tools: Bash, Glob, Grep, Read, Write, Edit, TodoWrite, Skill
 model: sonnet
-color: orange
+color: pink
 maxTurns: 250
 maxTurns-override: true
 skills:

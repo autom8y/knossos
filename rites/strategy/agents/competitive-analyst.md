@@ -19,7 +19,7 @@ description: |
 type: analyst
 tools: Bash, Glob, Grep, Read, Write, WebSearch, WebFetch, TodoWrite, Skill
 model: opus
-color: cyan
+color: blue
 maxTurns: 150
 skills:
   - strategy-ref

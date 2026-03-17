@@ -19,7 +19,7 @@ description: |
 type: architect
 tools: Bash, Glob, Grep, Read, Edit, Write, Skill
 model: opus
-color: cyan
+color: purple
 maxTurns: 150
 skills:
   - ui-design-systems

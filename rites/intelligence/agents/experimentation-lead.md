@@ -19,7 +19,7 @@ description: |
 type: designer
 tools: Bash, Glob, Grep, Read, Edit, Write, TodoWrite, Skill
 model: opus
-color: cyan
+color: blue
 maxTurns: 150
 skills:
   - intelligence-ref

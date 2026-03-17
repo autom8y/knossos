@@ -19,7 +19,7 @@ description: |
 type: specialist
 tools: Bash, Read, Write, TodoWrite
 model: sonnet
-color: orange
+color: red
 maxTurns: 80
 skills:
   - releaser-ref

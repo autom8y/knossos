@@ -19,7 +19,7 @@ description: |
 type: specialist
 tools: Read, Write, TodoWrite
 model: sonnet
-color: cyan
+color: pink
 maxTurns: 30
 maxTurns-override: true
 skills:
