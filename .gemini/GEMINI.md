@@ -7,17 +7,16 @@ Use the available agents and slash commands. Agents activate automatically when 
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
 ## Quick Start
 
-7-agent workflow (ui):
+6-agent workflow (releaser):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates UI development phases and routes work to specialists |
-| **design-system-architect** | Defines token taxonomy, component architecture, and governance pipeline |
-| **rendering-architect** | Determines per-route rendering strategy, hydration, and performance budgets |
-| **stylist** | Translates design tokens into CSS architecture, layout patterns, and visual implementation |
-| **component-engineer** | Implements components with state management, testing, and structured output |
-| **a11y-engineer** | Validates WCAG 2.2 AA compliance and gates accessibility quality |
-| **frontend-fanatic** | Browser-first visual auditing and UX evaluation through a designer's lens |
+| **potnia** | Coordinates release phases, gates complexity, manages DAG-branch failure halting |
+| **cartographer** | Discovers repos, maps git state, identifies package ecosystems and available commands |
+| **dependency-resolver** | Builds cross-repo dependency DAG, detects version mismatches, calculates blast radius |
+| **release-planner** | Creates phased execution plan with parallel groups, rollback boundaries, and CI time estimates |
+| **release-executor** | Executes the release plan — publishes packages, bumps versions, pushes code, creates PRs |
+| **pipeline-monitor** | Monitors CI pipelines via gh CLI, reports green/red matrix, diagnoses failures |
 
 Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
@@ -45,13 +44,12 @@ Agents activate automatically based on description matching. Write prompts that 
 
 Prompts in `.gemini/agents/`:
 
-- `potnia.md` - Coordinates UI development phases and routes work to specialists
-- `design-system-architect.md` - Defines token taxonomy, component architecture, and governance pipeline
-- `rendering-architect.md` - Determines per-route rendering strategy, hydration, and performance budgets
-- `stylist.md` - Translates design tokens into CSS architecture, layout patterns, and visual implementation
-- `component-engineer.md` - Implements components with state management, testing, and structured output
-- `a11y-engineer.md` - Validates WCAG 2.2 AA compliance and gates accessibility quality
-- `frontend-fanatic.md` - Browser-first visual auditing and UX evaluation through a designer's lens
+- `potnia.md` - Coordinates release phases, gates complexity, manages DAG-branch failure halting
+- `cartographer.md` - Discovers repos, maps git state, identifies package ecosystems and available commands
+- `dependency-resolver.md` - Builds cross-repo dependency DAG, detects version mismatches, calculates blast radius
+- `release-planner.md` - Creates phased execution plan with parallel groups, rollback boundaries, and CI time estimates
+- `release-executor.md` - Executes the release plan — publishes packages, bumps versions, pushes code, creates PRs
+- `pipeline-monitor.md` - Monitors CI pipelines via gh CLI, reports green/red matrix, diagnoses failures
 <!-- KNOSSOS:END agent-configurations -->
 
 <!-- KNOSSOS:START platform-infrastructure -->
