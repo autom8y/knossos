@@ -29,7 +29,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, Skill
 model: sonnet
 color: orange
-maxTurns: 30
+maxTurns: 45
 maxTurns-override: true
 skills:
   - clinic-ref

@@ -23,7 +23,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: pink
-maxTurns: 30
+maxTurns: 45
 maxTurns-override: true
 skills:
   - thermia-ref

@@ -7,7 +7,7 @@ description: |
   assessing session hygiene. Triggers: orphan, triage, cleanup, stale, hygiene.
 model: sonnet
 color: orange
-maxTurns: 20
+maxTurns: 30
 tools: Read, Write, Bash, Glob, Grep
 disallowedTools:
   - Edit

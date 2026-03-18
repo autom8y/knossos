@@ -28,7 +28,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Edit, Write, Skill
 model: opus
 color: purple
-maxTurns: 30
+maxTurns: 45
 maxTurns-override: true
 skills:
   - clinic-ref

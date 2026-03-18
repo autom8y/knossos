@@ -20,7 +20,7 @@ type: specialist
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: yellow
-maxTurns: 30
+maxTurns: 45
 maxTurns-override: true
 skills:
   - releaser-ref

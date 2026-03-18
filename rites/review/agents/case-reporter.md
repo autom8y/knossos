@@ -20,7 +20,7 @@ type: specialist
 tools: Read, Write, TodoWrite
 model: sonnet
 color: pink
-maxTurns: 30
+maxTurns: 50
 maxTurns-override: true
 skills:
   - review-ref

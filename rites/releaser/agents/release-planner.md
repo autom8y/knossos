@@ -20,7 +20,7 @@ type: specialist
 tools: Read, Write, Glob, Grep, TodoWrite
 model: sonnet
 color: purple
-maxTurns: 25
+maxTurns: 35
 maxTurns-override: true
 skills:
   - releaser-ref

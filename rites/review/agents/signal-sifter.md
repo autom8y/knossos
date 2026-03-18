@@ -20,7 +20,7 @@ type: analyst
 tools: Bash, Glob, Grep, Read, Write, TodoWrite
 model: sonnet
 color: yellow
-maxTurns: 30
+maxTurns: 100
 maxTurns-override: true
 skills:
   - review-ref

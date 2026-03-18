@@ -21,7 +21,7 @@ type: orchestrator
 tools: Read
 model: opus
 color: cyan
-maxTurns: 25
+maxTurns: 40
 skills:
   - orchestrator-templates
   - review-ref
