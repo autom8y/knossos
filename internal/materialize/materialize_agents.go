@@ -44,6 +44,10 @@ func (m *Materializer) materializeAgents(manifest *RiteManifest, ritePath, chann
 	// causes CC's file watcher to see DELETE events for files that are immediately
 	// recreated, which crashes/disrupts active Claude Code sessions.
 
+	// Load archetype config files (e.g., orchestrator.yaml) into manifest.ArchetypeData.
+	// Config file provides base data; manifest archetype_data overrides per-field.
+	enrichArchetypeData(manifest, m.riteFS(resolved))
+
 	// Phase 1: Render archetype agents (before source file walk).
 	// Archetype agents are rendered from templates in knossos/archetypes/ and do NOT
 	// need a source file in the rite's agents/ directory.

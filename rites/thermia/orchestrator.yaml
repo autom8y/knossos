@@ -1,0 +1,72 @@
+# Orchestrator configuration for thermia
+# Consumed by ari sync to populate archetype template data for potnia.md
+# References workflow.yaml for phase/specialist data
+
+# Rite metadata
+rite:
+  name: thermia
+  domain: cache architecture
+  color: cyan
+
+# Frontmatter customization
+frontmatter:
+  role: "Coordinates cache consultation phases, gates complexity, manages consultative flow"
+  description: |
+    Routes cache consultation work through assessment, architecture, specification, and validation phases.
+    Determines complexity level (QUICK/STANDARD/DEEP) and ensures the "exhaust alternatives first" principle is enforced.
+    Use when: designing cache architecture, evaluating caching decisions, auditing existing cache systems, post-mortem analysis.
+    Triggers: coordinate, orchestrate, cache consultation, caching workflow, cache architecture coordination, Redis evaluation.
+
+# Specialist routing conditions (when to route to each)
+routing:
+  heat-mapper: "Consultation start (always first) -- map thermal landscape and evaluate alternatives"
+  systems-thermodynamicist: "Assessment complete, at least one CACHE verdict (STANDARD/DEEP only)"
+  capacity-engineer: "Architecture complete with pattern + consistency + failure modes per layer"
+  thermal-monitor: "Specification complete (STANDARD/DEEP) or assessment complete (QUICK, lite mode)"
+
+# Workflow position descriptors
+workflow_position:
+  upstream: "User cache consultation request or /thermia trigger"
+  downstream: "10x-dev (implementation), clinic (cache incidents), sre (monitoring infrastructure), arch (broader concerns)"
+
+# Handoff criteria between phases (checklist items)
+handoff_criteria:
+  assessment:
+    - "thermal-assessment.md exists in .sos/wip/thermia/"
+    - "6-gate framework applied to all candidates"
+    - "Alternatives evaluated (query optimization, materialized views, CDN, etc.)"
+    - "At least one CACHE verdict or all OPTIMIZE-INSTEAD with rationale"
+  architecture:
+    - "cache-architecture.md exists in .sos/wip/thermia/"
+    - "Every layer has pattern + consistency model + failure mode"
+    - "Invalidation strategy specified"
+    - "ADRs for significant decisions"
+  specification:
+    - "capacity-specification.md exists in .sos/wip/thermia/"
+    - "Every layer has derived sizing + eviction policy + stampede protection + TTL design"
+    - "Aggregate resource plan with costs"
+  validation:
+    - "observability-plan.md exists in .sos/wip/thermia/"
+    - "Design validation checklist completed"
+    - "No unresolved operational blind spots"
+
+# Skills references for this rite
+skills:
+  - "thermia-ref for artifact chain, 6-gate framework, complexity levels, cross-rite routing"
+
+# Rite-specific anti-patterns
+antipatterns:
+  - "Skipping assessment: routing directly to architecture without heat-mapper evaluation. Alternatives must be assessed first."
+  - "Micromanaging specialists: telling the thermodynamicist which pattern to pick or the capacity-engineer how to size."
+  - "Premature completion: accepting QUICK when the problem clearly needs STANDARD."
+  - "Over-scoping: escalating to DEEP for a simple 'should I cache this?' question."
+  - "Implementing: suggesting cache configurations, TTL values, or eviction policies."
+
+# Cross-rite protocol
+cross_rite_protocol: |
+  Thermia produces design artifacts, not implementation. Route by reference only:
+  - 10x-dev: Implementation of the cache design (primary outbound)
+  - clinic: Active cache incident requiring forensic investigation
+  - sre: Monitoring infrastructure that needs building
+  - arch: Broader architectural concerns surfaced during consultation
+  Reference rite names directly in recommendations. User decides whether to switch.

@@ -934,6 +934,106 @@ func TestBuildOrchestratorData_MissingArchetypeData(t *testing.T) {
 	}
 }
 
+func TestMaterializeAgents_ArchetypeRendersFromConfigFile(t *testing.T) {
+	t.Parallel()
+	projectDir, channelDir := setupArchetypeRite(t)
+
+	// Write an orchestrator.yaml to the test rite directory (simulating a real rite).
+	// No ArchetypeData in the manifest — config file is the sole data source.
+	ritesDir := filepath.Join(projectDir, ".knossos", "rites", "test-arch")
+	orchestratorYAML := `
+rite:
+  name: test-arch
+  domain: testing
+  color: orange
+frontmatter:
+  description: "Coordinates config-driven test phases"
+routing:
+  engineer: "Implementation needed"
+handoff_criteria:
+  engineer:
+    - "Code complete"
+    - "Tests pass"
+antipatterns:
+  - "Skipping tests"
+cross_rite_protocol: "Route to 10x-dev for implementation"
+workflow_position:
+  upstream: "User request"
+  downstream: "10x-dev"
+`
+	if err := os.WriteFile(filepath.Join(ritesDir, "orchestrator.yaml"), []byte(orchestratorYAML), 0644); err != nil {
+		t.Fatalf("setup: %v", err)
+	}
+
+	manifest := &RiteManifest{
+		Name:        "test-arch",
+		Description: "Test rite for config-driven archetype",
+		EntryAgent:  "potnia",
+		Agents: []Agent{
+			{Name: "potnia", Role: "Coordinates workflow", Archetype: "orchestrator"},
+			{Name: "engineer", Role: "Implements code"},
+		},
+		// ArchetypeData intentionally nil — real-world scenario
+	}
+
+	resolver := paths.NewResolver(projectDir)
+	m := NewMaterializer(resolver)
+
+	resolved := &ResolvedRite{
+		Name:         "test-arch",
+		RitePath:     ritesDir,
+		ManifestPath: filepath.Join(ritesDir, "manifest.yaml"),
+		Source:       RiteSource{Type: SourceProject, Path: ritesDir},
+	}
+
+	err := m.materializeAgents(manifest, resolved.RitePath, channelDir, resolved, provenance.NullCollector{}, nil, nil, nil, "", "", nil)
+	if err != nil {
+		t.Fatalf("materializeAgents() error = %v", err)
+	}
+
+	// Verify potnia was rendered from archetype template WITH config file data
+	potniaPath := filepath.Join(channelDir, "agents", "potnia.md")
+	potniaContent, err := os.ReadFile(potniaPath)
+	if err != nil {
+		t.Fatalf("expected potnia at %s: %v", potniaPath, err)
+	}
+
+	output := string(potniaContent)
+
+	// Must NOT contain the source file content (archetype still wins)
+	if strings.Contains(output, "This should not appear") {
+		t.Error("potnia should be rendered from archetype, not copied from source file")
+	}
+
+	// Must contain config-file-derived content
+	checks := []struct {
+		name    string
+		content string
+	}{
+		{"rite name in body", "consultative throughline** for test-arch"},
+		{"color from config", "orange"},
+		{"phase routing from config", "| engineer | Implementation needed |"},
+		{"handoff criteria from config", "| engineer | - Code complete<- Tests pass< |"},
+		{"antipattern from config", "Skipping tests"},
+		{"cross-rite protocol from config", "Route to 10x-dev for implementation"},
+		{"position from config", "**Upstream**: User request"},
+		{"heading", "# Potnia"},
+	}
+	for _, tc := range checks {
+		if !strings.Contains(output, tc.content) {
+			t.Errorf("config-driven potnia missing %q: expected %q", tc.name, tc.content)
+		}
+	}
+
+	// Transform pipeline should still strip knossos-only fields
+	if strings.Contains(output, "\ntype:") {
+		t.Error("transform pipeline should strip 'type' from archetype output")
+	}
+	if !strings.Contains(output, "name: potnia") {
+		t.Error("transform pipeline should inject name")
+	}
+}
+
 func TestRenderArchetypeAgent_UnknownArchetype(t *testing.T) {
 	t.Parallel()
 	root := projectRoot(t)
