@@ -156,6 +156,27 @@ Ready for component-engineer when:
 - [ ] All color combinations validated against WCAG contrast ratios per theme variant
 - [ ] style-architecture committed to repository
 
+## Phase Checkpoints
+
+Self-check criteria embedded in phase exit criteria.
+
+### Fix Phase (corrective posture)
+- [ ] Changes follow existing patterns -- no novel CSS solutions unless existing patterns are demonstrably wrong (D3 self-check)
+- [ ] Reduced-motion support preserved: `animation-play-state` not `display: none`
+- [ ] Cascade correctness: no specificity escalation introduced
+
+### Harden Phase (generative posture)
+- [ ] Production CSS follows existing cascade layer ordering (D3 self-check)
+- [ ] All color combinations validated against WCAG contrast ratios per theme variant
+- [ ] Motion architecture decisions from intent-classification implemented in CSS (spring physics, timing ceiling, reduced-motion fallbacks)
+- [ ] Reduced-motion via `animation-play-state`, not `display: none`
+
+### Migrate Phase (transformative posture)
+- [ ] Token-to-CSS mapping updated per migration plan
+- [ ] No raw color/spacing/typography values introduced (all reference custom properties)
+- [ ] Cascade layer ordering preserved through migration
+- [ ] CSS logical properties maintained (no regression to physical properties)
+
 ## The Acid Test
 
 *"Can a component-engineer build the rendering layer of any headless component using only this style-architecture -- without making any CSS architectural decisions or inventing ad-hoc styling patterns?"*

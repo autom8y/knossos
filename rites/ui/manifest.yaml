@@ -1,70 +1,50 @@
 # Rite Manifest: ui
-# Generated per ADR-0015 (Content Organization)
+# Updated per UI Creative Evolution Sprint 2 agent roster specification
 
 name: ui
-version: "1.0.0"
-description: UI/UX development lifecycle from design system foundations through accessible, performant component delivery
+version: "2.0.0"
+description: UI/UX development lifecycle with posture-aware routing (corrective/generative/transformative) across scope tiers (COMPONENT/FEATURE/SYSTEM)
 
 # entry_agent: The agent CC invokes first via Task tool (orchestrator routing).
-# This is distinct from workflow.yaml entry_point.agent (domain workflow entry).
 entry_agent: potnia
-
-phases:
-  - name: foundation
-    agent: design-system-architect
-    produces: design-system-spec
-    description: Define token taxonomy, component architecture, governance pipeline
-    condition: "complexity >= SYSTEM"
-
-  - name: strategy
-    agent: rendering-architect
-    produces: rendering-manifest
-    description: Determine per-route rendering, hydration, performance budgets
-    condition: "complexity >= MODULE"
-
-  - name: styling
-    agent: stylist
-    produces: style-architecture
-    description: CSS architecture, token-to-CSS mapping, layout/responsive/animation patterns
-    condition: "complexity >= MODULE"
-
-  - name: implementation
-    agent: component-engineer
-    produces: component-implementation
-    description: Build components with state management, testing, structured output
-
-  - name: validation
-    agent: a11y-engineer
-    produces: accessibility-report
-    description: Validate WCAG 2.2 AA across four testing layers
 
 agents:
   - name: potnia
-    role: Coordinates UI development phases and routes work to specialists
+    role: Coordinates UI development via scope x posture routing, strategic critique at intent phase
 
-  - name: design-system-architect
-    role: Defines token taxonomy, component architecture, and governance pipeline
+  - name: design-system-steward
+    role: Defines and evolves design systems -- token taxonomy, component architecture, governance, change proposals, impact analysis, migration planning
 
   - name: rendering-architect
     role: Determines per-route rendering strategy, hydration, and performance budgets
 
   - name: stylist
-    role: Translates design tokens into CSS architecture, layout patterns, and visual implementation
+    role: Translates design tokens and motion specs into CSS architecture, layout, responsive, animation implementation
 
   - name: component-engineer
-    role: Implements components with state management, testing, and structured output
+    role: Implements production components with state management, testing, and structured output
 
   - name: a11y-engineer
-    role: Validates WCAG 2.2 AA compliance and gates accessibility quality
+    role: Validates WCAG 2.2 AA compliance and gates accessibility quality (zero tolerance)
 
   - name: frontend-fanatic
-    role: Browser-first visual auditing and UX evaluation through a designer's lens
+    role: Browser-first subtractive auditing, visual auditing, and UX evaluation -- audit-phase owner in corrective posture
+
+  - name: interaction-prototyper
+    role: Throwaway interaction prototyping in the feel phase -- code as design medium, browser as canvas
+
+  - name: motion-architect
+    role: Motion classification, interaction physics, animation architecture -- pre-CSS structural decisions
 
 dromena:
-  - ui-ref
+  - ui
+  - touchup
+  - compose
+  - evolve
   - component-audit
   - a11y-check
   - perf-budget
+  - motion-audit
 
 legomena:
   - ui-design-systems
@@ -72,6 +52,9 @@ legomena:
   - ui-architecture
   - ui-ref
   - aesthetic-evaluation
+  - motion-architecture
+  - evolution-lifecycle
+  - quality-gates
 
 hooks: []
 
@@ -82,9 +65,9 @@ dependencies:
   - shared
 
 complexity_levels:
-  - name: TASK
+  - name: COMPONENT
     scope: "Single component, <200 LOC"
-  - name: MODULE
+  - name: FEATURE
     scope: "Feature area or page, 3-10 components"
   - name: SYSTEM
     scope: "Design system overhaul, cross-cutting changes"

@@ -1,4 +1,5 @@
 # Orchestrator configuration for ui
+# Updated per UI Creative Evolution Sprints 1-5
 
 # Rite metadata
 rite:
@@ -8,82 +9,213 @@ rite:
 
 # Frontmatter customization
 frontmatter:
-  role: "Coordinates UI development phases"
+  role: "Coordinates UI development via scope x posture routing"
   description: |
-    Stateless advisor that routes work through UI specialists. Does not execute—provides structured directives for the main agent to invoke specialists. Use when: UI development spans multiple phases or requires coordination across design systems, rendering, styling, implementation, and accessibility. Triggers: coordinate, orchestrate, UI workflow, design system, component development, accessibility validation.
+    Stateless advisor that routes work through UI specialists using a two-dimensional
+    model: scope (COMPONENT/FEATURE/SYSTEM) determines agent count; posture
+    (corrective/generative/transformative) determines workflow shape. Does not
+    execute -- provides structured directives. Triggers: coordinate, orchestrate,
+    UI workflow, design system, component development, accessibility validation.
 
-# Specialist routing conditions (when to route to each)
-# Specialist names come from workflow.yaml phases
+# Two-dimensional routing: scope x posture
 routing:
-  design-system-architect: "New design system, token taxonomy needed, component architecture overhaul"
-  rendering-architect: "Design system exists, new feature/page needs rendering strategy and performance budgets"
-  stylist: "Rendering manifest exists, CSS architecture and token-to-CSS mapping needed"
-  component-engineer: "Style architecture exists, components ready for implementation with state management and testing"
-  a11y-engineer: "Implementation complete, WCAG 2.2 AA validation needed across four testing layers"
-  frontend-fanatic: "Visual/aesthetic quality evaluation needed, post-styling or post-implementation design review, UX critique, first-impression audit, user requests design feedback"
+  # Posture detection heuristics
+  posture_detection:
+    corrective: "fix, broken, wrong, regression, cleanup, remove, simplify, refine, touchup, audit, check"
+    generative: "build, create, new, prototype, explore, feels like, interaction, compose, design, imagine"
+    transformative: "migrate, evolve, deprecate, rename, rollout, update system, token change, redesign system"
+    default: corrective
+
+  # Dispatch table: posture x scope -> phase sequence
+  dispatch:
+    corrective:
+      COMPONENT:
+        phases: [audit, fix, validate]
+        entry_agent: frontend-fanatic
+      FEATURE:
+        phases: [audit, fix, validate]
+        entry_agent: frontend-fanatic
+      SYSTEM:
+        phases: [audit, impact, fix, validate]
+        entry_agent: frontend-fanatic
+    generative:
+      COMPONENT:
+        phases: [feel, harden, validate]
+        entry_agent: interaction-prototyper
+        note: "Intent phase skipped at COMPONENT scope -- implicit in request"
+      FEATURE:
+        phases: [intent, feel, harden, validate]
+        entry_agent: motion-architect
+      SYSTEM:
+        phases: [intent, feel, harden, validate]
+        entry_agent: motion-architect
+    transformative:
+      COMPONENT:
+        redirect: "corrective.COMPONENT"
+        note: "Transformative at COMPONENT scope is corrective work in disguise"
+      FEATURE:
+        phases: [propose, analyze, migrate, validate]
+        entry_agent: design-system-steward
+      SYSTEM:
+        phases: [propose, analyze, migrate, validate]
+        entry_agent: design-system-steward
+
+  # Specialist routing per posture
+  corrective:
+    frontend-fanatic: "Audit phase owner: subtractive audit, removal checklist, edge state catalog, imperfection inventory"
+    motion-architect: "Audit phase participant: motion assessment (frequency, interruptibility, timing)"
+    rendering-architect: "Audit phase participant at FEATURE/SYSTEM: performance audit. Fix phase: rendering corrections"
+    stylist: "Fix phase: CSS-level corrections (contrast, focus, animation, layout)"
+    component-engineer: "Fix phase: behavioral corrections (ARIA, keyboard, semantic HTML, state)"
+    design-system-steward: "Impact phase at SYSTEM: blast radius assessment across tokens and contracts"
+    a11y-engineer: "Validate phase: WCAG 2.2 AA zero-tolerance gate"
+
+  generative:
+    motion-architect: "Intent phase (FEATURE/SYSTEM): interaction classification, motion budget, physics checklist"
+    interaction-prototyper: "Feel phase: throwaway prototype, browser as canvas, screen recordings"
+    component-engineer: "Harden phase: production rebuild from feel assessment"
+    stylist: "Harden phase: CSS architecture implementing motion decisions"
+    rendering-architect: "Harden phase (FEATURE/SYSTEM): performance budget enforcement"
+    design-system-steward: "Intent phase participant at SYSTEM: design system constraints. Harden phase: contract alignment"
+    a11y-engineer: "Validate phase: WCAG 2.2 AA zero-tolerance gate"
+    frontend-fanatic: "Post-harden advisory: aesthetic evaluation (optional, user-invoked). Validate phase soft gate on D1/D2 at FEATURE/SYSTEM"
+
+  transformative:
+    design-system-steward: "Propose phase: change RFC, contract classification. Analyze phase: impact analysis, codemod specs, rollout plan. Migrate phase: rollout oversight"
+    rendering-architect: "Analyze phase: rendering impact. Migrate phase: rendering strategy updates"
+    motion-architect: "Analyze phase: motion impact assessment"
+    stylist: "Migrate phase: CSS migration (tokens, cascade)"
+    component-engineer: "Migrate phase: component migration (API, behavior, adapters)"
+    a11y-engineer: "Validate phase: WCAG 2.2 AA gate + five-contract verification"
+    frontend-fanatic: "Validate phase soft gate: visual contract (QG-E4)"
+
+# Strategic critique activation rules (potnia-coordinated)
+strategic_critique:
+  corrective:
+    activates: false
+    note: "Corrective work has known targets; strategic questions are out of scope"
+  generative:
+    activates: true
+    transitions:
+      - from: intent
+        to: feel
+        question: "Is the interaction classification correct? Is the novelty budget appropriate?"
+      - from: harden
+        to: validate
+        question: "Does the hardened implementation preserve the strategic intent from the feel phase?"
+  transformative:
+    activates: true
+    transitions:
+      - from: propose
+        to: analyze
+        question: "Is this proposal the right change? Does the scope match intent? Are affected contracts correctly identified?"
 
 # Workflow position descriptors
 workflow_position:
   upstream: "User request for UI development work, SessionStart hook context"
-  downstream: "Specialists execute; artifacts flow to session context (design-system-spec -> rendering-manifest -> style-architecture -> component-implementation -> accessibility-report)"
+  downstream: "Posture-specific artifact chains -- corrective: audit-report -> fixed-implementation -> accessibility-report; generative: intent-classification -> feel-prototype-assessment -> component-implementation -> accessibility-report; transformative: change-proposal -> impact-analysis -> migrated-implementation -> accessibility-report"
 
-# Handoff criteria between phases (checklist items)
+# Handoff criteria between phases
 handoff_criteria:
-  foundation:
-    - "Token taxonomy defined in DTCG format with three tiers (global, alias, component)"
-    - "Token naming follows semantic convention at alias and component tiers"
-    - "Component catalog classifies all components by behavioral tier (primitive/composite/pattern)"
-    - "Slot vs. prop boundaries documented for each component"
-    - "Lifecycle status assigned in machine-readable metadata"
-    - "Governance gates defined with automated checks"
-    - "Breaking change classification rules documented"
-    - "design-system-spec committed to repository"
-  strategy:
-    - "Per-route rendering mode declared with justification for anything above SSG"
-    - "Hydration strategy documented per interactive region"
-    - "Performance budget allocated (365KB JS gzipped total, per-route if applicable)"
-    - "CLS mitigation requirements specified (aspect-ratio, min-height, font-display)"
-    - "Streaming boundaries and loading placeholder dimensions specified"
-    - "Progressive enhancement requirements explicit (what must work without JS)"
-    - "rendering-manifest committed to repository"
-  styling:
-    - "CSS architecture documented (cascade layers, custom property scoping, nesting strategy)"
-    - "Token-to-CSS mapping complete (all DTCG tokens resolved to custom properties)"
-    - "Layout patterns defined per component type (flexbox/grid, container queries)"
-    - "Responsive strategy documented (fluid typography, breakpoint rationale)"
-    - "Animation standards specified (allowed properties, timing tokens, reduced-motion fallbacks)"
-    - "Theming implementation documented (custom property layers, dark mode, multi-brand)"
-    - "All color combinations validated against WCAG contrast ratios per theme variant"
-    - "style-architecture committed to repository"
-  implementation:
-    - "Components implemented with headless logic separation"
-    - "State classified by origin for every stateful value"
+  # Corrective posture
+  audit:
+    - "Structured audit-report exists with actionable items"
+    - "Every item classified: removal (subtractive), fix (corrective), edge-state (gap)"
+    - "Motion assessment complete (existing animations evaluated per frequency x novelty)"
+    - "Items routed to responsible agent (CSS -> stylist, behavioral -> component-engineer)"
+  impact:
+    - "Blast radius documented across tokens, components, and all five contract types"
+    - "Affected components identified with specific required changes"
+    - "Fix effort confirmed feasible"
+  fix:
+    - "All audit-report items addressed"
+    - "No new capabilities added (scope guard)"
+    - "Subtractive changes applied before additive changes"
+    - "Every change independently shippable"
+
+  # Generative posture
+  intent:
+    - "Interaction classified: frequency tier, novelty allocation, gesture type"
+    - "Motion architecture decisions documented (spring vs keyframe, timing, interruptibility)"
+    - "10% novelty budget allocated"
+    - "Strategic alignment confirmed by potnia"
+  feel:
+    - "Working prototype exists in browser"
+    - "Screen recordings captured"
+    - "Practitioner assessment documented: 'this feels right' (subjective)"
+    - "Notes on what works and what does not"
+    - "CRITICAL: Prototype code is NOT passed forward to harden phase"
+  harden:
+    - "Production implementation exists rebuilt from feel assessment"
+    - "Motion architecture decisions preserved from intent-classification"
     - "Static analysis passes at 100%"
     - "Integration tests pass for user-meaningful behaviors"
-    - "Component isolation fixtures exist (default, loading, error, empty, edge-case)"
-    - "Test output in structured formats (CTRF, SARIF)"
-    - "Semantic HTML elements used (not div soup)"
-    - "component-implementation committed to repository"
-  validation:
-    - "Static lint layer passes (zero tolerance for missing alt, labels, invalid ARIA)"
-    - "Automated audit passes via axe-core (contrast, landmarks, ARIA validity)"
-    - "Interaction testing passes (keyboard nav, focus management, APG patterns)"
-    - "Manual review protocol documented (alt text quality, reading order, screen reader accuracy)"
-    - "Internationalization constraints verified (logical properties, text expansion)"
+    - "Component isolation fixtures exist"
+    - "Accessibility integrated during build, not bolted on"
+
+  # Transformative posture
+  propose:
+    - "RFC document with clear change description"
+    - "All five contract types classified (API, behavior, visual, a11y, automation)"
+    - "Dependency graph traversed, affected components identified"
+    - "Estimated blast radius documented"
+  analyze:
+    - "Per-contract impact assessment complete"
+    - "Codemod specifications generated (or unnecessary determination documented)"
+    - "Four-phase rollout plan with phase gate criteria"
+    - "Never-skip-Phase-2 (block new usage) confirmed"
+  migrate:
+    - "All four rollout phases executed (or current phase gate met)"
+    - "Codemods applied, adapter layers implemented"
+    - "Visual regression reviewed at each phase boundary"
+    - "No deprecated usage remaining (Phase 4)"
+
+  # Terminal (all postures)
+  validate:
+    - "WCAG 2.2 AA zero-tolerance gate passes (a11y-engineer runs first)"
     - "All findings in structured format with location and severity"
     - "accessibility-report committed to repository"
-    - "No WCAG 2.2 AA violations remain (zero tolerance)"
+    - "No WCAG 2.2 AA violations remain"
+    - "For generative FEATURE/SYSTEM: frontend-fanatic D1/D2 soft gates pass"
+    - "For transformative: frontend-fanatic visual contract (QG-E4) soft gate passes"
+
   aesthetic_audit:
     - "All target URLs navigated via browserbase"
     - "First-impression captured with visceral reaction documented"
     - "All four VisAWI facets scored with evidence"
-    - "Interactive flows completed and evaluated"
     - "Every finding references a named HCI principle"
     - "Findings table complete with severity, facet, Norman level, and routing"
-    - "Potential a11y issues routed to a11y-engineer"
-    - "aesthetic-audit-report committed to repository"
 
-# Skills references for this rite
+# Validate phase coordination (multi-agent for generative/transformative)
+validate_phase:
+  execution_order:
+    - "a11y-engineer runs first (hard gate). Back-route immediately on failure."
+    - "frontend-fanatic runs second (posture-dependent soft gates)"
+  invocation_rules:
+    corrective_component: "a11y-engineer only. Frontend-fanatic discretionary."
+    corrective_feature_system: "a11y-engineer + frontend-fanatic advisory."
+    generative_component: "a11y-engineer + frontend-fanatic at potnia's discretion."
+    generative_feature_system: "a11y-engineer + frontend-fanatic (automatic, D1/D2 soft gates active)."
+    transformative: "a11y-engineer + frontend-fanatic (visual contract soft gate active)."
+
+# Quality gate summary
+quality_gates:
+  corrective:
+    hard: [QG-T1]
+    embedded: [QG-T2, QG-T3]
+    advisory: [QG-T4, QG-T5]
+  generative:
+    hard: [QG-C1]
+    soft: [QG-C2, QG-C3]
+    embedded: [QG-C4, QG-C6]
+    advisory: [QG-C5, QG-C7]
+  transformative:
+    hard: [QG-E1, QG-E5]
+    soft: [QG-E4]
+    embedded: [QG-E2, QG-E3, QG-E6, QG-E7, QG-E9]
+    advisory: [QG-E8]
+
+# Skills references
 skills:
   - orchestrator-templates
   - cross-rite-handoff
@@ -93,10 +225,97 @@ antipatterns:
   - "Framework endorsement without justification (stack-agnostic by default)"
   - "Deferring a11y violations to backlog (always blocking, zero tolerance)"
   - "Treating performance budgets as optimization targets (they are architectural constraints)"
-  - "Skipping validation phase (every complexity level runs a11y-engineer)"
+  - "Skipping validation phase (every posture at every scope runs a11y-engineer)"
   - "Single rendering strategy for all routes (per-route strategy required)"
   - "Div soup with ARIA compensation (semantic HTML first)"
-  - "Aesthetic findings blocking workflow (frontend-fanatic findings are always advisory, never blocking)"
+  - "Aesthetic findings blocking workflow in corrective posture (corrective frontend-fanatic findings are always advisory)"
+  - "Personality/brand and emotional design findings blocking workflow in any posture (subjective dimensions are always advisory)"
+  - "Carrying feel-phase code into harden phase (throwaway is structural, not cultural)"
+  - "Routing corrective requests through generative path (default posture is corrective)"
+  - "Making motion architecture decisions in CSS implementation (motion-architect decides, stylist implements)"
+  - "Mixing subtractive and additive changes in fix phase (removals first, then fixes)"
 
 # Cross-rite protocol
 cross_rite_protocol: "Surface cross-rite concerns in state_update.blockers. Route to: 10x-dev for backend API design, docs for documentation gaps, debt-triage for performance debt, security for auth UI/PII. Recommend user invoke Skill(cross-rite-handoff). Do NOT attempt cross-rite routing directly."
+
+# Back-routes per posture
+back_routes:
+  corrective:
+    - source_phase: validate
+      trigger: "fail(a11y_violations_css)"
+      target_phase: fix
+      target_agent: stylist
+      requires_user_confirmation: false
+      condition: "CSS-level a11y violations (contrast, focus styles, reduced-motion, target sizing)"
+
+    - source_phase: validate
+      trigger: "fail(a11y_violations_component)"
+      target_phase: fix
+      target_agent: component-engineer
+      requires_user_confirmation: false
+      condition: "Behavioral a11y violations (ARIA, keyboard, semantic HTML)"
+
+    - source_phase: fix
+      trigger: "scope_expansion"
+      target_phase: audit
+      target_agent: frontend-fanatic
+      requires_user_confirmation: true
+      condition: "Fix reveals additional problems not in original audit"
+
+  generative:
+    - source_phase: validate
+      trigger: "fail(a11y_violation)"
+      target_phase: harden
+      target_agent: component-engineer
+      requires_user_confirmation: false
+      condition: "A11y violations in hardened output"
+
+    - source_phase: validate
+      trigger: "fail(interaction_quality)"
+      target_phase: harden
+      target_agent: component-engineer
+      requires_user_confirmation: false
+      condition: "Interaction quality does not match intent classification (D1/D2 soft gate)"
+
+    - source_phase: harden
+      trigger: "feel_unpreservable"
+      target_phase: feel
+      target_agent: interaction-prototyper
+      requires_user_confirmation: true
+      condition: "Hardening reveals feel cannot be preserved under production constraints"
+
+    - source_phase: feel
+      trigger: "classification_wrong"
+      target_phase: intent
+      target_agent: motion-architect
+      requires_user_confirmation: true
+      condition: "Prototyping reveals interaction classification was wrong"
+
+  transformative:
+    - source_phase: validate
+      trigger: "fail(contract_violation)"
+      target_phase: migrate
+      target_agent: component-engineer
+      requires_user_confirmation: false
+      condition: "Contract violations in migrated output"
+
+    - source_phase: validate
+      trigger: "fail(visual_contract)"
+      target_phase: migrate
+      target_agent: component-engineer
+      requires_user_confirmation: false
+      condition: "Visual regression detected in migrated output (QG-E4 soft gate)"
+
+    - source_phase: migrate
+      trigger: "dependency_discovered"
+      target_phase: analyze
+      target_agent: design-system-steward
+      requires_user_confirmation: false
+      condition: "Migration reveals additional dependencies not in original analysis"
+
+    - source_phase: analyze
+      trigger: "proposal_infeasible"
+      target_phase: propose
+      target_agent: design-system-steward
+      requires_user_confirmation: true
+      condition: "Impact analysis shows proposal needs restructuring"

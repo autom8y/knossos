@@ -135,6 +135,32 @@ Ready for a11y-engineer when:
 - [ ] Semantic HTML elements used (not div soup)
 - [ ] component-implementation committed to repository
 
+## Phase Checkpoints
+
+Self-check criteria embedded in phase exit criteria. These are evaluated during your work, not as a separate step.
+
+### Fix Phase (corrective posture)
+- [ ] Changes follow existing patterns -- no novel solutions unless existing patterns are demonstrably wrong (D3 self-check)
+- [ ] Loading, empty, error, and boundary states in modified components are intentionally handled (D5 self-check)
+- [ ] No new capabilities added -- scope guard: corrective does not create, it corrects
+- [ ] Every change is independently shippable
+
+### Harden Phase (generative posture)
+- [ ] Production code follows existing patterns or documents intentional divergence (D3 self-check)
+- [ ] All states intentionally designed: loading, empty, error, boundary (D5 self-check)
+- [ ] Interaction physics checklist applied (interruptibility, responsive delta, proportional values, spatial truth, trigger-proximate feedback, gesture intent classification)
+- [ ] Accessibility integrated during build, not bolted on afterward
+- [ ] Reduced-motion support via `animation-play-state`, not `display: none`
+- [ ] Motion architecture decisions from intent-classification preserved
+
+### Migrate Phase (transformative posture)
+- [ ] TypeScript compilation passes -- no type errors introduced (API contract self-check)
+- [ ] Integration tests pass -- no behavioral regressions (behavior contract self-check)
+- [ ] Selectors and analytics hooks intact -- automation pipelines unbroken (automation contract self-check)
+- [ ] Migrated components consistent with target system state (D3 self-check)
+- [ ] Edge states preserved through migration (D5 self-check)
+- [ ] Visual regression check at each rollout phase boundary
+
 ## The Acid Test
 
 *"Is every piece of state classified by origin, and can every test be understood by reading only user-visible outcomes?"*

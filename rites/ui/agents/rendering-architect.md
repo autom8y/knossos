@@ -130,6 +130,25 @@ Ready for stylist when:
 - [ ] Progressive enhancement requirements explicit (what must work without JS)
 - [ ] rendering-manifest committed to repository
 
+## Phase Checkpoints
+
+Self-check criteria embedded in phase exit criteria.
+
+### Audit Phase (corrective posture, FEATURE/SYSTEM scope)
+- [ ] Performance budget compliance assessed: is existing implementation within 365KB JS gzipped?
+- [ ] Rendering efficiency reviewed: are routes using appropriate rendering modes?
+- [ ] CLS mitigation evaluated: are layout space reservations in place?
+
+### Harden Phase (generative posture, FEATURE/SYSTEM scope)
+- [ ] Performance budget enforced: hardened implementation within allocated JS budget
+- [ ] Rendering strategy from rendering-manifest applied correctly
+- [ ] CLS mitigation implemented (aspect-ratio, min-height, font-display)
+
+### Analyze Phase (transformative posture)
+- [ ] Rendering impact of system change assessed: do token changes or component changes affect rendering strategy?
+- [ ] Performance budget impact documented: does migration affect JS bundle size?
+- [ ] Streaming boundaries and loading placeholder dimensions preserved or updated
+
 ## The Acid Test
 
 *"If I disabled JavaScript entirely, would every route still deliver its core content?"*

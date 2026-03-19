@@ -1,107 +1,172 @@
 ---
 name: ui-ref
-description: "UI rite self-reference: agent roster, workflow phases, commands, and quick-start guide. Use when: orienting to the ui rite, routing work to the correct specialist, understanding phase flow, looking up available commands. Triggers: ui rite, agents, workflow, potnia, design-system-architect, rendering-architect, stylist, component-engineer, a11y-engineer."
+description: "UI rite self-reference: 9-agent roster, three-posture workflow, command surface, routing matrix, and quick-start guide. Use when: orienting to the ui rite, routing work to the correct specialist, understanding posture-based phase flow, looking up available commands, checking which workflow shape to use. Triggers: ui rite, agents, workflow, potnia, design-system-steward, rendering-architect, stylist, component-engineer, a11y-engineer, frontend-fanatic, interaction-prototyper, motion-architect, corrective, generative, transformative."
 ---
 
 # UI Rite Reference
 
-> Agent roster, workflow phases, commands, and quick-start guide for the ui rite.
+> 9-agent roster, three-posture workflow, command surface, and quick-start guide for the ui rite (v2.0).
 
 ## Agent Roster
 
-| Agent | Role | Entry Point |
-|-------|------|-------------|
-| **potnia** | Coordinates UI development phases; routes work to specialists based on complexity and work type | All work via Task tool |
-| **design-system-architect** | Defines token taxonomy (DTCG three-tier), component architecture, and governance pipeline | New design system, design system overhaul |
-| **rendering-architect** | Determines per-route rendering strategy, hydration patterns, and performance budgets | New feature/page, performance work |
-| **stylist** | Translates design tokens into CSS architecture, layout patterns, and visual implementation | Styling overhaul, CSS architecture |
-| **component-engineer** | Implements components with state management, testing, and structured output | Component modification, component addition |
-| **a11y-engineer** | Validates WCAG 2.2 AA compliance across four testing layers and gates accessibility quality | A11y remediation, accessibility validation |
+| Agent | Role | Type | Postures |
+|-------|------|------|----------|
+| **potnia** | Coordinates via scope x posture routing; strategic critique at phase transitions | orchestrator | all |
+| **design-system-steward** | Defines and evolves design systems: token taxonomy, governance, change proposals, impact analysis, migration | architect | all |
+| **rendering-architect** | Per-route rendering strategy, hydration, performance budgets | architect | all |
+| **stylist** | CSS architecture, token-to-CSS mapping, layout, responsive, animation implementation | builder | all |
+| **component-engineer** | Production component implementation: state management, testing, headless logic separation | engineer | all |
+| **a11y-engineer** | WCAG 2.2 AA validation -- terminal gate in every posture, zero tolerance | validator | all |
+| **frontend-fanatic** | Subtractive auditing (corrective audit-phase owner), visual auditing, UX evaluation; soft gate on D1/D2 (generative) and visual contract (transformative) | evaluator | all |
+| **interaction-prototyper** | Throwaway interaction prototyping in the feel phase -- code as design medium | prototyper | generative only |
+| **motion-architect** | Motion classification, interaction physics, animation architecture -- pre-CSS structural decisions | architect | all |
 
-## Workflow Phases
+## Two-Dimensional Routing Matrix
 
-```
-Foundation → Strategy → Styling → Implementation → Validation
-    |             |          |            |               |
-design-system- rendering- stylist   component-   accessibility-
- architect     architect            engineer      engineer
-```
+Scope x Posture determines the workflow shape:
 
-Phases are conditional on complexity level:
+| | COMPONENT | FEATURE | SYSTEM |
+|---|---|---|---|
+| **Corrective** | audit -> fix -> validate | audit -> fix -> validate | audit -> impact -> fix -> validate |
+| **Generative** | feel -> harden -> validate | intent -> feel -> harden -> validate | intent -> feel -> harden -> validate |
+| **Transformative** | *redirect to corrective* | propose -> analyze -> migrate -> validate | propose -> analyze -> migrate -> validate |
 
-| Complexity | Scope | Phases Active |
-|-----------|-------|--------------|
-| **TASK** | Single component, <200 LOC | Implementation, Validation |
-| **MODULE** | Feature area or page, 3–10 components | Strategy, Styling, Implementation, Validation |
-| **SYSTEM** | Design system overhaul, cross-cutting changes | All five phases |
+**COMPONENT x Transformative**: Always redirects to corrective COMPONENT. Transformative requires cross-component coordination (minimum FEATURE scope).
 
-## Entry Points by Work Type
+## Posture Detection Heuristics
 
-| Work Type | Entry Agent |
-|-----------|------------|
-| New design system | design-system-architect |
-| Design system overhaul | design-system-architect |
-| New feature | rendering-architect |
-| New page | rendering-architect |
-| Styling overhaul | stylist |
-| Component modification | component-engineer |
-| Component addition | component-engineer |
-| A11y remediation | a11y-engineer |
+| Signals | Posture |
+|---------|---------|
+| fix, broken, wrong, regression, cleanup, remove, simplify, refine, touchup, audit, check | Corrective |
+| build, create, new, prototype, explore, feels like, interaction, compose, design, imagine | Generative |
+| migrate, evolve, deprecate, rename, rollout, update system, token change, redesign system | Transformative |
+| Ambiguous | **Corrective (default)** -- smallest blast radius |
 
-## Back-Routes (Automatic)
+## Commands
 
-| Trigger | From | To |
-|---------|------|----|
-| A11y violations in CSS (contrast, focus styles) | a11y-engineer | stylist |
-| A11y violations requiring component changes (ARIA, keyboard) | a11y-engineer | component-engineer |
-| Implementation exceeds JS budget | component-engineer | rendering-architect |
-| CSS performance reveals CLS or rendering cost issues | stylist | rendering-architect |
-| Missing tokens prevent CSS mapping | stylist | design-system-architect (user confirmation required) |
-| Missing tokens prevent rendering decisions | rendering-architect | design-system-architect (user confirmation required) |
+| Command | Type | Posture | Description |
+|---------|------|---------|-------------|
+| `/ui` | Orchestrated | Auto-detected | Universal entry: posture and scope auto-detected |
+| `/touchup` | Orchestrated | Corrective | Fix imperfections, remove unnecessary elements |
+| `/compose` | Orchestrated | Generative | Build new interactions with feel-first prototyping |
+| `/evolve` | Orchestrated | Transformative | Design system migration with phased rollout |
+| `/component-audit` | Utility | Corrective (partial) | Design system compliance check (audit only, no fix/validate) |
+| `/a11y-check` | Utility | n/a | Standalone WCAG 2.2 AA validation |
+| `/perf-budget` | Utility | n/a | Standalone performance budget compliance check |
+| `/motion-audit` | Utility | n/a | Standalone motion architecture assessment |
 
-## Available Commands
+## Phase-Agent Assignments
 
-| Command | Description |
-|---------|-------------|
-| `/ui` | Full UI development lifecycle (complexity-routed via potnia) |
-| `/component-audit` | Audit a component against design system standards |
-| `/a11y-check` | Run accessibility validation check |
-| `/perf-budget` | Check performance budget compliance |
+### Corrective Posture
+
+| Phase | Owner | Participants |
+|-------|-------|-------------|
+| audit | frontend-fanatic | motion-architect (FEATURE/SYSTEM), rendering-architect (FEATURE/SYSTEM) |
+| impact | design-system-steward | rendering-architect (SYSTEM only) |
+| fix | component-engineer / stylist | rendering-architect (FEATURE/SYSTEM performance fixes) |
+| validate | a11y-engineer | frontend-fanatic (advisory, discretionary) |
+
+### Generative Posture
+
+| Phase | Owner | Participants |
+|-------|-------|-------------|
+| intent | motion-architect | potnia (strategic critique), design-system-steward (SYSTEM) |
+| feel | interaction-prototyper | (none -- throwaway phase, no quality gates) |
+| harden | component-engineer | stylist, rendering-architect (FEATURE/SYSTEM), design-system-steward (SYSTEM) |
+| validate | a11y-engineer (first) | frontend-fanatic (automatic FEATURE/SYSTEM: D1/D2 soft gates) |
+
+### Transformative Posture
+
+| Phase | Owner | Participants |
+|-------|-------|-------------|
+| propose | design-system-steward | (potnia strategic critique at propose->analyze) |
+| analyze | design-system-steward | rendering-architect, motion-architect |
+| migrate | component-engineer | stylist, rendering-architect, design-system-steward (oversight) |
+| validate | a11y-engineer (first) | frontend-fanatic (visual contract soft gate QG-E4) |
+
+## Quality Gate Summary
+
+| Gate | Dimension | Type | Posture |
+|------|-----------|------|---------|
+| D0: Accessibility | WCAG 2.2 AA | Hard (always) | All |
+| D1: Micro-interactions | Interaction quality | Soft (blocking) | Generative FEATURE/SYSTEM |
+| D2: Cognitive efficiency | User flow directness | Soft (blocking) | Generative FEATURE/SYSTEM |
+| Visual contract (QG-E4) | Visual regression | Soft (blocking) | Transformative |
+| D3: Consistency | Pattern reuse | Embedded self-check | All |
+| D5: Edge state craft | State completeness | Embedded self-check | All |
+| D4, D6: Brand/Emotion | Subjective quality | Advisory (never blocking) | All |
+
+## Back-Routes
+
+| Trigger | From | To | Auto? |
+|---------|------|----|-------|
+| A11y CSS violations | validate | fix (stylist) | Yes |
+| A11y component violations | validate | fix (component-engineer) | Yes |
+| D1/D2 soft gate fail | validate | harden (component-engineer) | Yes |
+| Visual contract regression | validate | migrate (component-engineer) | Yes |
+| Contract violations | validate | migrate | Yes |
+| New dependencies found | migrate | analyze | Yes |
+| Fix scope expands | fix | audit | User confirm |
+| Feel cannot be hardened | harden | feel | User confirm |
+| Classification wrong | feel | intent | User confirm |
+| Proposal infeasible | analyze | propose | User confirm |
 
 ## Quick Start
 
-**For a new component** (TASK complexity):
-1. Invoke potnia via `/ui` or Task tool
-2. potnia routes to `component-engineer` for implementation
-3. `a11y-engineer` validates WCAG 2.2 AA
-4. Back-routes fire automatically if violations found
+### Fix something broken (Corrective)
+```
+/touchup "fix the focus state on the dropdown nav"
+-- or --
+/ui "fix the focus state on the dropdown nav"
+```
 
-**For a new feature or page** (MODULE complexity):
-1. Invoke potnia — routes to `rendering-architect` first
-2. `rendering-architect` produces rendering manifest (per-route strategy, hydration, budgets)
-3. `stylist` produces CSS architecture and token mapping
-4. `component-engineer` implements with state management and tests
-5. `a11y-engineer` validates
+### Build something new (Generative)
+```
+/compose "build a command palette with keyboard navigation"
+-- or --
+/ui "build a command palette with keyboard navigation"
+```
 
-**For a new design system** (SYSTEM complexity):
-1. `design-system-architect` produces design-system-spec (token taxonomy, component classification, governance pipeline)
-2. Continue through all five phases
+### Migrate a design system change (Transformative)
+```
+/evolve "migrate from HSL to Oklch color tokens"
+-- or --
+/ui "migrate from HSL to Oklch color tokens"
+```
+
+### Targeted utilities
+```
+/a11y-check                  # WCAG validation only
+/perf-budget                 # Performance budget check
+/component-audit             # Design system compliance check
+/motion-audit "CommandPalette"  # Motion architecture assessment
+```
 
 ## Artifacts Produced
 
 | Agent | Artifact | Location |
 |-------|---------|---------|
-| design-system-architect | Design System Spec (DSS-{slug}.md) | `.ledge/specs/` |
+| design-system-steward | Design System Spec (DSS-{slug}.md) | `.ledge/specs/` |
+| design-system-steward | Change Proposal (CP-{slug}.md) | `.ledge/specs/` |
+| design-system-steward | Impact Analysis (IA-{slug}.md) | `.ledge/specs/` |
 | rendering-architect | Rendering Manifest (RM-{slug}.md) | `.ledge/specs/` |
 | stylist | Style Architecture (SA-{slug}.md) | `.ledge/specs/` |
+| motion-architect | Motion Architecture Spec (MOTION-{slug}.md) | `.ledge/specs/` |
+| interaction-prototyper | Feel Prototype Assessment (FEEL-{slug}.md) | `.ledge/reviews/` |
 | component-engineer | Component implementation | In codebase |
 | a11y-engineer | Accessibility Report (A11Y-{slug}.md) | `.ledge/reviews/` |
+| frontend-fanatic | Audit Report (AUDIT-{slug}.md) | `.ledge/reviews/` |
 
 ## Skills Available to Agents
 
-| Skill | Contents |
-|-------|---------|
-| `ui-design-systems` | Token taxonomy, component classification, governance |
-| `ui-quality` | WCAG checklist, testing pyramid, performance budgets |
-| `ui-architecture` | State patterns, rendering strategies, CSS principles |
-| `ui-ref` | This reference |
+| Skill | Contents | Consuming Agents |
+|-------|---------|-----------------|
+| `ui-design-systems` | Token taxonomy, component classification, governance | design-system-steward, stylist |
+| `ui-quality` | WCAG checklist, testing pyramid, performance budgets | a11y-engineer, stylist |
+| `ui-architecture` | State patterns, rendering strategies, CSS principles | rendering-architect, component-engineer, stylist |
+| `aesthetic-evaluation` | VisAWI, fluency principles, emotional design | frontend-fanatic |
+| `motion-architecture` | Frequency x novelty matrix, progressive craft layers (L0-L4) | motion-architect, component-engineer |
+| `evolution-lifecycle` | Four-phase rollout model (transformative posture only) | design-system-steward |
+| `quality-gates` | Per-posture gate criteria (QG-T, QG-C, QG-E) | frontend-fanatic |
+| `orchestrator-templates` | CONSULTATION_RESPONSE format | potnia |
+| `cross-rite-handoff` | Cross-rite routing patterns | potnia |

@@ -139,6 +139,16 @@ Workflow complete when:
 - [ ] accessibility-report committed to repository
 - [ ] No WCAG 2.2 AA violations remain (zero tolerance)
 
+## Phase Checkpoints
+
+### Validate Phase (all postures)
+- [ ] Four-layer validation complete: lint, axe-core, interaction testing, manual review protocol
+- [ ] Zero-tolerance enforcement: no WCAG 2.2 AA violations remain; every violation is blocking
+- [ ] For corrective posture: standard four-layer validation
+- [ ] For generative posture: standard four-layer validation (feel phase explicitly exempt -- a11y begins in harden)
+- [ ] For transformative posture: standard four-layer validation PLUS a11y contract preservation verification (migration must not degrade a11y from pre-migration baseline)
+- [ ] Back-route triggered automatically on violation: CSS violations -> stylist, component violations -> component-engineer, migration violations -> migrate phase
+
 ## The Acid Test
 
 *"Can a keyboard-only user on a screen reader complete every task this UI offers, in every supported locale?"*
