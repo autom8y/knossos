@@ -6,6 +6,7 @@ import (
 	"maps"
 	"os"
 	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 
@@ -189,39 +190,102 @@ func ResolvePoolServers(pools *MCPPoolsConfig, refs []MCPPoolRef, channel string
 	return servers, nil
 }
 
-// envVarPattern matches ${VAR_NAME} references in strings.
-var envVarPattern = regexp.MustCompile(`\$\{([^}]+)\}`)
+// envVarPattern matches ${VAR_NAME} and ${?VAR_NAME} references in strings.
+// The optional ? prefix marks a variable as non-required: unset optional vars
+// are silently dropped from the env map instead of producing a warning.
+var envVarPattern = regexp.MustCompile(`\$\{(\??[^}]+)\}`)
 
-// ValidateMCPEnvVars scans MCP server configs for ${VAR} patterns and emits
-// slog.Warn for each unset variable. Non-blocking: never returns an error.
-// CC/Gemini resolve ${VAR} at runtime via their own env; this validation
-// catches missing direnv setup during development.
+// ValidateMCPEnvVars scans MCP server configs for ${VAR} patterns, emits
+// slog.Warn for each unset required variable, and resolves optional vars.
+//
+// Optional var syntax: ${?VAR} — if VAR is set, rewritten to ${VAR} in the
+// server config. If VAR is unset, the env entry is removed entirely so
+// CC/Gemini never see an unresolvable reference. Required vars (${VAR})
+// retain existing behavior: warn on unset, pass through for runtime resolution.
+//
+// Mutates server configs in place (optional var cleanup).
 func ValidateMCPEnvVars(servers []MCPServerConfig) {
 	seen := make(map[string]bool)
 
-	for _, server := range servers {
-		// Scan env values
+	for i := range servers {
+		server := &servers[i]
+
+		// Resolve optional env vars first (mutates server.Env)
+		if server.Env != nil {
+			for key, val := range server.Env {
+				resolved, keep := resolveEnvRef(val, server.Name, &seen)
+				if !keep {
+					delete(server.Env, key)
+				} else if resolved != val {
+					server.Env[key] = resolved
+				}
+			}
+		}
+
+		// Validate remaining env values (required vars only at this point)
 		for _, v := range server.Env {
-			extractAndWarn(v, server.Name, &seen)
+			warnUnsetRequired(v, server.Name, &seen)
 		}
 		// Scan args (some MCPs take ${VAR} in CLI flags)
 		for _, arg := range server.Args {
-			extractAndWarn(arg, server.Name, &seen)
+			warnUnsetRequired(arg, server.Name, &seen)
 		}
 	}
 }
 
-// extractAndWarn extracts ${VAR} references from a string and warns on unset vars.
-func extractAndWarn(s, serverName string, seen *map[string]bool) {
+// resolveEnvRef processes a single env value string for optional var references.
+// Returns (resolved string, keep). If keep is false, the caller should delete
+// the env entry entirely (optional var was unset).
+func resolveEnvRef(s, serverName string, seen *map[string]bool) (string, bool) {
 	matches := envVarPattern.FindAllStringSubmatch(s, -1)
+	result := s
 	for _, match := range matches {
-		varName := match[1]
+		fullMatch := match[0] // e.g. "${?STAGEHAND_API_KEY}"
+		rawName := match[1]   // e.g. "?STAGEHAND_API_KEY"
+
+		if len(rawName) == 0 {
+			continue
+		}
+
+		optional := rawName[0] == '?'
+		if !optional {
+			continue // required vars handled by warnUnsetRequired
+		}
+
+		varName := rawName[1:] // strip '?'
 		if (*seen)[varName] {
 			continue
 		}
-		(*seen)[varName] = true
-		if _, ok := os.LookupEnv(varName); !ok {
-			slog.Warn("MCP env var not set", "var", varName, "server", serverName)
+
+		if _, ok := os.LookupEnv(varName); ok {
+			// Optional var is set — normalize ${?VAR} → ${VAR}
+			(*seen)[varName] = true
+			normalized := fmt.Sprintf("${%s}", varName)
+			result = strings.Replace(result, fullMatch, normalized, 1)
+		} else {
+			// Optional var is unset — drop the env entry
+			(*seen)[varName] = true
+			slog.Debug("MCP optional env var not set, dropping", "var", varName, "server", serverName)
+			return "", false
+		}
+	}
+	return result, true
+}
+
+// warnUnsetRequired warns on unset required (non-optional) ${VAR} references.
+func warnUnsetRequired(s, serverName string, seen *map[string]bool) {
+	matches := envVarPattern.FindAllStringSubmatch(s, -1)
+	for _, match := range matches {
+		rawName := match[1]
+		if len(rawName) > 0 && rawName[0] == '?' {
+			continue // optional — already handled by resolveEnvRef
+		}
+		if (*seen)[rawName] {
+			continue
+		}
+		(*seen)[rawName] = true
+		if _, ok := os.LookupEnv(rawName); !ok {
+			slog.Warn("MCP env var not set", "var", rawName, "server", serverName)
 		}
 	}
 }

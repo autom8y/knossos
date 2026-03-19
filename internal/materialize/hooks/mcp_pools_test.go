@@ -387,3 +387,67 @@ func TestValidateMCPEnvVars_ScansArgsAndEnv(t *testing.T) {
 	// Just verify no panic — both args and env are scanned
 	ValidateMCPEnvVars(servers)
 }
+
+func TestValidateMCPEnvVars_OptionalUnset_DropsEnvEntry(t *testing.T) {
+	// No t.Parallel — uses os.Unsetenv
+	os.Unsetenv("OPT_TEST_UNSET_VAR_123")
+
+	servers := []MCPServerConfig{{
+		Name: "test-server",
+		Env: map[string]string{
+			"REQUIRED_VAR": "literal-value",
+			"OPTIONAL_VAR": "${?OPT_TEST_UNSET_VAR_123}",
+		},
+	}}
+
+	ValidateMCPEnvVars(servers)
+
+	// Optional unset var should be removed from env map
+	assert.NotContains(t, servers[0].Env, "OPTIONAL_VAR",
+		"unset optional var must be dropped from env")
+	// Required literal value must survive
+	assert.Equal(t, "literal-value", servers[0].Env["REQUIRED_VAR"],
+		"non-optional env entry must be preserved")
+}
+
+func TestValidateMCPEnvVars_OptionalSet_NormalizesToRequired(t *testing.T) {
+	// No t.Parallel — uses t.Setenv
+	t.Setenv("OPT_TEST_SET_VAR_456", "my-api-key")
+
+	servers := []MCPServerConfig{{
+		Name: "test-server",
+		Env: map[string]string{
+			"API_KEY": "${?OPT_TEST_SET_VAR_456}",
+		},
+	}}
+
+	ValidateMCPEnvVars(servers)
+
+	// Optional set var should be normalized: ${?VAR} → ${VAR}
+	assert.Equal(t, "${OPT_TEST_SET_VAR_456}", servers[0].Env["API_KEY"],
+		"set optional var must be normalized to ${VAR} (strip ?)")
+}
+
+func TestValidateMCPEnvVars_MixedOptionalAndRequired(t *testing.T) {
+	// No t.Parallel — uses t.Setenv + os.Unsetenv
+	t.Setenv("MIX_REQUIRED_789", "required-value")
+	os.Unsetenv("MIX_OPTIONAL_789")
+
+	servers := []MCPServerConfig{{
+		Name: "test-server",
+		Env: map[string]string{
+			"REQ":  "${MIX_REQUIRED_789}",
+			"OPT":  "${?MIX_OPTIONAL_789}",
+			"LIT":  "LOCAL",
+		},
+	}}
+
+	ValidateMCPEnvVars(servers)
+
+	// Required var preserved (set, no warning)
+	assert.Equal(t, "${MIX_REQUIRED_789}", servers[0].Env["REQ"])
+	// Optional unset var dropped
+	assert.NotContains(t, servers[0].Env, "OPT")
+	// Literal preserved
+	assert.Equal(t, "LOCAL", servers[0].Env["LIT"])
+}
