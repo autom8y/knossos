@@ -1,5 +1,7 @@
 package channel
 
+import "strings"
+
 // CanonicalTool maps knossos canonical tool names to per-channel wire names.
 // This is the harness-agnostic vocabulary: templates and platform code reference
 // canonical names; channel compilers resolve to wire names at projection time.
@@ -67,6 +69,14 @@ func WireToCanonicalTool(wireName string) (string, bool) {
 //   - (geminiName, true): translated successfully.
 //   - (ccTool, false): no Gemini equivalent found — caller receives the original name.
 func CCWireToGeminiWire(ccTool string) (string, bool) {
+	// MCP Tool Translation (Gemini CLI requires mcp_server_tool syntax)
+	if strings.HasPrefix(ccTool, "mcp:") {
+		trimmed := strings.TrimPrefix(ccTool, "mcp:")
+		// Replace / with _ for mcp:server/tool -> mcp_server_tool
+		// Transform "mcp:server" -> "mcp_server"
+		return "mcp_" + strings.ReplaceAll(trimmed, "/", "_"), true
+	}
+
 	for _, wires := range CanonicalTool {
 		if wires["claude"] == ccTool {
 			if gemini, ok := wires["gemini"]; ok {
@@ -89,6 +99,14 @@ func CCWireToGeminiWire(ccTool string) (string, bool) {
 //   - (geminiName, true): translated successfully.
 //   - (ccTool, true): unknown tool — passes through unchanged (forward compat).
 func TranslateTool(ccTool string) (string, bool) {
+	// MCP Tool Translation (Gemini CLI requires mcp_server_tool syntax)
+	if strings.HasPrefix(ccTool, "mcp:") {
+		trimmed := strings.TrimPrefix(ccTool, "mcp:")
+		// Replace / with _ for mcp:server/tool -> mcp_server_tool
+		// Transform "mcp:server" -> "mcp_server"
+		return "mcp_" + strings.ReplaceAll(trimmed, "/", "_"), true
+	}
+
 	for _, wires := range CanonicalTool {
 		if wires["claude"] == ccTool {
 			gemini, hasGemini := wires["gemini"]

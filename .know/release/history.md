@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-17T17:10:00Z"
+generated_at: "2026-03-17T23:21:30Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "78d47f3e"
+source_hash: "caac5baa"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -260,3 +260,29 @@ max_incremental_cycles: 0
 - 3 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml, validate-orchestrators.yml
 - 4 Dependabot vulnerability alerts on main (informational, non-blocking)
 - Headline: UI rite extract/observe/act agents, CUA browser tools fix, MCP scoping, browser-local pool fix
+
+### v0.12.0 — 2026-03-17
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-17 |
+| Version | v0.11.0 -> v0.12.0 (minor) |
+| Commits | 3 (1 feat, 1 fix, 1 chore) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 4b146dc3178cd9b5c6c8dec0e3f50d267076c2c2 |
+| Commit SHA | caac5baa |
+| release.yml | GREEN (109s, run 23220985888) |
+| e2e-distribution.yml | GREEN (49s, run 23221034888) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.12.0, commit 0583d04c) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twenty-fourth consecutive PASS verdict (v0.3.2 -> ... -> v0.11.0 -> v0.12.0)
+- Total chain: ~150s (within historical baseline ~150-190s)
+- macOS E2E: GREEN (20s), Linux E2E: GREEN (46s)
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 2 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking)
+- Headline: UI rite CSS architecture research mena, ari ask org rite search fix, cached release knowledge update

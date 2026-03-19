@@ -123,7 +123,7 @@ func TestResolvePoolServers_BasicResolution(t *testing.T) {
 	}
 
 	refs := []MCPPoolRef{{Pool: "browser-local"}}
-	servers, err := ResolvePoolServers(pools, refs)
+	servers, err := ResolvePoolServers(pools, refs, "")
 	require.NoError(t, err)
 	require.Len(t, servers, 1)
 
@@ -151,7 +151,7 @@ func TestResolvePoolServers_ArgsAppend(t *testing.T) {
 		Pool:       "browser-local",
 		ArgsAppend: []string{"--headless", "--timeout", "30"},
 	}}
-	servers, err := ResolvePoolServers(pools, refs)
+	servers, err := ResolvePoolServers(pools, refs, "")
 	require.NoError(t, err)
 	require.Len(t, servers, 1)
 
@@ -182,7 +182,7 @@ func TestResolvePoolServers_EnvMerge(t *testing.T) {
 			"STAGEHAND_MODEL_API_KEY": "${KEY}", // Add new
 		},
 	}}
-	servers, err := ResolvePoolServers(pools, refs)
+	servers, err := ResolvePoolServers(pools, refs, "")
 	require.NoError(t, err)
 	require.Len(t, servers, 1)
 
@@ -191,7 +191,49 @@ func TestResolvePoolServers_EnvMerge(t *testing.T) {
 	assert.Equal(t, "original", servers[0].Env["KEEP_ME"], "existing non-overridden env should be preserved")
 }
 
-func TestResolvePoolServers_EnvMerge_RewritesArgs(t *testing.T) {
+// TestResolvePoolServers_ChannelEnvOverrides verifies that channel-specific env vars
+// (e.g. GEMINI_CUA_MODEL) override default env vars (CUA_MODEL) when set.
+func TestResolvePoolServers_ChannelEnvOverrides(t *testing.T) {
+	pools := &MCPPoolsConfig{
+		Pools: map[string]MCPPool{
+			"test-pool": {
+				Server: MCPServerConfig{
+					Name: "test-server",
+					Env: map[string]string{
+						"CUA_MODEL": "default-model",
+						"API_KEY":   "${API_KEY}",
+					},
+				},
+			},
+		},
+	}
+
+	refs := []MCPPoolRef{{Pool: "test-pool"}}
+
+	// Case 1: No overrides set -> default behavior
+	servers, err := ResolvePoolServers(pools, refs, "gemini")
+	require.NoError(t, err)
+	assert.Equal(t, "default-model", servers[0].Env["CUA_MODEL"])
+
+	// Case 2: GEMINI override set -> overrides for gemini channel
+	t.Setenv("GEMINI_CUA_MODEL", "gemini-pro")
+	servers, err = ResolvePoolServers(pools, refs, "gemini")
+	require.NoError(t, err)
+	assert.Equal(t, "${GEMINI_CUA_MODEL}", servers[0].Env["CUA_MODEL"])
+
+	// Case 3: GEMINI override set but channel is claude -> no override
+	servers, err = ResolvePoolServers(pools, refs, "claude")
+	require.NoError(t, err)
+	assert.Equal(t, "default-model", servers[0].Env["CUA_MODEL"])
+
+	// Case 4: ANTHROPIC override set -> overrides for claude channel (default prefix)
+	t.Setenv("ANTHROPIC_CUA_MODEL", "claude-3-opus")
+	servers, err = ResolvePoolServers(pools, refs, "claude")
+	require.NoError(t, err)
+	assert.Equal(t, "${ANTHROPIC_CUA_MODEL}", servers[0].Env["CUA_MODEL"])
+}
+
+func TestResolvePoolServers_EnvMergeRewritesArgs(t *testing.T) {
 	t.Parallel()
 	pools := &MCPPoolsConfig{
 		Pools: map[string]MCPPool{
@@ -220,7 +262,7 @@ func TestResolvePoolServers_EnvMerge_RewritesArgs(t *testing.T) {
 			"STAGEHAND_MODEL_API_KEY": "${ANTHROPIC_API_KEY}",
 		},
 	}}
-	servers, err := ResolvePoolServers(pools, refs)
+	servers, err := ResolvePoolServers(pools, refs, "")
 	require.NoError(t, err)
 	require.Len(t, servers, 1)
 
@@ -246,7 +288,7 @@ func TestResolvePoolServers_UnknownPool(t *testing.T) {
 	}
 
 	refs := []MCPPoolRef{{Pool: "does-not-exist"}}
-	servers, err := ResolvePoolServers(pools, refs)
+	servers, err := ResolvePoolServers(pools, refs, "")
 	assert.Error(t, err)
 	assert.Nil(t, servers)
 	assert.Contains(t, err.Error(), "unknown MCP pool")
@@ -262,18 +304,18 @@ func TestResolvePoolServers_EmptyRefs(t *testing.T) {
 		},
 	}
 
-	servers, err := ResolvePoolServers(pools, nil)
+	servers, err := ResolvePoolServers(pools, nil, "")
 	require.NoError(t, err)
 	assert.Nil(t, servers)
 
-	servers, err = ResolvePoolServers(pools, []MCPPoolRef{})
+	servers, err = ResolvePoolServers(pools, []MCPPoolRef{}, "")
 	require.NoError(t, err)
 	assert.Nil(t, servers)
 }
 
 func TestResolvePoolServers_NilPools(t *testing.T) {
 	t.Parallel()
-	servers, err := ResolvePoolServers(nil, []MCPPoolRef{{Pool: "anything"}})
+	servers, err := ResolvePoolServers(nil, []MCPPoolRef{{Pool: "anything"}}, "")
 	require.NoError(t, err)
 	assert.Nil(t, servers)
 }
@@ -299,7 +341,7 @@ func TestResolvePoolServers_DoesNotMutatePoolDefinition(t *testing.T) {
 		EnvMerge:   map[string]string{"NEW_VAR": "new_value"},
 	}}
 
-	_, err := ResolvePoolServers(pools, refs)
+	_, err := ResolvePoolServers(pools, refs, "")
 	require.NoError(t, err)
 
 	// Original pool must be unchanged

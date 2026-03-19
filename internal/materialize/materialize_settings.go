@@ -20,7 +20,7 @@ import (
 // materializeSettingsWithManifest generates or updates settings.local.json.
 // Loads hooks.yaml and merges hook registrations into settings.
 // MCP servers are NOT written here — see materializeMcpJson (SCAR-028).
-func (m *Materializer) materializeSettingsWithManifest(channelDir string, _ *RiteManifest, collector provenance.Collector, channel string) error {
+func (m *Materializer) materializeSettingsWithManifest(channelDir string, _ *RiteManifest, resolvedMCPServers []MCPServer, collector provenance.Collector, channel string) error {
 	settingsPath := filepath.Join(channelDir, "settings.local.json")
 
 	// Load existing settings or create empty map
@@ -40,6 +40,12 @@ func (m *Materializer) materializeSettingsWithManifest(channelDir string, _ *Rit
 	// SCAR-028 cleanup: remove stale mcpServers from settings.local.json.
 	// MCP servers are now written to .mcp.json (see materializeMcpJson).
 	delete(existingSettings, "mcpServers")
+
+	// Gemini channel exception: Gemini CLI reads MCP config from settings.json,
+	// not .mcp.json. Re-inject resolved servers if channel is gemini.
+	if channel == "gemini" && len(resolvedMCPServers) > 0 {
+		existingSettings = mergeMCPServers(existingSettings, resolvedMCPServers)
+	}
 
 	// Gemini agent activation gate: inject experimental.enableAgents=true.
 	// Without this flag, Gemini CLI ignores .gemini/agents/ entirely.

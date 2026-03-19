@@ -85,12 +85,21 @@ func LoadMCPPoolsConfigWithPaths(knossosHome, projectRoot string) *MCPPoolsConfi
 //  1. Look up pool by name in MCPPoolsConfig
 //  2. Clone the pool's canonical server definition
 //  3. Apply args_append: append to server.Args
-//  4. Apply env_merge: merge into server.Env (rite values win on conflict)
+//  4. Apply channel-specific env overrides (e.g. GEMINI_CUA_MODEL -> CUA_MODEL)
+//  5. Apply env_merge: merge into server.Env (rite values win on conflict)
 //
 // Returns error on unknown pool name (misconfiguration).
-func ResolvePoolServers(pools *MCPPoolsConfig, refs []MCPPoolRef) ([]MCPServerConfig, error) {
+func ResolvePoolServers(pools *MCPPoolsConfig, refs []MCPPoolRef, channel string) ([]MCPServerConfig, error) {
 	if pools == nil || len(refs) == 0 {
 		return nil, nil
+	}
+
+	// Determine channel prefix for env overrides
+	// gemini -> GEMINI_
+	// claude -> ANTHROPIC_ (legacy/default)
+	channelPrefix := "ANTHROPIC"
+	if channel == "gemini" {
+		channelPrefix = "GEMINI"
 	}
 
 	servers := make([]MCPServerConfig, 0, len(refs))
@@ -132,18 +141,33 @@ func ResolvePoolServers(pools *MCPPoolsConfig, refs []MCPPoolRef) ([]MCPServerCo
 			server.Args = append(server.Args, ref.ArgsAppend...)
 		}
 
-		// Apply env_merge (rite values win on conflict).
-		// Also rewrites ${VAR} references in args: when env_merge overrides a key
-		// whose pool value was "${KEY}", any "${KEY}" in args is rewritten to the
-		// new value. This enables provider bridging: the pool uses agnostic var
-		// names (STAGEHAND_MODEL_API_KEY) and the rite bridges to provider-specific
-		// vars (${ANTHROPIC_API_KEY}) via env_merge — args are rewritten to match
-		// so CC resolves them from the parent process env.
+		// Build merge map: start with implicit channel overrides, then apply explicit env_merge.
+		// Channel overrides allow parameterizing CUA_MODEL/API keys by channel.
+		// Logic: if server has env var VAR, check for {CHANNEL}_VAR in os.Env.
+		// If found, override VAR -> "${{CHANNEL}_VAR}".
+		mergeMap := make(map[string]string)
+
+		// 1. Implicit channel overrides
+		if server.Env != nil {
+			for key := range server.Env {
+				overrideVar := fmt.Sprintf("%s_%s", channelPrefix, key)
+				if _, exists := os.LookupEnv(overrideVar); exists {
+					mergeMap[key] = fmt.Sprintf("${%s}", overrideVar)
+				}
+			}
+		}
+
+		// 2. Explicit env_merge from rite (wins over implicit)
 		if len(ref.EnvMerge) > 0 {
+			maps.Copy(mergeMap, ref.EnvMerge)
+		}
+
+		// Apply final merge map
+		if len(mergeMap) > 0 {
 			if server.Env == nil {
 				server.Env = make(map[string]string)
 			}
-			for key, newVal := range ref.EnvMerge {
+			for key, newVal := range mergeMap {
 				oldVal, existed := server.Env[key]
 				server.Env[key] = newVal
 

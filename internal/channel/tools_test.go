@@ -93,17 +93,42 @@ func TestTranslateTool_UnknownPassthrough(t *testing.T) {
 	}
 }
 
+// TestTranslateTool_MCP verifies MCP tool translation.
+func TestTranslateTool_MCP(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		input    string
+		expected string
+	}{
+		{"mcp:github/create_issue", "mcp_github_create_issue"},
+		{"mcp:browserbase/session_create", "mcp_browserbase_session_create"},
+		{"mcp:server-name/tool-name", "mcp_server-name_tool-name"},
+		{"mcp:server", "mcp_server"},
+	}
+
+	for _, tc := range cases {
+		got, ok := channel.TranslateTool(tc.input)
+		if !ok {
+			t.Errorf("TranslateTool(%q): ok=false, want true", tc.input)
+		}
+		if got != tc.expected {
+			t.Errorf("TranslateTool(%q) = %q, want %q", tc.input, got, tc.expected)
+		}
+	}
+}
+
 // TestTranslateFrontmatterTools_MixedInput verifies the slice translation helper.
 func TestTranslateFrontmatterTools_MixedInput(t *testing.T) {
 	t.Parallel()
 
-	input := []string{"Read", "Bash", "Task", "Skill", "Edit", "CustomTool", "WebSearch"}
+	input := []string{"Read", "Bash", "Task", "Skill", "Edit", "CustomTool", "WebSearch", "mcp:github/create_issue"}
 	// Expected: Read->read_file, Bash->run_shell_command, Task dropped,
 	//           Skill->activate_skill, Edit->replace, CustomTool passes through,
-	//           WebSearch->google_web_search
+	//           WebSearch->google_web_search, mcp:github/create_issue->mcp_github_create_issue
 	got := channel.TranslateFrontmatterTools(input)
 
-	expected := []string{"read_file", "run_shell_command", "activate_skill", "replace", "CustomTool", "google_web_search"}
+	expected := []string{"read_file", "run_shell_command", "activate_skill", "replace", "CustomTool", "google_web_search", "mcp_github_create_issue"}
 	if len(got) != len(expected) {
 		t.Fatalf("TranslateFrontmatterTools: len=%d, want %d; got %v", len(got), len(expected), got)
 	}

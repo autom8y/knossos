@@ -22,7 +22,7 @@ func TestMaterializeSettingsWithManifest_NoMCPServers(t *testing.T) {
 		Name: "test-rite",
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, nil, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	// Verify settings file was created
@@ -63,7 +63,7 @@ func TestMaterializeSettingsWithManifest_StaleMcpServersRemoved(t *testing.T) {
 	require.NoError(t, os.WriteFile(settingsPath, data, 0644))
 
 	manifest := &RiteManifest{Name: "test-rite"}
-	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
+	err = (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, nil, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	// Verify mcpServers was removed
@@ -286,7 +286,7 @@ func TestSCAR028_MCPServers_NotInSettingsLocalJson(t *testing.T) {
 		},
 	}
 
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, nil, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
@@ -326,7 +326,7 @@ func TestMaterializeMcpJsonWithPools_ResolvesAndWrites(t *testing.T) {
 	}
 
 	err := func() error {
-		resolved, err := resolveAllMCPServers(manifest, poolsConfig)
+		resolved, err := resolveAllMCPServers(manifest, poolsConfig, "")
 		if err != nil {
 			return err
 		}
@@ -378,7 +378,7 @@ func TestMaterializeMcpJsonWithPools_DirectServerOverridesPool(t *testing.T) {
 	}
 
 	err := func() error {
-		resolved, err := resolveAllMCPServers(manifest, poolsConfig)
+		resolved, err := resolveAllMCPServers(manifest, poolsConfig, "")
 		if err != nil {
 			return err
 		}
@@ -443,6 +443,67 @@ func TestMaterializeMcpJsonWithPools_WritesOwnership(t *testing.T) {
 	assert.Equal(t, []string{"browserbase"}, ownership.Servers)
 }
 
+// TestMaterializeSettingsWithManifest_GeminiInjectsMCPServers verifies that
+// resolved MCP servers are injected into settings.local.json for the Gemini channel.
+func TestMaterializeSettingsWithManifest_GeminiInjectsMCPServers(t *testing.T) {
+	t.Parallel()
+	tempDir := t.TempDir()
+	manifest := &RiteManifest{Name: "test-rite"}
+
+	resolvedServers := []MCPServer{
+		{
+			Name:    "browserbase",
+			Command: "npx",
+			Args:    []string{"-y", "@autom8y/mcp-stagehand"},
+		},
+	}
+
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, resolvedServers, provenance.NullCollector{}, "gemini")
+	require.NoError(t, err)
+
+	settingsPath := filepath.Join(tempDir, "settings.local.json")
+	data, err := os.ReadFile(settingsPath)
+	require.NoError(t, err)
+
+	var settings map[string]any
+	require.NoError(t, json.Unmarshal(data, &settings))
+
+	mcpServers, ok := settings["mcpServers"].(map[string]any)
+	require.True(t, ok, "mcpServers must be present in settings.local.json for Gemini")
+
+	browserbase, ok := mcpServers["browserbase"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "npx", browserbase["command"])
+}
+
+// TestMaterializeSettingsWithManifest_ClaudeDoesNotInjectMCPServers verifies that
+// resolved MCP servers are NOT injected into settings.local.json for the Claude channel.
+func TestMaterializeSettingsWithManifest_ClaudeDoesNotInjectMCPServers(t *testing.T) {
+	t.Parallel()
+	tempDir := t.TempDir()
+	manifest := &RiteManifest{Name: "test-rite"}
+
+	resolvedServers := []MCPServer{
+		{
+			Name:    "browserbase",
+			Command: "npx",
+			Args:    []string{"-y", "@autom8y/mcp-stagehand"},
+		},
+	}
+
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, resolvedServers, provenance.NullCollector{}, "claude")
+	require.NoError(t, err)
+
+	settingsPath := filepath.Join(tempDir, "settings.local.json")
+	data, err := os.ReadFile(settingsPath)
+	require.NoError(t, err)
+
+	var settings map[string]any
+	require.NoError(t, json.Unmarshal(data, &settings))
+
+	assert.Nil(t, settings["mcpServers"], "mcpServers must NOT be in settings.local.json for Claude")
+}
+
 // TestSCAR_MCPPoolResolution_NeverWritesToSettingsLocalJson is a SCAR regression
 // test verifying that pool-resolved servers still go to .mcp.json only.
 func TestSCAR_MCPPoolResolution_NeverWritesToSettingsLocalJson(t *testing.T) {
@@ -464,7 +525,7 @@ func TestSCAR_MCPPoolResolution_NeverWritesToSettingsLocalJson(t *testing.T) {
 	}
 
 	// Write settings (hooks only)
-	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, provenance.NullCollector{}, "claude")
+	err := (&Materializer{}).materializeSettingsWithManifest(tempDir, manifest, nil, provenance.NullCollector{}, "claude")
 	require.NoError(t, err)
 
 	settingsPath := filepath.Join(tempDir, "settings.local.json")
@@ -478,7 +539,7 @@ func TestSCAR_MCPPoolResolution_NeverWritesToSettingsLocalJson(t *testing.T) {
 
 	// Write MCP servers to .mcp.json
 	m := newMCPTestMaterializer(t, tempDir)
-	resolved, resolveErr := resolveAllMCPServers(manifest, poolsConfig)
+	resolved, resolveErr := resolveAllMCPServers(manifest, poolsConfig, "")
 	require.NoError(t, resolveErr)
 	err = m.materializeMcpJsonFromResolved(tempDir, manifest, resolved, provenance.NullCollector{}, "")
 	require.NoError(t, err)

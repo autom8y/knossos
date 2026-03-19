@@ -48,7 +48,7 @@ func fromHookServers(hookServers []hooks.MCPServerConfig) []MCPServer {
 
 // resolveAllMCPServers resolves pool refs + direct mcp_servers into a unified MCPServer list.
 // Direct servers win on name collision (rite-specific override of pool canonical).
-func resolveAllMCPServers(manifest *RiteManifest, poolsConfig *MCPPoolsConfig) ([]MCPServer, error) {
+func resolveAllMCPServers(manifest *RiteManifest, poolsConfig *MCPPoolsConfig, channel string) ([]MCPServer, error) {
 	if manifest == nil {
 		return nil, nil
 	}
@@ -56,7 +56,7 @@ func resolveAllMCPServers(manifest *RiteManifest, poolsConfig *MCPPoolsConfig) (
 	// Resolve pool references
 	var poolServers []MCPServer
 	if poolsConfig != nil && len(manifest.MCPPools) > 0 {
-		resolved, err := hooks.ResolvePoolServers(poolsConfig, manifest.MCPPools)
+		resolved, err := hooks.ResolvePoolServers(poolsConfig, manifest.MCPPools, channel)
 		if err != nil {
 			return nil, err
 		}
