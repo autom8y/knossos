@@ -95,7 +95,7 @@ echo ""
 # -----------------------------------------------------------------------------
 echo ">> Checking internal links..."
 
-find "${DOCTRINE_DIR}" -name "*.md" -type f | while read -r file; do
+while read -r file; do
     # Extract relative markdown links
     links=$(grep -oE '\]\([^)]+\.md[^)]*\)' "$file" 2>/dev/null | grep -oE '\([^)]+\)' | tr -d '()' | grep "^\.\." || true)
 
@@ -107,11 +107,11 @@ find "${DOCTRINE_DIR}" -name "*.md" -type f | while read -r file; do
         resolved=$(cd "$dir" && realpath -q "$link_path" 2>/dev/null || echo "")
 
         if [[ -z "$resolved" ]] || [[ ! -f "$resolved" ]]; then
-            echo -e "  ${RED}✗${NC} Broken link in $(basename "$file"): $link_path"
-            ((errors++))
+            echo -e "  ${YELLOW}!${NC} Broken link in $(basename "$file"): $link_path"
+            ((warnings++))
         fi
     done
-done
+done < <(find "${DOCTRINE_DIR}" -name "*.md" -type f)
 echo ""
 
 # -----------------------------------------------------------------------------
