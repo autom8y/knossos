@@ -168,7 +168,7 @@ func runDriftdetectCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pri
 
 	// Check for retry spiral (consecutive failures with similar input)
 	if pattern := detectRetrySpiralFromState(state); pattern != "" {
-		saveDriftState(statePath, state)
+		saveDriftState(statePath, state, printer)
 		complaintPath, err := fileDriftComplaint(hookEnv, "retry-spiral", pattern, nowFn)
 		if err != nil {
 			printer.VerboseLog("warn", "driftdetect: failed to file complaint",
@@ -184,7 +184,7 @@ func runDriftdetectCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pri
 
 	// Check for command exploration (3+ ari command variations)
 	if pattern := detectCommandExplorationFromState(state); pattern != "" {
-		saveDriftState(statePath, state)
+		saveDriftState(statePath, state, printer)
 		complaintPath, err := fileDriftComplaint(hookEnv, "command-exploration", pattern, nowFn)
 		if err != nil {
 			printer.VerboseLog("warn", "driftdetect: failed to file complaint",
@@ -199,7 +199,7 @@ func runDriftdetectCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pri
 	}
 
 	// No pattern detected — save state and exit
-	saveDriftState(statePath, state)
+	saveDriftState(statePath, state, printer)
 	return printer.Print(DriftOutput{Message: "no drift pattern detected"})
 }
 
@@ -430,11 +430,14 @@ func loadDriftState(path string) *DriftState {
 }
 
 // saveDriftState writes the drift state to the session directory.
-// Best-effort: errors are silently ignored (async hook, no blocking).
-func saveDriftState(path string, state *DriftState) {
+// Best-effort: errors are logged but not fatal (async hook, no blocking).
+func saveDriftState(path string, state *DriftState, printer *output.Printer) {
 	data, err := json.Marshal(state)
 	if err != nil {
 		return
 	}
-	_ = os.WriteFile(path, data, 0644)
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		printer.VerboseLog("warn", "driftdetect: failed to save drift state",
+			map[string]any{"path": path, "error": err.Error()})
+	}
 }

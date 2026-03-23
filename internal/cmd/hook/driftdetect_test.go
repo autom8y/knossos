@@ -403,7 +403,9 @@ func TestDriftState_LoadSave(t *testing.T) {
 	state.RecentCalls = []DriftCall{
 		{Tool: "Bash", InputHash: "abc", InputSnippet: "go build", Success: true, At: "2026-03-11T14:00:00Z"},
 	}
-	saveDriftState(statePath, state)
+	var stdout, stderr bytes.Buffer
+	p := output.NewPrinter(output.FormatJSON, &stdout, &stderr, false)
+	saveDriftState(statePath, state, p)
 
 	loaded := loadDriftState(statePath)
 	if len(loaded.RecentCalls) != 1 {

@@ -114,5 +114,6 @@
     }
   },
 
-  "additionalProperties": true
+  "additionalProperties": true,
+  "$comment": "additionalProperties:true is intentional -- forward-compatible schema evolution. Agents may add custom fields (e.g. corroborations). Validation enforces required fields and known field formats only."
 }

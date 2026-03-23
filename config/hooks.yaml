@@ -107,6 +107,7 @@ hooks:
 
   # H-drift: CLI-agent interop drift detection (Cassandra Protocol)
   - event: post_tool
+    matcher: "Bash"
     command: "ari hook driftdetect --output json"
     timeout: 5
     async: true
