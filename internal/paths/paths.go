@@ -388,38 +388,62 @@ func EnsureStateDir() error {
 // --- User-Level Resource Paths ---
 
 // UserAgentsDirForChannel returns the user-level agents directory for a specific channel.
-func UserAgentsDirForChannel(channel string) string {
-	return filepath.Join(UserChannelDir(channel), "agents")
+func UserAgentsDirForChannel(channel string) (string, error) {
+	dir, err := UserChannelDir(channel)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "agents"), nil
 }
 
 
 // UserSkillsDirForChannel returns the user-level skills directory for a specific channel.
-func UserSkillsDirForChannel(channel string) string {
-	return filepath.Join(UserChannelDir(channel), "skills")
+func UserSkillsDirForChannel(channel string) (string, error) {
+	dir, err := UserChannelDir(channel)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "skills"), nil
 }
 
 
 // UserCommandsDirForChannel returns the user-level commands directory for a specific channel.
-func UserCommandsDirForChannel(channel string) string {
-	return filepath.Join(UserChannelDir(channel), "commands")
+func UserCommandsDirForChannel(channel string) (string, error) {
+	dir, err := UserChannelDir(channel)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "commands"), nil
 }
 
 
 // UserHooksDirForChannel returns the user-level hooks directory for a specific channel.
-func UserHooksDirForChannel(channel string) string {
-	return filepath.Join(UserChannelDir(channel), "hooks")
+func UserHooksDirForChannel(channel string) (string, error) {
+	dir, err := UserChannelDir(channel)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "hooks"), nil
 }
 
 
 // UserProvenanceManifestForChannel returns the user-level provenance manifest for a specific channel.
-func UserProvenanceManifestForChannel(channel string) string {
-	return filepath.Join(UserChannelDir(channel), "USER_PROVENANCE_MANIFEST.yaml")
+func UserProvenanceManifestForChannel(channel string) (string, error) {
+	dir, err := UserChannelDir(channel)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "USER_PROVENANCE_MANIFEST.yaml"), nil
 }
 
 
 // OrgProvenanceManifestForChannel returns the org-level provenance manifest for a specific channel.
-func OrgProvenanceManifestForChannel(channel string) string {
-	return filepath.Join(UserChannelDir(channel), "ORG_PROVENANCE_MANIFEST.yaml")
+func OrgProvenanceManifestForChannel(channel string) (string, error) {
+	dir, err := UserChannelDir(channel)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "ORG_PROVENANCE_MANIFEST.yaml"), nil
 }
 
 

@@ -7,16 +7,16 @@ Use the available agents and slash commands. Agents activate automatically when 
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
 ## Quick Start
 
-6-agent workflow (releaser):
+6-agent workflow (ecosystem):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates release phases, gates complexity, manages DAG-branch failure halting |
-| **cartographer** | Discovers repos, maps git state, identifies package ecosystems and available commands |
-| **dependency-resolver** | Builds cross-repo dependency DAG, detects version mismatches, calculates blast radius |
-| **release-planner** | Creates phased execution plan with parallel groups, rollback boundaries, and CI time estimates |
-| **release-executor** | Executes the release plan — publishes packages, bumps versions, pushes code, creates PRs |
-| **pipeline-monitor** | Monitors CI pipelines via gh CLI, reports green/red matrix, diagnoses failures |
+| **potnia** | Coordinates ecosystem infrastructure phases |
+| **ecosystem-analyst** | Traces sync pipeline/knossos problems to root causes and produces gap analysis |
+| **context-architect** | Designs context solutions, schemas, and ecosystem patterns |
+| **integration-engineer** | Implements sync pipeline and knossos changes with integration tests |
+| **documentation-engineer** | Creates migration runbooks and compatibility documentation |
+| **compatibility-tester** | Validates ecosystem changes across satellite configurations |
 
 Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
@@ -39,17 +39,17 @@ Agents activate automatically based on description matching. Write prompts that 
 
 <!-- KNOSSOS:END commands -->
 
-<!-- KNOSSOS:START agent-configurations regenerate=true source=agents/*.md -->
+<!-- KNOSSOS:START agent-configurations source=agents/*.md regenerate=true -->
 ## Agents
 
 Prompts in `.gemini/agents/`:
 
-- `potnia.md` - Coordinates release phases, gates complexity, manages DAG-branch failure halting
-- `cartographer.md` - Discovers repos, maps git state, identifies package ecosystems and available commands
-- `dependency-resolver.md` - Builds cross-repo dependency DAG, detects version mismatches, calculates blast radius
-- `release-planner.md` - Creates phased execution plan with parallel groups, rollback boundaries, and CI time estimates
-- `release-executor.md` - Executes the release plan — publishes packages, bumps versions, pushes code, creates PRs
-- `pipeline-monitor.md` - Monitors CI pipelines via gh CLI, reports green/red matrix, diagnoses failures
+- `potnia.md` - Coordinates ecosystem infrastructure phases
+- `ecosystem-analyst.md` - Traces sync pipeline/knossos problems to root causes and produces gap analysis
+- `context-architect.md` - Designs context solutions, schemas, and ecosystem patterns
+- `integration-engineer.md` - Implements sync pipeline and knossos changes with integration tests
+- `documentation-engineer.md` - Creates migration runbooks and compatibility documentation
+- `compatibility-tester.md` - Validates ecosystem changes across satellite configurations
 <!-- KNOSSOS:END agent-configurations -->
 
 <!-- KNOSSOS:START platform-infrastructure -->

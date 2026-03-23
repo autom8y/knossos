@@ -9,6 +9,16 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
+    },
+    "go-semantic": {
+      "command": "go-semantic-mcp"
+    },
+    "terraform": {
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-terraform"
+      ],
+      "command": "npx"
     }
   }
 }

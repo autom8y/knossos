@@ -44,24 +44,41 @@ type UserResourcePaths struct {
 // ResolveUserResourcesForChannel resolves source/target paths for user-scope resources
 // targeting a specific channel.
 func ResolveUserResourcesForChannel(knossosHome, channel string) ([]UserResourcePaths, error) {
+	agentsDir, err := paths.UserAgentsDirForChannel(channel)
+	if err != nil {
+		return nil, err
+	}
+	commandsDir, err := paths.UserCommandsDirForChannel(channel)
+	if err != nil {
+		return nil, err
+	}
+	skillsDir, err := paths.UserSkillsDirForChannel(channel)
+	if err != nil {
+		return nil, err
+	}
+	hooksDir, err := paths.UserHooksDirForChannel(channel)
+	if err != nil {
+		return nil, err
+	}
+
 	return []UserResourcePaths{
 		{
 			ResourceType: ResourceAgents,
 			SourceDir:    filepath.Join(knossosHome, "agents"),
-			TargetDir:    paths.UserAgentsDirForChannel(channel),
+			TargetDir:    agentsDir,
 			Nested:       false,
 		},
 		{
 			ResourceType: ResourceMena,
 			SourceDir:    filepath.Join(knossosHome, "mena"),
-			CommandsDir:  paths.UserCommandsDirForChannel(channel),
-			SkillsDir:    paths.UserSkillsDirForChannel(channel),
+			CommandsDir:  commandsDir,
+			SkillsDir:    skillsDir,
 			Nested:       true,
 		},
 		{
 			ResourceType: ResourceHooks,
 			SourceDir:    filepath.Join(knossosHome, "hooks"),
-			TargetDir:    paths.UserHooksDirForChannel(channel),
+			TargetDir:    hooksDir,
 			Nested:       true,
 		},
 	}, nil

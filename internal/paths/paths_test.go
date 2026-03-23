@@ -540,16 +540,20 @@ func TestUserLevelPaths(t *testing.T) {
 
 	tests := []struct {
 		name string
-		got  string
+		call func() (string, error)
 		want string
 	}{
-		{"UserChannelDir/claude", UserChannelDir("claude"), filepath.Join(homeDir, ".claude")},
+		{"UserChannelDir/claude", func() (string, error) { return UserChannelDir("claude") }, filepath.Join(homeDir, ".claude")},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.got != tt.want {
-				t.Errorf("%s() = %q, want %q", tt.name, tt.got, tt.want)
+			got, err := tt.call()
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tt.want {
+				t.Errorf("%s() = %q, want %q", tt.name, got, tt.want)
 			}
 		})
 	}
@@ -565,31 +569,35 @@ func TestUserLevelForChannelPaths(t *testing.T) {
 	tests := []struct {
 		name    string
 		channel string
-		got     string
+		call    func(string) (string, error)
 		want    string
 	}{
 		// Claude channel (default behavior)
-		{"UserAgentsDirForChannel/claude", "claude", UserAgentsDirForChannel("claude"), filepath.Join(homeDir, ".claude", "agents")},
-		{"UserSkillsDirForChannel/claude", "claude", UserSkillsDirForChannel("claude"), filepath.Join(homeDir, ".claude", "skills")},
-		{"UserCommandsDirForChannel/claude", "claude", UserCommandsDirForChannel("claude"), filepath.Join(homeDir, ".claude", "commands")},
-		{"UserHooksDirForChannel/claude", "claude", UserHooksDirForChannel("claude"), filepath.Join(homeDir, ".claude", "hooks")},
-		{"UserProvenanceManifestForChannel/claude", "claude", UserProvenanceManifestForChannel("claude"), filepath.Join(homeDir, ".claude", "USER_PROVENANCE_MANIFEST.yaml")},
-		{"OrgProvenanceManifestForChannel/claude", "claude", OrgProvenanceManifestForChannel("claude"), filepath.Join(homeDir, ".claude", "ORG_PROVENANCE_MANIFEST.yaml")},
+		{"UserAgentsDirForChannel/claude", "claude", UserAgentsDirForChannel, filepath.Join(homeDir, ".claude", "agents")},
+		{"UserSkillsDirForChannel/claude", "claude", UserSkillsDirForChannel, filepath.Join(homeDir, ".claude", "skills")},
+		{"UserCommandsDirForChannel/claude", "claude", UserCommandsDirForChannel, filepath.Join(homeDir, ".claude", "commands")},
+		{"UserHooksDirForChannel/claude", "claude", UserHooksDirForChannel, filepath.Join(homeDir, ".claude", "hooks")},
+		{"UserProvenanceManifestForChannel/claude", "claude", UserProvenanceManifestForChannel, filepath.Join(homeDir, ".claude", "USER_PROVENANCE_MANIFEST.yaml")},
+		{"OrgProvenanceManifestForChannel/claude", "claude", OrgProvenanceManifestForChannel, filepath.Join(homeDir, ".claude", "ORG_PROVENANCE_MANIFEST.yaml")},
 		// Gemini channel
-		{"UserAgentsDirForChannel/gemini", "gemini", UserAgentsDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "agents")},
-		{"UserSkillsDirForChannel/gemini", "gemini", UserSkillsDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "skills")},
-		{"UserCommandsDirForChannel/gemini", "gemini", UserCommandsDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "commands")},
-		{"UserHooksDirForChannel/gemini", "gemini", UserHooksDirForChannel("gemini"), filepath.Join(homeDir, ".gemini", "hooks")},
-		{"UserProvenanceManifestForChannel/gemini", "gemini", UserProvenanceManifestForChannel("gemini"), filepath.Join(homeDir, ".gemini", "USER_PROVENANCE_MANIFEST.yaml")},
-		{"OrgProvenanceManifestForChannel/gemini", "gemini", OrgProvenanceManifestForChannel("gemini"), filepath.Join(homeDir, ".gemini", "ORG_PROVENANCE_MANIFEST.yaml")},
+		{"UserAgentsDirForChannel/gemini", "gemini", UserAgentsDirForChannel, filepath.Join(homeDir, ".gemini", "agents")},
+		{"UserSkillsDirForChannel/gemini", "gemini", UserSkillsDirForChannel, filepath.Join(homeDir, ".gemini", "skills")},
+		{"UserCommandsDirForChannel/gemini", "gemini", UserCommandsDirForChannel, filepath.Join(homeDir, ".gemini", "commands")},
+		{"UserHooksDirForChannel/gemini", "gemini", UserHooksDirForChannel, filepath.Join(homeDir, ".gemini", "hooks")},
+		{"UserProvenanceManifestForChannel/gemini", "gemini", UserProvenanceManifestForChannel, filepath.Join(homeDir, ".gemini", "USER_PROVENANCE_MANIFEST.yaml")},
+		{"OrgProvenanceManifestForChannel/gemini", "gemini", OrgProvenanceManifestForChannel, filepath.Join(homeDir, ".gemini", "ORG_PROVENANCE_MANIFEST.yaml")},
 		// Empty channel defaults to claude
-		{"UserAgentsDirForChannel/empty", "", UserAgentsDirForChannel(""), filepath.Join(homeDir, ".claude", "agents")},
+		{"UserAgentsDirForChannel/empty", "", UserAgentsDirForChannel, filepath.Join(homeDir, ".claude", "agents")},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.got != tt.want {
-				t.Errorf("%s = %q, want %q", tt.name, tt.got, tt.want)
+			got, err := tt.call(tt.channel)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tt.want {
+				t.Errorf("%s = %q, want %q", tt.name, got, tt.want)
 			}
 		})
 	}

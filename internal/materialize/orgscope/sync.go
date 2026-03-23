@@ -73,7 +73,11 @@ func syncOrgScopeResolved(params SyncOrgScopeParams) (*OrgScopeResult, error) {
 
 	userChannelDir := params.UserChannelDir
 	if userChannelDir == "" {
-		userChannelDir = paths.UserChannelDir(params.Channel)
+		var err error
+		userChannelDir, err = paths.UserChannelDir(params.Channel)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Load or bootstrap ORG_PROVENANCE_MANIFEST.yaml

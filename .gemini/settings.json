@@ -1,0 +1,16 @@
+{
+  "experimental": {
+    "enableAgents": true,
+    "plan": true,
+    "taskTracker": true,
+    "jitContext": true,
+    "modelSteering": true,
+    "toolOutputMasking": {
+      "enabled": true
+    },
+    "extensionRegistry": true,
+    "directWebFetch": true,
+    "useOSC52Copy": true,
+    "useOSC52Paste": true
+  }
+}

@@ -30,7 +30,11 @@ type syncer struct {
 func SyncUserScope(params SyncUserScopeParams) (*UserScopeResult, error) {
 	userChannelDir := params.UserChannelDir
 	if userChannelDir == "" {
-		userChannelDir = paths.UserChannelDir("claude")
+		var err error
+		userChannelDir, err = paths.UserChannelDir(params.Opts.Channel)
+		if err != nil {
+			return nil, err
+		}
 	}
 	s := &syncer{
 		resolver:	params.Resolver,

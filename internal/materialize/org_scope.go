@@ -22,7 +22,11 @@ func (m *Materializer) syncOrgScopeSingleChannel(opts SyncOptions) (*OrgScopeRes
 	// otherwise resolve from the channel name (e.g., ~/.claude or ~/.gemini).
 	userChannelDir := m.userChannelDir
 	if userChannelDir == "" {
-		userChannelDir = paths.UserChannelDir(opts.Channel)
+		var err error
+		userChannelDir, err = paths.UserChannelDir(opts.Channel)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	result, err := orgscope.SyncOrgScope(orgscope.SyncOrgScopeParams{

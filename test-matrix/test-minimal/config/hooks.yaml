@@ -1,0 +1,155 @@
+# Ari Hook Configuration
+# Canonical source of truth for harness hook registrations.
+# Materialization reads this file and generates settings.local.json hooks section.
+#
+# Schema version: 2.0
+# v2 adds 'command' field for direct binary invocation (replaces bash wrappers).
+#
+# Priority: Lower values execute first (range: 1-100)
+#
+# Event names use knossos canonical vocabulary (ADR-0032, snake_case).
+# The materialization pipeline translates canonical -> wire format per channel.
+
+schema_version: "2.0"
+
+hooks:
+  # ===========================================================================
+  # session_start Hooks
+  # ===========================================================================
+  - event: session_start
+    command: "ari hook context --output json"
+    timeout: 10
+    priority: 5
+    description: "Injects session context via ari hook context"
+
+  # ===========================================================================
+  # session_end Hooks
+  # ===========================================================================
+  - event: session_end
+    command: "ari hook sessionend --output json"
+    timeout: 5
+    priority: 5
+    description: "Emits session.ended event and auto-parks on session end"
+
+  # ===========================================================================
+  # stop Hooks
+  # ===========================================================================
+  - event: stop
+    command: "ari hook autopark --output json"
+    timeout: 5
+    priority: 5
+    description: "Auto-parks session on stop via ari hook autopark"
+
+  # ===========================================================================
+  # pre_compact Hooks
+  # ===========================================================================
+  - event: pre_compact
+    command: "ari hook precompact --output json"
+    timeout: 5
+    priority: 5
+    description: "Rotates SESSION_CONTEXT.md on context compaction"
+
+  # ===========================================================================
+  # pre_tool Hooks
+  # ===========================================================================
+  - event: pre_tool
+    matcher: "Edit|Write"
+    command: "ari hook writeguard --output json"
+    timeout: 3
+    priority: 3
+    description: "Guards session context writes via ari hook writeguard"
+
+  - event: pre_tool
+    matcher: "Bash"
+    command: "ari hook validate --output json"
+    timeout: 5
+    priority: 5
+    description: "Validates bash commands via ari hook validate"
+
+  - event: pre_tool
+    matcher: "Bash"
+    command: "ari hook git-conventions --output json"
+    timeout: 5
+    priority: 5
+    description: "Validates git commit messages against conventional format"
+
+  - event: pre_tool
+    matcher: "Bash"
+    command: "ari hook attribution-guard --output json"
+    timeout: 5
+    priority: 6
+    description: "Blocks git commits containing AI attribution markers (Co-Authored-By, Generated with)"
+
+  # ===========================================================================
+  # post_tool Hooks
+  # ===========================================================================
+  - event: post_tool
+    matcher: "Edit|Write|Bash"
+    command: "ari hook clew --output json"
+    timeout: 5
+    async: true
+    priority: 5
+    description: "Tracks artifacts and commits via ari hook clew"
+
+  # H5: Phase-transition detection for proactive suggestions
+  - event: post_tool
+    command: "ari hook suggest --output json"
+    timeout: 5
+    async: true
+    priority: 85
+    description: "Detects phase transitions and surfaces contextual suggestions"
+
+  - event: post_tool
+    command: "ari hook budget --output json"
+    timeout: 3
+    priority: 90
+    description: "Tracks tool use count for cognitive budget warnings"
+
+  # H-drift: CLI-agent interop drift detection (Cassandra Protocol)
+  - event: post_tool
+    matcher: "Bash"
+    command: "ari hook driftdetect --output json"
+    timeout: 5
+    async: true
+    priority: 95
+    description: "Detects CLI-agent surface drift and auto-files complaints"
+
+  # ===========================================================================
+  # worktree_create Hooks
+  # CC-specific lifecycle event (not yet in ADR-0032 canonical set)
+  # ===========================================================================
+  - event: worktree_create
+    command: "ari hook worktree-seed --output json"
+    timeout: 30
+    priority: 5
+    description: "Creates and seeds git worktrees with rite configuration on worktree_create"
+
+  # ===========================================================================
+  # worktree_remove Hooks
+  # CC-specific lifecycle event (not yet in ADR-0032 canonical set)
+  # ===========================================================================
+  - event: worktree_remove
+    command: "ari hook worktree-remove --output json"
+    timeout: 10
+    priority: 5
+    description: "Removes git worktrees on worktree_remove"
+
+  # ===========================================================================
+  # subagent_start Hooks
+  # ===========================================================================
+  - event: subagent_start
+    command: "ari hook subagent-start --output json"
+    timeout: 5
+    async: true
+    priority: 5
+    description: "Logs subagent spawn events to session clew"
+
+  # ===========================================================================
+  # subagent_stop Hooks
+  # ===========================================================================
+  - event: subagent_stop
+    command: "ari hook subagent-stop --output json"
+    timeout: 5
+    async: true
+    priority: 5
+    description: "Logs subagent completion events to session clew"

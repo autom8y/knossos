@@ -344,6 +344,11 @@ func (m *Materializer) MaterializeMinimal(opts Options) (*Result, error) {
 		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
 	}
 
+	// Project platform config (e.g. experimental features)
+	if err := m.materializeConfigSettings(channelDir, collector, opts.Channel); err != nil {
+		return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize config settings", err)
+	}
+
 	// Project platform mena + shared rite mena so cross-cutting mode still
 	// has core features (/know, /radar, /research, etc.).
 	if err := m.materializeMinimalMena(channelDir, collector, opts.OverwriteDiverged, opts.Channel, comp); err != nil {
@@ -564,6 +569,10 @@ func (m *Materializer) MaterializeWithOptions(activeRiteName string, opts Option
 	if !opts.Soft {
 		if err := m.materializeSettingsWithManifest(channelDir, manifest, resolvedMCPServers, collector, opts.Channel); err != nil {
 			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize settings", err)
+		}
+
+		if err := m.materializeConfigSettings(channelDir, collector, opts.Channel); err != nil {
+			return nil, errors.Wrap(errors.CodeGeneralError, "failed to materialize config settings", err)
 		}
 	}
 

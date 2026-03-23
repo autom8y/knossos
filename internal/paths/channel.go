@@ -42,11 +42,10 @@ func AllChannels() []TargetChannel {
 }
 
 // ChannelByName returns the TargetChannel for the given name.
-// Empty string defaults to "claude" for backward compatibility (HA-6-001).
 // Valid channels are derived from AllChannels(), not hardcoded (HA-6-027).
 func ChannelByName(name string) (TargetChannel, error) {
 	if name == "" {
-		return ClaudeChannel{}, nil // intentional default (HA-3-030)
+		return nil, fmt.Errorf("channel name must be explicitly provided")
 	}
 	for _, ch := range AllChannels() {
 		if ch.Name() == name {
@@ -61,19 +60,11 @@ func (r *Resolver) ChannelDir(ch TargetChannel) string {
 }
 
 // UserChannelDir returns the user-level directory for a specific channel.
-// For channel="" or "claude": ~/.claude
-// For channel="gemini": ~/.gemini
-//
-// On unrecognized channel names, falls back to ~/.claude intentionally.
-// All callers (ForChannel path helpers, user_scope, org_scope) pass validated
-// channel strings or empty string (which ChannelByName normalizes to "claude").
-// Returning an error here would require error handling in ~10 callers that
-// construct paths -- the fallback is the pragmatic choice (HA-3-030 scope).
-func UserChannelDir(channel string) string {
+func UserChannelDir(channel string) (string, error) {
 	homeDir, _ := os.UserHomeDir()
 	ch, err := ChannelByName(channel)
 	if err != nil {
-		return filepath.Join(homeDir, ".claude")
+		return "", fmt.Errorf("invalid channel %q, cannot resolve user channel dir: %w", channel, err)
 	}
-	return filepath.Join(homeDir, ch.DirName())
+	return filepath.Join(homeDir, ch.DirName()), nil
 }

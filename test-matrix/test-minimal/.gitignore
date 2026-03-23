@@ -1,0 +1,10 @@
+# Knossos
+.knossos/
+.claude/CLAUDE.md
+**/.sos/*
+!**/.sos/land/
+!**/.sos/land/**
+**/.ledge/*
+!**/.ledge/shelf/
+!**/.ledge/shelf/**
+# End Knossos
