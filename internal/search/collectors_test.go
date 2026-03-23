@@ -3,6 +3,7 @@ package search
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/spf13/cobra"
@@ -393,17 +394,18 @@ func writeProcessionTemplate(t *testing.T, root, name, description string, stati
 	dir := filepath.Join(root, "processions")
 	require.NoError(t, os.MkdirAll(dir, 0755))
 
-	content := "name: " + name + "\ndescription: \"" + description + "\"\nstations:\n"
+	var content strings.Builder
+	content.WriteString("name: " + name + "\ndescription: \"" + description + "\"\nstations:\n")
 	rites := []string{"security", "debt-triage", "10x-dev", "hygiene", "security"}
-	for i := 0; i < stations; i++ {
+	for i := range stations {
 		r := rites[i%len(rites)]
-		content += "  - name: station-" + string(rune('a'+i)) + "\n"
-		content += "    rite: " + r + "\n"
-		content += "    goal: \"Goal " + string(rune('a'+i)) + "\"\n"
-		content += "    produces: [artifact-" + string(rune('a'+i)) + "]\n"
+		content.WriteString("  - name: station-" + string(rune('a'+i)) + "\n")
+		content.WriteString("    rite: " + r + "\n")
+		content.WriteString("    goal: \"Goal " + string(rune('a'+i)) + "\"\n")
+		content.WriteString("    produces: [artifact-" + string(rune('a'+i)) + "]\n")
 	}
-	content += "artifact_dir: .sos/wip/" + name + "/\n"
-	require.NoError(t, os.WriteFile(filepath.Join(dir, name+".yaml"), []byte(content), 0644))
+	content.WriteString("artifact_dir: .sos/wip/" + name + "/\n")
+	require.NoError(t, os.WriteFile(filepath.Join(dir, name+".yaml"), []byte(content.String()), 0644))
 }
 
 func TestCollectProcessions_NilResolver(t *testing.T) {

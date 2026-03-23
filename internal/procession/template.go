@@ -47,18 +47,20 @@ func (t *Template) Validate() error {
 	var issues []string
 
 	// 1. Validate template name
-	if t.Name == "" {
+	switch {
+	case t.Name == "":
 		issues = append(issues, "name: must not be empty")
-	} else if len(t.Name) > 64 {
+	case len(t.Name) > 64:
 		issues = append(issues, fmt.Sprintf("name: must be at most 64 characters (got %d)", len(t.Name)))
-	} else if !namePattern.MatchString(t.Name) {
+	case !namePattern.MatchString(t.Name):
 		issues = append(issues, fmt.Sprintf("name: %q does not match pattern ^[a-z][a-z0-9-]*$", t.Name))
 	}
 
 	// 2. Validate description
-	if t.Description == "" {
+	switch {
+	case t.Description == "":
 		issues = append(issues, "description: must not be empty")
-	} else if len(t.Description) > 200 {
+	case len(t.Description) > 200:
 		issues = append(issues, fmt.Sprintf("description: must be at most 200 characters (got %d)", len(t.Description)))
 	}
 
@@ -91,11 +93,12 @@ func (t *Template) Validate() error {
 		prefix := fmt.Sprintf("stations[%d]", i)
 
 		// 5a. Station name pattern and length
-		if s.Name == "" {
+		switch {
+		case s.Name == "":
 			issues = append(issues, fmt.Sprintf("%s.name: must not be empty", prefix))
-		} else if len(s.Name) > 32 {
+		case len(s.Name) > 32:
 			issues = append(issues, fmt.Sprintf("%s.name: must be at most 32 characters (got %d)", prefix, len(s.Name)))
-		} else if !namePattern.MatchString(s.Name) {
+		case !namePattern.MatchString(s.Name):
 			issues = append(issues, fmt.Sprintf("%s.name: %q does not match pattern ^[a-z][a-z0-9-]*$", prefix, s.Name))
 		}
 

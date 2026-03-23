@@ -1,5 +1,7 @@
 package session
 
+import "slices"
+
 // ChannelLifecycleMap maps channel-specific lifecycle event names to Knossos session FSM transitions.
 // Each AI assistant channel (Claude, Gemini, etc.) uses different event names for
 // session lifecycle events. This map normalizes them into Knossos Status values.
@@ -34,25 +36,17 @@ func ClaudeLifecycleMap() ChannelLifecycleMap {
 // Returns the target status and true if the event maps to a known transition,
 // or empty string and false if the event is not recognized.
 func (m ChannelLifecycleMap) MapToFSMTransition(eventName string) (Status, bool) {
-	for _, e := range m.StartEvents {
-		if e == eventName {
-			return StatusActive, true
-		}
+	if slices.Contains(m.StartEvents, eventName) {
+		return StatusActive, true
 	}
-	for _, e := range m.EndEvents {
-		if e == eventName {
-			return StatusArchived, true
-		}
+	if slices.Contains(m.EndEvents, eventName) {
+		return StatusArchived, true
 	}
-	for _, e := range m.SuspendEvents {
-		if e == eventName {
-			return StatusParked, true
-		}
+	if slices.Contains(m.SuspendEvents, eventName) {
+		return StatusParked, true
 	}
-	for _, e := range m.ResumeEvents {
-		if e == eventName {
-			return StatusActive, true
-		}
+	if slices.Contains(m.ResumeEvents, eventName) {
+		return StatusActive, true
 	}
 	return "", false
 }

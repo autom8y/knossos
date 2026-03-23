@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -45,10 +46,10 @@ func TestGenerateChannelGitignore_BasicEntries(t *testing.T) {
 	channelDir := t.TempDir()
 
 	manifest := testManifest(map[string]provenance.OwnerType{
-		"agents/builder.md":     provenance.OwnerKnossos,
-		"commands/commit/":      provenance.OwnerKnossos,
-		"skills/conventions/":   provenance.OwnerKnossos,
-		"agents/my-custom.md":   provenance.OwnerUser,
+		"agents/builder.md":   provenance.OwnerKnossos,
+		"commands/commit/":    provenance.OwnerKnossos,
+		"skills/conventions/": provenance.OwnerKnossos,
+		"agents/my-custom.md": provenance.OwnerUser,
 	})
 
 	written, err := generateChannelGitignore(channelDir, manifest)
@@ -83,11 +84,11 @@ func TestGenerateChannelGitignore_ExcludesOutliers(t *testing.T) {
 	channelDir := t.TempDir()
 
 	manifest := testManifest(map[string]provenance.OwnerType{
-		"agents/builder.md":      provenance.OwnerKnossos,
-		"ACTIVE_WORKFLOW.yaml":   provenance.OwnerKnossos,
-		".mcp.json":              provenance.OwnerKnossos,
-		"CLAUDE.md":              provenance.OwnerKnossos,
-		"GEMINI.md":              provenance.OwnerKnossos,
+		"agents/builder.md":    provenance.OwnerKnossos,
+		"ACTIVE_WORKFLOW.yaml": provenance.OwnerKnossos,
+		".mcp.json":            provenance.OwnerKnossos,
+		"CLAUDE.md":            provenance.OwnerKnossos,
+		"GEMINI.md":            provenance.OwnerKnossos,
 	})
 
 	written, err := generateChannelGitignore(channelDir, manifest)
@@ -113,8 +114,8 @@ func TestGenerateChannelGitignore_DirectoryEntries(t *testing.T) {
 	channelDir := t.TempDir()
 
 	manifest := testManifest(map[string]provenance.OwnerType{
-		"commands/commit/":     provenance.OwnerKnossos,
-		"skills/conventions/":  provenance.OwnerKnossos,
+		"commands/commit/":    provenance.OwnerKnossos,
+		"skills/conventions/": provenance.OwnerKnossos,
 	})
 
 	written, err := generateChannelGitignore(channelDir, manifest)
@@ -135,7 +136,7 @@ func TestGenerateChannelGitignore_Idempotent(t *testing.T) {
 	channelDir := t.TempDir()
 
 	manifest := testManifest(map[string]provenance.OwnerType{
-		"agents/builder.md": provenance.OwnerKnossos,
+		"agents/builder.md":   provenance.OwnerKnossos,
 		"settings.local.json": provenance.OwnerKnossos,
 	})
 
@@ -189,13 +190,7 @@ func TestGenerateChannelGitignore_SelfEntry(t *testing.T) {
 	assert.Contains(t, text, ".gitignore\n")
 	// Self-entry should NOT have the / prefix (it's the file itself, not a tracked entry)
 	lines := strings.Split(text, "\n")
-	foundSelfEntry := false
-	for _, line := range lines {
-		if line == ".gitignore" {
-			foundSelfEntry = true
-			break
-		}
-	}
+	foundSelfEntry := slices.Contains(lines, ".gitignore")
 	assert.True(t, foundSelfEntry, "self-entry '.gitignore' should be present without / prefix")
 }
 

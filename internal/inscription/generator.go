@@ -429,11 +429,12 @@ func (g *Generator) generateQuickStartContent() (string, error) {
 	}
 
 	// Footer
-	if g.Context.IsKnossosProject {
+	switch {
+	case g.Context.IsKnossosProject:
 		sb.WriteString("Entry point: `/go`. Agent invocation patterns: `prompting` skill. Routing guidance: `/consult`.")
-	} else if g.Context.Channel == "gemini" {
+	case g.Context.Channel == "gemini":
 		sb.WriteString("Agents activate when your prompt matches their description.")
-	} else {
+	default:
 		sb.WriteString("Delegate to specialists via Task tool.")
 	}
 

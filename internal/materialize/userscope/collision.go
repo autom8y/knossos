@@ -29,10 +29,6 @@ func NewCollisionChecker(knossosDir string, channel ...string) *CollisionChecker
 	return c
 }
 
-func (c *CollisionChecker) loadRiteManifest(knossosDir string) {
-	c.loadRiteManifestForChannel(knossosDir, "")
-}
-
 func (c *CollisionChecker) loadRiteManifestForChannel(knossosDir, channel string) {
 	c.riteEntries = make(map[string]bool)
 	manifestPath := provenance.ManifestPathForChannel(knossosDir, channel)

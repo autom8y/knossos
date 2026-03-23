@@ -1,6 +1,7 @@
 package config
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 
@@ -64,9 +65,7 @@ func loadAndMerge(path string, base *Settings) error {
 		if base.Experimental == nil {
 			base.Experimental = make(map[string]bool)
 		}
-		for k, v := range temp.Experimental {
-			base.Experimental[k] = v
-		}
+		maps.Copy(base.Experimental, temp.Experimental)
 	}
 
 	return nil

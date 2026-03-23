@@ -155,7 +155,7 @@ func CollectAgents(resolver *paths.Resolver) []SearchEntry {
 		return nil
 	}
 
-	agentsDir := resolver.AgentsDir()
+	agentsDir := resolver.AgentsDirForChannel(paths.ClaudeChannel{})
 	dirEntries, err := os.ReadDir(agentsDir)
 	if err != nil {
 		return nil
@@ -324,7 +324,9 @@ func CollectProcessions(resolver *paths.Resolver, rps ...[]procmena.ResolvedProc
 		}
 
 		// Keywords: station names + rite names + "procession" + "cross-rite"
-		keywords := append(stationNames, riteNames...)
+		keywords := make([]string, 0, len(stationNames)+len(riteNames)+3)
+		keywords = append(keywords, stationNames...)
+		keywords = append(keywords, riteNames...)
 		keywords = append(keywords, "procession", "cross-rite", "workflow")
 
 		entries = append(entries, SearchEntry{

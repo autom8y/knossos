@@ -262,7 +262,7 @@ func collectChannel(resolver *paths.Resolver) ChannelHealth {
 	health.ActiveRite = resolver.ReadActiveRite()
 
 	// Agent count
-	agentsDir := resolver.AgentsDir()
+	agentsDir := resolver.AgentsDirForChannel(paths.ClaudeChannel{})
 	if entries, err := os.ReadDir(agentsDir); err == nil {
 		for _, e := range entries {
 			if !e.IsDir() && strings.HasSuffix(e.Name(), ".md") {

@@ -43,9 +43,10 @@ func AllChannels() []TargetChannel {
 
 // ChannelByName returns the TargetChannel for the given name.
 // Valid channels are derived from AllChannels(), not hardcoded (HA-6-027).
+// If name is empty, it returns ClaudeChannel for backward compatibility (ADR-0031).
 func ChannelByName(name string) (TargetChannel, error) {
 	if name == "" {
-		return nil, fmt.Errorf("channel name must be explicitly provided")
+		return ClaudeChannel{}, nil
 	}
 	for _, ch := range AllChannels() {
 		if ch.Name() == name {

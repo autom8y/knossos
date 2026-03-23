@@ -77,7 +77,7 @@ func (a *GeminiAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 // Gemini reads the same {"decision": "...", "reason": "..."} format as Claude Code.
 // No os.Exit: the caller prints the response bytes and the process exits naturally.
 func (a *GeminiAdapter) FormatResponse(decision string, reason string) ([]byte, error) {
-	resp := map[string]interface{}{
+	resp := map[string]any{
 		"decision": decision,
 	}
 	if reason != "" {

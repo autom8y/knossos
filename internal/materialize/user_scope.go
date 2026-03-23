@@ -3,6 +3,7 @@ package materialize
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/autom8y/knossos/internal/materialize/userscope"
 	"github.com/autom8y/knossos/internal/paths"
@@ -75,9 +76,7 @@ func (m *Materializer) syncUserScopeAllChannels(opts SyncOptions) (*UserScopeRes
 
 		// Merge resource results (keep channel-specific target paths for the last channel
 		// that wrote each resource — aggregation is totals-only for multi-channel)
-		for k, v := range chResult.Resources {
-			aggregate.Resources[k] = v
-		}
+		maps.Copy(aggregate.Resources, chResult.Resources)
 		aggregate.Errors = append(aggregate.Errors, chResult.Errors...)
 		aggregate.Totals.Added += chResult.Totals.Added
 		aggregate.Totals.Updated += chResult.Totals.Updated

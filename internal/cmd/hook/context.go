@@ -19,6 +19,8 @@ import (
 	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/materialize/source"
 	"github.com/autom8y/knossos/internal/naxos"
+	"github.com/autom8y/knossos/internal/paths"
+
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/session"
 	"github.com/autom8y/knossos/internal/suggest"
@@ -331,7 +333,7 @@ func runContextCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Printer
 		availableRites[i] = r.Name
 	}
 
-	availableAgents := listAvailableAgents(resolver.AgentsDir())
+	availableAgents := listAvailableAgents(resolver.AgentsDirForChannel(paths.ClaudeChannel{}))
 
 	// Build output
 	result := ContextOutput{

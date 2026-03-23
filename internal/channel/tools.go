@@ -70,8 +70,8 @@ func WireToCanonicalTool(wireName string) (string, bool) {
 //   - (ccTool, false): no Gemini equivalent found — caller receives the original name.
 func CCWireToGeminiWire(ccTool string) (string, bool) {
 	// MCP Tool Translation (Gemini CLI requires mcp_server_tool syntax)
-	if strings.HasPrefix(ccTool, "mcp:") {
-		trimmed := strings.TrimPrefix(ccTool, "mcp:")
+	if after, ok := strings.CutPrefix(ccTool, "mcp:"); ok {
+		trimmed := after
 		// Replace / with _ for mcp:server/tool -> mcp_server_tool
 		// Transform "mcp:server" -> "mcp_server"
 		return "mcp_" + strings.ReplaceAll(trimmed, "/", "_"), true
@@ -100,8 +100,8 @@ func CCWireToGeminiWire(ccTool string) (string, bool) {
 //   - (ccTool, true): unknown tool — passes through unchanged (forward compat).
 func TranslateTool(ccTool string) (string, bool) {
 	// MCP Tool Translation (Gemini CLI requires mcp_server_tool syntax)
-	if strings.HasPrefix(ccTool, "mcp:") {
-		trimmed := strings.TrimPrefix(ccTool, "mcp:")
+	if after, ok := strings.CutPrefix(ccTool, "mcp:"); ok {
+		trimmed := after
 		// Replace / with _ for mcp:server/tool -> mcp_server_tool
 		// Transform "mcp:server" -> "mcp_server"
 		return "mcp_" + strings.ReplaceAll(trimmed, "/", "_"), true

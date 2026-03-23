@@ -3,6 +3,7 @@ package hook
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -41,7 +42,7 @@ func runCall(ctx *cmdContext, args []string) error {
 	// 3. Reconstruct command
 	// The args will look like ["ari", "hook", "validate", "--output", "json"]
 	// We want to insert --signature <sig>
-	
+
 	finalArgs := make([]string, 0, len(args)+2)
 	finalArgs = append(finalArgs, args...)
 	if sig != "" {
@@ -67,7 +68,8 @@ func runCall(ctx *cmdContext, args []string) error {
 
 	// Forward exit code
 	err = subCmd.Run()
-	if exitErr, ok := err.(*exec.ExitError); ok {
+	exitErr := &exec.ExitError{}
+	if errors.As(err, &exitErr) {
 		os.Exit(exitErr.ExitCode())
 	}
 	return err

@@ -330,8 +330,8 @@ func TestSync_ChannelAll_IndependentManifests(t *testing.T) {
 	}
 
 	geminiOnlyOpts := materialize.SyncOptions{
-		Scope:   materialize.ScopeRite,
-		Channel: "gemini",
+		Scope:    materialize.ScopeRite,
+		Channel:  "gemini",
 		RiteName: "test-rite",
 	}
 
@@ -413,7 +413,7 @@ func normalizeKnossosMarkers(data []byte) []byte {
 		sortedAttrs := make([]string, len(attrs))
 		copy(sortedAttrs, attrs)
 		// Simple sort -- alphabetical is sufficient for determinism
-		for a := 0; a < len(sortedAttrs); a++ {
+		for a := range sortedAttrs {
 			for b := a + 1; b < len(sortedAttrs); b++ {
 				if sortedAttrs[a] > sortedAttrs[b] {
 					sortedAttrs[a], sortedAttrs[b] = sortedAttrs[b], sortedAttrs[a]

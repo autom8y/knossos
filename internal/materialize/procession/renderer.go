@@ -24,7 +24,6 @@ func RenderToDirWithProcessions(projectRoot string, tmpDir string, render Render
 	count := 0
 	for _, rp := range processions {
 		data := BuildWorkflowData(rp.Template)
-		rendered := false
 
 		// Render dromena (command) only when rite matches
 		entryRite := ""
@@ -44,7 +43,6 @@ func RenderToDirWithProcessions(projectRoot string, tmpDir string, render Render
 			if err := os.WriteFile(filepath.Join(droDir, "INDEX.dro.md"), droContent, 0o644); err != nil {
 				return count, err
 			}
-			rendered = true
 		}
 
 		// Render legomena (skill) — always, regardless of rite
@@ -60,11 +58,7 @@ func RenderToDirWithProcessions(projectRoot string, tmpDir string, render Render
 		if err := os.WriteFile(filepath.Join(legoDir, "INDEX.lego.md"), legoContent, 0o644); err != nil {
 			return count, err
 		}
-		rendered = true
-
-		if rendered {
-			count++
-		}
+		count++
 	}
 
 	return count, nil

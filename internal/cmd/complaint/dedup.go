@@ -193,7 +193,6 @@ func complaintDedupKey(c Complaint) string {
 
 // MarshalJSON implements custom JSON for dedup output.
 func (o dedupOutput) MarshalJSON() ([]byte, error) {
-	type alias dedupOutput
 	groups := o.Groups
 	if groups == nil {
 		groups = []dedupGroup{}

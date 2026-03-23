@@ -123,7 +123,7 @@ func buildAgentStatusFromManifest(manifest *ritelib.RiteManifest, resolver *path
 
 	// Get list of installed agents
 	installedAgents := make(map[string]bool)
-	agentsDir := resolver.AgentsDir()
+	agentsDir := resolver.AgentsDirForChannel(paths.ClaudeChannel{})
 	if entries, err := os.ReadDir(agentsDir); err == nil {
 		for _, entry := range entries {
 			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
@@ -155,7 +155,7 @@ func buildAgentStatusList(t *ritelib.Rite, workflow *ritelib.Workflow, resolver 
 
 	// Get list of installed agents
 	installedAgents := make(map[string]bool)
-	agentsDir := resolver.AgentsDir()
+	agentsDir := resolver.AgentsDirForChannel(paths.ClaudeChannel{})
 	if entries, err := os.ReadDir(agentsDir); err == nil {
 		for _, entry := range entries {
 			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {

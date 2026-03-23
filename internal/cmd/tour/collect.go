@@ -36,7 +36,7 @@ func collectChannel(resolver *paths.Resolver) ChannelSection {
 	}
 
 	// Count .md files in agents/
-	agentsDir := resolver.AgentsDir()
+	agentsDir := resolver.AgentsDirForChannel(paths.ClaudeChannel{})
 	section.Agents = DirCount{
 		Count: countFilesWithSuffix(agentsDir, ".md"),
 		Items: listFiles(agentsDir),

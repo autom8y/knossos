@@ -9,7 +9,7 @@ import (
 
 func TestClaudeAdapter_ParsePayload(t *testing.T) {
 	adapter := &ClaudeAdapter{}
-	
+
 	payload := `{"session_id": "sess-123", "hook_event_name": "PreToolUse", "tool_name": "ReadFiles"}`
 	reader := bytes.NewReader([]byte(payload))
 
@@ -121,7 +121,7 @@ func TestGeminiAdapter_FormatResponse_Allow(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var m map[string]interface{}
+	var m map[string]any
 	if err := json.Unmarshal(resp, &m); err != nil {
 		t.Fatalf("response is not valid JSON: %v", err)
 	}
@@ -141,7 +141,7 @@ func TestGeminiAdapter_FormatResponse_Block(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	var m map[string]interface{}
+	var m map[string]any
 	if err := json.Unmarshal(resp, &m); err != nil {
 		t.Fatalf("response is not valid JSON: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestGeminiAdapter_FormatResponse_Block(t *testing.T) {
 
 func TestChannelDetection_DefaultClaude(t *testing.T) {
 	os.Unsetenv("KNOSSOS_CHANNEL")
-	
+
 	adapter := GetAdapter()
 	if adapter.ChannelName() != "claude" {
 		t.Errorf("expected claude, got %s", adapter.ChannelName())
@@ -165,7 +165,7 @@ func TestChannelDetection_DefaultClaude(t *testing.T) {
 func TestChannelDetection_GeminiEnvVar(t *testing.T) {
 	os.Setenv("KNOSSOS_CHANNEL", "gemini")
 	defer os.Unsetenv("KNOSSOS_CHANNEL")
-	
+
 	adapter := GetAdapter()
 	if adapter.ChannelName() != "gemini" {
 		t.Errorf("expected gemini, got %s", adapter.ChannelName())
@@ -178,7 +178,7 @@ func TestClaudeAdapter_FormatResponse(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	
+
 	var m map[string]string
 	if err := json.Unmarshal(resp, &m); err != nil {
 		t.Fatal(err)

@@ -276,7 +276,6 @@ func (o complaintListOutput) Rows() [][]string {
 // MarshalJSON implements custom JSON marshaling so that an empty complaint
 // list renders as [] rather than null.
 func (o complaintListOutput) MarshalJSON() ([]byte, error) {
-	type alias complaintListOutput
 	complaints := o.Complaints
 	if complaints == nil {
 		complaints = []Complaint{}

@@ -47,23 +47,23 @@ func (a *ClaudeAdapter) ParsePayload(reader io.Reader) (*Env, error) {
 	}
 
 	return &Env{
-		Event:             event,
-		ToolName:          stdin.ToolName,
-		ToolInput:         toolInput,
-		ToolResult:        toolResult,
-		SessionID:         stdin.SessionID,
-		ProjectDir:        projectDir,
-		CWD:               cwd,
-		ConversationID:    stdin.ConversationID,
-		UserMessage:       stdin.Prompt,
-		Signature:         stdin.XKnossosSignature,
-		RawPayload:        data,
+		Event:          event,
+		ToolName:       stdin.ToolName,
+		ToolInput:      toolInput,
+		ToolResult:     toolResult,
+		SessionID:      stdin.SessionID,
+		ProjectDir:     projectDir,
+		CWD:            cwd,
+		ConversationID: stdin.ConversationID,
+		UserMessage:    stdin.Prompt,
+		Signature:      stdin.XKnossosSignature,
+		RawPayload:     data,
 	}, nil
 }
 
 func (a *ClaudeAdapter) FormatResponse(decision string, reason string) ([]byte, error) {
 	// Claude Code hook response format
-	resp := map[string]interface{}{
+	resp := map[string]any{
 		"decision": decision,
 	}
 	if reason != "" {

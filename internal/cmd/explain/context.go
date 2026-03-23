@@ -51,7 +51,7 @@ func contextRite(resolver *paths.Resolver) string {
 }
 
 func contextAgent(resolver *paths.Resolver) string {
-	count := countMDFilesIn(resolver.AgentsDir())
+	count := countMDFilesIn(resolver.AgentsDirForChannel(paths.ClaudeChannel{}))
 	return fmt.Sprintf("Your project has %d agents defined.", count)
 }
 
