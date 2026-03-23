@@ -41,7 +41,7 @@ for dir in "${required_dirs[@]}"; do
         echo -e "  ${GREEN}✓${NC} ${dir}"
     else
         echo -e "  ${RED}✗${NC} ${dir} - MISSING"
-        ((errors++))
+        errors=$((errors + 1))
     fi
 done
 echo ""
@@ -60,7 +60,7 @@ for family in $cli_families; do
         echo -e "  ${GREEN}✓${NC} cli-${family}.md"
     else
         echo -e "  ${YELLOW}!${NC} cli-${family}.md - not found (may be intentional)"
-        ((warnings++))
+        warnings=$((warnings + 1))
     fi
 done
 echo ""
@@ -85,7 +85,7 @@ for rite in $rites; do
         echo -e "  ${GREEN}✓${NC} ${rite}.md"
     else
         echo -e "  ${YELLOW}!${NC} ${rite}.md - not documented"
-        ((warnings++))
+        warnings=$((warnings + 1))
     fi
 done
 echo ""
@@ -108,7 +108,7 @@ while read -r file; do
 
         if [[ -z "$resolved" ]] || [[ ! -f "$resolved" ]]; then
             echo -e "  ${YELLOW}!${NC} Broken link in $(basename "$file"): $link_path"
-            ((warnings++))
+            warnings=$((warnings + 1))
         fi
     done
 done < <(find "${DOCTRINE_DIR}" -name "*.md" -type f)
@@ -130,11 +130,11 @@ for doc in "${DOCTRINE_DIR}"/operations/cli-reference/cli-*.md; do
 
     if [[ "$has_synopsis" == "no" ]]; then
         echo -e "  ${YELLOW}!${NC} ${name} - missing Synopsis/Commands section"
-        ((warnings++))
+        warnings=$((warnings + 1))
     fi
     if [[ "$has_examples" == "no" ]]; then
         echo -e "  ${YELLOW}!${NC} ${name} - missing Examples section"
-        ((warnings++))
+        warnings=$((warnings + 1))
     fi
 done
 echo ""
