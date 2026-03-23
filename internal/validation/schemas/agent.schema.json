@@ -35,7 +35,12 @@
         "meta",
         "designer",
         "analyst",
-        "engineer"
+        "engineer",
+        "architect",
+        "builder",
+        "evaluator",
+        "prototyper",
+        "validator"
       ],
       "description": "Agent archetype determining section ownership and platform behaviors"
     },

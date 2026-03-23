@@ -1,14 +1,14 @@
 ---
 domain: architecture
-generated_at: "2026-03-13T10:04:06Z"
+generated_at: "2026-03-23T18:00:00Z"
 expires_after: "7d"
 source_scope:
   - "./cmd/**/*.go"
   - "./internal/**/*.go"
   - "./go.mod"
 generator: theoros
-source_hash: "59a0de2"
-confidence: 0.87
+source_hash: "78abb186"
+confidence: 0.82
 format_version: "1.0"
 update_mode: "full"
 incremental_cycle: 0
@@ -22,171 +22,137 @@ land_hash: "08704d8d5bd3b4b8b2c6a8a1590586893f35aa5a3c3d6f27c260cee86fca82b0"
 
 ## Package Structure
 
-The codebase is a Go module (`github.com/autom8y/knossos`, Go 1.23+) with a single CLI binary (`ari`) and one entry package at `cmd/ari/`. All domain logic lives under `internal/`.
+This is a Go project (module `github.com/autom8y/knossos`, Go 1.23+). The binary is `ari` (Ariadne). The layout follows the standard Go project layout with two primary source directories: `cmd/` for the entry point and `internal/` for all domain logic.
 
-### Top-Level Layout
+### Entry Point
 
-| Directory | Purpose |
-|-----------|---------|
-| `cmd/ari/` | Binary entry point (minimal logic) |
-| `internal/cmd/` | Cobra subcommand wiring (one subdirectory per top-level command) |
-| `internal/` (domain) | Core domain logic: materialize, session, hook, inscription, paths, etc. |
-| `embed.go` | Go embed directives — packages rites/, knossos/templates/, agents/, mena/, processions/ into the binary |
-| `rites/` | Rite definitions (manifest.yaml + agents + mena) |
-| `knossos/templates/` | CLAUDE.md.tpl and section templates |
-| `mena/` | Platform-level mena (dromena and legomena) |
-| `agents/` | Cross-rite agent prompt files |
-| `processions/` | Cross-rite workflow templates |
+`cmd/ari/` — single file `main.go`. Sets version metadata, wires embedded assets into the CLI binary, and delegates to `internal/cmd/root`.
 
-### `internal/cmd/` Subpackages (CLI Wiring Layer)
+### `internal/cmd/` — Command Layer (27 packages)
 
-Each subdirectory corresponds to an `ari` subcommand group. These are thin wiring packages: they parse flags, build context, call domain packages, and format output.
+Each subdirectory implements one or more `cobra.Command` tree entries. Packages are thin: they wire flags, resolve paths, call into domain logic, and print results via `internal/output`.
 
-| Package | Purpose |
-|---------|---------|
-| `internal/cmd/root/` | Root cobra command; registers all subcommands; global flags (`--output`, `--verbose`, `--project-dir`, `--session-id`, `--channel`) |
-| `internal/cmd/common/` | Shared context types (`BaseContext`, `SessionContext`); embedded asset wiring; output helpers |
-| `internal/cmd/session/` | Session lifecycle commands (create, park, resume, wrap, fray, log, query, audit, transition, snapshot, migrate, gc, lock, claim, field, status, suggest_next, timeline) |
-| `internal/cmd/sync/` | `ari sync` command; delegates to `materialize.Sync()` |
-| `internal/cmd/hook/` | All hook handlers (agentguard, attributionguard, autopark, budget, clew, context, driftdetect, gitconventions, precompact, sessionend, subagent, suggest, validate, worktreeremove, worktreeseed, writeguard) |
-| `internal/cmd/manifest/` | `ari manifest` (diff, merge, show, validate) |
-| `internal/cmd/inscription/` | `ari inscription` (sync, diff, validate, rollback, backups) |
-| `internal/cmd/rite/` | `ari rite` (current, info, invoke, list, pantheon, release, status, validate, context) |
-| `internal/cmd/agent/` | `ari agent` (embody, list, new, update, validate) |
-| `internal/cmd/artifact/` | `ari artifact` (list, query, rebuild, register) |
-| `internal/cmd/worktree/` | `ari worktree` (clone, create, cleanup, export, import, list, remove, status, switch, sync) |
-| `internal/cmd/initialize/` | `ari init` |
-| `internal/cmd/land/` | `ari land` and `ari land synthesize` |
-| `internal/cmd/handoff/` | `ari handoff` (execute, history, prepare, status) |
-| `internal/cmd/procession/` | `ari procession` (abandon, create, list, proceed, recede, status) |
-| `internal/cmd/knows/` | `ari knows` |
-| `internal/cmd/ledge/` | `ari ledge` (list, promote) |
-| `internal/cmd/lint/` | `ari lint` (lint_preferential) |
-| `internal/cmd/naxos/` | `ari naxos` (scan, triage) |
-| `internal/cmd/org/` | `ari org` (current, init, list, set) |
-| `internal/cmd/provenance/` | `ari provenance` |
-| `internal/cmd/sails/` | `ari sails check` |
-| `internal/cmd/status/` | `ari status` |
-| `internal/cmd/explain/` | `ari explain` (concepts, context) |
-| `internal/cmd/tour/` | `ari tour` (collect) |
-| `internal/cmd/tribute/` | `ari tribute generate` |
-| `internal/cmd/validate/` | `ari validate` |
-| `internal/cmd/complaint/` | `ari complaint list` |
-| `internal/cmd/ask/` | `ari ask` (search within ari help) |
+| Package | User-facing command | Purpose |
+|---|---|---|
+| `internal/cmd/root` | (root) | Registers all subcommands; global flags; `PersistentPreRunE` for project discovery |
+| `internal/cmd/session` | `ari session` | Session CRUD: create, park, resume, wrap, log, audit, status |
+| `internal/cmd/sync` | `ari sync` | Dispatches to `internal/materialize` unified pipeline |
+| `internal/cmd/rite` | `ari rite` | Rite list, switch, info |
+| `internal/cmd/hook` | `ari hook` | Hook event handlers: agent-guard, budget, autopark, handshake, writeguard, context-injection |
+| `internal/cmd/manifest` | `ari manifest` | Manifest diff, merge, validate |
+| `internal/cmd/inscription` | `ari inscription` | CLAUDE.md region management |
+| `internal/cmd/knows` | `ari knows` | .know/ file read/write |
+| `internal/cmd/ledge` | `ari ledge` | .ledge/ artifact management (promote, list) |
+| `internal/cmd/tribute` | `ari tribute` | TRIBUTE.md generation at session wrap |
+| `internal/cmd/naxos` | `ari naxos` | Orphaned session cleanup |
+| `internal/cmd/sails` | `ari sails` | Session signal files (gray/white sails) |
+| `internal/cmd/handoff` | `ari handoff` | Session handoff generation |
+| `internal/cmd/procession` | `ari procession` | Cross-rite procession workflow management |
+| `internal/cmd/provenance` | `ari provenance` | Provenance manifest inspection |
+| `internal/cmd/worktree` | `ari worktree` | Git worktree lifecycle for agent isolation |
+| `internal/cmd/artifact` | `ari artifact` | Session artifact tracking |
+| `internal/cmd/agent` | `ari agent` | Agent listing and inspection |
+| `internal/cmd/land` | `ari land` | Cross-session .sos/land/ synthesis management |
+| `internal/cmd/org` | `ari org` | Organization-scope resource sync |
+| `internal/cmd/lint` | `ari lint` | Rite and agent lint checks |
+| `internal/cmd/status` | `ari status` | Project/session status overview |
+| `internal/cmd/explain` | `ari explain` | Explain knossos concepts |
+| `internal/cmd/tour` | `ari tour` | Guided project walkthrough |
+| `internal/cmd/ask` | `ari ask` | Search/query across project context |
+| `internal/cmd/complaint` | `ari complaint` | Cassandra complaint filing |
+| `internal/cmd/initialize` | `ari init` | Bootstrap new knossos project |
+| `internal/cmd/common` | (shared) | Shared command utilities, embedded asset wiring, `NeedsProject` annotation |
 
-**Hub within `internal/cmd/`**: `common` is imported by every other cmd package.
+### `internal/` — Domain Logic (36 packages)
 
-### `internal/` Domain Packages
+**Core domain packages:**
 
-#### Hub Packages (imported by many)
+| Package | Purpose | Key types |
+|---|---|---|
+| `internal/materialize` | Channel directory generation — the primary sync pipeline | `Materializer`, `RiteManifest`, `SyncOptions`, `SyncResult`, `Options`, `Result` |
+| `internal/session` | Session lifecycle state machine, context, events | `Status`, `FSM`, `Context`, `Event`, `ClewEvent`, `Strand`, `Procession` |
+| `internal/inscription` | CLAUDE.md/GEMINI.md region management (marker system) | `Manifest`, `Region`, `Marker`, `OwnerType`, `ParsedRegion`, `ParseResult` |
+| `internal/provenance` | File-level provenance tracking; divergence detection | `ProvenanceManifest`, `ProvenanceEntry`, `OwnerType`, `ScopeType`, `Collector` |
+| `internal/hook` | Hook event parsing, lifecycle adapter, clew contract events | `StdinPayload`, `Env`, `HookEvent`, `LifecycleAdapter`, `ClaudeAdapter`, `GeminiAdapter` |
+| `internal/rite` | Rite discovery, context injection, switching | `RiteContext`, `ContextRow`, `Syncer` (interface) |
+| `internal/manifest` | Project manifest load/parse/diff/merge | `Manifest`, `Format` |
+| `internal/paths` | Path resolution, project root discovery, `.sos/` paths | `Resolver` |
+| `internal/errors` | Typed exit codes and error constants | `KnossosError`, exit code constants (ExitSuccess=0 through ExitSwitchAborted=13+) |
+| `internal/output` | Format-aware stdout/stderr printing (text/json/yaml) | `Printer`, `Format`, `Textable` (interface) |
+| `internal/config` | KNOSSOS_HOME and XDG config dir resolution | `KnossosHome()`, `XDGDataDir()`, `ActiveOrg()` |
+| `internal/frontmatter` | YAML frontmatter extraction from markdown | `FlexibleStringSlice`, `Parse()` |
+| `internal/channel` | Canonical tool name ↔ channel wire name mapping | `CanonicalTool` map |
+| `internal/registry` | Platform reference registry (agents, skills, CLI, dromena) | `RefKey`, `RefCategory` |
+| `internal/lock` | Advisory file locking with stale detection (5-minute threshold) | `LockMetadata`, `Shared`/`Exclusive` |
+| `internal/fileutil` | Atomic file writes (temp-file-then-rename) | `AtomicWriteFile()`, `WriteIfChanged()` |
+| `internal/tokenizer` | Token counting (tiktoken cl100k_base) | `Counter` |
+| `internal/checksum` | SHA256 checksums with `sha256:` prefix | (utility functions) |
+| `internal/session/fsm.go` | 4-state session FSM (NONE→ACTIVE→PARKED/ARCHIVED) | `FSM` |
+| `internal/naxos` | Orphan session cleanup (named after island where Ariadne was abandoned) | `OrphanReason`, `SuggestedAction` |
+| `internal/tribute` | TRIBUTE.md session summary generation | `GenerateResult`, `Artifact`, `Decision`, `PhaseRecord` |
+| `internal/suggest` | Contextual suggestion generation (pure: struct in, slice out) | `Suggestion`, `Kind`, `SessionInput` |
+| `internal/perspective` | Agent perspective document assembly (pre-materialization view) | `PerspectiveDocument`, `LayerEnvelope`, `LayerStatus` |
+| `internal/know` | .know/ domain file parsing (frontmatter + staleness detection) | `Meta`, `KnowFile` |
+| `internal/ledge` | .ledge/ artifact promotion and management | (promote, list) |
+| `internal/search` | Cross-project search/indexing for `ari ask` | `Entry`, `Index`, `Score` |
 
-| Package | Imported by (files) | Purpose |
-|---------|---------------------|---------|
-| `internal/errors/` | 120 | Domain error types, exit codes (ExitSuccess=0 through ExitSyncNotConfigured=21), error constructors |
-| `internal/output/` | 94 | Format-aware output (text/json/yaml), `Printer` struct, `Textable`/`Tabular` interfaces, all output DTO structs |
-| `internal/paths/` | 71 | Path resolution; `Resolver` struct; `TargetChannel` interface (ClaudeChannel, GeminiChannel); all XDG/project directory helpers |
-| `internal/session/` | 42 | Session FSM, Context struct, status types, phase types, events, timeline, lock protocol |
-| `internal/provenance/` | 20 | ProvenanceManifest, ProvenanceEntry, OwnerType, ScopeType; file-level provenance tracking |
-| `internal/materialize/` | 7 | Materializer (main pipeline engine); consumed by sync, rite, inscription commands |
+**Sub-packages of `internal/materialize/`:**
 
-#### Domain Logic Packages
+| Sub-package | Purpose |
+|---|---|
+| `internal/materialize/source` | 5-tier rite source resolution (project > user > knossos > org > embedded) |
+| `internal/materialize/mena` | Mena (.dro.md/.lego.md) collection, routing, projection to commands/skills |
+| `internal/materialize/hooks` | Hooks config loading, hooks settings merge |
+| `internal/materialize/compiler` | `ChannelCompiler` interface; `ClaudeCompiler` (pass-through), `GeminiCompiler` (tool translation) |
+| `internal/materialize/orgscope` | Org-scope resource sync |
+| `internal/materialize/userscope` | User-scope resource sync (cross-rite agents, mena, hooks) |
+| `internal/materialize/procession` | Procession template resolution |
 
-| Package | Key Types | Purpose |
-|---------|-----------|---------|
-| `internal/materialize/` | `Materializer`, `RiteManifest`, `Options`, `Result`, `SyncOptions`, `SyncResult` | Core pipeline: rite source resolution -> generate agents/mena/rules/inscription/settings -> provenance tracking |
-| `internal/materialize/source/` | `SourceResolver`, `ResolvedRite`, `RiteSource` | 6-tier rite resolution (explicit > project > user > org > platform > embedded) |
-| `internal/materialize/compiler/` | `ChannelCompiler` interface, `GeminiCompiler` | Per-channel compilation pass (Claude = passthrough, Gemini = transform) |
-| `internal/materialize/mena/` | `Engine`, `Namespace`, `Walker`, `Transform` | Mena collection, namespace management, .dro/.lego routing to commands/skills |
-| `internal/materialize/userscope/` | `UserScopeResult`, `CollisionChecker` | User-level sync (agents, mena, hooks) with collision avoidance |
-| `internal/materialize/orgscope/` | (sync.go) | Org-level sync pipeline |
-| `internal/materialize/procession/` | `Resolver`, `Renderer` | Cross-rite procession template resolution and rendering |
-| `internal/inscription/` | `Manifest`, `Region`, `Marker`, `ParsedRegion`, `OwnerType` | CLAUDE.md templating with region ownership (knossos/satellite/regenerate); 3-owner marker system |
-| `internal/session/` | `Context`, `FSM`, `Status`, `Phase`, `Strand`, `Procession` | Session lifecycle (NONE->ACTIVE->PARKED->ARCHIVED FSM); SESSION_CONTEXT.md parsing/serialization; 5 phases |
-| `internal/hook/` | `StdinPayload`, `Env`, `HookEvent`, `LifecycleAdapter` | Hook event parsing from stdin JSON; 14 canonical event types; adapter pattern for CC/Gemini |
-| `internal/hook/clewcontract/` | `TypedEvent`, `Writer`, `BufferedEventWriter` | Append-only JSONL event log with 16 typed events; thread-safe via mutex |
-| `internal/provenance/` | `ProvenanceManifest`, `ProvenanceEntry`, `OwnerType`, `ScopeType` | File-level ownership tracking (knossos/user/untracked); divergence detection; per-channel manifests |
-| `internal/agent/` | `FlexibleStringSlice`, `MemoryField`, `Frontmatter` | Agent frontmatter parsing; archetype scaffolding; validation |
-| `internal/paths/` | `Resolver`, `TargetChannel`, `ClaudeChannel`, `GeminiChannel` | All path computation; project root discovery (.knossos/ or .claude/.gemini/ walk-up) |
-| `internal/resolution/` | `Chain`, `Tier`, `ResolvedItem` | Generic multi-tier resolution (zero internal imports; TENSION-005) |
-| `internal/manifest/` | `Manifest`, `Format` | Project manifest loading, diffing, merging |
-| `internal/frontmatter/` | `FlexibleStringSlice` | YAML frontmatter parsing shared by agent and materialize packages |
-| `internal/mena/` | `StripMenaExtension()`, `RouteMenaFile()` | Mena file type detection (.dro -> commands/, .lego -> skills/) |
-| `internal/registry/` | `RefCategory`, `Registry` | Leaf package (zero internal imports); denial-recovery registry for platform references |
-| `internal/config/` | `KnossosHome()`, `ActiveOrg()` | Lazy-initialized config (KNOSSOS_HOME, KNOSSOS_ORG env vars); once.Do caching |
-| `internal/errors/` | `AriadneError`, 21 exit codes, error code constants | Domain errors with JSON serialization; `IsHandled()`, `GetExitCode()` |
-| `internal/output/` | `Printer`, `Format`, `Tabular`, `Textable` | Format-aware output; all output DTO structs |
-| `internal/fileutil/` | `WriteIfChanged()`, `AtomicWriteFile()` | Idempotent writes; atomic writes (prevents CC file watcher noise) |
-| `internal/channel/` | (channel-related helpers) | Channel-level abstractions (distinct from paths.TargetChannel) |
-| `internal/checksum/` | (sha256 helpers) | SHA256 checksums with "sha256:" prefix format |
-| `internal/lock/` | `Manager`, `LockMetadata` | Advisory file locking; 5-minute stale threshold |
-| `internal/validation/` | `ValidateSessionFields()` | Session schema validation |
-| `internal/artifact/` | (registry) | Federated Artifact Registry |
-| `internal/know/` | (parsing) | .know/ file parsing |
-| `internal/ledge/` | (management) | Ledge artifact management |
-| `internal/naxos/` | (triage) | Session hygiene triage |
-| `internal/procession/` | (workflow templates) | Cross-rite workflow template types |
-| `internal/sails/` | (confidence system) | White Sails confidence signaling (WHITE/GRAY/BLACK) |
-| `internal/suggest/` | (suggestions) | Next-action suggestions |
-| `internal/perspective/` | (perspective) | Perspective/view helpers |
-| `internal/tokenizer/` | (token counting) | Token counting for context budget estimation |
-| `internal/tribute/` | (generation) | TRIBUTE.md auto-generation |
-| `internal/sync/` | (state management) | Sync state management |
-| `internal/worktree/` | (git worktrees) | Worktree lifecycle management |
-| `internal/search/` | (search) | Search within ari help content |
-| `internal/assets/` | (embedded assets) | Embedded FS management (SetEmbedded, SetUserAssets) |
+**Sub-packages of `internal/hook/`:**
 
-**Leaf packages** (no internal imports):
-- `internal/errors/`, `internal/resolution/`, `internal/registry/`, `internal/checksum/`, `internal/tokenizer/`
+| Sub-package | Purpose |
+|---|---|
+| `internal/hook/clewcontract` | Append-only JSONL event log (16 event types); `BufferedEventWriter` (5s flush, thread-safe) |
+
+**Hub packages** (imported by many): `internal/errors`, `internal/paths`, `internal/fileutil`, `internal/output`, `internal/frontmatter`
+
+**Leaf packages** (no internal imports): `internal/registry`, `internal/provenance`, `internal/channel`, `internal/checksum`
 
 ---
 
 ## Layer Boundaries
 
-The codebase follows a clean 3-layer model:
+The codebase follows a strict 3-tier layer model:
 
 ```
-Layer 1: CLI Surface
-  cmd/ari/main.go
-  internal/cmd/{subcommand}/
-
-Layer 2: Command Wiring
-  internal/cmd/root/     (registers all subcommands)
-  internal/cmd/common/   (shared context helpers)
-
-Layer 3: Domain Logic
-  internal/materialize/  (pipeline hub)
-  internal/session/
-  internal/hook/
-  internal/inscription/
-  internal/provenance/
-  internal/paths/        (shared utility hub)
-  internal/errors/       (leaf)
-  internal/output/       (leaf)
-  internal/resolution/   (leaf, zero internal imports per TENSION-005)
-  internal/registry/     (leaf, zero internal imports)
+cmd/ari/main.go
+      ↓
+internal/cmd/* (command wiring — cobra handlers, flag parsing, output)
+      ↓
+internal/* (domain logic — no cobra, no output printing)
 ```
 
-**Import direction: cmd/ -> internal/cmd/ -> internal/\***
+**Import direction rules observed:**
 
-### Hub Packages
+1. `cmd/ari/main.go` imports only: `knossos` (root embed package), `internal/cmd/common`, `internal/cmd/root`, `internal/errors`, `internal/output`
+2. `internal/cmd/root` imports ALL command sub-packages (it is the hub of the command layer)
+3. Domain packages do NOT import `internal/cmd/*` — the boundary is enforced by package layout
+4. `internal/provenance` is declared a **leaf package** (imports only stdlib) — noted explicitly in `provenance.go` line 68: "NOTE: Provenance is a leaf package (no internal imports per ADR-0026)"
+5. `internal/registry` is a **leaf package** — imports only stdlib (documented in source)
+6. `internal/materialize` is the largest hub: imports `internal/errors`, `internal/fileutil`, `internal/paths`, `internal/provenance`, `internal/registry`, `internal/config`, `internal/checksum`, `internal/inscription`, `internal/channel`, `internal/frontmatter`
+7. `internal/session` imports `internal/errors`, `internal/fileutil`, `internal/validation`, `internal/hook/clewcontract`
+8. `internal/hook` imports `internal/hook/clewcontract` (sub-package), no upward imports
 
-- `internal/errors/` — imported by 120 files; true leaf (no internal imports)
-- `internal/output/` — imported by 94 files; minimal internal dependencies
-- `internal/paths/` — imported by 71 files; imports only `internal/errors/` and `internal/config/`
-- `internal/session/` — imported by 42 files; imports `internal/errors/`, `internal/fileutil/`, `internal/validation/`
+**Boundary-enforcement patterns:**
 
-### Key Boundary Rules
+- The root embed package (`package knossos`, `embed.go`) sits at module root and is imported by `main.go` only — it is the single dependency inversion point for embedded assets
+- `internal/materialize` uses sub-packages (`source/`, `mena/`, `hooks/`, `compiler/`, `userscope/`, `orgscope/`) with type-alias re-exports in the parent package for backward compatibility (e.g., `source.go`, `mena.go`, `hooks.go`, `user_scope.go`)
+- `internal/cmd/common` acts as the shared context between `main.go` and all command packages — it holds embedded asset references and `NeedsProject` annotation logic
 
-1. `provenance` is a leaf with respect to `materialize`: `materialize imports provenance, never the reverse` (per ADR-0026)
-2. `resolution.Chain` has zero internal imports; tier paths are injected via constructor to avoid import cycles (TENSION-005)
-3. `inscription.OwnerType` and `provenance.OwnerType` are distinct types with different semantics (TENSION-001)
-4. `materialize` achieves clean boundaries through sub-packages: `materialize/source`, `materialize/mena`, `materialize/userscope`, `materialize/orgscope`, `materialize/hooks`, `materialize/compiler`, `materialize/procession`
-
-**Notable cross-cutting imports** (Layer 1 -> Layer 1):
-- `session` imports `hook/clewcontract` (event emission)
-- `tribute` imports `session`, `sails`, `artifact` (all domain)
-- `sails` imports `hook/clewcontract` (event log reading)
-- `perspective` imports `agent`, `provenance`, `rite`, `frontmatter` (multi-domain assembly)
+**Layer summary:**
+- **CLI surface**: `cmd/ari/` + `internal/cmd/*`
+- **Domain core**: `internal/materialize`, `internal/session`, `internal/inscription`, `internal/hook`, `internal/rite`, `internal/provenance`
+- **Infrastructure leaf**: `internal/errors`, `internal/paths`, `internal/fileutil`, `internal/output`, `internal/config`, `internal/registry`, `internal/checksum`, `internal/channel`, `internal/frontmatter`
 
 ---
 
@@ -194,242 +160,228 @@ Layer 3: Domain Logic
 
 ### Binary Entry Point
 
-`cmd/ari/main.go` performs:
-1. Sets version info on root command: `root.SetVersion(version, commit, date)`
-2. Sets build version for XDG extraction: `common.SetBuildVersion(version)`
-3. Wires embedded assets into the global `assets` package via `common.SetEmbeddedAssets(...)`, `common.SetEmbeddedUserAssets(...)`, `common.SetEmbeddedProcessions(...)`
-4. Executes root command: `root.Execute()` -> cobra dispatch
-5. Handles unhandled errors with format-aware printing; exits with `errors.GetExitCode(err)`
+`cmd/ari/main.go` `main()`:
+1. Sets version via `root.SetVersion(version, commit, date)`
+2. Wires embedded assets: `common.SetEmbeddedAssets(knossos.EmbeddedRites, knossos.EmbeddedTemplates, knossos.EmbeddedHooksYAML)`
+3. Wires user assets: `common.SetEmbeddedUserAssets(knossos.EmbeddedAgents, knossos.EmbeddedMena)`
+4. Wires processions: `common.SetEmbeddedProcessions(knossos.EmbeddedProcessions)`
+5. Calls `root.Execute()` — returns error if any command failed
+6. Error printing is format-aware via `output.Printer`
 
-### CLI Subcommands (complete list)
+### CLI Command Tree (all registered subcommands)
 
-| Subcommand | Package | Purpose |
-|------------|---------|---------|
-| `ari session` | `internal/cmd/session/` | Session lifecycle (create, park, resume, wrap, fray, log, query, audit, transition, snapshot, migrate, gc, lock, claim, field, status, suggest-next, timeline) |
-| `ari manifest` | `internal/cmd/manifest/` | Manifest diff, merge, show, validate |
-| `ari inscription` | `internal/cmd/inscription/` | CLAUDE.md sync, diff, validate, rollback, backups |
-| `ari sync` | `internal/cmd/sync/` | Full rite+user sync pipeline |
-| `ari validate` | `internal/cmd/validate/` | Generic validation |
-| `ari handoff` | `internal/cmd/handoff/` | Session handoff (execute, history, prepare, status) |
-| `ari procession` | `internal/cmd/procession/` | Cross-rite workflow (abandon, create, list, proceed, recede, status) |
-| `ari worktree` | `internal/cmd/worktree/` | Git worktree management |
-| `ari hook` | `internal/cmd/hook/` | Hook execution (all hook types) |
-| `ari knows` | `internal/cmd/knows/` | Knowledge base query |
-| `ari artifact` | `internal/cmd/artifact/` | Artifact registry (list, query, rebuild, register) |
-| `ari sails` | `internal/cmd/sails/` | Confidence signal check |
-| `ari naxos` | `internal/cmd/naxos/` | Session hygiene triage (scan, triage) |
-| `ari rite` | `internal/cmd/rite/` | Rite management (current, info, invoke, list, pantheon, release, status, validate, context) |
-| `ari agent` | `internal/cmd/agent/` | Agent management (embody, list, new, update, validate) |
-| `ari tribute` | `internal/cmd/tribute/` | Tribute generation |
-| `ari init` | `internal/cmd/initialize/` | Project initialization |
-| `ari provenance` | `internal/cmd/provenance/` | Provenance inspection |
-| `ari org` | `internal/cmd/org/` | Org management (current, init, list, set) |
-| `ari land` | `internal/cmd/land/` | Land knowledge pipeline |
-| `ari ledge` | `internal/cmd/ledge/` | Ledge artifact management |
-| `ari lint` | `internal/cmd/lint/` | Preferential language linting |
-| `ari status` | `internal/cmd/status/` | Project/session status |
-| `ari explain` | `internal/cmd/explain/` | Explain concepts, context |
-| `ari tour` | `internal/cmd/tour/` | Codebase tour |
-| `ari ask` | `internal/cmd/ask/` | Search ari help content |
-| `ari complaint` | `internal/cmd/complaint/` | Complaint management |
-| `ari version` | `internal/cmd/root/` | Version info |
+| Command | Package | Description |
+|---|---|---|
+| `ari session` | `internal/cmd/session` | Session lifecycle: create, park, resume, wrap, log, audit, status |
+| `ari sync` | `internal/cmd/sync` | Unified sync pipeline (rite + user + org scopes) |
+| `ari rite` | `internal/cmd/rite` | Rite management: list, switch, info |
+| `ari hook` | `internal/cmd/hook` | Hook event handlers invoked by CC/Gemini lifecycle events |
+| `ari manifest` | `internal/cmd/manifest` | Manifest diff, merge, validate |
+| `ari inscription` | `internal/cmd/inscription` | CLAUDE.md region management |
+| `ari knows` | `internal/cmd/knows` | .know/ codebase knowledge file management |
+| `ari ledge` | `internal/cmd/ledge` | .ledge/ work product artifact promotion |
+| `ari tribute` | `internal/cmd/tribute` | Generate TRIBUTE.md at session wrap |
+| `ari naxos` | `internal/cmd/naxos` | Orphan session detection and cleanup |
+| `ari sails` | `internal/cmd/sails` | Session signal files (gray/white sails for hand-off signals) |
+| `ari handoff` | `internal/cmd/handoff` | Session handoff document generation |
+| `ari procession` | `internal/cmd/procession` | Cross-rite coordinated workflow management |
+| `ari provenance` | `internal/cmd/provenance` | Inspect PROVENANCE_MANIFEST.yaml |
+| `ari worktree` | `internal/cmd/worktree` | Git worktree lifecycle management for agent isolation |
+| `ari artifact` | `internal/cmd/artifact` | Session artifact tracking |
+| `ari agent` | `internal/cmd/agent` | Agent listing, inspection, perspective view |
+| `ari land` | `internal/cmd/land` | .sos/land/ cross-session synthesis management |
+| `ari org` | `internal/cmd/org` | Organization-scope resource sync |
+| `ari lint` | `internal/cmd/lint` | Rite and agent quality lint |
+| `ari status` | `internal/cmd/status` | Project and session status overview |
+| `ari explain` | `internal/cmd/explain` | Explain knossos concepts in context |
+| `ari tour` | `internal/cmd/tour` | Guided project walkthrough |
+| `ari ask` | `internal/cmd/ask` | Semantic search over project context |
+| `ari complaint` | `internal/cmd/complaint` | File Cassandra-protocol complaints |
+| `ari init` | `internal/cmd/initialize` | Bootstrap new knossos project |
+| `ari version` | `internal/cmd/root` | Show version/build metadata |
 
-### Global Flags (all subcommands)
+### Global Flags (defined in `internal/cmd/root`)
 
-- `--output/-o` (text/json/yaml, default: text)
-- `--verbose/-v` (JSON lines to stderr)
-- `--config` (config file override)
-- `--project-dir/-p` (override project root discovery)
-- `--session-id/-s` (override current session)
-- `--channel` (target channel: claude/gemini/all, default: all)
+- `--output, -o` (text/json/yaml) — format-aware output
+- `--verbose, -v` — verbose JSON lines to stderr
+- `--config` — explicit config file path
+- `--project-dir, -p` — override project root discovery
+- `--session-id, -s` — override session ID
+- `--channel` — target channel: claude, gemini, or all (default: "all")
 
 ### Key Exported Interfaces
 
-- `paths.TargetChannel` — implemented by `ClaudeChannel{}` and `GeminiChannel{}`; provides Name(), DirName(), ContextFile(), ContextFilePath(), SkillsDir()
-- `output.Textable` — types implement `Text() string` for human-readable output
-- `output.Tabular` — types implement `Headers() []string` and `Rows() [][]string` for table output
-- `hook.LifecycleAdapter` — `ClaudeAdapter` and `GeminiAdapter` implementations for hook payload parsing
-- `materialize/compiler.ChannelCompiler` — per-channel compilation pass interface
-- `provenance.Collector` — interface for recording file provenance (2 methods: `Record`, `Entries`)
-- `rite.Syncer` — interface `SyncRite(riteName string, keepOrphans bool) error`
+- `compiler.ChannelCompiler` — `CompileCommand()`, `CompileSkill()`, `CompileAgent()`, `ContextFilename()` — consumed by `internal/materialize` during agent/mena generation
+- `provenance.Collector` — thread-safe provenance recording interface, threaded through all rite pipeline stages
+- `output.Textable` — `Text() string` — implemented by all output structs to support text format printing
+- `rite.Syncer` — `SyncRite(riteName string, keepOrphans bool) error` — satisfied by `Materializer`
+- `internal/hook.LifecycleAdapter` — `ParsePayload(io.Reader) (*Env, error)` — implemented by `ClaudeAdapter` and `GeminiAdapter`
+
+### Project Discovery
+
+`paths.FindProjectRoot()` walks upward from CWD checking for `.knossos/`, `.claude/`, or `.gemini/` directories. `.knossos/` is the strongest signal (platform dir). Project root is the anchor for all relative path resolution.
 
 ---
 
 ## Key Abstractions
 
-### 1. `materialize.Materializer` (`internal/materialize/materialize.go`)
+### 1. `Materializer` — `internal/materialize/materialize.go`
 
-The central pipeline engine. Key methods:
-- `Sync(SyncOptions) (*SyncResult, error)` — unified entry point dispatching to rite/org/user scopes
-- `MaterializeWithOptions(riteName string, opts Options) (*Result, error)` — full rite pipeline (9+ stages)
-- `MaterializeMinimal(opts Options) (*Result, error)` — cross-cutting mode (no rite)
+The central orchestrator. Holds: `resolver *paths.Resolver`, `sourceResolver *SourceResolver`, embedded FSes (`embeddedTemplates`, `embeddedAgents`, `embeddedMena`, `embeddedProcessions`), and a `channelDirOverride`. Its `Sync(SyncOptions)` method is the unified sync pipeline entry point, dispatching to rite scope (`MaterializeWithOptions`), user scope (`syncUserScope`), and org scope (`syncOrgScope`).
 
-Constructed via `NewMaterializer(resolver)` or builder pattern (`WithEmbeddedFS`, `WithEmbeddedTemplates`, etc.).
+### 2. `RiteManifest` — `internal/materialize/materialize.go`
 
-### 2. `materialize.RiteManifest` (`internal/materialize/materialize.go`)
+YAML representation of `rites/{name}/manifest.yaml`. Contains: `Name`, `Version`, `Agents []Agent`, `Dromena []string`, `Legomena []string`, `MCPServers []MCPServer`, `MCPPools []MCPPoolRef`, `HookDefaults`, `AgentDefaults`, `SkillPolicies`, `ArchetypeData`. This is the configuration contract for a rite — every materialization pass reads it to know what to generate.
 
-Central configuration struct read from `rites/{name}/manifest.yaml`. Key fields:
-- `Agents []Agent` — agent definitions
-- `Dromena []string` — commands to project to commands/
-- `Legomena []string` — skills to project to skills/
-- `HookDefaults *HookDefaults` — write-guard token budgets
-- `SkillPolicies []SkillPolicy` — capability-driven skill wiring rules
-- `AgentDefaults map[string]any` — frontmatter merge into all agents
-- `MCPServers []MCPServer` — MCP server declarations (written to .mcp.json per SCAR-028)
-- `ArchetypeData map[string]map[string]any` — per-archetype template data
+### 3. `inscription.Manifest` — `internal/inscription/types.go`
 
-### 3. `session.Context` (`internal/session/context.go`)
+Stored at `.knossos/KNOSSOS_MANIFEST.yaml`. Tracks region ownership in CLAUDE.md/GEMINI.md. Regions have three ownership types: `knossos` (always overwritten), `satellite` (never overwritten), `regenerate` (rebuilt from source). Region hashes enable divergence detection. This is the core of the idempotent, non-destructive CLAUDE.md merge system.
 
-SESSION_CONTEXT.md YAML frontmatter struct. Schema version 2.3. Key fields:
-- `Status Status` — NONE/ACTIVE/PARKED/ARCHIVED
-- `CurrentPhase string` — requirements/design/implementation/validation/complete
-- `Strands []Strand` — child sessions created via `ari session fray`
-- `Procession *Procession` — active cross-rite workflow state (nil when none)
+### 4. `session.Context` — `internal/session/context.go`
 
-Supports polymorphic YAML deserialization for `Strands` (v2.1/2.2 `[]string` or v2.3+ `[]Strand`).
+Parsed `SESSION_CONTEXT.md` — the mutable session document. Contains FSM `Status`, timestamps, `ActiveRite`, `CurrentPhase`, `Procession`, and `Strands` (for forked sessions via `ari fray`). Direct writes to this file are blocked by the writeguard hook; only `ari` CLI commands or Moirai agent may mutate it.
 
-### 4. `session.FSM` (`internal/session/fsm.go`)
+### 5. `session.FSM` — `internal/session/fsm.go`
 
-4-state finite state machine: NONE -> ACTIVE -> PARKED -> ARCHIVED (terminal). Valid transitions:
-- NONE -> ACTIVE (create)
-- ACTIVE -> PARKED (park)
-- ACTIVE -> ARCHIVED (wrap)
-- PARKED -> ACTIVE (resume)
-- PARKED -> ARCHIVED (wrap)
+4-state finite state machine: `NONE → ACTIVE → PARKED/ARCHIVED`, `PARKED → ACTIVE/ARCHIVED`. `ARCHIVED` is terminal. Transitions are validated before every session mutation.
 
-### 5. `provenance.ProvenanceManifest` (`internal/provenance/provenance.go`)
+### 6. `hook.StdinPayload` — `internal/hook/env.go`
 
-Tracks every file in the channel directory with owner (knossos/user/untracked) and scope (rite/org/user). Stored at `.knossos/PROVENANCE_MANIFEST.yaml`. Key safety invariant: `OwnerUser` files are NEVER overwritten by pipeline.
+The JSON structure CC/Gemini sends to hooks on stdin. Contains `SessionID`, `ToolName`, `ToolInput`, `HookEventName`, `CWD`, `TranscriptPath`. The critical architectural lesson: hook data arrives on stdin as JSON, NOT as environment variables (only `CLAUDE_PROJECT_DIR` is an env var).
 
-### 6. `hook.StdinPayload` / `hook.Env` (`internal/hook/env.go`)
+### 7. `provenance.ProvenanceManifest` — `internal/provenance/provenance.go`
 
-**Critical pattern**: CC sends all hook data as JSON on stdin, NOT via environment variables. Only `CLAUDE_PROJECT_DIR` is an env var. `StdinPayload` contains: `session_id`, `tool_name`, `tool_input`, `hook_event_name`, etc. Adapter pattern (`ClaudeAdapter`/`GeminiAdapter`) selected by `KNOSSOS_CHANNEL` env var.
+Stored at `.knossos/PROVENANCE_MANIFEST.yaml` (rite scope) and `.knossos/USER_PROVENANCE_MANIFEST.yaml` (user scope). Maps relative channel-dir paths to `ProvenanceEntry` records. `OwnerType` is `knossos`/`user`/`untracked`. Schema v2.0. Divergence detection promotes `knossos → user` on checksum mismatch.
 
-### 7. `resolution.Chain` (`internal/resolution/chain.go`)
+### 8. `ChannelCompiler` interface — `internal/materialize/compiler/compiler.go`
 
-Generic multi-tier resolver (zero internal imports; injected paths). `Resolve(name, validate)` for top-down early-exit; `ResolveAll(validate)` for shadow-aware enumeration. Used for rite resolution (project > user > org > platform > embedded) and procession template resolution.
+Abstraction for harness-specific agent/mena compilation. `ClaudeCompiler` is pass-through; `GeminiCompiler` translates canonical tool names to Gemini wire names using `internal/channel.CanonicalTool`. This is the harness-agnosticism seam — templates use canonical names, compilers resolve at projection time.
 
-### 8. `paths.Resolver` (`internal/paths/paths.go`)
+### 9. `paths.Resolver` — `internal/paths/paths.go`
 
-Central path computation for all project-relative paths. Constructed with a `projectRoot`. Provides: `SessionsDir()`, `KnossosDir()`, `ChannelDir(TargetChannel)`, `AgentsDirForChannel()`, `RiteDir()`, `SessionContextFile()`, etc. `FindProjectRoot()` walks up from CWD looking for `.knossos/` (strongest signal).
+Anchored to `projectRoot`. Provides all structured path accessors: `SOSDir()`, `SessionsDir()`, `LocksDir()`, `HarnessMapDir()`, `SessionContextFile(sessionID)`, `SessionEventsFile(sessionID)`, `ActiveRiteFile()`, `KnossosManifestFile()`, etc. All domain packages accept a `*Resolver` rather than computing paths independently.
 
-### 9. `output.Printer` (`internal/output/output.go`)
+### 10. `FlexibleStringSlice` — `internal/frontmatter/frontmatter.go`
 
-Format-aware output dispatching to text/json/yaml. All command output types implement either `Textable` (custom text) or `Tabular` (table).
+YAML type that accepts both comma-separated strings and YAML lists. Used in agent frontmatter for tool lists (e.g., `tools: "Bash, Read, Glob"` and `tools: [Bash, Read, Glob]` are both valid). A common convention across all agent files.
 
-### 10. `inscription.Generator` / KNOSSOS region system (`internal/inscription/`)
+### Design Patterns Observed
 
-Manages CLAUDE.md sections via `<!-- KNOSSOS:START region-name -->` markers. Three owner types: `knossos` (always overwritten), `satellite` (user-owned, never overwritten), `regenerate` (generated from source).
-
-### Design Patterns
-
-- **Polymorphic YAML fields**: `session.strandList`, `agent.FlexibleStringSlice`, `agent.MemoryField` — custom `UnmarshalYAML` to accept multiple forms
-- **Envelope/wrapper pattern**: `materialize.SyncResult` wraps `RiteScopeResult`, `OrgScopeResult`, `UserScopeResult`
-- **Builder pattern with method chaining**: `Materializer.WithEmbeddedFS(...).WithEmbeddedTemplates(...)`
-- **Cascade/merge pattern**: `agent_defaults` (manifest level) -> agent frontmatter; `hook_defaults` (shared -> rite) merge
-- **DI via constructor**: `NewMaterializerWithSourceResolver(resolver, sr)` enables test injection
-- **Registry with shadowing**: Higher-priority tiers shadow lower-priority in `resolution.Chain.ResolveAll()`
-- **Provenance collector**: Thread-safe collector threaded through pipeline stages; `NullCollector` for dry-run
-- **Idempotency pattern**: `writeIfChanged()` reads existing file before writing — skips write if content is identical
+- **Polymorphic YAML fields**: `FlexibleStringSlice` allows two syntax forms for the same field
+- **Type-alias re-export pattern**: `internal/materialize/mena.go`, `source.go`, `hooks.go`, `user_scope.go` re-export sub-package types as aliases — enables sub-package extraction without breaking callers
+- **Cascade/merge pattern**: `AgentDefaults` in `RiteManifest` merged into per-agent frontmatter; `SkillPolicies` evaluated per-agent; archetype data cascades from config file → manifest override → runtime render
+- **Envelope pattern**: `hook.StdinPayload` wraps all CC hook data in one JSON envelope; `clewcontract` events follow a typed envelope with `type` discriminator
+- **Registry pattern**: `internal/registry` provides stable `RefKey` constants for platform references, with fallback hints — prevents hard-coded string duplication across the codebase
+- **4-tier source resolution**: rite sources resolve as project > user > knossos > org > embedded (5 tiers including embedded)
 
 ---
 
 ## Data Flow
 
-### 1. Sync Pipeline (Primary: rite source -> `.claude/`)
+### 1. Sync Pipeline (rite scope): `ari sync` → channel directory
 
 ```
-rites/{name}/manifest.yaml
-    | source resolution (materialize/source.SourceResolver)
-       checks: explicit > project > user > org > platform > embedded
-    | RiteManifest deserialization
-    | Materializer.Sync(SyncOptions)
-       |-- materializeAgents() -> .claude/agents/*.md
-       |     agent frontmatter + agent_defaults merge
-       |     archetype rendering (orchestrator.md.tpl)
-       |     skill policies applied (SkillPolicy)
-       |     provenance.Collector records each file
-       |-- materializeMena() -> .claude/commands/ and .claude/skills/
-       |     .dro.md files -> commands/, .lego.md files -> skills/
-       |     StripMenaExtension, RouteMenaFile
-       |-- materializeRules() -> .claude/rules/*.md
-       |-- materializeInscription() -> .claude/CLAUDE.md
-       |     inscription.SyncCLAUDEmd(): render templates -> merge regions
-       |     preserves satellite regions, overwrites knossos regions
-       |-- materializeSettingsWithManifest() -> .claude/settings.local.json (hooks)
-       |-- materializeMcpJson() -> .mcp.json (MCP servers, per SCAR-028)
-       |-- trackState() -> .knossos/sync/state.json
-       |-- writeActiveRite() -> .knossos/ACTIVE_RITE
-       --- provenance.Collector.Save() -> .knossos/PROVENANCE_MANIFEST.yaml
+User runs: ari sync --rite ecosystem
+
+internal/cmd/sync
+  ↓ calls
+internal/materialize.Materializer.Sync(SyncOptions{Scope: ScopeRite, RiteName: "ecosystem"})
+  ↓
+source.SourceResolver.Resolve("ecosystem")
+  → checks: project/rites/ → user-level rites → $KNOSSOS_HOME/rites → embedded FS
+  → returns ResolvedRite{RitePath, ManifestPath, Source}
+  ↓
+Load RiteManifest from resolved.ManifestPath (YAML parse)
+  ↓
+enrichArchetypeData(manifest, riteFS) — loads orchestrator.yaml config
+  ↓
+materializeAgents(manifest, ...) — reads rites/{name}/agents/*.md, transforms frontmatter,
+  applies AgentDefaults, SkillPolicies, MCP config; writes to .claude/agents/*.md
+  ↓
+materializeMena(manifest, ...) — collects .dro.md/.lego.md files, routes to
+  .claude/commands/ (dromena) or .claude/skills/ (legomena), strips extensions
+  ↓
+materializeInscription(manifest, ...) — runs inscription pipeline:
+  LoadManifest → Generate sections from templates → Merge (preserve satellite regions) →
+  Backup if migration → AtomicWrite CLAUDE.md → UpdateHashes in KNOSSOS_MANIFEST.yaml
+  ↓
+materializeSettings(...) — merges hooks into .claude/settings.json
+  ↓
+provenanceCollector.Save() → writes .knossos/PROVENANCE_MANIFEST.yaml
 ```
 
-Configuration merge points within the pipeline:
-- Agent frontmatter: explicit fields > `agent_defaults` in manifest > archetype defaults
-- Mena: 4-tier source resolution (project > dependency > shared > user)
-- MCP servers: written to `.mcp.json` (project root), union merge
-- CLAUDE.md: knossos regions overwritten; satellite regions preserved; `regenerate` regions re-rendered
+All writes use `fileutil.WriteIfChanged()` to avoid CC file-watcher disruption. `writeIfChanged` is the atomic-safe idempotency gate.
 
-### 2. Session Event Pipeline
+### 2. User Scope Sync: agents, mena, hooks → `~/.claude/`
 
 ```
-CC lifecycle event (SessionStart, Stop, PreToolUse, etc.)
-    | CC sends JSON to ari hook subcommand stdin
-    | hook.ParseEnv() -> hook.Env (session ID, event type, tool info)
-    | internal/cmd/hook/{context,autopark,budget,clew,...}.go
-    | session.Context.Load() from SESSION_CONTEXT.md
-    | session state mutation (transition, field update, etc.)
-    | hook/clewcontract.BufferedEventWriter.Emit()
-       -> appends typed event to .sos/sessions/{id}/events.jsonl
-    | hook output (hookSpecificOutput envelope with permissionDecision for CC)
+Materializer.syncUserScope(opts)
+  ↓
+userscope.SyncUserScope(params)
+  → source: $KNOSSOS_HOME/agents/, $KNOSSOS_HOME/mena/, $KNOSSOS_HOME/hooks/
+    (fallback: embedded FS from binary)
+  → target: ~/.claude/agents/, ~/.claude/commands/, ~/.claude/skills/, ~/.claude/hooks/
+  → CollisionChecker: reads .knossos/PROVENANCE_MANIFEST.yaml to prevent user scope
+    from shadowing rite resources (flat-name collision prevention)
+  → provenance.LoadOrBootstrap → saves to .knossos/USER_PROVENANCE_MANIFEST.yaml
 ```
 
-The events.jsonl file supports 3 format versions (v1 legacy `Event`, v2 flat `ClewEvent`, v3 typed `TypedEvent`) — interleaved per ADR-0027 backward compat bridge in `internal/session/events_read.go`.
-
-### 3. Hook Pipeline (CC integration)
+### 3. Hook Pipeline: CC lifecycle event → `ari hook <subcommand>`
 
 ```
-Claude Code tool use
-    | CC sends {"hook_event_name": "PreToolUse", "tool_name": "...", ...} to stdin
-    | hook.parseStdin() -> StdinPayload
-    | hook.ParseEnv() builds Env (CLAUDE_PROJECT_DIR only env var)
-    | hook handler (e.g., writeguard, budget, agentguard) processes Env
-    | hook.Output struct -> JSON on stdout:
-       {"hookSpecificOutput": {"permissionDecision": "allow"/"deny"}}
-    | CC reads permissionDecision — hooks fail-open (error -> allow)
+CC lifecycle event fires (e.g., PreToolUse with tool=Write)
+  ↓ CC spawns ari as subprocess
+ari hook writeguard  (or budget, agent-guard, context-injection, autopark, handshake)
+  ↓
+internal/hook.ParseEnv()
+  → reads JSON payload from stdin (NOT env vars)
+  → CLAUDE_PROJECT_DIR from env
+  → GetAdapter() checks KNOSSOS_CHANNEL env var → returns ClaudeAdapter or GeminiAdapter
+  → adapter.ParsePayload(stdin) → returns *Env{SessionID, ToolName, ToolInput, ...}
+  ↓
+Command-specific logic (e.g., writeguard: checks if ToolInput.path matches *_CONTEXT.md)
+  ↓
+Output: JSON to stdout { decision: "block"/"allow", reason: "..." }
+  (CC reads permissionDecision from hookSpecificOutput envelope, NOT top-level decision)
+  ↓
+Optional: clewcontract.BufferedEventWriter appends event to .sos/sessions/{id}/events.jsonl
 ```
 
-### 4. Configuration Value Tracing
+### 4. Session Pipeline: session lifecycle events
 
-An agent's `model` value example:
 ```
-rites/{name}/agents/{agent}.md frontmatter (model: claude-opus-4-5)
-    OR rites/{name}/manifest.yaml agent_defaults.model
-    | materialize.materializeAgents() merge: agent field > agent_defaults
-    | agent_transform.go applies write-guard defaults, model override
-    | writeIfChanged() -> .claude/agents/{agent}.md
-    | provenance.Collector records checksum
+ari session create --initiative "Feature X"
+  ↓
+internal/session.FSM.ValidateTransition(NONE → ACTIVE)
+  ↓
+lock.Acquire(.sos/sessions/.locks/{id}.lock, Exclusive, 10s timeout)
+  ↓
+Write SESSION_CONTEXT.md (via fileutil.AtomicWriteFile)
+  ↓
+lock.Release()
+  ↓
+clewcontract: emit EVENT_SESSION_START to events.jsonl
+
+Hook fires (PreToolUse writeguard) when any agent tries to write *_CONTEXT.md directly
+  → blocks write, returns "block" decision to CC
+  → ensures only ari commands can mutate session state
 ```
+
+### 5. Configuration Merge Points
+
+- **Agent frontmatter cascade**: rite `manifest.yaml` `agent_defaults` → individual agent frontmatter — merged during `materializeAgents`
+- **Skill policies**: `manifest.yaml` `skill_policies` evaluated per-agent during agent materialization — adds `skills:` frontmatter entries conditionally
+- **Archetype data**: `knossos/archetypes/orchestrator.yaml` → `manifest.yaml` `archetype_data` (per-archetype) → runtime `OrchestratorData` struct — template rendering
+- **Hooks**: rite `manifest.yaml` `hooks` + `hook_defaults` + `config/mcp-pools.yaml` → merged into `.claude/settings.json` `hooks` array
 
 ---
 
 ## Knowledge Gaps
 
-1. **`internal/channel/` package**: Files discovered but content not read in detail; its relationship to `paths.TargetChannel` was not fully traced.
-
-2. **`internal/suggest/`, `internal/perspective/`, `internal/search/`**: Package purpose noted from doc comments but internal structures not examined.
-
-3. **`internal/materialize/compiler/`**: Gemini compiler transformation logic not read in detail (only confirmed the `ChannelCompiler` interface and that Gemini requires a compile pass, Claude is passthrough).
-
-4. **`internal/materialize/mena/content_rewrite.go`**: Mena content rewrite logic not fully examined.
-
-5. **`internal/sync/` (root-level, not materialize/sync)**: Sync state management package content not read.
-
-6. **`internal/naxos/` triage logic**: Naxos triage scoring not examined in detail.
-
-7. **The `ari ask` search index**: How `internal/cmd/ask/` builds and queries the help index not traced.
-
-8. **Worktree seed/clone mechanics**: `internal/cmd/worktree/` subcommands and `internal/worktree/` domain package not fully read.
-
-9. **Org-scope resolution chain**: The `materialize/orgscope` sub-package and its interaction with the 4-tier resolution order were not directly read.
-
-10. **`internal/hook/clewcontract/`**: The 16-event type JSONL schema and `BufferedEventWriter` implementation were not individually inspected.
+1. `internal/cmd/hook` sub-commands: individual hook handlers (`agent-guard`, `budget`, `autopark`, `handshake`, `writeguard`, `context-injection`) were not read in detail — their internal logic is partially inferred from package-level doc comments and rules files
+2. `internal/ledge` package internals not fully explored — promote and auto-promote logic observed only at file listing level
+3. `internal/search` — index/scoring internals not read; structure inferred from file names
+4. `internal/perspective` — full layer assembly logic not traced (types read, `assemble.go` not read)
+5. `internal/procession` — cross-rite workflow template details not read
+6. `internal/cmd/ask` sub-command implementation not read beyond signature in root.go
+7. Org scope resolution (`orgscope/`) — delegation confirmed but internal org resource paths not traced

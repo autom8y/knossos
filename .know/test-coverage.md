@@ -1,13 +1,13 @@
 ---
 domain: test-coverage
-generated_at: "2026-03-13T10:04:06Z"
+generated_at: "2026-03-23T18:00:00Z"
 expires_after: "7d"
 source_scope:
   - "./cmd/**/*.go"
   - "./internal/**/*.go"
   - "./go.mod"
 generator: theoros
-source_hash: "59a0de2"
+source_hash: "78abb186"
 confidence: 0.88
 format_version: "1.0"
 update_mode: "full"
@@ -22,84 +22,58 @@ land_hash: "9b8f28035904e1dcd19d584717ac3629753bc808309497ce41f27180caabe7ac"
 
 ## Coverage Gaps
 
-### Completely Untested Packages
+### Package-Level Coverage
 
-**cmd sub-packages with zero test files (10 packages, 34 source files):**
+76 packages contain non-test Go source files. 61 of those have at least one test file. **15 packages have no test files (80.3% package coverage).**
 
-| Package | Source Files | Notes |
-|---------|-------------|-------|
-| `internal/cmd/artifact/` | 5 | CLI command wrappers: `artifact.go`, `list.go`, `query_cmd.go`, `rebuild.go`, `register.go` |
-| `internal/cmd/common/` | 6 | Shared CLI utilities: `annotations.go`, `args.go`, `context.go`, `embedded.go`, `errors.go`, `group.go` |
-| `internal/cmd/inscription/` | 6 | Inscription commands: `backups.go`, `diff.go`, `inscription.go`, `rollback.go`, `sync.go`, `validate.go` |
-| `internal/cmd/land/` | 2 | `land.go`, `synthesize.go` |
-| `internal/cmd/ledge/` | 3 | `ledge.go`, `list.go`, `promote.go` |
-| `internal/cmd/manifest/` | 5 | `diff.go`, `manifest.go`, `merge.go`, `show.go`, `validate.go` |
-| `internal/cmd/naxos/` | 3 | `naxos.go`, `scan.go`, `triage.go` |
-| `internal/cmd/provenance/` | 1 | `provenance.go` |
-| `internal/cmd/root/` | 1 | `root.go` (CLI entry wiring) |
-| `internal/cmd/tribute/` | 2 | `generate.go`, `tribute.go` |
+**Untested packages and their criticality:**
 
-**Other packages with zero test files (1 package):**
+| Package | Files / Lines | Criticality Assessment |
+|---|---|---|
+| `cmd/ari` | `main.go` (entry point only) | Low — single-line `main()` that delegates to root cmd |
+| `internal/assets` | `assets.go` | Low — likely embedded file access only |
+| `internal/cmd/root` | `root.go` (255 lines) | Medium — Cobra root command wiring; substantial CLI setup logic |
+| `internal/cmd/common` | 6 files, ~258 lines | Medium — shared args, context, and error helpers used across all cmd subpackages |
+| `internal/cmd/artifact` | 5 files, ~595 lines | Medium — `artifact list/query/rebuild/register` CLI handlers |
+| `internal/cmd/inscription` | 6 files, ~730 lines | Medium — `inscription sync/rollback/diff/validate` CLI handlers (core write pathway) |
+| `internal/cmd/land` | `land.go` + `synthesize.go` (399 lines) | Medium — `synthesize.go` is 362 lines of session land synthesis logic |
+| `internal/cmd/ledge` | 3 files, ~204 lines | Low-Medium — ledge promote/list handlers |
+| `internal/cmd/manifest` | 5 files, ~561 lines | Medium — manifest diff/merge/show/validate CLI handlers |
+| `internal/cmd/naxos` | 3 files, ~230 lines | Low — scan/triage wrappers; core logic in `internal/naxos` (tested) |
+| `internal/cmd/provenance` | `provenance.go` (274 lines) | Medium — provenance query CLI handler |
+| `internal/cmd/tribute` | 2 files, ~220 lines | Low — tribute generate wrapper; core in `internal/tribute` (tested) |
+| `test/hooks/testutil` | `env.go`, `golden.go` | Not production code — test infrastructure |
+| `test/worktree/testutil` | `worktree.go` | Not production code — test infrastructure |
 
-| Package | Source Files | Notes |
-|---------|-------------|-------|
-| `internal/assets/` | 1 | `assets.go` — embedded asset loading |
+**The two `test/*/testutil` packages are test helpers, not production code.** Excluding them, 13 production packages lack tests.
 
-### Partially Tested Critical Packages
+### Critical Path Coverage
 
-**`internal/materialize/` (hottest path per workflow-patterns: 87 changes, 5 sessions):**
+**CLI command handlers:** Heavily tested. 22 of 35 `internal/cmd/` sub-packages have dedicated test files. The untested CLI sub-packages are mostly thin Cobra wrappers that delegate to tested library packages (e.g., `cmd/naxos` → `internal/naxos` has 4 test files; `cmd/tribute` → `internal/tribute` has 3 test files). Exceptions: `cmd/inscription/synthesize.go` (362 lines) and `cmd/common` (6 shared helper files) represent meaningful untested logic.
 
-- 23 source files in the root package, but 16 lack direct `*_test.go` counterparts. The untested source files include: `collision.go`, `frontmatter.go`, `hooks.go`, `materialize.go`, `materialize_agents.go`, `materialize_gitignore.go`, `materialize_inscription.go`, `materialize_mena.go`, `materialize_rules.go`, `materialize_settings.go`, `mena.go`, `org_scope.go`, `source.go`, `sync_types.go`, `syncer.go`, `user_scope.go`.
-- Mitigation: 29 integration-style test files cover behavior across these — `unified_sync_test.go`, `workflow_test.go`, `write_test.go`, `rite_switch_integration_test.go`, `provenance_integration_test.go`, etc.
+**Sync pipeline:** Well covered. `internal/materialize` has the most concentrated test investment in the codebase — 54 test files covering unified sync, channel routing, MCP, mena transforms, procession rendering, and userscope operations.
 
-**`internal/hook/` (8 source files):**
-
-- `adapter_claude.go`, `adapter_gemini.go`, and `output.go` have no test files. Platform-specific adapters are not tested.
-
-**`internal/cmd/hook/` (20 source files, 16 test files):**
-
-- Untested: `call.go`, `cheapo_revert.go`, `wiring.go`, `worktreeremove.go`, `worktreeseed.go`
-
-**`internal/rite/` (10 source files, 6 test files):**
-
-- `invoker.go`, `syncer.go`, `validate.go`, `context.go` have no direct test counterparts.
-
-**`internal/perspective/` (6 source files, 1 test file):**
-
-- Only `perspective_test.go` exists. `assemble.go`, `audit.go`, `context.go`, `simulate.go`, and `types.go` are uncovered.
-
-**`internal/worktree/` (6 source files, 2 test files):**
-
-- `git.go`, `metadata.go`, `session_integration.go`, `worktree.go` have no direct test counterparts.
+**Hook handlers:** Comprehensively covered. All 14 hook command handlers in `internal/cmd/hook/` have dedicated test files (agentguard, attributionguard, autopark, budget, clew, context, driftdetect, gitconventions, hook, precompact, sessionend, subagent, suggest, validate, writeguard).
 
 ### Test Blind Spots
 
-1. **CLI command handler logic** (`cmd/artifact`, `cmd/inscription`, `cmd/manifest`, `cmd/land`, `cmd/ledge`, `cmd/naxos`, `cmd/tribute`) — complete absence of tests.
-2. **Hook adapter platform differences** — `adapter_claude.go` and `adapter_gemini.go` are untested.
-3. **`internal/cmd/common/`** — shared CLI utilities used by almost every command handler have no tests; wide blast radius.
-4. **`internal/perspective/`** — 5 of 6 source files untested.
+1. **`os.Setenv` without cleanup (parallelization blocker):** ~13 test files use `os.Setenv` without `t.Setenv` or deferred restore. These tests cannot safely run in parallel, blocking `-parallel` flag usage.
 
-### Negative Test Coverage
+2. **No coverage measurement infrastructure:** No `.coverprofile` files, no `codecov.yml`, no `-coverprofile` flags in CI (`ariadne-tests.yml` runs `CGO_ENABLED=0 go test -v ./...` without coverage flags). There is no way to see numeric coverage percentages.
 
-- 126 occurrences of `want.*error`, `wantErr`, `expectErr`, `shouldErr` patterns across test files.
-- 3,163 `err != nil` / `errors.Is` checks in test files.
-- Table-driven negative cases present in 116 files using `[]struct` patterns.
+3. **Golden file infrastructure unused:** `test/hooks/testutil/golden.go` defines a full golden file framework (GoldenFile type, UPDATE_GOLDEN env var, JSON/string comparison), but zero test files import or use it currently.
 
-### Coverage Measurement Infrastructure
-
-- No `coverage.out` or `.coverprofile` files in the repository.
-- No `go test -cover` or `-coverprofile` flags in `justfile` or `.github/workflows/ariadne-tests.yml`.
-- Coverage percentage is unknown and not tracked.
+4. **Negative tests and error path coverage:** 108 `wantErr`/`errExpected` patterns found across 17 files; 164 files assert `err != nil`. Error path coverage is present but not uniform — lighter packages like `cmd/common`, `cmd/root`, and `cmd/inscription` have no tests at all, so their error paths are uncovered.
 
 ### Prioritized Gap List
 
-1. **HIGH** — `internal/cmd/common/` (6 files, no tests): shared utilities, wide blast radius.
-2. **HIGH** — `internal/hook/adapter_claude.go`, `adapter_gemini.go`: platform-specific hook dispatch paths.
-3. **MEDIUM** — `internal/cmd/inscription/` (6 files, no tests): inscription is a core materialization surface.
-4. **MEDIUM** — `internal/materialize/syncer.go`, `materialize.go`: entry points covered indirectly but no unit isolation.
-5. **MEDIUM** — `internal/perspective/` (5 of 6 files uncovered).
-6. **LOW** — `internal/cmd/artifact/`, `cmd/naxos/`, `cmd/tribute/`, `cmd/manifest/`: less critical CLI wrappers.
-7. **LOW** — `internal/assets/assets.go`: single-file embedded asset loader.
+1. **HIGH: `internal/cmd/common`** — Shared CLI helpers (`args.go`, `context.go`, `errors.go`) used by all cmd handlers. A bug here affects every command.
+2. **HIGH: `internal/cmd/inscription`** — 730 lines of inscription sync/rollback/validate logic with zero tests; this is a core write pathway.
+3. **MEDIUM: `internal/cmd/root`** — 255 lines of Cobra wiring. CLI startup failures cannot be caught.
+4. **MEDIUM: `internal/cmd/land/synthesize.go`** — 362 lines of session synthesis logic without coverage.
+5. **MEDIUM: `internal/cmd/manifest`** — 561 lines across 5 files; manifest is a frequently-used command group.
+6. **LOW: `os.Setenv` cleanup** — ~13 test files use `os.Setenv` without cleanup. Replace with `t.Setenv` to enable parallel execution.
+7. **LOW: Golden file adoption** — The infrastructure exists in `test/hooks/testutil/golden.go` but is unused.
 
 ---
 
@@ -107,76 +81,69 @@ land_hash: "9b8f28035904e1dcd19d584717ac3629753bc808309497ce41f27180caabe7ac"
 
 ### Test Function Naming
 
-The dominant pattern is `Test{Subject}_{Scenario}`:
+All test functions follow the Go convention: `TestFunctionName` (or `TestTypeName_MethodName`). 3,299 `func Test` declarations found across 223 files. No deviations observed from standard naming.
 
-```
-TestAutoPromoteSession_AllPromotable
-TestUnifiedSync_CollisionDetection
-TestMaterializeWorkflow_WritesFile
-TestWriteIfChanged_SkipsIdentical
-TestValidateCmd_ShortDescription
-```
+### Subtest Patterns
 
-Both underscore-separated (~80%) and PascalCase-only (~20%) variants appear.
+446 `t.Run(` calls found across 103 files. Subtests are widely used for scenario grouping. Dominant patterns:
 
-### Subtest Patterns (`t.Run`)
-
-446 `t.Run(` calls across 103 files — widespread adoption. Heavy use in table-driven tests:
-
-```go
-for _, tc := range testCases {
-    t.Run(tc.name, func(t *testing.T) { ... })
-}
-```
+- **Table-driven subtests:** 114 files use `tests := []struct{...}` or equivalent, iterating with `for _, tt := range tests { t.Run(...) }`. Example: `internal/cmd/lint/lint_preferential_test.go`.
+- **Named scenario subtests:** Single-file scenario grouping with `t.Run("description", func(t *testing.T) {...})`. Prevalent in hook tests and session tests.
 
 ### Assertion Patterns
 
-Two distinct patterns coexist:
+The codebase uses **stdlib `testing` only** for assertions — no testify or gomock. All 226 test files import `"testing"`. Only 32 files use `require.` or `assert.` (from testify), and inspection shows these are used in a minority of tests. The dominant assertion style is:
 
-- **Standard library** (`t.Errorf`, `t.Fatalf`): 193 of 223 test files. Baseline for most tests.
-- **testify** (`require.*`/`assert.*`): 30 files (1,592 occurrences). Concentrated in `internal/materialize/`, `internal/cmd/`, `internal/search/`, `internal/sails/`.
+```go
+if got != want {
+    t.Errorf("description: got %v, want %v", got, want)
+}
+```
 
-Package-level consistency: once testify is used in a package, all tests in that package use it.
+For fatal conditions: `t.Fatal`, `t.Fatalf` (found across 195 files with 9,350 occurrences total).
 
 ### Test Helper Patterns
 
-- `t.Helper()` used in 140 files — consistent and broad adoption.
-- Helper functions named `setup{Noun}`, `make{Noun}Ctx`, `run{Noun}Test`.
-- `test/hooks/testutil/golden.go` — golden file utility with `UPDATE_GOLDEN=1` env var support.
-- `test/hooks/testutil/env.go` — hook test environment helpers.
-- Most helpers use `t.TempDir()` (913+ occurrences) for filesystem isolation.
+116 `t.Helper()` calls found across 58 files. Helper functions are defined locally within test files (e.g., `filterByRule` in `internal/cmd/lint/lint_preferential_test.go`). No shared test helper packages are imported by production test files — `test/hooks/testutil` and `test/worktree/testutil` exist but are not currently consumed.
 
 ### Skip Patterns
 
-`t.Skip` in 11 locations across 8 files. Skip conditions: git repo not present, testdata not found, root user execution, timestamp precision, no agent files.
+11 `t.Skip(` calls across 8 files. Skip reasons include:
+- Environment-dependent tests (e.g., `internal/agent/integration_test.go`: skips when testdata is unavailable)
+- Platform or tooling dependency checks
+- `internal/cmd/worktree/worktree_test.go`: explicit skip with note
 
-No build-tag-gated integration tests (no `//go:build integration` patterns).
+### Testdata Directories
 
-### Fixture Patterns
+Only one `testdata/` directory found: `internal/cmd/complaint/testdata/`. It contains 3 YAML complaint fixture files:
+- `COMPLAINT-20260310-180045-integration-engineer.yaml`
+- `COMPLAINT-20260311-091500-pythia.yaml`
+- `COMPLAINT-20260311-143022-drift-detect.yaml`
 
-- **Temp dirs**: `t.TempDir()` used in 140 test files — standard for filesystem isolation.
-- **testdata directory**: `internal/cmd/complaint/testdata/` contains YAML complaint fixtures.
-- **Golden files**: `test/hooks/fixtures/` with testutil golden infrastructure.
-- **Embedded rites**: `testdata-ari/rites/` contains `broken-rite/`, `minimal-rite/`, `valid-rite/`.
+No other `testdata/` directories exist. Most tests create ephemeral fixtures inline using `t.TempDir()`.
+
+### Test Fixture Patterns
+
+1. **`t.TempDir()` (primary pattern):** 142 files use `t.TempDir()` with 1,020 total calls. Tests write fixtures programmatically into temp directories. This is the dominant approach.
+2. **Inline string/byte fixtures:** Tests embed YAML, JSON, and markdown strings directly in test code.
+3. **Golden files:** Infrastructure defined (`test/hooks/testutil/golden.go`, UPDATE_GOLDEN env var pattern), but unused in any test file.
+4. **YAML complaint fixtures:** Only in `internal/cmd/complaint/testdata/`.
 
 ### Test Environment Management
 
-- No `TestMain` functions anywhere — no global setup/teardown.
-- `CGO_ENABLED=0` required for all test runs (macOS dyld compatibility issue).
-- Race detector optionally run via `go test -race -v ./...` in CI (`continue-on-error: true`).
+- `t.TempDir()`: 142 files — idiomatic, auto-cleaned
+- `t.Setenv()`: 6 files — correct pattern, cleaned up automatically
+- `os.Setenv()` without cleanup: ~13 files — problematic for parallel execution (confirmed by session memory: "t.Setenv friction: 2 sessions targeted t.Setenv elimination")
+- No `TestMain` functions found — no global setup/teardown
 
 ### Fuzz Tests
 
-Three fuzz targets:
-- `internal/frontmatter/fuzz_test.go`: `FuzzParse`
-- `internal/agent/fuzz_test.go`: `FuzzParseAgentFrontmatter`
-- `internal/know/fuzz_test.go`: `FuzzComputeFileDiff`
+3 fuzz test files:
+- `internal/know/fuzz_test.go` — `FuzzComputeFileDiff`
+- `internal/frontmatter/fuzz_test.go` — `FuzzParse`
+- `internal/agent/fuzz_test.go` — `FuzzParseAgentFrontmatter`
 
-Not run in CI — available for local fuzzing only.
-
-### SCAR Regression Tests
-
-14+ functions named `TestSCAR{NNN}_{Description}` concentrated in `internal/materialize/scar_regression_test.go` and `internal/materialize/source/source_test.go`. These use reflection (`reflect.TypeFor`) and filesystem inspection to assert structural invariants that must never regress.
+All target parsing/diff functions — appropriate targets for fuzzing (parser correctness and crash safety).
 
 ---
 
@@ -184,72 +151,80 @@ Not run in CI — available for local fuzzing only.
 
 ### Overall Distribution
 
-- **223 test files** across the `internal/` package tree.
-- **335 source files** in `internal/` (excluding test files).
-- **Test-to-source ratio**: 0.67 (223/335).
-- **3,249 total test functions** (`func Test*`) across 220 files.
-- **446 subtest calls** (`t.Run`) across 103 files.
-- **3 fuzz test functions**.
+| Metric | Count |
+|---|---|
+| Total test files | 226 |
+| Total `func Test` declarations | 3,299 |
+| Packages with test files | 61 of 76 (80.3%) |
+| Packages without test files | 15 (19.7%) |
+| Production packages without tests | 13 |
+| Test helper packages without tests | 2 |
 
 ### Most Heavily Tested Areas
 
-| Package | Test Files | Test Functions | Notes |
-|---------|-----------|----------------|-------|
-| `internal/cmd/session/` | 20 | 300+ | Session lifecycle most tested cmd area |
-| `internal/session/` | 14 | 215+ | Core session model — near-complete coverage |
-| `internal/materialize/` | 29 | 200+ | Integration-style, behavior-over-unit |
-| `internal/cmd/hook/` | 16 | 180+ | Hook handlers heavily tested |
-| `internal/inscription/` | 7 | 180+ | Inscription pipeline well covered |
-| `internal/hook/clewcontract/` | 10 | 170+ | Clew contract event system |
-| `internal/sails/` | 7 | 150+ | Sails health-check subsystem |
-| `internal/search/` | 5 | 139+ | Search index and scoring |
-| `internal/know/` | 6 | 169+ | Knowledge management |
-| `internal/cmd/rite/` | 1 | 100 | Single test file but 100 test functions |
+By file count:
 
-### Test Package Naming Patterns
+1. **`internal/materialize/`** — 54 test files (largest concentration). Covers the materialization pipeline comprehensively: sync, routing, MCP integration, mena transforms, hook defaults, procession, userscope, worktree.
+2. **`internal/cmd/session/`** — 23 test files. Covers session lifecycle commands: create, wrap, fray, gc, lock, log, query, recover, snapshot, status, suggest_next, timeline, moirai integration, archive boundary.
+3. **`internal/cmd/hook/`** — 16 test files. Covers every hook handler.
+4. **`internal/session/`** — 14 test files. Core session domain logic.
+5. **`internal/hook/clewcontract/`** — 11 test files. Hook event contract layer.
+6. **`internal/inscription/`** — 8 test files (library layer tested; cmd layer untested).
 
-White-box testing (same package name) dominates: 214 of 223 test files. Only `internal/manifest/` uses external test packages (`package manifest_test` — 4 files).
+### Test Package Naming
 
-### Integration Tests vs Unit Tests
+**Dominant pattern: `package <name>` (same package, white-box testing).** 217 of 226 test files use white-box package declarations. Only 9 files use the `package <name>_test` external test pattern:
 
-No build-tag separation. "Integration" signaled by file naming convention only:
-- 9 integration-style files: `rite_switch_integration_test.go`, `mcp_integration_test.go`, `provenance_integration_test.go`, `sails/integration_test.go`, `cmd/session/integration_test.go`, `cmd/session/status_integration_test.go`, `cmd/session/moirai_integration_test.go`, `agent/integration_test.go`, `inscription/integration_test.go`
+- `internal/manifest/diff_test.go`
+- `internal/manifest/merge_test.go`
+- `internal/manifest/manifest_test.go`
+- `internal/manifest/schema_test.go`
+- `internal/paths/channel_test.go`
+- `internal/materialize/compiler/compiler_test.go`
+- `internal/materialize/channel_routing_test.go`
+- `internal/channel/tools_test.go`
+- `internal/sync/state_test.go`
 
-All run with same `CGO_ENABLED=0 go test ./...` command.
+### Integration vs Unit Test Files
 
-### How Tests Are Run
+There is no formal separation. Files named `*_integration_test.go` (12 files) are mixed with unit test files in the same directories:
 
-```bash
-# Standard (required: CGO disabled)
+- `internal/agent/integration_test.go`
+- `internal/inscription/integration_test.go`
+- `internal/cmd/session/integration_test.go`
+- `internal/cmd/session/status_integration_test.go`
+- `internal/cmd/session/moirai_integration_test.go`
+- `internal/materialize/rite_switch_integration_test.go`
+- `internal/materialize/mcp_integration_test.go`
+- `internal/materialize/provenance_integration_test.go`
+- `internal/sails/integration_test.go`
+
+No build tags separate them from unit tests — all run under `CGO_ENABLED=0 go test ./...`.
+
+### TestMain Patterns
+
+No `TestMain` functions found anywhere in the codebase. There is no global test setup or teardown.
+
+### Standard Test Command
+
+```
 CGO_ENABLED=0 go test ./...
-
-# Verbose
-CGO_ENABLED=0 go test -v ./...
-
-# Specific package
-CGO_ENABLED=0 go test -v ./internal/sails/...
-
-# CI race detector (optional, best-effort)
-go test -race -v ./...
 ```
 
-CI triggers on changes to `cmd/**`, `internal/**`, `test/**`, `go.mod`, `go.sum`.
+This is the canonical invocation (confirmed in `.github/workflows/ariadne-tests.yml`, referenced in `CLAUDE.md` and MEMORY.md). The CI workflow additionally attempts a race detector run:
 
-### Mental Model for Writing New Tests
+```
+go test -race -v ./... || echo "Race detector tests skipped (CGO required)"
+```
 
-1. Place test in the same package (white-box) unless testing `internal/manifest/`-style sealed APIs.
-2. Use `t.TempDir()` for all filesystem fixtures.
-3. Use testify if the package already uses it; use stdlib otherwise.
-4. Name tests `Test{Noun}_{Condition}` for unit cases, `TestSCAR{NNN}_{Description}` for regression guards.
-5. Use `t.Run()` for table-driven tests.
-6. Declare helpers with `t.Helper()` and name them `setup{Noun}`, `make{Noun}Ctx`, or `run{Noun}Test`.
-7. Fuzz targets go in `*_fuzz_test.go` files — not run in CI.
+The race detector run is non-blocking (allowed to fail), reflecting that some packages require CGO.
 
 ---
 
 ## Knowledge Gaps
 
-- **Actual line coverage percentage**: No `go test -cover` data collected. Line coverage per package is unknown.
-- **Integration test scope**: The 9 integration tests are identified by naming convention only. Their actual external dependencies were not verified.
-- **`cmd/common` behavior under error paths**: Shared command context error presentation logic is untested.
-- **Test execution time**: No timing data observed; slow tests are unidentified.
+1. **Numeric coverage percentages:** No coverage measurement infrastructure (no `-coverprofile` in CI). This document cannot state "package X is 72% covered" — only structural coverage (file/package presence) is observable.
+2. **Error path saturation in tested packages:** While many packages have tests, whether every error branch is exercised cannot be determined without instrumented coverage reports.
+3. **`internal/cmd/inscription/synthesize.go` internals:** This 362-line file has no tests and synthesizes session data from land files. Its internal logic paths are unknown without reading it.
+4. **Race conditions in `os.Setenv` tests:** The full list of tests affected by `os.Setenv` without cleanup may be larger than the 13 files identified — tests that call helpers which internally call `os.Setenv` would not appear in this search.
+5. **`testutil` adoption timeline:** It is unclear whether `test/hooks/testutil/golden.go` was pre-built for future use or is residual from an abandoned migration.

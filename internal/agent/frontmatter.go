@@ -78,6 +78,11 @@ var validAgentTypes = map[string]bool{
 	"designer":     true,
 	"analyst":      true,
 	"engineer":     true,
+	"architect":    true,
+	"builder":      true,
+	"evaluator":    true,
+	"prototyper":   true,
+	"validator":    true,
 }
 
 // mcpToolPattern matches MCP tool references like "mcp:github" or "mcp:github/create_issue".

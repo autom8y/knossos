@@ -1,11 +1,11 @@
 ---
 domain: release/platform-profile
-generated_at: "2026-03-17T23:21:30Z"
+generated_at: "2026-03-19T12:37:25Z"
 expires_after: "30d"
 source_scope:
   - "./.know/release/"
 generator: cartographer
-source_hash: "caac5baa"
+source_hash: "78abb186"
 confidence: 0.85
 format_version: "1.0"
 update_mode: "full"
@@ -75,7 +75,7 @@ Terminal stage: e2e-distribution.yml (has health check)
 
 ## Known Issues
 
-- None. Full pipeline chain verified green as of v0.12.0 (2026-03-17).
-- 2 pre-existing informational workflow failures (non-blocking): ariadne-tests (golangci-lint schema), verify-doctrine (missing ariadne/ dir).
+- None. Full pipeline chain verified green as of v0.14.0 (2026-03-19).
+- 3 pre-existing informational workflow failures (non-blocking): ariadne-tests (golangci-lint schema), verify-doctrine (missing ariadne/ dir), validate-orchestrators.
 - verify-formal-specs.yml was removed (no longer present as of v0.7.1).
 - 4 Dependabot vulnerability alerts on main (1 critical, 1 high, 2 moderate) — informational, non-blocking.

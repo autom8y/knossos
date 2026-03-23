@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-17T23:21:30Z"
+generated_at: "2026-03-19T12:37:25Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "caac5baa"
+source_hash: "78abb186"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -286,3 +286,55 @@ max_incremental_cycles: 0
 - 2 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml
 - 4 Dependabot vulnerability alerts on main (informational, non-blocking)
 - Headline: UI rite CSS architecture research mena, ari ask org rite search fix, cached release knowledge update
+
+### v0.13.0 — 2026-03-19
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-19 |
+| Version | v0.12.0 -> v0.13.0 (minor) |
+| Commits | 3 (2 feat, 1 chore) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 583edd53c46831e0141900d111c1310ea4da0d45 |
+| Commit SHA | 0fad30de |
+| release.yml | GREEN (113s, run 23278074579) |
+| e2e-distribution.yml | GREEN (54s, run 23278117839) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.13.0, commit e1d3460, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twenty-fifth consecutive PASS verdict (v0.3.2 -> ... -> v0.12.0 -> v0.13.0)
+- Total chain: ~158s (within historical baseline ~150-190s)
+- macOS E2E: GREEN (30s), Linux E2E: GREEN (50s)
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 3 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml, validate-orchestrators.yml
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking)
+- Headline: MCP support for Gemini channel, orchestrator.yaml archetype rendering, agent maxTurns increase
+
+### v0.14.0 — 2026-03-19
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-19 |
+| Version | v0.13.0 -> v0.14.0 (minor) |
+| Commits | 2 (2 feat) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 1f0b1dd414bb88248a9ce9053cd5cee3639cafaa |
+| Commit SHA | 78abb186 |
+| release.yml | GREEN (106s, run 23295051963) |
+| e2e-distribution.yml | GREEN (49s, run 23295111604) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.14.0, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twenty-sixth consecutive PASS verdict (v0.3.2 -> ... -> v0.13.0 -> v0.14.0)
+- Total chain: ~147s (within historical baseline ~150-190s)
+- macOS E2E: GREEN (18s), Linux E2E: GREEN (46s)
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 3 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml, validate-orchestrators.yml
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking)
+- Headline: Optional env var syntax for MCP pool config, UI rite redesign with posture-based routing and 9-agent pantheon

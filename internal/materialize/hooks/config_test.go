@@ -62,10 +62,10 @@ func TestBuildHooksSettings(t *testing.T) {
 	if len(preToolUse) != 2 {
 		t.Fatalf("PreToolUse has %d entries, want 2", len(preToolUse))
 	}
-	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+	if extractHookCommand(preToolUse[0]) != "ari hook call ari hook writeguard --output json" {
 		t.Errorf("PreToolUse[0] command = %v, want writeguard (priority 3)", extractHookCommand(preToolUse[0]))
 	}
-	if extractHookCommand(preToolUse[1]) != "ari hook validate --output json" {
+	if extractHookCommand(preToolUse[1]) != "ari hook call ari hook validate --output json" {
 		t.Errorf("PreToolUse[1] command = %v, want validate (priority 5)", extractHookCommand(preToolUse[1]))
 	}
 
@@ -77,10 +77,10 @@ func TestBuildHooksSettings(t *testing.T) {
 	if len(postToolUse) != 2 {
 		t.Fatalf("PostToolUse has %d entries, want 2", len(postToolUse))
 	}
-	if extractHookCommand(postToolUse[0]) != "ari hook clew --output json" {
+	if extractHookCommand(postToolUse[0]) != "ari hook call ari hook clew --output json" {
 		t.Errorf("PostToolUse[0] command = %v, want clew (priority 5)", extractHookCommand(postToolUse[0]))
 	}
-	if extractHookCommand(postToolUse[1]) != "ari hook budget --output json" {
+	if extractHookCommand(postToolUse[1]) != "ari hook call ari hook budget --output json" {
 		t.Errorf("PostToolUse[1] command = %v, want budget (priority 90)", extractHookCommand(postToolUse[1]))
 	}
 
@@ -100,7 +100,7 @@ func TestBuildHooksSettings(t *testing.T) {
 	if hooksArr[0]["type"] != "command" {
 		t.Errorf("PreToolUse[0].hooks[0].type = %v, want command", hooksArr[0]["type"])
 	}
-	if hooksArr[0]["command"] != "ari hook writeguard --output json" {
+	if hooksArr[0]["command"] != "ari hook call ari hook writeguard --output json" {
 		t.Errorf("PreToolUse[0].hooks[0].command = %v, want writeguard", hooksArr[0]["command"])
 	}
 }
@@ -167,7 +167,7 @@ func TestMergeHooksSettings_FreshSettings(t *testing.T) {
 	if len(preToolUse) != 1 {
 		t.Fatalf("Expected 1 matcher group, got %d", len(preToolUse))
 	}
-	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+	if extractHookCommand(preToolUse[0]) != "ari hook call ari hook writeguard --output json" {
 		t.Errorf("command = %v, want writeguard", extractHookCommand(preToolUse[0]))
 	}
 }
@@ -214,7 +214,7 @@ func TestMergeHooksSettings_PreservesUserHooks(t *testing.T) {
 	}
 
 	// Ari group should come first
-	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+	if extractHookCommand(preToolUse[0]) != "ari hook call ari hook writeguard --output json" {
 		t.Errorf("First entry should be ari hook, got %v", extractHookCommand(preToolUse[0]))
 	}
 
@@ -254,7 +254,7 @@ func TestMergeHooksSettings_PreservesOldFlatUserHooks(t *testing.T) {
 	}
 
 	// Ari group should come first (new format)
-	if extractHookCommand(preToolUse[0]) != "ari hook writeguard --output json" {
+	if extractHookCommand(preToolUse[0]) != "ari hook call ari hook writeguard --output json" {
 		t.Errorf("First entry should be ari hook, got %v", extractHookCommand(preToolUse[0]))
 	}
 
@@ -300,7 +300,7 @@ func TestMergeHooksSettings_RemovesOldAriHooks(t *testing.T) {
 	if len(postToolUse) != 1 {
 		t.Fatalf("Expected 1 entry, got %d", len(postToolUse))
 	}
-	if extractHookCommand(postToolUse[0]) != "ari hook budget --output json" {
+	if extractHookCommand(postToolUse[0]) != "ari hook call ari hook budget --output json" {
 		t.Errorf("Expected budget hook, got %v", extractHookCommand(postToolUse[0]))
 	}
 }
