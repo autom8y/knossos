@@ -12,6 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/validation"
 )
 
 // Complaint represents a parsed complaint YAML artifact.
@@ -108,6 +109,22 @@ func runList(ctx *cmdContext, opts listOptions) error {
 	if err != nil {
 		// Non-fatal: missing directory is a valid empty state.
 		complaints = nil
+	}
+
+	// Optional schema validation pass: log warnings for malformed complaints.
+	if len(complaints) > 0 {
+		if v, vErr := validation.NewValidator(); vErr == nil {
+			for _, c := range complaints {
+				data, mErr := yaml.Marshal(&c)
+				if mErr != nil {
+					continue
+				}
+				if vErr := v.ValidateComplaint(data); vErr != nil {
+					printer.VerboseLog("warn", "complaint failed schema validation",
+						map[string]any{"id": c.ID, "error": vErr.Error()})
+				}
+			}
+		}
 	}
 
 	// Apply filters.

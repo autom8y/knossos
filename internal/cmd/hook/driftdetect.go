@@ -11,14 +11,17 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 
 	"github.com/autom8y/knossos/internal/hook"
 	"github.com/autom8y/knossos/internal/output"
+	"github.com/autom8y/knossos/internal/validation"
 )
 
 // Drift detection constants.
 const (
 	DriftStateFile           = ".drift-state.json"
+	DriftDedupStateFile      = ".drift-dedup-state.json"
 	DriftMaxRecentCalls      = 10
 	DriftRetryThreshold      = 3
 	DriftExplorationThreshold = 3
@@ -49,6 +52,56 @@ type DriftOutput struct {
 // Text implements output.Textable.
 func (d DriftOutput) Text() string {
 	return d.Message
+}
+
+// DedupState tracks which complaint dedup keys have already been filed.
+// Persisted at .sos/wip/complaints/.drift-dedup-state.json per ADR-cassandra-dedup-boundary.
+type DedupState struct {
+	Version int                    `json:"version"`
+	Entries map[string]DedupEntry  `json:"entries"`
+}
+
+// DedupEntry records a single dedup key's filing state.
+type DedupEntry struct {
+	FirstFiled  string `json:"first_filed"`
+	LastSeen    string `json:"last_seen"`
+	Count       int    `json:"count"`
+	ComplaintID string `json:"complaint_id"`
+}
+
+// loadDedupState reads the dedup state file. Returns a fresh state on any error (fail-open).
+func loadDedupState(path string) DedupState {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return DedupState{Version: 1, Entries: make(map[string]DedupEntry)}
+	}
+	var state DedupState
+	if err := json.Unmarshal(data, &state); err != nil {
+		return DedupState{Version: 1, Entries: make(map[string]DedupEntry)}
+	}
+	if state.Entries == nil {
+		state.Entries = make(map[string]DedupEntry)
+	}
+	return state
+}
+
+// saveDedupState writes the dedup state file. Errors are logged but do not block.
+func saveDedupState(path string, state DedupState, printer *output.Printer) {
+	data, err := json.Marshal(state)
+	if err != nil {
+		printer.VerboseLog("warn", "driftdetect: failed to marshal dedup state",
+			map[string]any{"error": err.Error()})
+		return
+	}
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		printer.VerboseLog("warn", "driftdetect: failed to write dedup state",
+			map[string]any{"error": err.Error()})
+	}
+}
+
+// dedupKey computes the dedup key for a complaint. Format: pattern_type:target_tool.
+func dedupKey(pattern, toolFallbackTarget string) string {
+	return pattern + ":" + toolFallbackTarget
 }
 
 // toolFallbackPatterns maps Bash command prefixes to their dedicated tool equivalents.
@@ -123,15 +176,49 @@ func runDriftdetectCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pri
 		return printer.Print(DriftOutput{Message: "no tool information"})
 	}
 
-	// Check for single-event tool fallback pattern (no state needed)
+	// Check for single-event tool fallback pattern with dedup gate.
 	if hookEnv.ToolName == "Bash" {
 		if pattern := detectToolFallback(hookEnv.ToolInput); pattern != "" {
+			// Dedup gate: check if this pattern+tool was already filed.
+			targetTool := detectToolFallbackTarget(hookEnv.ToolInput)
+			projectDir := hookEnv.GetProjectDir()
+			dedupPath := filepath.Join(projectDir, ".sos", "wip", "complaints", DriftDedupStateFile)
+			dedupState := loadDedupState(dedupPath)
+			key := dedupKey("tool-fallback", targetTool)
+			now := nowFn()
+
+			if entry, exists := dedupState.Entries[key]; exists {
+				// Duplicate: update count and last_seen, skip filing.
+				entry.Count++
+				entry.LastSeen = now.Format(time.RFC3339)
+				dedupState.Entries[key] = entry
+				saveDedupState(dedupPath, dedupState, printer)
+				return printer.Print(DriftOutput{
+					Pattern: "tool-fallback",
+					Filed:   false,
+					Message: fmt.Sprintf("tool fallback: %s (duplicate #%d, suppressed)", pattern, entry.Count),
+				})
+			}
+
+			// New key: file the complaint.
 			complaintPath, err := fileDriftComplaint(hookEnv, "tool-fallback", pattern, nowFn)
 			if err != nil {
 				printer.VerboseLog("warn", "driftdetect: failed to file complaint",
 					map[string]any{"error": err.Error()})
 				return printer.Print(DriftOutput{Message: "tool fallback detected, complaint filing failed"})
 			}
+			validateFiledComplaint(complaintPath, printer)
+
+			// Record in dedup state.
+			complaintID := fmt.Sprintf("COMPLAINT-%s-drift-detector", now.Format("20060102-150405"))
+			dedupState.Entries[key] = DedupEntry{
+				FirstFiled:  now.Format(time.RFC3339),
+				LastSeen:    now.Format(time.RFC3339),
+				Count:       1,
+				ComplaintID: complaintID,
+			}
+			saveDedupState(dedupPath, dedupState, printer)
+
 			return printer.Print(DriftOutput{
 				Pattern:   "tool-fallback",
 				Filed:     true,
@@ -173,6 +260,8 @@ func runDriftdetectCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pri
 		if err != nil {
 			printer.VerboseLog("warn", "driftdetect: failed to file complaint",
 				map[string]any{"error": err.Error()})
+		} else {
+			validateFiledComplaint(complaintPath, printer)
 		}
 		return printer.Print(DriftOutput{
 			Pattern:   "retry-spiral",
@@ -189,6 +278,8 @@ func runDriftdetectCore(cmd *cobra.Command, ctx *cmdContext, printer *output.Pri
 		if err != nil {
 			printer.VerboseLog("warn", "driftdetect: failed to file complaint",
 				map[string]any{"error": err.Error()})
+		} else {
+			validateFiledComplaint(complaintPath, printer)
 		}
 		return printer.Print(DriftOutput{
 			Pattern:   "command-exploration",
@@ -214,6 +305,21 @@ func detectToolFallback(toolInput string) string {
 	for prefix, dedicatedTool := range toolFallbackPatterns {
 		if strings.HasPrefix(cmd, prefix) {
 			return fmt.Sprintf("used Bash '%s...' instead of %s tool", truncate(cmd, 60), dedicatedTool)
+		}
+	}
+	return ""
+}
+
+// detectToolFallbackTarget returns the dedicated tool name for a tool-fallback command.
+// Returns empty string if no fallback pattern matches.
+func detectToolFallbackTarget(toolInput string) string {
+	cmd := extractBashCommand(toolInput)
+	if cmd == "" {
+		return ""
+	}
+	for prefix, dedicatedTool := range toolFallbackPatterns {
+		if strings.HasPrefix(cmd, prefix) {
+			return dedicatedTool
 		}
 	}
 	return ""
@@ -301,6 +407,20 @@ func detectCommandExplorationFromState(state *DriftState) string {
 	return ""
 }
 
+// complaintYAML mirrors the quick-file complaint structure for safe YAML marshaling.
+// Uses yaml.v3 struct marshaling to eliminate YAML injection risk from unescaped
+// Bash command snippets (fixes H1 from Cassandra health review).
+type complaintYAML struct {
+	ID          string   `yaml:"id"`
+	FiledBy     string   `yaml:"filed_by"`
+	FiledAt     string   `yaml:"filed_at"`
+	Title       string   `yaml:"title"`
+	Severity    string   `yaml:"severity"`
+	Description string   `yaml:"description"`
+	Tags        []string `yaml:"tags"`
+	Status      string   `yaml:"status"`
+}
+
 // fileDriftComplaint writes a quick-file complaint YAML to .sos/wip/complaints/.
 func fileDriftComplaint(hookEnv *hook.Env, pattern, detail string, nowFn func() time.Time) (string, error) {
 	now := nowFn()
@@ -322,28 +442,45 @@ func fileDriftComplaint(hookEnv *hook.Env, pattern, detail string, nowFn func() 
 		severity = "low"
 	}
 
-	complaint := fmt.Sprintf(`id: %s
-filed_by: drift-detector
-filed_at: %s
-title: "%s drift: %s"
-severity: %s
-description: |
-  Drift detection hook identified a %s pattern.
-  %s
-  Tool: %s
-tags:
-  - drift
-  - %s
-  - auto-filed
-status: filed
-`, id, now.Format(time.RFC3339), pattern, truncate(detail, 80), severity,
-		pattern, detail, hookEnv.ToolName, pattern)
+	c := complaintYAML{
+		ID:       id,
+		FiledBy:  "drift-detector",
+		FiledAt:  now.Format(time.RFC3339),
+		Title:    fmt.Sprintf("%s drift: %s", pattern, truncate(detail, 120)),
+		Severity: severity,
+		Description: fmt.Sprintf("Drift detection hook identified a %s pattern.\n%s\nTool: %s",
+			pattern, detail, hookEnv.ToolName),
+		Tags:   []string{"drift", pattern, "auto-filed"},
+		Status: "filed",
+	}
 
-	if err := os.WriteFile(path, []byte(complaint), 0644); err != nil {
+	data, err := yaml.Marshal(&c)
+	if err != nil {
+		return "", fmt.Errorf("marshal complaint: %w", err)
+	}
+
+	if err := os.WriteFile(path, data, 0644); err != nil {
 		return "", fmt.Errorf("write complaint: %w", err)
 	}
 
 	return path, nil
+}
+
+// validateFiledComplaint performs non-blocking schema validation on a filed complaint.
+// Logs a warning if the complaint fails validation but does not prevent filing.
+func validateFiledComplaint(path string, printer *output.Printer) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return // best-effort: skip validation if read fails
+	}
+	v, err := validation.NewValidator()
+	if err != nil {
+		return // best-effort: skip if validator unavailable
+	}
+	if err := v.ValidateComplaint(data); err != nil {
+		printer.VerboseLog("warn", "driftdetect: filed complaint failed schema validation",
+			map[string]any{"path": path, "error": err.Error()})
+	}
 }
 
 // extractBashCommand extracts the command string from Bash tool input JSON.

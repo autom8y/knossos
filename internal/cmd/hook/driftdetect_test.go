@@ -543,3 +543,54 @@ func pipeHookStdinWithTool(t *testing.T, event, projectDir, toolName, toolInput 
 		os.Unsetenv("CLAUDE_PROJECT_DIR")
 	})
 }
+
+// --- hook.Verify auth path tests (H3) ---
+
+// TestHookVerify_ValidSignatureAccepted tests that a correctly signed payload passes verification.
+func TestHookVerify_ValidSignatureAccepted(t *testing.T) {
+	secret := "test-hook-secret-12345"
+	t.Setenv("KNOSSOS_HOOK_SECRET", secret)
+
+	payload := []byte(`{"hook_event_name":"PostToolUse","tool_name":"Bash"}`)
+	signature := hook.Sign(payload)
+
+	if signature == "" {
+		t.Fatal("Sign() returned empty signature with secret set")
+	}
+	if !hook.Verify(payload, signature) {
+		t.Error("Verify() rejected valid signature")
+	}
+}
+
+// TestHookVerify_TamperedPayloadRejected tests that a tampered payload is rejected with the correct signature.
+func TestHookVerify_TamperedPayloadRejected(t *testing.T) {
+	secret := "test-hook-secret-12345"
+	t.Setenv("KNOSSOS_HOOK_SECRET", secret)
+
+	original := []byte(`{"hook_event_name":"PostToolUse","tool_name":"Bash"}`)
+	signature := hook.Sign(original)
+
+	tampered := []byte(`{"hook_event_name":"PostToolUse","tool_name":"Write"}`)
+	if hook.Verify(tampered, signature) {
+		t.Error("Verify() accepted tampered payload — should reject")
+	}
+}
+
+// TestHookVerify_EmptySignatureBehavior explicitly asserts the empty-signature behavior:
+// - With no secret set: accept (transition period / opt-in)
+// - With secret set: reject (signature required)
+func TestHookVerify_EmptySignatureBehavior(t *testing.T) {
+	payload := []byte(`{"hook_event_name":"PostToolUse","tool_name":"Bash"}`)
+
+	// No secret: empty signature should be accepted (graceful degradation).
+	t.Setenv("KNOSSOS_HOOK_SECRET", "")
+	if !hook.Verify(payload, "") {
+		t.Error("Verify() rejected empty signature with no secret — should allow during transition period")
+	}
+
+	// With secret: empty signature must be rejected.
+	t.Setenv("KNOSSOS_HOOK_SECRET", "test-secret")
+	if hook.Verify(payload, "") {
+		t.Error("Verify() accepted empty signature with secret set — should reject")
+	}
+}

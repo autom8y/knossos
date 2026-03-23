@@ -150,6 +150,40 @@ func (v *Validator) ValidateAgentData(data any) error {
 	return nil
 }
 
+// ValidateComplaint validates complaint YAML data against the complaint schema.
+// Accepts raw YAML bytes (complaint files are YAML, not JSON).
+// The $ref chain to common.schema.json is exercised by this validation.
+func (v *Validator) ValidateComplaint(data []byte) error {
+	schema, err := v.getSchema("complaint")
+	if err != nil {
+		return err
+	}
+
+	// Parse YAML to map, then convert to JSON for schema validation.
+	var parsed map[string]any
+	if err := yaml.Unmarshal(data, &parsed); err != nil {
+		return errors.Wrap(errors.CodeSchemaInvalid, "invalid YAML in complaint", err)
+	}
+
+	jsonData, err := json.Marshal(parsed)
+	if err != nil {
+		return errors.Wrap(errors.CodeSchemaInvalid, "failed to convert complaint to JSON", err)
+	}
+
+	var jsonParsed any
+	if err := json.Unmarshal(jsonData, &jsonParsed); err != nil {
+		return errors.Wrap(errors.CodeSchemaInvalid, "invalid JSON from complaint conversion", err)
+	}
+
+	if err := schema.Validate(jsonParsed); err != nil {
+		return errors.NewWithDetails(errors.CodeSchemaInvalid,
+			"complaint validation failed",
+			map[string]any{"error": err.Error()})
+	}
+
+	return nil
+}
+
 // --- Lightweight validation without full schema ---
 
 // ValidateSessionFields performs lightweight validation of required session fields.

@@ -44,6 +44,8 @@ Examples:
 	}
 
 	cmd.AddCommand(newListCmd(ctx))
+	cmd.AddCommand(newUpdateCmd(ctx))
+	cmd.AddCommand(newDedupCmd(ctx))
 
 	// Complaint commands do not require project context (complaints dir
 	// is resolved relative to project, but gracefully empty if missing).

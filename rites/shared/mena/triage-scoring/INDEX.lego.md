@@ -7,9 +7,42 @@ description: "Cassandra Protocol triage scoring model for complaint prioritizati
 
 > Reference for scoring, prioritizing, and routing complaints filed via the complaint-filing skill. Used by `/reflect` triage pipeline.
 
-## Scoring Dimensions
+## Quick-File vs Deep-File Detection
 
-Every complaint is scored on 6 dimensions. Each dimension produces a 0-100 sub-score. The final triage score is a weighted sum.
+Before scoring, classify each complaint as **quick-file** or **deep-file**:
+
+| Format | Detection Heuristic | Scoring Path |
+|--------|-------------------|--------------|
+| **Quick-file** | `filed_by == "drift-detector"` AND `zone` is empty AND `evidence` is nil | Noise-review track (3 dimensions) |
+| **Deep-file** | Has `zone`, `effort_estimate`, `evidence`, or `related_scars` | Standard track (6 dimensions) |
+| **Agent quick-file** | `filed_by != "drift-detector"` AND no deep-file fields | Standard track (6 dimensions, with zone default = behavior) |
+
+**Quick-file routing rule**: Complaints filed by `drift-detector` with `severity: low` and no `zone`/`effort_estimate` fields auto-route to the **noise-review track**. This prevents auto-filed tool-fallback noise from consuming human-review bandwidth.
+
+### Noise-Review Track (Quick-File Only)
+
+Quick-file complaints use simplified 3-dimension scoring:
+
+| Dimension | Weight | Scoring Rule |
+|-----------|--------|--------------|
+| **Severity** | 40% | Same as standard (low=20, medium=45, high=70, critical=95) |
+| **Recurrence** | 40% | Same as standard (1=15, 2=40, 3-4=65, 5+=90) |
+| **Source Diversity** | 20% | Same as standard (1 filer=20, 2=50, 3+=80) |
+
+Zone Impact, Scar-Tissue Match, and Effort-to-Impact are **skipped** (these fields are absent in quick-file format). No zone override applies — quick-file complaints route purely by threshold band.
+
+**Noise-review threshold bands** (same as standard):
+- 0-39: auto-reject (typical for single low-severity tool-fallback)
+- 40-69: auto-accept
+- 70+: escalate to standard track for full 6-dimension scoring
+
+A typical single-observation `severity: low` tool-fallback complaint scores: `(20 * 0.40) + (15 * 0.40) + (20 * 0.20) = 8 + 6 + 4 = 18` → **auto-reject**. This is the correct routing for tool-fallback noise.
+
+A recurring tool-fallback (5+ observations, 2 filers) scores: `(20 * 0.40) + (90 * 0.40) + (50 * 0.20) = 8 + 36 + 10 = 54` → **auto-accept** (warrant investigation as a pattern).
+
+## Scoring Dimensions (Standard Track)
+
+Every complaint on the standard track is scored on 6 dimensions. Each dimension produces a 0-100 sub-score. The final triage score is a weighted sum.
 
 | Dimension | Weight | What It Measures |
 |-----------|--------|------------------|
@@ -30,7 +63,9 @@ Every complaint is scored on 6 dimensions. Each dimension produces a 0-100 sub-s
 
 **Zone Impact** (from complaint `zone` field):
 - `parameter` = 30, `behavior` = 60, `structure` = 90
-- Missing zone = 45 (default to behavior-level review)
+- Missing zone for **deep-file** complaints = 45 (default to behavior-level review)
+- Missing zone for **agent quick-file** complaints (non-drift-detector, no deep-file fields) = 30 (default to parameter — less restrictive)
+- Note: drift-detector quick-file complaints never reach this dimension (they use the noise-review track)
 
 **Scar-Tissue Match** (cross-reference result):
 - No match = 20, match to fixed SCAR = 40, match to OPEN scar = 75, regression of fixed SCAR = 95
