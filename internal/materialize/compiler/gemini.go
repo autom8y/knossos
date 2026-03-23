@@ -54,7 +54,9 @@ func (c *GeminiCompiler) CompileSkill(name, description, body string) (string, s
 	if err := encoder.Encode(fm); err != nil {
 		return "", "", nil, fmt.Errorf("failed to encode frontmatter: %w", err)
 	}
-	encoder.Close()
+	if err := encoder.Close(); err != nil {
+		return "", "", nil, fmt.Errorf("failed to close encoder: %w", err)
+	}
 	
 	buf.WriteString("---\n")
 	buf.WriteString(strings.TrimLeft(body, " \t\n\r"))
@@ -106,7 +108,9 @@ func (c *GeminiCompiler) CompileAgent(name string, frontmatter map[string]any, b
 	if err := encoder.Encode(frontmatter); err != nil {
 		return nil, fmt.Errorf("failed to encode frontmatter: %w", err)
 	}
-	encoder.Close()
+	if err := encoder.Close(); err != nil {
+		return nil, fmt.Errorf("failed to close encoder: %w", err)
+	}
 
 	buf.WriteString("---\n")
 	buf.WriteString(body)

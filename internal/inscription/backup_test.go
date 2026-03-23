@@ -127,7 +127,7 @@ func TestBackupManager_RestoreBackup_ByTimestamp(t *testing.T) {
 	tmpDir := t.TempDir()
 	targetDir := filepath.Join(tmpDir, paths.ClaudeChannel{}.DirName())
 	backupDir := filepath.Join(targetDir, "backups")
-	os.MkdirAll(backupDir, 0755)
+	_ = os.MkdirAll(backupDir, 0755)
 
 	targetPath := filepath.Join(targetDir, "CLAUDE.md")
 
@@ -135,12 +135,12 @@ func TestBackupManager_RestoreBackup_ByTimestamp(t *testing.T) {
 	os.WriteFile(targetPath, []byte("First content"), 0644)
 	bm := NewBackupManagerWithTarget(backupDir, targetPath)
 	bm.MaxBackups = 10 // Allow more backups for this test
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	// Wait a full second and create second backup (timestamp has 1-second resolution)
 	time.Sleep(1100 * time.Millisecond)
 	os.WriteFile(targetPath, []byte("Second content"), 0644)
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	// Get list of backups
 	backups, _ := bm.ListBackups()
@@ -186,7 +186,7 @@ func TestBackupManager_RestoreBackup_NotFound(t *testing.T) {
 	os.WriteFile(targetPath, []byte("Content"), 0644)
 
 	bm := NewBackupManagerWithTarget(backupDir, targetPath)
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	err := bm.RestoreBackup("nonexistent-timestamp")
 	if err == nil {
@@ -208,7 +208,7 @@ func TestBackupManager_CleanupOldBackups(t *testing.T) {
 
 	// Create more backups than limit
 	for range 5 {
-		bm.CreateBackup()
+		_, _ = bm.CreateBackup()
 		time.Sleep(10 * time.Millisecond) // Ensure different timestamps
 	}
 
@@ -233,7 +233,7 @@ func TestBackupManager_ListBackups(t *testing.T) {
 
 	// Create multiple backups with 1-second delays (timestamp resolution is 1 second)
 	for i := range 3 {
-		bm.CreateBackup()
+		_, _ = bm.CreateBackup()
 		if i < 2 {
 			time.Sleep(1100 * time.Millisecond)
 		}
@@ -283,7 +283,7 @@ func TestBackupManager_ListBackups_IgnoresOtherFiles(t *testing.T) {
 	os.WriteFile(targetPath, []byte("Content"), 0644)
 
 	bm := NewBackupManagerWithTarget(backupDir, targetPath)
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	// Create some other files in backup dir
 	os.WriteFile(filepath.Join(backupDir, "OTHER.md.2026-01-06T10-00-00Z"), []byte("other"), 0644)
@@ -309,7 +309,7 @@ func TestBackupManager_HasBackups(t *testing.T) {
 		t.Error("HasBackups() should be false initially")
 	}
 
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	if !bm.HasBackups() {
 		t.Error("HasBackups() should be true after creating backup")
@@ -332,11 +332,11 @@ func TestBackupManager_GetLatestBackup(t *testing.T) {
 	}
 
 	bm.MaxBackups = 10
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 	time.Sleep(10 * time.Millisecond)
 
 	os.WriteFile(targetPath, []byte("Updated"), 0644)
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	latest := bm.GetLatestBackup()
 	if latest == nil {
@@ -437,7 +437,7 @@ func TestBackupManager_DeleteAllBackups(t *testing.T) {
 
 	// Create multiple backups
 	for range 3 {
-		bm.CreateBackup()
+		_, _ = bm.CreateBackup()
 		time.Sleep(10 * time.Millisecond)
 	}
 
@@ -608,11 +608,11 @@ func TestBackupManager_GetLatestBackupContent(t *testing.T) {
 
 	bm := NewBackupManagerWithTarget(backupDir, targetPath)
 	bm.MaxBackups = 10
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	time.Sleep(10 * time.Millisecond)
 	os.WriteFile(targetPath, []byte("Second content"), 0644)
-	bm.CreateBackup()
+	_, _ = bm.CreateBackup()
 
 	content, err := bm.GetLatestBackupContent()
 	if err != nil {

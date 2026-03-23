@@ -188,8 +188,12 @@ func TestSetHarnessSessionMap_OverwritesExisting(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	SetHarnessSessionMap(resolver, "cc-test", "session-old")
-	SetHarnessSessionMap(resolver, "cc-test", "session-new")
+	if err := SetHarnessSessionMap(resolver, "cc-test", "session-old"); err != nil {
+		t.Fatalf("SetHarnessSessionMap failed: %v", err)
+	}
+	if err := SetHarnessSessionMap(resolver, "cc-test", "session-new"); err != nil {
+		t.Fatalf("SetHarnessSessionMap failed: %v", err)
+	}
 
 	mapFile := filepath.Join(resolver.HarnessMapDir(), "cc-test")
 	data, err := os.ReadFile(mapFile)
@@ -244,7 +248,7 @@ func TestClearHarnessSessionMap_RemovesFile(t *testing.T) {
 	projectRoot := t.TempDir()
 	resolver := paths.NewResolver(projectRoot)
 
-	SetHarnessSessionMap(resolver, "cc-test", "session-123")
+	_ = SetHarnessSessionMap(resolver, "cc-test", "session-123")
 
 	err := ClearHarnessSessionMap(resolver, "cc-test")
 	if err != nil {

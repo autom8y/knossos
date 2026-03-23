@@ -1,6 +1,7 @@
 version: "2"
 
 linters:
+  default: none
   enable:
     - modernize
     - errorlint
@@ -10,40 +11,36 @@ linters:
     - ineffassign
     - staticcheck
     - unused
-
-linters-settings:
-  errorlint:
-    errorf: true
-    asserts: true
-    comparison: true
-  gocritic: {}
-  errcheck:
-    exclude-functions:
-      - (io.Closer).Close
-      - (io.Writer).Write
-      - (*os.File).Close
-      - (*os.File).Write
-      - os.Remove
-      - os.RemoveAll
-      - os.Setenv
-      - os.Unsetenv
-      - os.WriteFile
-      - os.Mkdir
-      - os.MkdirAll
-      - os.Chmod
-      - fmt.Fprint
-      - fmt.Fprintf
-      - fmt.Fprintln
-      - fmt.Print
-      - fmt.Printf
-      - fmt.Println
+  settings:
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+    gocritic: {}
+    errcheck:
+      exclude-functions:
+        - (io.Closer).Close
+        - (io.Writer).Write
+        - (*os.File).Close
+        - (*os.File).Write
+        - os.Remove
+        - os.RemoveAll
+        - os.Setenv
+        - os.Unsetenv
+        - os.WriteFile
+        - os.Mkdir
+        - os.MkdirAll
+        - os.Chmod
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - fmt.Print
+        - fmt.Printf
+        - fmt.Println
 
 issues:
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  exclude-rules:
-    - path: ".*_test\\.go"
-      linters:
-        - errcheck
-    - path: ".*_test\\.go"
-      text: "SA5011"
+  exclusions:
+    rules:
+      - path: ".*_test\\.go"
+        linters:
+          - errcheck

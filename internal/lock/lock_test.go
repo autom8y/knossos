@@ -42,7 +42,7 @@ func TestManager_ExclusiveLock(t *testing.T) {
 	if err != nil {
 		t.Fatalf("First Acquire() error = %v", err)
 	}
-	defer lock1.Release()
+	defer func() { _ = lock1.Release() }()
 
 	// Second lock should timeout
 	_, err = mgr.Acquire(sessionID, Exclusive, 100*time.Millisecond, "test-lock2")
@@ -61,13 +61,13 @@ func TestManager_SharedLock(t *testing.T) {
 	if err != nil {
 		t.Fatalf("First shared Acquire() error = %v", err)
 	}
-	defer lock1.Release()
+	defer func() { _ = lock1.Release() }()
 
 	lock2, err := mgr.Acquire(sessionID, Shared, 5*time.Second, "test-shared2")
 	if err != nil {
 		t.Errorf("Second shared Acquire() should succeed: %v", err)
 	} else {
-		lock2.Release()
+		_ = lock2.Release()
 	}
 }
 
@@ -86,7 +86,7 @@ func TestManager_IsLocked(t *testing.T) {
 		t.Fatalf("Acquire() error = %v", err)
 	}
 
-	lock.Release()
+	_ = lock.Release()
 }
 
 func TestManager_ConcurrentPark(t *testing.T) {
@@ -111,7 +111,7 @@ func TestManager_ConcurrentPark(t *testing.T) {
 
 			time.Sleep(100 * time.Millisecond)
 
-			lock.Release()
+			_ = lock.Release()
 			results <- nil
 		}(i)
 	}
@@ -167,7 +167,7 @@ func TestManager_RaceCondition(t *testing.T) {
 			counter = current + 1
 			mu.Unlock()
 
-			lock.Release()
+			_ = lock.Release()
 		}()
 	}
 
@@ -196,7 +196,7 @@ func TestLock_Metadata(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Acquire() error = %v", err)
 	}
-	defer lock.Release()
+	defer func() { _ = lock.Release() }()
 
 	if lock.SessionID() != sessionID {
 		t.Errorf("SessionID() = %q, want %q", lock.SessionID(), sessionID)
@@ -256,7 +256,7 @@ func TestLockFileFormat_JSON(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Acquire() error = %v", err)
 	}
-	defer lock.Release()
+	defer func() { _ = lock.Release() }()
 
 	// Read lock file and verify JSON content
 	lockPath := filepath.Join(tmpDir, sessionID+".lock")
@@ -445,7 +445,7 @@ func TestManager_StaleLockReclamation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Acquire() should succeed on stale lock, got: %v", err)
 	}
-	defer lock.Release()
+	defer func() { _ = lock.Release() }()
 
 	// Verify the lock was reclaimed with new metadata
 	if lock.Metadata().Holder != "reclaimer" {
@@ -529,7 +529,7 @@ func TestManager_StaleLockReclamation_Concurrent(t *testing.T) {
 
 	// Release all acquired locks
 	for _, l := range locks {
-		l.Release()
+		_ = l.Release()
 	}
 }
 

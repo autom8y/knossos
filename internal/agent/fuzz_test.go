@@ -7,6 +7,6 @@ func FuzzParseAgentFrontmatter(f *testing.F) {
 	f.Add([]byte("---\n---\n"))
 	f.Add([]byte(""))
 	f.Fuzz(func(t *testing.T, b []byte) {
-		ParseAgentFrontmatter(b) // must not panic
+		_, _ = ParseAgentFrontmatter(b) // must not panic
 	})
 }

@@ -641,7 +641,7 @@ func BenchmarkValidateHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(nil, ctx, printer)
+		_ = runValidateCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -673,7 +673,7 @@ func BenchmarkValidateHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(nil, ctx, printer)
+		_ = runValidateCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -714,7 +714,7 @@ func BenchmarkValidateHook_Validation(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runValidateCore(nil, ctx, printer)
+		_ = runValidateCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()

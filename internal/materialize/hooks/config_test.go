@@ -321,7 +321,9 @@ func TestMergeHooksSettings_Idempotent(t *testing.T) {
 	// Serialize to JSON and back (simulates load/save cycle)
 	data, _ := json.Marshal(result1)
 	var settings2 map[string]any
-	json.Unmarshal(data, &settings2)
+	if err := json.Unmarshal(data, &settings2); err != nil {
+		t.Fatalf("Failed to unmarshal JSON: %v", err)
+	}
 
 	result2 := MergeHooksSettings(settings2, cfg, "claude")
 

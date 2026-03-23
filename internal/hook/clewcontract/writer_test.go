@@ -18,7 +18,7 @@ func TestNewEventWriter(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	expectedPath := filepath.Join(tmpDir, EventsFileName)
 	if writer.Path() != expectedPath {
@@ -34,7 +34,7 @@ func TestNewEventWriter_CreatesDirectory(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Directory should exist
 	if _, err := os.Stat(nestedDir); os.IsNotExist(err) {
@@ -50,7 +50,7 @@ func TestNewEventWriterPath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriterPath failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	if writer.Path() != customPath {
 		t.Errorf("Path() = %v, want %v", writer.Path(), customPath)
@@ -68,7 +68,7 @@ func TestEventWriter_Write(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	event := Event{
 		Timestamp: "2024-01-04T10:23:45.123Z",
@@ -112,7 +112,7 @@ func TestEventWriter_AppendBehavior(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Write multiple events
 	events := []Event{
@@ -166,7 +166,7 @@ func TestEventWriter_WriteMultiple(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	events := []Event{
 		{Timestamp: "2024-01-04T10:00:00.000Z", Type: EventTypeToolCall, Summary: "First"},
@@ -201,7 +201,7 @@ func TestEventWriter_WriteMultiple_Empty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Should not error with empty slice
 	if err := writer.WriteMultiple([]Event{}); err != nil {
@@ -220,7 +220,7 @@ func TestEventWriter_ThreadSafety(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	const numWriters = 10
 	const eventsPerWriter = 100
@@ -275,7 +275,7 @@ func TestEventWriter_FileCreationOnFirstWrite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// File should not exist yet
 	if _, err := os.Stat(writer.Path()); !os.IsNotExist(err) {
@@ -318,7 +318,7 @@ func TestNewBufferedEventWriter(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	writer := NewBufferedEventWriter(tmpDir, DefaultFlushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	expectedPath := filepath.Join(tmpDir, EventsFileName)
 	if writer.Path() != expectedPath {
@@ -331,7 +331,7 @@ func TestBufferedEventWriter_Write_NonBlocking(t *testing.T) {
 
 	// Use a long flush interval so events stay buffered
 	writer := NewBufferedEventWriter(tmpDir, 1*time.Hour)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	event := NewToolCallEvent("Bash", "/test", nil)
 
@@ -353,7 +353,7 @@ func TestBufferedEventWriter_ManualFlush(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	writer := NewBufferedEventWriter(tmpDir, 1*time.Hour)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	event := NewToolCallEvent("Read", "/some/file", nil)
 	writer.Write(event)
@@ -390,7 +390,7 @@ func TestBufferedEventWriter_AutoFlush(t *testing.T) {
 	// Use a short flush interval
 	flushInterval := 100 * time.Millisecond
 	writer := NewBufferedEventWriter(tmpDir, flushInterval)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	event := NewToolCallEvent("Edit", "/test/file", nil)
 	writer.Write(event)
@@ -472,7 +472,7 @@ func TestBufferedEventWriter_WriteAfterClose(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	writer := NewBufferedEventWriter(tmpDir, 1*time.Hour)
-	writer.Close()
+	_ = writer.Close()
 
 	// Write after close should not panic
 	event := NewToolCallEvent("Bash", "/test", nil)
@@ -488,7 +488,7 @@ func TestBufferedEventWriter_FlushEmpty(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	writer := NewBufferedEventWriter(tmpDir, 1*time.Hour)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Flush with no events should succeed
 	if err := writer.Flush(); err != nil {
@@ -506,7 +506,7 @@ func TestBufferedEventWriter_ThreadSafety(t *testing.T) {
 
 	// Short flush interval to exercise concurrent flush + write
 	writer := NewBufferedEventWriter(tmpDir, 50*time.Millisecond)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	const numWriters = 10
 	const eventsPerWriter = 100
@@ -562,7 +562,7 @@ func TestBufferedEventWriter_MultipleFlushes(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	writer := NewBufferedEventWriter(tmpDir, 1*time.Hour)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Write and flush multiple batches
 	for batch := range 3 {
@@ -612,7 +612,7 @@ func TestBufferedEventWriter_FlushError(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	writer := NewBufferedEventWriter(tmpDir, 1*time.Hour)
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// Initially no error
 	if err := writer.FlushError(); err != nil {

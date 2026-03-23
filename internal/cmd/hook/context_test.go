@@ -833,7 +833,7 @@ func BenchmarkContextHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextCore(nil, ctx, printer)
+		_ = runContextCore(nil, ctx, printer)
 	}
 
 	// Report ns/op
@@ -896,7 +896,7 @@ current_phase: "implementation"
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextCore(nil, ctx, printer)
+		_ = runContextCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()

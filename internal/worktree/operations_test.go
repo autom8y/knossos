@@ -508,7 +508,7 @@ func verifyArchiveMetadata(t *testing.T, archivePath string, wt *Worktree) {
 	if err != nil {
 		t.Fatalf("Failed to read gzip: %v", err)
 	}
-	defer gzReader.Close()
+	defer func() { _ = gzReader.Close() }()
 
 	tarReader := tar.NewReader(gzReader)
 
@@ -564,10 +564,10 @@ func createEmptyArchive(t *testing.T, path string) {
 	defer file.Close()
 
 	gzWriter := gzip.NewWriter(file)
-	defer gzWriter.Close()
+	defer func() { _ = gzWriter.Close() }()
 
 	tarWriter := tar.NewWriter(gzWriter)
-	defer tarWriter.Close()
+	defer func() { _ = tarWriter.Close() }()
 
 	// Add a dummy file
 	header := &tar.Header{

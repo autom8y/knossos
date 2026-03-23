@@ -348,7 +348,7 @@ func BenchmarkAutoparkHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAutoparkCore(nil, ctx, printer)
+		_ = runAutoparkCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()

@@ -958,7 +958,7 @@ func BenchmarkWriteguardHook_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(nil, ctx, printer)
+		_ = runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -990,7 +990,7 @@ func BenchmarkWriteguardHook_EarlyExit(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(nil, ctx, printer)
+		_ = runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -1780,7 +1780,7 @@ func BenchmarkWriteguardHook_TimelineAllow(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(nil, ctx, printer)
+		_ = runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()
@@ -1835,7 +1835,7 @@ func BenchmarkWriteguardHook_FrontmatterBlock(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runWriteguardCore(nil, ctx, printer)
+		_ = runWriteguardCore(nil, ctx, printer)
 	}
 
 	elapsed := b.Elapsed()

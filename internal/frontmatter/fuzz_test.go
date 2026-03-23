@@ -9,6 +9,6 @@ func FuzzParse(f *testing.F) {
 	f.Add([]byte(""))
 	f.Add([]byte("---\n"))
 	f.Fuzz(func(t *testing.T, b []byte) {
-		Parse(b) // must not panic
+		_, _, _ = Parse(b) // must not panic
 	})
 }

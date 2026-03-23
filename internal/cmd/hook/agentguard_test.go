@@ -439,7 +439,7 @@ func BenchmarkAgentGuard_Passthrough(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAgentGuardCore(nil, ctx, printer, "ecosystem-analyst", allowPaths)
+		_ = runAgentGuardCore(nil, ctx, printer, "ecosystem-analyst", allowPaths)
 	}
 
 	elapsed := b.Elapsed()

@@ -380,7 +380,7 @@ func BenchmarkAttributionGuard_FastPath(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAttributionGuardCore(nil, ctx, printer)
+		_ = runAttributionGuardCore(nil, ctx, printer)
 	}
 }
 
@@ -414,6 +414,6 @@ func BenchmarkAttributionGuard_CommitScan(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runAttributionGuardCore(nil, ctx, printer)
+		_ = runAttributionGuardCore(nil, ctx, printer)
 	}
 }

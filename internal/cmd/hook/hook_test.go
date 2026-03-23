@@ -536,7 +536,7 @@ func BenchmarkHook_EarlyExitPath(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runContextCore(nil, ctx, printer)
+		_ = runContextCore(nil, ctx, printer)
 	}
 
 	// Verify early exit is fast
@@ -565,7 +565,7 @@ func BenchmarkHook_TimeoutOverhead(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ctx.withTimeout(func() error {
+		_ = ctx.withTimeout(func() error {
 			return nil
 		})
 	}

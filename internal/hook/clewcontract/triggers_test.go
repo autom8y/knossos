@@ -233,7 +233,7 @@ func TestCheckTriggers_FileCount_AtThreshold(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	// Add 5th file - should trigger
 	currentEvent := Event{
@@ -244,8 +244,8 @@ func TestCheckTriggers_FileCount_AtThreshold(t *testing.T) {
 
 	// Write the 5th event
 	writer, _ = NewEventWriter(sessionDir)
-	writer.Write(currentEvent)
-	writer.Close()
+	_ = writer.Write(currentEvent)
+	_ = writer.Close()
 
 	eventsPath := filepath.Join(sessionDir, EventsFileName)
 	config := DefaultTriggerConfig()
@@ -282,7 +282,7 @@ func TestCheckTriggers_FileCount_BelowThreshold(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	currentEvent := Event{
 		Type: EventTypeToolCall,
@@ -323,7 +323,7 @@ func TestCheckTriggers_FailureRepeat(t *testing.T) {
 	if err := writer.Write(firstFailure); err != nil {
 		t.Fatal(err)
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	// Current event is same failure
 	currentEvent := Event{
@@ -371,7 +371,7 @@ func TestCheckTriggers_FailureRepeat_DifferentCommands(t *testing.T) {
 	if err := writer.Write(firstFailure); err != nil {
 		t.Fatal(err)
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	// Current event is different command failure
 	currentEvent := Event{
@@ -456,7 +456,7 @@ func TestCountUniqueFiles(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	eventsPath := filepath.Join(sessionDir, EventsFileName)
 	count := CountUniqueFiles(eventsPath)
@@ -497,7 +497,7 @@ func TestDetectRepeatedFailures(t *testing.T) {
 	if err := writer.Write(failure); err != nil {
 		t.Fatal(err)
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	// Check if similar failure is detected
 	currentEvent := Event{
@@ -539,7 +539,7 @@ func TestDetectRepeatedFailures_SuccessDoesNotCount(t *testing.T) {
 	if err := writer.Write(success); err != nil {
 		t.Fatal(err)
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	// Check if failure is detected as repeated (should not be)
 	currentEvent := Event{
@@ -636,7 +636,7 @@ func TestCheckTriggers_Priority_SacredPathFirst(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	writer.Close()
+	_ = writer.Close()
 
 	// Current event writes to sacred path AND would trigger file count
 	currentEvent := Event{

@@ -272,7 +272,7 @@ func TestCreateSeedCleanup(t *testing.T) {
 	// Clean up manually since we kept it
 	for _, match := range matches {
 		// Remove from git worktree list
-		exec.Command("git", "-C", projectDir, "worktree", "remove", match, "--force").Run()
+		_ = exec.Command("git", "-C", projectDir, "worktree", "remove", match, "--force").Run()
 		os.RemoveAll(match)
 	}
 }

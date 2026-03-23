@@ -908,7 +908,7 @@ func TestEventWriter_WriteTyped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	event := NewTypedSessionCreatedEvent("", "s-001", "test initiative", "MODULE", "ecosystem")
 	if err := writer.WriteTyped(event); err != nil {
@@ -953,7 +953,7 @@ func TestEventWriter_WriteTyped_InterleavedWithV2(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewEventWriter failed: %v", err)
 	}
-	defer writer.Close()
+	defer func() { _ = writer.Close() }()
 
 	// v2 flat event
 	v2Event := NewSessionCreatedEvent("s-001", "init", "PATCH", "ecosystem")

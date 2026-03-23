@@ -216,7 +216,9 @@ func TestMetadataGetOlderThan(t *testing.T) {
 	}
 
 	for _, wt := range worktrees {
-		mgr.Add(wt)
+		if err := mgr.Add(wt); err != nil {
+			t.Fatalf("Add failed: %v", err)
+		}
 	}
 
 	// Get worktrees older than 7 days
@@ -311,11 +313,15 @@ func setupTestGitRepo(t *testing.T) string {
 	// Configure git user
 	cmd = exec.Command("git", "config", "user.email", "test@test.com")
 	cmd.Dir = tmpDir
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Failed to set git config email: %v", err)
+	}
 
 	cmd = exec.Command("git", "config", "user.name", "Test User")
 	cmd.Dir = tmpDir
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Failed to set git config name: %v", err)
+	}
 
 	// Create initial commit
 	testFile := filepath.Join(tmpDir, "README.md")
@@ -323,7 +329,9 @@ func setupTestGitRepo(t *testing.T) string {
 
 	cmd = exec.Command("git", "add", ".")
 	cmd.Dir = tmpDir
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Failed to git add: %v", err)
+	}
 
 	cmd = exec.Command("git", "commit", "-m", "Initial commit")
 	cmd.Dir = tmpDir
@@ -588,7 +596,9 @@ func TestManagerCleanup(t *testing.T) {
 	metaMgr := NewMetadataManager(mgr.GetWorktreesDir())
 	wtMeta, _ := metaMgr.Get(wt.ID)
 	wtMeta.CreatedAt = time.Now().Add(-10 * 24 * time.Hour)
-	metaMgr.Update(*wtMeta)
+	if err := metaMgr.Update(*wtMeta); err != nil {
+		t.Fatalf("Update failed: %v", err)
+	}
 
 	// Cleanup with force and dry run
 	result, err := mgr.Cleanup(CleanupOptions{

@@ -444,7 +444,7 @@ func BenchmarkGitConventions_FastPath(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		stdout.Reset()
-		runGitConventionsCore(nil, ctx, printer)
+		_ = runGitConventionsCore(nil, ctx, printer)
 	}
 }
 
