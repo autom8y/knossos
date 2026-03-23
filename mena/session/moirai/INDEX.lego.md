@@ -56,4 +56,4 @@ When executing an operation:
 
 - `--dry-run`: Preview operation without execution
 - `--force`: Bypass non-critical validations
-- `--override`: Bypass lifecycle rules (requires reason)
+- `--force`: Bypass quality gates (e.g., BLACK sails). PARKED→ARCHIVED is a valid direct transition without any special flag.

@@ -2,6 +2,22 @@
 
 > What is spun cannot be unspun. Every session begins with Clotho's thread.
 
+## Phase Vocabulary
+
+The CLI accepts exactly these phase values for `ari session transition`:
+
+| Phase | Description |
+|-------|-------------|
+| `requirements` | Gathering and validating requirements |
+| `design` | Architectural and design decisions |
+| `implementation` | Code and content production |
+| `validation` | Testing and review |
+| `complete` | All work finished |
+
+`PLANNING` is **not** a CLI-recognized phase. Use `requirements` instead. The CLI will reject any phase not in this table.
+
+---
+
 ## create_session
 
 Creates a new session.

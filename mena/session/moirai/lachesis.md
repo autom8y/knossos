@@ -61,6 +61,8 @@ Transitions the session to a new workflow phase.
 
 Updates a field in SESSION_CONTEXT.md or SPRINT_CONTEXT.md.
 
+**Write guard constraint**: If the mutation touches both YAML frontmatter and Markdown body, issue **two separate Edit calls** — one for frontmatter, one for body. The write guard treats these as distinct sections and will block a combined edit with "Edit targets multiple SESSION_CONTEXT sections."
+
 **Syntax**: `update_field target="{session|sprint}" field="{name}" value="{value}"`
 
 **Parameters**:
@@ -204,6 +206,8 @@ Records an architectural or design decision.
 ## append_content
 
 Appends content to a named section of the session context.
+
+**Write guard constraint**: If the mutation touches both YAML frontmatter and Markdown body, issue **two separate Edit calls** — one for frontmatter, one for body. The write guard treats these as distinct sections and will block a combined edit.
 
 **Syntax**: `append_content section="{name}" content="{text}"`
 

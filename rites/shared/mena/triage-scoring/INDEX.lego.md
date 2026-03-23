@@ -15,7 +15,9 @@ Before scoring, classify each complaint as **quick-file** or **deep-file**:
 |--------|-------------------|--------------|
 | **Quick-file** | `filed_by == "drift-detector"` AND `zone` is empty AND `evidence` is nil | Noise-review track (3 dimensions) |
 | **Deep-file** | Has `zone`, `effort_estimate`, `evidence`, or `related_scars` | Standard track (6 dimensions) |
-| **Agent quick-file** | `filed_by != "drift-detector"` AND no deep-file fields | Standard track (6 dimensions, with zone default = behavior) |
+| **Agent quick-file** | `filed_by != "drift-detector"` AND no deep-file fields | Standard track (6 dimensions, with zone default = behavior for routing override) |
+
+**Agent quick-file zone handling**: Agent quick-files use two independently conservative defaults that serve different purposes. `zone_impact = 30` (parameter-level score) prevents quick-files from inflating composite scores without evidence. `zone default = behavior` (routing override) forces human review when the fix zone is unknown. These are intentionally decoupled: the score conservatively undersells risk while the routing conservatively oversells it. A filer providing explicit `zone: parameter` metadata overrides both defaults.
 
 **Quick-file routing rule**: Complaints filed by `drift-detector` with `severity: low` and no `zone`/`effort_estimate` fields auto-route to the **noise-review track**. This prevents auto-filed tool-fallback noise from consuming human-review bandwidth.
 
@@ -62,6 +64,9 @@ Every complaint on the standard track is scored on 6 dimensions. Each dimension 
 - 1 observation = 15, 2 = 40, 3-4 = 65, 5+ = 90
 
 **Zone Impact** (from complaint `zone` field):
+
+**CRITICAL**: The `zone` field refers to the **modification zone of the proposed fix**, not the system exhibiting the symptom. A complaint about lock behavior whose fix is a skill documentation edit has `zone: parameter` (the fix modifies a parameter/prompt, not the lock system). Documentation-only fixes are always `parameter` zone regardless of the system being documented.
+
 - `parameter` = 30, `behavior` = 60, `structure` = 90
 - Missing zone for **deep-file** complaints = 45 (default to behavior-level review)
 - Missing zone for **agent quick-file** complaints (non-drift-detector, no deep-file fields) = 30 (default to parameter — less restrictive)
@@ -104,7 +109,7 @@ The zone override only elevates review level, never reduces it. A parameter comp
 
 Before scoring, check every complaint against `.know/scar-tissue.md`:
 
-**Step 1: Match detection.** Search the Failure Catalog for SCAR entries matching the complaint's description, tags, or affected file paths. Match on: fix location overlap, category overlap, or behavioral pattern similarity.
+**Step 1: Match detection.** Search the Failure Catalog for SCAR entries matching the complaint's description, tags, or affected file paths. Match on: fix location overlap, category overlap, or behavioral pattern similarity. **RELATED requires mechanism overlap, not just domain overlap.** Two items sharing the same component (e.g., both involve the lock system) but describing different failure mechanisms (e.g., TOCTOU race vs CLI session resolution) are **no-match**, not RELATED.
 
 **Step 2: Scoring adjustment based on match type.**
 
@@ -116,6 +121,10 @@ Before scoring, check every complaint against `.know/scar-tissue.md`:
 | **No match** | Scar-tissue dimension = 20 (baseline) | No `scar_ref` notation |
 
 **Step 3: Linkage.** Every triage output entry includes `scar_ref` when a match is found. This creates a bidirectional trace: complaints reference SCARs, and future scar-tissue regeneration can reference resolved complaints.
+
+## Dedup Constraint
+
+Each complaint must belong to **exactly one** dedup group. When a complaint's tags overlap with multiple groups, assign it to the best-fit group by combined tag+title similarity. Multi-group assignment inflates group counts and creates ambiguous routing.
 
 ## Triage Output Format
 

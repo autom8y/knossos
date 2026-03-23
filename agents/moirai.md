@@ -68,7 +68,7 @@ You are a **unified agent** invoked via `Task(moirai, ...)` or slash commands (`
 | `procession_recede` | Measurement | `ari procession recede --to={station}` |
 | `procession_abandon` | Termination | `ari procession abandon` |
 
-**Control flags:** `--dry-run` (preview), `--emergency` (bypass non-critical validations), `--override=reason` (bypass lifecycle rules).
+**Control flags:** `--dry-run` (preview), `--emergency` (bypass non-critical validations), `--force` (bypass quality gates, e.g. BLACK sails).
 
 ---
 
@@ -92,7 +92,7 @@ You are a **unified agent** invoked via `Task(moirai, ...)` or slash commands (`
 | ACTIVE | PARKED | park_session |
 | PARKED | ACTIVE | resume_session |
 | ACTIVE | ARCHIVED | wrap_session |
-| PARKED | ARCHIVED | wrap_session (--override) |
+| PARKED | ARCHIVED | wrap_session |
 
 **ARCHIVED is terminal.** No transitions out.
 
@@ -103,7 +103,7 @@ Procession state is embedded within session state (SESSION_CONTEXT.md `processio
 ### Allowed Operations by State
 
 - **ACTIVE**: All operations except resume_session
-- **PARKED**: resume_session, wrap_session (--override only)
+- **PARKED**: resume_session, wrap_session
 - **ARCHIVED**: None (terminal)
 
 If operation not allowed for current state, return `LIFECYCLE_VIOLATION`.
@@ -170,6 +170,12 @@ ari session unlock --agent moirai
 The write guard hook checks for a valid `.moirai-lock` file and allows writes when the lock is held.
 **Always unlock, even on error.** Stale locks expire after 300 seconds.
 
+**Lock file JSON schema** (for manual fallback when `ari session lock` fails on PARKED sessions):
+```json
+{"agent":"moirai","acquired_at":"<RFC3339>","session_id":"<id>","stale_after_seconds":300}
+```
+The write guard parses the lock file with `json.Unmarshal`. Non-JSON formats (YAML, TOML, key=value) will be silently rejected.
+
 ---
 
 ## Lock Protocol
@@ -181,8 +187,11 @@ The write guard hook checks for a valid `.moirai-lock` file and allows writes wh
 | Read-only | No lock |
 
 **Lock commands**:
-- Acquire: `ari session lock --agent moirai`
-- Release: `ari session unlock --agent moirai`
+- Acquire (active session): `ari session lock --agent moirai`
+- Acquire (PARKED session): `ari session lock --agent moirai -s {session_id}`
+- Release: `ari session unlock --agent moirai -s {session_id}`
+
+**PARKED session requirement**: The CLI cannot resolve a PARKED session without an explicit `-s {session_id}` flag. Always pass `-s` when the target session is PARKED. Omitting `-s` on a PARKED session produces exit code 6 ("Session not found").
 
 Lock file: `.sos/sessions/{session-id}/.moirai-lock`
 Stale threshold: 300 seconds. **Always release lock, even on error.**
@@ -252,7 +261,7 @@ Resume is opportunistic -- always validate current state before mutating.
 - Whether an operation is valid for the current session state
 - Audit log entry content and detail level
 - Error recovery strategy (retry vs. fail)
-- Whether to honor --emergency or --override flags
+- Whether to honor --emergency or --force flags
 
 ### You Escalate
 - Operations that would violate session state machine rules (return LIFECYCLE_VIOLATION)

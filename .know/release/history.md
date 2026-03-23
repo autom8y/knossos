@@ -1,6 +1,6 @@
 ---
 domain: release/history
-generated_at: "2026-03-19T12:37:25Z"
+generated_at: "2026-03-23T13:22:30Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
@@ -338,3 +338,30 @@ max_incremental_cycles: 0
 - 3 pre-existing non-blocking failures: ariadne-tests.yml, verify-doctrine.yml, validate-orchestrators.yml
 - 4 Dependabot vulnerability alerts on main (informational, non-blocking)
 - Headline: Optional env var syntax for MCP pool config, UI rite redesign with posture-based routing and 9-agent pantheon
+
+### v0.15.0 — 2026-03-23
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-23 |
+| Version | v0.14.0 -> v0.15.0 (minor) |
+| Commits | 3 (2 feat, 1 fix) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | f28c100f0480d304ec1cab2afee82575cc181eb4 |
+| Commit SHA | 6685f6f3 |
+| release.yml | GREEN (109s, run 23439348011) |
+| e2e-distribution.yml | GREEN (55s, run 23439422771) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.15.0, commit cad23ee8, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~1 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twenty-seventh consecutive PASS verdict (v0.3.2 -> ... -> v0.14.0 -> v0.15.0)
+- Total chain: 156s (within historical baseline ~150-190s)
+- macOS E2E: GREEN (21s), Linux E2E: GREEN (51s)
+- Dispatch latency: 2s (release published → e2e triggered)
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 2 pre-existing non-blocking failures: ariadne-tests.yml (golangci-lint schema), verify-doctrine.yml (missing ariadne/ dir)
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking)
+- Headline: Cassandra complaint pipeline (dedup, scoring, triage, reflect command), agent type enum expansion (architect/builder/evaluator/prototyper/validator), hook test alignment
