@@ -1,0 +1,16 @@
+# Clew Terraform Variables — Example
+#
+# Copy this file to terraform.tfvars and fill in real values.
+# NEVER commit terraform.tfvars to version control.
+
+aws_account_id      = "123456789012"
+aws_region          = "us-east-1"
+vpc_id              = "vpc-0123456789abcdef0"
+public_subnet_ids   = ["subnet-0123456789abcdef0", "subnet-0123456789abcdef1"]
+acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Optional
+github_org    = "autom8y"
+github_repo   = "knossos"
+otel_endpoint = ""
+image_tag     = "latest"
