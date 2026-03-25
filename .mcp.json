@@ -1,14 +1,14 @@
 {
   "mcpServers": {
-    "github": {
+    "go-semantic": {
+      "command": "go-semantic-mcp"
+    },
+    "terraform": {
       "args": [
         "-y",
-        "@modelcontextprotocol/server-github"
+        "@modelcontextprotocol/server-terraform"
       ],
-      "command": "npx",
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-      }
+      "command": "npx"
     }
   }
 }
