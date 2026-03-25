@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log/slog"
 	"math"
 	"net/http"
 	"strconv"
@@ -100,6 +101,12 @@ func (v *Verifier) Handler(next http.Handler) http.Handler {
 		_ = r.Body.Close()
 
 		if err := v.Verify(r.Header, body); err != nil {
+			slog.Warn("slack verification failed",
+				"error", err,
+				"body_len", len(body),
+				"has_signature", r.Header.Get(SlackSignatureHeader) != "",
+				"has_timestamp", r.Header.Get(SlackTimestampHeader) != "",
+			)
 			http.Error(w, "unauthorized: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
