@@ -1,0 +1,1098 @@
+schema_version: "1.0"
+org: autom8y
+synced_at: "2026-03-25T12:42:58Z"
+repos:
+    - name: autom8
+      url: https://github.com/autom8y/autom8
+      default_branch: main
+      last_synced: "2026-03-25T12:42:15Z"
+      domains: []
+    - name: autom8-core
+      url: https://github.com/autom8y/autom8-core
+      default_branch: main
+      last_synced: "2026-03-25T12:42:16Z"
+      domains: []
+    - name: charter
+      url: https://github.com/autom8y/charter
+      default_branch: main
+      last_synced: "2026-03-25T12:42:16Z"
+      domains: []
+    - name: autom8y-asana
+      url: https://github.com/autom8y/autom8y-asana
+      default_branch: main
+      last_synced: "2026-03-25T12:42:20Z"
+      domains:
+        - qualified_name: autom8y::autom8y-asana::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-25T01:56:07Z"
+          expires_after: 7d
+          source_hash: c6bcef6
+          confidence: 0.75
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-25T01:56:07Z"
+          expires_after: 7d
+          source_hash: c6bcef6
+          confidence: 0.93
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-25T01:56:07Z"
+          expires_after: 7d
+          source_hash: c6bcef6
+          confidence: 0.91
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::feat/index
+          domain: feat/index
+          path: .know/feat/INDEX.md
+          generated_at: "2026-03-18T12:26:10Z"
+          expires_after: 30d
+          source_hash: 2c604fa
+          confidence: 0.93
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::feat/automation-engine
+          domain: feat/automation-engine
+          path: .know/feat/automation-engine.md
+          generated_at: "2026-03-18T12:39:28Z"
+          expires_after: 14d
+          source_hash: 2c604fa
+          confidence: 0.91
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::feat/data-attachment-bridge
+          domain: feat/data-attachment-bridge
+          path: .know/feat/data-attachment-bridge.md
+          generated_at: "2026-03-18T12:59:19Z"
+          expires_after: 14d
+          source_hash: 2c604fa
+          confidence: 0.93
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::feat/data-service-client
+          domain: feat/data-service-client
+          path: .know/feat/data-service-client.md
+          generated_at: "2026-03-18T12:39:28Z"
+          expires_after: 14d
+          source_hash: 2c604fa
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::feat/lambda-handlers
+          domain: feat/lambda-handlers
+          path: .know/feat/lambda-handlers.md
+          generated_at: "2026-03-18T12:39:28Z"
+          expires_after: 14d
+          source_hash: 2c604fa
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::release/history
+          domain: release/history
+          path: .know/release/history.md
+          generated_at: "2026-03-15T02:15:00Z"
+          expires_after: ""
+          source_hash: b7c4148
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::release/platform-profile
+          domain: release/platform-profile
+          path: .know/release/platform-profile.md
+          generated_at: "2026-03-15T02:15:00Z"
+          expires_after: 30d
+          source_hash: b7c4148
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-25T01:56:07Z"
+          expires_after: 7d
+          source_hash: c6bcef6
+          confidence: 0.87
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-asana::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-25T01:56:07Z"
+          expires_after: 7d
+          source_hash: c6bcef6
+          confidence: 0.88
+          format_version: "1.0"
+    - name: autom8y-data
+      url: https://github.com/autom8y/autom8y-data
+      default_branch: main
+      last_synced: "2026-03-25T12:42:23Z"
+      domains:
+        - qualified_name: autom8y::autom8y-data::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-18T19:45:00Z"
+          expires_after: 7d
+          source_hash: 51f5e8d
+          confidence: 0.82
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-data::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-18T19:45:00Z"
+          expires_after: 7d
+          source_hash: 51f5e8d
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-data::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-18T19:45:00Z"
+          expires_after: 7d
+          source_hash: 51f5e8d
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-data::feat/index
+          domain: feat/index
+          path: .know/feat/INDEX.md
+          generated_at: "2026-03-18T21:15:00Z"
+          expires_after: 30d
+          source_hash: 8c9dfeb
+          confidence: 0.91
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-data::release/history
+          domain: release/history
+          path: .know/release/history.md
+          generated_at: "2026-03-15T02:45:00Z"
+          expires_after: ""
+          source_hash: 07a7524
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-data::release/platform-profile
+          domain: release/platform-profile
+          path: .know/release/platform-profile.md
+          generated_at: "2026-03-15T02:45:00Z"
+          expires_after: 30d
+          source_hash: 07a7524
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-data::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-18T19:45:00Z"
+          expires_after: 7d
+          source_hash: 51f5e8d
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-data::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-18T19:45:00Z"
+          expires_after: 7d
+          source_hash: 51f5e8d
+          confidence: 0.87
+          format_version: "1.0"
+    - name: autom8y
+      url: https://github.com/autom8y/autom8y
+      default_branch: main
+      last_synced: "2026-03-25T12:42:30Z"
+      domains:
+        - qualified_name: autom8y::autom8y::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-14T17:34:02Z"
+          expires_after: 7d
+          source_hash: 5f94481
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-14T17:34:02Z"
+          expires_after: 7d
+          source_hash: 5f94481
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-14T17:34:02Z"
+          expires_after: 7d
+          source_hash: 5f94481
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::env-architecture
+          domain: env-architecture
+          path: .know/env-architecture.md
+          generated_at: "2026-03-15T12:00:00Z"
+          expires_after: 30d
+          source_hash: ""
+          confidence: 0.97
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::literature-ai-first-scheduling-architecture
+          domain: literature-ai-first-scheduling-architecture
+          path: .know/literature-ai-first-scheduling-architecture.md
+          generated_at: "2026-03-10T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.78
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::literature-aws-step-functions-scatter-gather
+          domain: literature-aws-step-functions-scatter-gather
+          path: .know/literature-aws-step-functions-scatter-gather.md
+          generated_at: "2026-03-11T00:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.68
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::literature-cost-conscious-coding
+          domain: literature-cost-conscious-coding
+          path: .know/literature-cost-conscious-coding.md
+          generated_at: "2026-02-27T20:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.62
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::literature-library-extraction-patterns
+          domain: literature-library-extraction-patterns
+          path: .know/literature-library-extraction-patterns.md
+          generated_at: "2026-03-11T00:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.62
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::literature-monorepo-distributed-satellites-interop-design-principles
+          domain: literature-monorepo-distributed-satellites-interop-design-principles
+          path: .know/literature-monorepo-distributed-satellites-interop-design-principles.md
+          generated_at: "2026-03-01T19:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.62
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::narrative-observability
+          domain: narrative-observability
+          path: .know/literature-narrative-observability.md
+          generated_at: ""
+          expires_after: ""
+          source_hash: ""
+          confidence: 0
+          format_version: ""
+        - qualified_name: autom8y::autom8y::otel-instrumentation-conventions
+          domain: otel-instrumentation-conventions
+          path: .know/literature-otel-instrumentation-conventions.md
+          generated_at: ""
+          expires_after: ""
+          source_hash: ""
+          confidence: 0
+          format_version: ""
+        - qualified_name: autom8y::autom8y::literature-service-orchestration-patterns
+          domain: literature-service-orchestration-patterns
+          path: .know/literature-service-orchestration-patterns.md
+          generated_at: "2026-03-24T18:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.68
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::literature-three-way-matching-financial-reconciliation
+          domain: literature-three-way-matching-financial-reconciliation
+          path: .know/literature-three-way-matching-financial-reconciliation.md
+          generated_at: "2026-03-11T18:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.64
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::observability-posture
+          domain: observability-posture
+          path: .know/observability-posture.md
+          generated_at: "2026-03-07T18:30:00Z"
+          expires_after: 14d
+          source_hash: ""
+          confidence: 0
+          format_version: ""
+        - qualified_name: autom8y::autom8y::release/dependency-topology
+          domain: release/dependency-topology
+          path: .know/release/dependency-topology.md
+          generated_at: "2026-03-07T12:00:00Z"
+          expires_after: 30d
+          source_hash: c9d08d0
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::release/history
+          domain: release/history
+          path: .know/release/history.md
+          generated_at: "2026-03-09T20:00:00Z"
+          expires_after: ""
+          source_hash: c9d08d0
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::release/platform-profile
+          domain: release/platform-profile
+          path: .know/release/platform-profile.md
+          generated_at: "2026-03-07T12:00:00Z"
+          expires_after: 30d
+          source_hash: c9d08d0
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-14T17:34:02Z"
+          expires_after: 7d
+          source_hash: 5f94481
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::security-posture
+          domain: security-posture
+          path: .know/security-posture.md
+          generated_at: "2026-03-11T11:00:00Z"
+          expires_after: 14d
+          source_hash: e571a47
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-14T17:34:02Z"
+          expires_after: 7d
+          source_hash: 5f94481
+          confidence: 0.85
+          format_version: "1.0"
+    - name: auth-client-go
+      url: https://github.com/autom8y/auth-client-go
+      default_branch: main
+      last_synced: "2026-03-25T12:42:30Z"
+      domains: []
+    - name: knossos
+      url: https://github.com/autom8y/knossos
+      default_branch: main
+      last_synced: "2026-03-25T12:42:45Z"
+      domains:
+        - qualified_name: autom8y::knossos::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-23T18:00:00Z"
+          expires_after: 7d
+          source_hash: 78abb186
+          confidence: 0.82
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-23T18:00:00Z"
+          expires_after: 7d
+          source_hash: 78abb186
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-23T18:00:00Z"
+          expires_after: 7d
+          source_hash: 78abb186
+          confidence: 0.91
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/index
+          domain: feat/index
+          path: .know/feat/INDEX.md
+          generated_at: "2026-03-03T20:45:00Z"
+          expires_after: 30d
+          source_hash: 18042fc
+          confidence: 0.93
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/agent-scaffolding
+          domain: feat/agent-scaffolding
+          path: .know/feat/agent-scaffolding.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/artifact-registry
+          domain: feat/artifact-registry
+          path: .know/feat/artifact-registry.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/clew-handoff-protocol
+          domain: feat/clew-handoff-protocol
+          path: .know/feat/clew-handoff-protocol.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/embedded-assets
+          domain: feat/embedded-assets
+          path: .know/feat/embedded-assets.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.86
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/explain-command
+          domain: feat/explain-command
+          path: .know/feat/explain-command.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/hook-infrastructure
+          domain: feat/hook-infrastructure
+          path: .know/feat/hook-infrastructure.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/inscription-system
+          domain: feat/inscription-system
+          path: .know/feat/inscription-system.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/know-system
+          domain: feat/know-system
+          path: .know/feat/know-system.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/manifest-operations
+          domain: feat/manifest-operations
+          path: .know/feat/manifest-operations.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/materialization-pipeline
+          domain: feat/materialization-pipeline
+          path: .know/feat/materialization-pipeline.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/mena-lint
+          domain: feat/mena-lint
+          path: .know/feat/mena-lint.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/mena-system
+          domain: feat/mena-system
+          path: .know/feat/mena-system.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.82
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/naxos-orphan-cleanup
+          domain: feat/naxos-orphan-cleanup
+          path: .know/feat/naxos-orphan-cleanup.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.91
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/org-management
+          domain: feat/org-management
+          path: .know/feat/org-management.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/project-initialization
+          domain: feat/project-initialization
+          path: .know/feat/project-initialization.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.91
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/project-status-dashboard
+          domain: feat/project-status-dashboard
+          path: .know/feat/project-status-dashboard.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/provenance-system
+          domain: feat/provenance-system
+          path: .know/feat/provenance-system.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/rite-management
+          domain: feat/rite-management
+          path: .know/feat/rite-management.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/session-event-system
+          domain: feat/session-event-system
+          path: .know/feat/session-event-system.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/session-forking
+          domain: feat/session-forking
+          path: .know/feat/session-forking.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/session-lifecycle
+          domain: feat/session-lifecycle
+          path: .know/feat/session-lifecycle.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.91
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/tribute-generation
+          domain: feat/tribute-generation
+          path: .know/feat/tribute-generation.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/validation-framework
+          domain: feat/validation-framework
+          path: .know/feat/validation-framework.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.87
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/white-sails-signaling
+          domain: feat/white-sails-signaling
+          path: .know/feat/white-sails-signaling.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.87
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::feat/worktree-management
+          domain: feat/worktree-management
+          path: .know/feat/worktree-management.md
+          generated_at: "2026-03-03T21:30:00Z"
+          expires_after: 14d
+          source_hash: 18042fc
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-agentic-knowledge-retrieval
+          domain: literature-agentic-knowledge-retrieval
+          path: .know/literature-agentic-knowledge-retrieval.md
+          generated_at: "2026-03-24T16:42:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.58
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-ai-coding-tools-feedback-loops
+          domain: literature-ai-coding-tools-feedback-loops
+          path: .know/literature-ai-coding-tools-feedback-loops.md
+          generated_at: "2026-03-11T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.75
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-autonomous-agent-dispatch-patterns
+          domain: literature-autonomous-agent-dispatch-patterns
+          path: .know/literature-autonomous-agent-dispatch-patterns.md
+          generated_at: "2026-03-24T18:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.63
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-causal-inference-in-spatiotemporal-epidemiology
+          domain: literature-causal-inference-in-spatiotemporal-epidemiology
+          path: .know/literature-causal-inference-in-spatiotemporal-epidemiology.md
+          generated_at: "2026-02-27T11:38:26Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.67
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-developer-cli-distribution-dogfooding-best-practices
+          domain: literature-developer-cli-distribution-dogfooding-best-practices
+          path: .know/literature-developer-cli-distribution-dogfooding-best-practices.md
+          generated_at: "2026-03-01T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.58
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-distributed-consensus
+          domain: literature-distributed-consensus
+          path: .know/literature-distributed-consensus.md
+          generated_at: "2026-02-27T10:51:10Z"
+          expires_after: 30d
+          source_hash: ""
+          confidence: 0.86
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-enterprise-ai-slack-integration
+          domain: literature-enterprise-ai-slack-integration
+          path: .know/literature-enterprise-ai-slack-integration.md
+          generated_at: "2026-03-24T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.58
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-event-sourcing-at-scale
+          domain: literature-event-sourcing-at-scale
+          path: .know/literature-event-sourcing-at-scale.md
+          generated_at: "2026-02-27T11:35:24Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.71
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-formal-verification-of-consensus-protocols
+          domain: literature-formal-verification-of-consensus-protocols
+          path: .know/literature-formal-verification-of-consensus-protocols.md
+          generated_at: "2026-02-27T00:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.72
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-human-ai-teaming-shared-autonomy-trust-calibration
+          domain: literature-human-ai-teaming-shared-autonomy-trust-calibration
+          path: .know/literature-human-ai-teaming-shared-autonomy-trust-calibration.md
+          generated_at: "2026-03-10T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.72
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-interface-aesthetic-perception-quality
+          domain: literature-interface-aesthetic-perception-quality
+          path: .know/literature-interface-aesthetic-perception-quality.md
+          generated_at: "2026-03-17T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.79
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-multi-agent-coding-systems
+          domain: literature-multi-agent-coding-systems
+          path: .know/literature-multi-agent-coding-systems.md
+          generated_at: "2026-03-10T19:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.75
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-open-source-as-development-paradigm
+          domain: literature-open-source-as-development-paradigm
+          path: .know/literature-open-source-as-development-paradigm.md
+          generated_at: "2026-03-10T19:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.72
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-organizational-learning-software-engineering
+          domain: literature-organizational-learning-software-engineering
+          path: .know/literature-organizational-learning-software-engineering.md
+          generated_at: "2026-03-10T18:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.7
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-production-self-tuning-systems-borg-autopilot
+          domain: literature-production-self-tuning-systems-borg-autopilot
+          path: .know/literature-production-self-tuning-systems-borg-autopilot.md
+          generated_at: "2026-03-11T00:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.82
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-recursive-self-improvement
+          domain: literature-recursive-self-improvement
+          path: .know/literature-recursive-self-improvement.md
+          generated_at: "2026-03-10T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.62
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-self-adaptive-systems
+          domain: literature-self-adaptive-systems
+          path: .know/literature-self-adaptive-systems.md
+          generated_at: "2026-03-10T00:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.79
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::literature-ui-design-engineering-craft
+          domain: literature-ui-design-engineering-craft
+          path: .know/literature-ui-design-engineering-craft.md
+          generated_at: "2026-03-19T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.51
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::radar
+          domain: radar
+          path: .know/radar.md
+          generated_at: "2026-03-03T00:00:00Z"
+          expires_after: 7d
+          source_hash: ""
+          confidence: 0
+          format_version: ""
+        - qualified_name: autom8y::knossos::release/dependency-topology
+          domain: release/dependency-topology
+          path: .know/release/dependency-topology.md
+          generated_at: "2026-03-23T13:22:30Z"
+          expires_after: 30d
+          source_hash: 6685f6f3
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::release/history
+          domain: release/history
+          path: .know/release/history.md
+          generated_at: "2026-03-23T13:22:30Z"
+          expires_after: ""
+          source_hash: 78abb186
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::release/platform-profile
+          domain: release/platform-profile
+          path: .know/release/platform-profile.md
+          generated_at: "2026-03-23T20:50:00Z"
+          expires_after: 30d
+          source_hash: d0e9fec9
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-23T18:00:00Z"
+          expires_after: 7d
+          source_hash: 78abb186
+          confidence: 0.95
+          format_version: "1.0"
+        - qualified_name: autom8y::knossos::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-23T18:00:00Z"
+          expires_after: 7d
+          source_hash: 78abb186
+          confidence: 0.88
+          format_version: "1.0"
+    - name: homebrew-tap
+      url: https://github.com/autom8y/homebrew-tap
+      default_branch: main
+      last_synced: "2026-03-25T12:42:45Z"
+      domains: []
+    - name: autom8y-sms
+      url: https://github.com/autom8y/autom8y-sms
+      default_branch: main
+      last_synced: "2026-03-25T12:42:48Z"
+      domains:
+        - qualified_name: autom8y::autom8y-sms::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-25T12:09:30Z"
+          expires_after: 7d
+          source_hash: "9934462"
+          confidence: 0.82
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-sms::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-25T12:09:30Z"
+          expires_after: 7d
+          source_hash: "9934462"
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-sms::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-25T12:09:30Z"
+          expires_after: 7d
+          source_hash: "9934462"
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-sms::release/history
+          domain: release/history
+          path: .know/release/history.md
+          generated_at: "2026-03-15T00:36:30Z"
+          expires_after: ""
+          source_hash: 25efd0c
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-sms::release/platform-profile
+          domain: release/platform-profile
+          path: .know/release/platform-profile.md
+          generated_at: "2026-03-15T00:36:30Z"
+          expires_after: 30d
+          source_hash: 25efd0c
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-sms::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-25T12:09:30Z"
+          expires_after: 7d
+          source_hash: "9934462"
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-sms::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-25T12:09:30Z"
+          expires_after: 7d
+          source_hash: "9934462"
+          confidence: 0.87
+          format_version: "1.0"
+    - name: autom8y-ads
+      url: https://github.com/autom8y/autom8y-ads
+      default_branch: main
+      last_synced: "2026-03-25T12:42:50Z"
+      domains:
+        - qualified_name: autom8y::autom8y-ads::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-01T12:42:56Z"
+          expires_after: 7d
+          source_hash: 762ed0e
+          confidence: 0.95
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-ads::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-01T12:42:56Z"
+          expires_after: 7d
+          source_hash: 762ed0e
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-ads::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-01T12:42:56Z"
+          expires_after: 7d
+          source_hash: 762ed0e
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-ads::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-01T12:42:56Z"
+          expires_after: 7d
+          source_hash: 762ed0e
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-ads::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-01T12:42:56Z"
+          expires_after: 7d
+          source_hash: 762ed0e
+          confidence: 0.88
+          format_version: "1.0"
+    - name: autom8y-workflows
+      url: https://github.com/autom8y/autom8y-workflows
+      default_branch: main
+      last_synced: "2026-03-25T12:42:50Z"
+      domains: []
+    - name: a8
+      url: https://github.com/autom8y/a8
+      default_branch: main
+      last_synced: "2026-03-25T12:42:56Z"
+      domains:
+        - qualified_name: autom8y::a8::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-13T10:25:55Z"
+          expires_after: 7d
+          source_hash: d83c747
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-13T10:25:55Z"
+          expires_after: 7d
+          source_hash: d83c747
+          confidence: 0.93
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-13T10:25:55Z"
+          expires_after: 7d
+          source_hash: d83c747
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-aws-fargate-spot-capacity-providers
+          domain: literature-aws-fargate-spot-capacity-providers
+          path: .know/literature-aws-fargate-spot-capacity-providers.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.64
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-ecs-fargate-autoscaling-small-fleets
+          domain: literature-ecs-fargate-autoscaling-small-fleets
+          path: .know/literature-ecs-fargate-autoscaling-small-fleets.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.58
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-ecs-fargate-vs-ec2-tco
+          domain: literature-ecs-fargate-vs-ec2-tco
+          path: .know/literature-ecs-fargate-vs-ec2-tco.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.61
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-lgtm-observability-stack-grafana-loki-tempo-mimir
+          domain: literature-lgtm-observability-stack-grafana-loki-tempo-mimir
+          path: .know/literature-lgtm-observability-stack-grafana-loki-tempo-mimir.md
+          generated_at: "2026-03-05T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.72
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-platform-engineering-declarative-reconciliation-patterns
+          domain: literature-platform-engineering-declarative-reconciliation-patterns
+          path: .know/literature-platform-engineering-declarative-reconciliation-patterns.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.62
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-progressive-delivery-canary-ecs-fargate
+          domain: literature-progressive-delivery-canary-ecs-fargate
+          path: .know/literature-progressive-delivery-canary-ecs-fargate.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.62
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-progressive-delivery
+          domain: literature-progressive-delivery
+          path: .know/literature-progressive-delivery.md
+          generated_at: "2026-03-06T18:45:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.75
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-release-engineering
+          domain: literature-release-engineering
+          path: .know/literature-release-engineering.md
+          generated_at: "2026-03-06T18:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.64
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-sms-test-infrastructure
+          domain: literature-sms-test-infrastructure
+          path: .know/literature-sms-test-infrastructure.md
+          generated_at: "2026-03-11T00:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.63
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::literature-workflow-orchestration
+          domain: literature-workflow-orchestration
+          path: .know/literature-workflow-orchestration.md
+          generated_at: "2026-03-06T18:00:00Z"
+          expires_after: 180d
+          source_hash: ""
+          confidence: 0.62
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::release/history
+          domain: release/history
+          path: .know/release/history.md
+          generated_at: "2026-03-09T14:22:00Z"
+          expires_after: ""
+          source_hash: db104cd
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::release/platform-profile
+          domain: release/platform-profile
+          path: .know/release/platform-profile.md
+          generated_at: "2026-03-09T14:22:00Z"
+          expires_after: 30d
+          source_hash: db104cd
+          confidence: 0.85
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-13T10:25:55Z"
+          expires_after: 7d
+          source_hash: d83c747
+          confidence: 0.9
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-13T10:25:55Z"
+          expires_after: 7d
+          source_hash: d83c747
+          confidence: 0.87
+          format_version: "1.0"
+        - qualified_name: autom8y::a8::workstation
+          domain: workstation
+          path: .know/workstation.md
+          generated_at: ""
+          expires_after: ""
+          source_hash: ""
+          confidence: 0
+          format_version: ""
+    - name: autom8y-scheduling
+      url: https://github.com/autom8y/autom8y-scheduling
+      default_branch: main
+      last_synced: "2026-03-25T12:42:58Z"
+      domains:
+        - qualified_name: autom8y::autom8y-scheduling::architecture
+          domain: architecture
+          path: .know/architecture.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 7d
+          source_hash: 39376b6
+          confidence: 0.95
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-scheduling::conventions
+          domain: conventions
+          path: .know/conventions.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 7d
+          source_hash: 39376b6
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-scheduling::design-constraints
+          domain: design-constraints
+          path: .know/design-constraints.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 7d
+          source_hash: 39376b6
+          confidence: 0.88
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-scheduling::scar-tissue
+          domain: scar-tissue
+          path: .know/scar-tissue.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 7d
+          source_hash: 39376b6
+          confidence: 0.92
+          format_version: "1.0"
+        - qualified_name: autom8y::autom8y-scheduling::test-coverage
+          domain: test-coverage
+          path: .know/test-coverage.md
+          generated_at: "2026-03-25T12:00:00Z"
+          expires_after: 7d
+          source_hash: 39376b6
+          confidence: 0.92
+          format_version: "1.0"

@@ -5,13 +5,13 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
 	"github.com/autom8y/knossos/internal/config"
+	"github.com/autom8y/knossos/internal/envload"
 	"github.com/autom8y/knossos/internal/errors"
 	"github.com/autom8y/knossos/internal/observe"
 	"github.com/autom8y/knossos/internal/output"
@@ -31,6 +31,8 @@ import (
 
 // serveOptions holds flag values for the serve command.
 type serveOptions struct {
+	org                string
+	envFile            string
 	port               int
 	slackSigningSecret string
 	slackBotToken      string
@@ -69,30 +71,47 @@ The server provides:
   - OpenTelemetry tracing (optional, via OTEL_EXPORTER_OTLP_ENDPOINT)
   - Concurrency limiting for pipeline queries
 
-Secrets are configured via environment variables (12-factor):
-  SLACK_SIGNING_SECRET  Slack app signing secret (required)
-  SLACK_BOT_TOKEN       Slack bot OAuth token (required)
+Configuration is resolved via a four-tier hierarchy (highest wins):
+  1. CLI flags (--port, --slack-signing-secret, etc.)
+  2. Process environment variables (SLACK_SIGNING_SECRET, PORT, etc.)
+  3. Org env file ($XDG_DATA_HOME/knossos/orgs/{org}/serve.env)
+  4. Hardcoded defaults (port=8080, log_level=INFO, max_concurrent=10)
+
+Required secrets (must be set via any tier):
+  SLACK_SIGNING_SECRET  Slack app signing secret
+  SLACK_BOT_TOKEN       Slack bot OAuth token
   ANTHROPIC_API_KEY     Claude API key (required for reasoning)
 
-Observability:
-  OTEL_EXPORTER_OTLP_ENDPOINT  OTLP collector endpoint (optional, noop if unset)
+Optional configuration:
+  PORT                          Server port (default: 8080)
   LOG_LEVEL                     Log level: DEBUG, INFO, WARN, ERROR (default: INFO)
   MAX_CONCURRENT                Max concurrent pipeline queries (default: 10)
+  OTEL_EXPORTER_OTLP_ENDPOINT  OTLP collector endpoint (empty = noop tracing)
 
 Examples:
-  SLACK_SIGNING_SECRET=xxx SLACK_BOT_TOKEN=xoxb-xxx ANTHROPIC_API_KEY=sk-xxx ari serve
-  SLACK_SIGNING_SECRET=xxx SLACK_BOT_TOKEN=xoxb-xxx ANTHROPIC_API_KEY=sk-xxx ari serve --port 3000
-  SLACK_SIGNING_SECRET=xxx SLACK_BOT_TOKEN=xoxb-xxx ANTHROPIC_API_KEY=sk-xxx ari serve --drain-timeout 60s`,
+  ari serve --org autom8y
+  ari serve --org autom8y --port 3000
+  ari serve --env-file /path/to/custom.env
+  SLACK_SIGNING_SECRET=xxx SLACK_BOT_TOKEN=xoxb-xxx ari serve`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runServe(ctx, opts)
 		},
 	}
 
-	cmd.Flags().IntVar(&opts.port, "port", 8080, "Server port (env: PORT)")
-	cmd.Flags().StringVar(&opts.slackSigningSecret, "slack-signing-secret", "", "Slack signing secret (env: SLACK_SIGNING_SECRET)")
-	cmd.Flags().StringVar(&opts.slackBotToken, "slack-bot-token", "", "Slack bot token (env: SLACK_BOT_TOKEN)")
-	cmd.Flags().DurationVar(&opts.drainTimeout, "drain-timeout", 30*time.Second, "Graceful shutdown drain timeout")
-	cmd.Flags().IntVar(&opts.maxConcurrent, "max-concurrent", 10, "Max concurrent pipeline queries (env: MAX_CONCURRENT)")
+	cmd.Flags().StringVar(&opts.org, "org", "",
+		"Organization name (env: KNOSSOS_ORG, default: active org)")
+	cmd.Flags().StringVar(&opts.envFile, "env-file", "",
+		"Path to env file (default: $XDG_DATA_HOME/knossos/orgs/{org}/serve.env)")
+	cmd.Flags().IntVar(&opts.port, "port", 0,
+		"Server port (env: PORT, default: 8080)")
+	cmd.Flags().StringVar(&opts.slackSigningSecret, "slack-signing-secret", "",
+		"Slack signing secret (env: SLACK_SIGNING_SECRET)")
+	cmd.Flags().StringVar(&opts.slackBotToken, "slack-bot-token", "",
+		"Slack bot token (env: SLACK_BOT_TOKEN)")
+	cmd.Flags().DurationVar(&opts.drainTimeout, "drain-timeout", 0,
+		"Graceful shutdown drain timeout (default: 30s)")
+	cmd.Flags().IntVar(&opts.maxConcurrent, "max-concurrent", 0,
+		"Max concurrent pipeline queries (env: MAX_CONCURRENT, default: 10)")
 
 	// ari serve does NOT require project context
 	common.SetNeedsProject(cmd, false, true)
@@ -104,11 +123,38 @@ Examples:
 func runServe(ctx *cmdContext, opts serveOptions) error {
 	printer := ctx.GetPrinter(output.FormatText)
 
-	// A1: Configure structured logging (JSON to stderr with trace context).
-	observe.ConfigureStructuredLogging(os.Getenv("LOG_LEVEL"))
+	// Resolve org context (nil is valid -- means pure env-var mode).
+	orgCtx := resolveOrgContext(opts.org)
 
-	// A1: Initialise OTEL tracer (noop when endpoint is empty).
-	shutdownTracer, err := observe.InitTracer("clew", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+	// Load configuration via the four-tier hierarchy.
+	cfg, err := envload.Load(orgCtx, envload.Overrides{
+		SlackSigningSecret: opts.slackSigningSecret,
+		SlackBotToken:      opts.slackBotToken,
+		Port:               opts.port,
+		MaxConcurrent:      opts.maxConcurrent,
+		DrainTimeout:       opts.drainTimeout,
+		EnvFile:            opts.envFile,
+	})
+	if err != nil {
+		return common.PrintAndReturn(printer,
+			errors.Wrap(errors.CodeUsageError, "failed to load configuration", err))
+	}
+
+	// Validate required secrets.
+	if cfg.SlackSigningSecret == "" {
+		return common.PrintAndReturn(printer,
+			errors.New(errors.CodeUsageError, "SLACK_SIGNING_SECRET is required (set via env var, org env file, or --slack-signing-secret)"))
+	}
+	if cfg.SlackBotToken == "" {
+		return common.PrintAndReturn(printer,
+			errors.New(errors.CodeUsageError, "SLACK_BOT_TOKEN is required (set via env var, org env file, or --slack-bot-token)"))
+	}
+
+	// Configure structured logging (JSON to stderr with trace context).
+	observe.ConfigureStructuredLogging(cfg.LogLevel)
+
+	// Initialise OTEL tracer (noop when endpoint is empty).
+	shutdownTracer, err := observe.InitTracer("clew", cfg.OTELEndpoint)
 	if err != nil {
 		slog.Warn("OTEL tracer initialization failed, continuing without tracing", "error", err)
 	} else {
@@ -119,57 +165,20 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		}()
 	}
 
-	// Resolve secrets from env vars with flag fallback (12-factor)
-	signingSecret := opts.slackSigningSecret
-	if signingSecret == "" {
-		signingSecret = os.Getenv("SLACK_SIGNING_SECRET")
-	}
-	if signingSecret == "" {
-		return common.PrintAndReturn(printer,
-			errors.New(errors.CodeUsageError, "SLACK_SIGNING_SECRET is required (set via env var or --slack-signing-secret)"))
-	}
+	// Build server config.
+	serverCfg := serve.DefaultConfig()
+	serverCfg.Port = cfg.Port
+	serverCfg.DrainTimeout = cfg.DrainTimeout
 
-	botToken := opts.slackBotToken
-	if botToken == "" {
-		botToken = os.Getenv("SLACK_BOT_TOKEN")
-	}
-	if botToken == "" {
-		return common.PrintAndReturn(printer,
-			errors.New(errors.CodeUsageError, "SLACK_BOT_TOKEN is required (set via env var or --slack-bot-token)"))
-	}
-
-	// Resolve port from env var with flag fallback
-	port := opts.port
-	if portStr := os.Getenv("PORT"); portStr != "" && opts.port == 8080 {
-		var parsed int
-		if _, err := fmt.Sscanf(portStr, "%d", &parsed); err == nil && parsed > 0 {
-			port = parsed
-		}
-	}
-
-	// Resolve max concurrent from env var with flag fallback
-	maxConcurrent := opts.maxConcurrent
-	if mcStr := os.Getenv("MAX_CONCURRENT"); mcStr != "" && opts.maxConcurrent == 10 {
-		var parsed int
-		if _, err := fmt.Sscanf(mcStr, "%d", &parsed); err == nil && parsed > 0 {
-			maxConcurrent = parsed
-		}
-	}
-
-	// Build server config
-	cfg := serve.DefaultConfig()
-	cfg.Port = port
-	cfg.DrainTimeout = opts.drainTimeout
-
-	// Create health checker and server
+	// Create health checker and server.
 	checker := health.NewChecker()
-	srv := serve.New(cfg, serve.WithHealthChecker(checker))
+	srv := serve.New(serverCfg, serve.WithHealthChecker(checker))
 
 	// Build the reasoning pipeline (fail-open: logs warnings for missing dependencies).
 	// Returns intermediate components for health check registration.
 	pipelineResult := buildPipeline()
 
-	// A1: Create cost tracker and instrumented pipeline wrapper.
+	// Create cost tracker and instrumented pipeline wrapper.
 	costTracker := observe.NewCostTracker()
 	var queryRunner internalslack.QueryRunner
 	if pipelineResult.pipeline != nil {
@@ -177,20 +186,20 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	}
 
 	// Create Slack client and handler.
-	slackClient := internalslack.NewSlackClient(botToken)
+	slackClient := internalslack.NewSlackClient(cfg.SlackBotToken)
 	slackCfg := internalslack.DefaultSlackConfig()
-	slackCfg.BotToken = botToken
+	slackCfg.BotToken = cfg.SlackBotToken
 	slackHandler, _ := internalslack.NewSlackHandler(queryRunner, slackClient, slackCfg)
 
 	// Register webhook verification middleware wrapping the Slack handler.
-	verifier := webhook.NewVerifier(signingSecret)
+	verifier := webhook.NewVerifier(cfg.SlackSigningSecret)
 	srv.RegisterHandler("POST", "/slack/events", verifier.Handler(slackHandler))
 
-	// A3: Wire OTEL tracing middleware.
+	// Wire OTEL tracing middleware.
 	srv.Use(observe.OTELMiddleware())
 
-	// A2: Wire concurrency limit middleware.
-	srv.Use(serve.ConcurrencyLimit(maxConcurrent))
+	// Wire concurrency limit middleware.
+	srv.Use(serve.ConcurrencyLimit(cfg.MaxConcurrent))
 
 	// Register health checks.
 	checker.Register("slack", func(hctx context.Context) error {
@@ -203,7 +212,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		return nil
 	})
 
-	// B1: Additional health checks for ECS deployment.
+	// Additional health checks for ECS deployment.
 	checker.Register("catalog", func(_ context.Context) error {
 		if pipelineResult.catalog == nil || pipelineResult.catalog.DomainCount() == 0 {
 			return fmt.Errorf("domain catalog not loaded or empty")
@@ -217,27 +226,50 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		return nil
 	})
 	checker.Register("claude_api", func(_ context.Context) error {
-		if os.Getenv("ANTHROPIC_API_KEY") == "" {
+		if cfg.AnthropicAPIKey == "" {
 			return fmt.Errorf("ANTHROPIC_API_KEY not configured")
 		}
 		return nil
 	})
 
 	slog.Info("server configured",
-		"port", port,
-		"drain_timeout", opts.drainTimeout,
-		"max_concurrent", maxConcurrent,
+		"port", cfg.Port,
+		"drain_timeout", cfg.DrainTimeout,
+		"max_concurrent", cfg.MaxConcurrent,
 		"pipeline_ready", pipelineResult.pipeline != nil,
-		"otel_endpoint", os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
+		"otel_endpoint", cfg.OTELEndpoint,
 	)
 
-	// Start blocks until shutdown signal
+	// Start blocks until shutdown signal.
 	if err := srv.Start(context.Background()); err != nil {
 		return common.PrintAndReturn(printer,
 			errors.Wrap(errors.CodeServerStartFailed, "server failed to start", err))
 	}
 
 	return nil
+}
+
+// resolveOrgContext resolves the org from the --org flag, KNOSSOS_ORG env var, or active-org file.
+// Returns nil if no org is configured -- this is valid (pure env-var mode).
+func resolveOrgContext(orgFlag string) config.OrgContext {
+	orgName := orgFlag
+	if orgName == "" {
+		orgName = config.ActiveOrg()
+	}
+	if orgName == "" {
+		slog.Debug("no org configured, skipping org env file layer")
+		return nil
+	}
+
+	orgCtx, err := config.NewOrgContext(orgName)
+	if err != nil {
+		slog.Warn("failed to create org context, skipping org env file layer",
+			"org", orgName, "error", err)
+		return nil
+	}
+
+	slog.Info("org context resolved", "org", orgName)
+	return orgCtx
 }
 
 // pipelineComponents holds intermediate pipeline components for health check registration.

@@ -18,19 +18,13 @@
           "protocol": "tcp"
         }
       ],
-      "healthCheck": {
-        "command": ["CMD-SHELL", "wget -qO- http://localhost:8080/ready || exit 1"],
-        "interval": 30,
-        "timeout": 5,
-        "retries": 3,
-        "startPeriod": 15
-      },
       "environment": [
         { "name": "PORT", "value": "8080" },
         { "name": "LOG_LEVEL", "value": "INFO" },
         { "name": "MAX_CONCURRENT", "value": "10" },
         { "name": "OTEL_EXPORTER_OTLP_ENDPOINT", "value": "${OTEL_ENDPOINT}" },
-        { "name": "OTEL_SERVICE_NAME", "value": "clew" }
+        { "name": "OTEL_SERVICE_NAME", "value": "clew" },
+        { "name": "KNOSSOS_ORG", "value": "autom8y" }
       ],
       "secrets": [
         {

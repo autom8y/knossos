@@ -29,6 +29,10 @@ on:
       - 'internal/trust/**'
       - 'internal/search/**'
       - 'internal/cmd/serve/**'
+      - 'internal/registry/**'
+      - 'internal/envload/**'
+      - 'internal/config/**'
+      - 'internal/tokenizer/**'
       - 'go.mod'
       - 'go.sum'
   workflow_dispatch:

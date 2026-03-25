@@ -24,9 +24,16 @@ display_information:
   background_color: "#1a1a2e"
 
 features:
+  app_home:
+    home_tab_enabled: false
+    messages_tab_enabled: true
+    messages_tab_read_only_enabled: false
   bot_user:
     display_name: Clew
     always_online: true
+  assistant_view:
+    assistant_description: "The thread through the labyrinth — organizational intelligence assistant"
+    suggested_prompts: []
 
 oauth_config:
   scopes:
