@@ -4,49 +4,95 @@ Complete operator walkthrough to deploy [@clew](https://github.com/autom8y/knoss
 
 ---
 
-## Prerequisites
+## Phase 1: Prerequisites
 
-Before starting, confirm you have:
+Complete ALL prerequisites before running any Terraform commands. The ACM certificate is on the critical path and can take up to 72 hours with email validation -- use DNS validation for fastest turnaround.
 
-- [ ] **AWS Account** with admin access (or permissions to create IAM roles, ECS, ALB, ECR, Secrets Manager, CloudWatch)
+- [ ] **AWS Account** with admin access (or permissions to create IAM roles, ECS, ALB, ECR, Secrets Manager, CloudWatch, VPC)
 - [ ] **Terraform >= 1.5** installed locally (`terraform version`)
 - [ ] **AWS CLI v2** configured with credentials (`aws sts get-caller-identity`)
-- [ ] **Existing VPC** with at least 2 public subnets (with internet gateway route)
-- [ ] **ACM Certificate** for your domain (validated, in the same region as deployment)
+- [ ] **Existing VPC** with at least 2 public subnets (with internet gateway route for Fargate public IP egress)
+- [ ] **ACM Certificate** issued and validated for your custom domain (e.g., `clew.yourdomain.com`). Must be in the same region as deployment. Certificate CN/SAN must match your custom domain.
+- [ ] **Custom domain** -- required because ALB DNS (`*.elb.amazonaws.com`) cannot have an ACM certificate. The Slack Request URL MUST use a custom domain with a valid CA-signed certificate.
+- [ ] **Anthropic API key** -- obtain from console.anthropic.com (format: `sk-ant-...`)
 - [ ] **GitHub admin access** to autom8y/knossos (for secrets/variables configuration)
-- [ ] **Slack workspace admin access** (for app creation)
+- [ ] **Slack workspace admin access** (for app creation and installation)
+
+**Critical ordering note**: The ACM certificate MUST be issued and validated before `terraform apply`. The ALB HTTPS listener creation will fail without it.
+
+| Prerequisite | How to Verify |
+|-------------|---------------|
+| AWS account access | `aws sts get-caller-identity` |
+| Terraform version | `terraform version` |
+| VPC subnets | `aws ec2 describe-subnets --filters Name=vpc-id,Values=vpc-xxx` |
+| ACM certificate | `aws acm describe-certificate --certificate-arn <arn>` -- Status: ISSUED |
+| Custom domain | `dig clew.yourdomain.com` (after DNS setup in Phase 6) |
 
 ---
 
-## Step 1: Provision Infrastructure with Terraform
+## Phase 2: Infrastructure Provisioning
 
 ```bash
 cd deploy/terraform
 
 # Copy and fill in your variables
 cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with your real values:
-#   aws_account_id, vpc_id, public_subnet_ids, acm_certificate_arn
+```
 
+Edit `terraform.tfvars` with real values:
+
+```hcl
+aws_account_id      = "123456789012"
+aws_region          = "us-east-1"
+vpc_id              = "vpc-xxxxxxxxxxxxxxxxx"
+public_subnet_ids   = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-yyyyyyyyyyyyyyyyy"]
+acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/YOUR-CERT-ID"
+```
+
+```bash
 # Initialize Terraform (downloads AWS provider)
 terraform init
 
-# Preview what will be created
-terraform plan
+# Preview what will be created (~20 resources)
+terraform plan -out=tfplan
 
-# Apply (creates ~20 resources)
-terraform apply
+# Apply
+terraform apply tfplan
+
+# Save outputs (you will need these in later phases)
+terraform output -json > terraform-outputs.json
+export ALB_DNS=$(terraform output -raw alb_dns_name)
+export ECR_URL=$(terraform output -raw ecr_repository_url)
+export OIDC_ROLE=$(terraform output -raw oidc_role_arn)
+export ECS_CLUSTER=$(terraform output -raw ecs_cluster_name)
+export ECS_SERVICE=$(terraform output -raw ecs_service_name)
 ```
 
-**Save the outputs** -- you will need them in subsequent steps:
+**Verification**:
 
 ```bash
-terraform output
-# alb_dns_name         = "clew-alb-XXXXXXXXX.us-east-1.elb.amazonaws.com"
-# ecr_repository_url   = "123456789012.dkr.ecr.us-east-1.amazonaws.com/clew"
-# oidc_role_arn        = "arn:aws:iam::123456789012:role/clew-github-actions"
-# ecs_cluster_name     = "clew-cluster"
-# ecs_service_name     = "clew-service"
+# ECR repository exists
+aws ecr describe-repositories --repository-names clew --query 'repositories[0].repositoryUri'
+# Expected: "123456789012.dkr.ecr.us-east-1.amazonaws.com/clew"
+
+# ECS cluster is ACTIVE
+aws ecs describe-clusters --clusters clew-cluster --query 'clusters[0].status' --output text
+# Expected: ACTIVE
+
+# Secrets exist (empty)
+aws secretsmanager list-secrets --filters Key=name,Values=clew/ --query 'SecretList[].Name' --output table
+# Expected: clew/slack-signing-secret, clew/slack-bot-token, clew/anthropic-api-key
+```
+
+**Expected state after Phase 2**: ECS service exists but shows 0 running tasks (no container image yet). This is expected -- the deployment circuit breaker handles this gracefully.
+
+**Potential blocker**: If a GitHub Actions OIDC provider already exists in this AWS account, `terraform apply` will fail with `EntityAlreadyExists`. Resolution:
+
+```bash
+# Import the existing provider
+EXISTING_ARN=$(aws iam list-open-id-connect-providers --query 'OpenIDConnectProviderList[?contains(Arn, `github`)].Arn' --output text)
+terraform import aws_iam_openid_connect_provider.github_actions "$EXISTING_ARN"
+# Then re-run terraform apply
 ```
 
 ### What Terraform Creates
@@ -60,52 +106,57 @@ terraform output
 | ALB | `clew-alb` | HTTPS termination + routing |
 | Target Group | `clew-tg` | Health-checked target (/ready on 8080) |
 | CloudWatch Log Group | `/ecs/clew` | 30-day log retention |
-| Secrets Manager | 3 secrets | Empty placeholders (populated in Step 3) |
+| Secrets Manager | 3 secrets | Empty placeholders (populated in Phase 4) |
 | IAM Roles | 3 roles | Execution, task, GitHub Actions OIDC |
 | Security Groups | 2 SGs | ALB (443 in), ECS (8080 from ALB) |
 
 ---
 
-## Step 2: Create the Slack App
+## Phase 3: Slack App Creation (WITHOUT Request URL)
+
+**IMPORTANT: Remove or leave blank the `request_url` line before creating the app.** The Request URL can only be set after the app is deployed and healthy (Phase 7), because Slack immediately sends a `url_verification` challenge that must be answered within 3 seconds.
 
 1. Go to [api.slack.com/apps](https://api.slack.com/apps)
 2. Click **Create New App** > **From an app manifest**
-3. Select your workspace
+3. Select your target workspace
 4. Paste the contents of `deploy/slack-app-manifest.yml`
-5. **Replace `${ALB_DNS}`** with the `alb_dns_name` from Terraform output
-6. Review and click **Create**
+5. **Before submitting**: Remove the entire `request_url` line, or leave it blank
+6. Review scopes and events, then click **Create**
+7. Click **Install to Workspace** and approve the requested scopes
 
-After creation, collect these values from the Slack app settings:
+After creation and installation, collect credentials:
 
-| Value | Location in Slack UI | Destination |
-|-------|---------------------|-------------|
-| **Signing Secret** | Basic Information > App Credentials | `clew/slack-signing-secret` |
-| **Bot User OAuth Token** | OAuth & Permissions > Bot User OAuth Token | `clew/slack-bot-token` |
+| Value | Location in Slack UI | Format |
+|-------|---------------------|--------|
+| **Signing Secret** | Basic Information > App Credentials > Signing Secret | 64-character hex string |
+| **Bot User OAuth Token** | OAuth & Permissions > Bot User OAuth Token | `xoxb-...` (only available after installing to workspace) |
+
+**Verification**: Both values are visible in the Slack app settings UI. The Bot Token only appears after clicking "Install to Workspace."
 
 ---
 
-## Step 3: Store Secrets in AWS Secrets Manager
+## Phase 4: Secrets Population
 
-Populate the three empty secrets that Terraform created:
+Populate the three empty secrets that Terraform created in Phase 2:
 
 ```bash
-# Slack signing secret (from Step 2)
+# Slack signing secret (from Phase 3)
 aws secretsmanager put-secret-value \
   --secret-id clew/slack-signing-secret \
-  --secret-string "YOUR_SLACK_SIGNING_SECRET"
+  --secret-string "YOUR_SLACK_SIGNING_SECRET_HERE"
 
-# Slack bot token (from Step 2)
+# Slack bot token (from Phase 3)
 aws secretsmanager put-secret-value \
   --secret-id clew/slack-bot-token \
-  --secret-string "xoxb-YOUR-SLACK-BOT-TOKEN"
+  --secret-string "xoxb-YOUR-SLACK-BOT-TOKEN-HERE"
 
-# Anthropic API key (from console.anthropic.com)
+# Anthropic API key (from Prerequisites)
 aws secretsmanager put-secret-value \
   --secret-id clew/anthropic-api-key \
-  --secret-string "sk-ant-YOUR-ANTHROPIC-API-KEY"
+  --secret-string "sk-ant-YOUR-ANTHROPIC-API-KEY-HERE"
 ```
 
-Verify all three are populated:
+**Verification**:
 
 ```bash
 for secret in clew/slack-signing-secret clew/slack-bot-token clew/anthropic-api-key; do
@@ -113,11 +164,12 @@ for secret in clew/slack-signing-secret clew/slack-bot-token clew/anthropic-api-
   aws secretsmanager get-secret-value --secret-id "$secret" --query 'Name' --output text 2>/dev/null \
     && echo "OK" || echo "MISSING"
 done
+# Expected: all three show "OK"
 ```
 
 ---
 
-## Step 4: Configure GitHub Secrets and Variables
+## Phase 5: CI/CD Configuration
 
 In the GitHub repository settings (Settings > Secrets and variables > Actions):
 
@@ -131,97 +183,190 @@ In the GitHub repository settings (Settings > Secrets and variables > Actions):
 
 | Name | Value | Source |
 |------|-------|--------|
-| `OTEL_ENDPOINT` | OTLP HTTP endpoint (e.g., `http://collector:4318`) or empty string | Your observability stack |
+| `OTEL_ENDPOINT` | OTLP HTTP endpoint (e.g., `http://collector:4318`) or empty string | Your observability stack (leave empty to disable tracing) |
+
+**Verification**:
+
+```bash
+# Using GitHub CLI
+gh secret list | grep AWS_ACCOUNT_ID
+# Expected: AWS_ACCOUNT_ID  Updated <timestamp>
+
+gh variable list | grep OTEL_ENDPOINT
+# Expected: OTEL_ENDPOINT  <value or empty>  Updated <timestamp>
+```
 
 ---
 
-## Step 5: DNS Configuration
+## Phase 6: DNS Configuration and First Deploy
 
-Point your domain at the ALB:
+These can be done in parallel.
 
-1. Get the ALB DNS name: `terraform -chdir=deploy/terraform output alb_dns_name`
-2. Create a CNAME record in your DNS provider:
-   - **Name**: `clew.yourdomain.com` (must match ACM certificate)
-   - **Type**: CNAME
-   - **Value**: the ALB DNS name
+### 6A. DNS Setup
 
-3. Update the Slack app's Request URL:
-   - Go to [api.slack.com/apps](https://api.slack.com/apps) > your app > Event Subscriptions
-   - Set Request URL to: `https://clew.yourdomain.com/slack/events`
-   - Slack will send a challenge request -- the app must be running to verify
+Create a CNAME record pointing your custom domain to the ALB:
 
----
+| Record | Type | Value |
+|--------|------|-------|
+| `clew.yourdomain.com` | CNAME | Value of `$ALB_DNS` (e.g., `clew-alb-xxx.us-east-1.elb.amazonaws.com`) |
 
-## Step 6: First Deploy
+If using Route 53, create an Alias record instead of CNAME (avoids CNAME at zone apex issues).
 
-### Option A: Via GitHub Actions (recommended)
+**Verification**:
 
-Trigger the workflow manually:
+```bash
+dig clew.yourdomain.com CNAME +short
+# Expected: clew-alb-xxx.us-east-1.elb.amazonaws.com.
+```
 
-1. Go to Actions > "Deploy Clew" > "Run workflow"
-2. Select `main` branch
-3. Click "Run workflow"
+### 6B. First Deploy
+
+**Option A -- Via GitHub Actions (recommended)**:
+
+```bash
+# Trigger manually
+gh workflow run "Deploy Clew"
+gh run watch
+```
 
 Or push any change to files in the trigger paths to `main`.
 
-### Option B: Manual first deploy
-
-If the CI pipeline is not yet configured, push the first image manually:
+**Option B -- Manual first deploy** (if CI is not yet configured):
 
 ```bash
 # Authenticate with ECR
-ECR_REGISTRY=$(terraform -chdir=deploy/terraform output -raw ecr_repository_url | cut -d/ -f1)
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+ECR_REGISTRY=$(echo "$ECR_URL" | cut -d/ -f1)
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
 # Build and push
-docker build -f deploy/Dockerfile -t $ECR_REGISTRY/clew:latest .
-docker push $ECR_REGISTRY/clew:latest
+docker build -f deploy/Dockerfile -t "$ECR_URL:latest" .
+docker push "$ECR_URL:latest"
 
-# Force a new deployment of the service
+# Force new deployment
 aws ecs update-service \
   --cluster clew-cluster \
   --service clew-service \
   --force-new-deployment
 ```
 
----
-
-## Step 7: Verification
-
-### Check ECS service health
+**Wait for ECS service stability** (~2-5 minutes):
 
 ```bash
+aws ecs wait services-stable --cluster clew-cluster --services clew-service
+```
+
+**Verification**:
+
+```bash
+# ECS service health
 aws ecs describe-services \
   --cluster clew-cluster \
   --services clew-service \
   --query 'services[0].{status:status,desired:desiredCount,running:runningCount}'
 # Expected: {"status": "ACTIVE", "desired": 1, "running": 1}
-```
 
-### Check application health endpoints
-
-```bash
-# Liveness (always 200 if process is running)
+# Application health (requires DNS to have propagated)
 curl -s https://clew.yourdomain.com/health | jq .
 # Expected: {"status":"ok"}
 
-# Readiness (200 only when all checks pass)
 curl -s https://clew.yourdomain.com/ready | jq .
 # Expected: {"status":"ready","checks":{"slack":"ok","reasoning":"ok","catalog":"ok","search_index":"ok","claude_api":"ok"}}
+
+# TLS certificate validation
+openssl s_client -connect clew.yourdomain.com:443 -servername clew.yourdomain.com </dev/null 2>/dev/null | openssl x509 -noout -dates
+# Expected: shows valid notBefore/notAfter dates
 ```
 
-### Test Slack integration
-
-1. Open Slack and DM @Clew
-2. Send: "What does our codebase do?"
-3. Verify you receive a response within 30 seconds
-
-### Check logs
+**Check logs for successful startup**:
 
 ```bash
 aws logs tail /ecs/clew --follow --since 5m
 # Look for: "server configured" with port=8080, pipeline_ready=true
 ```
+
+---
+
+## Phase 7: Request URL Activation (MUST BE LAST)
+
+**This phase MUST happen after the application is running and healthy.** The Request URL can only be set after the app is deployed because Slack immediately sends a `url_verification` challenge that must be answered within 3 seconds. If the app is not running, verification will fail and Slack will reject the URL.
+
+1. Go to [api.slack.com/apps](https://api.slack.com/apps) > your Clew app
+2. Navigate to **Event Subscriptions**
+3. Toggle **Enable Events** to On (if not already)
+4. Set **Request URL** to: `https://clew.yourdomain.com/slack/events`
+5. Slack will immediately send a `url_verification` challenge
+6. Wait for the green checkmark confirming verification passed
+
+**Verification**:
+
+```bash
+# Check logs for the challenge
+aws logs filter-log-events \
+  --log-group-name /ecs/clew \
+  --filter-pattern '"url_verification"' \
+  --start-time $(date -v-5M +%s000 2>/dev/null || date -d '5 minutes ago' +%s000)
+# Expected: log entry showing successful challenge response
+```
+
+**If verification fails**, check:
+- Is the app running? `curl -s https://clew.yourdomain.com/ready`
+- Does DNS resolve? `dig clew.yourdomain.com`
+- Is the ALB security group open on 443? Check inbound rules.
+- Is the TLS certificate valid? `openssl s_client -connect clew.yourdomain.com:443`
+
+---
+
+## Phase 8: Smoke Test
+
+Run all four tiers to confirm end-to-end functionality.
+
+### Tier 1 -- Infrastructure (Pre-Slack)
+
+| Test | Command | Expected |
+|------|---------|----------|
+| Health endpoint | `curl -s https://clew.yourdomain.com/ready \| jq .` | `{"status":"ready",...}` with all checks "ok" |
+| TLS valid | `openssl s_client -connect clew.yourdomain.com:443 </dev/null 2>/dev/null \| head -5` | Valid certificate chain |
+| Secrets accessible | Check CloudWatch for startup errors | No `ResourceInitializationError` |
+
+### Tier 2 -- Slack Connectivity
+
+| Test | Method | Expected |
+|------|--------|----------|
+| URL verification | Completed in Phase 7 | Green checkmark in Slack |
+| Auth test | Check logs for `auth.test` response | Bot user info in logs |
+| Invalid signature | Send crafted request with wrong signature | 401 Unauthorized |
+
+### Tier 3 -- Event Delivery
+
+| Test | Method | Expected |
+|------|--------|----------|
+| Thread started | Open Clew in Slack assistant (top bar or DM) | Suggested prompts appear within 1-2 seconds |
+| Message processing | Send "What is the architecture of this project?" | Response with citations within 30 seconds |
+| Status indicator | Send any message | "Searching knowledge..." status visible during processing |
+| Thread title | Send a message | Thread title set (first 60 chars of question) |
+
+### Tier 4 -- Edge Cases
+
+| Test | Method | Expected |
+|------|--------|----------|
+| Concurrent requests | Send 6+ messages rapidly | 5 processed, 6th gets rate-limited response |
+| Empty message | Send message with only whitespace | No pipeline invocation (check logs) |
+| Duplicate event | Check logs during normal operation | "duplicate event filtered" entries for Slack retries |
+
+---
+
+## Common Failure Modes
+
+| Symptom | Likely Cause | Resolution |
+|---------|-------------|------------|
+| No events received | URL verification failed or Request URL not set | Complete Phase 7; check ALB DNS, SGs, TLS cert |
+| Events received but no response | Bot token invalid or missing | Verify `xoxb-` token in Secrets Manager; redeploy ECS task |
+| `missing_scope` error | Manifest scopes not applied | Reinstall app to workspace |
+| 401 on all requests | Signing secret mismatch | Re-copy signing secret to Secrets Manager; redeploy |
+| Duplicate responses | Dedup map lost on restart | Expected during deploys; accept for MVP |
+| Status stuck on "thinking" | Pipeline error without status clear | Check `processMessage` error handling in logs |
+| `CannotPullContainerError` | No image in ECR | Push first image (Phase 6B Option B) |
+| `ResourceInitializationError` | Secrets Manager access denied | Check execution role IAM policy |
 
 ---
 
@@ -254,7 +399,7 @@ curl -s https://clew.yourdomain.com/ready | jq .
 
 ### Slack not receiving events
 
-1. Verify Request URL is correct in Slack app settings
+1. Verify Request URL is correct in Slack app settings (Phase 7)
 2. Check that the ALB security group allows 443 inbound
 3. Check that DNS resolves: `dig clew.yourdomain.com`
 4. Look for Slack verification failures in logs:
