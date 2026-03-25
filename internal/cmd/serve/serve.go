@@ -180,7 +180,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	slackClient := internalslack.NewSlackClient(botToken)
 	slackCfg := internalslack.DefaultSlackConfig()
 	slackCfg.BotToken = botToken
-	slackHandler := internalslack.NewSlackHandler(queryRunner, slackClient, slackCfg)
+	slackHandler, _ := internalslack.NewSlackHandler(queryRunner, slackClient, slackCfg)
 
 	// Register webhook verification middleware wrapping the Slack handler.
 	verifier := webhook.NewVerifier(signingSecret)

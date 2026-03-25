@@ -21,6 +21,88 @@ type eventDedup struct {
 	ttl   time.Duration
 }
 
+// threadContextEntry holds a stored thread context with expiration metadata.
+type threadContextEntry struct {
+	context  json.RawMessage
+	storedAt time.Time
+}
+
+// ThreadContextStore provides goroutine-safe storage for assistant thread context.
+// When users navigate to a different channel while the assistant container is open,
+// Slack sends an assistant_thread_context_changed event with channel context.
+// This store holds that context keyed by thread timestamp for pipeline retrieval.
+type ThreadContextStore struct {
+	mu      sync.Mutex
+	entries map[string]threadContextEntry
+	ttl     time.Duration
+	done    chan struct{}
+}
+
+// newThreadContextStore creates a ThreadContextStore with TTL-based expiration.
+// The cleanup goroutine runs every ttl/2 and stops when the done channel is closed.
+func newThreadContextStore(ttl time.Duration) *ThreadContextStore {
+	s := &ThreadContextStore{
+		entries: make(map[string]threadContextEntry),
+		ttl:     ttl,
+		done:    make(chan struct{}),
+	}
+	go func() {
+		ticker := time.NewTicker(ttl / 2)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				s.cleanup()
+			case <-s.done:
+				return
+			}
+		}
+	}()
+	return s
+}
+
+// Set stores thread context for the given thread timestamp.
+func (s *ThreadContextStore) Set(threadTS string, ctx json.RawMessage) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.entries[threadTS] = threadContextEntry{
+		context:  ctx,
+		storedAt: time.Now(),
+	}
+}
+
+// Get retrieves the stored context for a thread timestamp.
+// Returns the context and true if found and not expired, or nil and false otherwise.
+func (s *ThreadContextStore) Get(threadTS string) (json.RawMessage, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	entry, ok := s.entries[threadTS]
+	if !ok {
+		return nil, false
+	}
+	if time.Since(entry.storedAt) > s.ttl {
+		delete(s.entries, threadTS)
+		return nil, false
+	}
+	return entry.context, true
+}
+
+// Stop terminates the background cleanup goroutine.
+func (s *ThreadContextStore) Stop() {
+	close(s.done)
+}
+
+func (s *ThreadContextStore) cleanup() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cutoff := time.Now().Add(-s.ttl)
+	for ts, entry := range s.entries {
+		if entry.storedAt.Before(cutoff) {
+			delete(s.entries, ts)
+		}
+	}
+}
+
 func newEventDedup(ttl time.Duration) *eventDedup {
 	d := &eventDedup{
 		seen: make(map[string]time.Time),
@@ -101,14 +183,16 @@ var defaultSuggestedPrompts = []string{
 	"What are the known design constraints?",
 }
 
-// NewSlackHandler returns an http.HandlerFunc that processes Slack Events API payloads.
+// NewSlackHandler returns an http.HandlerFunc that processes Slack Events API payloads
+// and a ThreadContextStore for pipeline access to assistant thread context.
 // The handler routes events to the reasoning pipeline and renders responses.
 //
 // The request body has already been restored by the upstream verification middleware
 // (webhook.Verifier.Handler).
-func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig) http.HandlerFunc {
-	dedup := newEventDedup(5 * time.Minute)       // TD-02: 5-minute dedup window
-	limiter := newConcurrencyLimiter(5)            // TD-03: max 5 concurrent pipeline queries
+func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig) (http.HandlerFunc, *ThreadContextStore) {
+	dedup := newEventDedup(5 * time.Minute)             // TD-02: 5-minute dedup window
+	limiter := newConcurrencyLimiter(5)                  // TD-03: max 5 concurrent pipeline queries
+	ctxStore := newThreadContextStore(30 * time.Minute)  // GAP-10: 30-minute thread context TTL
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
@@ -155,13 +239,15 @@ func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig)
 		switch inner.Type {
 		case "assistant_thread_started":
 			handleAssistantThreadStarted(w, envelope.Event, client)
+		case "assistant_thread_context_changed":
+			handleAssistantThreadContextChanged(w, envelope.Event, ctxStore)
 		case "message":
 			handleMessage(w, envelope.Event, pipeline, client, limiter)
 		default:
 			slog.Debug("unhandled event type", "type", inner.Type)
 			w.WriteHeader(http.StatusOK)
 		}
-	}
+	}, ctxStore
 }
 
 // handleAssistantThreadStarted processes an assistant_thread_started event.
@@ -187,6 +273,35 @@ func handleAssistantThreadStarted(w http.ResponseWriter, eventData json.RawMessa
 			)
 		}
 	}()
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// handleAssistantThreadContextChanged processes an assistant_thread_context_changed event.
+// Stores the updated channel context so the pipeline can provide context-aware responses.
+// This is an acknowledge-only event -- no response is sent to Slack.
+func handleAssistantThreadContextChanged(w http.ResponseWriter, eventData json.RawMessage, ctxStore *ThreadContextStore) {
+	var event AssistantThreadContextChangedEvent
+	if err := json.Unmarshal(eventData, &event); err != nil {
+		slog.Error("failed to parse assistant_thread_context_changed event", "error", err)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	threadTS := event.AssistantThread.ThreadTS
+	threadCtx := event.AssistantThread.Context
+
+	if threadTS != "" && len(threadCtx) > 0 {
+		ctxStore.Set(threadTS, threadCtx)
+		slog.Info("stored assistant thread context",
+			"thread_ts", threadTS,
+			"channel_id", event.AssistantThread.ChannelID,
+		)
+	} else {
+		slog.Debug("assistant_thread_context_changed with empty thread_ts or context",
+			"thread_ts", threadTS,
+		)
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -264,8 +379,11 @@ func processMessage(channelID, threadTS, question string, pipeline QueryRunner, 
 		)
 	}
 
-	// Run the reasoning pipeline.
-	resp, err := pipeline.Query(context.Background(), question)
+	// GAP-6: Run the reasoning pipeline with a 60-second timeout.
+	// Prevents hanging API calls from exhausting concurrency limiter slots.
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	resp, err := pipeline.Query(ctx, question)
 	if err != nil {
 		slog.Error("pipeline query failed",
 			"channel", channelID,

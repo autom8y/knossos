@@ -82,6 +82,17 @@ type AssistantThreadInfo struct {
 	Context json.RawMessage `json:"context,omitempty"`
 }
 
+// AssistantThreadContextChangedEvent represents a Slack assistant_thread_context_changed event.
+// Fired when a user navigates to a different channel while the assistant container is open.
+// The Context field in AssistantThreadInfo carries the new channel_id and team_id.
+type AssistantThreadContextChangedEvent struct {
+	// Type is "assistant_thread_context_changed".
+	Type string `json:"type"`
+
+	// AssistantThread contains the thread details and updated context.
+	AssistantThread AssistantThreadInfo `json:"assistant_thread"`
+}
+
 // innerEventType is a minimal struct for peeking at the event type field
 // before full deserialization.
 type innerEventType struct {
