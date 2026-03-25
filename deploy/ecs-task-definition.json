@@ -29,15 +29,15 @@
       "secrets": [
         {
           "name": "SLACK_SIGNING_SECRET",
-          "valueFrom": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:clew/slack-signing-secret"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:696318035277:secret:clew/slack-signing-secret-j0CHCd"
         },
         {
           "name": "SLACK_BOT_TOKEN",
-          "valueFrom": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:clew/slack-bot-token"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:696318035277:secret:clew/slack-bot-token-c0F88b"
         },
         {
           "name": "ANTHROPIC_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:clew/anthropic-api-key"
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:696318035277:secret:clew/anthropic-api-key-pkPelo"
         }
       ],
       "logConfiguration": {
