@@ -19,7 +19,7 @@ resource "aws_lb_target_group" "clew" {
 
   health_check {
     enabled             = true
-    path                = "/ready"
+    path                = "/health"
     port                = "traffic-port"
     protocol            = "HTTP"
     healthy_threshold   = 2
