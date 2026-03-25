@@ -4,16 +4,19 @@
 #   1. Go to https://api.slack.com/apps
 #   2. Click "Create New App" > "From an app manifest"
 #   3. Select workspace and paste this YAML
-#   4. REMOVE or leave blank the request_url before creating the app
-#      (set it in Event Subscriptions AFTER the app is deployed and healthy)
-#   5. After creation, click "Install to Workspace"
+#   4. After creation, click "Install to Workspace"
 #
 # After creation and installation, copy:
 #   - Signing Secret  -> AWS Secrets Manager: clew/slack-signing-secret
 #   - Bot User Token  -> AWS Secrets Manager: clew/slack-bot-token
 #
-# IMPORTANT: The request_url must use your custom domain (e.g., clew.yourdomain.com),
-# NOT the raw ALB DNS name. ACM certificates cannot be issued for *.elb.amazonaws.com.
+# Post-deployment (Phase 7):
+#   Configure Event Subscriptions manually in the Slack UI:
+#   - Enable Events, set Request URL: https://clew.yourdomain.com/slack/events
+#   - Subscribe to bot events: assistant_thread_started, assistant_thread_context_changed, message.im
+#
+# IMPORTANT: Event subscriptions are NOT in this manifest because Slack requires a
+# verified Request URL at creation time. Configure them AFTER the app is deployed.
 
 display_information:
   name: Clew
@@ -21,8 +24,6 @@ display_information:
   background_color: "#1a1a2e"
 
 features:
-  assistant_view:
-    enabled: true
   bot_user:
     display_name: Clew
     always_online: true
@@ -37,15 +38,6 @@ oauth_config:
       - im:write
 
 settings:
-  event_subscriptions:
-    # Set this AFTER the app is deployed and healthy.
-    # Use your custom domain: https://clew.yourdomain.com/slack/events
-    # Do NOT use the raw ALB DNS -- it will fail TLS verification.
-    request_url: "https://clew.yourdomain.com/slack/events"
-    bot_events:
-      - assistant_thread_started
-      - assistant_thread_context_changed
-      - message.im
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false
