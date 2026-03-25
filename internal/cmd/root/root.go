@@ -28,9 +28,11 @@ import (
 	"github.com/autom8y/knossos/internal/cmd/manifest"
 	"github.com/autom8y/knossos/internal/cmd/naxos"
 	"github.com/autom8y/knossos/internal/cmd/org"
+	"github.com/autom8y/knossos/internal/cmd/registry"
 	"github.com/autom8y/knossos/internal/cmd/provenance"
 	"github.com/autom8y/knossos/internal/cmd/rite"
 	"github.com/autom8y/knossos/internal/cmd/sails"
+	servecmd "github.com/autom8y/knossos/internal/cmd/serve"
 	"github.com/autom8y/knossos/internal/cmd/session"
 	"github.com/autom8y/knossos/internal/cmd/status"
 	"github.com/autom8y/knossos/internal/cmd/sync"
@@ -160,6 +162,7 @@ func init() {
 	rootCmd.AddCommand(initcmd.NewInitCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(provenance.NewProvenanceCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(org.NewOrgCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(registry.NewRegistryCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(land.NewLandCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(ledgecmd.NewLedgeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(lint.NewLintCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
@@ -168,6 +171,7 @@ func init() {
 	rootCmd.AddCommand(tour.NewTourCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(ask.NewAskCmd(rootCmd, &globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(complaint.NewComplaintCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
+	rootCmd.AddCommand(servecmd.NewServeCmd(&globalOpts.Output, &globalOpts.Verbose, &globalOpts.ProjectDir))
 	rootCmd.AddCommand(versionCmd)
 }
 

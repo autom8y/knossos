@@ -8,11 +8,15 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
+	"log/slog"
+
 	"github.com/autom8y/knossos/internal/agent"
-	"github.com/autom8y/knossos/internal/cmd/explain"
+	"github.com/autom8y/knossos/internal/concept"
+	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/frontmatter"
 	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/paths"
+	registryorg "github.com/autom8y/knossos/internal/registry/org"
 	"github.com/autom8y/knossos/internal/rite"
 )
 
@@ -62,9 +66,9 @@ func collectCommandsRecursive(root, cmd *cobra.Command, entries *[]SearchEntry) 
 	}
 }
 
-// CollectConcepts returns entries from the explain concept registry.
+// CollectConcepts returns entries from the concept registry.
 func CollectConcepts() []SearchEntry {
-	concepts := explain.AllConcepts()
+	concepts := concept.AllConcepts()
 	entries := make([]SearchEntry, 0, len(concepts))
 	for _, c := range concepts {
 		entries = append(entries, SearchEntry{
@@ -389,5 +393,63 @@ func CollectRouting(resolver *paths.Resolver) []SearchEntry {
 		}
 	}
 
+	return entries
+}
+
+// CollectKnowledgeDomains loads the org-level DomainCatalog and returns
+// SearchEntry items for each domain in the catalog.
+// Fail-open: returns nil if no org context is configured, no catalog exists,
+// or any loading step fails. This ensures ari ask works without a registry.
+func CollectKnowledgeDomains() []SearchEntry {
+	orgCtx, err := config.DefaultOrgContext()
+	if err != nil {
+		// No active org configured -- normal for single-repo usage.
+		return nil
+	}
+
+	catalogPath := registryorg.CatalogPath(orgCtx)
+	catalog, err := registryorg.LoadCatalog(catalogPath)
+	if err != nil {
+		slog.Debug("knowledge domain collection skipped", "error", err)
+		return nil
+	}
+
+	domains := catalog.ListDomains()
+	if len(domains) == 0 {
+		return nil
+	}
+
+	entries := make([]SearchEntry, 0, len(domains))
+	for _, d := range domains {
+		// Parse the qualified name to extract repo for context.
+		var repoName string
+		parts := strings.SplitN(d.QualifiedName, "::", 3)
+		if len(parts) >= 2 {
+			repoName = parts[1]
+		}
+
+		summary := d.Domain
+		if repoName != "" {
+			summary = d.Domain + " (" + repoName + ")"
+		}
+
+		// Build keywords from domain name and path.
+		kw := strings.FieldsFunc(d.Domain, func(r rune) bool {
+			return r == '/' || r == '-'
+		})
+		if repoName != "" {
+			kw = append(kw, repoName)
+		}
+		kw = append(kw, "knowledge", "know")
+
+		entries = append(entries, SearchEntry{
+			Name:        d.QualifiedName,
+			Domain:      DomainKnowledge,
+			Summary:     summary,
+			Description: d.Domain + " from " + d.Path,
+			Action:      "ari knows read " + d.Domain,
+			Keywords:    kw,
+		})
+	}
 	return entries
 }

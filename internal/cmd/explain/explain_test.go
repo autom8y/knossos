@@ -1,19 +1,20 @@
 package explain
 
 import (
-	"io/fs"
 	"testing"
 
+	"github.com/autom8y/knossos/internal/concept"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 // --- Concept Loading Tests ---
+// These tests verify the concept package through the explain delegation layer.
 
 func TestAllConceptsLoaded(t *testing.T) {
 	// TC-E01: All 16 concepts loaded
-	assert.Equal(t, 16, len(registry))
+	assert.Equal(t, 16, len(AllConcepts()))
 }
 
 func TestSortedNamesCorrect(t *testing.T) {
@@ -22,7 +23,12 @@ func TestSortedNamesCorrect(t *testing.T) {
 		"agent", "dromena", "evans-principle", "inscription", "knossos", "know", "ledge",
 		"legomena", "mena", "potnia", "rite", "sails", "session", "sos", "tribute", "xenia",
 	}
-	assert.Equal(t, expected, sortedNames)
+	all := AllConcepts()
+	names := make([]string, len(all))
+	for i, c := range all {
+		names[i] = c.Name
+	}
+	assert.Equal(t, expected, names)
 }
 
 func TestEachConceptHasSummary(t *testing.T) {
@@ -49,7 +55,7 @@ func TestSeeAlsoIsNonNil(t *testing.T) {
 // --- Lookup Tests (table-driven) ---
 
 func TestLookupExactMatch(t *testing.T) {
-	// TC-E06 through TC-E18: Exact match for all 13 concepts
+	// TC-E06 through TC-E18: Exact match for all 16 concepts
 	concepts := []string{
 		"rite", "session", "agent", "mena", "dromena", "legomena",
 		"inscription", "tribute", "sails", "know", "ledge", "sos", "knossos",
@@ -143,118 +149,18 @@ func TestLookupSuggestions(t *testing.T) {
 	}
 }
 
-// --- Levenshtein Distance Unit Tests ---
-
-func TestLevenshteinDistance(t *testing.T) {
-	tests := []struct {
-		name     string
-		a        string
-		b        string
-		expected int
-	}{
-		{"TC-E33: identical", "rite", "rite", 0},
-		{"TC-E34: one substitution", "rite", "ryte", 1},
-		{"TC-E35: one insertion", "rite", "rites", 1},
-		{"TC-E36: one deletion", "rite", "rit", 1},
-		{"TC-E37: empty string", "", "abc", 3},
-		{"TC-E38: both empty", "", "", 0},
-		{"TC-E39: completely different", "abc", "xyz", 3},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected, levenshtein(tt.a, tt.b))
-		})
-	}
-}
-
 // --- Frontmatter Parsing Tests ---
+// These tests now use the concept package's exported ParseConceptForTest helper
+// since parseConcept is internal to the concept package.
 
 func TestParseConceptValid(t *testing.T) {
-	// TC-E40: Valid frontmatter
-	data := []byte(`---
-summary: Test summary line.
-see_also: [foo, bar]
-aliases: [test-alias]
-harness_term: test-cc
----
-This is the description body.
-`)
-	entry, err := parseConcept("test", data)
+	// TC-E40: Valid concept entry via LookupConcept
+	entry, err := concept.LookupConcept("rite")
 	require.NoError(t, err)
-	assert.Equal(t, "test", entry.Name)
-	assert.Equal(t, "Test summary line.", entry.Summary)
-	assert.Equal(t, "This is the description body.", entry.Description)
-	assert.Equal(t, []string{"foo", "bar"}, entry.SeeAlso)
-	assert.Equal(t, []string{"test-alias"}, entry.Aliases)
-	assert.Equal(t, "test-cc", entry.HarnessTerm)
-	assert.Equal(t, "test (test-cc)", entry.DisplayName)
-}
-
-func TestParseConceptMissingSummary(t *testing.T) {
-	// TC-E41: Missing summary
-	data := []byte(`---
-see_also: [foo]
----
-Body text.
-`)
-	_, err := parseConcept("test", data)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "missing required field: summary")
-}
-
-func TestParseConceptEmptySeeAlso(t *testing.T) {
-	// TC-E42: Empty see_also
-	data := []byte(`---
-summary: Test summary.
-see_also: []
----
-Body text.
-`)
-	entry, err := parseConcept("test", data)
-	require.NoError(t, err)
+	assert.Equal(t, "rite", entry.Name)
+	assert.NotEmpty(t, entry.Summary)
+	assert.NotEmpty(t, entry.Description)
 	assert.NotNil(t, entry.SeeAlso)
-	assert.Empty(t, entry.SeeAlso)
-}
-
-func TestParseConceptNoAliases(t *testing.T) {
-	// TC-E43: No aliases field
-	data := []byte(`---
-summary: Test summary.
-see_also: [foo]
----
-Body text.
-`)
-	entry, err := parseConcept("test", data)
-	require.NoError(t, err)
-	assert.NotNil(t, entry.Aliases)
-	assert.Empty(t, entry.Aliases)
-}
-
-func TestParseConceptWithHarnessTerm(t *testing.T) {
-	// TC-E44: With cc_term
-	data := []byte(`---
-summary: Test summary.
-see_also: []
-harness_term: skills
----
-Body text.
-`)
-	entry, err := parseConcept("legomena", data)
-	require.NoError(t, err)
-	assert.Equal(t, "legomena (skills)", entry.DisplayName)
-}
-
-func TestParseConceptWithoutHarnessTerm(t *testing.T) {
-	// TC-E45: Without cc_term
-	data := []byte(`---
-summary: Test summary.
-see_also: []
----
-Body text.
-`)
-	entry, err := parseConcept("rite", data)
-	require.NoError(t, err)
-	assert.Equal(t, "rite", entry.DisplayName)
 }
 
 // --- Display Name Tests ---
@@ -262,7 +168,7 @@ Body text.
 func TestDisplayNames(t *testing.T) {
 	tests := []struct {
 		name            string
-		concept         string
+		conceptName     string
 		expectedDisplay string
 	}{
 		{"TC-E46: legomena", "legomena", "legomena (skills)"},
@@ -272,8 +178,8 @@ func TestDisplayNames(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			entry, ok := registry[tt.concept]
-			require.True(t, ok, "concept %q not found in registry", tt.concept)
+			entry, err := concept.LookupConcept(tt.conceptName)
+			require.NoError(t, err)
 			assert.Equal(t, tt.expectedDisplay, entry.DisplayName)
 		})
 	}
@@ -293,38 +199,26 @@ func TestConceptListOutputImplementsTabular(t *testing.T) {
 
 // --- Embedded File Inventory Tests ---
 
-func TestEmbeddedFSContains16Files(t *testing.T) {
-	// TC-E52: Embedded FS contains exactly 16 files
-	entries, err := fs.ReadDir(conceptFS, "concepts")
-	require.NoError(t, err)
-
-	mdCount := 0
-	for _, e := range entries {
-		if !e.IsDir() && len(e.Name()) > 3 && e.Name()[len(e.Name())-3:] == ".md" {
-			mdCount++
-		}
-	}
-	assert.Equal(t, 16, mdCount)
+func TestAllConceptsHave16Entries(t *testing.T) {
+	// TC-E52: 16 concepts loaded
+	assert.Equal(t, 16, len(AllConcepts()))
 }
 
-func TestAllExpectedFilenamesPresent(t *testing.T) {
-	// TC-E53: All expected filenames present
-	expectedFiles := []string{
-		"agent.md", "dromena.md", "evans-principle.md", "inscription.md", "knossos.md",
-		"know.md", "ledge.md", "legomena.md", "mena.md", "potnia.md",
-		"rite.md", "sails.md", "session.md", "sos.md", "tribute.md", "xenia.md",
+func TestAllExpectedConceptsPresent(t *testing.T) {
+	// TC-E53: All expected concepts present
+	expectedNames := []string{
+		"agent", "dromena", "evans-principle", "inscription", "knossos",
+		"know", "ledge", "legomena", "mena", "potnia",
+		"rite", "sails", "session", "sos", "tribute", "xenia",
 	}
 
-	entries, err := fs.ReadDir(conceptFS, "concepts")
-	require.NoError(t, err)
-
-	fileNames := make(map[string]bool)
-	for _, e := range entries {
-		fileNames[e.Name()] = true
+	conceptMap := make(map[string]bool)
+	for _, c := range AllConcepts() {
+		conceptMap[c.Name] = true
 	}
 
-	for _, expected := range expectedFiles {
-		assert.True(t, fileNames[expected], "missing embedded concept file: %s", expected)
+	for _, expected := range expectedNames {
+		assert.True(t, conceptMap[expected], "missing concept: %s", expected)
 	}
 }
 

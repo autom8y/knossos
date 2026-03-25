@@ -120,14 +120,22 @@ With a project, also searches rites, agents, dromena, and routing.`,
 			}
 
 			for i, r := range results {
-				out.Results = append(out.Results, AskResultEntry{
+				entry := AskResultEntry{
 					Rank:    i + 1,
 					Name:    r.Name,
 					Domain:  string(r.Domain),
 					Summary: r.Summary,
 					Action:  r.Action,
 					Score:   r.Score,
-				})
+				}
+
+				// For knowledge results, extract repo source and freshness annotation.
+				if r.Domain == search.DomainKnowledge {
+					entry.Source = extractRepoFromQN(r.Name)
+					entry.Freshness = r.Description // Contains freshness annotation.
+				}
+
+				out.Results = append(out.Results, entry)
 			}
 
 			return printer.Print(out)
@@ -135,7 +143,7 @@ With a project, also searches rites, agents, dromena, and routing.`,
 	}
 
 	cmd.Flags().IntVar(&limit, "limit", search.DefaultLimit, "Maximum results to return")
-	cmd.Flags().StringVar(&domain, "domain", "", "Filter by domain (comma-separated): command,concept,rite,agent,dromena,routing,session")
+	cmd.Flags().StringVar(&domain, "domain", "", "Filter by domain (comma-separated): command,concept,rite,agent,dromena,routing,session,knowledge")
 	cmd.Flags().StringVar(&sessionFlag, "session", "", "Session ID override (auto-detects if omitted)")
 
 	common.SetNeedsProject(cmd, false, true)
@@ -201,6 +209,17 @@ func buildAskSessionContext(signals *search.SessionSignals) *AskSessionContext {
 	}
 
 	return sc
+}
+
+// extractRepoFromQN extracts the repo name from a qualified name.
+// "org::repo::domain" -> "repo"
+// Returns empty string if the qualified name is not in the expected format.
+func extractRepoFromQN(qn string) string {
+	parts := strings.SplitN(qn, "::", 3)
+	if len(parts) >= 2 {
+		return parts[1]
+	}
+	return ""
 }
 
 // formatDuration converts a duration to a human-readable string like "2m", "1h", "3d".

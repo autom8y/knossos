@@ -6,17 +6,6 @@ import (
 	"strings"
 )
 
-// ConceptEntry holds a fully parsed concept definition.
-type ConceptEntry struct {
-	Name        string   `json:"name"`
-	DisplayName string   `json:"display_name"`
-	Summary     string   `json:"summary"`
-	Description string   `json:"description"`
-	SeeAlso     []string `json:"see_also"`
-	Aliases     []string `json:"aliases"`
-	HarnessTerm string   `json:"harness_term,omitempty"`
-}
-
 // ConceptOutput represents a single concept lookup result.
 // Implements output.Textable for human-readable output.
 // Serializes to JSON/YAML via struct tags for machine-readable output.

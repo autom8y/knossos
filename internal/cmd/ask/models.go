@@ -38,12 +38,14 @@ type AskActivitySummary struct {
 
 // AskResultEntry represents a single search result.
 type AskResultEntry struct {
-	Rank    int    `json:"rank"`
-	Name    string `json:"name"`
-	Domain  string `json:"domain"`
-	Summary string `json:"summary"`
-	Action  string `json:"action"`
-	Score   int    `json:"score,omitempty"`
+	Rank      int    `json:"rank"`
+	Name      string `json:"name"`
+	Domain    string `json:"domain"`
+	Summary   string `json:"summary"`
+	Action    string `json:"action"`
+	Score     int    `json:"score,omitempty"`
+	Source    string `json:"source,omitempty"`    // repo origin for knowledge results
+	Freshness string `json:"freshness,omitempty"` // freshness annotation for knowledge results
 }
 
 // Text implements output.Textable.
@@ -66,8 +68,15 @@ func (a AskOutput) Text() string {
 
 	b.WriteString("\n")
 	for _, r := range a.Results {
-		fmt.Fprintf(&b, "  %d. %s [%s]\n", r.Rank, r.Name, r.Domain)
+		domainLabel := r.Domain
+		if r.Source != "" {
+			domainLabel = r.Domain + " from " + r.Source
+		}
+		fmt.Fprintf(&b, "  %d. %s [%s]\n", r.Rank, r.Name, domainLabel)
 		fmt.Fprintf(&b, "     %s\n", r.Summary)
+		if r.Freshness != "" {
+			fmt.Fprintf(&b, "     Freshness: %s\n", r.Freshness)
+		}
 		if r.Action != "" {
 			fmt.Fprintf(&b, "     Try: %s\n", r.Action)
 		}

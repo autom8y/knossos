@@ -11,8 +11,9 @@ const (
 	DomainAgent    Domain = "agent"
 	DomainDromena    Domain = "dromena"
 	DomainRouting    Domain = "routing"
-	DomainSession    Domain = "session"
-	DomainProcession Domain = "procession"
+	DomainSession       Domain = "session"
+	DomainProcession    Domain = "procession"
+	DomainKnowledge     Domain = "knowledge"
 )
 
 // SearchEntry is a single indexed item from any data source.

@@ -180,6 +180,10 @@ func exitCodeForCode(code string) int {
 		return ExitFileNotFound
 	case CodeQualityGateFailed:
 		return ExitQualityGateFailed
+	case CodeSignatureInvalid, CodeTimestampExpired:
+		return ExitPermissionDenied
+	case CodeServerStartFailed:
+		return ExitGeneralError
 	default:
 		return ExitGeneralError
 	}
@@ -445,6 +449,14 @@ func IsRemoteNotFound(err error) bool {
 func IsSyncNotConfigured(err error) bool {
 	return isCode(err, CodeSyncNotConfigured)
 }
+
+// --- Serve-domain error codes ---
+
+const (
+	CodeSignatureInvalid  = "SIGNATURE_INVALID"
+	CodeTimestampExpired  = "TIMESTAMP_EXPIRED"
+	CodeServerStartFailed = "SERVER_START_FAILED"
+)
 
 // --- Rite-domain error codes ---
 

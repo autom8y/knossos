@@ -78,6 +78,15 @@ func ActiveOrg() string {
 	return strings.TrimSpace(string(data))
 }
 
+// RegistryDir returns the registry directory for a named organization.
+// Location: $XDG_DATA_HOME/knossos/registry/{orgName}/
+//
+// This is a pure function — NOT cached with sync.Once (TENSION-016 avoidance).
+// Callers who need stable paths should capture the result themselves.
+func RegistryDir(orgName string) string {
+	return filepath.Join(XDGDataDir(), "registry", orgName)
+}
+
 // ResetKnossosHome resets the cached home directory (for testing only).
 //
 // Tests that need a custom KNOSSOS_HOME must follow this pattern to avoid
