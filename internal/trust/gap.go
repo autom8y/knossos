@@ -67,22 +67,32 @@ func NewGapAdmission(missingDomains []string, staleDomains []StaleDomainInfo) Ga
 	return gap
 }
 
-// generateSuggestions creates actionable /know commands from gap information.
-// Suggestions reference real repos and domains, not fabricated ones.
+// generateSuggestions creates actionable suggestions from gap information.
+// Framed for Slack users (not CLI developers).
 func generateSuggestions(missingDomains []string, staleDomains []StaleDomainInfo) []string {
 	var suggestions []string
 
-	// For missing domains: suggest generating knowledge
+	// For missing domains: explain what is missing
 	for _, domain := range missingDomains {
 		suggestions = append(suggestions,
-			fmt.Sprintf("Run `/know --domain=%s` in the relevant repository to generate this knowledge", domain))
+			fmt.Sprintf("Knowledge about %q has not been generated yet. A developer can add it to the knowledge base.", domain))
 	}
 
-	// For stale domains: suggest regenerating with specific repo context
+	// For stale domains: explain what needs refreshing
 	for _, sd := range staleDomains {
-		suggestions = append(suggestions,
-			fmt.Sprintf("Run `/know --domain=%s` in repo %s to refresh (last generated %d days ago)",
-				sd.Domain, sd.Repo, sd.DaysSinceGenerated))
+		if sd.Repo != "" && sd.DaysSinceGenerated > 0 {
+			suggestions = append(suggestions,
+				fmt.Sprintf("The %s knowledge in %s was last updated %d days ago and may need to be refreshed.",
+					sd.Domain, sd.Repo, sd.DaysSinceGenerated))
+		} else if sd.Repo != "" {
+			suggestions = append(suggestions,
+				fmt.Sprintf("The %s knowledge in %s may be outdated and could need to be refreshed.",
+					sd.Domain, sd.Repo))
+		} else {
+			suggestions = append(suggestions,
+				fmt.Sprintf("The %s knowledge may be outdated and could need to be refreshed.",
+					sd.Domain))
+		}
 	}
 
 	return suggestions
@@ -92,9 +102,9 @@ func generateSuggestions(missingDomains []string, staleDomains []StaleDomainInfo
 // Used when a single domain is the bottleneck (e.g., a query about one specific topic).
 func SuggestionFor(domain, repo string) string {
 	if repo != "" {
-		return fmt.Sprintf("Run `/know --domain=%s` in repo %s", domain, repo)
+		return fmt.Sprintf("The %s knowledge in %s may need to be refreshed.", domain, repo)
 	}
-	return fmt.Sprintf("Run `/know --domain=%s` in the relevant repository", domain)
+	return fmt.Sprintf("The %s knowledge may need to be refreshed.", domain)
 }
 
 // HasGaps returns true if there are any missing or stale domains.

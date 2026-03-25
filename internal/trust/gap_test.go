@@ -19,7 +19,8 @@ func TestGapAdmission_MissingDomain(t *testing.T) {
 	assert.True(t, gap.HasGaps())
 	assert.False(t, gap.IsEmpty())
 	require.Len(t, gap.Suggestions, 1)
-	assert.Contains(t, gap.Suggestions[0], "/know --domain=kubernetes-migration")
+	assert.Contains(t, gap.Suggestions[0], "kubernetes-migration")
+	assert.Contains(t, gap.Suggestions[0], "has not been generated yet")
 	assert.Contains(t, gap.Reason, "no knowledge found for")
 	assert.Contains(t, gap.Reason, "kubernetes-migration")
 }
@@ -38,8 +39,8 @@ func TestGapAdmission_StaleDomain(t *testing.T) {
 
 	assert.True(t, gap.HasGaps())
 	require.Len(t, gap.Suggestions, 1)
-	assert.Contains(t, gap.Suggestions[0], "/know --domain=test-coverage")
-	assert.Contains(t, gap.Suggestions[0], "repo knossos")
+	assert.Contains(t, gap.Suggestions[0], "test-coverage")
+	assert.Contains(t, gap.Suggestions[0], "knossos")
 	assert.Contains(t, gap.Suggestions[0], "21 days ago")
 	assert.Contains(t, gap.Reason, "stale knowledge in")
 	assert.Contains(t, gap.Reason, "autom8y::knossos::test-coverage")
@@ -65,7 +66,7 @@ func TestGapAdmission_MixedMissingAndStale(t *testing.T) {
 	// First suggestion is for missing, second for stale
 	assert.Contains(t, gap.Suggestions[0], "security-policy")
 	assert.Contains(t, gap.Suggestions[1], "design-constraints")
-	assert.Contains(t, gap.Suggestions[1], "repo auth")
+	assert.Contains(t, gap.Suggestions[1], "auth")
 }
 
 func TestGapAdmission_Empty(t *testing.T) {
@@ -85,7 +86,7 @@ func TestGapAdmission_MultipleMissingDomains(t *testing.T) {
 
 	require.Len(t, gap.Suggestions, 3)
 	for _, s := range gap.Suggestions {
-		assert.True(t, strings.Contains(s, "/know --domain="), "suggestion should contain /know command")
+		assert.True(t, strings.Contains(s, "has not been generated yet"), "suggestion should describe missing knowledge")
 	}
 	assert.Contains(t, gap.Reason, "kubernetes-migration")
 	assert.Contains(t, gap.Reason, "security-policy")
@@ -114,27 +115,28 @@ func TestGapAdmission_MultipleStaleDomains(t *testing.T) {
 	)
 
 	require.Len(t, gap.Suggestions, 2)
-	assert.Contains(t, gap.Suggestions[0], "repo knossos")
-	assert.Contains(t, gap.Suggestions[1], "repo auth")
+	assert.Contains(t, gap.Suggestions[0], "knossos")
+	assert.Contains(t, gap.Suggestions[1], "auth")
 }
 
 func TestSuggestionFor_WithRepo(t *testing.T) {
 	s := SuggestionFor("architecture", "knossos")
-	assert.Contains(t, s, "/know --domain=architecture")
-	assert.Contains(t, s, "repo knossos")
+	assert.Contains(t, s, "architecture")
+	assert.Contains(t, s, "knossos")
+	assert.Contains(t, s, "may need to be refreshed")
 }
 
 func TestSuggestionFor_WithoutRepo(t *testing.T) {
 	s := SuggestionFor("architecture", "")
-	assert.Contains(t, s, "/know --domain=architecture")
-	assert.Contains(t, s, "relevant repository")
-	assert.NotContains(t, s, "repo ")
+	assert.Contains(t, s, "architecture")
+	assert.Contains(t, s, "may need to be refreshed")
+	assert.NotContains(t, s, "in ")
 }
 
 func TestSuggestionFor_FeatDomain(t *testing.T) {
 	s := SuggestionFor("feat/materialization", "knossos")
-	assert.Contains(t, s, "/know --domain=feat/materialization")
-	assert.Contains(t, s, "repo knossos")
+	assert.Contains(t, s, "feat/materialization")
+	assert.Contains(t, s, "knossos")
 }
 
 func TestGapAdmission_HasGaps_OnlyMissing(t *testing.T) {
@@ -159,4 +161,21 @@ func TestGapAdmission_ReasonFormat(t *testing.T) {
 	require.Len(t, parts, 2)
 	assert.True(t, strings.HasPrefix(parts[0], "no knowledge found for"))
 	assert.True(t, strings.HasPrefix(parts[1], "stale knowledge in"))
+}
+
+func TestGapAdmission_StaleDomain_NoRepo(t *testing.T) {
+	gap := NewGapAdmission(
+		nil,
+		[]StaleDomainInfo{{
+			QualifiedName:      "autom8y::::test-coverage",
+			Domain:             "test-coverage",
+			Repo:               "",
+			Freshness:          0.10,
+			DaysSinceGenerated: 0,
+		}},
+	)
+
+	require.Len(t, gap.Suggestions, 1)
+	assert.Contains(t, gap.Suggestions[0], "test-coverage")
+	assert.Contains(t, gap.Suggestions[0], "may be outdated")
 }

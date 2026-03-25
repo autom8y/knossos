@@ -27,7 +27,7 @@ type CompletionRequest struct {
 	// UserMessage is the user's question.
 	UserMessage string
 
-	// Model is the Claude model identifier (e.g., "claude-sonnet-4-5-20241022").
+	// Model is the Claude model identifier (e.g., "claude-sonnet-4-6").
 	Model string
 
 	// MaxTokens is the maximum response tokens. Must be > 0.

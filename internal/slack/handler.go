@@ -178,9 +178,9 @@ type QueryRunner interface {
 
 // defaultSuggestedPrompts are the initial prompts shown when a user starts an assistant thread.
 var defaultSuggestedPrompts = []string{
-	"What is the architecture of this project?",
-	"What conventions does this codebase follow?",
-	"What are the known design constraints?",
+	"How are our projects structured?",
+	"What practices and conventions do we follow?",
+	"What decisions have shaped our technical direction?",
 }
 
 // NewSlackHandler returns an http.HandlerFunc that processes Slack Events API payloads

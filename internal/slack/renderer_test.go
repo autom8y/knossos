@@ -31,10 +31,10 @@ func TestRenderHighConfidence(t *testing.T) {
 	// Second block: divider
 	assert.IsType(t, &slackapi.DividerBlock{}, blocks[1])
 
-	// Citation blocks
-	assertContextContains(t, blocks[2], "autom8y::knossos::architecture")
+	// Citation blocks: human-readable labels
+	assertContextContains(t, blocks[2], "Architecture (knossos)")
 	assertContextContains(t, blocks[2], "Layer Boundaries")
-	assertContextContains(t, blocks[3], "autom8y::knossos::conventions")
+	assertContextContains(t, blocks[3], "Conventions (knossos)")
 
 	// Last block: confidence indicator
 	last := blocks[len(blocks)-1]
@@ -63,15 +63,15 @@ func TestRenderMediumConfidence(t *testing.T) {
 	// First block: answer
 	assertSectionContains(t, blocks[0], "release process involves tagging")
 
-	// Second block: staleness warning
+	// Second block: staleness warning with human-readable domain name
 	assertSectionContains(t, blocks[1], "Some sources may not be current")
-	assertSectionContains(t, blocks[1], "release")
+	assertSectionContains(t, blocks[1], "Release (knossos)")
 
 	// Divider
 	assert.IsType(t, &slackapi.DividerBlock{}, blocks[2])
 
-	// Citation
-	assertContextContains(t, blocks[3], "autom8y::knossos::release")
+	// Citation: human-readable
+	assertContextContains(t, blocks[3], "Release (knossos)")
 
 	// Confidence indicator
 	last := blocks[len(blocks)-1]
@@ -90,8 +90,8 @@ func TestRenderLowConfidence(t *testing.T) {
 				{QualifiedName: "autom8y::knossos::release", Domain: "release", DaysSinceGenerated: 30},
 			},
 			Suggestions: []string{
-				"Run `/know --domain=deployment` in the relevant repository to generate this knowledge",
-				"Run `/know --domain=release` in repo knossos to refresh (last generated 30 days ago)",
+				"Knowledge about \"deployment\" has not been generated yet. A developer can add it to the knowledge base.",
+				"The release knowledge in knossos was last updated 30 days ago and may need to be refreshed.",
 			},
 		},
 	}
@@ -109,12 +109,13 @@ func TestRenderLowConfidence(t *testing.T) {
 	// Missing domains
 	assertSectionContains(t, blocks[2], "deployment")
 
-	// Stale domains
-	assertSectionContains(t, blocks[3], "release")
-	assertSectionContains(t, blocks[3], "30 days old")
+	// Stale domains: human-readable format
+	assertSectionContains(t, blocks[3], "Release (knossos)")
+	assertSectionContains(t, blocks[3], "last updated 30 days ago")
 
-	// Suggestions
-	assertSectionContains(t, blocks[4], "/know --domain=deployment")
+	// Suggestions: no CLI commands
+	assertSectionContains(t, blocks[4], "deployment")
+	assertSectionContains(t, blocks[4], "has not been generated yet")
 }
 
 func TestRenderLowConfidence_NoGap(t *testing.T) {
@@ -175,6 +176,27 @@ func TestRenderHighConfidence_NoCitations(t *testing.T) {
 	assertSectionContains(t, blocks[0], "direct answer")
 	assert.IsType(t, &slackapi.DividerBlock{}, blocks[1])
 	assertContextContains(t, blocks[len(blocks)-1], "High confidence")
+}
+
+func TestHumanReadableName(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"standard", "autom8y::knossos::architecture", "Architecture (knossos)"},
+		{"hyphenated", "autom8y::knossos::test-coverage", "Test Coverage (knossos)"},
+		{"feat domain", "autom8y::knossos::feat/materialization", "Feat/Materialization (knossos)"},
+		{"not qualified", "just-a-name", "just-a-name"},
+		{"two parts", "a::b", "a::b"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := humanReadableName(tc.input)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
 }
 
 // --- test helpers ---

@@ -16,6 +16,8 @@ package reason
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"strings"
 	"time"
 
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
@@ -103,6 +105,17 @@ func (p *Pipeline) Query(ctx context.Context, question string) (*response.Reason
 		StaleDomains:     findStaleDomains(chain, p.scorer.Config().Thresholds.LowThreshold),
 	}
 	confidence := p.scorer.Score(scoreInput)
+
+	slog.Info("confidence score computed",
+		"overall", confidence.Overall,
+		"freshness", confidence.Freshness,
+		"retrieval", confidence.Retrieval,
+		"coverage", confidence.Coverage,
+		"tier", confidence.Tier.String(),
+		"source_count", len(chain.Sources),
+		"stale_count", len(scoreInput.StaleDomains),
+		"missing_count", len(scoreInput.MissingDomains),
+	)
 
 	// Step 6: LOW tier short-circuit (D-9 -- skip Claude entirely).
 	if confidence.Tier == trust.TierLow {
@@ -217,14 +230,20 @@ func findMissingDomains(hints []intent.DomainHint, chain trust.ProvenanceChain) 
 
 // findStaleDomains identifies domains in the chain below the freshness threshold.
 func findStaleDomains(chain trust.ProvenanceChain, threshold float64) []trust.StaleDomainInfo {
+	now := time.Now()
 	var stale []trust.StaleDomainInfo
 	for _, s := range chain.Sources {
 		if s.FreshnessAtQuery < threshold {
+			daysSince := 0
+			if !s.GeneratedAt.IsZero() {
+				daysSince = int(now.Sub(s.GeneratedAt).Hours() / 24)
+			}
 			stale = append(stale, trust.StaleDomainInfo{
-				QualifiedName: s.QualifiedName,
-				Domain:        s.Domain,
-				Repo:          s.Repo,
-				Freshness:     s.FreshnessAtQuery,
+				QualifiedName:      s.QualifiedName,
+				Domain:             s.Domain,
+				Repo:               s.Repo,
+				Freshness:          s.FreshnessAtQuery,
+				DaysSinceGenerated: daysSince,
 			})
 		}
 	}
@@ -264,10 +283,21 @@ func buildProvenanceLinkInputs(
 			SourceHash:    entry.SourceHash,
 			FilePath:      entry.Path,
 			Domain:        entry.Domain,
+			Repo:          repoFromQualifiedName(entry.QualifiedName),
 		})
 	}
 
 	return inputs
+}
+
+// repoFromQualifiedName extracts the repo component from a qualified name "org::repo::domain".
+// Returns empty string if the format is not as expected.
+func repoFromQualifiedName(qn string) string {
+	parts := strings.SplitN(qn, "::", 3)
+	if len(parts) >= 2 {
+		return parts[1]
+	}
+	return ""
 }
 
 // extractSearchDomains converts DomainHints to search.Domain filter list.

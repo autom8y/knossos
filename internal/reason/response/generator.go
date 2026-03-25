@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	reasoncontext "github.com/autom8y/knossos/internal/reason/context"
@@ -14,7 +15,7 @@ import (
 // GeneratorConfig controls response generation behavior.
 type GeneratorConfig struct {
 	// Model is the Claude model identifier.
-	// Default: "claude-sonnet-4-5-20241022" (D-8).
+	// Default: "claude-sonnet-4-6".
 	Model string
 
 	// MaxResponseTokens is the maximum response tokens.
@@ -33,7 +34,7 @@ type GeneratorConfig struct {
 // DefaultGeneratorConfig returns production defaults.
 func DefaultGeneratorConfig() GeneratorConfig {
 	return GeneratorConfig{
-		Model:             "claude-sonnet-4-5-20241022",
+		Model:             "claude-sonnet-4-6",
 		MaxResponseTokens: 2000,
 		Temperature:       0.2,
 		TimeoutSeconds:    30,
@@ -200,11 +201,17 @@ func (g *Generator) Generate(
 
 // addStalenessFooter appends a staleness footer and caveats to the answer for MEDIUM tier.
 func addStalenessFooter(answer string, chain *trust.ProvenanceChain, existingCaveats []string) string {
-	footer := "\n\nNote: Some sources may not reflect the latest changes. Run `/know --all` in the relevant repository to refresh."
+	footer := "\n\n_Note: Some sources may not reflect the latest changes._"
 	if chain != nil {
 		stale := chain.StaleSources(0.4)
 		for _, s := range stale {
-			footer += fmt.Sprintf("\nNote: The [%s::%s] source may not reflect recent changes.", s.Repo, s.Domain)
+			display := strings.ReplaceAll(s.Domain, "-", " ")
+			display = strings.Title(display) //nolint:staticcheck
+			if s.Repo != "" {
+				footer += fmt.Sprintf("\n_The %s information from %s may not reflect recent changes._", display, s.Repo)
+			} else {
+				footer += fmt.Sprintf("\n_The %s information may not reflect recent changes._", display)
+			}
 		}
 	}
 	return answer + footer
@@ -220,13 +227,13 @@ func (g *Generator) buildDegradedResponse(
 ) *ReasoningResponse {
 	answer := "I found relevant knowledge sources but was unable to generate a complete synthesis at this time. Here are the sources I found:"
 
-	// Convert ProvenanceChain sources to citations.
+	// Convert ProvenanceChain sources to citations with human-readable names.
 	var citations []Citation
 	if chain != nil {
 		for _, s := range chain.Sources {
 			citations = append(citations, Citation{
 				QualifiedName: s.QualifiedName,
-				Excerpt:       s.FilePath,
+				Excerpt:       humanReadableSourceName(s.QualifiedName, s.Domain, s.Repo),
 			})
 		}
 	}
@@ -256,7 +263,7 @@ func (g *Generator) buildCitationOnlyResponse(
 		for _, s := range chain.Sources {
 			citations = append(citations, Citation{
 				QualifiedName: s.QualifiedName,
-				Excerpt:       s.FilePath,
+				Excerpt:       humanReadableSourceName(s.QualifiedName, s.Domain, s.Repo),
 			})
 		}
 	}
@@ -271,6 +278,17 @@ func (g *Generator) buildCitationOnlyResponse(
 		Degraded:       true,
 		DegradedReason: "all citations were fabricated by Claude and stripped",
 	}
+}
+
+// humanReadableSourceName converts a qualified name into a readable label for degraded responses.
+// Example: "autom8y::knossos::architecture" -> "Architecture (knossos)"
+func humanReadableSourceName(qualifiedName, domain, repo string) string {
+	if domain != "" && repo != "" {
+		display := strings.ReplaceAll(domain, "-", " ")
+		display = strings.Title(display) //nolint:staticcheck
+		return fmt.Sprintf("%s (%s)", display, repo)
+	}
+	return qualifiedName
 }
 
 // ValidateCitations cross-checks Claude's citations against the provenance chain.

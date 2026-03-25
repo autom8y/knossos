@@ -81,9 +81,9 @@ func (c *SlackClient) SetSuggestedPrompts(channelID, threadTS string, prompts []
 		}
 	}
 	payload := map[string]any{
-		"channel_id":        channelID,
-		"thread_ts":         threadTS,
-		"suggested_prompts": promptObjects,
+		"channel_id": channelID,
+		"thread_ts":  threadTS,
+		"prompts":    promptObjects,
 	}
 	return c.rawAPICall("assistant.threads.setSuggestedPrompts", payload)
 }

@@ -336,7 +336,7 @@ func TestValidateCitations_AllValid(t *testing.T) {
 }
 
 func TestEstimateCost(t *testing.T) {
-	cost := EstimateCost("claude-sonnet-4-5-20241022", TokenUsage{
+	cost := EstimateCost("claude-sonnet-4-6", TokenUsage{
 		InputTokens:  1_000_000,
 		OutputTokens: 1_000_000,
 	})

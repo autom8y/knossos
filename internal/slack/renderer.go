@@ -137,9 +137,14 @@ func RenderLowConfidence(resp *response.ReasoningResponse) []slackapi.Block {
 
 	// Stale domains section
 	if resp.Gap != nil && len(resp.Gap.StaleDomains) > 0 {
-		staleText := "*Stale knowledge domains:*\n"
+		staleText := "*Knowledge that may be outdated:*\n"
 		for _, sd := range resp.Gap.StaleDomains {
-			staleText += fmt.Sprintf("  - `%s` (%d days old)\n", sd.QualifiedName, sd.DaysSinceGenerated)
+			name := humanReadableName(sd.QualifiedName)
+			if sd.DaysSinceGenerated > 0 {
+				staleText += fmt.Sprintf("  - %s -- last updated %d days ago\n", name, sd.DaysSinceGenerated)
+			} else {
+				staleText += fmt.Sprintf("  - %s -- age unknown\n", name)
+			}
 		}
 		blocks = append(blocks, slackapi.NewSectionBlock(
 			slackapi.NewTextBlockObject(slackapi.MarkdownType, staleText, false, false),
@@ -162,13 +167,31 @@ func RenderLowConfidence(resp *response.ReasoningResponse) []slackapi.Block {
 	return blocks
 }
 
-// formatCitationLabel formats a Citation as a Slack markdown string.
+// formatCitationLabel formats a Citation as a human-readable Slack markdown string.
+// Parses qualified names like "org::repo::domain" into "Domain (repo)".
 func formatCitationLabel(c response.Citation) string {
-	label := fmt.Sprintf("*%s*", c.QualifiedName)
+	label := humanReadableName(c.QualifiedName)
 	if c.Section != "" {
 		label += fmt.Sprintf(" > %s", c.Section)
 	}
-	return label
+	return fmt.Sprintf("*%s*", label)
+}
+
+// humanReadableName converts a qualified name "org::repo::domain" into
+// a human-readable label like "Architecture (knossos)".
+func humanReadableName(qualifiedName string) string {
+	parts := strings.Split(qualifiedName, "::")
+	if len(parts) != 3 {
+		return qualifiedName
+	}
+	repo := parts[1]
+	domain := parts[2]
+
+	// Title-case the domain, replacing hyphens with spaces.
+	display := strings.ReplaceAll(domain, "-", " ")
+	display = strings.Title(display) //nolint:staticcheck // strings.Title is fine for simple domain names
+
+	return fmt.Sprintf("%s (%s)", display, repo)
 }
 
 // staleDomainList returns a comma-separated list of stale domain names from the response.
@@ -179,7 +202,7 @@ func staleDomainList(resp *response.ReasoningResponse) string {
 	}
 	names := make([]string, len(resp.Gap.StaleDomains))
 	for i, sd := range resp.Gap.StaleDomains {
-		names[i] = sd.Domain
+		names[i] = humanReadableName(sd.QualifiedName)
 	}
 	return strings.Join(names, ", ")
 }
