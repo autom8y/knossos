@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # The Knossos Doctrine
@@ -49,19 +49,54 @@ docs/doctrine/
 │   └── COMPLIANCE-STATUS.md    # Current implementation status
 │
 ├── operations/                 # How to use the platform
-│   └── cli-reference/          # CLI command reference (84+ commands, 20 families)
+│   └── cli-reference/          # CLI command reference (all 32 families documented)
 │       ├── index.md            # Quick reference and navigation
 │       ├── cli-session.md      # Session lifecycle (15 commands)
 │       ├── cli-rite.md         # Rite management (10 commands)
 │       ├── cli-worktree.md     # Worktree operations (11 commands)
-│       └── ...                 # All 20 command families
+│       ├── cli-sync.md         # Materialization (8 commands)
+│       ├── cli-hook.md         # Hook operations (11 commands)
+│       ├── cli-handoff.md      # Agent handoffs (4 commands)
+│       ├── cli-agent.md        # Agent management (summon, dismiss, roster)
+│       ├── cli-serve.md        # Clew HTTP server
+│       ├── cli-procession.md   # Cross-rite workflows
+│       ├── cli-land.md         # Session synthesis
+│       ├── cli-status.md       # Platform health dashboard
+│       ├── cli-org.md          # Organization management
+│       ├── cli-registry.md     # Registry sync and status
+│       ├── cli-ask.md          # Domain-filtered queries
+│       ├── cli-knows.md        # Knowledge base checks
+│       ├── cli-ledge.md        # Work product artifacts
+│       ├── cli-lint.md         # Codebase linting
+│       ├── cli-provenance.md   # Content provenance
+│       ├── cli-explain.md      # Term definitions
+│       ├── cli-complaint.md    # Complaint tracking
+│       ├── cli-init.md         # Project initialization
+│       ├── cli-tour.md         # Interactive tour
+│       ├── cli-version.md      # Version info
+│       └── cli-help.md         # CLI help
 │
-├── rites/                      # Catalog of 14 rites
+├── rites/                      # Catalog of 19 rites (all documented)
 │   ├── index.md                # Rite selection guide
 │   ├── 10x-dev.md              # Full development lifecycle
 │   ├── arch.md                 # Architecture assessment
+│   ├── clinic.md               # Clinical debugging workflow
+│   ├── docs.md                 # Documentation workflow
+│   ├── forge.md                # Rite creation (meta-rite)
+│   ├── hygiene.md              # Code quality maintenance
+│   ├── debt-triage.md          # Technical debt remediation
+│   ├── releaser.md             # Release management
+│   ├── review.md               # Code review workflow
+│   ├── security.md             # Threat modeling and compliance
+│   ├── sre.md                  # Operations and reliability
+│   ├── intelligence.md         # Research and synthesis
+│   ├── rnd.md                  # Exploration and prototypes
+│   ├── strategy.md             # Business analysis
+│   ├── thermia.md              # Thermal/performance analysis
+│   ├── ecosystem.md            # Platform infrastructure
 │   ├── slop-chop.md            # AI code quality gate
-│   └── ...                     # All 14 rites documented
+│   ├── ui.md                   # UI development workflow
+│   └── shared.md               # Cross-rite resources
 │
 ├── guides/                     # Operational guides
 │   └── worktree-guide.md       # Worktree production patterns
@@ -80,8 +115,8 @@ docs/doctrine/
 - **PROJECTION** = channel directories (materialized by `ari sync materialize`)
 
 **Completed**:
-- `operations/cli-reference/` - CLI reference (84+ commands across 20 families)
-- `rites/` - 14 rite documentation files with selection guide
+- `operations/cli-reference/` - CLI reference (all 32 command families documented)
+- `rites/` - All 19 rite documentation files with selection guide
 - `guides/worktree-guide.md` - Worktree production patterns
 - `reference/agent-capabilities.md` - CC-OPP capability reference
 - `reference/architecture-map.md` - Subsystem and package map
@@ -92,8 +127,7 @@ docs/doctrine/
 - Will expand organically as content emerges
 
 **Symlinks**:
-- `foundations/` → `../../decisions/` (ADRs)
-- `operations/guides/` → `../../../guides/` (operational guides)
+- `foundations/` → `../../decisions/` (ADRs: ADR-0001, ADR-0005, ADR-0009)
 
 ---
 
@@ -113,10 +147,10 @@ docs/doctrine/
 
 | Metric | Value |
 |--------|-------|
-| Go source lines | 105,609 |
-| CLI commands | 84+ across 20 families |
-| Agents | 75 across 14 rites |
-| ADRs | 27 |
+| Go source lines | 93,668 (non-test files in cmd/ and internal/; excludes 119,624 test lines) |
+| CLI command families | 32 (see `ari --help` for current list) |
+| Agents | 110 across 19 rites |
+| ADRs | 9 published documents (ADR-0001 through ADR-0032; 32 numbers allocated) |
 
 See [compliance/COMPLIANCE-STATUS.md](compliance/COMPLIANCE-STATUS.md) for the complete report.
 

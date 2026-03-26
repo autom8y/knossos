@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # Rite: forge
@@ -16,7 +16,7 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 |----------|-------|
 | **Name** | forge |
 | **Form** | Full (multi-agent workflow) |
-| **Agents** | 7 |
+| **Agents** | 8 |
 | **Entry Agent** | potnia |
 
 ---
@@ -41,6 +41,7 @@ The forge rite is the meta-rite for building agents, tools, and platform infrast
 | **workflow-engineer** | Configures workflow phases and transitions |
 | **platform-engineer** | Integrates agents into knossos ecosystem |
 | **agent-curator** | Updates knowledge base and documentation |
+| **domain-forensics** | Forensic analysis of domain patterns and constraints |
 | **eval-specialist** | Evaluates and validates agent pantheon readiness |
 
 See agent files: `rites/forge/agents/`
@@ -78,10 +79,11 @@ The forge creates new rites following this structure:
 rites/{new-rite}/
 ├── manifest.yaml          # Rite composition
 ├── agents/                # Agent prompt files
-│   ├── orchestrator.md
+│   ├── potnia.md
 │   └── {specialists}.md
-├── skills/                # Rite-specific skills
-└── hooks/                 # Rite-specific hooks
+└── mena/                  # Rite-specific commands and knowledge
+    ├── {command}.dro.md   # Dromena (transient commands)
+    └── {knowledge}.lego.md # Legomena (persistent knowledge)
 ```
 
 ```mermaid
@@ -114,7 +116,7 @@ flowchart TD
 /forge
 
 # Create new rite
-Task(orchestrator, "create new rite for code review workflow")
+Task(potnia, "create new rite for code review workflow")
 
 # Design phase only
 Task(agent-designer, "design rite for security auditing")
@@ -146,4 +148,4 @@ Task(eval-specialist, "evaluate 10x-dev rite performance")
 
 - [Daedalus Glossary Entry](../reference/GLOSSARY.md#daedalus)
 - [Rite System Overview](../philosophy/knossos-doctrine.md)
-- [Orchestrator Templates](/orchestrator-templates)
+- `/orchestrator-templates` skill — Orchestrator prompt templates

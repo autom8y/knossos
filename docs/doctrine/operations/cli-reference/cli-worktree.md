@@ -439,4 +439,4 @@ ari session create "API Documentation"
 
 - [Worktree Production Guide](../../guides/worktree-guide.md)
 - [Worktree Glossary Entry](../../reference/GLOSSARY.md#worktree)
-- [ADR-0010: Worktree Session Seeding](../../../decisions/ADR-0010-worktree-session-seeding.md)
+- [Worktree Guide](../../guides/worktree-guide.md) — Production patterns and operations

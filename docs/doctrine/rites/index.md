@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # Rite Catalog Index
@@ -16,17 +16,22 @@ A **rite** is a practice bundle that provides specialized workflows for differen
 |------|------|--------|-------|---------|
 | [10x-dev](10x-dev.md) | Full | 5 | potnia | Full development lifecycle |
 | [arch](arch.md) | Full | 5 | potnia | Architecture assessment |
+| [clinic](clinic.md) | Full | 5 | potnia | Production error investigation lifecycle |
 | [docs](docs.md) | Full | 5 | potnia | Documentation workflow |
-| [forge](forge.md) | Meta | 7 | potnia | Rite creation |
+| [forge](forge.md) | Meta | 8 | potnia | Rite creation |
 | [hygiene](hygiene.md) | Full | 5 | potnia | Code quality lifecycle |
 | [debt-triage](debt-triage.md) | Full | 4 | potnia | Technical debt management |
+| [releaser](releaser.md) | Full | 6 | potnia | Multi-repo release orchestration |
+| [review](review.md) | Full | 4 | potnia | Language-agnostic code review |
 | [security](security.md) | Full | 5 | potnia | Security assessment lifecycle |
 | [sre](sre.md) | Full | 5 | potnia | Reliability engineering |
 | [intelligence](intelligence.md) | Full | 5 | potnia | Product analytics |
 | [strategy](strategy.md) | Full | 5 | potnia | Business strategy |
+| [thermia](thermia.md) | Full | 5 | potnia | Cache architecture consultation |
 | [rnd](rnd.md) | Full | 6 | potnia | Technology exploration |
 | [ecosystem](ecosystem.md) | Full | 6 | potnia | Platform infrastructure |
 | [slop-chop](slop-chop.md) | Full | 6 | potnia | AI code quality gate |
+| [ui](ui.md) | Full | 9 | potnia | UI/UX development lifecycle |
 | [shared](shared.md) | Cross-rite | 1 | — | Cross-rite resources (theoros) |
 
 ---
@@ -54,15 +59,26 @@ Special rites that operate on the rite system itself. The **forge** rite is the 
 - [arch](arch.md) — Architecture assessment and remediation
 - [hygiene](hygiene.md) — Code quality audits and improvements
 - [debt-triage](debt-triage.md) — Technical debt assessment and remediation
+- [review](review.md) — Language-agnostic code review with health grading
 - [slop-chop](slop-chop.md) — AI code quality gate; hallucination detection and temporal debt audit
+
+### UI & Frontend
+- [ui](ui.md) — UI/UX development lifecycle with posture-aware routing
 
 ### Documentation & Knowledge
 - [docs](docs.md) — Documentation creation and maintenance
 - [forge](forge.md) — Creating new rites (meta-rite)
 
+### Debugging & Operations
+- [clinic](clinic.md) — Production error investigation and treatment planning
+- [thermia](thermia.md) — Cache architecture consultation and observability design
+
 ### Security & Reliability
 - [security](security.md) — Security assessments and threat modeling
 - [sre](sre.md) — Observability, incidents, and resilience
+
+### Release Engineering
+- [releaser](releaser.md) — Multi-repo release orchestration across package ecosystems
 
 ### Analytics & Strategy
 - [intelligence](intelligence.md) — Product analytics and experimentation
@@ -83,16 +99,25 @@ flowchart TD
     B -->|Architecture| AR[arch]
     B -->|Quality| D[hygiene]
     B -->|Debt| E[debt-triage]
+    B -->|Code Review| RV[review]
     B -->|AI Code Review| SC[slop-chop]
+
+    A --> UI{UI/Frontend?}
+    UI -->|Yes| U[ui]
 
     A --> F{Documentation?}
     F -->|Yes| G[docs]
+
+    A --> DBG{Debugging?}
+    DBG -->|Production Error| CL[clinic]
+    DBG -->|Cache Design| TH[thermia]
 
     A --> H{Security?}
     H -->|Yes| I[security]
 
     A --> J{Operations?}
     J -->|Reliability| K[sre]
+    J -->|Release| RL[releaser]
     J -->|Infrastructure| L[ecosystem]
 
     A --> M{Strategy?}
@@ -116,8 +141,13 @@ flowchart TD
 /docs         # Documentation
 /hygiene      # Code quality
 /debt         # Technical debt
+/review       # Code review
+/ui           # UI/UX development
+/clinic       # Production error investigation
+/thermia      # Cache architecture consultation
 /security     # Security
 /sre          # Reliability
+/releaser     # Release orchestration
 /intelligence # Analytics
 /strategy     # Business strategy
 /rnd          # R&D
@@ -210,4 +240,4 @@ skills:
 - [CLI: rite](../operations/cli-reference/cli-rite.md) — Rite CLI commands
 - [The Forge](forge.md) — Creating new rites
 - [Knossos Doctrine - Rites](../philosophy/knossos-doctrine.md#iv-the-rites)
-- [Knossos Integration](../../guides/knossos-integration.md) — When to use orchestrated mode
+- [Knossos Doctrine - Rites](../philosophy/knossos-doctrine.md) — Rite philosophy and design

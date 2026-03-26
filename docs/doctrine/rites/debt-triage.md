@@ -90,4 +90,4 @@ Task(risk-assessor, "assess risk of database migration debt")
 ## See Also
 
 - [CLI: rite](../operations/cli-reference/cli-rite.md)
-- [Shared Templates](/shared-templates)
+- `/shared-templates` skill — Shared rite templates

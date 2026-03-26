@@ -73,7 +73,7 @@ flowchart LR
 /sprint "Authentication Sprint" --tasks="Login,Logout,Session"
 
 # Direct orchestrator invocation
-Task(orchestrator, "implement user authentication")
+Task(potnia, "implement user authentication")
 ```
 
 ---
@@ -107,4 +107,4 @@ Task(orchestrator, "implement user authentication")
 
 - [CLI: session](../operations/cli-reference/cli-session.md) — Session management
 - [CLI: rite](../operations/cli-reference/cli-rite.md) — Rite operations
-- [Orchestration Skill](/orchestration)
+- `/orchestration` skill — Consultation protocol routing

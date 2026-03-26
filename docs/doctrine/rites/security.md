@@ -98,4 +98,4 @@ Task(penetration-tester, "test authentication endpoints")
 ## See Also
 
 - [CLI: rite](../operations/cli-reference/cli-rite.md)
-- [Security Standards](/standards)
+- `/standards` skill — Security standards and conventions

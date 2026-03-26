@@ -1,1 +1,0 @@
-../../../guides/white-sails.md

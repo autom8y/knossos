@@ -1,11 +1,11 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # CLI Reference
 
-**Status**: ✓ Complete
-**Coverage**: 72 commands across 14 families
+**Status**: Partial (10 of 32 families fully documented)
+**Coverage**: 32 command families total; run `ari --help` for the authoritative list
 
 ## Documentation
 
@@ -43,5 +43,5 @@ ari [command] --help    # Command-specific help
 
 ## See Also
 
-- [Ariadne CLI Guide](../guides/ariadne-cli.md)
-- [Knossos Integration Guide](../guides/knossos-integration.md)
+- [CLI Reference Index](index.md) — All 32 command families
+- [Worktree Guide](../guides/worktree-guide.md) — Parallel session patterns

@@ -90,4 +90,4 @@ ari completion powershell | Out-String | Invoke-Expression
 
 ## See Also
 
-- [Ariadne CLI Guide](../guides/ariadne-cli.md)
+- [CLI Reference Index](index.md) — All 32 command families

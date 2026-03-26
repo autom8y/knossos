@@ -1,10 +1,10 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # Knossos Doctrine Compliance Status
 
-> Current state of the Knossos platform as of February 2026.
+> Current state of the Knossos platform as of March 2026.
 
 ---
 
@@ -12,14 +12,11 @@ last_verified: 2026-02-26
 
 | Metric | Value |
 |--------|-------|
-| Go source lines | 105,609 |
-| Go files | 340 (212 source + 128 test) |
-| Go packages | 53 |
-| CLI command families | 20 |
-| CLI commands total | 84+ |
-| Specialist agents | 75 across 14 rites |
-| Active rites | 14 |
-| ADRs documented | 27 |
+| Go source lines | 93,668 (non-test files in cmd/ and internal/; excludes 119,624 test lines) |
+| CLI command families | 32 (see `ari --help` for current list) |
+| Specialist agents | 110 across 19 rites |
+| Active rites | 19 |
+| ADRs documented | 9 published documents (ADR-0001 through ADR-0032; 32 numbers allocated) |
 | Skills (legomena) | 150 |
 | Commands (dromena) | 84 |
 
@@ -37,7 +34,7 @@ last_verified: 2026-02-26
 | **Naxos Detection** | Complete | Full orphan scanning with configurable thresholds |
 | **Inscription System** | Complete | Marker-based regeneration, backup/restore, section management |
 | **Terminology** | Complete | team→rite, roster→knossos, orchestrator→potnia all migrated |
-| **Rite Operations** | Complete | invoke/swap/release/pantheon operational across 14 rites |
+| **Rite Operations** | Complete | invoke/swap/release/pantheon operational across 19 rites |
 | **Moirai Authority** | Complete | Unified agent with skill-based routing (beneficial simplification) |
 | **Theoria/Pinakes** | Complete | Domain registry, theoros agent, `/theoria` dromena, synkrisis |
 | **Hook Infrastructure** | Complete | SessionStart, PreToolUse, PostToolUse + agent-guard enforcement |
@@ -62,7 +59,9 @@ last_verified: 2026-02-26
 
 ## II. The Working System
 
-### Ariadne CLI (`ari`) — 84+ commands across 20 families
+### Ariadne CLI (`ari`) — 32 command families
+
+The CLI has grown beyond the documented families below. For the authoritative list, run `ari --help`. The following are the fully documented families:
 
 ```
 ari
@@ -76,16 +75,7 @@ ari
 ├── artifact (4)     # Registry management
 ├── validate (3)     # Schema enforcement
 ├── manifest (4)     # Manifest operations
-├── agent (3)        # Agent operations
-├── initialize (2)   # Project initialization
-├── migrate (2)      # Migration utilities
-├── lint (2)         # Lint and validation
-├── provenance (2)   # Provenance tracking
-├── sails (1)        # Confidence computation
-├── naxos (1)        # Orphan detection
-├── tribute (1)      # Session reports
-├── completion (4)   # Shell autocompletion
-└── version (1)      # Version info
+└── ... 22 additional families — see `ari --help`
 ```
 
 ### Session Lifecycle — Formally Verified
@@ -96,9 +86,9 @@ Three states (ACTIVE, PARKED, ARCHIVED), five transitions enforced by FSM. TLA+ 
 
 Three colors (WHITE/GRAY/BLACK). Five proof types. Complexity-aware thresholds (70%/80%/90%). QA upgrade path. Cannot self-upgrade; modifiers only downgrade.
 
-### Rite System — 14 Rites
+### Rite System — 19 Rites
 
-10x-dev, arch, debt-triage, docs, ecosystem, forge, hygiene, intelligence, rnd, security, shared, slop-chop, sre, strategy.
+10x-dev, arch, clinic, debt-triage, docs, ecosystem, forge, hygiene, intelligence, releaser, review, rnd, security, shared, slop-chop, sre, strategy, thermia, ui.
 
 ### CC-OPP Agent Capability Uplift
 

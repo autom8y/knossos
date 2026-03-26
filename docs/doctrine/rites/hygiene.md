@@ -94,4 +94,4 @@ Task(architect-enforcer, "plan refactoring for user module")
 ## See Also
 
 - [CLI: rite](../operations/cli-reference/cli-rite.md)
-- [Smell Detection Skill](/smell-detection)
+- `/smell-detection` skill — Code smell detection patterns

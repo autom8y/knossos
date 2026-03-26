@@ -407,4 +407,4 @@ flowchart LR
 
 - [SOURCE vs PROJECTION](../../philosophy/mythology-concordance.md#materialization-flow)
 - [Materialization Glossary Entry](../../reference/GLOSSARY.md#materialization)
-- [Sync Integration Guide](../guides/knossos-integration.md)
+- [SOURCE vs PROJECTION](../../philosophy/mythology-concordance.md) — Materialization concepts

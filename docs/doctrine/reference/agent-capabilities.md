@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # Agent Capabilities (CC-OPP)
@@ -15,7 +15,7 @@ The CC-OPP uplift adds four capability dimensions to Knossos agents, declared vi
 | Capability | Agents Enabled | Mechanism |
 |------------|---------------|-----------|
 | **Memory** | 17 | Persistent auto-memory directory per agent |
-| **Skills** | 68 | Frontmatter `skills:` field, preloaded into agent context |
+| **Skills** | 95 of 110 | Frontmatter `skills:` field, preloaded into agent context |
 | **Hooks** | 10 | `ari hook agent-guard` enforcing tool restrictions |
 | **Resume** | Ecosystem only | Throughline protocol via `resume: {agentId}` |
 
@@ -58,7 +58,7 @@ skills:
 - Mixed dro/lego directories block skill resolution — 4 rites required directory splits as prerequisite
 - `forge-ref` (346 lines) is Potnia-only — specialists use Skill tool on-demand
 
-**Coverage:** 68 of 75 agents have `skills:` frontmatter. Exceptions: 3 agents in rites without mena, and agents where no skills apply.
+**Coverage:** 95 of 110 agents have `skills:` frontmatter (derived from `grep -rl "^skills:" rites/*/agents/ agents/`). Exceptions: agents in rites without mena directories, and agents where no skills apply.
 
 ---
 
@@ -93,7 +93,7 @@ Task(potnia, "consultation prompt", resume: previousAgentId)
 ```
 
 **How it works:**
-- Main thread stores agent ID from Task tool result
+- Main thread stores agent ID from Agent tool result
 - Subsequent calls pass `resume: {agentId}` to continue with full prior context
 - If resume fails (session changed, invalid ID), falls back to fresh invocation
 

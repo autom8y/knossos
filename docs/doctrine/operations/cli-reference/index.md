@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # CLI Reference
@@ -14,28 +14,40 @@ last_verified: 2026-02-26
 
 | Family | Commands | Description |
 |--------|----------|-------------|
-| [session](cli-session.md) | 15 | Create, list, park, resume, wrap sessions |
+| [session](cli-session.md) | 10 | Create, list, park, resume, wrap sessions |
 | [rite](cli-rite.md) | 10 | List, invoke, release, swap rites |
 | [worktree](cli-worktree.md) | 11 | Parallel sessions with filesystem isolation |
 | [sync](cli-sync.md) | 8 | Synchronize channel directory with remotes |
-| [hook](cli-hook.md) | 11 | Hook infrastructure + agent-guard |
+| [hook](cli-hook.md) | 6 | Hook infrastructure + agent-guard |
 | [handoff](cli-handoff.md) | 4 | Agent handoffs between phases |
 | [inscription](cli-inscription.md) | 5 | Context file inscription system |
 | [artifact](cli-artifact.md) | 4 | Register and query workflow artifacts |
 | [validate](cli-validate.md) | 3 | Validate artifacts and handoffs |
 | [manifest](cli-manifest.md) | 4 | Show, validate, diff manifests |
-| agent | 3 | Agent operations. See `ari agent --help` |
-| initialize | 2 | Project initialization. See `ari initialize --help` |
-| migrate | 2 | Migration utilities. See `ari migrate --help` |
-| lint | 2 | Lint and validation. See `ari lint --help` |
-| provenance | 2 | Provenance tracking. See `ari provenance --help` |
+| [agent](cli-agent.md) | 8 | Validate, scaffold, summon, and manage agents |
+| [serve](cli-serve.md) | 1 | Clew HTTP webhook server (Slack + reasoning pipeline) |
+| [procession](cli-procession.md) | 6 | Template-defined cross-rite station workflows |
+| [land](cli-land.md) | 1 | Cross-session knowledge synthesis via Dionysus |
+| [status](cli-status.md) | 1 | Unified project health dashboard |
+| [org](cli-org.md) | 4 | Create and manage organization-level resources |
+| [registry](cli-registry.md) | 3 | Cross-repo knowledge domain catalog |
+| [ask](cli-ask.md) | 1 | Natural language query for commands and workflows |
+| [knows](cli-knows.md) | 1 | Inspect `.know/` knowledge domains |
+| [ledge](cli-ledge.md) | 2 | List and promote work product artifacts |
+| [lint](cli-lint.md) | 1 | Lint agents, dromena, and legomena source files |
+| [provenance](cli-provenance.md) | 1 | Channel directory file ownership and checksums |
+| [explain](cli-explain.md) | 1 | Look up knossos domain concept definitions |
+| [complaint](cli-complaint.md) | 3 | View and manage Cassandra complaint artifacts |
+| [init](cli-init.md) | 1 | Scaffold the channel directory for a new project |
+| [tour](cli-tour.md) | 1 | Directory tree with file counts |
+| [version](cli-version.md) | 1 | Binary version and build metadata |
+| [help](cli-help.md) | 1 | Help for any command |
 | [sails](cli-sails.md) | 1 | White Sails quality gates |
 | [naxos](cli-naxos.md) | 1 | Orphaned session cleanup |
 | [tribute](cli-tribute.md) | 1 | Session summary generation |
 | [completion](cli-completion.md) | 4 | Shell autocompletion |
-| version | 1 | Version info |
 
-**Total**: 84+ commands across 20 families
+**Total**: 32 command families (all documented above)
 
 ---
 
@@ -60,7 +72,7 @@ All commands support these flags:
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
-| `--config` | string | `$XDG_CONFIG_HOME/ariadne/config.yaml` | Config file path |
+| `--config` | string | `$XDG_CONFIG_HOME/knossos/config.yaml` | Config file path |
 | `-o, --output` | string | `text` | Output format: text, json, yaml |
 | `-p, --project-dir` | string | auto-discovered | Project root directory |
 | `-s, --session-id` | string | current session | Override session ID |
@@ -159,6 +171,5 @@ ari rite swap docs     # Switch to docs rite
 
 ## See Also
 
-- [Ariadne CLI Guide](../guides/ariadne-cli.md)
-- [Knossos Integration Guide](../guides/knossos-integration.md)
+- [Worktree Guide](../guides/worktree-guide.md) — Parallel session patterns
 - [Ariadne Glossary Entry](../../reference/GLOSSARY.md#ariadne)

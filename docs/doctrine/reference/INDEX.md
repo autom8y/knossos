@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # Doctrine Reference Index
@@ -111,9 +111,9 @@ Architecture Decision Records documenting significant platform decisions.
 **Key ADRs:**
 - [`ADR-0009-knossos-roster-identity.md`](../../decisions/ADR-0009-knossos-roster-identity.md) — SOURCE vs PROJECTION clarification
 - [`ADR-0005-moirai-centralized-state-authority.md`](../../decisions/ADR-0005-moirai-centralized-state-authority.md) — Moirai as mutation authority
-- [`ADR-0013-moirai-consolidation.md`](../../decisions/ADR-0013-moirai-consolidation.md) — Unified Moirai architecture
 - [`ADR-0001-session-state-machine-redesign.md`](../../decisions/ADR-0001-session-state-machine-redesign.md) — Session lifecycle states
-- [`ADR-sync-materialization.md`](../../decisions/ADR-sync-materialization.md) — Materialization system design
+- [`ADR-0031-multi-channel-architecture.md`](../../decisions/ADR-0031-multi-channel-architecture.md) — Multi-channel projection architecture
+- [`ADR-0032-harness-agnostic-event-vocabulary.md`](../../decisions/ADR-0032-harness-agnostic-event-vocabulary.md) — Harness-agnostic event vocabulary
 
 **Audience:** Architects, engineers implementing features, anyone needing decision context.
 
@@ -123,16 +123,33 @@ Architecture Decision Records documenting significant platform decisions.
 
 **Path:** [`../operations/cli-reference/`](../operations/cli-reference/)
 
-Complete reference for all Ariadne CLI commands (84+ commands across 20 families).
+Complete reference for all Ariadne CLI commands (32 command families; see `ari --help` for current list).
 
-**Command Families:**
+**Command Families (all 32 documented):**
 - [session](../operations/cli-reference/cli-session.md) — Session lifecycle (15 commands)
 - [rite](../operations/cli-reference/cli-rite.md) — Rite management (10 commands)
 - [worktree](../operations/cli-reference/cli-worktree.md) — Parallel sessions (11 commands)
 - [sync](../operations/cli-reference/cli-sync.md) — Materialization (8 commands)
 - [hook](../operations/cli-reference/cli-hook.md) — Hook operations (11 commands)
 - [handoff](../operations/cli-reference/cli-handoff.md) — Agent handoffs (4 commands)
-- Plus 14 additional families (inscription, artifact, validate, manifest, agent, initialize, migrate, lint, provenance, sails, naxos, tribute, completion, version)
+- [agent](../operations/cli-reference/cli-agent.md) — Agent management (summon, dismiss, roster)
+- [serve](../operations/cli-reference/cli-serve.md) — Clew HTTP server
+- [procession](../operations/cli-reference/cli-procession.md) — Cross-rite workflows
+- [land](../operations/cli-reference/cli-land.md) — Session synthesis (Dionysus)
+- [status](../operations/cli-reference/cli-status.md) — Platform health dashboard
+- [org](../operations/cli-reference/cli-org.md) — Organization management
+- [registry](../operations/cli-reference/cli-registry.md) — Registry sync and status
+- [ask](../operations/cli-reference/cli-ask.md) — Domain-filtered queries
+- [knows](../operations/cli-reference/cli-knows.md) — Knowledge base checks
+- [ledge](../operations/cli-reference/cli-ledge.md) — Work product artifacts
+- [lint](../operations/cli-reference/cli-lint.md) — Codebase linting
+- [provenance](../operations/cli-reference/cli-provenance.md) — Content provenance
+- [explain](../operations/cli-reference/cli-explain.md) — Term definitions
+- [complaint](../operations/cli-reference/cli-complaint.md) — Complaint tracking
+- [init](../operations/cli-reference/cli-init.md) — Project initialization
+- [tour](../operations/cli-reference/cli-tour.md) — Interactive tour
+- [version](../operations/cli-reference/cli-version.md) — Version info
+- [help](../operations/cli-reference/cli-help.md) — CLI help
 
 **Entry Point:** [CLI Reference Index](../operations/cli-reference/index.md)
 
@@ -146,20 +163,25 @@ Complete reference for all Ariadne CLI commands (84+ commands across 20 families
 
 Documentation for each canonical rite (practice bundle).
 
-**Available Rites (14):**
+**Available Rites (19; all documented):**
 - [10x-dev](../rites/10x-dev.md) — Full development lifecycle
 - [arch](../rites/arch.md) — Architecture assessment
+- [clinic](../rites/clinic.md) — Clinical debugging workflow
 - [docs](../rites/docs.md) — Documentation workflow
 - [forge](../rites/forge.md) — Agent and tool creation (meta-rite)
 - [hygiene](../rites/hygiene.md) — Code quality maintenance
 - [debt-triage](../rites/debt-triage.md) — Technical debt remediation
+- [releaser](../rites/releaser.md) — Release management
+- [review](../rites/review.md) — Code review workflow
 - [security](../rites/security.md) — Threat modeling and compliance
 - [sre](../rites/sre.md) — Operations and reliability
 - [intelligence](../rites/intelligence.md) — Research and synthesis
 - [rnd](../rites/rnd.md) — Exploration and prototypes
 - [strategy](../rites/strategy.md) — Business analysis
+- [thermia](../rites/thermia.md) — Thermal/performance analysis
 - [ecosystem](../rites/ecosystem.md) — Platform infrastructure
 - [slop-chop](../rites/slop-chop.md) — AI code quality gate
+- [ui](../rites/ui.md) — UI development workflow
 - [shared](../rites/shared.md) — Cross-rite resources
 
 **Entry Point:** [Rite Catalog Index](../rites/index.md)
@@ -229,31 +251,9 @@ Current compliance status against doctrine principles and architectural decision
 
 **Path:** [`../foundations/`](../foundations/)
 
-Operational foundations—how the platform runs, not why it exists.
+ADR symlinks providing doctrine-accessible access to architecture decisions. Contains symlinks to `../../decisions/` for ADR-0001, ADR-0005, and ADR-0009.
 
-**Topics:**
-- Session management
-- Hook architecture
-- Materialization workflows
-- CLI usage patterns
-
-**Audience:** Operators, SREs, engineers maintaining platform infrastructure.
-
----
-
-### Evolution
-
-**Path:** [`../evolution/`](../evolution/)
-
-Migration guides, deprecation timelines, evolution roadmaps.
-
-**Topics:**
-- Terminology migrations (thread → clew, state-mate → Moirai)
-- Rename criteria (roster → knossos)
-- Upgrade paths
-- Breaking changes
-
-**Audience:** Contributors updating code for new conventions, maintainers planning migrations.
+**Audience:** Engineers reading foundational architecture decisions in context.
 
 ---
 
@@ -302,7 +302,7 @@ Executive summary of the doctrine—concise overview for stakeholders and new co
 
 1. Summary: [`../DOCTRINE.md`](../DOCTRINE.md) (vision and principles)
 2. Compliance: [`../compliance/COMPLIANCE-STATUS.md`](../compliance/COMPLIANCE-STATUS.md) (progress tracking)
-3. Evolution: [`../evolution/`](../evolution/) (roadmap and migrations)
+3. ADRs: [`../../decisions/`](../../decisions/) (architectural decisions)
 
 ---
 
@@ -333,9 +333,7 @@ Executive summary of the doctrine—concise overview for stakeholders and new co
 
 ### External Documentation
 
-- User Preferences: [`../../guides/user-preferences.md`](../../guides/user-preferences.md)
-- Knossos Integration Guide: [`../../guides/knossos-integration.md`](../../guides/knossos-integration.md)
-- Knossos Migration Path: [`../../guides/knossos-migration.md`](../../guides/knossos-migration.md)
+- Worktree Guide: [`../guides/worktree-guide.md`](../guides/worktree-guide.md) — Parallel session patterns
 
 ### Skills
 

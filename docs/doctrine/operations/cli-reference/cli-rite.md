@@ -366,7 +366,7 @@ ari rite pantheon [flags]
 ```
 
 **Description**:
-Shows all agents available in the current rite along with their roles. The "pantheon" is the set of [heroes](../../reference/GLOSSARY.md#heroes) available for Task tool delegation.
+Shows all agents available in the current rite along with their roles. The "pantheon" is the set of [heroes](../../reference/GLOSSARY.md#heroes) available for Agent tool delegation.
 
 **Examples**:
 ```bash

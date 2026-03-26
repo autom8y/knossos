@@ -92,4 +92,4 @@ Task(moonshot-architect, "design architecture for multi-agent orchestration")
 ## See Also
 
 - [CLI: rite](../operations/cli-reference/cli-rite.md)
-- [Spike Workflow](/spike)
+- `/spike` skill — Spike and exploration workflow patterns

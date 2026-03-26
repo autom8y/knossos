@@ -71,7 +71,7 @@ flowchart LR
 /docs "document feature X"
 
 # Orchestrator consultation
-Task(orchestrator, "audit and improve documentation for Y")
+Task(potnia, "audit and improve documentation for Y")
 
 # Direct agent invocation
 Task(doc-auditor, "audit docs/api/")
@@ -107,5 +107,5 @@ Task(tech-writer, "write getting started guide")
 ## See Also
 
 - [CLI: rite](../operations/cli-reference/cli-rite.md) — Rite operations
-- [Documentation Skill](/documentation)
-- [Tech Writing Standards](/standards)
+- `/documentation` skill — Template and standards reference
+- `/standards` skill — Code conventions and tech stack

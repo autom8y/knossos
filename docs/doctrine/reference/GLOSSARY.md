@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # Knossos Glossary
@@ -15,14 +15,19 @@ last_verified: 2026-02-26
 
 ## Mythology Terms
 
+### Apolysis
+Agent dismissal — the operation that removes a previously summoned agent from your user-level harness configuration. Inverse of [Klesis](#klesis). Implemented as `ari agent dismiss <name>`.
+- **Related**: Klesis, Katalogos, Summonable Heroes, Agent
+- **Command**: `ari agent dismiss`
+
 ### Ariadne
 The CLI binary (`ari`) that provides the clew—ensuring return through event recording and session management.
 - **Related**: Clew, Theseus, Session
 - **Source**: `cmd/ari/`
 
 ### Argus Pattern
-N-agent parallel dispatch pattern. One main thread (body) launches multiple Task agents (eyes) simultaneously for distributed observation. Named for Argus Panoptes, the hundred-eyed giant. A reusable technique, not a specific component; envisioned for tactical playbook swarms and similar N-agent operations.
-- **Related**: Theoria, Theoroi, Task Tool, Parallel Dispatch
+N-agent parallel dispatch pattern. One main thread (body) launches multiple Agent tool agents (eyes) simultaneously for distributed observation. Named for Argus Panoptes, the hundred-eyed giant. A reusable technique, not a specific component; envisioned for tactical playbook swarms and similar N-agent operations.
+- **Related**: Theoria, Theoroi, Agent Tool, Parallel Dispatch
 - **Source**: Pattern (no single file)
 
 ### Athens
@@ -34,6 +39,11 @@ The `main` branch—destination of merged PRs. Return from the labyrinth is inco
 CC Operational Platform Properties — the capability uplift giving agents memory, skills, hooks, and resume. Declared via YAML frontmatter in agent `.md` files.
 - **Related**: Agent Frontmatter, Memory, Skills, Hooks
 - **Source**: `internal/agent/frontmatter.go`
+
+### Channel
+A projection target for materialization — either `.claude/` (Claude Code) or `.gemini/` (Gemini CLI). Each channel has its own `ChannelCompiler` that translates rite artifacts into the channel's native format. The `--channel` global flag selects which channel to target.
+- **Related**: Materialization, Projection, Multi-Channel Architecture, ADR-0031
+- **Source**: `internal/materialize/`, `internal/paths/channel.go`
 
 ### Clew
 Session state + event log (`events.jsonl`) + provenance trail. The thread that unwinds through the labyrinth, providing a path back when context degrades.
@@ -60,9 +70,14 @@ Authority contract defining an agent's jurisdictional boundaries. Every agent de
 - **Related**: Potnia, Agent Contract, Jurisdiction
 - **Source**: `## Exousia` section in every agent `.md` file
 
+### Glint
+A signal of an undocumented pattern found by [Myron](#myron) during feature discovery scans. Each glint identifies a capability or behavior present in the codebase but absent from documentation. Glints are collected into Myron's discovery report.
+- **Related**: Myron, Scout, Feature Discovery
+- **Source**: Myron agent output
+
 ### Heroes
-Specialist agents invoked via Task tool for specific labors, defined in rite manifests. Summoned mid-journey with clew context.
-- **Related**: Agents, Task Tool, Rite
+Specialist agents invoked via Agent tool for specific labors, defined in rite manifests. Summoned mid-journey with clew context. Three tiers: Standing (always active), Rite (active with materialized rite), and Summonable Heroes (on-demand via `ari agent summon`).
+- **Related**: Agents, Agent Tool, Rite, Summonable Heroes
 - **Source**: `rites/[rite-name]/agents/`
 
 ### Inscription
@@ -75,10 +90,25 @@ Persistent reference knowledge (`.lego.md` files materialized to `.channel/skill
 - **Related**: Dromena, Mena, Skills
 - **Source**: `rites/*/mena/*.lego.md`
 
+### Katalogos
+The agent roster — the listing of standing, summoned, and available agents. Implemented as `ari agent roster`. Shows which Summonable Heroes are currently active and which are available.
+- **Related**: Klesis, Apolysis, Summonable Heroes
+- **Command**: `ari agent roster`
+
+### Klesis
+Agent summoning — the operation that materializes a Summonable Hero into your user-level harness configuration. Inverse of [Apolysis](#apolysis). Implemented as `ari agent summon <name>`.
+- **Related**: Apolysis, Katalogos, Summonable Heroes
+- **Command**: `ari agent summon`
+
 ### Knossos
 The labyrinth—the Knossos repository itself (SOURCE), not the channel directories it generates (PROJECTION).
 - **Related**: SOURCE, Platform, Repository
 - **Source**: Repository root
+
+### Metis
+Standing context-engineering agent — the Titaness of strategic wisdom and craft intelligence. Metis provides strategic meta-level guidance on agent design, context engineering, and platform decisions. A standing agent (always active), not a summonable hero.
+- **Related**: Pythia, Potnia, Standing Agents
+- **Source**: `agents/metis.md`
 
 ### Minotaur
 The initiative, feature, or task being pursued. The challenge at the labyrinth's heart—reason for the journey.
@@ -89,6 +119,11 @@ The initiative, feature, or task being pursued. The challenge at the labyrinth's
 Stakeholders who create initiatives and demand tribute (status reports and demos).
 - **Related**: Tribute, Status Reports
 - **Source**: `internal/tribute/`
+
+### Myron
+Feature discovery scout agent — performs wide-scan discovery of undocumented patterns and capabilities in the codebase. Produces [Glint](#glint) reports identifying features present in code but absent from documentation. Named for the sculptor who captured motion. Agent type: `scout`.
+- **Related**: Glint, Scout, Feature Discovery, Summonable Heroes
+- **Source**: `agents/myron.md` (or rite-scoped variant)
 
 ### Moirai
 The Fates—centralized session lifecycle agent. Clotho spins (create), Lachesis measures (update), Atropos cuts (end).
@@ -105,6 +140,12 @@ The domain registry legomena for audit operations. Catalogs audit targets, evalu
 - **Related**: Theoria, Theoroi, Legomena, Domain Registry
 - **Source**: `mena/pinakes/`
 
+### Procession
+A template-defined, station-based workflow that coordinates work across multiple rites within a session. Each station maps to a rite-scoped work unit; progress advances via `ari procession proceed`. The `completed_stations` log is append-only — `ari procession recede` repositions without erasing history.
+- **Related**: Session, Rite, Station
+- **Command**: `ari procession *`
+- **Source**: `internal/procession/`
+
 ### Potnia
 The Presiding Lady — per-rite entry agents providing work breakdown, specialist routing, and checkpoint guidance. Attested on Linear B tablet KN Gg(1) 702 as *da-pu₂-ri-to-jo po-ti-ni-ja* ("Potnia of the Labyrinth"), the presiding authority within the palace at Knossos (~1450-1300 BCE). Each rite has its own Potnia: the authority who presides within, not the external oracle consulted before entering.
 - **Provenance**: Tier 1 — Bronze Age Attestation (Linear B tablet KN Gg 702)
@@ -117,10 +158,15 @@ The cross-rite oracle/navigator — consulted before entering the labyrinth for 
 - **Related**: Potnia, Cross-Rite Navigation, Routing
 - **Source**: `agents/pythia.md`
 
+### Scout
+Agent type for wide-scan discovery agents. Scout agents (`type: scout` in frontmatter) perform broad observation without modifying state — they look for signals across the codebase and report findings. [Myron](#myron) is the canonical scout agent.
+- **Related**: Myron, Glint, Analyst, Agent Types
+- **Source**: Agent frontmatter `type: scout`
+
 ### Synkrisis
 Comparative synthesis step following parallel domain evaluations. Weaves individual theoros reports into cross-domain patterns and the final "State of the {X}" attestation. Named for Plutarch's comparative analysis technique in the *Parallel Lives*.
 - **Related**: Theoria, Theoroi, Synthesis, Report
-- **Source**: Planned: synthesis in `/theoria` dromena
+- **Source**: Synthesis step within the `/theoria` dromena
 
 ### Theoria
 The audit operation—a structured delegation of observers dispatched to assess domain health. Composite primitive: dromena (`/theoria`) + legomena (Pinakes) + agents (theoroi). Uses the Argus Pattern for parallel dispatch. Named for the Greek sacred state delegation.
@@ -130,7 +176,7 @@ The audit operation—a structured delegation of observers dispatched to assess 
 ### Theoroi
 Domain evaluator agents dispatched by a theoria. Each theoros observes a single domain using criteria from the Pinakes and produces a structured report. Read-only witnesses, not actors. Singular: theoros.
 - **Related**: Theoria, Pinakes, Heroes, Domain Evaluator
-- **Source**: Planned: `rites/shared/agents/theoros.md`
+- **Source**: `rites/shared/agents/theoros.md`
 
 ### Theseus
 The navigator—main AI harness agent with agency but amnesia. The agentic intelligence making decisions and summoning heroes.
@@ -258,6 +304,11 @@ Tracked work context with lifecycle (create, park, resume, wrap). Managed by Moi
 Reusable capability invoked via Skill tool. Defined in rite manifests. Legomena that persist in context.
 - **Related**: Rite, Tool, Legomena, Mena
 - **Source**: `rites/*/mena/*.lego.md`, materialized to `.channel/skills/`
+
+### Summonable Heroes
+Third tier of agent classification — on-demand agents materialized to `~/.claude/agents/` via `ari agent summon`. Unlike standing agents (always active) and rite agents (active with materialized rite), summonable heroes exist only when explicitly called. Declared with `tier: summonable` in source frontmatter. Operations: [Klesis](#klesis) (summon), [Apolysis](#apolysis) (dismiss), [Katalogos](#katalogos) (roster).
+- **Related**: Heroes, Klesis, Apolysis, Katalogos, Agent Tiers
+- **Command**: `ari agent summon`, `ari agent dismiss`, `ari agent roster`
 
 ### SOURCE
 The Knossos repository—canonical, versioned platform code that generates PROJECTIONS.

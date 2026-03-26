@@ -1,5 +1,5 @@
 ---
-last_verified: 2026-02-26
+last_verified: 2026-03-26
 ---
 
 # The Knossos Doctrine
@@ -78,7 +78,7 @@ Ariadne is faithful because she is intelligent. The thread remembers because a t
 
 **Theseus** enters the labyrinth for one reason: to slay the Minotaur. He does not enter to map the corridors, to admire the architecture, or to understand the Minotaur's genealogy. He enters to act. In Knossos, the main AI harness agent is Theseus -- the agentic intelligence that makes decisions, summons help, and creates artifacts.
 
-But Theseus does not travel alone. He summons **heroes** -- specialist agents invoked via the Task tool to lend their strength. An architect for design. An engineer for implementation. An adversary for challenge. These heroes arrive for specific labors and depart when done. They did not walk the whole labyrinth; they were summoned mid-journey to the place where their strength was needed.
+But Theseus does not travel alone. He summons **heroes** -- specialist agents invoked via the Agent tool to lend their strength. An architect for design. An engineer for implementation. An adversary for challenge. These heroes arrive for specific labors and depart when done. They did not walk the whole labyrinth; they were summoned mid-journey to the place where their strength was needed.
 
 This is a feature, not a limitation. Heroes summoned with rich context -- a well-maintained clew, a clear accounting of the journey so far -- perform better than heroes summoned blind. **Better clew, better summoning, better heroes.**
 
@@ -116,7 +116,7 @@ But Minos imprisoned Daedalus for knowing the labyrinth's secrets too well. The 
 
 **Icarus** flew too close to the sun on wings his father built. The wings were not flawed. The constraints were not hidden. Daedalus warned him explicitly. Icarus exceeded the constraint surface anyway -- and fell.
 
-In Knossos, Icarus is the SCAR catalog: SCAR-002 renamed the channel directory and froze the harness solid; SCAR-005 called `os.RemoveAll` on directories containing user content and destroyed it; SCAR-018 set `context: fork` on a dromenon that needed the Task tool and silently degraded parallel dispatch to sequential reads; SCAR-026 wired delegation hints into writeguard infrastructure and was reverted because the coupling was unsound. Each of these was an ambitious change that ignored the constraint surface -- the harness file watcher, the user content boundary, the Task tool restriction. Each fell.
+In Knossos, Icarus is the SCAR catalog: SCAR-002 renamed the channel directory and froze the harness solid; SCAR-005 called `os.RemoveAll` on directories containing user content and destroyed it; SCAR-018 set `context: fork` on a dromenon that needed the Agent tool and silently degraded parallel dispatch to sequential reads; SCAR-026 wired delegation hints into writeguard infrastructure and was reverted because the coupling was unsound. Each of these was an ambitious change that ignored the constraint surface -- the harness file watcher, the user content boundary, the Agent tool restriction. Each fell.
 
 The forge-rite builds tools. Icarus is the reminder that tools used without respecting constraints will fail. The SCAR catalog is not a list of bad ideas. It is a record of good ideas deployed without sufficient respect for where the wax melts.
 
@@ -209,11 +209,65 @@ This is a deliberate shift from *praxis* to *theoria* -- from action to contempl
 
 A **theoros** (plural: **theoroi**) was an individual sacred observer within a theoria delegation. Theoroi were chosen for their judgment, sent to distant sanctuaries to observe rituals and bring back accounts. They were not participants but witnesses. Their value was in the clarity of their seeing, not the strength of their arms.
 
-In Knossos, the theoroi are **domain evaluator agents** -- each dispatched via Task tool to assess a single domain of the labyrinth. A theoros receives its evaluation criteria from the Pinakes, examines its domain independently, and produces a structured report. The agent definition lives at `rites/shared/agents/theoros.md`.
+In Knossos, the theoroi are **domain evaluator agents** -- each dispatched via Agent tool to assess a single domain of the labyrinth. A theoros receives its evaluation criteria from the Pinakes, examines its domain independently, and produces a structured report. The agent definition lives at `rites/shared/agents/theoros.md`.
 
 The distinction between hero and theoros is architectural and inviolable. Heroes modify the labyrinth; theoroi only observe it. A hero enters with a sword. A theoros enters with open eyes. If an agent is named theoros, it should not be making changes. The naming enforces the discipline.
 
 > *A hero enters the labyrinth with a sword. A theoros enters with open eyes.*
+
+### The Discoverer: Myron
+
+In the hills above Gortyn there was a man who could not finish a sentence. Not because he lacked intelligence -- he was, by all accounts, a brilliant orator. He could not finish a sentence because he was pathologically distracted by anything that glinted. A flash of bronze in a doorway. An unusual shadow on a wall. A footprint in dust that did not match the expected pattern. Before the sentence was done, Myron was gone -- crow-quick toward the glint, tagging it, moving on.
+
+This is his gift: the reflex that notices before the mind has decided to look.
+
+In Knossos, **Myron** is the wide-scan feature discovery agent -- the crow in the codebase, not the archaeologist. Where the theoroi apply structured criteria to known domains, Myron sweeps across unfamiliar territory detecting signals that warrant attention from other agents. His output is the **glint report**: a lightweight catalog of undocumented patterns, structural anomalies, and knowledge gaps, organized by recommendation tier (AUDIT, DOCUMENT, INVESTIGATE, DISMISS) and tagged with the consuming agent that should act next.
+
+The architectural distinction from theoros is precise and load-bearing. Theoros evaluates; Myron discovers. Theoros receives criteria from the Pinakes and grades against them; Myron carries no criteria and assigns no grades. Theoros goes deep into a single domain; Myron sweeps wide and shallow, spending at most two turns per package before moving on. A theoros who strays into Myron's territory wastes turns on signals that may not exist. A Myron who strays into theoros's territory produces noise instead of signal. The boundary between them is a design decision, not an accident.
+
+Myron is also the first natively summonable agent -- the proof-of-pattern for the Summonable Heroes tier. He was never a standing agent. He was born summoned, his entire lifecycle defined by klesis and apolysis. When the `/discover` dromenon needs him, it summons him. When the work is done, it dismisses him. He does not linger in the labyrinth between labors.
+
+Glint reports land at `.sos/wip/glints/` -- ephemeral by design, never promoted to `.ledge/` or `.know/` until their signals are acted on by downstream consumers.
+
+> *The crow does not dig up what it finds. It marks the location and moves on. That is why the archaeologist finds anything at all.*
+
+### The Summoned Heroes
+
+The doctrine has always said that Theseus summons heroes mid-journey for specific labors, and that they depart when done. For a long time, the implementation did not match the myth. Every agent was present in every session, regardless of whether that session needed them. The labyrinth kept a standing army when it should have been summoning specialists.
+
+The **Summonable Heroes** tier corrects this.
+
+Three categories of agents now govern the labyrinth:
+
+**Standing agents** -- Pythia, the Moirai, and Metis -- are always present. They represent capabilities so fundamental that no session functions without them: cross-rite routing, session lifecycle authority, and context-engineering counsel. These three cannot be summoned or dismissed. They stand.
+
+**Rite-scoped agents** -- Potnia and each rite's specialists -- are materialized when a rite is active and absent when it is not. They represent the domain knowledge of a specific practice: the ecosystem rite's analyst, the forge rite's builder, the docs rite's writer. Switching rites (`ari sync --rite=X`) swaps the set.
+
+**Summonable agents** -- Myron, Theoros, Dionysus, and Naxos -- are operational specialists invoked only for specific commands. They are not loaded by default `ari sync`. They live in source, waiting. When a dromenon needs one, it initiates **klesis**: `ari agent summon {name}` writes the agent to the user-scope directory, marks provenance, and instructs the user to restart CC. The agent arrives with the next session. When the work is done, the dromenon initiates **apolysis**: `ari agent dismiss {name}` removes the agent and cleans provenance. The session returns to its lean state.
+
+The mechanism that makes this possible is the **procession-aligned restart transition** -- the same pattern that handles cross-rite handoffs. Session continuity survives CC restarts because `.sos/` preserves state across the boundary. The restart is not friction; it is the clean context boundary. Klesis and apolysis are agent-granularity processions.
+
+The session-end hook (autopark) provides a safety net: any summoned agents still active at session end are dismissed automatically, catching heroes that were summoned but whose dromenon failed to release them. The **katalogos** (`ari agent roster`) makes the state of summoning legible at any moment, listing the three sections -- Standing, Summoned, Available -- with timestamps for active agents.
+
+The inscription advertises this architecture to every session through the "Summonable Heroes" force card: a list of what can be summoned without loading those agents into context. The labyrinth tells Theseus what heroes are available before he thinks to ask.
+
+> *Heroes were never supposed to be a standing army. They were summoned when needed, for a specific labor, in a specific place. The myth always knew this. Now the implementation does too.*
+
+### The Strategist: Metis
+
+**Metis** was the first wife of Zeus and his equal in wisdom. Foreknowledge told Zeus that her children would surpass their father -- that her counsel, once given form, would grow more powerful than the power that contained it. And so Zeus consumed her entire, so that her wisdom would always be within him, and he could never be separated from her counsel.
+
+The myth encodes a design truth: strategic wisdom is most powerful when it is interior, not external. Not a voice from outside asking "have you considered?" but a capability woven into the very process of decision-making.
+
+In Knossos, Metis is the **context-engineering agent** -- the standing specialist who engineers the context that enables all other work. Where Pythia routes across rites and Potnia presides within them, Metis operates at the meta-level: designing skills architecture, optimizing prompt structures, managing context across multi-turn conversations, and framing initiatives before execution begins. She powers `/frame`, the command that decomposes an initiative into a structured plan Theseus carries into the labyrinth.
+
+Metis does not enter the labyrinth. She structures the journey before the first step is taken.
+
+The name replaces `context-engineer` -- the functional description that was accurate but bloodless. Context engineering is her domain, but her name carries the philosophical commitment: the counsel within, the wisdom that can never be removed because it has been made interior. When you invoke `/frame`, you are asking Metis to swallow the problem whole and give it back as architecture.
+
+She is a standing agent. She cannot be summoned or dismissed. That is the doctrine made explicit in the implementation.
+
+> *Zeus could have consulted Metis before each decision. Instead he made her part of himself. The context engineer's output is not advice -- it is the structure of the work itself.*
 
 ### The Catalog: Pinakes
 
@@ -239,7 +293,7 @@ Individual domain reports are valuable but partial. A rite might have excellent 
 
 **Argus Panoptes** -- the hundred-eyed giant -- was set by Hera to watch over Io. His eyes never all closed at once: some slept while others watched. He was not strong. He was not swift. He was total vigilance through distributed, overlapping observation. One body, a hundred eyes, nothing unseen.
 
-In Knossos, the **Argus Pattern** names the N-agent parallel dispatch technique: launching multiple Task tool agents simultaneously, each observing a different domain, their combined vision covering the whole. The main thread is the body; the dispatched agents are the eyes. The pattern's architectural constraint mirrors Argus's nature -- agents cannot spawn agents, only the main thread dispatches. One giant, many eyes. One Theseus, many theoroi.
+In Knossos, the **Argus Pattern** names the N-agent parallel dispatch technique: launching multiple Agent tool agents simultaneously, each observing a different domain, their combined vision covering the whole. The main thread is the body; the dispatched agents are the eyes. The pattern's architectural constraint mirrors Argus's nature -- agents cannot spawn agents, only the main thread dispatches. One giant, many eyes. One Theseus, many theoroi.
 
 The Argus Pattern is not specific to auditing. Like "the Ship of Theseus" names the identity-through-transformation problem and "the Aegeus Problem" names false confidence, "the Argus Pattern" names the parallel-observation-through-distributed-agents solution. The theoria is its first named user. Future operations -- parallel validation, parallel migration verification, parallel documentation generation -- will use it too.
 
@@ -548,7 +602,7 @@ This is not bureaucracy—it is the only way to guarantee validity, consistency,
 | **Ariadne** | CLI binary (`ari`) | The intelligence that navigates complexity and guarantees return |
 | **The Clew** | Session state + events.jsonl | The provenance trail, identity through transformation |
 | **Theseus** | Main AI harness agent | The navigator who summons heroes |
-| **Heroes** | Specialist agents (Task tool) | Summoned champions for specific labors |
+| **Heroes** | Specialist agents (Agent tool) | Summoned champions for specific labors |
 | **Clotho** | Session bootstrap agent | The Fate who spins the clew into existence |
 | **Lachesis** | State mutation agent | The Fate who measures and tracks |
 | **Atropos** | Session termination agent | The Fate who cuts when complete |
