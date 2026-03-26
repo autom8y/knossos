@@ -338,22 +338,44 @@ func TestPipeline_UnsupportedResponse_HasReason(t *testing.T) {
 
 // ---- Helper function tests ----
 
-func TestNormalizeRetrievalQuality_Empty(t *testing.T) {
-	assert.Equal(t, 0.0, normalizeRetrievalQuality(nil))
-}
-
-func TestNormalizeRetrievalQuality_ClampedAt1(t *testing.T) {
-	results := []search.SearchResult{
-		{Score: 2000}, // above 1000 -> clamp to 1.0
+func TestNormalizeRetrievalQuality(t *testing.T) {
+	// Table-driven: verify RRF scores (x1000 scaled) normalize correctly.
+	// Only DomainKnowledge results are considered; others are ignored.
+	// Max theoretical RRF: 3000/(40+1) ≈ 73 (top hit in all 3 retrieval lists).
+	tests := []struct {
+		name     string
+		results  []search.SearchResult
+		expected float64
+	}{
+		{"empty results", nil, 0.0},
+		{"no knowledge results", []search.SearchResult{
+			{SearchEntry: search.SearchEntry{Domain: search.DomainCommand}, Score: 500},
+		}, 0.0},
+		{"non-knowledge results ignored", []search.SearchResult{
+			{SearchEntry: search.SearchEntry{Domain: search.DomainConcept}, Score: 1000},
+			{SearchEntry: search.SearchEntry{Domain: search.DomainKnowledge}, Score: 50},
+		}, 0.50},
+		{"clamped at 1.0", []search.SearchResult{
+			{SearchEntry: search.SearchEntry{Domain: search.DomainKnowledge}, Score: 200},
+		}, 1.0},
+		{"top hit in 3 lists (max)", []search.SearchResult{
+			{SearchEntry: search.SearchEntry{Domain: search.DomainKnowledge}, Score: 73},
+		}, 0.73},
+		{"top hit in 2 lists", []search.SearchResult{
+			{SearchEntry: search.SearchEntry{Domain: search.DomainKnowledge}, Score: 49},
+		}, 0.49},
+		{"top hit in 1 list", []search.SearchResult{
+			{SearchEntry: search.SearchEntry{Domain: search.DomainKnowledge}, Score: 24},
+		}, 0.24},
+		{"weak single-list hit", []search.SearchResult{
+			{SearchEntry: search.SearchEntry{Domain: search.DomainKnowledge}, Score: 16},
+		}, 0.16},
 	}
-	assert.Equal(t, 1.0, normalizeRetrievalQuality(results))
-}
-
-func TestNormalizeRetrievalQuality_Normal(t *testing.T) {
-	results := []search.SearchResult{
-		{Score: 500}, // 0.5
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.InDelta(t, tt.expected, normalizeRetrievalQuality(tt.results), 0.001)
+		})
 	}
-	assert.InDelta(t, 0.5, normalizeRetrievalQuality(results), 0.001)
 }
 
 func TestComputeDomainCoverage_EmptyHints(t *testing.T) {

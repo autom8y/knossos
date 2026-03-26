@@ -37,7 +37,7 @@ func DefaultGeneratorConfig() GeneratorConfig {
 		Model:             "claude-sonnet-4-6",
 		MaxResponseTokens: 2000,
 		Temperature:       0.2,
-		TimeoutSeconds:    30,
+		TimeoutSeconds:    60,
 	}
 }
 

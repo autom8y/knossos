@@ -120,6 +120,9 @@ Examples:
 	cmd.Flags().IntVar(&opts.maxConcurrent, "max-concurrent", 0,
 		"Max concurrent pipeline queries (env: MAX_CONCURRENT, default: 10)")
 
+	// Register subcommands.
+	cmd.AddCommand(newQueryCmd(ctx))
+
 	// ari serve does NOT require project context
 	common.SetNeedsProject(cmd, false, true)
 

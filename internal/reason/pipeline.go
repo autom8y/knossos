@@ -173,20 +173,31 @@ func buildIntentSummary(intentResult intent.IntentResult) response.IntentSummary
 }
 
 // normalizeRetrievalQuality converts search scores to [0.0, 1.0].
-// Uses the top result's score as the signal.
-// Returns 0.0 for empty results.
+// Uses the top knowledge-domain result's score as the signal.
+// Only considers DomainKnowledge results, which carry RRF-fused scores
+// (x1000 scaled, range ~16-73). Non-knowledge results (commands, concepts)
+// use structural scoring on a different scale and are excluded.
+// Returns 0.0 when no knowledge results are found.
 func normalizeRetrievalQuality(results []search.SearchResult) float64 {
-	if len(results) == 0 {
+	// Find top knowledge-domain result score.
+	topScore := -1
+	for _, r := range results {
+		if r.Domain == search.DomainKnowledge && r.Score > topScore {
+			topScore = r.Score
+			break // Results are sorted by score descending; first match is top.
+		}
+	}
+	if topScore < 0 {
 		return 0.0
 	}
-	// Normalize: top score / 1000 (SearchResult.Score is already scaled by 1000 in fusion).
-	// Clamp to [0.0, 1.0].
-	score := float64(results[0].Score) / 1000.0
+	// RRF scores after x1000 scaling (index.go:273) range from ~16 to ~73
+	// depending on how many retrieval lists the result appears in.
+	// Max theoretical: 3000/(RRFConstK+1) = 73.17 (k=40, 3 lists).
+	// Dividing by 100 normalizes to [0.16, 0.73] which maps correctly to
+	// the trust model's confidence tiers (LOW < 0.4 < MEDIUM < 0.7 < HIGH).
+	score := float64(topScore) / 100.0
 	if score > 1.0 {
 		return 1.0
-	}
-	if score < 0.0 {
-		return 0.0
 	}
 	return score
 }

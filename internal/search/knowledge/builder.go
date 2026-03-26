@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/autom8y/knossos/internal/search/knowledge/embedding"
 	"github.com/autom8y/knossos/internal/search/knowledge/graph"
@@ -69,14 +73,27 @@ func Build(ctx context.Context, cfg BuildConfig) (*KnowledgeIndex, error) {
 	}
 
 	// Step 2-3: For each domain, check and regenerate as needed.
-	var reindexed, skipped, failed int
+	// Uses errgroup with concurrency limit for parallel LLM calls.
+	var reindexedCount, skippedCount, failedCount atomic.Int32
 	domainInfos := make([]graph.DomainInfo, 0, len(domains))
+
+	// Mutex protects shared, non-thread-safe stores: summaryStore, embeddingStore, catalog.
+	var mu sync.Mutex
+
+	// Pre-collect graph infos and identify which domains need reindexing.
+	// This read-phase touches the stores before goroutines start, so no mutex needed yet.
+	type domainWork struct {
+		entry          CatalogDomainEntry
+		meta           *DomainMetadata
+		needsSummary   bool
+		needsEmbedding bool
+	}
+	var work []domainWork
 
 	for _, d := range domains {
 		qn := d.QualifiedName
 		currentHash := d.SourceHash
 
-		// Build domain metadata.
 		meta := &DomainMetadata{
 			QualifiedName:  qn,
 			DomainType:     d.Domain,
@@ -86,7 +103,6 @@ func Build(ctx context.Context, cfg BuildConfig) (*KnowledgeIndex, error) {
 			FreshnessScore: 0, // BC-12: zero in Tier 1.
 		}
 
-		// Collect graph info (SourceScope from existing metadata if available).
 		gi := graph.DomainInfo{
 			QualifiedName: qn,
 			DomainType:    d.Domain,
@@ -98,77 +114,116 @@ func Build(ctx context.Context, cfg BuildConfig) (*KnowledgeIndex, error) {
 		}
 		domainInfos = append(domainInfos, gi)
 
-		// Check if reindex is needed.
 		needsSummary := summaryStore.NeedsRegeneration(qn, currentHash)
 		needsEmbedding := embeddingStore.NeedsRecompute(qn, currentHash)
 
 		if !needsSummary && !needsEmbedding {
 			catalog[qn] = meta
 			meta.IndexedAt = time.Now()
-			skipped++
+			skippedCount.Add(1)
 			continue
 		}
 
-		// Load content for reindexing.
-		if cfg.ContentStore == nil || !cfg.ContentStore.HasContent(qn) {
-			slog.Warn("content not available for domain, skipping",
-				"domain", qn)
-			// Keep stale data if available in persisted index.
-			if _, ok := catalog[qn]; ok {
-				skipped++
-			} else {
-				failed++
+		work = append(work, domainWork{
+			entry:          d,
+			meta:           meta,
+			needsSummary:   needsSummary,
+			needsEmbedding: needsEmbedding,
+		})
+	}
+
+	// Process domains requiring reindexing in parallel.
+	// Concurrency limit of 10 is conservative for Haiku API rate limits;
+	// empirical tuning deferred to Sprint 4.
+	g, gCtx := errgroup.WithContext(ctx)
+	g.SetLimit(10)
+
+	for _, w := range work {
+		w := w // capture loop variable
+		g.Go(func() error {
+			if gCtx.Err() != nil {
+				return nil // Parent context cancelled; stop scheduling.
 			}
-			continue
-		}
 
-		content, err := cfg.ContentStore.LoadContent(qn)
-		if err != nil {
-			slog.Warn("failed to load content for domain",
-				"domain", qn, "error", err)
-			failed++
-			continue
-		}
+			qn := w.entry.QualifiedName
+			currentHash := w.entry.SourceHash
 
-		// Regenerate summary.
-		if needsSummary && cfg.LLMClient != nil {
-			sections := parseSections(content)
-			llmAdapter := &llmClientAdapter{client: cfg.LLMClient}
-
-			domainCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
-			_, genErr := summaryStore.Generate(domainCtx, qn, content, currentHash, sections, llmAdapter)
-			cancel()
-
-			if genErr != nil {
-				slog.Warn("summary generation failed, using stale if available",
-					"domain", qn, "error", genErr)
-				// Non-fatal: domain still usable via BM25.
+			// Load content for reindexing.
+			if cfg.ContentStore == nil || !cfg.ContentStore.HasContent(qn) {
+				slog.Warn("content not available for domain, skipping",
+					"domain", qn)
+				mu.Lock()
+				if _, ok := catalog[qn]; ok {
+					skippedCount.Add(1)
+				} else {
+					failedCount.Add(1)
+				}
+				mu.Unlock()
+				return nil
 			}
-		} else if needsSummary && cfg.LLMClient == nil {
-			slog.Debug("LLM client not available, skipping summary generation",
-				"domain", qn)
-		}
 
-		// Regenerate embedding from summary text.
-		if needsEmbedding {
-			summaryText, hasSummary := summaryStore.GetSummary(qn)
-			embedText := summaryText
-			if !hasSummary {
-				// Fall back to content prefix for embedding when no summary.
-				embedText = truncateForEmbedding(content, 2000)
+			content, err := cfg.ContentStore.LoadContent(qn)
+			if err != nil {
+				slog.Warn("failed to load content for domain",
+					"domain", qn, "error", err)
+				failedCount.Add(1)
+				return nil
 			}
-			if embedText != "" {
-				vec := embedding.TextToVector(embedText, embeddingDimensions)
-				if vec != nil {
-					embeddingStore.Add(qn, vec, currentHash)
+
+			// Regenerate summary.
+			if w.needsSummary && cfg.LLMClient != nil {
+				sections := parseSections(content)
+				llmAdapter := &llmClientAdapter{client: cfg.LLMClient}
+
+				domainCtx, cancel := context.WithTimeout(gCtx, 30*time.Second)
+				mu.Lock()
+				_, genErr := summaryStore.Generate(domainCtx, qn, content, currentHash, sections, llmAdapter)
+				mu.Unlock()
+				cancel()
+
+				if genErr != nil {
+					slog.Warn("summary generation failed, using stale if available",
+						"domain", qn, "error", genErr)
+					// Non-fatal: domain still usable via BM25.
+				}
+			} else if w.needsSummary && cfg.LLMClient == nil {
+				slog.Debug("LLM client not available, skipping summary generation",
+					"domain", qn)
+			}
+
+			// Regenerate embedding from summary text.
+			if w.needsEmbedding {
+				mu.Lock()
+				summaryText, hasSummary := summaryStore.GetSummary(qn)
+				mu.Unlock()
+
+				embedText := summaryText
+				if !hasSummary {
+					embedText = truncateForEmbedding(content, 2000)
+				}
+				if embedText != "" {
+					vec := embedding.TextToVector(embedText, embeddingDimensions)
+					if vec != nil {
+						mu.Lock()
+						embeddingStore.Add(qn, vec, currentHash)
+						mu.Unlock()
+					}
 				}
 			}
-		}
 
-		catalog[qn] = meta
-		meta.IndexedAt = time.Now()
-		reindexed++
+			mu.Lock()
+			catalog[qn] = w.meta
+			w.meta.IndexedAt = time.Now()
+			mu.Unlock()
+			reindexedCount.Add(1)
+			return nil // Always nil -- individual domain failures are logged, not propagated.
+		})
 	}
+	_ = g.Wait() // All goroutines return nil; errors are logged per-domain.
+
+	reindexed := int(reindexedCount.Load())
+	skipped := int(skippedCount.Load())
+	failed := int(failedCount.Load())
 
 	// Step 3b: Build entity graph from metadata (D-L6: deterministic, zero LLM cost).
 	entityGraph := graph.Build(domainInfos)
