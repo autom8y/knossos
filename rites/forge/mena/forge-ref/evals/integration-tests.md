@@ -1,3 +1,7 @@
+---
+description: "Integration Tests companion for evals skill."
+---
+
 # Integration Tests
 
 > End-to-end tests for rite functionality

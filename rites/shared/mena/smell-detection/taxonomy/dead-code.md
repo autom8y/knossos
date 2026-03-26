@@ -1,3 +1,7 @@
+---
+description: "Dead Code Smells (DC-*) companion for taxonomy skill."
+---
+
 # Dead Code Smells (DC-*)
 
 > Code that is not executed, not reachable, or serves no purpose.

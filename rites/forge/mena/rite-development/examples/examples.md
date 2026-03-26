@@ -1,3 +1,7 @@
+---
+description: "Rite Examples companion for examples skill."
+---
+
 # Rite Examples
 
 > Reference implementations for rite patterns.

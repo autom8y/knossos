@@ -1,3 +1,7 @@
+---
+description: "Tech Assessment Template companion for templates skill."
+---
+
 # Tech Assessment Template
 
 > Technology evaluation with ecosystem assessment, risk analysis, and adopt/hold/avoid verdict.

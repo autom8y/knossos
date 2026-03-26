@@ -1,3 +1,7 @@
+---
+description: "Compliance Requirements Template companion for templates skill."
+---
+
 # Compliance Requirements Template
 
 > Regulatory mapping with control implementation, gap analysis, and evidence collection plan.

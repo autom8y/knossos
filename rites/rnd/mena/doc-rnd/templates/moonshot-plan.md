@@ -1,3 +1,7 @@
+---
+description: "Moonshot Plan Template companion for templates skill."
+---
+
 # Moonshot Plan Template
 
 > Long-term architectural vision with scenario planning, migration phases, and investment analysis.

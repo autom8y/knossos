@@ -1,3 +1,7 @@
+---
+description: "Architecture Smells (AR-*) companion for taxonomy skill."
+---
+
 # Architecture Smells (AR-*)
 
 > Structural issues that affect system design and maintainability.

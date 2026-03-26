@@ -1,3 +1,7 @@
+---
+description: "Scan Findings: {project-name} companion for templates skill."
+---
+
 # Scan Findings: {project-name}
 
 ## Scope

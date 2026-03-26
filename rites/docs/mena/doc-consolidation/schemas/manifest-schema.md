@@ -1,3 +1,7 @@
+---
+description: "Manifest Schema companion for schemas skill."
+---
+
 # Manifest Schema
 
 > **Purpose**: Define the structure for `MANIFEST.yaml` (Phase 0 output) that maps files to topics, enabling targeted extraction without reading full file contents.

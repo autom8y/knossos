@@ -1,3 +1,7 @@
+---
+description: "Prototype Documentation Template companion for templates skill."
+---
+
 # Prototype Documentation Template
 
 > Prototype results, feasibility verdict, and production path with deliberate shortcuts documented.

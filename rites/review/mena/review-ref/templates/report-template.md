@@ -1,3 +1,7 @@
+---
+description: "Code Review: {project-name} companion for templates skill."
+---
+
 # Code Review: {project-name}
 
 ## Executive Summary

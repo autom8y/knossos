@@ -1,3 +1,7 @@
+---
+description: "Infrastructure Change Template companion for templates skill."
+---
+
 # Infrastructure Change Template
 
 > Change management document for infrastructure modifications with risk assessment and rollback.

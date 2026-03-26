@@ -1,3 +1,7 @@
+---
+description: "Schema: Tribal Knowledge Entry [TRIBAL-NNN] companion for schemas skill."
+---
+
 # Schema: Tribal Knowledge Entry [TRIBAL-NNN]
 
 ## Template

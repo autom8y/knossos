@@ -16,29 +16,28 @@ last_verified: 2026-02-26
 
 ## Commands
 
-### ari artifact register
+Commands are ordered by frequency of use: inspection first, registration second, maintenance last.
 
-Register an artifact to the session registry.
+### ari artifact list
+
+List artifact counts by dimension.
 
 **Synopsis**:
 ```bash
-ari artifact register [flags]
+ari artifact list [flags]
 ```
 
 **Description**:
-Registers a work product to the artifact registry, associating it with the current session and enabling tracking across workflow phases.
+Shows summary of registered artifacts grouped by type, phase, or session.
 
 **Examples**:
 ```bash
-# Register a PRD
-ari artifact register --type=prd --path=docs/requirements/PRD-auth.md
+# List artifacts
+ari artifact list
 
-# Register with custom metadata
-ari artifact register --type=tdd --path=docs/design/TDD-auth.md --phase=design
+# Group by type
+ari artifact list --by=type
 ```
-
-**Related Commands**:
-- [`ari artifact query`](#ari-artifact-query) — Find registered artifacts
 
 ---
 
@@ -74,26 +73,29 @@ ari artifact query -o json
 
 ---
 
-### ari artifact list
+### ari artifact register
 
-List artifact counts by dimension.
+Register an artifact to the session registry.
 
 **Synopsis**:
 ```bash
-ari artifact list [flags]
+ari artifact register [flags]
 ```
 
 **Description**:
-Shows summary of registered artifacts grouped by type, phase, or session.
+Registers a work product to the artifact registry, associating it with the current session and enabling tracking across workflow phases.
 
 **Examples**:
 ```bash
-# List artifacts
-ari artifact list
+# Register a PRD
+ari artifact register --type=prd --path=docs/requirements/PRD-auth.md
 
-# Group by type
-ari artifact list --by=type
+# Register with custom metadata
+ari artifact register --type=tdd --path=docs/design/TDD-auth.md --phase=design
 ```
+
+**Related Commands**:
+- [`ari artifact query`](#ari-artifact-query) — Find registered artifacts
 
 ---
 

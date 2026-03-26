@@ -1,3 +1,7 @@
+---
+description: "Domain Authority Pattern companion for patterns skill."
+---
+
 # Domain Authority Pattern
 
 > Defining what agents decide, escalate, and route

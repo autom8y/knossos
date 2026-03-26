@@ -6,7 +6,7 @@ last_verified: 2026-02-26
 
 > Technology exploration lifecycle for scouting, prototyping, and future architecture.
 
-The R&D rite provides workflows for exploring emerging technologies and building proof-of-concept prototypes.
+The rnd rite is structured exploration with a deliberate escape hatch to production. Technology-scout produces adopt/trial/assess/hold/avoid verdicts on emerging technologies before any integration work begins — this prevents the common failure mode of prototyping first and evaluating fit afterward. Prototype-engineer explicitly builds with shortcuts: the goal is feasibility signal, not production code. Moonshot-architect then stress-tests current systems against 2+ year scenarios — 100x scale, regulatory inversion, paradigm shifts — and designs reversible migration paths with observable trigger signals. The tech-transfer agent closes the loop between R&D findings and production readiness, which most exploration workflows never formally do.
 
 ---
 
@@ -23,11 +23,11 @@ The R&D rite provides workflows for exploring emerging technologies and building
 
 ## When to Use
 
-- Scouting emerging technologies
-- Evaluating build vs buy decisions
-- Building proof-of-concept prototypes
-- Designing long-term architecture
-- Technology transfer to production
+- Evaluating a new technology (database, framework, service) before committing engineering time — get a verdict before you prototype
+- Making build vs. buy decisions with structured comparison matrices and explicit criteria
+- Validating a risky technical approach with a time-boxed prototype that has deliberate shortcuts
+- Planning architecture decisions for the 2+ year horizon, stress-tested against realistic future scenarios
+- **Not for**: production feature implementation — use 10x-dev. Not for evaluating a competitor's product strategy — use strategy or intelligence. rnd targets technology fit and long-term architecture, not business decisions.
 
 ---
 
@@ -35,12 +35,12 @@ The R&D rite provides workflows for exploring emerging technologies and building
 
 | Agent | Role |
 |-------|------|
-| **potnia** | Coordinates technology exploration phases |
-| **technology-scout** | Scouts emerging technologies and provides build vs buy analysis |
-| **integration-researcher** | Maps integration dependencies and assesses compatibility |
-| **prototype-engineer** | Builds proof-of-concept prototypes with deliberate shortcuts |
-| **moonshot-architect** | Designs visionary long-term architecture plans |
-| **tech-transfer** | Facilitates technology transfer from R&D to production teams |
+| **potnia** | Coordinates technology exploration phases; routes to prototyping only after scout verdict recommends trial or adopt |
+| **technology-scout** | Evaluates technology maturity, risk, and organizational fit; produces adopt/trial/assess/hold/avoid verdicts with evidence — not just recommendations |
+| **integration-researcher** | Maps integration dependencies, assesses compatibility with existing systems, and estimates integration complexity |
+| **prototype-engineer** | Builds feasibility prototypes with explicit shortcuts — the goal is signal, not production code; documents what was deliberately skipped |
+| **moonshot-architect** | Stress-tests current architecture against 2+ year scenarios; designs reversible migration paths with observable trigger signals |
+| **tech-transfer** | Bridges R&D findings to production readiness — produces handoff artifacts that 10x-dev can build from |
 
 See agent files: `rites/rnd/agents/`
 
@@ -71,14 +71,14 @@ flowchart LR
 # Quick switch to R&D
 /rnd
 
-# Technology scouting
-Task(technology-scout, "evaluate vector databases for semantic search")
+# Evaluate a technology before committing to it — scout produces a verdict
+Task(technology-scout, "evaluate Pinecone vs Weaviate vs building our own vector search — produce adopt/trial/assess recommendation with evidence")
 
-# Build prototype
-Task(prototype-engineer, "prototype AI-powered code review")
+# Build a feasibility prototype after scout recommends trial
+Task(prototype-engineer, "prototype ML-powered search using Weaviate — validate latency at 1M document scale, shortcuts are OK")
 
-# Moonshot architecture
-Task(moonshot-architect, "design architecture for multi-agent orchestration")
+# Plan long-term architecture for a technology that prototyped successfully
+Task(moonshot-architect, "ML search prototype validated — design architecture that survives 100x scale and regulatory data-residency requirements")
 ```
 
 ---

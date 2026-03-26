@@ -1,3 +1,7 @@
+---
+description: "Competitive Intel Template companion for templates skill."
+---
+
 # Competitive Intel Template
 
 > Competitor profiling with product analysis, pricing, predicted moves, and monitoring plan.

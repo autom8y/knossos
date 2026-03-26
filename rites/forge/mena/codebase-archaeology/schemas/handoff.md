@@ -1,3 +1,7 @@
+---
+description: "Schema: HANDOFF-PROMPT-FUEL Document companion for schemas skill."
+---
+
 # Schema: HANDOFF-PROMPT-FUEL Document
 
 ## Document Structure

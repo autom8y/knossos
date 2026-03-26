@@ -1,3 +1,7 @@
+---
+description: "Debt Ledger Integration companion for integration skill."
+---
+
 # Debt Ledger Integration
 
 > Schema and patterns for mapping smells to debt ledger entries.

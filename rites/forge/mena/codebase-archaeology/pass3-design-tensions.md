@@ -1,3 +1,7 @@
+---
+description: "Pass 3: Design Tension Catalog companion for codebase-archaeology skill."
+---
+
 # Pass 3: Design Tension Catalog
 
 > Identify structural conflicts, premature/missing abstractions, layering violations, naming mismatches, and load-bearing jank that agents must navigate rather than "fix."

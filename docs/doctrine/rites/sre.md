@@ -6,7 +6,7 @@ last_verified: 2026-02-26
 
 > Reliability engineering lifecycle for observability, coordination, and resilience testing.
 
-The SRE rite provides workflows for maintaining production reliability through observability, incident coordination, and chaos engineering.
+The SRE rite builds production reliability from the ground up: make the system observable, create runbooks for what can fail, harden the infrastructure, then deliberately break it to verify the hardening worked. Observability-engineer does not just add metrics — it maps the Four Golden Signals coverage, defines SLI/SLO targets with error budgets, and tunes alerts for signal-not-noise. Incident-commander produces runbooks before incidents happen, not postmortems after. Chaos-engineer is the rite's verification mechanism: every resilience claim gets a controlled fault injection experiment with an explicit blast radius limit and abort criteria. A claim without a chaos experiment is a hypothesis, not a guarantee.
 
 ---
 
@@ -23,11 +23,12 @@ The SRE rite provides workflows for maintaining production reliability through o
 
 ## When to Use
 
-- Assessing observability gaps
-- Creating reliability plans and runbooks
-- Implementing infrastructure improvements
-- Testing system resilience
-- Incident response coordination
+- Evaluating observability coverage for a service launching without monitoring
+- Defining SLI/SLO targets with error budgets and burn rate alerting before a reliability commitment
+- Creating incident runbooks for known failure modes before they become incidents
+- Hardening infrastructure against dependency outages, network partitions, or resource exhaustion
+- Verifying resilience claims with controlled chaos experiments — not just asserting that failover works
+- **Not for**: active incident response in progress — the rite is proactive. Not for diagnosing production bugs — use clinic. SRE prepares for failure; clinic responds to it.
 
 ---
 
@@ -35,11 +36,11 @@ The SRE rite provides workflows for maintaining production reliability through o
 
 | Agent | Role |
 |-------|------|
-| **potnia** | Coordinates reliability engineering initiative phases |
-| **observability-engineer** | Designs observability strategy and establishes SLO/SLI baselines |
-| **incident-commander** | Coordinates reliability plans and creates incident runbooks |
-| **platform-engineer** | Implements infrastructure changes and reliability improvements |
-| **chaos-engineer** | Designs and executes chaos experiments to verify resilience |
+| **potnia** | Coordinates reliability engineering phases; gates chaos experiments on completed infrastructure hardening |
+| **observability-engineer** | Maps Four Golden Signals coverage, defines SLI/SLO targets with error budgets, designs dashboards for signal-not-noise alerting |
+| **incident-commander** | Produces incident runbooks for known failure scenarios — step-by-step procedures, escalation paths, rollback instructions |
+| **platform-engineer** | Implements infrastructure changes (failover, circuit breakers, rate limiting) against the reliability plan |
+| **chaos-engineer** | Designs fault injection experiments with explicit hypotheses, blast radius limits, and abort criteria — breaks production on purpose to verify claims |
 
 See agent files: `rites/sre/agents/`
 
@@ -70,14 +71,14 @@ flowchart LR
 # Quick switch to SRE
 /sre
 
-# Observability assessment
-Task(observability-engineer, "assess observability gaps in payment service")
+# Full observability coverage for a new service
+Task(observability-engineer, "audit payment service monitoring — map Four Golden Signals coverage, define SLI/SLOs with error budgets")
 
-# Create runbook
-Task(incident-commander, "create incident runbook for database failover")
+# Create runbooks for known failure modes
+Task(incident-commander, "create incident runbook for database primary failover — include step-by-step procedures, escalation path, and rollback")
 
-# Chaos testing
-Task(chaos-engineer, "design chaos experiment for network partition")
+# Verify resilience claims with controlled fault injection
+Task(chaos-engineer, "design chaos experiment for database failover claim — define hypothesis, blast radius, abort criteria, then execute")
 ```
 
 ---

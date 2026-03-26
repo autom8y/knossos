@@ -1,3 +1,7 @@
+---
+description: "Component Isolation companion for ui-architecture skill."
+---
+
 # Component Isolation
 
 > Decision framework for choosing component style isolation strategies. When to use BEM, CSS Modules, @scope, Shadow DOM, or CSS-in-JS.

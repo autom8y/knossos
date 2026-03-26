@@ -1,3 +1,7 @@
+---
+description: "Section Ownership Model companion for inscription-architecture skill."
+---
+
 # Section Ownership Model
 
 The context file sections have explicit owners that determine sync behavior. This document defines the ownership model and how the sync pipeline applies it.

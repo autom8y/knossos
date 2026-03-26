@@ -1,13 +1,13 @@
 ---
 domain: feat/manifest-operations
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/manifest/**/*.go"
   - "./internal/cmd/manifest/**/*.go"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
+source_hash: "b329d719"
 confidence: 0.88
 format_version: "1.0"
 ---
@@ -16,44 +16,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Generic, format-agnostic layer for loading, validating, diffing, and three-way merging YAML/JSON manifest files. Primary targets: `.claude/manifest.json` and `rites/*/manifest.yaml`.
-
-**Key decisions**: Unified generic `Manifest` type (`map[string]interface{}`). TD-3: warnings-only on rite manifest validation, never blocks `Load()`. Git ref loading (`commit:path` patterns). Lightweight structural validation (full JSON Schema not active at runtime — DEBT-178). Four merge strategies: smart, ours, theirs, union.
+General-purpose toolkit for inspecting, validating, comparing, and reconciling YAML/JSON manifest files. Rite manifest validation is advisory, not blocking (TD-3). Git ref support (HEAD:.claude/manifest.json). Three-way merge with 4 strategies (smart, ours, theirs, union). Distinct from internal/materialize's RiteManifest (two packages are not kept in sync).
 
 ## Conceptual Model
 
-### Four Operations
-
-- **Show**: `Load` + display with optional schema info
-- **Validate**: `Load` + `SchemaValidator.Validate` (structural checks only)
-- **Diff**: `Load` x2 + `Diff` (structural comparison, optional array-as-set mode)
-- **Merge**: `Load` x3 + `Merge` (three-way with strategy selection and conflict detection)
-
-### Three-Way Merge (Smart Strategy)
-
-Standard semantics: unchanged + changed = accept change; both changed same = accept; both changed differently = conflict. Conflicts produce git-style markers. Default resolution: ours wins.
+**Manifest:** uniform envelope (Path, Format, Content map, Raw bytes). Format auto-detected from extension. **Git ref support:** isGitRef detection (excludes Windows drive letters), git show with 30s timeout. **Four merge strategies:** smart (field-level three-way with conflict markers), ours, theirs, union (arrays as sets). **Diff model:** recursive tree walk with jQuery-style paths, added/modified/removed classification, --ignore-order for set semantics. **Schema validation:** lightweight structural checking (jsonschema compiler present but nil).
 
 ## Implementation Map
 
-Domain: `/Users/tomtenuta/Code/knossos/internal/manifest/` — `manifest.go` (404 lines), `diff.go` (334), `merge.go` (408), `schema.go` (443). CLI: `/Users/tomtenuta/Code/knossos/internal/cmd/manifest/` — show, validate, diff, merge subcommands.
-
-### Key Entry Points
-
-- `manifest.Load(path)` — primary loader (auto-detects git refs)
-- `manifest.Diff(base, compare, opts)` — structural comparison
-- `manifest.Merge(base, ours, theirs, opts)` — three-way merge
-- `manifest.NewSchemaValidator()` — structural field-presence checks
+`internal/manifest/` (4 files): manifest.go (Load/Save/Clone/Get, ValidateRiteManifest advisory), diff.go (Diff, FormatUnified), merge.go (Merge 4 strategies, conflict markers), schema.go (SchemaValidator, DetectSchemaFromPath). `internal/cmd/manifest/` (5 files): show (with --resolved defaults injection), validate (--strict for additionalProperties), diff (non-zero exit on changes), merge (--write-to, --dry-run). 3 embedded schema files.
 
 ## Boundaries and Failure Modes
 
-- Full JSON Schema validation NOT active at runtime (DEBT-178)
-- Format detection defaults to JSON for unknown extensions
-- Conflict marker generation is path-naive (simplified replacement)
-- `ValidateRiteManifest` only fires when both `name` AND `agents` keys present
-- `LoadFromGitRef` has no `exec.CommandContext` timeout (SCAR-010 class risk)
+internal/manifest is NOT used by internal/materialize (separate RiteManifest structs, not in sync). Full JSON Schema validation disabled (compiler nil). ValidateRiteManifest is advisory (slog.Warn only). Format detection bug in merge --write-to (compares path string to "yaml" literal). ValidateBytes would panic (nil compiler). No CLI-layer tests.
 
 ## Knowledge Gaps
 
-1. "TDD Section 7.1" merge spec document not located on disk.
-2. `ValidateBytes` is dead code (compiler is nil).
-3. `agent-manifest.schema.json` has no known runtime consumer.
+1. rite-manifest.schema.json requires agents[].file but Go validator doesn't check
+2. Schema and operative struct architecturally diverged
+3. agent-manifest.schema.json relationship unclear

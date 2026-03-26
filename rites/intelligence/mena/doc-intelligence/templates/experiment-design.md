@@ -1,3 +1,7 @@
+---
+description: "Experiment Design Template companion for templates skill."
+---
+
 # Experiment Design Template
 
 > A/B test pre-registration with hypothesis, sample size calculation, metrics, and stopping rules.

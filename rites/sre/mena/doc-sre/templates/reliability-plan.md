@@ -1,3 +1,7 @@
+---
+description: "Reliability Plan Template companion for templates skill."
+---
+
 # Reliability Plan Template
 
 > Quarterly or sprint-level planning for reliability work, driven by incident patterns.

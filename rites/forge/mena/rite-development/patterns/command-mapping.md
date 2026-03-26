@@ -1,3 +1,7 @@
+---
+description: "Command Mapping Patterns companion for patterns skill."
+---
+
 # Command Mapping Patterns
 
 How slash commands integrate with rite workflows.

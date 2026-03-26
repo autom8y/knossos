@@ -1,3 +1,7 @@
+---
+description: "Consultation Response Schema companion for schemas skill."
+---
+
 # Consultation Response Schema
 
 > Structure for orchestrator's directive to main agent.

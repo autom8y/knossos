@@ -1,3 +1,7 @@
+---
+description: "Pass 4: Golden Path Exemplars companion for codebase-archaeology skill."
+---
+
 # Pass 4: Golden Path Exemplars
 
 > Identify best-in-class patterns for each major concept type, paired with anti-exemplars from the same codebase. Golden Path Contrast is one of the most effective prompt engineering techniques for code generation.

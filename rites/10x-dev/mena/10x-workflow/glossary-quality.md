@@ -1,3 +1,7 @@
+---
+description: "Glossary: Quality & Principles companion for 10x-workflow skill."
+---
+
 # Glossary: Quality & Principles
 
 > Quality concepts, anti-patterns, workflow principles

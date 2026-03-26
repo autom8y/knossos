@@ -1,3 +1,7 @@
+---
+description: "Migration Runbook Template companion for templates skill."
+---
+
 # Migration Runbook Template
 
 > Satellite owner migration guide.

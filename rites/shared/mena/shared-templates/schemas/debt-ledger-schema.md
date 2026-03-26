@@ -1,3 +1,7 @@
+---
+description: "Debt Ledger Schema companion for schemas skill."
+---
+
 # Debt Ledger Schema
 
 **Version:** 1.0

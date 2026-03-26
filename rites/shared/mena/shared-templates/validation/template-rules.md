@@ -1,3 +1,7 @@
+---
+description: "Template Validation Rules companion for validation skill."
+---
+
 # Template Validation Rules
 
 **Version:** 1.0

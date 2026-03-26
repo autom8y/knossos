@@ -1,3 +1,7 @@
+---
+description: "{NNN}-{Title} companion for templates skill."
+---
+
 # {NNN}-{Title}
 
 > **Consolidated from**: {source_file_1}, {source_file_2}, ...

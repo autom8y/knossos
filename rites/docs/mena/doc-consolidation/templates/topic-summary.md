@@ -1,3 +1,7 @@
+---
+description: "Topic Summary: {topic_name} companion for templates skill."
+---
+
 # Topic Summary: {topic_name}
 
 > **Topic ID**: {topic_id}

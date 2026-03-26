@@ -1,3 +1,7 @@
+---
+description: "Documentation Migration Plan Template companion for templates skill."
+---
+
 # Documentation Migration Plan Template
 
 > Phased plan for restructuring documentation: moves, merges, retirements, and cross-reference updates.

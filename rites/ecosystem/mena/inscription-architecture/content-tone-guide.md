@@ -1,3 +1,7 @@
+---
+description: "Content Tone Guide companion for inscription-architecture skill."
+---
+
 # Content Tone Guide
 
 Examples and patterns for writing descriptive context file content.

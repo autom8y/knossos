@@ -1,3 +1,7 @@
+---
+description: "Agent Template companion for templates skill."
+---
+
 # Agent Template
 
 > Canonical template for creating agents in the 10x ecosystem.
@@ -37,10 +41,10 @@ color: [OPTIONAL] # red | blue | green | yellow | purple | orange | pink | cyan 
 | Field | Required | Format | Notes |
 |-------|----------|--------|-------|
 | `name` | Yes | kebab-case | Must match filename without `.md` extension |
-| `description` | Yes | YAML multi-line (`\|`) | First line is role summary; includes usage triggers and examples |
+| `description` | Yes | YAML multi-line (`\|`) | First line is role summary; includes triggers and examples |
 | `tools` | Yes | Comma-separated | Only include tools the agent actually needs |
 | `model` | No | Model identifier | Use opus for orchestration/design, sonnet for implementation |
-| `color` | No | Color name | Choose unused color within the pantheon for visual distinction |
+| `color` | No | Color name | Choose unused color within the pantheon |
 
 ### Tool Selection Guide
 
@@ -55,6 +59,26 @@ color: [OPTIONAL] # red | blue | green | yellow | purple | orange | pink | cyan 
 
 ## Required Sections
 
+Sections MUST appear in this order:
+
+| # | Section | Key Requirements |
+|---|---------|-----------------|
+| 1 | Title and Overview | 2-3 sentences; present tense; unique value prop |
+| 2 | Core Responsibilities | 4-6 bullets with bold labels; distinct, action-oriented |
+| 3 | Position in Workflow | ASCII diagram; specify Upstream and Downstream |
+| 4 | Domain Authority | Three subsections: decide / escalate / route |
+| 5 | Approach | 3-5 numbered phases; each produces something concrete |
+| 6 | What You Produce | Artifact table; reference skill templates |
+| 7 | Handoff Criteria | 5-10 binary checkboxes; include "document committed" |
+| 8 | The Acid Test | Single italicized question; recovery action |
+| 9 | Skills Reference | 3-5 skills with stated purpose each |
+| 10 | Cross-Rite Routing | Reference shared protocol; add agent-specific scenarios |
+| 11 | Anti-Patterns to Avoid | 3-6 items: bold name, problem, correction |
+
+Optional sections (Behavioral Constraints, Consultation Protocol) may appear between Skills Reference and Anti-Patterns for orchestrators.
+
+---
+
 ### 1. Title and Overview
 
 ```markdown
@@ -64,14 +88,6 @@ color: [OPTIONAL] # red | blue | green | yellow | purple | orange | pink | cyan 
 Should convey the agent's personality and working style in 2-3 sentences.
 Use present tense. Establish the agent's unique value proposition.]
 ```
-
-**Purpose**: First impression that sets tone and establishes agent identity.
-
-**Guidelines**:
-- 2-3 sentences maximum
-- Present tense ("The X does Y" not "The X will do Y")
-- Convey personality through action verbs
-- Distinguish from similar agents
 
 ---
 
@@ -87,14 +103,6 @@ Use present tense. Establish the agent's unique value proposition.]
 - **[Responsibility 5]**: [Description of what this entails and why it matters]
 ```
 
-**Purpose**: Define scope of work this agent handles.
-
-**Guidelines**:
-- 4-6 bullet points with bold labels
-- Each responsibility should be distinct (no overlap)
-- Use action-oriented language
-- Include what the agent does AND why
-
 ---
 
 ### 3. Position in Workflow
@@ -103,9 +111,6 @@ Use present tense. Establish the agent's unique value proposition.]
 ## Position in Workflow
 
 ```
-[ASCII diagram showing agent in context of workflow]
-
-Example:
 ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
 │  [Upstream]  │─────>│ [THIS AGENT] │─────>│ [Downstream] │
 └──────────────┘      └──────────────┘      └──────────────┘
@@ -121,15 +126,6 @@ Example:
 **Downstream**: [What this agent produces and for whom]
 ```
 
-**Purpose**: Visual clarity on where agent fits in rite pipeline.
-
-**Guidelines**:
-- Use ASCII box drawing characters for consistency
-- Show primary upstream and downstream agents
-- Include artifact production below
-- For terminal agents, show "DONE" as downstream
-- For orchestrators, show hub-and-spoke pattern
-
 ---
 
 ### 4. Domain Authority
@@ -141,27 +137,15 @@ Example:
 - [Decision area 1 within your expertise - be specific]
 - [Decision area 2 within your expertise]
 - [Decision area 3 within your expertise]
-- [Additional decision areas as needed]
 
 **You escalate to [Role/User]:**
 - [Condition requiring escalation 1]
 - [Condition requiring escalation 2]
-- [Additional escalation conditions]
 
 **You route to [Next Agent]:**
 - [Handoff condition 1 with what artifact/context to include]
 - [Handoff condition 2]
-- [Additional routing rules as needed]
 ```
-
-**Purpose**: Clear ownership boundaries prevent decision paralysis and scope creep.
-
-**Guidelines**:
-- "You decide" items are within-agent authority (no approval needed)
-- "You escalate" items require human judgment or cross-rite coordination
-- "You route" items go to specific other agents (name them)
-- Be specific: "Code structure" is vague; "Test file organization and fixture design" is clear
-- Multiple routing targets are fine for agents with branching outputs
 
 ---
 
@@ -176,15 +160,6 @@ Example:
 4. **[Phase Name]**: [Verb-led description of phase activities], [expected outputs]
 ```
 
-**Purpose**: Standardized methodology for consistency across invocations.
-
-**Guidelines**:
-- 3-5 phases typical
-- Each phase should produce something (artifact, decision, state change)
-- Use consistent verbs: Analyze, Design, Implement, Validate, Document
-- Phases should map roughly to logical work chunks
-- Can use numbered list or H3 subheadings for complex phases
-
 ---
 
 ### 6. What You Produce
@@ -198,23 +173,8 @@ Example:
 | **[Secondary Artifact]** | [When/why produced, conditional triggers] |
 | **[Optional Artifact]** (complexity level) | [When this applies] |
 
-### Artifact Production
-
 Produce [Primary Artifact] using [skill] skill, [template-name] section.
-
-**Context customization**:
-- [Specific guidance for this agent's artifact variant]
-- [What to include that's unique to this workflow position]
-- [Quality criteria specific to this artifact type]
 ```
-
-**Purpose**: Concrete deliverables with quality standards.
-
-**Guidelines**:
-- List all possible artifacts, mark optional ones
-- Reference skill templates for standard formats
-- Include customization notes for agent-specific variations
-- Complexity-gated artifacts should note which complexity levels apply
 
 ---
 
@@ -232,15 +192,6 @@ Ready for [Next Phase/Agent] when:
 - [ ] [Document committed to repository]
 ```
 
-**Purpose**: Objective gate preventing premature handoffs.
-
-**Guidelines**:
-- Each criterion must be binary (yes/no, not "mostly" or "somewhat")
-- Include artifact existence check (e.g., "Gap Analysis document committed")
-- 5-10 criteria typical
-- Criteria should be checkable by downstream agent
-- Always include a "document committed" criterion for traceability
-
 ---
 
 ### 8. The Acid Test
@@ -248,28 +199,10 @@ Ready for [Next Phase/Agent] when:
 ```markdown
 ## The Acid Test
 
-*"[Single pivotal question that determines if work is complete. Should force deep
-reflection and be answerable with yes/no.]"*
+*"[Single pivotal question that determines if work is complete.]"*
 
-If uncertain: [What to do when the answer isn't clearly yes - specific action]
+If uncertain: [Specific recovery action]
 ```
-
-**Purpose**: Gut-check that catches what checklists miss.
-
-**Guidelines**:
-- Single question in italics with quotes
-- Question should be from downstream consumer's perspective
-- "If uncertain" provides actionable recovery path
-- Should make agent uncomfortable if work is incomplete
-
-**Examples**:
-- Analyst: "Could Context Architect design without asking clarifying questions?"
-- Architect: "Could Integration Engineer implement without making my decisions?"
-- Engineer: "Could a satellite owner run cem sync without breaking?"
-- Tester: "Would I bet my production satellite on this upgrade?"
-- Docs: "Could an unfamiliar owner upgrade using only this runbook?"
-
----
 
 ### 9. Skills Reference
 
@@ -280,18 +213,7 @@ Reference these skills as appropriate:
 - [skill-1] for [what guidance it provides]
 - [skill-2] for [what guidance it provides]
 - [skill-3] for [what guidance it provides]
-- [domain-specific-skill] for [specific guidance]
 ```
-
-**Purpose**: Connect agent to broader knowledge base.
-
-**Guidelines**:
-- List 3-5 most relevant skills
-- Include purpose for each (not just skill name)
-- Common skills: documentation, standards, 10x-workflow
-- Rite-specific skills should be included
-
----
 
 ### 10. Cross-Rite Routing
 
@@ -303,15 +225,6 @@ See cross-rite-handoff skill for handoff patterns to other rites.
 [Optional: Common cross-rite scenarios specific to this agent]
 ```
 
-**Purpose**: Prevent work from getting stuck at rite boundaries.
-
-**Guidelines**:
-- Reference shared protocol for standard patterns
-- Add agent-specific scenarios if commonly encountered
-- Include when to route OUT of rite vs. escalate within the pantheon
-
----
-
 ### 11. Anti-Patterns to Avoid
 
 ```markdown
@@ -320,22 +233,11 @@ See cross-rite-handoff skill for handoff patterns to other rites.
 - **[Anti-pattern Name]**: [Why this is problematic]. [What to do instead].
 - **[Anti-pattern Name]**: [Why this is problematic]. [What to do instead].
 - **[Anti-pattern Name]**: [Why this is problematic]. [What to do instead].
-- **[Anti-pattern Name]**: [Why this is problematic]. [What to do instead].
 ```
-
-**Purpose**: Learn from common mistakes.
-
-**Guidelines**:
-- 3-6 anti-patterns typical
-- Bold name, explanation, then correction
-- Draw from actual failure modes observed in practice
-- Be specific: "Vague specs" is okay; "Saying 'update settings' without specifying which function" is better
 
 ---
 
 ## Validation Rules
-
-Use this checklist to validate agent definitions before committing:
 
 ### Frontmatter Validation
 - [ ] `name` is kebab-case and matches filename
@@ -363,30 +265,10 @@ Use this checklist to validate agent definitions before committing:
 - [ ] Anti-Patterns has 3-6 items with bold names
 
 ### Consistency Validation
-- [ ] Artifacts mentioned in "What You Produce" align with Handoff Criteria
+- [ ] Artifacts in "What You Produce" align with Handoff Criteria
 - [ ] Downstream agent in workflow matches "You route to" in Domain Authority
 - [ ] Tools listed match actual needs for agent's approach
 - [ ] No placeholder text remaining (no `[brackets]` or `{braces}`)
-
----
-
-## Section Order
-
-Sections MUST appear in this order for consistency across agents:
-
-1. Title and Overview (H1)
-2. Core Responsibilities (H2)
-3. Position in Workflow (H2)
-4. Domain Authority (H2)
-5. Approach (H2)
-6. What You Produce (H2)
-7. Handoff Criteria (H2)
-8. The Acid Test (H2)
-9. Skills Reference (H2)
-10. Cross-Rite Routing (H2)
-11. Anti-Patterns to Avoid (H2)
-
-Optional sections (Behavioral Constraints, Consultation Protocol) may appear between Skills Reference and Anti-Patterns for specialized agents like orchestrators.
 
 ---
 
@@ -400,11 +282,7 @@ Optional sections (Behavioral Constraints, Consultation Protocol) may appear bet
 | Documentation | `sonnet` | Content creation, moderate complexity |
 | Tester | `opus` | Judgment calls on quality gates |
 
----
-
 ## Color Assignment
-
-Assign colors to differentiate agents within a pantheon. Avoid duplicates within the same pantheon.
 
 | Color | Typical Usage |
 |-------|---------------|

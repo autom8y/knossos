@@ -1,3 +1,7 @@
+---
+description: "Prompt Engineering Principles companion for agent-prompt-engineering skill."
+---
+
 # Prompt Engineering Principles
 
 > 8 principles that separate working prompts from frustrating ones

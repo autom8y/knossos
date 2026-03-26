@@ -1,3 +1,7 @@
+---
+description: "Smell Report Format companion for integration skill."
+---
+
 # Smell Report Format
 
 > Field requirements and structure for smell report documents.

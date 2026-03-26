@@ -1,3 +1,7 @@
+---
+description: "Schema: Tension Entry [TENSION-NNN] companion for schemas skill."
+---
+
 # Schema: Tension Entry [TENSION-NNN]
 
 ## Template

@@ -1,3 +1,7 @@
+---
+description: "Handoff Artifact Schema companion for procession-ref skill."
+---
+
 # Handoff Artifact Schema
 
 Procession handoff artifacts are Markdown files with YAML frontmatter. They live at `{artifact_dir}/HANDOFF-{source_station}-to-{target_station}.md`.

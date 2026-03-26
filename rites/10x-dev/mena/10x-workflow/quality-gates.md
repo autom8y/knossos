@@ -1,3 +1,7 @@
+---
+description: "Quality Gates companion for 10x-workflow skill."
+---
+
 # Quality Gates
 
 > Mandatory checkpoints between workflow phases

@@ -1,22 +1,28 @@
 ---
 name: commit-conventions
-description: "Releaser-specific commit conventions extending platform conventions. Use when: committing version bumps, release publishes, or changelog entries in releaser rite context. Triggers: release commit, version bump, chore(deps), chore(release), publish commit."
+description: |
+  Releaser-specific commit conventions extending platform conventions.
+  Use when: committing version bumps, release publishes, PR creation, or
+  changelog entries in a releaser rite context.
+  Triggers: release commit, version bump, chore(deps), chore(release),
+  publish commit, dependency bump, bump consumer, auto-merge PR.
 ---
 
 # Releaser Commit Conventions
 
-Extends platform `conventions` skill with release-specific commit formats.
+> Extends platform `conventions` skill with release-specific commit formats.
+> Consumed by: Release-Executor (executes), Release-Planner (references for plan output).
 
-## Release Commit Formats
+## Quick-Reference Commit Formats
 
 | Action | Format | Example |
 |--------|--------|---------|
 | Dependency bump | `chore(deps): bump {dependency} to {version}` | `chore(deps): bump @acme/sdk to 2.1.0` |
 | Package publish | `chore(release): publish {package} v{version}` | `chore(release): publish core-sdk v1.3.0` |
 
-## Constraint Style Matching
+## Constraint Style — Preserve Existing Style
 
-When bumping consumer dependency versions, preserve the consumer's existing constraint style:
+When bumping a consumer's dependency version, match the format already in that manifest.
 
 | Style | Before | After |
 |-------|--------|-------|
@@ -24,14 +30,21 @@ When bumping consumer dependency versions, preserve the consumer's existing cons
 | range | `>=1.2.0` | `>=1.3.0` |
 | compatible | `^1.2.3` | `^1.3.0` |
 
+**Rule**: read the consumer manifest first, then write the bump commit in the same style.
+
 ## PR Conventions
 
-- PR title: descriptive, references packages affected
-- PR body: list repos bumped, versions changed, link to publish confirmation
-- Auto-merge: `gh pr merge --auto --squash {pr-number}` only when plan specifies `auto_merge_pr`
+- Title: descriptive, names all affected packages
+- Body: list repos bumped, versions changed, link to publish confirmation
+- Auto-merge: `gh pr merge --auto --squash {pr-number}` — only when `auto_merge_pr` is set in plan
 
-## Safety (supplements platform conventions)
+## Safety Rules
 
-- NEVER publish without the plan specifying the action
+- NEVER publish without the release plan specifying the action
 - NEVER skip CI checks or add `[skip ci]` to commits
 - ALWAYS verify publish success before bumping consumers
+
+## Related Skills
+
+- `releaser-ref` skill — Full releaser workflow reference (phases, state map, dependency graph)
+- `conventions` skill — Platform-wide commit and branch naming conventions

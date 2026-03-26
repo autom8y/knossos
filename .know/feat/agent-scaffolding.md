@@ -1,14 +1,13 @@
 ---
 domain: feat/agent-scaffolding
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/agent/**/*.go"
   - "./internal/cmd/agent/**/*.go"
-  - "./docs/decisions/ADR-0024*.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
+source_hash: "b329d719"
 confidence: 0.88
 format_version: "1.0"
 ---
@@ -17,56 +16,23 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Replaces freeform agent authoring with structured scaffolding, validation, and platform section updates. Prior: 61+ agents as inconsistent markdown, no schema validation, no type classification, 2-4 hours per agent.
-
-**ADR-0024**: "Smart Authoring, Simple Materialization" — intelligence in CLI commands, materializer copies verbatim. Section ownership (platform/author/derived). Warning-based MCP validation. `additionalProperties: true` in JSON Schema. Two-tier validation (WARN/STRICT).
+Solves structural authoring: correct frontmatter, sections, tool lists, and behavioral constraints per archetype. Three guarantees: authoring scaffolding (ari agent new from archetype), structural governance (ari agent validate with WARN/STRICT tiers), summonable agent lifecycle (summon/dismiss to ~/.claude/agents/). Three-ownership section model: platform (managed), author (preserved), derived (generated from frontmatter). tier field (standing/rite/summonable) controls materialization lifecycle, not capabilities. knossosOnlyFields stripped at two independent paths (materialize and summon).
 
 ## Conceptual Model
 
-### Three Archetypes
-
-| Archetype | Model | Tools | Color | MaxTurns |
-|-----------|-------|-------|-------|----------|
-| `orchestrator` | opus | Read | purple | 40 |
-| `specialist` | opus | Bash,Glob,Grep,Read,Edit,Write,TodoWrite,Skill | orange | 150 |
-| `reviewer` | opus | +WebFetch,WebSearch | red | 100 |
-
-Types `meta`, `designer`, `analyst`, `engineer` fall back to `specialist` archetype.
-
-### Section Ownership
-
-| Ownership | On Scaffold | On `ari agent update` |
-|-----------|-------------|----------------------|
-| `platform` | Pre-populated from template | Regenerated |
-| `author` | `<!-- TODO: hint -->` | Preserved |
-| `derived` | Generated from frontmatter | Regenerated |
-
-### Three Workflows
-
-1. **Authoring**: `ari agent new` → `GetArchetype()` → `ScaffoldAgent()` → write
-2. **Validation**: `ari agent validate` → Phase 1 (parse) → Phase 2 (JSON Schema) → Phase 3 (semantic)
-3. **Update**: `ari agent update` → `ParseAgentSections()` → `RegeneratePlatformSections()` → `AssembleAgentFile()`
+**Three archetypes:** orchestrator (Read-only, maxTurns 40, Task disallowed), specialist (broad tools, maxTurns 150), reviewer (Task disallowed, must define contract.must_not). 13 valid type values map to 3 archetype definitions. **Three tiers:** standing (always materialized), rite (per-sync), summonable (on-demand). **Two-tier validation:** Phase 1 (parse), Phase 2 (JSON Schema), Phase 3 (semantic: validateCore + archetype rules). **Section ownership:** platform (re-rendered on update), author (preserved), derived (generated).
 
 ## Implementation Map
 
-16 files in `/Users/tomtenuta/Code/knossos/internal/agent/`. 6 files in `internal/cmd/agent/`. 3 embedded `.md.tpl` archetype templates.
-
-### Key Types
-
-`AgentFrontmatter`, `Archetype`, `SectionOwnership`, `ParsedAgent`, `ValidationMode`, `MemoryField`, `FlexibleStringSlice`.
-
-**Critical boundary**: `internal/materialize` does NOT import `internal/agent`. Materializer copies agent files verbatim.
+`internal/agent/` (9 files): frontmatter.go (AgentFrontmatter, validateCore), archetype.go (3 archetypes, SectionDef), scaffold.go (ScaffoldAgent via Go templates), sections.go (ParseAgentSections, exact+prefix heading match), regenerate.go (RegeneratePlatformSections), validate.go (AgentValidator, WARN/STRICT), mcp_validate.go (MCP cross-reference). `internal/cmd/agent/` (8 files): new, validate, update, summon (collision check + knossos field strip + provenance), dismiss (provenance check), roster (3-section: standing/summoned/available), list, embody (delegates to internal/perspective). Materialize: agent_transform.go (7-step transform pipeline).
 
 ## Boundaries and Failure Modes
 
-- Does NOT run during `ari sync` (authoring-time only)
-- Does NOT enforce strict validation on existing agents (opt-in via `--strict`)
-- Type fallback is silent (analyst → specialist without warning)
-- `ari agent update` uses `os.WriteFile` not `AtomicWriteFile`
-- `ValidationMode` uses `iota` (violates typed string constant convention)
+Silent tier mismatch (standing agents without files show no description). BehavioralContract.MaxTurns not surfaced as CC maxTurns. Summon collision checker degrades to noop on uninitialized projects. Non-standard types silently map to specialist. Template placeholder extraction for section content is fragile. Provenance non-fatal for summon/dismiss. ADR-0024 missing from disk.
 
 ## Knowledge Gaps
 
-1. Archetype template content (`.md.tpl` files) not read.
-2. `agent.schema.json` conditional rules not confirmed against current schema.
-3. Lint integration uses raw file inspection, not `internal/agent` parsing.
+1. JSON Schema content not read
+2. Archetype .md.tpl template content not read
+3. internal/perspective package not fully traced
+4. Skill policy application details not read

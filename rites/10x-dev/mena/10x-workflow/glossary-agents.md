@@ -1,3 +1,7 @@
+---
+description: "Glossary: Agents & Artifacts companion for 10x-workflow skill."
+---
+
 # Glossary: Agents & Artifacts
 
 > Agent roles, documentation artifacts, communication patterns

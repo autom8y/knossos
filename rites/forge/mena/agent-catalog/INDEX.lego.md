@@ -74,9 +74,7 @@ Provides the canonical rite profile template, step-by-step Pythia sync checklist
 
 ## Pythia Sync Checklist
 
-### New Rite
-
-Files to update:
+### New Rite — Files to Update
 
 1. **ecosystem-map.md**
    - Add rite to Rites table
@@ -108,7 +106,6 @@ Files to check:
 
 ### Deprecated Rite
 
-Actions:
 1. Mark as deprecated in rite profile
 2. Remove from active routing (intent-patterns)
 3. Add migration note pointing to replacement

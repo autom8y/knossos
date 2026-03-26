@@ -1,3 +1,7 @@
+---
+description: "Agent Glossary companion for glossary skill."
+---
+
 # Agent Glossary
 
 Definitions and patterns for agent roles in rites.

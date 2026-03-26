@@ -1,3 +1,7 @@
+---
+description: "Workflow Lifecycle companion for 10x-workflow skill."
+---
+
 # Workflow Lifecycle
 
 > Complete lifecycle from initiative scoping through delivery validation. This is the operational manual for running the 10x workflow.
@@ -306,53 +310,12 @@ At phase boundaries, Potnia summarizes:
 
 ## Problem Resolution
 
-### Ambiguity Discovered
-
-```
-1. Pause execution
-2. Surface specific ambiguity to user
-3. Propose resolution if possible
-4. Get clarification
-5. Update plan if needed
-6. Continue
-```
-
-### Quality Gate Failure
-
-```
-1. Do NOT proceed
-2. Identify specific gaps
-3. Determine remediation:
-   - Minor: Current session
-   - Major: Route to appropriate agent
-4. Get user confirmation
-5. Execute remediation
-6. Re-verify gate
-```
-
-### Scope Creep
-
-```
-1. Flag explicitly: "This is scope creep"
-2. Categorize:
-   - Nice to have -> Defer
-   - Actually blocking -> Re-plan
-3. Propose handling
-4. Get user decision
-5. Document in out-of-scope or expand
-```
-
-### External Blocker
-
-```
-1. Document blocker specifically
-2. Identify what can proceed
-3. Propose:
-   - Parallel work
-   - Placeholder approach
-   - Wait
-4. Get user decision
-```
+| Situation | Response |
+|-----------|----------|
+| **Ambiguity** | Pause; surface specific ambiguity; propose resolution; get confirmation; continue |
+| **Gate failure** | Do NOT proceed; identify gaps; route minor fixes to current session, major to appropriate agent; re-verify |
+| **Scope creep** | Flag explicitly; defer "nice to have"; re-plan if blocking; get user decision; document |
+| **External blocker** | Document specifically; identify parallel work; propose parallel / placeholder / wait; get decision |
 
 ---
 

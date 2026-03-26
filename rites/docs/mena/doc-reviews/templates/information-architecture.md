@@ -1,3 +1,7 @@
+---
+description: "Information Architecture Specification Template companion for templates skill."
+---
+
 # Information Architecture Specification Template
 
 > Documentation taxonomy, directory structure, naming conventions, and navigation design.

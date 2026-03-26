@@ -1,3 +1,7 @@
+---
+description: "Refactoring Plan Template companion for templates skill."
+---
+
 # Refactoring Plan Template
 
 > Phased refactoring sequence.

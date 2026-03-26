@@ -1,15 +1,14 @@
 ---
 domain: feat/session-forking
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
-  - "./internal/cmd/session/fray*.go"
+  - "./internal/cmd/session/fray.go"
   - "./internal/session/context.go"
-  - "./docs/decisions/ADR-0006*.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.85
+source_hash: "b329d719"
+confidence: 0.82
 format_version: "1.0"
 ---
 
@@ -17,39 +16,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Enables a single session to spawn parallel workstreams without violating the single-active-session-per-terminal constraint. Creates a child session inheriting parent context, auto-parks the parent, provides each child with its own directory and lifecycle.
-
-**ADR-0006**: Hybrid parallelization pattern (serial Layer 1, parallel Layer 2). 60% wall-time reduction. **ADR-0001**: FSM that fray respects (ACTIVE→PARKED). **ADR-0010**: `--seed` complement. **ADR-0029**: Worktree environment contract.
+Enables parallel workstreams within a single initiative by creating a child session inheriting parent context while allowing independent work. Auto-parks parent (prevents concurrent mutation), fail-open for worktree creation, child inherits state but not identity, strand tracking on parent (ACTIVE -> LANDED), event emission non-fatal. ADR-0006 referenced but not found on disk.
 
 ## Conceptual Model
 
-### Parent-Child Relationship
-
-- Parent: ACTIVE → PARKED, `parked_reason: "Frayed to {childID}"`, `strands: [childID]`
-- Child: `frayed_from: parentID`, `fray_point: parentPhase`, `schema_version: "2.2"`, inherits initiative/complexity/rite/phase
-
-### Key Events
-
-- `session.frayed` on parent at fork time
-- `session.strand_resolved` on parent when child wraps
+**Directed parent-child graph:** Parent (PARKED, strands list) -> Child (ACTIVE, FrayedFrom back-pointer, FrayPoint phase). **Strand lifecycle:** ACTIVE -> LANDED (on child wrap). **Two event types:** session.frayed (on parent at fork), session.strand_resolved (on parent at child wrap). **Worktree isolation:** /tmp/knossos-fray-* via createWorktree (30s timeout). **Schema:** strandList polymorphic YAML deserializer handles v2.1 []string and v2.3 []Strand.
 
 ## Implementation Map
 
-Primary: `/Users/tomtenuta/Code/knossos/internal/cmd/session/fray.go` (entry point, `fraySession()` function). Supporting: `internal/session/context.go` (`FrayedFrom`/`Strands` fields), `internal/cmd/session/wrap.go:246-256` (strand_resolved back-emission).
-
-Tests: `fray_test.go` — 4 tests. No integration test for strand_resolved roundtrip.
+Entry: `internal/cmd/session/fray.go` -- fraySession() 11-step pipeline: resolve parent -> exclusive lock -> load context -> FSM validate -> create child -> write child -> update parent (park + append strand) -> write parent -> optional worktree -> emit events -> return FrayOutput. Child wrap integration in wrap.go: emit strand_resolved, update parent strand status to LANDED.
 
 ## Boundaries and Failure Modes
 
-- Does NOT detect conflicting changes between strands
-- Does NOT auto-resume parent when strands resolve
-- Worktree creation is best-effort (non-fatal on failure)
-- Events emission is non-fatal by design
-- Fraying a frayed child creates a chain (no cycle detection)
-- No integration test for fray→wrap→strand_resolved path
+FSM constraint: fray only from ACTIVE -> PARKED. Lock protocol: parent locked exclusively (5-min stale threshold). Partial failure: child dir removed on parent save failure. No ADR-0006 on disk. Strand abandon path unimplemented. Multi-level fray trees untested. Worktree cleanup on wrap not handled. FrameRef on Strand never set.
 
 ## Knowledge Gaps
 
-1. Worktree lifecycle unmanaged (created at `/tmp/`, never tracked or cleaned).
-2. v2 vs v3 event path divergence in fray (v3 constructor exists but unused).
-3. No dedicated ADR for fray; schema_version 2.2 bump lacks rationale.
+1. ADR-0006 missing from disk
+2. Strand abandon resolution not implemented
+3. Nested fray (grandchild) behavior untested

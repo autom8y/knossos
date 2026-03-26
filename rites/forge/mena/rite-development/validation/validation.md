@@ -1,3 +1,7 @@
+---
+description: "Rite Validation companion for validation skill."
+---
+
 # Rite Validation
 
 > Pre-flight checks and troubleshooting for rite deployment.

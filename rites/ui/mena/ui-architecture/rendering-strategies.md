@@ -1,3 +1,7 @@
+---
+description: "Rendering Strategies companion for ui-architecture skill."
+---
+
 # Rendering Strategies
 
 > SSG/ISR/Streaming SSR/Full SSR/Islands/Resumability decision framework, hydration spectrum, per-route configuration.

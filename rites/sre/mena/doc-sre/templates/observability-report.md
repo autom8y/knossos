@@ -1,3 +1,7 @@
+---
+description: "Observability Report Template companion for templates skill."
+---
+
 # Observability Report Template
 
 > Audit current monitoring, logging, tracing, and alerting coverage for a system or service.

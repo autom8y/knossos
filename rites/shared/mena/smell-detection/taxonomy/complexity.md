@@ -1,3 +1,7 @@
+---
+description: "Complexity Hotspots (CX-*) companion for taxonomy skill."
+---
+
 # Complexity Hotspots (CX-*)
 
 > Code that is excessively complex or difficult to understand.

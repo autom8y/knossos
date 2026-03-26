@@ -1,3 +1,7 @@
+---
+description: "Extraction Schema companion for schemas skill."
+---
+
 # Extraction Schema
 
 > **Purpose**: Define the structure for `extraction-{topic}.yaml` files that capture analyzed source content, enabling synthesis agents to work from structured extractions (~2K tokens) rather than raw sources (~10K tokens).

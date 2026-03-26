@@ -124,14 +124,8 @@ propose → analyze → migrate → validate
 
 ## Skills
 
-- `ui-ref` — Workflow reference
-- `ui-design-systems` — Design system patterns and token taxonomy
-- `ui-quality` — Quality gates and testing patterns
-- `ui-architecture` — Rendering strategy and performance budgets
-- `aesthetic-evaluation` — Visual and UX evaluation criteria
-- `motion-architecture` — Motion classification and interaction physics
-- `evolution-lifecycle` — Design system evolution and migration
-- `quality-gates` — Gate criteria across all workflow phases
+- `ui-ref` — Comprehensive UI reference (design systems, quality gates, motion, aesthetics, evolution lifecycle)
+- `ui-architecture` — CSS principles, rendering strategies, state patterns, component isolation
 
 ---
 

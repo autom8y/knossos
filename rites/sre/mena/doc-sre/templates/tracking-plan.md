@@ -1,3 +1,7 @@
+---
+description: "Tracking Plan Template companion for templates skill."
+---
+
 # Tracking Plan Template
 
 > Analytics event specification with naming conventions, properties, and validation rules.

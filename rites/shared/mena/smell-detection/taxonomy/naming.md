@@ -1,3 +1,7 @@
+---
+description: "Naming Inconsistencies (NM-*) companion for taxonomy skill."
+---
+
 # Naming Inconsistencies (NM-*)
 
 > Terminology drift, misleading identifiers, and convention violations.

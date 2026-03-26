@@ -88,8 +88,6 @@ instrumentation → research → experimentation → synthesis
 
 **Produces**: `.ledge/spikes/TRACK-{slug}.md`
 
----
-
 ### User Researcher
 
 **Purpose**: Capture the qualitative 'why'
@@ -102,8 +100,6 @@ instrumentation → research → experimentation → synthesis
 
 **Produces**: `.ledge/spikes/RESEARCH-{slug}.md`
 
----
-
 ### Experimentation Lead
 
 **Purpose**: Run the scientific method on product
@@ -115,8 +111,6 @@ instrumentation → research → experimentation → synthesis
 - Statistical rigor
 
 **Produces**: `.ledge/spikes/EXPERIMENT-{slug}.md`
-
----
 
 ### Insights Analyst
 

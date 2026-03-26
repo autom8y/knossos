@@ -1,3 +1,7 @@
+---
+description: "Context-Based Severity Overrides companion for severity skill."
+---
+
 # Context-Based Severity Overrides
 
 > Patterns for adjusting default severity factors based on context.

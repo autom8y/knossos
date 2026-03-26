@@ -1,3 +1,7 @@
+---
+description: "Workflow Validity Evaluation companion for evals skill."
+---
+
 # Workflow Validity Evaluation
 
 > Checklist for verifying workflow.yaml files are valid and coherent

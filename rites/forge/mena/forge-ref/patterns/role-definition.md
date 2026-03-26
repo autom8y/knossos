@@ -1,3 +1,7 @@
+---
+description: "Role Definition Pattern companion for patterns skill."
+---
+
 # Role Definition Pattern
 
 > How to define clear, non-overlapping agent roles

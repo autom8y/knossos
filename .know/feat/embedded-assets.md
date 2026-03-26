@@ -1,16 +1,15 @@
 ---
 domain: feat/embedded-assets
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./embed.go"
   - "./internal/assets/**/*.go"
-  - "./internal/materialize/source/**/*.go"
-  - "./docs/decisions/TDD-single-binary-completion.md"
+  - "./internal/cmd/common/embedded.go"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.86
+source_hash: "b329d719"
+confidence: 0.82
 format_version: "1.0"
 ---
 
@@ -18,45 +17,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Makes `ari` self-contained: the binary carries all rites, templates, hooks config, cross-rite agents, and platform mena compiled in at build time. Eliminates dependency on `$KNOSSOS_HOME` source repository.
-
-**TDD**: `/Users/tomtenuta/Code/knossos/docs/decisions/TDD-single-binary-completion.md`
-
-**Key decisions**: `embed.go` at module root as `package knossos`. Five asset classes. ~2MB binary size increase (LOW risk). Hybrid distribution: XDG extraction on `ari init` for filesystem performance on subsequent syncs.
+Solves bootstrapping: users run ari init immediately after download with no KNOSSOS_HOME. Zero external runtime dependencies. Version coherence (embedded assets match binary version). Hybrid distribution: embedded FS provides canonical source, ari init extracts mena to XDG with version sentinel for upgrade detection. Six //go:embed directives in module-root embed.go.
 
 ## Conceptual Model
 
-### Five Asset Classes
-
-| Variable | Source | Type | Role |
-|---|---|---|---|
-| `EmbeddedRites` | `rites/` | `embed.FS` | All rite definitions |
-| `EmbeddedTemplates` | `knossos/templates/` | `embed.FS` | CLAUDE.md section templates |
-| `EmbeddedHooksYAML` | `config/hooks.yaml` | `[]byte` | Hook configuration |
-| `EmbeddedAgents` | `agents/` | `embed.FS` | Cross-rite agents |
-| `EmbeddedMena` | `mena/` | `embed.FS` | Platform mena |
-
-### Six-Tier Resolution (Embedded = Tier 6)
-
-1. Explicit → 2. Project satellite → 3. User → 4. Org → 5. Knossos platform → 6. **Binary embedded**
-
-### Wiring Chain
-
-`embed.go` → `main.go` → `common.SetEmbeddedAssets()` → `assets.SetEmbedded()` → `Materializer.WithEmbeddedFS()`
+**Role 1 (fallback source):** EmbeddedRites as lowest-priority tier in resolution chain. fs.Sub creates sub-FS rooted at rite directory. **Role 2 (bootstrap to XDG):** EmbeddedMena and EmbeddedAgents extracted during ari init with .ari-version sentinel. Wipe-and-reextract on version mismatch. **Role 3 (hooks bootstrap):** EmbeddedHooksYAML ([]byte, single file) bootstrapped if missing. **Role 4 (processions):** EmbeddedProcessions for template resolution. **Global state flow:** embed.go -> main.go SetEmbedded* -> internal/assets store -> internal/cmd/common accessors -> Materializer With* methods.
 
 ## Implementation Map
 
-Core files: `embed.go`, `internal/assets/assets.go`, `internal/cmd/common/embedded.go`, `cmd/ari/main.go`. Resolution: `internal/materialize/source/resolver.go` (tier 6 `checkEmbeddedSource()`). Pipeline: `materialize.go` (`riteFS()`, `templatesFS()`, `copyDirFromFS()`).
+`embed.go` (6 exports: EmbeddedRites, EmbeddedTemplates, EmbeddedHooksYAML, EmbeddedAgents, EmbeddedMena, EmbeddedProcessions). `internal/assets/assets.go` (package-level storage + getters/setters + BuildVersion). `internal/cmd/common/embedded.go` (thin pass-through). `internal/materialize/source/resolver.go` (WithEmbeddedFS, riteChain adds embedded tier). `internal/materialize/materialize.go` (riteFS, templatesFS using fs.Sub). `internal/cmd/initialize/init.go` (extractEmbeddedMenaToXDG).
 
 ## Boundaries and Failure Modes
 
-- Embedded content is a compile-time snapshot (stale across binary versions)
-- `riteFS()` fallback silently degrades to nonexistent OS path on `fs.Sub` failure
-- XDG `RemoveAll` on version upgrade can destroy user-created files without provenance guard
-- `KnossosHome()` default `~/Code/knossos` can shadow embedded tier unexpectedly
+embed.go MUST live at module root (//go:embed paths are relative). SourceEmbedded skips platform mena injection (prevents developer-local leaks). EmbeddedHooksYAML is write-once (no version-aware upgrade). No embedded FS in rite.Discovery (only sync/init use embedded). assets.SetEmbedded not called -> embedded tier silently absent. fs.Sub failure -> falls back to os.DirFS (likely fails on FS-relative path). XDG RemoveAll failure -> warning, stale mena retained. Operational trap: rebuilt binary vs PATH binary divergence.
 
 ## Knowledge Gaps
 
-1. XDG `RemoveAll` user-file destruction risk undocumented.
-2. `riteFS` error path untested.
-3. TDD Task 3 (shell cleanup) completion status unverified.
+1. TDD-single-binary-completion.md not found on disk
+2. EmbeddedAgents user-scope consumption path not traced
+3. resolution.RiteChain constructor signature inferred from call sites

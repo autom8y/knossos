@@ -1,3 +1,7 @@
+---
+description: "Market Analysis Template companion for templates skill."
+---
+
 # Market Analysis Template
 
 > TAM/SAM/SOM sizing with segment analysis, growth drivers, and strategic implications.

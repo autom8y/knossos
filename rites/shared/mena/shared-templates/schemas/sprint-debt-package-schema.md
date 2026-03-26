@@ -1,3 +1,7 @@
+---
+description: "Sprint Debt Package Schema companion for schemas skill."
+---
+
 # Sprint Debt Package Schema
 
 **Version:** 1.0

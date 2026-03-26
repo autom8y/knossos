@@ -1,3 +1,7 @@
+---
+description: "Quick Audit Checklist companion for agent-prompt-engineering skill."
+---
+
 # Quick Audit Checklist
 
 > 6-point rapid assessment for agent prompts (under 5 minutes)

@@ -1,3 +1,7 @@
+---
+description: "Exousia Calibration from Tribal Knowledge companion for prompt-fuel-reference skill."
+---
+
 # Exousia Calibration from Tribal Knowledge
 
 ## What EX-NN Entries Are

@@ -1,3 +1,7 @@
+---
+description: "Research Findings Template companion for templates skill."
+---
+
 # Research Findings Template
 
 > User research synthesis with participant profiles, evidence-backed findings, and actionable recommendations.

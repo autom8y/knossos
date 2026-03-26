@@ -1,3 +1,7 @@
+---
+description: "Insights Artifacts companion for intelligence-ref skill."
+---
+
 # Insights Artifacts
 
 > HANDOFF templates, findings format, and insights report guidance for the Insights Analyst.

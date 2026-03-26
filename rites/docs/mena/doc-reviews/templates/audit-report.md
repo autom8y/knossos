@@ -1,3 +1,7 @@
+---
+description: "Documentation Audit Report Template companion for templates skill."
+---
+
 # Documentation Audit Report Template
 
 > Systematic assessment of documentation health: staleness, orphans, redundancy, and gaps.

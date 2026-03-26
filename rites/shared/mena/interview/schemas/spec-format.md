@@ -1,3 +1,7 @@
+---
+description: "Spec Artifact Format companion for schemas skill."
+---
+
 # Spec Artifact Format
 
 > Output schema for interview-produced specifications.

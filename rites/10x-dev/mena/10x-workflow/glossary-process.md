@@ -1,3 +1,7 @@
+---
+description: "Glossary: Process & Workflow companion for 10x-workflow skill."
+---
+
 # Glossary: Process & Workflow
 
 > Workflow phases, concepts, decision-making

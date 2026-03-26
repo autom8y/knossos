@@ -4,9 +4,9 @@ last_verified: 2026-02-26
 
 # Rite: docs
 
-> Documentation lifecycle from audit through review.
+> Documentation lifecycle from audit through accuracy review.
 
-The docs rite provides a complete workflow for documentation: Audit → Structure → Write → Review. Currently active for this sprint.
+The docs rite treats documentation as a product with its own lifecycle: audit existing state, redesign the structure, write the content, then verify technical accuracy. Each phase is a specialist handoff, not a single-agent pass. Doc-auditor does not just flag stale pages — it maps coverage against the actual codebase and identifies what's missing. Information-architect does not rearrange files — it designs taxonomy and navigation for how users actually look for information. This separates docs from ad-hoc documentation updates: the rite enforces that structure decisions precede writing decisions, so tech-writer never makes taxonomy choices, and doc-reviewer never rewrites content — only validates accuracy against the codebase.
 
 ---
 
@@ -23,11 +23,11 @@ The docs rite provides a complete workflow for documentation: Audit → Structur
 
 ## When to Use
 
-- Creating API documentation
-- Writing technical guides
-- Auditing documentation quality
-- Restructuring documentation
-- Consolidating redundant docs
+- Auditing documentation for staleness, redundancy, or gaps after a major codebase refactoring
+- Redesigning the doc taxonomy when users can't find things and the structure is the cause
+- Consolidating redundant docs scattered across multiple files into authoritative single sources
+- Writing new documentation for a feature that shipped without docs
+- **Not for**: quick one-off page edits — invoke tech-writer directly. The full rite is for initiatives where audit findings will drive structural changes before writing begins.
 
 ---
 
@@ -35,11 +35,11 @@ The docs rite provides a complete workflow for documentation: Audit → Structur
 
 | Agent | Role |
 |-------|------|
-| **potnia** | Coordinates documentation workflow phases |
-| **doc-auditor** | Audits existing documentation and identifies gaps and priorities |
-| **information-architect** | Designs documentation structure aligned with user mental models |
-| **tech-writer** | Writes clear, accurate technical documentation |
-| **doc-reviewer** | Reviews documentation for technical accuracy and quality |
+| **potnia** | Coordinates documentation workflow phases; gates writing on approved structure |
+| **doc-auditor** | Inventories existing docs for staleness, redundancy, and coverage gaps — correlates with git history and codebase state, not timestamps alone |
+| **information-architect** | Designs taxonomy, navigation, and content organization for how users actually look for information; produces content briefs for tech-writer |
+| **tech-writer** | Writes from content briefs, optimizing for comprehension — explains why, not just what; never makes taxonomy decisions |
+| **doc-reviewer** | Validates technical accuracy against the codebase; approves or returns with specific corrections — does not rewrite |
 
 See agent files: `rites/docs/agents/`
 
@@ -70,12 +70,14 @@ flowchart LR
 # Quick switch to docs rite
 /docs "document feature X"
 
-# Orchestrator consultation
-Task(potnia, "audit and improve documentation for Y")
+# Full documentation initiative — audit drives structure drives writing
+Task(potnia, "audit and restructure the rite documentation — 21 files, varying quality")
 
-# Direct agent invocation
-Task(doc-auditor, "audit docs/api/")
-Task(tech-writer, "write getting started guide")
+# Audit a specific directory for gaps and staleness
+Task(doc-auditor, "audit docs/doctrine/rites/ — flag stale last_verified dates and missing sections")
+
+# Write from a content brief when structure is already approved
+Task(tech-writer, "write the getting started guide per content brief at .ledge/specs/getting-started-brief.md")
 ```
 
 ---
@@ -107,5 +109,5 @@ Task(tech-writer, "write getting started guide")
 ## See Also
 
 - [CLI: rite](../operations/cli-reference/cli-rite.md) — Rite operations
-- `/documentation` skill — Template and standards reference
-- `/standards` skill — Code conventions and tech stack
+- [CLI: sync](../operations/cli-reference/cli-sync.md)
+- [Rite Catalog](index.md)

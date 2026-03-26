@@ -1,3 +1,7 @@
+---
+description: "Pass 1: Scar Tissue Catalog companion for codebase-archaeology skill."
+---
+
 # Pass 1: Scar Tissue Catalog
 
 > Extract past bugs, regressions, and defensive patterns born from production failures. Scar tissue is the highest-value prompt content because it encodes failure modes an AI cannot derive from reading current code alone.

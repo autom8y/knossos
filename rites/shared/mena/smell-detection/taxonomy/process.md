@@ -1,3 +1,7 @@
+---
+description: "Process Smells (PR-*) companion for taxonomy skill."
+---
+
 # Process Smells (PR-*)
 
 > Issues in development workflow, testing, and documentation.

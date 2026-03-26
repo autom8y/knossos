@@ -6,7 +6,7 @@ last_verified: 2026-02-26
 
 > AI code quality gate — hallucination detection and temporal debt audit.
 
-The slop-chop rite provides workflows for identifying and remediating AI-generated code quality issues: hallucinated APIs, temporal assumptions, logic gaps, and cruft patterns.
+The slop-chop rite hunts for AI-generated code pathologies that standard code review misses — hallucinated imports, phantom API calls, cargo-culted patterns, and temporal debt (hardcoded dates, stale version assumptions). It treats AI-generated code as guilty until proven innocent. Hallucination-hunter performs static verification first: every import resolved, every API call cross-referenced against actual signatures, every dependency confirmed to exist. Logic-surgeon and cruft-cutter then assess reasoning quality and unnecessary patterns. Gate-keeper issues a binary verdict — PASS, FAIL, or CONDITIONAL-PASS — with an evidence chain, not a list of suggestions. FAIL blocks the merge. Temporal findings never block (they are always advisory) — this distinction prevents false positives while maintaining hard gates on hallucinated or broken code.
 
 ---
 
@@ -23,11 +23,11 @@ The slop-chop rite provides workflows for identifying and remediating AI-generat
 
 ## When to Use
 
-- Auditing AI-generated code for hallucinated APIs or imports
-- Detecting temporal assumptions (hardcoded dates, stale version references)
-- Finding logic gaps and incomplete error handling
-- Cleaning up AI code cruft patterns
-- Quality-gating before merge of AI-authored PRs
+- Quality-gating a PR where AI wrote significant portions of the code before it merges
+- Auditing an existing codebase that was heavily AI-assisted for phantom imports or wrong API signatures
+- Detecting temporal debt: hardcoded dates, deprecated API references, or version assumptions baked in at generation time
+- Getting a binary PASS/FAIL gate verdict with full evidence chain, not a review checklist
+- **Not for**: general code quality cleanup — use hygiene for that. Not for detecting architectural patterns or design issues — slop-chop targets the specific failure modes of LLM code generation, not human code quality.
 
 ---
 
@@ -35,12 +35,12 @@ The slop-chop rite provides workflows for identifying and remediating AI-generat
 
 | Agent | Role |
 |-------|------|
-| **potnia** | Coordinates slop-chop assessment phases |
-| **hallucination-hunter** | Detects hallucinated APIs, imports, and non-existent references |
-| **logic-surgeon** | Identifies logic gaps, incomplete branches, and reasoning errors |
-| **cruft-cutter** | Finds and removes unnecessary code patterns (dead code, redundant checks) |
-| **gate-keeper** | Final quality gate — pass/fail decision with evidence |
-| **remedy-smith** | Produces remediation patches for identified issues |
+| **potnia** | Coordinates slop-chop assessment phases; routes to remedy-smith only when blocking findings are present |
+| **hallucination-hunter** | Verifies every import, API call, and dependency against actual existence — static verification only, no logic assessment; produces detection-report |
+| **logic-surgeon** | Identifies incomplete branches, missing error handling, and reasoning errors that hallucination-hunter's static pass cannot catch |
+| **cruft-cutter** | Finds AI-characteristic cruft: dead code generated "just in case," redundant null checks, copy-pasted boilerplate without adaptation |
+| **gate-keeper** | Issues PASS / FAIL / CONDITIONAL-PASS verdict with complete evidence chain; FAIL exits non-zero and blocks merge; temporal findings are always advisory |
+| **remedy-smith** | Produces targeted remediation patches for blocking findings — invoked only when gate-keeper finds issues that need fixing |
 
 See agent files: `rites/slop-chop/agents/`
 
@@ -71,14 +71,14 @@ flowchart LR
 # Quick switch to slop-chop
 /slop-chop
 
-# Hunt for hallucinated APIs
-Task(hallucination-hunter, "scan src/ for non-existent API calls and imports")
+# Full quality gate for an AI-authored PR
+Task(hallucination-hunter, "verify all imports and API calls in src/auth/ against actual existence — produce detection-report")
 
-# Analyze logic gaps
-Task(logic-surgeon, "check error handling completeness in auth module")
+# Logic assessment after hallucination check is clean
+Task(logic-surgeon, "check error handling completeness and branch coverage in the auth module — look for AI reasoning gaps")
 
-# Run full quality gate
-Task(gate-keeper, "quality gate assessment for PR #42")
+# Issue the final gate verdict
+Task(gate-keeper, "synthesize all findings from detection-report and analysis-report — issue PASS/FAIL for PR #42")
 ```
 
 ---

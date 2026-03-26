@@ -1,3 +1,7 @@
+---
+description: "Gap Analysis Template companion for templates skill."
+---
+
 # Gap Analysis Template
 
 > Issue diagnosis for knossos/satellite problems.

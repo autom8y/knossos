@@ -1,3 +1,7 @@
+---
+description: "Resilience Report Template companion for templates skill."
+---
+
 # Resilience Report Template
 
 > Aggregate assessment of system resilience across multiple chaos experiments.

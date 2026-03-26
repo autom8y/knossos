@@ -6,7 +6,7 @@ last_verified: 2026-02-26
 
 > Full development lifecycle from requirements through validation.
 
-The 10x-dev rite provides a complete workflow for feature implementation: PRD → TDD → Code → QA. It's the primary rite for building production features.
+The 10x-dev rite is the production feature delivery engine — requirements to running code, with every specialist playing a distinct role in sequence. It does not assume the request is well-understood: requirements-analyst begins by treating every input as ambiguous, turning stakeholder language into a PRD with measurable acceptance criteria and explicit scope boundaries before any design or code begins. This separates 10x-dev from a simple coding workflow: the rite enforces that ambiguity is resolved on paper, not in code. For PATCH-level changes the design phase is skipped; for everything MODULE and above, architect produces a TDD that qa-adversary will later test against — not as a formality, but adversarially, probing for gaps between spec and implementation.
 
 ---
 
@@ -23,10 +23,11 @@ The 10x-dev rite provides a complete workflow for feature implementation: PRD �
 
 ## When to Use
 
-- Implementing new features
-- Building from requirements to deployment
-- Need integrated design-to-test workflow
-- Complex work requiring multiple specialists
+- Implementing a new feature where requirements are vague or disputed — requirements-analyst elicits the real spec before code starts
+- Building anything MODULE or larger that needs an explicit technical design before implementation
+- Work where you need a QA adversary to test against the spec, not just verify the code compiles
+- Multi-task sprints where several features share a sprint boundary — use `/sprint` to parallelize
+- **Not for**: bug fixes, minor changes, or one-off patches — use clinic or a direct `/task` for those
 
 ---
 
@@ -34,11 +35,11 @@ The 10x-dev rite provides a complete workflow for feature implementation: PRD �
 
 | Agent | Role |
 |-------|------|
-| **potnia** | Coordinates development lifecycle phases and routes work to specialists |
-| **requirements-analyst** | Gathers requirements and produces PRD artifacts |
-| **architect** | Creates technical design documents and architecture decisions |
-| **principal-engineer** | Implements code according to design specifications |
-| **qa-adversary** | Validates implementation through adversarial testing |
+| **potnia** | Coordinates development lifecycle phases; gates each transition on prior-phase output quality |
+| **requirements-analyst** | Transforms vague stakeholder requests into PRDs with measurable acceptance criteria, MoSCoW priorities, and explicit out-of-scope statements |
+| **architect** | Evaluates competing design tradeoffs and produces TDDs and ADRs — decides component boundaries, not just documents them |
+| **principal-engineer** | Implements code against the approved TDD; flag deviations rather than silently resolve them |
+| **qa-adversary** | Tests against the PRD acceptance criteria adversarially — probes edge cases and boundary conditions, not just happy paths |
 
 See agent files: `rites/10x-dev/agents/`
 
@@ -66,14 +67,17 @@ flowchart LR
 ## Invocation Patterns
 
 ```bash
-# Full task lifecycle
+# Full task lifecycle — potnia drives all four phases
 /task "implement feature X"
 
-# Multi-task sprint
+# Multi-task sprint — parallelizes features within a sprint boundary
 /sprint "Authentication Sprint" --tasks="Login,Logout,Session"
 
-# Direct orchestrator invocation
-Task(potnia, "implement user authentication")
+# Start from orchestrator with explicit context
+Task(potnia, "implement user authentication — PRD scope: email+password only, OAuth deferred to next sprint")
+
+# Skip to implementation when PRD and TDD already exist
+Task(principal-engineer, "implement the notification service per TDD at .ledge/specs/notification-tdd.md")
 ```
 
 ---
@@ -107,4 +111,4 @@ Task(potnia, "implement user authentication")
 
 - [CLI: session](../operations/cli-reference/cli-session.md) — Session management
 - [CLI: rite](../operations/cli-reference/cli-rite.md) — Rite operations
-- `/orchestration` skill — Consultation protocol routing
+- [Rite Catalog](index.md)

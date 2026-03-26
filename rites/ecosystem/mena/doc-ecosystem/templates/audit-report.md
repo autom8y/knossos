@@ -1,3 +1,7 @@
+---
+description: "Audit Report Template companion for templates skill."
+---
+
 # Audit Report Template
 
 > Quality signoff for completed refactoring work.

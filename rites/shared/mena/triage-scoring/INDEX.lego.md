@@ -19,8 +19,6 @@ Before scoring, classify each complaint as **quick-file** or **deep-file**:
 
 **Agent quick-file zone handling**: Agent quick-files use two independently conservative defaults that serve different purposes. `zone_impact = 30` (parameter-level score) prevents quick-files from inflating composite scores without evidence. `zone default = behavior` (routing override) forces human review when the fix zone is unknown. These are intentionally decoupled: the score conservatively undersells risk while the routing conservatively oversells it. A filer providing explicit `zone: parameter` metadata overrides both defaults.
 
-**Quick-file routing rule**: Complaints filed by `drift-detector` with `severity: low` and no `zone`/`effort_estimate` fields auto-route to the **noise-review track**. This prevents auto-filed tool-fallback noise from consuming human-review bandwidth.
-
 ### Noise-Review Track (Quick-File Only)
 
 Quick-file complaints use simplified 3-dimension scoring:
@@ -38,9 +36,7 @@ Zone Impact, Scar-Tissue Match, and Effort-to-Impact are **skipped** (these fiel
 - 40-69: auto-accept
 - 70+: escalate to standard track for full 6-dimension scoring
 
-A typical single-observation `severity: low` tool-fallback complaint scores: `(20 * 0.40) + (15 * 0.40) + (20 * 0.20) = 8 + 6 + 4 = 18` → **auto-reject**. This is the correct routing for tool-fallback noise.
-
-A recurring tool-fallback (5+ observations, 2 filers) scores: `(20 * 0.40) + (90 * 0.40) + (50 * 0.20) = 8 + 36 + 10 = 54` → **auto-accept** (warrant investigation as a pattern).
+See [scoring-example.lego.md](scoring-example.lego.md) for worked arithmetic on both cases.
 
 ## Scoring Dimensions (Standard Track)
 
@@ -107,7 +103,7 @@ The zone override only elevates review level, never reduces it. A parameter comp
 
 ## Cross-Reference Protocol
 
-Before scoring, check every complaint against `.know/scar-tissue.md`:
+Check every complaint against `.know/scar-tissue.md` before scoring.
 
 **Step 1: Match detection.** Search the Failure Catalog for SCAR entries matching the complaint's description, tags, or affected file paths. Match on: fix location overlap, category overlap, or behavioral pattern similarity. **RELATED requires mechanism overlap, not just domain overlap.** Two items sharing the same component (e.g., both involve the lock system) but describing different failure mechanisms (e.g., TOCTOU race vs CLI session resolution) are **no-match**, not RELATED.
 
@@ -120,11 +116,11 @@ Before scoring, check every complaint against `.know/scar-tissue.md`:
 | **Related** (complaint is adjacent to but distinct from a SCAR) | Scar-tissue dimension = 60 (moderate signal) | Add `scar_ref: SCAR-NNN (RELATED)` to triage output |
 | **No match** | Scar-tissue dimension = 20 (baseline) | No `scar_ref` notation |
 
-**Step 3: Linkage.** Every triage output entry includes `scar_ref` when a match is found. This creates a bidirectional trace: complaints reference SCARs, and future scar-tissue regeneration can reference resolved complaints.
+**Step 3: Linkage.** Include `scar_ref` in every triage entry when matched. This creates a bidirectional trace for future scar-tissue regeneration.
 
 ## Dedup Constraint
 
-Each complaint must belong to **exactly one** dedup group. When a complaint's tags overlap with multiple groups, assign it to the best-fit group by combined tag+title similarity. Multi-group assignment inflates group counts and creates ambiguous routing.
+Each complaint belongs to **exactly one** dedup group. Use best-fit by combined tag+title similarity. Multi-group assignment inflates group counts and creates ambiguous routing.
 
 ## Triage Output Format
 
@@ -146,18 +142,8 @@ Each triaged complaint produces a summary entry in `.sos/wip/TRIAGE-complaints.m
   rationale: "{one-line explanation of routing decision}"
 ```
 
-## Scoring Example
+## Companion Reference
 
-A complaint about a missing skill (`severity: medium`, `zone: behavior`, filed by 2 agents, 3 observations, no scar match, `effort_estimate: small`):
-
-| Dimension | Raw Score | Weight | Contribution |
-|-----------|-----------|--------|--------------|
-| Severity | 45 | 25% | 11.25 |
-| Recurrence | 65 | 20% | 13.00 |
-| Zone Impact | 60 | 20% | 12.00 |
-| Scar-Tissue Match | 20 | 15% | 3.00 |
-| Effort-to-Impact | 75 | 10% | 7.50 |
-| Source Diversity | 50 | 10% | 5.00 |
-| **Total** | | | **51.75** |
-
-Score 51.75 would normally auto-accept, but zone is `behavior` -- zone override applies. Action: **human-review**.
+| Topic | File | When to Load |
+|-------|------|--------------|
+| Worked scoring examples | [scoring-example.lego.md](scoring-example.lego.md) | Verifying arithmetic or calibrating intuition |

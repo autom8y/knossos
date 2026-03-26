@@ -1,3 +1,7 @@
+---
+description: "Pythia Synchronization Pattern companion for patterns skill."
+---
+
 # Pythia Synchronization Pattern
 
 > Keep the Pythia agent canonical with all ecosystem changes

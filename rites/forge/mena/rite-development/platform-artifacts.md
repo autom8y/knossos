@@ -1,3 +1,7 @@
+---
+description: "Platform Artifacts companion for rite-development skill."
+---
+
 # Platform Artifacts
 
 > Knossos structure reference, ari sync behavior, verification commands, and infrastructure maintenance notes.

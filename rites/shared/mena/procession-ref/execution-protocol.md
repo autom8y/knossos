@@ -1,3 +1,7 @@
+---
+description: "Execution Protocol companion for procession-ref skill."
+---
+
 # Execution Protocol
 
 > Generic station orchestration protocol for procession dromena. Values in `{braces}` refer to the invoking procession dromena's Station Map and frontmatter. Read them from the dromena that loaded this skill.

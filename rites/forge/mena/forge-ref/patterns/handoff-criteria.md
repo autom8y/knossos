@@ -1,3 +1,7 @@
+---
+description: "Handoff Criteria Pattern companion for patterns skill."
+---
+
 # Handoff Criteria Pattern
 
 > Defining clear, verifiable conditions for passing work downstream

@@ -1,3 +1,7 @@
+---
+description: "Schema: Exemplar Entry [GOLD-NNN] companion for schemas skill."
+---
+
 # Schema: Exemplar Entry [GOLD-NNN]
 
 ## Template

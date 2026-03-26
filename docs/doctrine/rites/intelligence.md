@@ -6,7 +6,7 @@ last_verified: 2026-02-26
 
 > Product analytics lifecycle for instrumentation, research, experimentation, and insights.
 
-The intelligence rite provides workflows for data-driven decision making through analytics, user research, and experimentation.
+The intelligence rite is an evidence-to-decision pipeline: instrument, observe, experiment, decide. It does not start with gut feelings about what to build — analytics-engineer designs the tracking plan and event taxonomy first, so user-researcher and experimentation-lead work from reliable data rather than reconstructed history. The rite's defining moment is insights-analyst's output: not raw data, but a GO/NO-GO recommendation with confidence ratings and impact projections that stakeholders can act on without interpretation. This separates intelligence from ad-hoc analytics work: the rite enforces statistical rigor at the experimentation phase, so the synthesis phase produces numbers you can defend, not numbers you have to explain.
 
 ---
 
@@ -23,11 +23,11 @@ The intelligence rite provides workflows for data-driven decision making through
 
 ## When to Use
 
-- Designing event tracking
-- Conducting user research
-- Running experiments
-- Synthesizing insights
-- Data-driven product decisions
+- Instrumenting a new feature with a tracking plan before it ships, not after
+- Auditing unreliable or inconsistent analytics where event naming drifted over time
+- Designing experiments with proper statistical methodology — sample size, duration, segment definitions
+- Synthesizing completed experiment results into a GO/NO-GO recommendation with confidence ratings
+- **Not for**: competitive market research or strategic planning — use strategy or rnd for those. Intelligence is internal product analytics and user behavior, not external market analysis.
 
 ---
 
@@ -35,11 +35,11 @@ The intelligence rite provides workflows for data-driven decision making through
 
 | Agent | Role |
 |-------|------|
-| **potnia** | Coordinates analytics and research initiative phases |
-| **analytics-engineer** | Designs tracking plans and implements event instrumentation |
-| **user-researcher** | Conducts user research and extracts qualitative insights |
-| **experimentation-lead** | Designs experiments with proper statistical methodology |
-| **insights-analyst** | Synthesizes quantitative and qualitative data into insights |
+| **potnia** | Coordinates analytics and research phases; gates synthesis on completed experiment data |
+| **analytics-engineer** | Designs event taxonomies and tracking plans with validation rules; audits existing analytics for naming drift and coverage gaps |
+| **user-researcher** | Extracts qualitative insights from user behavior; surfaces segment-level patterns that quantitative data misses |
+| **experimentation-lead** | Designs statistically sound A/B tests with sample size calculations, duration estimates, and segment definitions |
+| **insights-analyst** | Produces GO/NO-GO recommendations with impact projections and confidence ratings — transforms data into decisions, not reports |
 
 See agent files: `rites/intelligence/agents/`
 
@@ -70,14 +70,17 @@ flowchart LR
 # Quick switch to intelligence
 /intelligence
 
-# Design tracking
-Task(analytics-engineer, "design tracking for checkout funnel")
+# Design a tracking plan before a feature ships
+Task(analytics-engineer, "design event taxonomy and tracking plan for checkout funnel — include validation rules and QA checklist")
 
-# User research
-Task(user-researcher, "conduct user research on onboarding")
+# Conduct user research on a specific behavior
+Task(user-researcher, "analyze onboarding drop-off at step 3 — what are users doing and why do they leave?")
 
-# Experiment design
-Task(experimentation-lead, "design A/B test for new pricing")
+# Design an experiment with statistical rigor
+Task(experimentation-lead, "design A/B test for new pricing page — calculate required sample size and minimum detectable effect")
+
+# Synthesize results into a decision after experiment completes
+Task(insights-analyst, "checkout A/B test finished — 14 days of data, interpret results and deliver GO/NO-GO recommendation")
 ```
 
 ---

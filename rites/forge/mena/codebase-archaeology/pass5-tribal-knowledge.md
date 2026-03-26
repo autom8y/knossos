@@ -1,3 +1,7 @@
+---
+description: "Pass 5: Tribal Knowledge Interview companion for codebase-archaeology skill."
+---
+
 # Pass 5: Tribal Knowledge Interview
 
 > Interactive interview with the domain expert to extract knowledge not encoded in code: priorities, fears, unwritten rules, judgment calls. This pass generates questions -- it does not answer them.

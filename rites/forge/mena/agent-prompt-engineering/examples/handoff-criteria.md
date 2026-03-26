@@ -1,3 +1,7 @@
+---
+description: "Requirements Analyst Handoff Criteria companion for examples skill."
+---
+
 # Requirements Analyst Handoff Criteria
 
 > Part of [agent-prompt-engineering](../INDEX.lego.md) skill examples

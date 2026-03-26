@@ -1,3 +1,7 @@
+---
+description: "Integration Map Template companion for templates skill."
+---
+
 # Integration Map Template
 
 > Integration analysis with current/target architecture, gap analysis, and effort estimation.

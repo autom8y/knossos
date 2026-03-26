@@ -1,3 +1,7 @@
+---
+description: "Risk Matrix Schema companion for schemas skill."
+---
+
 # Risk Matrix Schema
 
 **Version:** 1.0

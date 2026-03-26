@@ -1,3 +1,7 @@
+---
+description: "Incident Communication Template companion for templates skill."
+---
+
 # Incident Communication Template
 
 > Structured incident notifications, status updates, and resolution communications.

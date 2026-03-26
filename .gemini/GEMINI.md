@@ -7,16 +7,15 @@ Use the available agents and slash commands. Agents activate automatically when 
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
 ## Quick Start
 
-6-agent workflow (releaser):
+5-agent workflow (hygiene):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates release phases, gates complexity, manages DAG-branch failure halting |
-| **cartographer** | Discovers repos, maps git state, identifies package ecosystems and available commands |
-| **dependency-resolver** | Builds cross-repo dependency DAG, detects version mismatches, calculates blast radius |
-| **release-planner** | Creates phased execution plan with parallel groups, rollback boundaries, and CI time estimates |
-| **release-executor** | Executes the release plan — publishes packages, bumps versions, pushes code, creates PRs |
-| **pipeline-monitor** | Monitors CI pipelines via gh CLI, reports green/red matrix, diagnoses failures |
+| **potnia** | Coordinates code hygiene initiative phases |
+| **code-smeller** | Detects code smells and quality issues across codebase |
+| **architect-enforcer** | Plans refactoring approach and enforces architecture standards |
+| **janitor** | Executes code cleanup and improvements |
+| **audit-lead** | Audits cleanup results and provides quality signoff |
 
 Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
@@ -36,7 +35,7 @@ Agents activate automatically based on description matching. Write prompts that 
 | Skill | Loaded into context | `.gemini/skills/` |
 | Agent | Activates on description match | `.gemini/agents/` |
 | Hook | Auto-fires on lifecycle events | `.gemini/settings.local.json` |
-
+Agents cannot spawn other agents — only the main thread can dispatch sub-agents.
 <!-- KNOSSOS:END commands -->
 
 <!-- KNOSSOS:START agent-configurations regenerate=true source=agents/*.md -->
@@ -44,12 +43,21 @@ Agents activate automatically based on description matching. Write prompts that 
 
 Prompts in `.gemini/agents/`:
 
-- `potnia.md` - Coordinates release phases, gates complexity, manages DAG-branch failure halting
-- `cartographer.md` - Discovers repos, maps git state, identifies package ecosystems and available commands
-- `dependency-resolver.md` - Builds cross-repo dependency DAG, detects version mismatches, calculates blast radius
-- `release-planner.md` - Creates phased execution plan with parallel groups, rollback boundaries, and CI time estimates
-- `release-executor.md` - Executes the release plan — publishes packages, bumps versions, pushes code, creates PRs
-- `pipeline-monitor.md` - Monitors CI pipelines via gh CLI, reports green/red matrix, diagnoses failures
+- `potnia.md` - Coordinates code hygiene initiative phases
+- `code-smeller.md` - Detects code smells and quality issues across codebase
+- `architect-enforcer.md` - Plans refactoring approach and enforces architecture standards
+- `janitor.md` - Executes code cleanup and improvements
+- `audit-lead.md` - Audits cleanup results and provides quality signoff
+
+### Summonable Heroes
+Operational agents available on demand. Their commands handle the lifecycle:
+- **myron** - Feature discovery scout -> `/discover`
+- **theoros** - Domain auditor -> `/know`
+- **dionysus** - Knowledge synthesizer -> `/land`
+- **naxos** - Session hygiene -> `/naxos`
+
+Summon: `ari agent summon {name}` then restart CC.
+Dismiss: `ari agent dismiss {name}` then restart CC.
 <!-- KNOSSOS:END agent-configurations -->
 
 <!-- KNOSSOS:START platform-infrastructure -->

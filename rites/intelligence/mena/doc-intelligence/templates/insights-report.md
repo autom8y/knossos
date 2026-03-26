@@ -1,3 +1,7 @@
+---
+description: "Insights Report Template companion for templates skill."
+---
+
 # Insights Report Template
 
 > Data-driven decision recommendation with segment analysis, alternative explanations, and ship/no-ship verdict.

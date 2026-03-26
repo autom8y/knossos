@@ -1,3 +1,7 @@
+---
+description: "Orchestrator Role Clarification companion for examples skill."
+---
+
 # Orchestrator Role Clarification
 
 > Part of [agent-prompt-engineering](../INDEX.lego.md) skill examples

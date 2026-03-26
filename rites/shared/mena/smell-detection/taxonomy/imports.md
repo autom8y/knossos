@@ -1,3 +1,7 @@
+---
+description: "Import Hygiene (IM-*) companion for taxonomy skill."
+---
+
 # Import Hygiene (IM-*)
 
 > Dependency management issues and import organization problems.

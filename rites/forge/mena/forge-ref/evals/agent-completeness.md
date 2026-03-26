@@ -1,3 +1,7 @@
+---
+description: "Agent Completeness Evaluation companion for evals skill."
+---
+
 # Agent Completeness Evaluation
 
 > Checklist for verifying agent .md files are complete and valid

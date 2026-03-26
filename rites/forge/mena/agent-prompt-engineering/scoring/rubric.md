@@ -1,3 +1,7 @@
+---
+description: "Agent Quality Rubric companion for scoring skill."
+---
+
 # Agent Quality Rubric
 
 > 6-dimension scoring system for evaluating agent prompts

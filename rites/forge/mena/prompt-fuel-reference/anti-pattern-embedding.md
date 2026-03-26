@@ -1,3 +1,7 @@
+---
+description: "Anti-Pattern Embedding companion for prompt-fuel-reference skill."
+---
+
 # Anti-Pattern Embedding
 
 ## What AP-NN Entries Are

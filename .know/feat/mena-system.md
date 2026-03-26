@@ -1,77 +1,38 @@
 ---
 domain: feat/mena-system
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/mena/**/*.go"
   - "./internal/materialize/mena/**/*.go"
   - "./mena/**/*.md"
-  - "./docs/decisions/ADR-0023*.md"
-  - "./docs/decisions/ADR-0025*.md"
-  - "./docs/decisions/ADR-0021*.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.82
+source_hash: "b329d719"
+confidence: 0.88
 format_version: "1.0"
 ---
 
-# Mena (Dromena + Legomena) System
+# Mena (Dromena + Legomena) Distribution System
 
 ## Purpose and Design Rationale
 
-Unified convention for CC context artifacts as first-class source files. **ADR-0021**: Unified skills/commands into single tree. **ADR-0023**: Replaced frontmatter routing with filesystem extension convention (`.dro.md`/`.lego.md`). **ADR-0025**: Added `MenaScope` for pipeline targeting.
-
-### Two-Type Taxonomy
-
-| Type | Extension | CC Target | Context Lifecycle |
-|------|-----------|-----------|------------------|
-| Dromena | `.dro.md` | `.claude/commands/` | Transient (execute and exit) |
-| Legomena | `.lego.md` | `.claude/skills/` | Persistent (stays in context) |
+Different content types have different context lifecycles: dromena (commands, transient) vs legomena (skills, persistent). Extension infix (.dro.md/.lego.md) is the routing signal -- eliminates frontmatter inspection during routing. Two-level package: internal/mena (leaf, zero imports) for primitives, internal/materialize/mena (hub) for full projection. Priority bottom-up: platform < shared < dependency < active rite. INDEX-file pattern with companion files for progressive disclosure. Namespace flattening for user-friendly /name invocation.
 
 ## Conceptual Model
 
-### Source Priority (lowest → highest)
-
-`mena/` (platform) → `rites/shared/mena/` → `rites/{dependency}/mena/` → `rites/{active}/mena/`
-
-### INDEX Files and Namespace Flattening
-
-- `INDEX.dro.md` → promoted to flat file at target (e.g., `.claude/commands/bar.md`)
-- `INDEX.lego.md` → renamed to `SKILL.md` at target (e.g., `.claude/skills/bar/SKILL.md`)
-- Dromena are namespace-flattened; legomena retain path structure
-
-### Five-Pass Sync Pipeline
-
-1. Collect entries from all sources → 2. Namespace resolution → 3. Filter + flat name assignment → 4. Write directories → 5. Write standalones → 6. Clean stale knossos-owned entries
-
-### Two Projection Modes
-
-- **Additive**: user-scope sync (preserves user-created skills)
-- **Destructive**: rite-scope sync (removes stale knossos-owned files via provenance)
+**Two types:** Dromenon (.dro.md -> commands/, transient) vs Legomenon (.lego.md -> skills/, persistent). **Four-level source priority:** active rite > dependency rite > shared rite > procession > platform. **Three entry structures:** directory (INDEX file + companions), standalone file, grouping directory. **6-pass projection pipeline:** collect -> namespace resolve -> apply flat names -> write (with transforms) -> clean stale -> reconcile untracked. **Two modes:** destructive (rite scope, wipes stale) and additive (user scope, preserves). **Content rewriting:** extension refs + channel path substitution (4-pass, code-block safe).
 
 ## Implementation Map
 
-Leaf package: `/Users/tomtenuta/Code/knossos/internal/mena/` (4 files, zero imports). Materialize sub-package: `/Users/tomtenuta/Code/knossos/internal/materialize/mena/` (6 files).
-
-### Key Boundary Rules
-
-- SCAR-005: Never `os.RemoveAll` on managed directories
-- SCAR-006: Satellite rites must use `KnossosHome()` for shared mena base
-- SCAR-007: Mixed dro/lego directories → entire directory routes as dromena
-- SCAR-018: `context: fork` blocks Task tool access
-- SCAR-027: Session artifacts in `rites/shared/mena/` become permanent
+Leaf: `internal/mena/` (types.go, source.go, exists.go, walk.go). Hub: `internal/materialize/mena/` (types.go, frontmatter.go, collect.go, namespace.go, engine.go, walker.go, transform.go, content_rewrite.go). Integration: `internal/materialize/materialize_mena.go` (materializeMena, materializeMinimalMena, renderProcessionMena). MenaFrontmatter schema: name (required), description (required), argument-hint, triggers, allowed-tools, model, etc. ChannelCompiler interface for harness-specific output (TOML for Gemini commands).
 
 ## Boundaries and Failure Modes
 
-- `internal/mena` is a leaf package (zero internal imports — enforced)
-- Embedded FS standalone files silently ignored
-- `os.DirFS` does not follow symlinks
-- Frontmatter parse failures return zero-value struct with `log.Printf` warning
-- `MenaScope` in ADR-0025 not present in current `MenaFrontmatter` struct (implementation gap)
+Mixed dro/lego directory blocks skill resolution (documented in MEMORY.md). Walk does NOT support embedded FS (lint operates on filesystem only). Silent skips for nonexistent sources. Namespace collision falls back to directory-path routing with warning. renderProcessionMena is fail-open. Stale cleanup requires provenance (first sync after rite switch can't clean). Standalone files default to "dro" type. Compiler applied only to primary files (companions pass through as-is).
 
 ## Knowledge Gaps
 
-1. `materialize_mena.go` bridge file not read.
-2. `MenaScope` implementation gap between ADR-0025 and current code.
-3. Usersync pipeline not fully traced.
+1. renderProcessionMena rendering details not traced
+2. ADRs 0021, 0023, 0025 not found on disk
+3. Gemini channel compiler TOML format not read

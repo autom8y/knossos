@@ -1,13 +1,13 @@
 ---
 domain: feat/project-status-dashboard
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/cmd/status/**/*.go"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.88
+source_hash: "b329d719"
+confidence: 0.92
 format_version: "1.0"
 ---
 
@@ -15,48 +15,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-`ari status` provides a single-command read-only health snapshot of all five Knossos directory trees (`.claude/`, `.knossos/`, `.know/`, `.ledge/`, `.sos/`) in one unified view.
-
-**Key design decisions**:
-- Single collector function with five independent sub-collectors
-- Read-only by design (explicitly documented in help text)
-- Exit code 1 on unhealthy (`.claude/` missing)
-- Sync recency from `PROVENANCE_MANIFEST.yaml`, not `state.json`
-- Active rite from `ACTIVE_RITE` file, not `state.json`
+Read-only unified health overview of five directory trees (.claude/, .knossos/, .know/, .ledge/, .sos/). Single diagnostic screen for starting sessions or debugging. Healthy = channel directory exists (only unhealthy condition). Exit code 1 when unhealthy (CI-gate usable).
 
 ## Conceptual Model
 
-### HealthDashboard Structure
-
-Five sub-health types: `ClaudeHealth`, `KnossosHealth`, `KnowHealth`, `LedgeHealth`, `SOSHealth`, plus `Healthy bool` and `Errors []string`.
-
-**Healthy = `.claude/` exists only.** Other directories not existing is non-fatal.
-
-### Relationship to Other Features
-
-- Consumes `know.ReadMeta()` for `.know/` freshness
-- Consumes `provenance.Load()` for last sync timestamp
-- Sibling to `ari knows` (richer per-domain detail) and `ari session status` (full session detail)
+**HealthDashboard:** Channel (active rite, agent count, last sync), Knossos (satellite rite inventory), Know (domain freshness via know.ReadMeta), Ledge (artifact counts by category), SOS (session counts by status + current session). **DomainStatus** from internal/know with Fresh bool and Expires date. Session status reading uses minimal hand-written YAML scanner (not full parser).
 
 ## Implementation Map
 
-Single file: `/Users/tomtenuta/Code/knossos/internal/cmd/status/status.go` (457 lines), tests in `status_test.go` (420 lines, 76.8% coverage).
-
-### Data Flow
-
-```
-ari status → collect(resolver) → 5 sub-collectors → HealthDashboard → printer.Print()
-```
+`internal/cmd/status/status.go` (single file): NewStatusCmd, collect (5 collectors), collectChannel (ClaudeChannel, ReadActiveRite, agent count, provenance LastSync), collectKnossos (satellite rite scan), collectKnow (delegates to know.ReadMeta), collectLedge (4 countMDFiles calls), collectSOS (sessions + archive scan), readSessionStatus (streaming frontmatter scanner), formatAge. Tests in status_test.go.
 
 ## Boundaries and Failure Modes
 
-- Does NOT modify any files
-- Does NOT validate agent frontmatter or ledge artifact schemas
-- Silent error discarding pattern: `collectX` functions return partial results on read failures
-- In worktrees: all five directories may be absent, only `.claude/` triggers unhealthy
+Hardcoded to ClaudeChannel (Gemini-only projects show unhealthy). Only Fresh bool displayed (staleness reason not surfaced). No per-agent details. collectKnow silent partial failure (error -> zero counts with Exists=true). Sessions with malformed context silently excluded from counts.
 
 ## Knowledge Gaps
 
-1. No ADR for `ari status` creation.
-2. Silent error discard policy is undocumented.
-3. `collect()` orchestrator has no dedicated test.
+1. YAML rendering path not verified
+2. know.ReadMeta error path may be unintentional
+3. Archived count uses directory name heuristic (potential overcount)

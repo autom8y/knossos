@@ -57,6 +57,29 @@ ari inscription sync --dry-run
 
 ---
 
+### ari inscription diff
+
+Show differences between current and generated.
+
+**Synopsis**:
+```bash
+ari inscription diff [flags]
+```
+
+**Description**:
+Shows what would change if `ari inscription sync` were run. Useful for understanding drift.
+
+**Examples**:
+```bash
+# See inscription diff
+ari inscription diff
+```
+
+**Related Commands**:
+- [`ari sync diff`](cli-sync.md#ari-sync-diff) — Full sync diff
+
+---
+
 ### ari inscription validate
 
 Validate inscription manifest and context file.
@@ -80,29 +103,6 @@ ari inscription validate -o json
 
 **Related Commands**:
 - [`ari rite validate`](cli-rite.md#ari-rite-validate) — Rite validation
-
----
-
-### ari inscription diff
-
-Show differences between current and generated.
-
-**Synopsis**:
-```bash
-ari inscription diff [flags]
-```
-
-**Description**:
-Shows what would change if `ari inscription sync` were run. Useful for understanding drift.
-
-**Examples**:
-```bash
-# See inscription diff
-ari inscription diff
-```
-
-**Related Commands**:
-- [`ari sync diff`](cli-sync.md#ari-sync-diff) — Full sync diff
 
 ---
 

@@ -1,3 +1,7 @@
+---
+description: "Agent Prompt Template companion for agent-prompt-engineering skill."
+---
+
 # Agent Prompt Template
 
 > 11-section structure with token budgets. Target 150-200 lines total.

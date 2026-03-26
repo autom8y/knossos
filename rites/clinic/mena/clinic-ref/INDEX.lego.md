@@ -57,6 +57,21 @@ One level: INVESTIGATION. All investigations run all four phases. Depth is emerg
 - Simple bug: ~4 agent invocations, ~30k tokens, no back-routes
 - Compound failure: ~6-8 invocations, ~150k tokens, 1-2 back-routes
 
+## Anti-Patterns
+
+| Agent | Anti-Pattern | Correct Behavior |
+|-------|-------------|------------------|
+| triage-nurse | Premature diagnosis in intake report | Document symptoms, not theories |
+| triage-nurse | Vague evidence collection plan | "Check the logs" → specify system, data type, time range |
+| pathologist | Context hoarding (keeping evidence in context) | Write to E{NNN}.txt immediately |
+| pathologist | Analytical summaries in index.yaml | Factual description only |
+| diagnostician | Premature convergence | Check that ALL symptoms map to identified cause(s) |
+| diagnostician | Re-running commands | Evidence is on disk — read it; if missing, trigger back-route |
+| diagnostician | Loading all evidence files | Read index first, load selectively |
+| attending | Re-diagnosing instead of using diagnosis.md | If insufficient, trigger back-route |
+| attending | Vague acceptance criteria | Specific, testable conditions |
+| attending | Ignoring monitoring gaps | If observability was absent, produce handoff-sre.md |
+
 ## Companion Reference
 
 | Topic | File | When to Load |
@@ -64,4 +79,3 @@ One level: INVESTIGATION. All investigations run all four phases. Depth is emerg
 | index.yaml full schema, status values, evidence format | `index-schema.md` | Writing or validating index.yaml |
 | Back-route protocols (evidence_gap, diagnosis_insufficient, scope_expansion) | `back-routes.md` | Triggering or handling back-routes |
 | Cross-rite handoff formats (10x-dev, SRE, debt-triage) | `handoff-formats.md` | Producing treatment handoff artifacts |
-| Agent anti-patterns | `anti-patterns.md` | Reviewing agent behavior |

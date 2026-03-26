@@ -114,11 +114,8 @@ See [reference/agent-capabilities.md](../reference/agent-capabilities.md) for de
 
 | Gap | Severity | Notes |
 |-----|----------|-------|
-| 5 CLI families underdocumented | Low | `agent`, `initialize`, `migrate`, `lint`, `provenance` — trust `ari <family> --help` |
 | Cognitive budget active tracking | Medium | Infrastructure ready, active warning system incomplete |
 | Handoff validation gates | Medium | Events recorded, pre-execution enforcement unclear |
-| arch rite doc was missing | Fixed | Added `docs/doctrine/rites/arch.md` |
-| slop-chop rite doc was missing | Fixed | Added `docs/doctrine/rites/slop-chop.md` |
 
 ### Beneficial Divergences
 

@@ -1,3 +1,7 @@
+---
+description: "Severity Classification companion for severity skill."
+---
+
 # Severity Classification
 
 > Multi-factor weighted scoring algorithm for smell severity assessment.

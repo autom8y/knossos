@@ -1,3 +1,7 @@
+---
+description: "Phase Sequencing Patterns companion for patterns skill."
+---
+
 # Phase Sequencing Patterns
 
 How to design sequential workflow phases.

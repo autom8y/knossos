@@ -1,3 +1,7 @@
+---
+description: "HANDOFF Artifact Schema v1.0 companion for cross-rite-handoff skill."
+---
+
 # HANDOFF Artifact Schema v1.0
 
 > Machine-readable frontmatter schema for cross-rite work transfer

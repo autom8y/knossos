@@ -109,21 +109,9 @@ Complete rite implementations:
 
 ---
 
-## Existing Rites Reference
+## Existing Rites
 
-| Rite | Agents | Workflow | Entry Agent |
-|------|--------|----------|-------------|
-| 10x-dev | 5 | Requirements → Design → Implementation → Validation | requirements-analyst |
-| docs | 4 | Audit → Architecture → Writing → Review | doc-auditor |
-| hygiene | 4 | Assessment → Planning → Execution → Audit | code-smeller |
-| debt-triage | 3 | Collection → Assessment → Planning | debt-collector |
-| sre | 4 | Observation → Coordination → Implementation → Resilience | observability-engineer |
-| security | 4 | Threat Modeling → Compliance → Testing → Review | threat-modeler |
-| intelligence | 4 | Instrumentation → Research → Experimentation → Synthesis | analytics-engineer |
-| rnd | 4 | Scouting → Integration → Prototyping → Future Architecture | technology-scout |
-| strategy | 4 | Market Research → Competitive Analysis → Business Modeling → Planning | market-researcher |
-
-*See knossos rites/ directory for current rite/agent counts.*
+See `rites/` directory for current rite inventory and agent counts. Each rite has a `-ref` skill with full workflow and agent details.
 
 ---
 
@@ -151,25 +139,4 @@ When creating or modifying rites, update the Pythia's knowledge base. See [patte
 
 ## Quick Start
 
-To create a new rite:
-
-```bash
-# 1. Create directory structure
-mkdir -p $KNOSSOS_HOME/rites/{name}/agents
-
-# 2. Copy and fill templates
-# - workflow.yaml from templates/workflow.yaml.template
-# - agent files from templates/agent-template.md
-
-# 3. Create command and skill
-# - {channel_dir}/commands/{name}.md
-# - rites/{name}/mena/{name}-ref/INDEX.lego.md
-
-# 4. Sync to project
-# - ari sync --rite {name}
-
-# 5. Validate
-$KNOSSOS_HOME/ari sync --rite {name}
-```
-
-See [validation/validation.md](validation/validation.md) for full pre-flight checks.
+Ready to scaffold? See [quick-start.lego.md](quick-start.lego.md) for the full command sequence.

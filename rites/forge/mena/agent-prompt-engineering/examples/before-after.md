@@ -1,3 +1,7 @@
+---
+description: "Before/After Transformation Examples companion for examples skill."
+---
+
 # Before/After Transformation Examples
 
 > Real agent prompt improvements with annotated changes

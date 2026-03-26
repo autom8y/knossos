@@ -88,8 +88,6 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 
 **Produces**: `.ledge/spikes/MARKET-{slug}.md`
 
----
-
 ### Competitive Analyst
 
 **Purpose**: Know competitors better than they know themselves
@@ -102,8 +100,6 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 
 **Produces**: `.ledge/spikes/COMPETE-{slug}.md`
 
----
-
 ### Business Model Analyst
 
 **Purpose**: Stress-test how we make money
@@ -115,8 +111,6 @@ market-research → competitive-analysis → business-modeling → strategic-pla
 - Scenario modeling
 
 **Produces**: `.ledge/spikes/FINANCE-{slug}.md`
-
----
 
 ### Roadmap Strategist
 

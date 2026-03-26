@@ -1,3 +1,7 @@
+---
+description: "Financial Model Template companion for templates skill."
+---
+
 # Financial Model Template
 
 > Scenario-based financial projections with unit economics, sensitivity analysis, and risk assessment.

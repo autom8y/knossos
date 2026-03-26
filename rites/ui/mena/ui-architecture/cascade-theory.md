@@ -1,3 +1,7 @@
+---
+description: "Cascade Theory companion for ui-architecture skill."
+---
+
 # Cascade Theory
 
 > Deep reference for the CSS cascade algorithm, layer semantics, scope proximity, and registered custom properties. The "why" companion to css-principles.md.

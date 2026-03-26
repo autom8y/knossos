@@ -1,3 +1,7 @@
+---
+description: "Strategic Roadmap Template companion for templates skill."
+---
+
 # Strategic Roadmap Template
 
 > Initiative prioritization, resource allocation, and OKR-driven roadmap planning.

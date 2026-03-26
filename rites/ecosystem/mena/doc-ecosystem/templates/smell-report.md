@@ -1,3 +1,7 @@
+---
+description: "Smell Report Template companion for templates skill."
+---
+
 # Smell Report Template
 
 > Code smell catalog and cleanup priorities.

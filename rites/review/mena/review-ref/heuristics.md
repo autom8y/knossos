@@ -1,3 +1,7 @@
+---
+description: "Scan Heuristics Catalog companion for review-ref skill."
+---
+
 # Scan Heuristics Catalog
 
 Language-agnostic structural signals for the signal-sifter. All thresholds are starting points -- context may justify exceptions.

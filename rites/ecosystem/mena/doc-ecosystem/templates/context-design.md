@@ -1,3 +1,7 @@
+---
+description: "Context Design Template companion for templates skill."
+---
+
 # Context Design Template
 
 > Technical design for ecosystem changes.

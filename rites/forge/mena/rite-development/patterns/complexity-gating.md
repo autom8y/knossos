@@ -1,3 +1,7 @@
+---
+description: "Complexity Gating Patterns companion for patterns skill."
+---
+
 # Complexity Gating Patterns
 
 How to design complexity levels that skip phases appropriately.

@@ -1,3 +1,7 @@
+---
+description: "Staleness Detection Mode companion for doc-reviews skill."
+---
+
 # Staleness Detection Mode
 
 > Focused analysis of documentation freshness by cross-referencing document modification dates with related code changes.

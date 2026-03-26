@@ -1,3 +1,7 @@
+---
+description: "Security Signoff Template companion for templates skill."
+---
+
 # Security Signoff Template
 
 > Security review checklist and approval workflow for code changes touching sensitive areas.

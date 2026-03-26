@@ -1,3 +1,7 @@
+---
+description: "Transition Protocol companion for procession-ref skill."
+---
+
 # Transition Protocol
 
 Three operations govern procession state transitions: proceed, recede, and abandon.

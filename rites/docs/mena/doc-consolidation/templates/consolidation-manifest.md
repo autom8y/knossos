@@ -1,3 +1,7 @@
+---
+description: "Consolidation Manifest companion for templates skill."
+---
+
 # Consolidation Manifest
 
 > **Target**: {category_dir}

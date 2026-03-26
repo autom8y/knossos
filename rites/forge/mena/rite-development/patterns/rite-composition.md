@@ -1,3 +1,7 @@
+---
+description: "Rite Composition Patterns companion for patterns skill."
+---
+
 # Rite Composition Patterns
 
 How to size and structure agent pantheons.

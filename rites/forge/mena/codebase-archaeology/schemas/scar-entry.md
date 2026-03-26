@@ -1,3 +1,7 @@
+---
+description: "Schema: Scar Entry [SCAR-NNN] companion for schemas skill."
+---
+
 # Schema: Scar Entry [SCAR-NNN]
 
 ## Template

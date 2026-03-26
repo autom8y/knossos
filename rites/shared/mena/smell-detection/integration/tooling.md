@@ -1,3 +1,7 @@
+---
+description: "Automated Detection Tooling companion for integration skill."
+---
+
 # Automated Detection Tooling
 
 > Reference guide for automated smell detection tools and commands.

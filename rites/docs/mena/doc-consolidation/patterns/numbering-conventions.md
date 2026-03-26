@@ -1,3 +1,7 @@
+---
+description: "Numbering Conventions companion for patterns skill."
+---
+
 # Numbering Conventions
 
 > **Purpose**: Standardized numbering scheme for consolidated documents to ensure consistent organization, clear hierarchy, and predictable file discovery.

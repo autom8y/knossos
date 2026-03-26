@@ -1,3 +1,7 @@
+---
+description: "Schema: Guard Entry [GUARD-NNN] companion for schemas skill."
+---
+
 # Schema: Guard Entry [GUARD-NNN]
 
 ## Guard Template

@@ -1,3 +1,7 @@
+---
+description: "Transfer Artifacts companion for templates skill."
+---
+
 # Transfer Artifacts
 
 > Templates for TRANSFER documents and cross-rite HANDOFF artifacts produced by Tech Transfer.

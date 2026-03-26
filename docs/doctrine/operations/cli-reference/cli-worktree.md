@@ -16,56 +16,7 @@ last_verified: 2026-02-26
 
 ## Commands
 
-### ari worktree create
-
-Create a new isolated worktree.
-
-**Synopsis**:
-```bash
-ari worktree create <name> [flags]
-```
-
-**Description**:
-Creates a git worktree for parallel session work. The worktree is created in `.worktrees/{id}/` with full ecosystem initialization including a fresh channel directory, rite materialization, and optional session creation.
-
-**Arguments**:
-- `name` (string, required): Descriptive name for the worktree
-
-**Flags**:
-| Flag | Type | Default | Description |
-|------|------|---------|-------------|
-| `--complexity` | string | `MODULE` | Session complexity: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION |
-| `--from` | string | `HEAD` | Git ref to create worktree from |
-| `--rite` | string | current rite | [Rite](../../reference/GLOSSARY.md#rite) to activate in worktree |
-
-**Examples**:
-```bash
-# Create worktree for feature work
-ari worktree create feature-auth
-
-# Create with specific rite
-ari worktree create billing-sprint --rite=10x-dev
-
-# Create from specific branch
-ari worktree create bugfix --from=develop
-
-# Create with high complexity
-ari worktree create migration --complexity=MIGRATION
-```
-
-**What Happens**:
-1. Git worktree created with detached HEAD (no branch pollution)
-2. Channel directory materialized from roster
-3. Rite activated via sync materialize
-4. Initial session created (optional)
-5. Worktree metadata saved to `.knossos/.worktree-meta.json`
-
-**Related Commands**:
-- [`ari worktree list`](#ari-worktree-list) — List worktrees
-- [`ari worktree remove`](#ari-worktree-remove) — Remove worktree
-- [`ari session create`](cli-session.md#ari-session-create) — Create session in worktree
-
----
+Commands are ordered by frequency of use: inspection first, lifecycle second, import/export last.
 
 ### ari worktree list
 
@@ -133,6 +84,57 @@ ari worktree status feature-auth -o yaml
 **Related Commands**:
 - [`ari worktree list`](#ari-worktree-list) — Summary of all worktrees
 - [`ari session status`](cli-session.md#ari-session-status) — Session-specific status
+
+---
+
+### ari worktree create
+
+Create a new isolated worktree.
+
+**Synopsis**:
+```bash
+ari worktree create <name> [flags]
+```
+
+**Description**:
+Creates a git worktree for parallel session work. The worktree is created in `.worktrees/{id}/` with full ecosystem initialization including a fresh channel directory, rite materialization, and optional session creation.
+
+**Arguments**:
+- `name` (string, required): Descriptive name for the worktree
+
+**Flags**:
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--complexity` | string | `MODULE` | Session complexity: PATCH, MODULE, SYSTEM, INITIATIVE, MIGRATION |
+| `--from` | string | `HEAD` | Git ref to create worktree from |
+| `--rite` | string | current rite | [Rite](../../reference/GLOSSARY.md#rite) to activate in worktree |
+
+**Examples**:
+```bash
+# Create worktree for feature work
+ari worktree create feature-auth
+
+# Create with specific rite
+ari worktree create billing-sprint --rite=10x-dev
+
+# Create from specific branch
+ari worktree create bugfix --from=develop
+
+# Create with high complexity
+ari worktree create migration --complexity=MIGRATION
+```
+
+**What Happens**:
+1. Git worktree created with detached HEAD (no branch pollution)
+2. Channel directory materialized from roster
+3. Rite activated via sync materialize
+4. Initial session created (optional)
+5. Worktree metadata saved to `.knossos/.worktree-meta.json`
+
+**Related Commands**:
+- [`ari worktree list`](#ari-worktree-list) — List worktrees
+- [`ari worktree remove`](#ari-worktree-remove) — Remove worktree
+- [`ari session create`](cli-session.md#ari-session-create) — Create session in worktree
 
 ---
 
@@ -437,6 +439,5 @@ ari session create "API Documentation"
 
 ## See Also
 
-- [Worktree Production Guide](../../guides/worktree-guide.md)
-- [Worktree Glossary Entry](../../reference/GLOSSARY.md#worktree)
 - [Worktree Guide](../../guides/worktree-guide.md) — Production patterns and operations
+- [Worktree Glossary Entry](../../reference/GLOSSARY.md#worktree)

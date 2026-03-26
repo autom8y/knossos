@@ -1,3 +1,7 @@
+---
+description: "Assessment: {project-name} companion for templates skill."
+---
+
 # Assessment: {project-name}
 
 ## Health Grades

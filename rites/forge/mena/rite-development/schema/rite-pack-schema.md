@@ -1,3 +1,7 @@
+---
+description: "Rite Schema companion for schema skill."
+---
+
 # Rite Schema
 
 > Complete schema for workflow.yaml files in rite definitions.

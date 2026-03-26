@@ -1,3 +1,7 @@
+---
+description: "Artifact Glossary companion for glossary skill."
+---
+
 # Artifact Glossary
 
 Naming patterns and conventions for workflow artifacts.

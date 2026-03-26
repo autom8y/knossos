@@ -1,3 +1,7 @@
+---
+description: "Context File Anti-Patterns companion for inscription-architecture skill."
+---
+
 # Context File Anti-Patterns
 
 What NOT to put in the context file. Each anti-pattern includes the violation, why it's wrong, and the correct approach.

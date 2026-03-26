@@ -1,3 +1,7 @@
+---
+description: "Compatibility Report Template companion for templates skill."
+---
+
 # Compatibility Report Template
 
 > Cross-satellite validation results.

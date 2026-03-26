@@ -1,3 +1,7 @@
+---
+description: "Consolidation Index companion for templates skill."
+---
+
 # Consolidation Index
 
 > **Generated**: {YYYY-MM-DD}

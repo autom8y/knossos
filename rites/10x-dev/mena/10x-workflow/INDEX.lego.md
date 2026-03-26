@@ -45,14 +45,24 @@ Every session follows **PLAN -> CLARIFY -> EXECUTE -> VERIFY -> HANDOFF**.
 - **Implementation**: Satisfies TDD, tests pass, type-safe, readable, documented
 - **Validation**: Acceptance criteria met, edge cases covered, failures handled, production ready
 
+## Glossary Navigation
+
+Workflow terminology by domain:
+
+| Domain | File | Terms Covered |
+|--------|------|---------------|
+| Agents & Artifacts | `glossary-agents.md` | Agent roles, documentation artifacts, communication patterns |
+| Process & Workflow | `glossary-process.md` | Workflow phases, concepts, decision-making |
+| Quality & Principles | `glossary-quality.md` | Quality concepts, anti-patterns, workflow principles |
+
 ## Companion Reference
 
 | Topic | File | When to Load |
 |-------|------|-------------|
-| Entry point selection by work type | `entry-points.md` | Deciding where to start |
+| Entry point selection by work type | `entry-points.lego.md` | Deciding where to start |
 | Full session protocol with checklists | `lifecycle.md` | Running a session |
 | Detailed quality gate criteria | `quality-gates.md` | Validating phase transitions |
-| Glossary navigation | `glossary-index.md` | Looking up workflow terms |
+| Glossary (agents, artifacts, patterns) | `glossary-agents.md`, `glossary-process.md`, `glossary-quality.md` | Looking up workflow terms |
 
 ## Related Skills
 

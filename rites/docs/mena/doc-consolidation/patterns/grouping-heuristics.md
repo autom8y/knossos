@@ -1,3 +1,7 @@
+---
+description: "Grouping Heuristics companion for patterns skill."
+---
+
 # Grouping Heuristics
 
 > **Purpose**: Rules for categorizing documentation files into topic clusters during the Discovery phase (Phase 0).

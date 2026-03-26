@@ -1,16 +1,15 @@
 ---
 domain: feat/validation-framework
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/validation/**/*.go"
-  - "./internal/validation/schemas/*.json"
+  - "./internal/validation/schemas/**"
   - "./internal/cmd/validate/**/*.go"
-  - "./docs/decisions/ADR-0008*.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.87
+source_hash: "b329d719"
+confidence: 0.86
 format_version: "1.0"
 ---
 
@@ -18,42 +17,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Provides machine-verifiable schema enforcement for workflow artifacts (PRDs, TDDs, ADRs, Test Plans) and session state at two gates: structural (JSON Schema Draft 2020-12) and phase-transition (handoff criteria).
-
-**ADR-0008**: Chose `go:embed` for handoff criteria schema. Rejected runtime file loading and code generation. **Dual-schema strategy**: JSON artifacts use `jsonschema/v6` library; YAML handoff criteria use lightweight declarative struct.
+Embedded, binary-portable schema validation for all structured artifacts. embedLoader with embed:// URL scheme routes $ref resolution through embedded filesystem. Two-tier validation: schema-structural (JSON Schema) vs handoff-behavioral (YAML-configured phase transition criteria). Lightweight Go fallback functions (ValidateSessionFields, ValidateSailsFields) for hot paths where full compiler is unnecessary.
 
 ## Conceptual Model
 
-### Three Validation Modes
-
-1. **Frontmatter Extraction** (`ExtractFrontmatter`) — parses YAML frontmatter from markdown
-2. **JSON Schema Validation** (`Validator`) — structural checks against 11 embedded schemas
-3. **Handoff Criteria Validation** (`HandoffValidator`) — phase-transition gate with blocking/non-blocking criteria
-
-### Artifact Type Detection Priority
-
-1. Frontmatter `type` field → 2. Filename pattern regex → 3. `ArtifactTypeUnknown`
-
-### 11 Schema Files
-
-`common`, `session-context`, `prd`, `tdd`, `adr`, `test-plan`, `white-sails`, `agent`, `knossos-manifest`, `handoff-criteria.json`, `handoff-criteria.yaml`
+**Core Validator:** lazy-compiling jsonschema.Compiler with cache. **Common schema** defines shared $defs (timestamps, IDs, enums). **ArtifactValidator:** type detection (frontmatter > filename > unknown) + frontmatter extraction + schema validation. **HandoffValidator:** per-phase per-artifact-type criteria (blocking + warning), loaded from embedded handoff-criteria.yaml. **Sails validation:** WHITE_SAILS.yaml structural correctness (JSON/YAML dual input). **11 schema files** covering session-context, agent, complaint, prd, tdd, adr, test-plan, knossos-manifest, white-sails, handoff-procession, handoff-criteria.
 
 ## Implementation Map
 
-9 source files + 4 test files in `/Users/tomtenuta/Code/knossos/internal/validation/`. CLI: `/Users/tomtenuta/Code/knossos/internal/cmd/validate/validate.go` (3 subcommands: artifact, handoff, schema).
-
-Consumed by: `internal/session` (ValidateSessionFields), `internal/sails` (White Sails validation), `internal/agent` (agent frontmatter), `internal/cmd/handoff` (handoff prepare).
+`internal/validation/` (6 files): validator.go (Validator, embedLoader, session/agent/complaint methods + standalone functions), frontmatter.go (FrontmatterResult, ExtractFrontmatter), artifact.go (ArtifactValidator, ValidationIssue), handoff.go (HandoffValidator, 3 evaluation modes), sails.go (SailsValidationResult), procession.go (lightweight Go-level validation). CLI: `internal/cmd/validate/validate.go` (artifact, handoff, schema subcommands).
 
 ## Boundaries and Failure Modes
 
-- Near-leaf package: zero internal domain imports
-- Dual `ParseYAMLFrontmatter` implementations (validator.go vs frontmatter.go) — potential divergence
-- `isEmpty()` returns false for integer 0 (semantic gap for `non_empty: true`)
-- Schema cache is per-Validator instance (no package-level cache)
-- `--schema` flag in validate subcommand is non-functional (shadowed variable)
+Body content not validated (frontmatter only). No cross-artifact referential integrity. knossos-manifest.schema.json is orphaned (no Validator method). Handoff phase-artifact unknown combinations return empty criteria (Passed:true with zero checks). Agent schema validation wraps errors opaquely. ParseYAMLFrontmatter vs ExtractFrontmatter duplication (legacy). ValidateBytes would panic (compiler is nil).
 
 ## Knowledge Gaps
 
-1. Five schema files (tdd, adr, test-plan, agent, knossos-manifest) not read.
-2. `handoff-criteria.schema.json` exists but has no known Go consumer.
-3. White Sails modifier semantics not fully traced.
+1. ADR-0008 not found on disk
+2. prd/tdd/adr/test-plan schema contents not individually read
+3. internal/cmd/handoff/prepare.go HandoffValidator usage not read

@@ -1,3 +1,7 @@
+---
+description: "Postmortem Template companion for templates skill."
+---
+
 # Postmortem Template
 
 > Blameless incident analysis documenting timeline, contributing factors, and action items.

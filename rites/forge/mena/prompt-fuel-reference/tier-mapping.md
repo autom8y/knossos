@@ -1,3 +1,7 @@
+---
+description: "Tier Mapping: HANDOFF to Prompt Sections companion for prompt-fuel-reference skill."
+---
+
 # Tier Mapping: HANDOFF to Prompt Sections
 
 ## CRITICAL Tier -- Baked Into System Prompt

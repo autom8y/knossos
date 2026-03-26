@@ -1,3 +1,7 @@
+---
+description: "Threat Model Template companion for templates skill."
+---
+
 # Threat Model Template
 
 > STRIDE/DREAD analysis with data flow diagrams, threat identification, and mitigation tracking.

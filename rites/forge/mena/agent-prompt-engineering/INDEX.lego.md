@@ -11,15 +11,7 @@ description: "Agent prompt engineering standards. Use when: writing new agent pr
 
 **Target 150-200 lines per agent.** Agents exceeding 250 lines likely contain redundancy.
 
-This skill codifies learnings from 10 deep optimization sprints across production agent pantheons. Use it to create new agents, audit existing prompts, or debug agent behavior problems.
-
-Effective agent prompts share three qualities: **clarity** (the agent knows exactly what it does), **boundaries** (the agent knows what it owns vs. escalates), and **testability** (handoff criteria are objectively verifiable).
-
-## The Acid Test
-
-*"Could someone unfamiliar with agent development create a production-ready agent using only this skill?"*
-
-If uncertain: The skill needs more concrete examples or clearer step-by-step guidance.
+Effective agent prompts share three qualities: **clarity** (the agent knows exactly what it does), **boundaries** (the agent owns vs. escalates), and **testability** (handoff criteria are objectively verifiable).
 
 ## When NOT to Use This Skill
 
@@ -29,14 +21,6 @@ Skip full template compliance for:
 - Agents discarded after one session (throwaway debugging aids)
 
 For these cases, include only: role identity (2 sentences) and basic responsibilities.
-
-## Invocation
-
-Via Skill tool: `skill: "agent-prompt-engineering"`
-
-Example prompts:
-- "Create a new agent following agent-prompt-engineering template for {purpose}"
-- "Audit this agent prompt against the rubric"
 
 ## Decision Tree
 
@@ -125,65 +109,6 @@ Create or audit agents via Task tool delegation:
 /task Audit [agent-name].md using agent-prompt-engineering skill: score against rubric.md, check principles.md anti-patterns, validate with checklist.md. Report scores and recommended fixes.
 ```
 
-## Skill Contents
-
-| File | Purpose |
-|------|---------|
-| [principles.md](principles.md) | 9 core principles with integrated anti-patterns and detection checklist |
-| [template.md](template.md) | 11-section agent template with inline guidance |
-| [scoring/rubric.md](scoring/rubric.md) | 6-dimension quality rubric (1-5 scale) |
-| [validation/checklist.md](validation/checklist.md) | Pre-deployment verification checklist |
-| [examples/before-after.md](examples/before-after.md) | Real transformation examples |
-
-## When to Use This Skill
-
-**Creating a new agent:**
-1. Start with [template.md](template.md)
-2. Apply [principles.md](principles.md) while writing
-3. Validate against [validation/checklist.md](validation/checklist.md)
-4. Score using [scoring/rubric.md](scoring/rubric.md)
-
-**Auditing existing agents:**
-1. Score each agent using [scoring/rubric.md](scoring/rubric.md)
-2. Check Anti-Pattern Summary table above for detection patterns
-3. Compare against [examples/before-after.md](examples/before-after.md)
-4. Apply fixes following [principles.md](principles.md)
-
-**Debugging agent behavior:**
-1. Check if frontmatter description matches actual behavior
-2. Verify Domain Authority section defines boundaries
-3. Review Handoff Criteria for measurability
-4. Look for anti-pattern violations in principles.md
-
-## Escalation
-
-Route to human when:
-- Designing entirely new agent patterns (not variations of existing)
-- Audit reveals systemic issues across 3+ agents
-- Rite structure changes require workflow redesign
-- Conflicting requirements between skill principles
-
-**Non-prompt issues**: Agent performance -> infrastructure team. Tool limitations -> platform team. Model behavior -> `/consult`.
-
-## Cross-Skill Integration
-
-| Skill | Relationship |
-|-------|--------------|
-| `rite-development` skill | Uses this skill's template for new agents |
-| `documentation` skill | Artifact templates referenced by agents |
-| `standards` skill | Code conventions agents should enforce |
-| `file-verification` skill | Verification protocol agents should reference |
-
-## Quality Targets
-
-A well-engineered agent prompt:
-- Scores 4+ on all 6 rubric dimensions
-- Passes all validation checklist items
-- Contains zero anti-patterns (see Anti-Pattern Summary above)
-- Stays under 200 lines
-- Uses active voice throughout
-- Has objectively testable handoff criteria
-
 ## Anti-Pattern Summary
 
 Quick reference for the 7 most common prompt failures:
@@ -198,10 +123,22 @@ Quick reference for the 7 most common prompt failures:
 | Generic Examples | No learning signal | Could apply to any agent |
 | Missing Anti-Patterns | Repeated failures | No domain-specific guardrails |
 
-Full details with fixes: [principles.md](principles.md) (integrated into each principle). For skill user mistakes (vs agent author mistakes), see [skill-anti-patterns.md](skill-anti-patterns.md).
+Full details with fixes: [principles.md](principles.md). For skill user mistakes, see [skill-anti-patterns.md](skill-anti-patterns.md).
 
-## Related Documentation
+## Companion Reference
 
-- Agent template: see `rite-development` skill for agent template
-- Existing agents: `rites/*/agents/*.md` (source) or channel agents directory (projection)
-- Rite catalog: Check `rites/` directory for production examples
+| Topic | File | When to Load |
+|-------|------|--------------|
+| 9 core principles + anti-patterns | [principles.md](principles.md) | Writing prompts or debugging behavior |
+| 11-section agent template | [template.md](template.md) | Creating a new agent |
+| 6-dimension quality rubric | [scoring/rubric.md](scoring/rubric.md) | Auditing existing agents |
+| Pre-deployment checklist | [validation/checklist.md](validation/checklist.md) | Before shipping any agent |
+| Before/after examples | [examples/before-after.md](examples/before-after.md) | Learning transformation patterns |
+| Skill user anti-patterns | [skill-anti-patterns.md](skill-anti-patterns.md) | Diagnosing skill misuse |
+
+## Escalation
+
+Route to human when:
+- Designing entirely new agent patterns (not variations of existing)
+- Audit reveals systemic issues across 3+ agents
+- Rite structure changes require workflow redesign

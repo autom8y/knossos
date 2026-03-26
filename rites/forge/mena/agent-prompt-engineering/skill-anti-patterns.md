@@ -1,3 +1,7 @@
+---
+description: "Skill Anti-Patterns companion for agent-prompt-engineering skill."
+---
+
 # Skill Anti-Patterns
 
 > 4 common mistakes when using this skill

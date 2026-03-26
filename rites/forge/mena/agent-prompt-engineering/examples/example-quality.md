@@ -1,3 +1,7 @@
+---
+description: "Principal Engineer Examples Quality companion for examples skill."
+---
+
 # Principal Engineer Examples Quality
 
 > Part of [agent-prompt-engineering](../INDEX.lego.md) skill examples

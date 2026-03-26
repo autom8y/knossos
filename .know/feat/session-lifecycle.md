@@ -1,18 +1,15 @@
 ---
 domain: feat/session-lifecycle
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/session/**/*.go"
   - "./internal/cmd/session/**/*.go"
   - "./internal/lock/**/*.go"
-  - "./docs/decisions/ADR-0001*.md"
-  - "./docs/decisions/ADR-0022*.md"
-  - "./docs/decisions/ADR-0027*.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.91
+source_hash: "b329d719"
+confidence: 0.87
 format_version: "1.0"
 ---
 
@@ -20,83 +17,29 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Solves context loss and uncoordinated state mutations in multi-agent CC workflows. Three foundational ADRs: **ADR-0001** (FSM with 3 states, advisory flock locking, TLA+ spec), **ADR-0022** (scan-based discovery, lock format v2, SQLite rejected), **ADR-0027** (unified event system, CC session map, relaxed single-ACTIVE to per-CC-instance).
-
-### Rejected Alternatives
-
-Multiple ACTIVE per repo (complexity), configurable single/multi (two code paths), SQLite (CGO), event sourcing (overhead), process-scoped sessions (PID accumulation).
+Session Lifecycle Management solves context continuity and coordinated state mutation problems in multi-agent CC workflows. Three ADRs shape the design: ADR-0001 (FSM redesign: 4-state machine, advisory flock locking, TLA+ spec), ADR-0022 (scan-based discovery eliminating TOCTOU, lock format v2, schema versioning), ADR-0027 (unified event system, CC session map, relaxed single-ACTIVE per CC instance). Key tradeoffs: WriteIfChanged prevents CC file watcher triggers (LB-001), dual read path for v1/v2/v3 event formats (LB-004), scan-based O(n) discovery with no cache, non-transactional wrap (10+ sequential steps, no rollback).
 
 ## Conceptual Model
 
-### State Machine
-
-```
-NONE ──[create]──► ACTIVE ──[park]──► PARKED
-                     │                   │
-                     │[wrap]             │[resume]
-                     ▼                   ▼
-                  ARCHIVED ◄──[wrap]── ACTIVE
-```
-
-Phase transitions FORWARD-ONLY: requirements → design → implementation → validation → complete.
-
-### Layer Model
-
-User/Agent → Moirai (convention) → `ari session` CLI (enforcement) → `internal/session` (FSM/serialization) → `internal/lock` (flock) → filesystem
-
-### Core Types
-
-- `Context` — SESSION_CONTEXT.md parsed form (status, initiative, complexity, phase, fray fields)
-- `FSM` — transition validation matrix
-- `Status` — ACTIVE/PARKED/ARCHIVED + `NormalizeStatus()` for phantom values (SCAR-014)
-- CC session map — `.sos/sessions/.cc-map/{cc-session-id}` → Knossos session ID
-
-### Resolution Priority Chain
-
-1. `--session-id` flag → 2. CC map lookup → 3. Smart scan (`FindActiveSessions`)
+**State Machine:** NONE -> ACTIVE -> PARKED -> ARCHIVED (terminal). `NormalizeStatus()` handles phantom values (SCAR-014). **Phase Machine (orthogonal):** requirements -> design -> implementation -> validation -> complete (forward-only). **Complexity:** PATCH/MODULE/SYSTEM/INITIATIVE/MIGRATION. **Execution Mode:** native/cross-cutting/orchestrated (derived from status + activeRite). **Snapshot Roles:** orchestrator (10 entries), specialist (5+3), background (minimal). **Fray:** child inherits parent context, parent auto-parks, strand tracking (ACTIVE -> LANDED). **Schema:** v2.3 (procession, typed strands).
 
 ## Implementation Map
 
-`internal/session/` (22 files, 12 test files): status.go, fsm.go, context.go, id.go, discovery.go, resolve.go, rotation.go, events_read.go, timeline.go, snapshot.go.
+`internal/session/` (22 files): status.go (4 status constants), fsm.go (transition validation), context.go (Context type, parse/serialize/save), id.go (session-YYYYMMDD-HHMMSS-hex), discovery.go (scan-based FindActiveSession), resolve.go (priority chain: explicit -> harness map -> scan), complexity.go, rotation.go (body archival, keep last 80 lines), snapshot.go (role-adaptive projections), timeline.go (11 curated event types), events_read.go (tri-format reader), channel.go, execution_mode.go.
 
-`internal/cmd/session/` (35 files, 17 test files): create, park, resume, wrap, fray, transition, recover, gc, list, audit, snapshot, migrate, log, field, lock, integration tests.
+`internal/cmd/session/` (41 files): 20 subcommands including create, park, resume, wrap, fray, transition, migrate, recover, gc, claim, snapshot, lock/unlock, audit, log, field, status, list, timeline, suggest_next.
 
-`internal/lock/` (4 files): advisory flock with stale detection.
+`internal/lock/` (4 files): LockMetadata JSON, flock(2) advisory locks, 10s default timeout, 5-min stale threshold (SCAR-001 atomic reclamation).
 
-### Key Flows
-
-- **Create**: sentinel lock → FindActiveSession guard → FSM validate → NewContext → Save → emit event
-- **Wrap**: pre-lock archived check → exclusive lock → FSM validate → generate sails (BLACK blocks) → archive → graduate artifacts → cleanup locks/CC map → move to archive
-- **Hook resolution**: stdin JSON → `ResolveSession()` priority chain → session operations
-
-### SCAR Evidence
-
-SCAR-001 (stale lock reclamation), SCAR-011 (.current-session deprecated), SCAR-012 (archived session denial), SCAR-013 (wrap edge cases), SCAR-014 (phantom status normalization), SCAR-020 (session ID threading).
-
-### Test Coverage
-
-~300 test functions in `internal/session/`, ~450 in `internal/cmd/session/`. Notable: `moirai_integration_test.go` (28 tests, golden path), FSM exhaustive transition tests.
+**Data Flow:** Create: validate -> __create__ lock -> FindActiveSession guard -> FSM validate -> NewContext -> Save -> emit event. Wrap: pre-lock archive check -> exclusive lock -> FSM validate -> sails gate -> save ARCHIVED -> emit events -> graduate artifacts -> cleanup -> archive move.
 
 ## Boundaries and Failure Modes
 
-- Lock does NOT work on NFS/SMB (advisory flock is local-only)
-- `BufferedEventWriter.Write()` is fire-and-forget (use `Flush()+FlushError()` for confirmation)
-- Rotation operates on body only (frontmatter always preserved)
-- Snapshot generation never fails (graceful degradation to empty)
-- Phase transitions are forward-only (no reversal mechanism)
-- `--seed` mode bypasses single-session constraint via ephemeral worktree
-
-### Key Error Paths
-
-- Lock timeout → `ErrLockTimeout` (directs to `ari session recover`)
-- FSM violation → `ErrLifecycleViolation`
-- BLACK sails at wrap → `CodeQualityGateFailed` (override with `--force`)
-- Multiple active sessions → error from `FindActiveSession()`
+Advisory flock does NOT work on NFS/SMB. BufferedEventWriter is fire-and-forget (call Flush). SESSION_CONTEXT.md writes blocked by PreToolUse writeguard hook. Phase transitions are forward-only. Rotation preserves YAML frontmatter. Snapshot never returns error. Key failures: lock timeout (ErrLockTimeout -> ari session recover), FSM violation (ErrLifecycleViolation), BLACK sails at wrap (CodeQualityGateFailed, --force override), multiple ACTIVE sessions (use --session-id). Mutation authority: only ari session CLI commands and Moirai agent.
 
 ## Knowledge Gaps
 
-1. `migrate.go` (267 lines) has no dedicated test file (HIGH priority gap).
-2. `park.go` and `resume.go` have no dedicated test files.
-3. CC map cleanup in `recover.go` implementation not confirmed.
-4. `docs/specs/session-fsm.tla` TLA+ spec not read.
-5. ADR-0027 Phase 3/4 `.current-session` removal completeness unconfirmed.
+1. TLA+ spec file not found on disk
+2. ADR-0001, ADR-0022, ADR-0027 files not at docs/decisions/
+3. ParkSource autopark hook value not confirmed
+4. Procession lifecycle commands not traced

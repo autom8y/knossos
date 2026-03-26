@@ -1,3 +1,7 @@
+---
+description: "Default Severity Factors companion for severity skill."
+---
+
 # Default Severity Factors
 
 > Default impact, frequency, blast radius, and fix complexity values for all 42 smell types.

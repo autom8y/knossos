@@ -1,3 +1,7 @@
+---
+description: "First Principles: Inscription Architecture companion for inscription-architecture skill."
+---
+
 # First Principles: Inscription Architecture
 
 > "Session-specific knowledge should NOT be in the context file. The context file should just maintain alignment with the active rite to ensure standardized workflows are followed."

@@ -1,3 +1,7 @@
+---
+description: "Merge Strategies companion for patterns skill."
+---
+
 # Merge Strategies
 
 > **Purpose**: Decision framework for when to merge, split, or preserve separate documents during consolidation.

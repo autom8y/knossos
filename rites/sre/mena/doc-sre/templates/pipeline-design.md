@@ -1,3 +1,7 @@
+---
+description: "Pipeline Design Template companion for templates skill."
+---
+
 # Pipeline Design Template
 
 > CI/CD pipeline specification with stages, security, monitoring, and disaster recovery.

@@ -1,3 +1,7 @@
+---
+description: "DRY Violations (DRY-*) companion for taxonomy skill."
+---
+
 # DRY Violations (DRY-*)
 
 > Duplicated logic that should be consolidated.

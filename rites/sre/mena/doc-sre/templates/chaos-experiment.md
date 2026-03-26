@@ -1,3 +1,7 @@
+---
+description: "Chaos Experiment Template companion for templates skill."
+---
+
 # Chaos Experiment Template
 
 > Pre-registration for chaos engineering tests with hypothesis, blast radius, and abort criteria.

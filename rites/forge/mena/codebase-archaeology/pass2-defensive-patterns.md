@@ -1,3 +1,7 @@
+---
+description: "Pass 2: Defensive Pattern Inventory companion for codebase-archaeology skill."
+---
+
 # Pass 2: Defensive Pattern Inventory
 
 > Catalog every guard, assertion, constraint, validation, and safety check that prevents correctness failures. Also identify unguarded risk zones where defenses are missing.

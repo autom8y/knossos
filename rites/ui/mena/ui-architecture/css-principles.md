@@ -1,3 +1,7 @@
+---
+description: "CSS Architecture Principles companion for ui-architecture skill."
+---
+
 # CSS Architecture Principles
 
 > Methodology-neutral CSS principles: token-driven values, logical properties, cascade control, layout, animation.

@@ -1,3 +1,7 @@
+---
+description: "QA Adversary Token Efficiency companion for examples skill."
+---
+
 # QA Adversary Token Efficiency
 
 > Part of [agent-prompt-engineering](../INDEX.lego.md) skill examples

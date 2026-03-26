@@ -1,3 +1,7 @@
+---
+description: "Roadmap Artifacts companion for strategy-ref skill."
+---
+
 # Roadmap Artifacts
 
 > HANDOFF examples, RICE scoring templates, and strategic roadmap artifact patterns.

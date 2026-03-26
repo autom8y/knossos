@@ -1,3 +1,7 @@
+---
+description: "Checkpoint Format companion for schemas skill."
+---
+
 # Checkpoint Format
 
 > **Purpose**: Define the structure for `.consolidation/checkpoint-{topic}.yaml` files that capture workflow state, enabling any agent to resume consolidation work without re-reading sources or re-analyzing content.

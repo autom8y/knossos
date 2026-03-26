@@ -1,3 +1,7 @@
+---
+description: "Content Brief Template companion for templates skill."
+---
+
 # Content Brief Template
 
 > Specification for new documentation: purpose, audience, scope boundaries, and priority.

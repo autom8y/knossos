@@ -1,3 +1,7 @@
+---
+description: "Context File Boundary Test companion for inscription-architecture skill."
+---
+
 # Context File Boundary Test
 
 A practical checklist for determining if content belongs in the context file. Before adding ANY content, run through these five questions.

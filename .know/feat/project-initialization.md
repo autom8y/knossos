@@ -1,14 +1,13 @@
 ---
 domain: feat/project-initialization
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/cmd/initialize/**/*.go"
-  - "./docs/decisions/TDD-single-binary-completion.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.91
+source_hash: "b329d719"
+confidence: 0.88
 format_version: "1.0"
 ---
 
@@ -16,43 +15,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Before `ari init`, the binary required the Knossos source repository on disk. `go install` produced a non-functional binary. The feature was one of three goals in the "single-binary completion" sprint (TDD at `/Users/tomtenuta/Code/knossos/docs/decisions/TDD-single-binary-completion.md`).
-
-**Key decisions**: Embed rites/templates in binary via `//go:embed` at module root. `needsProject=false` (init creates project context). Idempotency sentinel is `KNOSSOS_MANIFEST.yaml` presence. XDG mena extraction with version sentinel for hybrid distribution.
+Bootstraps new project into knossos workflow. Only command with SetNeedsProject(false,false). Two modes: minimal scaffold (CLAUDE.md + settings + directories) and rite scaffold (full ari sync). Non-knossos .claude/ guard (rejects if .claude/ exists without knossos manifest, unless --force). XDG mena extraction as side effect (version-sentinel controlled). Single-binary distribution (works without KNOSSOS_HOME via embedded assets).
 
 ## Conceptual Model
 
-### Three Modes
-
-| Mode | Trigger | What happens |
-|------|---------|--------------|
-| `already_initialized` | `KNOSSOS_MANIFEST.yaml` exists | Exit 0, no writes |
-| `minimal` | No `--rite` | `MaterializeMinimal()` — CLAUDE.md, settings, manifest only |
-| `rite` | `--rite <name>` | Full `Sync()` — agents, mena, hooks, inscription |
-
-### Directory Scaffold
-
-Creates `.knossos/`, `.sos/`, `.ledge/{decisions,specs,reviews,spikes}` with `.gitkeep` files.
+**Three modes:** already initialized (exit 0 no-op), minimal scaffold (MaterializeMinimal), rite scaffold (Sync with ScopeAll + KeepOrphans). **scaffoldProjectDirs creates:** .knossos/, .sos/, .sos/land/, .ledge/{decisions,specs,reviews,spikes}, .ledge/shelf/, .gitignore with Knossos marker block. **extractEmbeddedMenaToXDG:** version-sentinel (.ari-version), wipe-and-reextract on version mismatch. **Gitignore management:** surgically replaces Knossos marker block, preserves user content.
 
 ## Implementation Map
 
-2 files: `/Users/tomtenuta/Code/knossos/internal/cmd/initialize/init.go`, `init_test.go` (10 test functions). Package named `initialize` because `init` is a Go keyword.
-
-### Key Entry Points
-
-- `NewInitCmd()` — Cobra constructor
-- `runInit()` — execution function
-- `extractEmbeddedMenaToXDG()` — version-gated XDG extraction
-- `scaffoldProjectDirs()` — creates directory tree
+`internal/cmd/initialize/init.go`: runInit (project dir resolution, idempotency check, non-knossos guard, materializer construction with embedded FS wiring, hooks.yaml bootstrap, XDG extraction, scaffoldProjectDirs, branch to minimal or rite sync). Tests cover fresh dir, with rite, already initialized, force, non-knossos guard, ledge idempotent, XDG extraction (4 paths), gitignore (4 scenarios).
 
 ## Boundaries and Failure Modes
 
-- Does NOT manage session lifecycle
-- Does NOT validate `--rite` name before materialization attempt
-- `scaffoldProjectDirs` errors silently swallowed (best-effort)
-- Non-Knossos `.claude/` protected: error unless `--force`
+Channel hardcoded to .claude (HA-CC annotation). hooks.yaml write-once (no version-aware upgrade). extractEmbeddedMenaToXDG is best-effort (slog.Warn on failure). scaffoldProjectDirs mkdir failures silent. Corrupted KNOSSOS_MANIFEST.yaml propagates error from LoadOrBootstrap. KeepOrphans=true means stale artifacts from prior rite not cleaned on --force re-init.
 
 ## Knowledge Gaps
 
-1. `MaterializeMinimal` behavior not fully traced.
-2. `--force` behavior on existing satellite CLAUDE.md regions not verified through merger source.
+1. --source flag non-existent path behavior not traced
+2. config/hooks.yaml content not examined
+3. No user-facing documentation for ari init beyond --help

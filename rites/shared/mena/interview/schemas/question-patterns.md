@@ -1,3 +1,7 @@
+---
+description: "Question Patterns companion for schemas skill."
+---
+
 # Question Patterns
 
 > Templates for structured interview questions by category.

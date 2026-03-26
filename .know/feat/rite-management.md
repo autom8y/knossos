@@ -1,16 +1,15 @@
 ---
 domain: feat/rite-management
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/rite/**/*.go"
   - "./internal/cmd/rite/**/*.go"
   - "./rites/*/manifest.yaml"
-  - "./docs/decisions/ADR-0007*.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.92
+source_hash: "b329d719"
+confidence: 0.87
 format_version: "1.0"
 ---
 
@@ -18,56 +17,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Rites are composable practice bundles — the primary unit of context switching. Each rite encapsulates agents, mena, hooks, and workflow configuration appropriate for a specific engineering practice domain.
-
-**ADR-0007**: YAML-based rite context over bash-sourced `context-injection.sh`. Problems: arbitrary code execution, no schema validation, shell spawning overhead.
-
-### Two Composition Modes
-
-1. **Rite switching** (`ari sync --rite <name>`): replaces active rite entirely
-2. **Additive invocation** (`ari rite invoke`): borrows components without switching (CLAUDE.md injection deferred to Phase 2)
+A rite is knossos's core unit of organizational purpose -- a composable bundle of agents, skills, hooks, and workflow for a specific domain. Two axes: active rite (replacement via ari sync) and invocation (additive borrowing, bounded by token budget). Four forms: simple (skills-only), practitioner (agents+skills), procedural (hooks+workflow), full (all). Context budget (default 50K tokens) guardrails invocation cost. Resolution chain: project > user > org > platform > embedded.
 
 ## Conceptual Model
 
-### Key Abstractions
-
-- **Rite**: Directory under `rites/<name>/` with `manifest.yaml`, `agents/`, `mena/`
-- **Active Rite**: Currently materialized rite, tracked by `.claude/ACTIVE_RITE`
-- **Rite Form**: `simple` (mena only), `practitioner` (agents+mena), `procedural` (hooks+workflows), `full`
-- **Invocation**: Borrowed components from non-active rite, stored in `INVOCATION_STATE.yaml`
-- **Budget**: Token cost tracking (2,000/agent, 1,000/skill, 500/workflow)
-
-### 18 Embedded Rites
-
-10x-dev, arch, clinic, debt-triage, docs, ecosystem, forge, hygiene, intelligence, releaser, review, rnd, security, shared, slop-chop, sre, strategy, thermia.
+**Rite manifest (manifest.yaml):** name, entry_agent, phases, agents, dromena/legomena, dependencies, complexity_levels, hooks, mcp_servers. **Active rite state:** .knossos/ACTIVE_RITE (plain text). **Invocation state:** INVOCATION_STATE.yaml (borrowings + budget tracking). **Context injection:** context.yaml key-value rows rendered into inscription. **19 bundled rites** in rites/ directory.
 
 ## Implementation Map
 
-Domain: `/Users/tomtenuta/Code/knossos/internal/rite/` (16 files). CLI: `/Users/tomtenuta/Code/knossos/internal/cmd/rite/` (11 files).
-
-### Key Types
-
-`RiteManifest`, `RiteForm`, `Discovery`, `Invoker`, `InvocationState`, `StateBudget`, `Validator`, `RiteContext`, `ContextLoader`, `Workflow`.
-
-### Key Flows
-
-- **Discovery**: `scanDir(.knossos/rites/)` → `scanDir(orgRitesDir)` → `scanDir(userRitesDir)` → sort → mark active
-- **Invoke**: load target manifest → validate → load state → detect conflicts → select components → estimate budget → generate ID → save state
-
-### TENSION-003
-
-Dual `RiteManifest` types: `internal/rite.RiteManifest` (invocation) vs `internal/materialize.RiteManifest` (pipeline). Import graph isolation.
+`internal/rite/` (10 files): manifest.go (RiteManifest, Validate), discovery.go (4-tier enumeration), invoker.go (11-step borrow pipeline), state.go (InvocationState persistence), budget.go (BudgetCalculator), workflow.go, context.go/context_loader.go (4-tier context resolution), validate.go (6 checks), syncer.go (dependency inversion interface). `internal/cmd/rite/` (10 files): list, info, current, invoke, release, status, validate, context, pantheon subcommands.
 
 ## Boundaries and Failure Modes
 
-- `ari rite invoke` only records intent — does NOT update CLAUDE.md or `.claude/` (Phase 2 deferred)
-- Discovery precedence: user overrides project (opposite of materialization's 6-tier resolution)
-- `CleanExpired()` exists but has no caller (expired invocations accumulate)
-- `skills` field polymorphism in manifest.yaml (string[] or SkillRef[])
-- Budget estimation is approximate (flat defaults, not file-scanning)
+Rite management vs materialization: internal/rite does NOT write channel directories (Syncer interface bridges to materialize). Invocation is not materialization (CLAUDE.md injection deferred to "Phase 2"). Active rite written by materialize, read by rite. ContextChain inverts user/project priority. Missing ACTIVE_RITE: CodeFileNotFound. Invocation conflicts: ErrBorrowConflict. Budget exceeded: default 50K tokens with rough estimates. Resolution shadowing is silent. loadRite skips invalid rites silently.
 
 ## Knowledge Gaps
 
-1. `ari rite invoke` Phase 2 has no ADR/issue/implementation plan.
-2. `CleanExpired()` callers: none exist in CLI.
-3. `orchestrator.yaml` fallback fidelity untested across rites.
+1. ari sync --rite full switching flow internals not read
+2. Dependency resolution for shared rite not traced through materialize
+3. ADR-0007 not found on disk

@@ -1,3 +1,7 @@
+---
+description: "Documentation Review Report Template companion for templates skill."
+---
+
 # Documentation Review Report Template
 
 > Accuracy validation of documentation against actual code behavior, with severity-graded findings.

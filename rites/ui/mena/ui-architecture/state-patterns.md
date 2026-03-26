@@ -1,3 +1,7 @@
+---
+description: "State Patterns companion for ui-architecture skill."
+---
+
 # State Patterns
 
 > State classification, SWR caching, optimistic UI rules, signals reactivity, state machines.

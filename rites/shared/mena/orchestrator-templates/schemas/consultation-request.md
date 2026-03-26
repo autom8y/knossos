@@ -1,3 +1,7 @@
+---
+description: "Consultation Request Schema companion for schemas skill."
+---
+
 # Consultation Request Schema
 
 > Structure for consulting an orchestrator agent.

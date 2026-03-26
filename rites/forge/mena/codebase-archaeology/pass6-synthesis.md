@@ -1,3 +1,7 @@
+---
+description: "Pass 6: Synthesis and Handoff (Prompt Fuel) companion for codebase-archaeology skill."
+---
+
 # Pass 6: Synthesis and Handoff (Prompt Fuel)
 
 > Compress Passes 1-5 into per-agent Prompt Fuel, tiered by priority. This pass extracts nothing new -- it distills, prioritizes, and formats for prompt consumption.

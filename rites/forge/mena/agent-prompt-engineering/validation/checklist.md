@@ -1,3 +1,7 @@
+---
+description: "Pre-Deployment Validation Checklist companion for validation skill."
+---
+
 # Pre-Deployment Validation Checklist
 
 > Verify agent prompts before adding to production rite catalog
