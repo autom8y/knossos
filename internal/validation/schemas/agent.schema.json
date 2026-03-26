@@ -40,7 +40,8 @@
         "builder",
         "evaluator",
         "prototyper",
-        "validator"
+        "validator",
+        "scout"
       ],
       "description": "Agent archetype determining section ownership and platform behaviors"
     },
