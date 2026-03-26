@@ -404,6 +404,86 @@ func (p *Pipeline) QueryWithTriage(ctx context.Context, triageInput *TriageResul
 	return p.generator.Generate(ctx, assembled, confidence, &chain, intentSummary)
 }
 
+// QueryStream runs the reasoning pipeline with streaming output using pre-computed triage results.
+// BC-03: Uses onChunk callback to stream text chunks. reason/ does NOT import slack/.
+//
+// Same as QueryWithTriage but uses GenerateStream instead of Generate.
+// Streaming prompt: free-form text with inline [org::repo::domain] citation markers
+// (NOT tool-forced structured output, which is incompatible with streaming).
+func (p *Pipeline) QueryStream(ctx context.Context, triageInput *TriageResultInput, onChunk func(chunk string)) (*response.ReasoningResponse, error) {
+	if p.assembler == nil || p.generator == nil || p.scorer == nil {
+		return nil, fmt.Errorf("pipeline has nil dependencies")
+	}
+
+	if triageInput == nil || len(triageInput.Candidates) == 0 {
+		// No triage candidates -- fall back to v1 pipeline (non-streaming).
+		return p.Query(ctx, triageInput.RefinedQuery)
+	}
+
+	question := triageInput.RefinedQuery
+
+	// Build search results from triage candidates.
+	searchResults := triageCandidatesToSearchResults(triageInput.Candidates)
+
+	// Build provenance chain.
+	linkInputs := buildProvenanceLinkInputs(searchResults, p.catalog)
+	now := time.Now()
+	decay := p.scorer.Config().Decay
+	chain := trust.NewProvenanceChain(linkInputs, &decay, now)
+
+	// BC-07: Compute weighted-mean freshness.
+	candidateInfos := make([]reasoncontext.TriageCandidateInfo, len(triageInput.Candidates))
+	for i, c := range triageInput.Candidates {
+		candidateInfos[i] = reasoncontext.TriageCandidateInfo{
+			QualifiedName:  c.QualifiedName,
+			RelevanceScore: c.RelevanceScore,
+			Freshness:      c.Freshness,
+			DomainType:     c.DomainType,
+		}
+	}
+
+	freshness := reasoncontext.WeightedMeanFreshness(candidateInfos)
+	if freshness == 0 {
+		freshness = trust.FreshnessFromChain(&chain)
+	}
+
+	// Compute confidence score.
+	scoreInput := trust.ScoreInput{
+		Freshness:        freshness,
+		RetrievalQuality: normalizeTriageRelevance(triageInput.Candidates),
+		DomainCoverage:   1.0,
+		Chain:            &chain,
+		StaleDomains:     findStaleDomains(chain, p.scorer.Config().Thresholds.LowThreshold),
+	}
+	confidence := p.scorer.Score(scoreInput)
+
+	slog.Info("streaming triage confidence score computed",
+		"overall", confidence.Overall,
+		"tier", confidence.Tier.String(),
+		"triage_candidates", len(triageInput.Candidates),
+	)
+
+	// LOW tier short-circuit (no streaming needed).
+	if confidence.Tier == trust.TierLow {
+		return &response.ReasoningResponse{
+			Answer: "insufficient knowledge to answer this question reliably",
+			Tier:   trust.TierLow,
+			Gap:    confidence.Gap,
+		}, nil
+	}
+
+	// Assemble context window.
+	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org)
+
+	intentSummary := response.IntentSummary{
+		Tier:       "OBSERVE",
+		Answerable: true,
+	}
+
+	// Generate with streaming.
+	return p.generator.GenerateStream(ctx, assembled, confidence, &chain, intentSummary, onChunk)
+}
+
 // triageCandidatesToSearchResults converts triage candidates to search results
 // so the existing assembler can process them.
 func triageCandidatesToSearchResults(candidates []TriageCandidateInput) []search.SearchResult {

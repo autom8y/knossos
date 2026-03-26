@@ -27,6 +27,8 @@ import (
 	"github.com/autom8y/knossos/internal/serve/health"
 	"github.com/autom8y/knossos/internal/serve/webhook"
 	internalslack "github.com/autom8y/knossos/internal/slack"
+	"github.com/autom8y/knossos/internal/slack/conversation"
+	"github.com/autom8y/knossos/internal/slack/streaming"
 	"github.com/autom8y/knossos/internal/tokenizer"
 	"github.com/autom8y/knossos/internal/triage"
 	"github.com/autom8y/knossos/internal/trust"
@@ -205,11 +207,40 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		slog.Info("triage orchestrator initialized (Sprint 5: BM25 fallback mode)")
 	}
 
-	// Create Slack client and handler.
+	// Create Slack client.
 	slackClient := internalslack.NewSlackClient(cfg.SlackBotToken)
 	slackCfg := internalslack.DefaultSlackConfig()
 	slackCfg.BotToken = cfg.SlackBotToken
-	slackHandler, ctxStore := internalslack.NewSlackHandler(queryRunner, slackClient, slackCfg, triageAdapter)
+
+	// Sprint 6: Construct ConversationManager with LLM summarizer and Slack thread fetcher.
+	var convMgr *conversation.Manager
+	convConfig := conversation.DefaultConfig()
+	var summarizer conversation.Summarizer
+	if llmClient != nil {
+		summarizer = conversation.NewLLMSummarizer(llmClient)
+	}
+	// SlackThreadFetcher is nil for now (conversations.replies integration is
+	// wired via the SlackClient in a future PR). ConversationManager degrades
+	// gracefully without it (DORMANT threads return nil).
+	convMgr = conversation.NewManager(convConfig, summarizer, nil)
+	slog.Info("conversation manager initialized",
+		"ttl", convConfig.TTL,
+		"max_recent_messages", convConfig.MaxRecentMessages,
+		"cleanup_interval", convConfig.CleanupInterval,
+	)
+
+	// Sprint 6: Construct StreamSender for progressive response rendering.
+	streamSender := streaming.NewSender(cfg.SlackBotToken, "")
+
+	// Create handler with full Sprint 6 dependencies.
+	slackHandler, ctxStore := internalslack.NewSlackHandlerWithDeps(internalslack.HandlerDeps{
+		Pipeline:        queryRunner,
+		Client:          slackClient,
+		Config:          slackCfg,
+		TriageRunner:    triageAdapter,
+		ConversationMgr: convMgr,
+		StreamSender:    streamSender,
+	})
 
 	// Register webhook verification middleware wrapping the Slack handler.
 	verifier := webhook.NewVerifier(cfg.SlackSigningSecret)
@@ -263,12 +294,18 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	// Start blocks until shutdown signal.
 	if err := srv.Start(context.Background()); err != nil {
 		ctxStore.Stop()
+		if convMgr != nil {
+			convMgr.Stop()
+		}
 		return common.PrintAndReturn(printer,
 			errors.Wrap(errors.CodeServerStartFailed, "server failed to start", err))
 	}
 
-	// Stop the ThreadContextStore cleanup goroutine on graceful shutdown.
+	// Stop background goroutines on graceful shutdown.
 	ctxStore.Stop()
+	if convMgr != nil {
+		convMgr.Stop() // Sprint 6: Stop ConversationManager cleanup goroutine.
+	}
 
 	return nil
 }
