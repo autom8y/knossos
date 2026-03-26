@@ -136,3 +136,70 @@ func TestIndex_Finalize(t *testing.T) {
 	assert.InDelta(t, 15.0, idx.AvgDocLen, 0.001) // (10+20)/2
 	assert.InDelta(t, 5.0, idx.AvgSecLen, 0.001)
 }
+
+func TestIndex_LookupContent(t *testing.T) {
+	tests := []struct {
+		name      string
+		qn        string
+		wantText  string
+		wantFound bool
+	}{
+		{
+			name:      "existing document returns content",
+			qn:        "org::repo::architecture",
+			wantText:  "Architecture content here",
+			wantFound: true,
+		},
+		{
+			name:      "second document returns its content",
+			qn:        "org::repo::conventions",
+			wantText:  "Conventions content here",
+			wantFound: true,
+		},
+		{
+			name:      "nonexistent document returns empty",
+			qn:        "org::repo::nonexistent",
+			wantText:  "",
+			wantFound: false,
+		},
+		{
+			name:      "empty qualified name returns empty",
+			qn:        "",
+			wantText:  "",
+			wantFound: false,
+		},
+	}
+
+	idx := NewIndex()
+	doc1 := &IndexedUnit{
+		QualifiedName: "org::repo::architecture",
+		Domain:        "architecture",
+		RawText:       "Architecture content here",
+		TermFreqs:     map[string]int{"architecture": 1},
+		TotalTerms:    1,
+	}
+	doc2 := &IndexedUnit{
+		QualifiedName: "org::repo::conventions",
+		Domain:        "conventions",
+		RawText:       "Conventions content here",
+		TermFreqs:     map[string]int{"conventions": 1},
+		TotalTerms:    1,
+	}
+	idx.AddDocument(doc1)
+	idx.AddDocument(doc2)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			text, found := idx.LookupContent(tt.qn)
+			assert.Equal(t, tt.wantFound, found)
+			assert.Equal(t, tt.wantText, text)
+		})
+	}
+}
+
+func TestIndex_LookupContent_EmptyIndex(t *testing.T) {
+	idx := NewIndex()
+	text, found := idx.LookupContent("org::repo::anything")
+	assert.False(t, found)
+	assert.Empty(t, text)
+}

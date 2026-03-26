@@ -62,6 +62,16 @@ func NewPipeline(
 	}
 }
 
+// contentLookup returns a function that resolves qualified names to raw .know/
+// content via the BM25 index. Returns nil when no search index is available,
+// which triageCandidatesToSearchResults handles gracefully.
+func (p *Pipeline) contentLookup() func(string) (string, bool) {
+	if p.search == nil {
+		return nil
+	}
+	return p.search.LookupContent
+}
+
 // Query runs the full reasoning pipeline for a single user question.
 // Always returns a response (never returns a nil *ReasoningResponse).
 // Returns an error only for programming errors (nil dependencies), not for
@@ -353,8 +363,9 @@ func (p *Pipeline) QueryWithTriage(ctx context.Context, triageInput *TriageResul
 
 	question := triageInput.RefinedQuery
 
-	// Build search results from triage candidates to reuse existing pipeline.
-	searchResults := triageCandidatesToSearchResults(triageInput.Candidates)
+	// Build search results from triage candidates, loading .know/ content
+	// from the BM25 index so the assembler receives real knowledge content.
+	searchResults := triageCandidatesToSearchResults(triageInput.Candidates, p.contentLookup())
 
 	// Build provenance chain from triage candidates + catalog.
 	linkInputs := buildProvenanceLinkInputs(searchResults, p.catalog)
@@ -441,8 +452,8 @@ func (p *Pipeline) QueryStream(ctx context.Context, triageInput *TriageResultInp
 
 	question := triageInput.RefinedQuery
 
-	// Build search results from triage candidates.
-	searchResults := triageCandidatesToSearchResults(triageInput.Candidates)
+	// Build search results from triage candidates, loading .know/ content.
+	searchResults := triageCandidatesToSearchResults(triageInput.Candidates, p.contentLookup())
 
 	// Build provenance chain.
 	linkInputs := buildProvenanceLinkInputs(searchResults, p.catalog)
@@ -504,18 +515,31 @@ func (p *Pipeline) QueryStream(ctx context.Context, triageInput *TriageResultInp
 }
 
 // triageCandidatesToSearchResults converts triage candidates to search results
-// so the existing assembler can process them.
-func triageCandidatesToSearchResults(candidates []TriageCandidateInput) []search.SearchResult {
+// so the existing assembler can process them. The contentLookup function
+// resolves qualified names to their raw .know/ content. When non-nil, each
+// candidate's Description is populated so the assembler receives real content
+// (not empty stubs). When nil, behavior is unchanged (backward compatible).
+func triageCandidatesToSearchResults(candidates []TriageCandidateInput, contentLookup func(string) (string, bool)) []search.SearchResult {
 	var results []search.SearchResult
 	for _, c := range candidates {
 		score := int(c.RelevanceScore * 1000)
+		entry := search.SearchEntry{
+			Name:   c.QualifiedName,
+			Domain: search.DomainKnowledge,
+		}
+
+		// Populate Description from BM25 content store so the assembler
+		// receives the actual .know/ content for this domain.
+		if contentLookup != nil {
+			if content, ok := contentLookup(c.QualifiedName); ok {
+				entry.Description = content
+			}
+		}
+
 		results = append(results, search.SearchResult{
-			SearchEntry: search.SearchEntry{
-				Name:   c.QualifiedName,
-				Domain: search.DomainKnowledge,
-			},
-			Score:     score,
-			MatchType: "triage",
+			SearchEntry: entry,
+			Score:       score,
+			MatchType:   "triage",
 		})
 	}
 	return results

@@ -68,9 +68,10 @@ type TokenUsage struct {
 }
 
 // AnthropicClient implements ClaudeClient using the Anthropic Go SDK.
-// Constructed with an API key; reads from ANTHROPIC_API_KEY env var.
+// Constructed with an API key; reuses the SDK client across calls for connection pooling.
 type AnthropicClient struct {
 	apiKey string
+	client anthropic.Client
 }
 
 // NewAnthropicClient creates a production ClaudeClient.
@@ -80,14 +81,17 @@ func NewAnthropicClient() (*AnthropicClient, error) {
 	if key == "" {
 		return nil, fmt.Errorf("ANTHROPIC_API_KEY environment variable is not set")
 	}
-	return &AnthropicClient{apiKey: key}, nil
+	return &AnthropicClient{
+		apiKey: key,
+		client: anthropic.NewClient(option.WithAPIKey(key)),
+	}, nil
 }
 
 // Complete sends a completion request to the Claude API using the Anthropic Go SDK.
 // When ResponseSchema is set, uses tool forcing to obtain structured JSON output.
 // Context cancellation propagates through the SDK call.
 func (c *AnthropicClient) Complete(ctx context.Context, req CompletionRequest) (*CompletionResponse, error) {
-	client := anthropic.NewClient(option.WithAPIKey(c.apiKey))
+	client := c.client
 
 	params := anthropic.MessageNewParams{
 		Model:     anthropic.Model(req.Model),

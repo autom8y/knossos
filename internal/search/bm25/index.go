@@ -191,6 +191,18 @@ func (idx *Index) SearchSections(query string, k int) []SearchResult {
 	return out
 }
 
+// LookupContent returns the RawText for a document matching the given qualified
+// name. Returns ("", false) if no document matches. O(n) scan — acceptable
+// because the document count is small (typically < 50 domains).
+func (idx *Index) LookupContent(qualifiedName string) (string, bool) {
+	for _, doc := range idx.Documents {
+		if doc.QualifiedName == qualifiedName {
+			return doc.RawText, true
+		}
+	}
+	return "", false
+}
+
 // Tokenize splits text into lowercase terms, filtering out short tokens,
 // file extensions, and markdown punctuation.
 func Tokenize(text string) []string {

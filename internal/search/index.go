@@ -169,6 +169,17 @@ func (idx *SearchIndex) HasBM25() bool {
 	return idx.bm25Index != nil
 }
 
+// LookupContent returns the raw .know/ content for a given qualified name.
+// Returns ("", false) if no BM25 index is available or the qualified name is
+// not found. Used by the triage path to populate content that BM25 search
+// results carry automatically but triage candidates lack.
+func (idx *SearchIndex) LookupContent(qualifiedName string) (string, bool) {
+	if idx == nil || idx.bm25Index == nil {
+		return "", false
+	}
+	return idx.bm25Index.LookupContent(qualifiedName)
+}
+
 // Search finds entries matching the query, scored and ranked.
 // Entries with score=0 are excluded. Results are sorted descending by score.
 // Domain filter and limit from opts are applied.

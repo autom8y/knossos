@@ -289,6 +289,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		ConversationMgr: convMgr,
 		StreamSender:    streamSender,
 		Metrics:         metricsRecorder,
+		MaxConcurrent:   cfg.MaxConcurrent,
 	})
 
 	// Register webhook verification middleware wrapping the Slack handler.

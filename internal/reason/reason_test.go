@@ -449,3 +449,66 @@ func TestExtractSearchDomains_WithHints(t *testing.T) {
 	assert.Equal(t, []search.Domain{search.DomainKnowledge}, domains)
 }
 
+// ---- triageCandidatesToSearchResults unit tests ----
+
+func TestTriageCandidatesToSearchResults_WithContentLookup(t *testing.T) {
+	// When a content lookup function is provided, Description should be populated.
+	contentStore := map[string]string{
+		"org::repo::architecture": "# Architecture\nPackage structure and layers.",
+		"org::repo::conventions":  "# Conventions\nError handling patterns.",
+	}
+	lookup := func(qn string) (string, bool) {
+		text, ok := contentStore[qn]
+		return text, ok
+	}
+
+	candidates := []TriageCandidateInput{
+		{QualifiedName: "org::repo::architecture", RelevanceScore: 0.95},
+		{QualifiedName: "org::repo::conventions", RelevanceScore: 0.7},
+	}
+
+	results := triageCandidatesToSearchResults(candidates, lookup)
+
+	require.Len(t, results, 2)
+	assert.Equal(t, "# Architecture\nPackage structure and layers.", results[0].Description,
+		"Description must contain .know/ content from BM25 index")
+	assert.Equal(t, "# Conventions\nError handling patterns.", results[1].Description)
+	assert.Equal(t, search.DomainKnowledge, results[0].Domain)
+	assert.Equal(t, "triage", results[0].MatchType)
+}
+
+func TestTriageCandidatesToSearchResults_NilLookup(t *testing.T) {
+	// When no content lookup is available, Description should remain empty.
+	// This is backward compatible with the original behavior.
+	candidates := []TriageCandidateInput{
+		{QualifiedName: "org::repo::architecture", RelevanceScore: 0.95},
+	}
+
+	results := triageCandidatesToSearchResults(candidates, nil)
+
+	require.Len(t, results, 1)
+	assert.Empty(t, results[0].Description, "nil lookup must leave Description empty")
+}
+
+func TestTriageCandidatesToSearchResults_MissingContent(t *testing.T) {
+	// When a candidate's qualified name is not in the content store,
+	// Description should remain empty for that candidate.
+	lookup := func(qn string) (string, bool) {
+		if qn == "org::repo::architecture" {
+			return "Architecture content", true
+		}
+		return "", false
+	}
+
+	candidates := []TriageCandidateInput{
+		{QualifiedName: "org::repo::architecture", RelevanceScore: 0.95},
+		{QualifiedName: "org::repo::unknown", RelevanceScore: 0.5},
+	}
+
+	results := triageCandidatesToSearchResults(candidates, lookup)
+
+	require.Len(t, results, 2)
+	assert.Equal(t, "Architecture content", results[0].Description)
+	assert.Empty(t, results[1].Description, "unknown domain must have empty Description")
+}
+

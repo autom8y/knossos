@@ -73,3 +73,32 @@ func TestRenderNoSourcesGapAdmission_Content(t *testing.T) {
 	assert.Contains(t, result, "MUST")
 	assert.Contains(t, result, "Do NOT fabricate")
 }
+
+// ---- T3: Citation provenance rule tests ----
+
+func TestRenderTierBehavior_HighTier_CitationProvenanceRule(t *testing.T) {
+	result := renderTierBehavior(trust.TierHigh)
+
+	assert.Contains(t, result, "CITATION PROVENANCE RULE",
+		"HIGH tier must include citation provenance instruction")
+	assert.Contains(t, result, "Only cite sources that are explicitly listed",
+		"must instruct Claude to only cite listed sources")
+	assert.Contains(t, result, "Do NOT cite domains",
+		"must warn against citing referenced domains from within content")
+}
+
+func TestRenderTierBehavior_MediumTier_CitationProvenanceRule(t *testing.T) {
+	result := renderTierBehavior(trust.TierMedium)
+
+	assert.Contains(t, result, "CITATION PROVENANCE RULE",
+		"MEDIUM tier must include citation provenance instruction")
+	assert.Contains(t, result, "Only cite sources that are explicitly listed",
+		"must instruct Claude to only cite listed sources")
+}
+
+func TestRenderTierBehavior_LowTier_NoCitationRule(t *testing.T) {
+	result := renderTierBehavior(trust.TierLow)
+
+	assert.NotContains(t, result, "CITATION PROVENANCE RULE",
+		"LOW tier should not include citation provenance rule (never reaches Claude)")
+}

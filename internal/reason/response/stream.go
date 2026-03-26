@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/anthropics/anthropic-sdk-go"
-	"github.com/anthropics/anthropic-sdk-go/option"
 
 	reasoncontext "github.com/autom8y/knossos/internal/reason/context"
 	"github.com/autom8y/knossos/internal/trust"
@@ -56,7 +55,7 @@ func (g *Generator) GenerateStream(
 		return g.Generate(ctx, assembled, confidence, chain, intentSummary)
 	}
 
-	client := anthropic.NewClient(option.WithAPIKey(anthropicClient.apiKey))
+	client := anthropicClient.client
 
 	params := anthropic.MessageNewParams{
 		Model:     anthropic.Model(g.config.Model),

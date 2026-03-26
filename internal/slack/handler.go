@@ -302,6 +302,10 @@ type HandlerDeps struct {
 	// Metrics records pre-pipeline and handler-level metrics.
 	// May be nil -- when nil, metrics recording is skipped.
 	Metrics HandlerMetrics
+
+	// MaxConcurrent is the maximum number of concurrent pipeline queries.
+	// Default: 5 if zero.
+	MaxConcurrent int
 }
 
 // NewSlackHandler returns an http.HandlerFunc that processes Slack Events API payloads
@@ -326,7 +330,11 @@ func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig,
 // called during server shutdown to terminate background goroutines.
 func NewSlackHandlerWithDeps(deps HandlerDeps) (http.HandlerFunc, *ThreadContextStore, func()) {
 	dedup := newEventDedup(5 * time.Minute)             // TD-02: 5-minute dedup window
-	limiter := newConcurrencyLimiter(5)                  // TD-03: max 5 concurrent pipeline queries
+	maxConcurrent := deps.MaxConcurrent
+	if maxConcurrent <= 0 {
+		maxConcurrent = 5
+	}
+	limiter := newConcurrencyLimiter(maxConcurrent)      // TD-03: configurable concurrent pipeline queries
 	ctxStore := newThreadContextStore(30 * time.Minute)  // GAP-10: 30-minute thread context TTL
 
 	return func(w http.ResponseWriter, r *http.Request) {

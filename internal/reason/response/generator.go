@@ -9,6 +9,7 @@ import (
 	"time"
 
 	reasoncontext "github.com/autom8y/knossos/internal/reason/context"
+	"github.com/autom8y/knossos/internal/slack/streaming"
 	"github.com/autom8y/knossos/internal/trust"
 )
 
@@ -117,14 +118,16 @@ func (g *Generator) Generate(
 	queryCtx, cancel := context.WithTimeout(ctx, time.Duration(g.config.TimeoutSeconds)*time.Second)
 	defer cancel()
 
-	// Call Claude API.
+	// Call Claude API without tool forcing -- free-form text generation is ~2x faster.
+	// The system prompt instructs Claude to use inline [org::repo::domain] citations
+	// which we extract post-hoc using the same regex as the streaming path.
 	completionReq := CompletionRequest{
 		SystemPrompt:   assembled.SystemPrompt,
 		UserMessage:    assembled.UserMessage,
 		Model:          g.config.Model,
 		MaxTokens:      g.config.MaxResponseTokens,
 		Temperature:    g.config.Temperature,
-		ResponseSchema: clewAnswerSchema,
+		ResponseSchema: nil,
 	}
 
 	resp, err := g.client.Complete(queryCtx, completionReq)
@@ -142,21 +145,10 @@ func (g *Generator) Generate(
 		return g.buildDegradedResponse("empty response from Claude", confidence, chain, intentSummary), nil
 	}
 
-	// Parse structured answer from JSON.
-	var structured StructuredAnswer
-	if parseErr := json.Unmarshal([]byte(resp.Content), &structured); parseErr != nil {
-		slog.Warn("failed to parse Claude structured response",
-			"error", parseErr,
-			"content_preview", truncate(resp.Content, 100),
-		)
-		return g.buildDegradedResponse(
-			fmt.Sprintf("failed to parse response: %v", parseErr),
-			confidence, chain, intentSummary,
-		), nil
-	}
-
-	if structured.Answer == "" {
-		return g.buildDegradedResponse("empty answer in structured response", confidence, chain, intentSummary), nil
+	// Parse response: try JSON first (fallback for structured output), then free-form text.
+	structured, ok := parseResponse(resp.Content)
+	if !ok {
+		return g.buildDegradedResponse("empty answer in response", confidence, chain, intentSummary), nil
 	}
 
 	// Validate citations against provenance chain (PT-06-C3).
@@ -362,6 +354,39 @@ func simpleTitleCase(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// parseResponse attempts to extract a StructuredAnswer from Claude's response.
+// Strategy: try JSON first (in case Claude returned structured output anyway),
+// then fall back to free-form text parsing with inline citation extraction.
+// Returns (answer, true) on success, or (zero, false) if the response is empty.
+func parseResponse(content string) (StructuredAnswer, bool) {
+	// Strategy 1: Try JSON parse (backward compat / if Claude returns JSON voluntarily).
+	var structured StructuredAnswer
+	if err := json.Unmarshal([]byte(content), &structured); err == nil && structured.Answer != "" {
+		return structured, true
+	}
+
+	// Strategy 2: Free-form text with inline [org::repo::domain] citations.
+	text := strings.TrimSpace(content)
+	if text == "" {
+		return StructuredAnswer{}, false
+	}
+
+	// Extract inline citations using the same regex as the streaming path.
+	qualifiedNames := streaming.ExtractCitations(text)
+	var citations []Citation
+	for _, qn := range qualifiedNames {
+		citations = append(citations, Citation{
+			QualifiedName: qn,
+			Excerpt:       "Referenced inline in response",
+		})
+	}
+
+	return StructuredAnswer{
+		Answer:    text,
+		Citations: citations,
+	}, true
 }
 
 // truncate returns at most n characters of s with "..." suffix if truncated.
