@@ -334,6 +334,73 @@ func TestExtractTierFromBytes_WithAbsentTier(t *testing.T) {
 	}
 }
 
+// --- Staleness annotation ---
+
+func TestBuildSummonedSection_StaleAnnotation(t *testing.T) {
+	fakeHome := t.TempDir()
+	claudeDir := filepath.Join(fakeHome, ".claude")
+	if err := os.MkdirAll(claudeDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Write a manifest with one fresh entry and one stale entry (>24h old).
+	freshTime := time.Now().UTC()
+	staleTime := time.Now().UTC().Add(-25 * time.Hour)
+
+	manifest := &provenance.ProvenanceManifest{
+		SchemaVersion: "2.0",
+		LastSync:      time.Now().UTC(),
+		Entries: map[string]*provenance.ProvenanceEntry{
+			"agents/fresh-agent.md": {
+				Owner:      provenance.OwnerKnossos,
+				Scope:      provenance.ScopeUser,
+				SourcePath: "summon:fresh-agent",
+				SourceType: "summon",
+				Checksum:   "sha256:" + strings.Repeat("a", 64),
+				LastSynced: freshTime,
+			},
+			"agents/stale-agent.md": {
+				Owner:      provenance.OwnerKnossos,
+				Scope:      provenance.ScopeUser,
+				SourcePath: "summon:stale-agent",
+				SourceType: "summon",
+				Checksum:   "sha256:" + strings.Repeat("b", 64),
+				LastSynced: staleTime,
+			},
+		},
+	}
+	manifestPath := provenance.UserManifestPath(claudeDir)
+	if err := provenance.Save(manifestPath, manifest); err != nil {
+		t.Fatalf("failed to save test manifest: %v", err)
+	}
+
+	entries := buildSummonedSection(claudeDir)
+	if len(entries) != 2 {
+		t.Fatalf("expected 2 summoned entries, got %d", len(entries))
+	}
+
+	byName := make(map[string]rosterEntry)
+	for _, e := range entries {
+		byName[e.Name] = e
+	}
+
+	freshEntry, ok := byName["fresh-agent"]
+	if !ok {
+		t.Fatal("fresh-agent missing from summoned section")
+	}
+	if strings.Contains(freshEntry.SummonedAt, "[stale?]") {
+		t.Errorf("fresh-agent should not have [stale?] annotation, got SummonedAt=%q", freshEntry.SummonedAt)
+	}
+
+	staleEntry, ok := byName["stale-agent"]
+	if !ok {
+		t.Fatal("stale-agent missing from summoned section")
+	}
+	if !strings.Contains(staleEntry.SummonedAt, "[stale?]") {
+		t.Errorf("stale-agent should have [stale?] annotation, got SummonedAt=%q", staleEntry.SummonedAt)
+	}
+}
+
 // --- Integration test: summon -> roster -> dismiss -> roster ---
 
 func TestIntegration_SummonRosterDismissRoster(t *testing.T) {

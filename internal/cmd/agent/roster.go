@@ -195,6 +195,11 @@ func buildSummonedSection(userChannelDir string) []rosterEntry {
 		summonedAt := ""
 		if !entry.LastSynced.IsZero() {
 			summonedAt = entry.LastSynced.Format(time.RFC3339)
+			// Annotate entries that have not been refreshed in over 24 hours.
+			// A stale summoned agent may indicate a missed dismiss from a previous session.
+			if time.Since(entry.LastSynced) > 24*time.Hour {
+				summonedAt += " [stale?]"
+			}
 		}
 
 		entries = append(entries, rosterEntry{
