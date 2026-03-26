@@ -27,6 +27,14 @@ func (m *Materializer) materializeInscription(manifest *RiteManifest, channelDir
 		})
 	}
 
+	// Hard-coded summonable agents list (extract to frontmatter if count exceeds 6)
+	summonableAgents := []inscription.SummonableAgentInfo{
+		{Name: "myron", Role: "Feature discovery scout", Command: "/discover"},
+		{Name: "theoros", Role: "Domain auditor", Command: "/know"},
+		{Name: "dionysus", Role: "Knowledge synthesizer", Command: "/land"},
+		{Name: "naxos", Role: "Session hygiene", Command: "/naxos"},
+	}
+
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
 		ActiveRite:		manifest.Name,
@@ -37,6 +45,7 @@ func (m *Materializer) materializeInscription(manifest *RiteManifest, channelDir
 		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 		ModelOverride:		modelOverride,
 		Channel:		channel,
+		SummonableAgents:	summonableAgents,
 	}
 
 	// Resolve template source: embedded FS or filesystem directory
@@ -88,6 +97,14 @@ func (m *Materializer) materializeInscription(manifest *RiteManifest, channelDir
 // materializeMinimalInscription generates CLAUDE.md for cross-cutting mode (no agents).
 // Delegates to inscription.SyncInscription without manifest updates.
 func (m *Materializer) materializeMinimalInscription(channelDir string, collector provenance.Collector, channel string, comp compiler.ChannelCompiler) (string, error) {
+	// Summonable agents are available across all rites, including cross-cutting mode
+	summonableAgents := []inscription.SummonableAgentInfo{
+		{Name: "myron", Role: "Feature discovery scout", Command: "/discover"},
+		{Name: "theoros", Role: "Domain auditor", Command: "/know"},
+		{Name: "dionysus", Role: "Knowledge synthesizer", Command: "/land"},
+		{Name: "naxos", Role: "Session hygiene", Command: "/naxos"},
+	}
+
 	projectRoot := m.resolver.ProjectRoot()
 	renderCtx := &inscription.RenderContext{
 		ActiveRite:		"",
@@ -97,6 +114,7 @@ func (m *Materializer) materializeMinimalInscription(channelDir string, collecto
 		ProjectRoot:		projectRoot,
 		IsKnossosProject:	m.templatesDir != "" && strings.HasPrefix(m.templatesDir, projectRoot),
 		Channel:		channel,
+		SummonableAgents:	summonableAgents,
 	}
 
 	contextFilename := "CLAUDE.md"

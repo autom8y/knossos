@@ -501,6 +501,119 @@ func TestGenerator_NilContext(t *testing.T) {
 	}
 }
 
+// TestGenerator_SummonableAgents_RendersSection verifies that generateAgentConfigsContent
+// emits a Summonable Heroes section when SummonableAgents is populated.
+func TestGenerator_SummonableAgents_RendersSection(t *testing.T) {
+	ctx := &RenderContext{
+		Agents: []AgentInfo{
+			{Name: "architect", File: "architect.md", Role: "Designs systems"},
+		},
+		SummonableAgents: []SummonableAgentInfo{
+			{Name: "myron", Role: "Feature discovery scout", Command: "/discover"},
+			{Name: "theoros", Role: "Domain auditor", Command: "/know"},
+		},
+	}
+	gen := NewGenerator("", nil, ctx)
+
+	content, err := gen.generateAgentConfigsContent()
+	if err != nil {
+		t.Fatalf("generateAgentConfigsContent() error = %v", err)
+	}
+
+	checks := []string{
+		"Summonable Heroes",
+		"**myron**",
+		"Feature discovery scout",
+		"/discover",
+		"**theoros**",
+		"Domain auditor",
+		"/know",
+		"ari agent summon {name}",
+		"ari agent dismiss {name}",
+		// Standing agent still present
+		"architect.md",
+		"Designs systems",
+	}
+	for _, check := range checks {
+		if !strings.Contains(content, check) {
+			t.Errorf("generateAgentConfigsContent() missing %q in output:\n%s", check, content)
+		}
+	}
+
+	// Fallback message must NOT appear when agents are present
+	if strings.Contains(content, "No agents installed") {
+		t.Error("generateAgentConfigsContent() should not show fallback message when agents are present")
+	}
+}
+
+// TestGenerator_SummonableAgents_EmptySkipsSection verifies that the Summonable
+// Heroes section is omitted when SummonableAgents is nil/empty.
+func TestGenerator_SummonableAgents_EmptySkipsSection(t *testing.T) {
+	// No SummonableAgents populated
+	ctx := &RenderContext{
+		Agents: []AgentInfo{
+			{Name: "architect", File: "architect.md", Role: "Designs systems"},
+		},
+	}
+	gen := NewGenerator("", nil, ctx)
+
+	content, err := gen.generateAgentConfigsContent()
+	if err != nil {
+		t.Fatalf("generateAgentConfigsContent() error = %v", err)
+	}
+
+	if strings.Contains(content, "Summonable Heroes") {
+		t.Error("generateAgentConfigsContent() should not render Summonable Heroes when list is empty")
+	}
+	if strings.Contains(content, "No agents installed") {
+		t.Error("generateAgentConfigsContent() should not show fallback when standing agents are present")
+	}
+}
+
+// TestGenerator_SummonableAgents_BothEmptyUsesDefault verifies that the default
+// content is returned when both Agents and SummonableAgents are empty.
+func TestGenerator_SummonableAgents_BothEmptyUsesDefault(t *testing.T) {
+	// Neither Agents nor SummonableAgents populated
+	ctx := &RenderContext{}
+	gen := NewGenerator("", nil, ctx)
+
+	content, err := gen.generateAgentConfigsContent()
+	if err != nil {
+		t.Fatalf("generateAgentConfigsContent() error = %v", err)
+	}
+
+	// Default content is returned (no Summonable Heroes section)
+	if !strings.Contains(content, "## Agents") {
+		t.Errorf("generateAgentConfigsContent() should contain ## Agents header: %q", content)
+	}
+	if strings.Contains(content, "Summonable Heroes") {
+		t.Error("generateAgentConfigsContent() should not show Summonable Heroes when both lists are empty")
+	}
+}
+
+// TestGenerator_SummonableAgents_OnlyShowsFallbackWhenNonePresent verifies that having
+// only summonable agents (no standing) does not trigger the fallback message.
+func TestGenerator_SummonableAgents_OnlyShowsFallbackWhenNonePresent(t *testing.T) {
+	ctx := &RenderContext{
+		SummonableAgents: []SummonableAgentInfo{
+			{Name: "myron", Role: "Feature discovery scout", Command: "/discover"},
+		},
+	}
+	gen := NewGenerator("", nil, ctx)
+
+	content, err := gen.generateAgentConfigsContent()
+	if err != nil {
+		t.Fatalf("generateAgentConfigsContent() error = %v", err)
+	}
+
+	if strings.Contains(content, "No agents installed") {
+		t.Error("generateAgentConfigsContent() should not show fallback when summonable agents exist")
+	}
+	if !strings.Contains(content, "Summonable Heroes") {
+		t.Error("generateAgentConfigsContent() should show Summonable Heroes section")
+	}
+}
+
 func TestGenerator_BuildMarkerOptions(t *testing.T) {
 	manifest := &Manifest{
 		Regions: map[string]*Region{

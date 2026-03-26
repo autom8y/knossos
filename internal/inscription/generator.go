@@ -22,6 +22,15 @@ type AgentInfo struct {
 	Produces string `json:"produces"`
 }
 
+// SummonableAgentInfo holds metadata for summonable agents shown in inscription.
+// Summonable agents are available on demand via ari agent summon/dismiss rather
+// than being permanently materialized like standing agents.
+type SummonableAgentInfo struct {
+	Name    string `json:"name"`
+	Role    string `json:"role"`
+	Command string `json:"command"`
+}
+
 // RenderContext provides data for template rendering.
 type RenderContext struct {
 	// ActiveRite is the current rite name.
@@ -53,6 +62,11 @@ type RenderContext struct {
 	// Channel is the target channel ("claude" or "gemini").
 	// Empty string is treated as "claude" — all templates default to CC behavior.
 	Channel string
+
+	// SummonableAgents contains agents available for on-demand summoning.
+	// These agents are not permanently materialized but can be summoned via
+	// `ari agent summon {name}` and dismissed via `ari agent dismiss {name}`.
+	SummonableAgents []SummonableAgentInfo
 }
 
 // Generator handles content generation for CLAUDE.md regions.
@@ -466,40 +480,61 @@ func (g *Generator) loadCrossRiteAgentTable() string {
 func (g *Generator) generateAgentConfigsContent() (string, error) {
 	hasRiteAgents := g.Context != nil && len(g.Context.Agents) > 0
 	hasCrossRiteAgents := g.Context != nil && len(g.Context.CrossRiteAgents) > 0
+	hasSummonableAgents := g.Context != nil && len(g.Context.SummonableAgents) > 0
 
-	if !hasRiteAgents && !hasCrossRiteAgents {
+	if !hasRiteAgents && !hasCrossRiteAgents && !hasSummonableAgents {
 		return g.getDefaultAgentConfigsContent(), nil
 	}
 
 	var sb strings.Builder
 	sb.WriteString("## Agents\n\n")
-	if g.Context != nil && g.Context.Channel == "gemini" {
-		sb.WriteString("Prompts in `.gemini/agents/`:\n\n")
-	} else {
-		sb.WriteString("Prompts in `.claude/agents/`:\n\n")
-	}
 
-	if hasRiteAgents {
-		for _, agent := range g.Context.Agents {
-			sb.WriteString("- `")
-			sb.WriteString(agent.File)
-			sb.WriteString("` - ")
-			sb.WriteString(agent.Role)
-			sb.WriteString("\n")
+	if hasRiteAgents || hasCrossRiteAgents {
+		if g.Context != nil && g.Context.Channel == "gemini" {
+			sb.WriteString("Prompts in `.gemini/agents/`:\n\n")
+		} else {
+			sb.WriteString("Prompts in `.claude/agents/`:\n\n")
 		}
-	}
 
-	if hasCrossRiteAgents {
 		if hasRiteAgents {
-			sb.WriteString("\nCross-rite agents:\n\n")
+			for _, agent := range g.Context.Agents {
+				sb.WriteString("- `")
+				sb.WriteString(agent.File)
+				sb.WriteString("` - ")
+				sb.WriteString(agent.Role)
+				sb.WriteString("\n")
+			}
 		}
-		for _, agent := range g.Context.CrossRiteAgents {
-			sb.WriteString("- `")
-			sb.WriteString(agent.File)
-			sb.WriteString("` - ")
+
+		if hasCrossRiteAgents {
+			if hasRiteAgents {
+				sb.WriteString("\nCross-rite agents:\n\n")
+			}
+			for _, agent := range g.Context.CrossRiteAgents {
+				sb.WriteString("- `")
+				sb.WriteString(agent.File)
+				sb.WriteString("` - ")
+				sb.WriteString(agent.Role)
+				sb.WriteString("\n")
+			}
+		}
+	}
+
+	// Summonable Heroes section: agents available on demand via ari agent summon/dismiss
+	if hasSummonableAgents {
+		sb.WriteString("\n### Summonable Heroes\n")
+		sb.WriteString("Operational agents available on demand. Their commands handle the lifecycle:\n")
+		for _, agent := range g.Context.SummonableAgents {
+			sb.WriteString("- **")
+			sb.WriteString(agent.Name)
+			sb.WriteString("** - ")
 			sb.WriteString(agent.Role)
-			sb.WriteString("\n")
+			sb.WriteString(" -> `")
+			sb.WriteString(agent.Command)
+			sb.WriteString("`\n")
 		}
+		sb.WriteString("\nSummon: `ari agent summon {name}` then restart CC.\n")
+		sb.WriteString("Dismiss: `ari agent dismiss {name}` then restart CC.")
 	}
 
 	return sb.String(), nil
