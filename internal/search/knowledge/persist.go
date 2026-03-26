@@ -35,7 +35,7 @@ const persistVersion = "1.0"
 
 // DefaultPersistedPath is the container path for pre-baked KnowledgeIndex JSON.
 // BC-11: Pre-baked in container image alongside ContentStore.
-const DefaultPersistedPath = "/app/data/knowledge-index.json"
+const DefaultPersistedPath = "/home/nonroot/.local/share/knossos/knowledge-index.json"
 
 // Save serializes a KnowledgeIndex to JSON at the given path.
 // Creates parent directories if needed.

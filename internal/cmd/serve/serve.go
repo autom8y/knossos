@@ -208,8 +208,11 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	// BC-11: Load from pre-baked JSON if available.
 	var knowledgeIdx *knowledge.KnowledgeIndex
 	if pipelineResult.catalog != nil {
-		// H-3: 90-second timeout aligns with ECS health check start period.
-		buildCtx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		// Knowledge index build can take several minutes for large codebases
+		// (128+ domains × ~700ms Haiku call each). Seeding quality is more
+		// important than startup speed. ECS health check uses /health (liveness),
+		// not /ready, so the service stays alive during index build.
+		buildCtx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 		knowledgeIdx = buildKnowledgeIndex(buildCtx, pipelineResult, llmClient)
 	}

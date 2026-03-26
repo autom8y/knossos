@@ -45,7 +45,7 @@
         "interval": 10,
         "timeout": 5,
         "retries": 3,
-        "startPeriod": 90
+        "startPeriod": 600
       },
       "logConfiguration": {
         "logDriver": "awslogs",
