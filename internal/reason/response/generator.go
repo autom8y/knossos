@@ -293,6 +293,10 @@ func humanReadableSourceName(qualifiedName, domain, repo string) string {
 
 // ValidateCitations cross-checks Claude's citations against the provenance chain.
 // Returns valid citations and a list of stripped invalid citations.
+//
+// Normalization: Claude sometimes includes ##section suffixes in qualified_name
+// (e.g., "autom8y::knossos::architecture##key-abstractions"). These are stripped
+// before matching against the provenance chain.
 func ValidateCitations(citations []Citation, chain *trust.ProvenanceChain) (valid []Citation, invalid []Citation) {
 	if chain == nil || chain.IsEmpty() {
 		return nil, citations
@@ -306,9 +310,24 @@ func ValidateCitations(citations []Citation, chain *trust.ProvenanceChain) (vali
 	for _, c := range citations {
 		if chainNames[c.QualifiedName] {
 			valid = append(valid, c)
-		} else {
-			invalid = append(invalid, c)
+			continue
 		}
+		// Strip ##section suffix and retry.
+		qn := c.QualifiedName
+		if idx := strings.Index(qn, "##"); idx >= 0 {
+			qn = qn[:idx]
+		}
+		if chainNames[qn] {
+			if c.Section == "" {
+				c.Section = c.QualifiedName[len(qn)+2:]
+			}
+			c.QualifiedName = qn
+			valid = append(valid, c)
+			continue
+		}
+		slog.Debug("citation not in provenance chain",
+			"cited", c.QualifiedName, "normalized", qn)
+		invalid = append(invalid, c)
 	}
 	return valid, invalid
 }
