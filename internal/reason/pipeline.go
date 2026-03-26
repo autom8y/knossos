@@ -331,8 +331,12 @@ func (p *Pipeline) QueryWithTriage(ctx context.Context, triageInput *TriageResul
 		return nil, fmt.Errorf("pipeline has nil dependencies")
 	}
 
-	if triageInput == nil || len(triageInput.Candidates) == 0 {
-		// No triage candidates -- fall back to v1 pipeline.
+	if triageInput == nil {
+		// Nil triageInput is a programming error -- caller should use Query() instead.
+		return nil, fmt.Errorf("QueryWithTriage called with nil triageInput; use Query() for non-triage path")
+	}
+	if len(triageInput.Candidates) == 0 {
+		// Triage ran but returned no candidates -- fall back with refined query.
 		return p.Query(ctx, triageInput.RefinedQuery)
 	}
 
@@ -415,8 +419,12 @@ func (p *Pipeline) QueryStream(ctx context.Context, triageInput *TriageResultInp
 		return nil, fmt.Errorf("pipeline has nil dependencies")
 	}
 
-	if triageInput == nil || len(triageInput.Candidates) == 0 {
-		// No triage candidates -- fall back to v1 pipeline (non-streaming).
+	if triageInput == nil {
+		// Nil triageInput is a programming error -- caller should use Query() instead.
+		return nil, fmt.Errorf("QueryStream called with nil triageInput; use Query() for non-triage path")
+	}
+	if len(triageInput.Candidates) == 0 {
+		// Triage ran but returned no candidates -- fall back with refined query (non-streaming).
 		return p.Query(ctx, triageInput.RefinedQuery)
 	}
 

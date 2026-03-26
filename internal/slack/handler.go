@@ -18,9 +18,10 @@ import (
 // eventDedup provides event ID deduplication with TTL-based expiration (TD-02 fix).
 // Slack may retry events; this prevents duplicate pipeline invocations.
 type eventDedup struct {
-	mu    sync.Mutex
-	seen  map[string]time.Time
-	ttl   time.Duration
+	mu   sync.Mutex
+	seen map[string]time.Time
+	ttl  time.Duration
+	done chan struct{}
 }
 
 // threadContextEntry holds a stored thread context with expiration metadata.
@@ -109,16 +110,27 @@ func newEventDedup(ttl time.Duration) *eventDedup {
 	d := &eventDedup{
 		seen: make(map[string]time.Time),
 		ttl:  ttl,
+		done: make(chan struct{}),
 	}
-	// Background cleanup every TTL/2.
+	// Background cleanup every TTL/2. Stops when done is closed.
 	go func() {
 		ticker := time.NewTicker(ttl / 2)
 		defer ticker.Stop()
-		for range ticker.C {
-			d.cleanup()
+		for {
+			select {
+			case <-ticker.C:
+				d.cleanup()
+			case <-d.done:
+				return
+			}
 		}
 	}()
 	return d
+}
+
+// Stop terminates the background cleanup goroutine.
+func (d *eventDedup) Stop() {
+	close(d.done)
 }
 
 // isDuplicate returns true if the event ID was already seen within the TTL window.
@@ -300,7 +312,7 @@ type HandlerDeps struct {
 //
 // The request body has already been restored by the upstream verification middleware
 // (webhook.Verifier.Handler).
-func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig, triageRunner TriageRunner) (http.HandlerFunc, *ThreadContextStore) {
+func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig, triageRunner TriageRunner) (http.HandlerFunc, *ThreadContextStore, func()) {
 	return NewSlackHandlerWithDeps(HandlerDeps{
 		Pipeline:     pipeline,
 		Client:       client,
@@ -310,7 +322,9 @@ func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig,
 }
 
 // NewSlackHandlerWithDeps creates the handler with full Sprint 6 dependencies.
-func NewSlackHandlerWithDeps(deps HandlerDeps) (http.HandlerFunc, *ThreadContextStore) {
+// Returns the handler, a ThreadContextStore, and a stop function that must be
+// called during server shutdown to terminate background goroutines.
+func NewSlackHandlerWithDeps(deps HandlerDeps) (http.HandlerFunc, *ThreadContextStore, func()) {
 	dedup := newEventDedup(5 * time.Minute)             // TD-02: 5-minute dedup window
 	limiter := newConcurrencyLimiter(5)                  // TD-03: max 5 concurrent pipeline queries
 	ctxStore := newThreadContextStore(30 * time.Minute)  // GAP-10: 30-minute thread context TTL
@@ -372,7 +386,7 @@ func NewSlackHandlerWithDeps(deps HandlerDeps) (http.HandlerFunc, *ThreadContext
 			slog.Debug("unhandled event type", "type", inner.Type)
 			w.WriteHeader(http.StatusOK)
 		}
-	}, ctxStore
+	}, ctxStore, func() { dedup.Stop() }
 }
 
 // handleAssistantThreadStarted processes an assistant_thread_started event.
@@ -606,13 +620,13 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 
 	// Store the user message and assistant response in conversation history.
 	if deps.ConversationMgr != nil {
-		deps.ConversationMgr.StoreMessage(ctx, threadTS, conversation.ThreadMessage{
+		deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
 			Role:      "user",
 			Content:   question,
 			Timestamp: time.Now(),
 		})
 		if resp != nil && resp.Answer != "" {
-			deps.ConversationMgr.StoreMessage(ctx, threadTS, conversation.ThreadMessage{
+			deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
 				Role:      "assistant",
 				Content:   resp.Answer,
 				Timestamp: time.Now(),

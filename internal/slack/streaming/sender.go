@@ -135,10 +135,19 @@ func (s *Sender) AppendStream(ctx context.Context, streamID string, chunk string
 	case modeNative:
 		return s.appendNativeStream(ctx, streamID, chunk)
 	case modeEdit:
+		// Hold the mutex while writing to the buffer and copying the text.
+		// Release before the HTTP call to avoid holding the lock during I/O.
+		s.mu.Lock()
 		state.buffer.WriteString(chunk)
-		return s.updateMessage(ctx, state.channelID, state.messageTS, state.buffer.String())
+		text := state.buffer.String()
+		channelID := state.channelID
+		messageTS := state.messageTS
+		s.mu.Unlock()
+		return s.updateMessage(ctx, channelID, messageTS, text)
 	case modeSingle:
+		s.mu.Lock()
 		state.buffer.WriteString(chunk)
+		s.mu.Unlock()
 		return nil // Accumulate only; sent on stop.
 	default:
 		return fmt.Errorf("unknown stream mode: %d", state.mode)

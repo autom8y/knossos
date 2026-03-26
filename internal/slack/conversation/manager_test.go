@@ -95,7 +95,7 @@ func TestManager_StoreAndRetrieve(t *testing.T) {
 	ctx := context.Background()
 
 	// Store a message.
-	mgr.StoreMessage(ctx, "thread-1", makeMsg("user", "What is the architecture?"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "What is the architecture?"))
 
 	// Retrieve it.
 	history := mgr.GetThreadHistory(ctx, "thread-1")
@@ -117,7 +117,7 @@ func TestManager_WindowLimitsRecentMessages(t *testing.T) {
 
 	// Store 5 messages.
 	for i := 0; i < 5; i++ {
-		mgr.StoreMessage(ctx, "thread-1", makeMsg("user", time.Now().String()))
+		mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", time.Now().String()))
 	}
 
 	history := mgr.GetThreadHistory(ctx, "thread-1")
@@ -136,7 +136,7 @@ func TestManager_SummarizationTriggered(t *testing.T) {
 
 	// Store enough messages to trigger summarization (>MaxRecentMessages).
 	for i := 0; i < 5; i++ {
-		mgr.StoreMessage(ctx, "thread-1", makeMsg("user", "message"))
+		mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "message"))
 	}
 
 	// Give the async summarization goroutine time to complete.
@@ -173,7 +173,7 @@ func TestManager_InitThread(t *testing.T) {
 	assert.Nil(t, history, "CREATED thread with no messages should return nil")
 
 	// Store a message and verify transition to ACTIVE.
-	mgr.StoreMessage(context.Background(), "thread-1", makeMsg("user", "hello"))
+	mgr.StoreMessage(context.Background(), "thread-1", "", makeMsg("user", "hello"))
 	history = mgr.GetThreadHistory(context.Background(), "thread-1")
 	require.NotNil(t, history)
 	assert.Equal(t, ThreadActive, history.State)
@@ -187,7 +187,7 @@ func TestManager_TTLEviction(t *testing.T) {
 	ctx := context.Background()
 
 	// Store a message.
-	mgr.StoreMessage(ctx, "thread-1", makeMsg("user", "hello"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "hello"))
 	require.NotNil(t, mgr.GetThreadHistory(ctx, "thread-1"))
 
 	// Wait for TTL + cleanup interval to fire.
@@ -324,7 +324,7 @@ func TestManager_Stop_CleanupGoroutine(t *testing.T) {
 
 	// After stop, operations should still work (just no background cleanup).
 	ctx := context.Background()
-	mgr.StoreMessage(ctx, "thread-1", makeMsg("user", "hello"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "hello"))
 	history := mgr.GetThreadHistory(ctx, "thread-1")
 	require.NotNil(t, history)
 }
@@ -338,7 +338,7 @@ func TestManager_Metrics(t *testing.T) {
 
 	// Generate some hits and misses.
 	mgr.GetThreadHistory(ctx, "nonexistent") // cold_start miss
-	mgr.StoreMessage(ctx, "thread-1", makeMsg("user", "hello"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "hello"))
 	mgr.GetThreadHistory(ctx, "thread-1") // hit
 
 	metrics := mgr.GetMetrics()
@@ -368,7 +368,7 @@ func TestManager_StoreMessage_ChannelIDPreserved(t *testing.T) {
 	mgr.InitThread("thread-1", "C001")
 
 	// Store messages.
-	mgr.StoreMessage(context.Background(), "thread-1", makeMsg("user", "hello"))
+	mgr.StoreMessage(context.Background(), "thread-1", "", makeMsg("user", "hello"))
 
 	// Verify channel ID is preserved.
 	mgr.mu.RLock()

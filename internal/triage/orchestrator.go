@@ -116,10 +116,14 @@ func (o *Orchestrator) Assess(ctx context.Context, query string, threadHistory [
 }
 
 // stage0RefineQuery uses Haiku to resolve implicit references in follow-up queries.
+// P2-5: Uses a 2-second timeout to bound latency for the optional refinement step.
 func (o *Orchestrator) stage0RefineQuery(ctx context.Context, query string, history []ThreadMessage) (string, error) {
+	stage0Ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
 	userMsg := stage0UserMessage(query, history)
 
-	resp, err := o.llmClient.Complete(ctx, llm.CompletionRequest{
+	resp, err := o.llmClient.Complete(stage0Ctx, llm.CompletionRequest{
 		SystemPrompt: stage0SystemPrompt,
 		UserMessage:  userMsg,
 		MaxTokens:    200,

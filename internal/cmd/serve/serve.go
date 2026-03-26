@@ -208,7 +208,10 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	// BC-11: Load from pre-baked JSON if available.
 	var knowledgeIdx *knowledge.KnowledgeIndex
 	if pipelineResult.catalog != nil {
-		knowledgeIdx = buildKnowledgeIndex(context.Background(), pipelineResult, llmClient)
+		// H-3: 90-second timeout aligns with ECS health check start period.
+		buildCtx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+		defer cancel()
+		knowledgeIdx = buildKnowledgeIndex(buildCtx, pipelineResult, llmClient)
 	}
 
 	// Build triage orchestrator (Sprint 5).
@@ -257,7 +260,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	}
 
 	// Create handler with full dependencies.
-	slackHandler, ctxStore := internalslack.NewSlackHandlerWithDeps(internalslack.HandlerDeps{
+	slackHandler, ctxStore, stopDedup := internalslack.NewSlackHandlerWithDeps(internalslack.HandlerDeps{
 		Pipeline:        queryRunner,
 		Client:          slackClient,
 		Config:          slackCfg,
@@ -333,6 +336,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 
 	// Start blocks until shutdown signal.
 	if err := srv.Start(context.Background()); err != nil {
+		stopDedup()
 		ctxStore.Stop()
 		if convMgr != nil {
 			convMgr.Stop()
@@ -342,6 +346,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	}
 
 	// Stop background goroutines on graceful shutdown.
+	stopDedup()
 	ctxStore.Stop()
 	if convMgr != nil {
 		convMgr.Stop()

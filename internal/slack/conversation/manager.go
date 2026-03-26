@@ -142,8 +142,9 @@ func (m *Manager) GetThreadHistory(ctx context.Context, threadTS string) *Thread
 
 // StoreMessage appends a message to the thread's history.
 // Creates the thread entry if it doesn't exist.
+// channelID is required for resurrection (Slack API recovery from DORMANT state).
 // Triggers summarization when message count exceeds the window size.
-func (m *Manager) StoreMessage(ctx context.Context, threadTS string, msg ThreadMessage) {
+func (m *Manager) StoreMessage(ctx context.Context, threadTS string, channelID string, msg ThreadMessage) {
 	m.mu.Lock()
 
 	entry, exists := m.threads[threadTS]
@@ -151,8 +152,12 @@ func (m *Manager) StoreMessage(ctx context.Context, threadTS string, msg ThreadM
 		entry = &threadEntry{
 			state:      ThreadActive,
 			lastAccess: time.Now(),
+			channelID:  channelID,
 		}
 		m.threads[threadTS] = entry
+	} else if entry.channelID == "" && channelID != "" {
+		// Backfill channelID if it was not set during InitThread.
+		entry.channelID = channelID
 	}
 
 	entry.messages = append(entry.messages, msg)

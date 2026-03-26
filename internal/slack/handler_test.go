@@ -159,7 +159,7 @@ func newTestableHandler(t *testing.T) *testableHandler {
 // --- Tests ---
 
 func TestHandler_URLVerificationChallenge(t *testing.T) {
-	handler, _ := NewSlackHandler(nil, nil, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(nil, nil, DefaultSlackConfig(), nil)
 
 	body := `{"type":"url_verification","challenge":"test-challenge-value"}`
 	req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
@@ -185,7 +185,7 @@ func TestHandler_EventCallbackBotFiltered(t *testing.T) {
 		},
 	}
 	client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
-	handler, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
 
 	event := MessageEvent{
 		Type:    "message",
@@ -222,7 +222,7 @@ func TestHandler_EventCallbackMessageSubtype(t *testing.T) {
 		},
 	}
 	client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
-	handler, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
 
 	event := MessageEvent{
 		Type:    "message",
@@ -251,7 +251,7 @@ func TestHandler_EventCallbackUserMessage(t *testing.T) {
 		},
 	}
 	client := NewSlackClientWithAPI(&recordingSlackAPI{}, "xoxb-test")
-	handler, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
 
 	event := MessageEvent{
 		Type:    "message",
@@ -279,7 +279,7 @@ func TestHandler_EventCallbackUserMessage(t *testing.T) {
 }
 
 func TestHandler_NonEventCallback(t *testing.T) {
-	handler, _ := NewSlackHandler(nil, nil, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(nil, nil, DefaultSlackConfig(), nil)
 
 	body := `{"type":"app_rate_limited","team_id":"T001"}`
 	req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
@@ -292,7 +292,7 @@ func TestHandler_NonEventCallback(t *testing.T) {
 
 func TestHandler_AssistantThreadStarted(t *testing.T) {
 	client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
-	handler, _ := NewSlackHandler(nil, client, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(nil, client, DefaultSlackConfig(), nil)
 
 	event := AssistantThreadEvent{
 		Type: "assistant_thread_started",
@@ -326,7 +326,7 @@ func TestHandler_EmptyMessage(t *testing.T) {
 		},
 	}
 	client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
-	handler, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(pipeline, client, DefaultSlackConfig(), nil)
 
 	event := MessageEvent{
 		Type:    "message",
@@ -349,7 +349,7 @@ func TestHandler_EmptyMessage(t *testing.T) {
 }
 
 func TestHandler_InvalidJSON(t *testing.T) {
-	handler, _ := NewSlackHandler(nil, nil, DefaultSlackConfig(), nil)
+	handler, _, _ := NewSlackHandler(nil, nil, DefaultSlackConfig(), nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader("not-json"))
 	w := httptest.NewRecorder()
