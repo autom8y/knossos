@@ -109,9 +109,6 @@ Authoritative mapping from Greek mythology to SOURCE implementation (not project
 Architecture Decision Records documenting significant platform decisions.
 
 **Key ADRs:**
-- [`ADR-0009-knossos-roster-identity.md`](../../decisions/ADR-0009-knossos-roster-identity.md) — SOURCE vs PROJECTION clarification
-- [`ADR-0005-moirai-centralized-state-authority.md`](../../decisions/ADR-0005-moirai-centralized-state-authority.md) — Moirai as mutation authority
-- [`ADR-0001-session-state-machine-redesign.md`](../../decisions/ADR-0001-session-state-machine-redesign.md) — Session lifecycle states
 - [`ADR-0031-multi-channel-architecture.md`](../../decisions/ADR-0031-multi-channel-architecture.md) — Multi-channel projection architecture
 - [`ADR-0032-harness-agnostic-event-vocabulary.md`](../../decisions/ADR-0032-harness-agnostic-event-vocabulary.md) — Harness-agnostic event vocabulary
 
@@ -251,7 +248,7 @@ Current compliance status against doctrine principles and architectural decision
 
 **Path:** [`../foundations/`](../foundations/)
 
-ADR symlinks providing doctrine-accessible access to architecture decisions. Contains symlinks to `../../decisions/` for ADR-0001, ADR-0005, and ADR-0009.
+Previously contained ADR symlinks (removed — targets did not exist). Published ADRs are in `docs/decisions/` (ADR-0031, ADR-0032) and `.ledge/decisions/`.
 
 **Audience:** Engineers reading foundational architecture decisions in context.
 

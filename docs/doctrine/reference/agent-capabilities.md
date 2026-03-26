@@ -14,9 +14,9 @@ The CC-OPP uplift adds four capability dimensions to Knossos agents, declared vi
 
 | Capability | Agents Enabled | Mechanism |
 |------------|---------------|-----------|
-| **Memory** | 17 | Persistent auto-memory directory per agent |
-| **Skills** | 95 of 110 | Frontmatter `skills:` field, preloaded into agent context |
-| **Hooks** | 10 | `ari hook agent-guard` enforcing tool restrictions |
+| **Memory** | 26 | Persistent auto-memory directory per agent |
+| **Skills** | 95 of 107 | Frontmatter `skills:` field, preloaded into agent context |
+| **Hooks** | 53 | `ari hook agent-guard` enforcing tool restrictions |
 | **Resume** | Ecosystem only | Throughline protocol via `resume: {agentId}` |
 
 ---
@@ -31,7 +31,7 @@ Agents with memory get a persistent auto-memory directory at `~/.claude/projects
 |------|---------|--------|---------|
 | Tier 1 | Content-rich MEMORY.md | 4 | Potnia orchestrators (deep workflow knowledge) |
 | Tier 2 | Structure-only MEMORY.md | 8 | Specialists with recurring patterns |
-| Tier 3 | No seed (self-populate) | 5 | Lower-frequency agents |
+| Tier 3 | No seed (self-populate) | 14 | Lower-frequency agents |
 
 **Constraints:**
 - 150-line soft cap on MEMORY.md (self-curating)
@@ -58,7 +58,7 @@ skills:
 - Mixed dro/lego directories block skill resolution — 4 rites required directory splits as prerequisite
 - `forge-ref` (346 lines) is Potnia-only — specialists use Skill tool on-demand
 
-**Coverage:** 95 of 110 agents have `skills:` frontmatter (derived from `grep -rl "^skills:" rites/*/agents/ agents/`). Exceptions: agents in rites without mena directories, and agents where no skills apply.
+**Coverage:** 95 of 107 agents have `skills:` frontmatter (derived from `grep -rl "^skills:" rites/*/agents/ agents/`). Exceptions: agents in rites without mena directories, and agents where no skills apply.
 
 ---
 
@@ -78,7 +78,7 @@ disallowedTools:
 2. `hooks: [agent-guard]` — runtime guard via `ari hook agent-guard`
 3. Tool restriction text in agent prompt — behavioral instruction
 
-**Coverage:** 10 agents across 5 rites. Applied to agents that should only Edit (not Write) or have other tool restrictions.
+**Coverage:** 53 agents. Applied to agents that should only Edit (not Write) or have other tool restrictions.
 
 **Implementation:** `internal/cmd/hook/agentguard.go` (150 lines, 14 tests)
 

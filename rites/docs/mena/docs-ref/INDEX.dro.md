@@ -24,11 +24,11 @@ After successful switch, show the agent table:
 
 | Agent | Role |
 |-------|------|
-| orchestrator | Coordinates documentation workflows |
+| potnia | Coordinates documentation workflows |
 | doc-auditor | Audits existing documentation quality |
 | information-architect | Designs information structure and hierarchy |
 | tech-writer | Writes and edits technical documentation |
-| review-coordinator | Coordinates documentation reviews |
+| doc-reviewer | Reviews documentation for technical accuracy and quality |
 
 ### 3. Update Session
 

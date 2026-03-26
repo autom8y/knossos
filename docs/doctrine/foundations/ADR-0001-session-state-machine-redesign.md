@@ -1,1 +1,0 @@
-../../decisions/ADR-0001-session-state-machine-redesign.md

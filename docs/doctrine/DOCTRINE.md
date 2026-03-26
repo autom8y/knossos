@@ -40,10 +40,7 @@ docs/doctrine/
 │   ├── design-principles.md    # Core principles extracted
 │   └── mythology-concordance.md # Myth ↔ SOURCE implementation map
 │
-├── foundations/                # Core architectural decisions (symlinks to ../../decisions/)
-│   ├── ADR-0001-session-state-machine-redesign.md
-│   ├── ADR-0005-moirai-centralized-state-authority.md
-│   └── ADR-0009-knossos-roster-identity.md
+├── foundations/                # (empty — ADR symlinks removed; see docs/decisions/ for ADRs)
 │
 ├── compliance/                 # Validation, status
 │   └── COMPLIANCE-STATUS.md    # Current implementation status
@@ -126,8 +123,7 @@ docs/doctrine/
 - Structure now reflects actual content, not aspirations
 - Will expand organically as content emerges
 
-**Symlinks**:
-- `foundations/` → `../../decisions/` (ADRs: ADR-0001, ADR-0005, ADR-0009)
+**Note**: `foundations/` previously contained ADR symlinks (ADR-0001, ADR-0005, ADR-0009) that were removed because their targets did not exist in `docs/decisions/`. Published ADRs: `docs/decisions/` (ADR-0031, ADR-0032) and `.ledge/decisions/` (ADR-0030, others).
 
 ---
 
@@ -149,8 +145,8 @@ docs/doctrine/
 |--------|-------|
 | Go source lines | 93,668 (non-test files in cmd/ and internal/; excludes 119,624 test lines) |
 | CLI command families | 32 (see `ari --help` for current list) |
-| Agents | 110 across 19 rites |
-| ADRs | 9 published documents (ADR-0001 through ADR-0032; 32 numbers allocated) |
+| Agents | 107 across 19 rites |
+| ADRs | 6 published documents (2 in docs/decisions/, 4 in .ledge/decisions/; numbers allocated through ADR-0032) |
 
 See [compliance/COMPLIANCE-STATUS.md](compliance/COMPLIANCE-STATUS.md) for the complete report.
 

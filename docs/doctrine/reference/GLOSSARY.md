@@ -108,7 +108,7 @@ The labyrinth—the Knossos repository itself (SOURCE), not the channel director
 ### Metis
 Standing context-engineering agent — the Titaness of strategic wisdom and craft intelligence. Metis provides strategic meta-level guidance on agent design, context engineering, and platform decisions. A standing agent (always active), not a summonable hero.
 - **Related**: Pythia, Potnia, Standing Agents
-- **Source**: `agents/metis.md`
+- **Source**: `agents/context-engineer.md`
 
 ### Minotaur
 The initiative, feature, or task being pursued. The challenge at the labyrinth's heart—reason for the journey.

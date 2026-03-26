@@ -54,7 +54,7 @@ This skill codifies the patterns discovered from building rites (10x-dev, docs, 
 
 ### Model and Color Assignment
 
-See [agent-prompt-engineering](../agent-prompt-engineering/INDEX.md#model-and-color-assignment) for model selection and color assignment guidance.
+See [agent-prompt-engineering](../agent-prompt-engineering/INDEX.lego.md#model-and-color-assignment) for model selection and color assignment guidance.
 
 ### Workflow Phases
 

@@ -14,9 +14,9 @@ last_verified: 2026-03-26
 |--------|-------|
 | Go source lines | 93,668 (non-test files in cmd/ and internal/; excludes 119,624 test lines) |
 | CLI command families | 32 (see `ari --help` for current list) |
-| Specialist agents | 110 across 19 rites |
+| Specialist agents | 107 across 19 rites |
 | Active rites | 19 |
-| ADRs documented | 9 published documents (ADR-0001 through ADR-0032; 32 numbers allocated) |
+| ADRs documented | 6 published documents (2 in docs/decisions/, 4 in .ledge/decisions/; numbers allocated through ADR-0032) |
 | Skills (legomena) | 150 |
 | Commands (dromena) | 84 |
 
@@ -38,7 +38,7 @@ last_verified: 2026-03-26
 | **Moirai Authority** | Complete | Unified agent with skill-based routing (beneficial simplification) |
 | **Theoria/Pinakes** | Complete | Domain registry, theoros agent, `/theoria` dromena, synkrisis |
 | **Hook Infrastructure** | Complete | SessionStart, PreToolUse, PostToolUse + agent-guard enforcement |
-| **CC-OPP Uplift** | Complete | Memory (17 agents), Skills (68 agents), Hooks (10 agents), Resume (ecosystem) |
+| **CC-OPP Uplift** | Complete | Memory (26 agents), Skills (95 agents), Hooks (53 agents), Resume (ecosystem) |
 | **Handoff Protocol** | Partial | Events recorded, validation gates partial |
 | **Cognitive Budget** | Partial | Infrastructure ready, active tracking incomplete |
 
@@ -92,9 +92,9 @@ Three colors (WHITE/GRAY/BLACK). Five proof types. Complexity-aware thresholds (
 
 ### CC-OPP Agent Capability Uplift
 
-- **Memory** (17 agents): 3-tier seeding, 150-line soft cap, self-curating
-- **Skills** (68 agents): Frontmatter `skills:` field, ~3,500 token ceiling
-- **Hooks** (10 agents): `ari hook agent-guard`, triple-layer enforcement
+- **Memory** (26 agents): 3-tier seeding, 150-line soft cap, self-curating
+- **Skills** (95 agents): Frontmatter `skills:` field, ~3,500 token ceiling
+- **Hooks** (53 agents): `ari hook agent-guard`, triple-layer enforcement
 - **Resume** (ecosystem only): Throughline protocol for Potnia continuity
 
 See [reference/agent-capabilities.md](../reference/agent-capabilities.md) for details.

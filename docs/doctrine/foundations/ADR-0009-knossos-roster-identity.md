@@ -1,1 +1,0 @@
-../../decisions/ADR-0009-knossos-roster-identity.md

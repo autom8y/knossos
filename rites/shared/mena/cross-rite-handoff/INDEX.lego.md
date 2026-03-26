@@ -47,5 +47,4 @@ What type of work?
 ## Progressive Disclosure
 
 - [schema.md](schema.md) - Full schema specification
-- [validation.sh](validation.sh) - Validation functions
 - [examples/](examples/) - Example handoffs by type

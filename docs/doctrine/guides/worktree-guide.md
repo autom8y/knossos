@@ -494,5 +494,3 @@ cat worktree/.git
 
 - [CLI: worktree](../operations/cli-reference/cli-worktree.md) — Command reference
 - [CLI: session](../operations/cli-reference/cli-session.md) — Session management
-- [ADR-0010: Worktree Session Seeding](../../decisions/ADR-0010-worktree-session-seeding.md)
-- [Parallel Session Pattern](../../decisions/ADR-0006-parallel-session-orchestration.md)

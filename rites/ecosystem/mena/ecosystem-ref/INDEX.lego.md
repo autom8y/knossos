@@ -98,5 +98,5 @@ ari session --help             # Session management subcommands
 
 ## Progressive Disclosure
 
-- [doc-ecosystem skill](../doc-ecosystem/INDEX.md) - Templates for ecosystem documentation
+- [doc-ecosystem skill](../doc-ecosystem/INDEX.lego.md) - Templates for ecosystem documentation
 - [inscription-architecture skill](../inscription-architecture/INDEX.lego.md) - Inscription (context file) architecture patterns

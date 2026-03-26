@@ -262,7 +262,7 @@ Use this after platform upgrades to pull in new section templates without losing
 **Examples**:
 ```bash
 # Update a specific agent file
-ari agent update rites/ecosystem/agents/orchestrator.md
+ari agent update rites/ecosystem/agents/potnia.md
 
 # Update all agents in the ecosystem rite
 ari agent update --rite ecosystem

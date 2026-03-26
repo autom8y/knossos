@@ -24,7 +24,7 @@ After successful switch, show the agent table:
 
 | Agent | Role |
 |-------|------|
-| orchestrator | Coordinates multi-phase workflows |
+| potnia | Coordinates multi-phase workflows |
 | requirements-analyst | Produces PRDs, clarifies intent |
 | architect | Produces TDDs and ADRs, designs solutions |
 | principal-engineer | Implements code with craft and discipline |
