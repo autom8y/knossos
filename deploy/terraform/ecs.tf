@@ -34,10 +34,10 @@ resource "aws_ecs_task_definition" "clew" {
 
       healthCheck = {
         command     = ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
-        interval    = 30
+        interval    = 10
         timeout     = 5
         retries     = 3
-        startPeriod = 15
+        startPeriod = 90
       }
 
       environment = [

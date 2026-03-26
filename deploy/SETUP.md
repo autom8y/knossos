@@ -412,22 +412,7 @@ curl -s https://clew.yourdomain.com/ready | jq .
 
 ### Rollback
 
-ECS circuit breaker handles automatic rollback on health check failure during deploy. For manual rollback:
-
-```bash
-# List recent task definitions
-aws ecs list-task-definitions --family-prefix clew --sort DESC --max-items 5
-
-# Roll back to a specific revision
-aws ecs update-service \
-  --cluster clew-cluster \
-  --service clew-service \
-  --task-definition clew:PREVIOUS_REVISION \
-  --force-new-deployment
-
-# Wait for stability
-aws ecs wait services-stable --cluster clew-cluster --services clew-service
-```
+See the dedicated **Rollback Procedure** section below for complete instructions.
 
 ---
 
@@ -448,6 +433,152 @@ aws ecs wait services-stable --cluster clew-cluster --services clew-service
                               |
                     [ Secrets Manager ]    <-- signing secret, bot token, API key
 ```
+
+---
+
+## Content Lifecycle and `ari org sync`
+
+### How Content Gets Into the Container
+
+Clew's knowledge is pre-baked into the Docker image at build time. The lifecycle is:
+
+1. **theoros** regenerates `.know/` files in individual repos (weekly or on-demand)
+2. **`ari org sync --org autom8y`** detects changed `source_hash` values, updates `deploy/registry/domains.yaml`
+3. **`deploy/scripts/collect-content.sh --sync`** copies `.know/` files from all repos into `deploy/content/`
+4. **Docker build** bakes content and catalog into the container image
+5. **ECS deploy** starts new container; indexes are built at startup from pre-baked content
+6. **Health check passes** only after all indexes are built and validated
+
+### Operational Cadence
+
+| Frequency | Action | Why |
+|-----------|--------|-----|
+| Weekly (recommended) | Run `ari org sync --org autom8y` + redeploy | Keeps knowledge fresh; matches theoros regeneration cadence |
+| Alert threshold | Catalog > 7 days stale | `collect-content.sh` warns automatically |
+| On-demand | After major `.know/` changes | Ensures critical updates reach users quickly |
+
+### Measuring Staleness
+
+```bash
+# Check catalog sync date
+grep 'synced_at:' deploy/registry/domains.yaml
+# Expected: synced_at: "2026-03-25T10:00:00Z" (recent timestamp)
+
+# Check stale domain count via ari
+ari registry info --org autom8y
+# Shows: total domains, stale count, last sync time
+
+# Check container startup coherence (in CloudWatch logs)
+aws logs filter-log-events \
+  --log-group-name /ecs/clew \
+  --filter-pattern '"startup coherence"' \
+  --start-time $(date -v-1H +%s000 2>/dev/null || date -d '1 hour ago' +%s000)
+# Look for: coherent=true, content_missing=0, knowledge_missing=0
+```
+
+---
+
+## Pre-Deploy Checklist
+
+Run through this checklist before every production deploy:
+
+- [ ] **Catalog fresh**: `grep 'synced_at:' deploy/registry/domains.yaml` shows a recent date (< 7 days)
+- [ ] **Content collected**: `deploy/scripts/collect-content.sh` ran successfully with 0 missing domains
+- [ ] **Tests pass**: `CGO_ENABLED=0 go test ./...` exits clean
+- [ ] **Docker builds**: `docker build -f deploy/Dockerfile -t clew:test .` succeeds locally
+- [ ] **Secrets populated**: All 3 secrets in Secrets Manager have values (Phase 4 verification)
+- [ ] **Previous deploy healthy**: `curl -s https://clew.yourdomain.com/ready | jq .status` returns `"ready"`
+
+---
+
+## Post-Deploy Verification
+
+After every deploy (automated or manual), verify:
+
+```bash
+# 1. ECS service is stable with correct task count
+aws ecs describe-services \
+  --cluster clew-cluster \
+  --services clew-service \
+  --query 'services[0].{status:status,desired:desiredCount,running:runningCount,deployments:length(deployments)}' \
+  --output table
+# Expected: status=ACTIVE, running=desired, deployments=1
+
+# 2. Health endpoints respond
+curl -s https://clew.yourdomain.com/health | jq .
+# Expected: {"status":"ok"}
+
+curl -s https://clew.yourdomain.com/ready | jq .
+# Expected: all checks "ok"
+
+# 3. Startup coherence passed (check logs)
+aws logs filter-log-events \
+  --log-group-name /ecs/clew \
+  --filter-pattern '"startup coherence validation complete"' \
+  --start-time $(date -v-10M +%s000 2>/dev/null || date -d '10 minutes ago' +%s000) \
+  --query 'events[*].message' --output text
+# Expected: coherent=true
+
+# 4. No error-level log entries
+aws logs filter-log-events \
+  --log-group-name /ecs/clew \
+  --filter-pattern '"level":"ERROR"' \
+  --start-time $(date -v-10M +%s000 2>/dev/null || date -d '10 minutes ago' +%s000) \
+  --max-items 5
+# Expected: no results
+
+# 5. Smoke test: send a message to @clew and verify response
+```
+
+---
+
+## Rollback Procedure
+
+### Automatic Rollback
+
+ECS deployment circuit breaker is enabled. If the new task fails health checks during deployment, ECS automatically rolls back to the previous task definition. No operator action required.
+
+### Manual Rollback
+
+```bash
+# Step 1: Identify the previous stable revision
+aws ecs list-task-definitions \
+  --family-prefix clew \
+  --sort DESC \
+  --max-items 5 \
+  --query 'taskDefinitionArns' --output table
+
+# Step 2: Roll back to the previous revision
+aws ecs update-service \
+  --cluster clew-cluster \
+  --service clew-service \
+  --task-definition clew:PREVIOUS_REVISION \
+  --force-new-deployment
+
+# Step 3: Wait for stability (typically 2-5 minutes)
+aws ecs wait services-stable --cluster clew-cluster --services clew-service
+
+# Step 4: Verify rollback succeeded
+curl -s https://clew.yourdomain.com/ready | jq .
+# Expected: all checks "ok"
+
+# Step 5: Check that only 1 deployment is active
+aws ecs describe-services \
+  --cluster clew-cluster \
+  --services clew-service \
+  --query 'services[0].deployments[*].{status:status,running:runningCount,desired:desiredCount}' \
+  --output table
+```
+
+### When to Rollback
+
+| Symptom | Action |
+|---------|--------|
+| Health check fails during deploy | Automatic (circuit breaker) |
+| Startup coherence warnings in logs | Investigate; rollback if responses are wrong |
+| Users report incorrect/stale answers | Rollback + investigate content pipeline |
+| Error rate spike in CloudWatch | Rollback immediately |
+| Pipeline timeout (Sonnet synthesis > 30s) | Check Anthropic API status; rollback only if persistent |
 
 ---
 

@@ -2,6 +2,7 @@ package conversation
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -464,4 +465,175 @@ func TestDeployGap_StartupTimestamp(t *testing.T) {
 		"startup timestamp must be >= construction start")
 	assert.True(t, mgr.startedAt.Before(after) || mgr.startedAt.Equal(after),
 		"startup timestamp must be <= construction end")
+}
+
+// ---- Deploy-Gap Chaos Experiment Tests (Sprint 9, WS-4) ----
+
+func TestDeployGap_ColdStartWithConcurrentFollowUps(t *testing.T) {
+	// Chaos Experiment 1 (unit-level): After container restart, 20 concurrent
+	// follow-up messages to distinct DORMANT threads must:
+	//   (a) recover via fetcher without duplicating API calls per thread
+	//   (b) complete within a bounded wall-clock time
+	//   (c) not exceed rate limits (verified by total fetcher call count)
+	//
+	// This tests the DORMANT -> RESURRECTING -> ACTIVE path under concurrency.
+	// Each thread gets 1 fetcher call; concurrent requests to the same thread
+	// coalesce via the resurrectCh mechanism (manager.go:230-243).
+
+	cfg := testConfig()
+	cfg.ResurrectingTimeout = 500 * time.Millisecond
+
+	fetcher := &mockFetcher{
+		messages: []ThreadMessage{
+			makeMsg("user", "original question"),
+			makeMsg("assistant", "original answer"),
+		},
+		delay: 30 * time.Millisecond, // Simulate Slack API latency.
+	}
+	mgr := NewManager(cfg, nil, fetcher)
+	defer mgr.Stop()
+
+	const threadCount = 20
+	ctx := context.Background()
+
+	// Simulate post-deploy state: all threads are DORMANT (TTL expired,
+	// but channelID preserved for resurrection).
+	mgr.mu.Lock()
+	for i := 0; i < threadCount; i++ {
+		ts := fmt.Sprintf("thread-%d", i)
+		mgr.threads[ts] = &threadEntry{
+			state:      ThreadDormant,
+			lastAccess: time.Now().Add(-3 * time.Hour),
+			channelID:  fmt.Sprintf("C%03d", i),
+		}
+	}
+	mgr.mu.Unlock()
+
+	// Launch 20 concurrent follow-ups, one per thread.
+	var wg sync.WaitGroup
+	results := make([]*ThreadHistory, threadCount)
+	start := time.Now()
+
+	for i := 0; i < threadCount; i++ {
+		i := i
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ts := fmt.Sprintf("thread-%d", i)
+			results[i] = mgr.GetThreadHistory(ctx, ts)
+		}()
+	}
+	wg.Wait()
+	elapsed := time.Since(start)
+
+	// Verify: all 20 threads recovered.
+	successCount := 0
+	for i, r := range results {
+		if r != nil {
+			successCount++
+			assert.Equal(t, ThreadActive, r.State,
+				"thread-%d should be ACTIVE after resurrection", i)
+			assert.Equal(t, 2, r.TotalMessageCount,
+				"thread-%d should have 2 messages from fetcher", i)
+		}
+	}
+	assert.Equal(t, threadCount, successCount,
+		"all %d threads must recover via fetcher", threadCount)
+
+	// Verify: exactly 20 fetcher calls (one per thread, no duplicates).
+	assert.Equal(t, threadCount, fetcher.callCount(),
+		"fetcher must be called exactly once per thread (no duplicates)")
+
+	// Verify: wall-clock time is bounded.
+	// 20 threads x 30ms delay = 600ms if fully parallel; allow generous margin.
+	assert.Less(t, elapsed, 5*time.Second,
+		"20 concurrent resurrections must complete within 5 seconds")
+
+	// Verify: metrics reflect the recoveries.
+	metrics := mgr.GetMetrics()
+	assert.Equal(t, int64(threadCount), metrics.HitTotal,
+		"all resurrections should record as hits after recovery")
+}
+
+func TestDeployGap_RateLimitAwareness(t *testing.T) {
+	// Chaos Experiment 1 corollary: when multiple goroutines request the SAME
+	// DORMANT thread concurrently, the fetcher is called exactly once. Other
+	// goroutines wait on resurrectCh and receive the result (or timeout).
+	//
+	// This verifies the double-check locking in resurrectThread (manager.go:229-244)
+	// and the waiter coalescing in waitForResurrection (manager.go:289-335).
+	//
+	// Uses long TTL/cleanup to avoid cleanup goroutine interference during
+	// resurrection. A real race exists between cleanup() and resurrection when
+	// TTL is short -- see KNOWN-GAP-001 in chaos experiment docs.
+
+	cfg := Config{
+		MaxRecentMessages:   3,
+		TTL:                 10 * time.Minute, // Long TTL: prevent cleanup interference.
+		CleanupInterval:     10 * time.Minute, // Long interval: no cleanup during test.
+		SummaryMaxTokens:    250,
+		ResurrectingTimeout: 500 * time.Millisecond,
+	}
+
+	fetcher := &mockFetcher{
+		messages: []ThreadMessage{
+			makeMsg("user", "hello"),
+			makeMsg("assistant", "hi"),
+			makeMsg("user", "follow-up"),
+		},
+		delay: 80 * time.Millisecond, // Longer delay to ensure all goroutines pile up.
+	}
+	mgr := NewManager(cfg, nil, fetcher)
+	defer mgr.Stop()
+
+	ctx := context.Background()
+
+	// Single DORMANT thread, 20 concurrent readers.
+	mgr.mu.Lock()
+	mgr.threads["shared-thread"] = &threadEntry{
+		state:      ThreadDormant,
+		lastAccess: time.Now().Add(-3 * time.Hour),
+		channelID:  "C001",
+	}
+	mgr.mu.Unlock()
+
+	const concurrency = 20
+	var wg sync.WaitGroup
+	results := make([]*ThreadHistory, concurrency)
+
+	for i := 0; i < concurrency; i++ {
+		i := i
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			results[i] = mgr.GetThreadHistory(ctx, "shared-thread")
+		}()
+	}
+	wg.Wait()
+
+	// Verify: fetcher called exactly once (no duplicate API calls).
+	assert.Equal(t, 1, fetcher.callCount(),
+		"fetcher must be called exactly once for concurrent requests to same thread")
+
+	// Verify: at least one goroutine got the result. Due to timing, some
+	// goroutines may timeout waiting for resurrection, but at least the
+	// initiating goroutine must succeed.
+	successCount := 0
+	for _, r := range results {
+		if r != nil {
+			successCount++
+			assert.Equal(t, 3, r.TotalMessageCount,
+				"recovered thread should have all 3 messages")
+			assert.Equal(t, ThreadActive, r.State)
+		}
+	}
+	assert.GreaterOrEqual(t, successCount, 1,
+		"at least one concurrent reader must get the recovered history")
+
+	// Verify: thread is now ACTIVE for subsequent reads (no further fetcher calls).
+	history := mgr.GetThreadHistory(ctx, "shared-thread")
+	require.NotNil(t, history)
+	assert.Equal(t, ThreadActive, history.State)
+	assert.Equal(t, 1, fetcher.callCount(),
+		"subsequent read must not trigger additional fetcher call")
 }

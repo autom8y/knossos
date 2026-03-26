@@ -135,6 +135,13 @@ func (d *eventDedup) isDuplicate(eventID string) bool {
 	return false
 }
 
+// size returns the current number of entries in the dedup map.
+func (d *eventDedup) size() int {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return len(d.seen)
+}
+
 func (d *eventDedup) cleanup() {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -170,6 +177,11 @@ func (l *concurrencyLimiter) tryAcquire() bool {
 
 func (l *concurrencyLimiter) release() {
 	<-l.sem
+}
+
+// active returns the number of currently acquired slots.
+func (l *concurrencyLimiter) active() int {
+	return len(l.sem)
 }
 
 // QueryRunner abstracts the reasoning pipeline for testability.
@@ -239,6 +251,17 @@ var defaultSuggestedPrompts = []string{
 	"What decisions have shaped our technical direction?",
 }
 
+// HandlerMetrics abstracts the observability recorder to avoid circular imports.
+// Satisfied by observe.EMFRecorder and observe.NopRecorder.
+type HandlerMetrics interface {
+	RecordPrePipelineLatency(cmResult string, duration time.Duration)
+	SetConcurrentQueries(count int)
+	IncrDropped(reason string)
+	SetDedupMapSize(size int)
+	IncrDedupDrops()
+	RecordHaikuCalls(count int)
+}
+
 // HandlerDeps holds all dependencies for the Slack event handler.
 type HandlerDeps struct {
 	Pipeline     QueryRunner
@@ -263,6 +286,10 @@ type HandlerDeps struct {
 	// StreamingRunner executes the streaming pipeline.
 	// May be nil -- when nil, uses non-streaming pipeline.
 	StreamingRunner StreamingQueryRunner
+
+	// Metrics records pre-pipeline and handler-level metrics.
+	// May be nil -- when nil, metrics recording is skipped.
+	Metrics HandlerMetrics
 }
 
 // NewSlackHandler returns an http.HandlerFunc that processes Slack Events API payloads
@@ -318,6 +345,10 @@ func NewSlackHandlerWithDeps(deps HandlerDeps) (http.HandlerFunc, *ThreadContext
 		// TD-02: Event deduplication — reject already-seen event IDs.
 		if dedup.isDuplicate(envelope.EventID) {
 			slog.Debug("duplicate event filtered", "event_id", envelope.EventID)
+			if deps.Metrics != nil {
+				deps.Metrics.IncrDedupDrops()
+				deps.Metrics.SetDedupMapSize(dedup.size())
+			}
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -463,15 +494,32 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 			"channel", msg.Channel,
 			"user", msg.User,
 		)
+		if deps.Metrics != nil {
+			deps.Metrics.IncrDropped("rate_limited")
+		}
 		go func() {
 			_ = deps.Client.SendBlocks(msg.Channel, threadTS, RenderRateLimited())
 		}()
 		return
 	}
 
+	// Record concurrent query gauge.
+	if deps.Metrics != nil {
+		deps.Metrics.SetConcurrentQueries(limiter.active())
+	}
+
 	// Process asynchronously with limiter release on completion.
 	go func() {
-		defer limiter.release()
+		defer func() {
+			limiter.release()
+			if deps.Metrics != nil {
+				deps.Metrics.SetConcurrentQueries(limiter.active())
+			}
+		}()
+
+		// Pre-pipeline timing starts here (includes ConversationManager lookup).
+		prePipelineStart := time.Now()
+		cmResult := "no_cm"
 
 		// Get conversation history for multi-turn context.
 		var threadHistory []TriageThreadMessage
@@ -479,6 +527,7 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 			ctx := context.Background()
 			history := deps.ConversationMgr.GetThreadHistory(ctx, threadTS)
 			if history != nil {
+				cmResult = "hit"
 				// BC-04: Convert conversation.ThreadMessage to handler-local type.
 				threadHistory = convertThreadHistory(history)
 				slog.Info("conversation history retrieved",
@@ -487,7 +536,14 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 					"recent_messages", len(history.RecentMessages),
 					"has_summary", history.Summary != "",
 				)
+			} else {
+				cmResult = "miss"
 			}
+		}
+
+		// Record pre-pipeline latency (ConversationManager lookup cost).
+		if deps.Metrics != nil {
+			deps.Metrics.RecordPrePipelineLatency(cmResult, time.Since(prePipelineStart))
 		}
 
 		processMessage(msg.Channel, threadTS, msg.Text, deps, threadHistory)
@@ -605,7 +661,9 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 // TriagePipeline is not wired.
 func processWithTriage(ctx context.Context, question string, deps HandlerDeps, threadHistory []TriageThreadMessage) (*response.ReasoningResponse, error) {
 	// Run triage (Stages 0-3) with thread history for multi-turn context.
+	triageStart := time.Now()
 	triageResult, err := deps.TriageRunner.Assess(ctx, question, threadHistory)
+	triageElapsed := time.Since(triageStart)
 	if err != nil {
 		slog.Warn("triage failed, falling back to v1 pipeline",
 			"error", err,
@@ -616,6 +674,13 @@ func processWithTriage(ctx context.Context, question string, deps HandlerDeps, t
 	if triageResult == nil || len(triageResult.Candidates) == 0 {
 		slog.Info("triage returned no candidates, falling back to v1 pipeline")
 		return deps.Pipeline.Query(ctx, question)
+	}
+
+	// Record triage metrics: Haiku call count and stage 3 latency.
+	if deps.Metrics != nil {
+		deps.Metrics.RecordHaikuCalls(triageResult.ModelCallCount)
+		// Record triage latency as stage3 (the dominant triage cost).
+		deps.Metrics.RecordPrePipelineLatency("triage", triageElapsed)
 	}
 
 	// Use the refined query from triage for improved search quality.

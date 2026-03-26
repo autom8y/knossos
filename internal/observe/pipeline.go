@@ -14,21 +14,28 @@ import (
 // Compile-time check: InstrumentedPipeline implements slack.QueryRunner.
 var _ slack.QueryRunner = (*InstrumentedPipeline)(nil)
 
-// InstrumentedPipeline wraps a QueryRunner with OTEL tracing and cost tracking.
+// InstrumentedPipeline wraps a QueryRunner with OTEL tracing, cost tracking,
+// and Thermia metrics recording.
 // It satisfies the slack.QueryRunner interface, allowing it to be substituted
 // for the raw pipeline without modifying frozen packages.
 type InstrumentedPipeline struct {
-	inner  slack.QueryRunner
-	tracer trace.Tracer
-	cost   *CostTracker
+	inner   slack.QueryRunner
+	tracer  trace.Tracer
+	cost    *CostTracker
+	metrics MetricsRecorder
 }
 
 // NewInstrumentedPipeline creates an instrumented wrapper around the inner pipeline.
-func NewInstrumentedPipeline(inner slack.QueryRunner, cost *CostTracker) *InstrumentedPipeline {
+// metrics may be nil (metrics recording will be skipped).
+func NewInstrumentedPipeline(inner slack.QueryRunner, cost *CostTracker, metrics MetricsRecorder) *InstrumentedPipeline {
+	if metrics == nil {
+		metrics = NopRecorder{}
+	}
 	return &InstrumentedPipeline{
-		inner:  inner,
-		tracer: Tracer("clew.pipeline"),
-		cost:   cost,
+		inner:   inner,
+		tracer:  Tracer("clew.pipeline"),
+		cost:    cost,
+		metrics: metrics,
 	}
 }
 
@@ -49,9 +56,13 @@ func (p *InstrumentedPipeline) Query(ctx context.Context, question string) (*res
 
 	start := time.Now()
 	resp, err := p.inner.Query(ctx, question)
-	durationMs := time.Since(start).Milliseconds()
+	elapsed := time.Since(start)
+	durationMs := elapsed.Milliseconds()
 
 	span.SetAttributes(attribute.Int64("clew.duration_ms", durationMs))
+
+	// Record end-to-end query latency metric (cm_path unknown at this layer, use "unknown").
+	p.metrics.RecordQueryLatency("unknown", elapsed)
 
 	if err != nil {
 		span.RecordError(err)

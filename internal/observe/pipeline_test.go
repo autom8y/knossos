@@ -39,7 +39,7 @@ func TestInstrumentedPipeline_DelegatesToInner(t *testing.T) {
 
 	inner := &mockQueryRunner{resp: expected}
 	cost := NewCostTracker()
-	pipeline := NewInstrumentedPipeline(inner, cost)
+	pipeline := NewInstrumentedPipeline(inner, cost, nil)
 
 	resp, err := pipeline.Query(context.Background(), "test question")
 	if err != nil {
@@ -68,7 +68,7 @@ func TestInstrumentedPipeline_RecordsCost(t *testing.T) {
 		},
 	}
 	cost := NewCostTracker()
-	pipeline := NewInstrumentedPipeline(inner, cost)
+	pipeline := NewInstrumentedPipeline(inner, cost, nil)
 
 	_, err := pipeline.Query(context.Background(), "question")
 	if err != nil {
@@ -93,7 +93,7 @@ func TestInstrumentedPipeline_PropagatesError(t *testing.T) {
 	expectedErr := fmt.Errorf("pipeline failure")
 	inner := &mockQueryRunner{err: expectedErr}
 	cost := NewCostTracker()
-	pipeline := NewInstrumentedPipeline(inner, cost)
+	pipeline := NewInstrumentedPipeline(inner, cost, nil)
 
 	_, err := pipeline.Query(context.Background(), "question")
 	if err == nil {
@@ -124,7 +124,7 @@ func TestInstrumentedPipeline_NilCostTracker(t *testing.T) {
 	}
 
 	// nil CostTracker should not panic.
-	pipeline := NewInstrumentedPipeline(inner, nil)
+	pipeline := NewInstrumentedPipeline(inner, nil, nil)
 	_, err := pipeline.Query(context.Background(), "question")
 	if err != nil {
 		t.Fatalf("Query() error = %v", err)
@@ -142,7 +142,7 @@ func TestInstrumentedPipeline_TruncatesLongQuestion(t *testing.T) {
 	}
 
 	cost := NewCostTracker()
-	pipeline := NewInstrumentedPipeline(inner, cost)
+	pipeline := NewInstrumentedPipeline(inner, cost, nil)
 
 	// Question longer than 256 chars should not cause issues.
 	longQuestion := make([]byte, 1000)

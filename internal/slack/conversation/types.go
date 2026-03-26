@@ -125,3 +125,15 @@ type Summarizer interface {
 	// Returns the summary text, or empty string on failure.
 	Summarize(ctx context.Context, messages []ThreadMessage) string
 }
+
+// MetricsEmitter abstracts the observability recorder to avoid circular imports.
+// Satisfied by observe.EMFRecorder and observe.NopRecorder.
+type MetricsEmitter interface {
+	IncrConversationHit()
+	IncrConversationMiss(reason string)
+	RecordConversationGetLatency(result string, duration time.Duration)
+	SetActiveThreads(count int)
+	IncrEvictions()
+	SetConversationMemoryBytes(bytes int64)
+	SetStartupTimestamp(t time.Time)
+}

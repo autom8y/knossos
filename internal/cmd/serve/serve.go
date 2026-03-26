@@ -185,11 +185,14 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	// Returns intermediate components for health check registration.
 	pipelineResult := buildPipeline()
 
+	// Create metrics recorder (CloudWatch EMF via structured slog).
+	metricsRecorder := observe.NewEMFRecorder()
+
 	// Create cost tracker and instrumented pipeline wrapper.
 	costTracker := observe.NewCostTracker()
 	var queryRunner internalslack.QueryRunner
 	if pipelineResult.pipeline != nil {
-		queryRunner = observe.NewInstrumentedPipeline(pipelineResult.pipeline, costTracker)
+		queryRunner = observe.NewInstrumentedPipeline(pipelineResult.pipeline, costTracker, metricsRecorder)
 	}
 
 	// Build LLM client (shared by triage, knowledge index, conversation manager).
@@ -236,7 +239,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	// SlackThreadFetcher is nil for now (conversations.replies integration is
 	// wired via the SlackClient in a future PR). ConversationManager degrades
 	// gracefully without it (DORMANT threads return nil).
-	convMgr = conversation.NewManager(convConfig, summarizer, nil)
+	convMgr = conversation.NewManager(convConfig, summarizer, nil, metricsRecorder)
 	slog.Info("conversation manager initialized",
 		"ttl", convConfig.TTL,
 		"max_recent_messages", convConfig.MaxRecentMessages,
@@ -262,6 +265,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		TriagePipeline:  triagePipelineAdapter,
 		ConversationMgr: convMgr,
 		StreamSender:    streamSender,
+		Metrics:         metricsRecorder,
 	})
 
 	// Register webhook verification middleware wrapping the Slack handler.
@@ -314,6 +318,10 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		}
 		return nil
 	})
+
+	// BC-11: Validate cross-cache coherence before health check goes green.
+	// This is fail-open: mismatches are logged as warnings, not errors.
+	validateStartupCoherence(pipelineResult.catalog, pipelineResult.searchIndex, knowledgeIdx)
 
 	slog.Info("server configured",
 		"port", cfg.Port,
@@ -616,6 +624,83 @@ func buildKnowledgeIndex(ctx context.Context, pr pipelineComponents, llmClient *
 	)
 
 	return idx
+}
+
+// validateStartupCoherence checks cross-cache consistency after all indexes are built.
+// BC-11: All caches should be derived from the same build generation.
+// This is fail-open: mismatches are logged as warnings, not errors.
+// See HANDOFF Section 2.5: 3 consistency invariants.
+func validateStartupCoherence(catalog *registryorg.DomainCatalog, searchIndex *search.SearchIndex, knowledgeIdx *knowledge.KnowledgeIndex) {
+	if catalog == nil {
+		slog.Warn("startup coherence: catalog is nil, skipping validation")
+		return
+	}
+
+	domains := catalog.ListDomains()
+	totalDomains := len(domains)
+	if totalDomains == 0 {
+		slog.Warn("startup coherence: catalog has 0 domains")
+		return
+	}
+
+	// Resolve content store for validation (same resolution as buildKnowledgeIndex).
+	contentStore := resolveKnowledgeContentStore()
+
+	// Invariant 1: Every cataloged domain should have content available.
+	var contentMissing []string
+	if contentStore != nil {
+		for _, d := range domains {
+			if !contentStore.HasContent(d.QualifiedName) {
+				contentMissing = append(contentMissing, d.QualifiedName)
+			}
+		}
+	}
+
+	// Invariant 2: KnowledgeIndex should have metadata for every cataloged domain.
+	var knowledgeMissing []string
+	if knowledgeIdx != nil {
+		for _, d := range domains {
+			if _, ok := knowledgeIdx.GetMetadata(d.QualifiedName); !ok {
+				knowledgeMissing = append(knowledgeMissing, d.QualifiedName)
+			}
+		}
+	}
+
+	// Invariant 3: BM25 index should be available if content exists.
+	bm25Available := searchIndex != nil && searchIndex.HasBM25()
+	if contentStore != nil && !bm25Available {
+		slog.Warn("startup coherence: content available but BM25 index not built")
+	}
+
+	// Log results.
+	if len(contentMissing) > 0 {
+		slog.Warn("startup coherence: catalog-content mismatch",
+			"missing_count", len(contentMissing),
+			"total_domains", totalDomains,
+			"missing_domains", contentMissing,
+		)
+	}
+	if len(knowledgeMissing) > 0 {
+		slog.Warn("startup coherence: catalog-knowledge mismatch",
+			"missing_count", len(knowledgeMissing),
+			"total_domains", totalDomains,
+			"missing_domains", knowledgeMissing,
+		)
+	}
+
+	coherent := len(contentMissing) == 0 && len(knowledgeMissing) == 0
+	knowledgeDomains := 0
+	if knowledgeIdx != nil {
+		knowledgeDomains = knowledgeIdx.DomainCount()
+	}
+	slog.Info("startup coherence validation complete",
+		"coherent", coherent,
+		"total_domains", totalDomains,
+		"content_missing", len(contentMissing),
+		"knowledge_missing", len(knowledgeMissing),
+		"bm25_available", bm25Available,
+		"knowledge_domains", knowledgeDomains,
+	)
 }
 
 // resolveKnowledgeContentStore returns a content store adapter for the knowledge index.

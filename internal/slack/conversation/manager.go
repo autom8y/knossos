@@ -27,6 +27,7 @@ type Manager struct {
 	// Dependencies (optional, fail-open).
 	summarizer Summarizer
 	fetcher    SlackThreadFetcher
+	emitter    MetricsEmitter
 
 	// Metrics (counters, gauges — stub placeholders for now).
 	metricsMu sync.Mutex
@@ -72,15 +73,26 @@ func NewMetrics() *Metrics {
 //
 // summarizer may be nil (summaries will be skipped, degraded to window-only).
 // fetcher may be nil (DORMANT threads cannot be resurrected, returns nil).
-func NewManager(config Config, summarizer Summarizer, fetcher SlackThreadFetcher) *Manager {
+// emitter may be nil (metrics recording will be skipped).
+func NewManager(config Config, summarizer Summarizer, fetcher SlackThreadFetcher, emitter ...MetricsEmitter) *Manager {
+	var me MetricsEmitter
+	if len(emitter) > 0 && emitter[0] != nil {
+		me = emitter[0]
+	}
 	m := &Manager{
-		threads:   make(map[string]*threadEntry),
-		config:    config,
+		threads:    make(map[string]*threadEntry),
+		config:     config,
 		summarizer: summarizer,
-		fetcher:   fetcher,
-		metrics:   NewMetrics(),
-		done:      make(chan struct{}),
-		startedAt: time.Now(),
+		fetcher:    fetcher,
+		emitter:    me,
+		metrics:    NewMetrics(),
+		done:       make(chan struct{}),
+		startedAt:  time.Now(),
+	}
+
+	// Emit startup timestamp metric.
+	if m.emitter != nil {
+		m.emitter.SetStartupTimestamp(m.startedAt)
 	}
 
 	// Start background cleanup goroutine.
@@ -433,6 +445,13 @@ func (m *Manager) cleanup() {
 		m.metrics.EvictionsTotal += int64(evicted)
 		m.metricsMu.Unlock()
 
+		if m.emitter != nil {
+			for i := 0; i < evicted; i++ {
+				m.emitter.IncrEvictions()
+			}
+			m.emitter.SetActiveThreads(len(m.threads))
+		}
+
 		slog.Debug("conversation cleanup",
 			"evicted", evicted,
 			"remaining", len(m.threads),
@@ -440,16 +459,26 @@ func (m *Manager) cleanup() {
 	}
 }
 
-// recordHit increments the hit counter.
-func (m *Manager) recordHit(_ time.Time) {
+// recordHit increments the hit counter and emits the EMF metric.
+func (m *Manager) recordHit(start time.Time) {
 	m.metricsMu.Lock()
-	defer m.metricsMu.Unlock()
 	m.metrics.HitTotal++
+	m.metricsMu.Unlock()
+
+	if m.emitter != nil {
+		m.emitter.IncrConversationHit()
+		m.emitter.RecordConversationGetLatency("hit", time.Since(start))
+	}
 }
 
-// recordMiss increments the miss counter with the given reason.
-func (m *Manager) recordMiss(reason string, _ time.Time) {
+// recordMiss increments the miss counter with the given reason and emits the EMF metric.
+func (m *Manager) recordMiss(reason string, start time.Time) {
 	m.metricsMu.Lock()
-	defer m.metricsMu.Unlock()
 	m.metrics.MissTotal[reason]++
+	m.metricsMu.Unlock()
+
+	if m.emitter != nil {
+		m.emitter.IncrConversationMiss(reason)
+		m.emitter.RecordConversationGetLatency("miss", time.Since(start))
+	}
 }
