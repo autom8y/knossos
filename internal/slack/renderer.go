@@ -30,11 +30,8 @@ func RenderResponse(resp *response.ReasoningResponse) []slackapi.Block {
 func RenderHighConfidence(resp *response.ReasoningResponse) []slackapi.Block {
 	var blocks []slackapi.Block
 
-	// Answer text
-	blocks = append(blocks, slackapi.NewSectionBlock(
-		slackapi.NewTextBlockObject(slackapi.MarkdownType, resp.Answer, false, false),
-		nil, nil,
-	))
+	// Answer text — split into multiple blocks if > 3000 chars (Slack limit).
+	blocks = append(blocks, splitAnswerBlocks(resp.Answer)...)
 
 	// Divider before citations
 	blocks = append(blocks, slackapi.NewDividerBlock())
@@ -63,11 +60,8 @@ func RenderHighConfidence(resp *response.ReasoningResponse) []slackapi.Block {
 func RenderMediumConfidence(resp *response.ReasoningResponse) []slackapi.Block {
 	var blocks []slackapi.Block
 
-	// Answer text
-	blocks = append(blocks, slackapi.NewSectionBlock(
-		slackapi.NewTextBlockObject(slackapi.MarkdownType, resp.Answer, false, false),
-		nil, nil,
-	))
+	// Answer text — split into multiple blocks if > 3000 chars (Slack limit).
+	blocks = append(blocks, splitAnswerBlocks(resp.Answer)...)
 
 	// Staleness warning with specific domains
 	staleDomains := staleDomainList(resp)
@@ -226,6 +220,56 @@ func simpleTitleCase(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// splitAnswerBlocks splits a long answer into multiple Slack section blocks.
+// Slack section block text has a 3000 character limit. This splits at paragraph
+// boundaries (double newline) to keep blocks readable.
+func splitAnswerBlocks(answer string) []slackapi.Block {
+	const maxLen = 2900 // Leave margin below 3000 for safety
+
+	if len(answer) <= maxLen {
+		return []slackapi.Block{
+			slackapi.NewSectionBlock(
+				slackapi.NewTextBlockObject(slackapi.MarkdownType, answer, false, false),
+				nil, nil,
+			),
+		}
+	}
+
+	var blocks []slackapi.Block
+	remaining := answer
+
+	for len(remaining) > 0 {
+		if len(remaining) <= maxLen {
+			blocks = append(blocks, slackapi.NewSectionBlock(
+				slackapi.NewTextBlockObject(slackapi.MarkdownType, remaining, false, false),
+				nil, nil,
+			))
+			break
+		}
+
+		// Find a paragraph break within the limit.
+		cutPoint := strings.LastIndex(remaining[:maxLen], "\n\n")
+		if cutPoint <= 0 {
+			// No paragraph break — try a single newline.
+			cutPoint = strings.LastIndex(remaining[:maxLen], "\n")
+		}
+		if cutPoint <= 0 {
+			// No newline at all — hard cut.
+			cutPoint = maxLen
+		}
+
+		chunk := remaining[:cutPoint]
+		remaining = strings.TrimLeft(remaining[cutPoint:], "\n")
+
+		blocks = append(blocks, slackapi.NewSectionBlock(
+			slackapi.NewTextBlockObject(slackapi.MarkdownType, chunk, false, false),
+			nil, nil,
+		))
+	}
+
+	return blocks
 }
 
 // RenderRateLimited returns blocks for a rate-limited response (TD-03).
