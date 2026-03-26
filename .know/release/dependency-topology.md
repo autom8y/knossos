@@ -1,11 +1,11 @@
 ---
 domain: release/dependency-topology
-generated_at: "2026-03-23T13:22:30Z"
+generated_at: "2026-03-26T22:36:44Z"
 expires_after: "30d"
 source_scope:
   - "./.know/release/"
 generator: dependency-resolver
-source_hash: "6685f6f3"
+source_hash: "aeb611c3"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"

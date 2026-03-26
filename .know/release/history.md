@@ -1,6 +1,6 @@
 ---
 domain: release/history
-generated_at: "2026-03-26T11:25:00Z"
+generated_at: "2026-03-26T22:36:44Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
@@ -444,3 +444,33 @@ max_incremental_cycles: 0
 - Ancillary: deploy-clew.yml RED — AWS OIDC role ARN missing account ID (pre-existing, non-blocking)
 - Ancillary: ariadne-tests.yml informational — golangci-lint built with go1.24 refusing go1.25 project (pre-existing)
 - Headline: Summonable Heroes (WS-1/WS-5: summon/dismiss/roster, Myron discovery), Gemini dromena (10x/architect/build/discover), Docker .know/ pre-bake for BM25, GitHub MCP swap, clew production hardening, literature reviews (GraphRAG, MoE)
+
+### v0.18.0 — 2026-03-26
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-26 |
+| Version | v0.17.0 -> v0.18.0 (minor) |
+| Commits | 19 (since v0.17.0; multiple feat + fix) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | 620c2887 |
+| Commit SHA | aeb611c3 |
+| release.yml | GREEN (143s, run 23621286249) |
+| e2e-distribution.yml | GREEN (51s, run 23621366099) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (31bd3b39, 4s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~7 min (execution) + ~4 min (monitoring) |
+
+**Notes:**
+- Thirty-first consecutive PASS verdict (v0.3.2 -> ... -> v0.17.0 -> v0.18.0)
+- Total chain: 194s (release.yml 143s + e2e 51s; within historical baseline ~150-195s)
+- macOS E2E: GREEN (21s), Linux E2E: GREEN (50s)
+- Dispatch latency: 4s (release published → e2e triggered)
+- Homebrew tap propagation: concurrent with release publish
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 28 files committed pre-tag (uncommitted working tree changes staged and committed)
+- Ancillary: deploy-clew.yml in-progress during verification (AWS OIDC, pre-existing, non-blocking)
+- Ancillary: ariadne-tests.yml RED (golangci-lint version mismatch, pre-existing, informational)
+- 1 Dependabot critical vulnerability alert on push (pre-existing, non-blocking)
+- Headline: Clew reasoning pipeline enhancements, slack format package extraction, Gemini command config updates, deploy hardening (health check, distroless, pre-bake), documentation elevation
