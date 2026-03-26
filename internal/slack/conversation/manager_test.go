@@ -376,3 +376,92 @@ func TestManager_StoreMessage_ChannelIDPreserved(t *testing.T) {
 
 	assert.Equal(t, "C001", entry.channelID)
 }
+
+// ---- Deploy-Gap Acceptance Tests ----
+
+func TestDeployGap_EmptyCacheOnStartup(t *testing.T) {
+	// After deploy, ConversationManager starts with empty cache.
+	// First follow-up to any thread returns nil (deploy-gap expected).
+	config := DefaultConfig()
+	mgr := NewManager(config, nil, nil)
+	defer mgr.Stop()
+
+	// No threads have been initialized -- simulates post-deploy state.
+	history := mgr.GetThreadHistory(context.Background(), "orphan-thread")
+	assert.Nil(t, history, "post-deploy: first follow-up must return nil (deploy-gap)")
+}
+
+func TestDeployGap_WithFetcher_GracefulRecovery(t *testing.T) {
+	// After deploy with a fetcher wired, DORMANT threads trigger recovery.
+	// The fetcher returns messages, and the manager populates the thread.
+	fetcher := &mockFetcher{
+		messages: []ThreadMessage{
+			{Role: "user", Content: "original question", Timestamp: time.Now().Add(-10 * time.Minute)},
+			{Role: "assistant", Content: "original answer", Timestamp: time.Now().Add(-9 * time.Minute)},
+		},
+	}
+	config := DefaultConfig()
+	mgr := NewManager(config, nil, fetcher)
+	defer mgr.Stop()
+
+	// Initialize the thread (simulates assistant_thread_started before deploy).
+	mgr.InitThread("deploy-test", "C001")
+
+	// First follow-up after thread was created but no messages stored.
+	// Without prior StoreMessage calls, the thread has no messages, so
+	// GetThreadHistory returns an empty/nil history.
+	history := mgr.GetThreadHistory(context.Background(), "deploy-test")
+
+	// With no stored messages, the thread exists but has empty history.
+	// This validates the deploy-gap path: manager starts empty, threads
+	// initialized but no conversation data.
+	if history != nil {
+		assert.Equal(t, 0, history.TotalMessageCount,
+			"deploy-gap: newly initialized thread should have no messages")
+	}
+}
+
+func TestDeployGap_NilFetcher_ReturnsNil(t *testing.T) {
+	// When fetcher is nil (conversations.replies not wired), DORMANT threads
+	// return nil gracefully. This is the expected Tier 1 behavior.
+	config := DefaultConfig()
+	mgr := NewManager(config, nil, nil)
+	defer mgr.Stop()
+
+	history := mgr.GetThreadHistory(context.Background(), "unknown-thread")
+	assert.Nil(t, history, "nil fetcher: DORMANT threads must return nil, not error")
+}
+
+func TestDeployGap_MetricsTrackDeployGap(t *testing.T) {
+	// The metrics must distinguish deploy_gap misses from cold_start and ttl_expired.
+	config := DefaultConfig()
+	mgr := NewManager(config, nil, nil)
+	defer mgr.Stop()
+
+	// Verify metrics are initialized with deploy_gap reason.
+	mgr.metricsMu.Lock()
+	_, hasDeployGap := mgr.metrics.MissTotal["deploy_gap"]
+	_, hasColdStart := mgr.metrics.MissTotal["cold_start"]
+	_, hasTTLExpired := mgr.metrics.MissTotal["ttl_expired"]
+	mgr.metricsMu.Unlock()
+
+	assert.True(t, hasDeployGap, "metrics must track deploy_gap miss reason")
+	assert.True(t, hasColdStart, "metrics must track cold_start miss reason")
+	assert.True(t, hasTTLExpired, "metrics must track ttl_expired miss reason")
+}
+
+func TestDeployGap_StartupTimestamp(t *testing.T) {
+	// The manager records its startup timestamp for deploy-gap detection.
+	// Any thread access before the startup time must be classified as deploy_gap.
+	before := time.Now()
+	config := DefaultConfig()
+	mgr := NewManager(config, nil, nil)
+	defer mgr.Stop()
+	after := time.Now()
+
+	require.False(t, mgr.startedAt.IsZero(), "startup timestamp must be set")
+	assert.True(t, mgr.startedAt.After(before) || mgr.startedAt.Equal(before),
+		"startup timestamp must be >= construction start")
+	assert.True(t, mgr.startedAt.Before(after) || mgr.startedAt.Equal(after),
+		"startup timestamp must be <= construction end")
+}

@@ -240,8 +240,6 @@ func (o *Orchestrator) stage2PreFilter(ctx context.Context, query string, candid
 		_, err := o.embeddingModel.Embed(ctx, query)
 		if err == nil {
 			// Embedding available -- use cosine similarity pre-filter.
-			// Sprint 5: this path is unreachable (StubEmbeddingModel always errors).
-			// Sprint 7: real implementation here.
 			slog.Info("stage 2 using embedding pre-filter")
 			return o.stage2EmbeddingFilter(ctx, query, candidates)
 		}
@@ -262,7 +260,6 @@ type stage2Candidate struct {
 }
 
 // stage2EmbeddingFilter uses cosine similarity for pre-filtering.
-// Sprint 5: unreachable (stub always errors). Sprint 7: real implementation.
 func (o *Orchestrator) stage2EmbeddingFilter(ctx context.Context, query string, candidates []DomainMetadata) ([]stage2Candidate, bool) {
 	// Placeholder for Sprint 7 embedding implementation.
 	// For now, return all candidates with zero similarity (pass-through).

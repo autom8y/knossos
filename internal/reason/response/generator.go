@@ -206,7 +206,7 @@ func addStalenessFooter(answer string, chain *trust.ProvenanceChain, existingCav
 		stale := chain.StaleSources(0.4)
 		for _, s := range stale {
 			display := strings.ReplaceAll(s.Domain, "-", " ")
-			display = strings.Title(display) //nolint:staticcheck
+			display = simpleTitleCase(display)
 			if s.Repo != "" {
 				footer += fmt.Sprintf("\n_The %s information from %s may not reflect recent changes._", display, s.Repo)
 			} else {
@@ -285,7 +285,7 @@ func (g *Generator) buildCitationOnlyResponse(
 func humanReadableSourceName(qualifiedName, domain, repo string) string {
 	if domain != "" && repo != "" {
 		display := strings.ReplaceAll(domain, "-", " ")
-		display = strings.Title(display) //nolint:staticcheck
+		display = simpleTitleCase(display)
 		return fmt.Sprintf("%s (%s)", display, repo)
 	}
 	return qualifiedName
@@ -314,7 +314,7 @@ func ValidateCitations(citations []Citation, chain *trust.ProvenanceChain) (vali
 }
 
 // EstimateCost computes approximate USD cost from token usage.
-// Pricing is hardcoded for sprint-6; sprint-10 will make it configurable.
+// Pricing is hardcoded; will be made configurable in a future iteration.
 func EstimateCost(model string, usage TokenUsage) float64 {
 	// Sonnet 4.5 pricing (approximate):
 	// Input:  $3.00 per million tokens
@@ -322,6 +322,27 @@ func EstimateCost(model string, usage TokenUsage) float64 {
 	inputCost := float64(usage.InputTokens) * 3.0 / 1_000_000.0
 	outputCost := float64(usage.OutputTokens) * 15.0 / 1_000_000.0
 	return inputCost + outputCost
+}
+
+// simpleTitleCase capitalizes the first letter of each word, where word
+// boundaries are spaces and slashes. Replaces deprecated strings.Title
+// for simple ASCII domain names (e.g., "feat/materialization" -> "Feat/Materialization").
+func simpleTitleCase(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	capitalizeNext := true
+	for _, r := range s {
+		if r == ' ' || r == '/' {
+			b.WriteRune(r)
+			capitalizeNext = true
+		} else if capitalizeNext {
+			b.WriteString(strings.ToUpper(string(r)))
+			capitalizeNext = false
+		} else {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
 }
 
 // truncate returns at most n characters of s with "..." suffix if truncated.

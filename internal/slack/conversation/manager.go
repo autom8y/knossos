@@ -48,7 +48,7 @@ type threadEntry struct {
 }
 
 // Metrics holds metric counters for observability.
-// Sprint 6: Stub implementation. Will wire to prometheus when available.
+// Stub implementation. Will wire to prometheus when available.
 type Metrics struct {
 	HitTotal        int64
 	MissTotal       map[string]int64 // reason -> count

@@ -178,6 +178,13 @@ type QueryRunner interface {
 	Query(ctx context.Context, question string) (*response.ReasoningResponse, error)
 }
 
+// TriageQueryRunner abstracts the reasoning pipeline's triage-aware entry point.
+// WARNING-03 fix: processWithTriage MUST use this interface (not QueryRunner.Query)
+// so that triage candidates reach the assembler for BC-07 weighted-mean freshness.
+type TriageQueryRunner interface {
+	QueryWithTriage(ctx context.Context, triageInput *TriageResultInputData) (*response.ReasoningResponse, error)
+}
+
 // StreamingQueryRunner extends QueryRunner with streaming support.
 // BC-03: Uses onChunk callback. reason/ does NOT import slack/.
 type StreamingQueryRunner interface {
@@ -233,22 +240,27 @@ var defaultSuggestedPrompts = []string{
 }
 
 // HandlerDeps holds all dependencies for the Slack event handler.
-// Sprint 6: Added ConversationManager and StreamSender.
 type HandlerDeps struct {
 	Pipeline     QueryRunner
 	Client       *SlackClient
 	Config       SlackConfig
 	TriageRunner TriageRunner
 
-	// Sprint 6: Conversation threading.
+	// TriagePipeline handles queries with pre-computed triage candidates.
+	// WARNING-03 fix: processWithTriage uses this to pass candidate data
+	// through to the assembler for BC-07 weighted-mean freshness.
+	// May be nil -- when nil, falls back to QueryRunner.Query (v1 path).
+	TriagePipeline TriageQueryRunner
+
+	// ConversationMgr tracks multi-turn conversation state.
 	// May be nil -- when nil, conversation history is not available.
 	ConversationMgr *conversation.Manager
 
-	// Sprint 6: Streaming response rendering.
+	// StreamSender renders progressive streaming responses.
 	// May be nil -- when nil, responses are posted as single messages.
 	StreamSender *streaming.Sender
 
-	// Sprint 6: Streaming pipeline runner.
+	// StreamingRunner executes the streaming pipeline.
 	// May be nil -- when nil, uses non-streaming pipeline.
 	StreamingRunner StreamingQueryRunner
 }
@@ -345,7 +357,7 @@ func handleAssistantThreadStarted(w http.ResponseWriter, eventData json.RawMessa
 	channelID := event.AssistantThread.ChannelID
 	threadTS := event.AssistantThread.ThreadTS
 
-	// Sprint 6: Initialize conversation tracking for this thread.
+	// Initialize conversation tracking for this thread.
 	if convMgr != nil {
 		convMgr.InitThread(threadTS, channelID)
 	}
@@ -461,7 +473,7 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 	go func() {
 		defer limiter.release()
 
-		// Sprint 6: Get conversation history for multi-turn context.
+		// Get conversation history for multi-turn context.
 		var threadHistory []TriageThreadMessage
 		if deps.ConversationMgr != nil {
 			ctx := context.Background()
@@ -502,7 +514,6 @@ func convertThreadHistory(history *conversation.ThreadHistory) []TriageThreadMes
 
 // processMessage runs the reasoning pipeline and posts the response.
 // Runs in a goroutine -- must not reference the http.ResponseWriter.
-// Sprint 6: Integrates conversation history and streaming.
 func processMessage(channelID, threadTS, question string, deps HandlerDeps, threadHistory []TriageThreadMessage) {
 	client := deps.Client
 
@@ -537,7 +548,7 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 		return
 	}
 
-	// Sprint 6: Store the user message and assistant response in conversation history.
+	// Store the user message and assistant response in conversation history.
 	if deps.ConversationMgr != nil {
 		deps.ConversationMgr.StoreMessage(ctx, threadTS, conversation.ThreadMessage{
 			Role:      "user",
@@ -587,11 +598,11 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 	}
 }
 
-// processWithTriage runs triage first, then passes the refined query to the pipeline.
-// Falls back to v1 pipeline (Query) when triage returns nil or errors.
-//
-// Sprint 5/6: Uses the refined query from triage and passes thread history
-// for multi-turn context resolution.
+// processWithTriage runs triage first, then passes candidates to the pipeline.
+// WARNING-03 fix: uses TriagePipeline.QueryWithTriage to pass candidate data
+// through to the assembler for BC-07 weighted-mean freshness computation.
+// Falls back to v1 pipeline (Query) when triage returns nil, errors, or
+// TriagePipeline is not wired.
 func processWithTriage(ctx context.Context, question string, deps HandlerDeps, threadHistory []TriageThreadMessage) (*response.ReasoningResponse, error) {
 	// Run triage (Stages 0-3) with thread history for multi-turn context.
 	triageResult, err := deps.TriageRunner.Assess(ctx, question, threadHistory)
@@ -620,5 +631,20 @@ func processWithTriage(ctx context.Context, question string, deps HandlerDeps, t
 		"model_calls", triageResult.ModelCallCount,
 	)
 
+	// WARNING-03 fix: Pass triage candidates through to the pipeline so the
+	// assembler receives RelevanceScores for BC-07 weighted-mean freshness.
+	// Without this, triage candidate data is discarded and freshness falls
+	// back to position-weighted chain computation.
+	if deps.TriagePipeline != nil {
+		triageInput := &TriageResultInputData{
+			RefinedQuery:   refinedQuery,
+			Candidates:     triageResult.Candidates,
+			ModelCallCount: triageResult.ModelCallCount,
+		}
+		return deps.TriagePipeline.QueryWithTriage(ctx, triageInput)
+	}
+
+	// Fallback: TriagePipeline not wired. Use v1 pipeline with refined query.
+	slog.Warn("TriagePipeline not wired, triage candidates discarded")
 	return deps.Pipeline.Query(ctx, refinedQuery)
 }

@@ -199,7 +199,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		slog.Warn("LLM client not available, triage and knowledge index features disabled", "error", llmErr)
 	}
 
-	// Sprint 7: Build KnowledgeIndex.
+	// Build KnowledgeIndex.
 	// BC-05: Wraps existing BM25 index (ONE index, not duplicated).
 	// BC-10: Restart-required for cache coherence. No hot-reload.
 	// BC-11: Load from pre-baked JSON if available.
@@ -214,7 +214,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	if llmClient != nil && pipelineResult.searchIndex != nil {
 		// Create search index adapter for triage.
 		triageSearchIdx := &triageSearchAdapter{searchIndex: pipelineResult.searchIndex, catalog: pipelineResult.catalog}
-		// Sprint 5: StubEmbeddingModel triggers BM25 fallback (BC-06).
+		// StubEmbeddingModel triggers BM25 fallback (BC-06).
 		embeddingModel := &triage.StubEmbeddingModel{}
 		triageOrch := triage.NewOrchestrator(llmClient, triageSearchIdx, embeddingModel)
 		triageAdapter = &triageOrchestratorAdapter{orch: triageOrch}
@@ -226,7 +226,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	slackCfg := internalslack.DefaultSlackConfig()
 	slackCfg.BotToken = cfg.SlackBotToken
 
-	// Sprint 6: Construct ConversationManager with LLM summarizer and Slack thread fetcher.
+	// Construct ConversationManager with LLM summarizer and Slack thread fetcher.
 	var convMgr *conversation.Manager
 	convConfig := conversation.DefaultConfig()
 	var summarizer conversation.Summarizer
@@ -243,15 +243,23 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		"cleanup_interval", convConfig.CleanupInterval,
 	)
 
-	// Sprint 6: Construct StreamSender for progressive response rendering.
+	// Construct StreamSender for progressive response rendering.
 	streamSender := streaming.NewSender(cfg.SlackBotToken, "")
 
-	// Create handler with full Sprint 6 dependencies.
+	// Build TriagePipeline adapter (WARNING-03 fix: passes triage candidates
+	// through to Pipeline.QueryWithTriage for BC-07 weighted-mean freshness).
+	var triagePipelineAdapter internalslack.TriageQueryRunner
+	if pipelineResult.pipeline != nil {
+		triagePipelineAdapter = &triagePipelineQueryAdapter{pipeline: pipelineResult.pipeline}
+	}
+
+	// Create handler with full dependencies.
 	slackHandler, ctxStore := internalslack.NewSlackHandlerWithDeps(internalslack.HandlerDeps{
 		Pipeline:        queryRunner,
 		Client:          slackClient,
 		Config:          slackCfg,
 		TriageRunner:    triageAdapter,
+		TriagePipeline:  triagePipelineAdapter,
 		ConversationMgr: convMgr,
 		StreamSender:    streamSender,
 	})
@@ -296,7 +304,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		}
 		return nil
 	})
-	// Sprint 7: Knowledge index health check.
+	// Knowledge index health check.
 	checker.Register("knowledge_index", func(_ context.Context) error {
 		if knowledgeIdx == nil {
 			return fmt.Errorf("knowledge index not built")
@@ -328,7 +336,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	// Stop background goroutines on graceful shutdown.
 	ctxStore.Stop()
 	if convMgr != nil {
-		convMgr.Stop() // Sprint 6: Stop ConversationManager cleanup goroutine.
+		convMgr.Stop()
 	}
 
 	return nil
@@ -769,5 +777,41 @@ func (a *knowledgeLLMAdapter) Complete(ctx context.Context, systemPrompt, userMe
 		SystemPrompt: systemPrompt,
 		UserMessage:  userMessage,
 		MaxTokens:    maxTokens,
+	})
+}
+
+// ---- WARNING-03 fix: TriagePipeline adapter ----
+
+// triagePipelineQueryAdapter adapts *reason.Pipeline to internalslack.TriageQueryRunner.
+// This bridge converts handler-local TriageResultInputData to reason.TriageResultInput
+// so that triage candidates (RelevanceScores, Freshness) reach the assembler for
+// BC-07 weighted-mean freshness computation.
+type triagePipelineQueryAdapter struct {
+	pipeline *reason.Pipeline
+}
+
+func (a *triagePipelineQueryAdapter) QueryWithTriage(ctx context.Context, triageInput *internalslack.TriageResultInputData) (*response.ReasoningResponse, error) {
+	if triageInput == nil {
+		return a.pipeline.Query(ctx, "")
+	}
+
+	// Convert handler-local types to reason/ types.
+	candidates := make([]reason.TriageCandidateInput, len(triageInput.Candidates))
+	for i, c := range triageInput.Candidates {
+		candidates[i] = reason.TriageCandidateInput{
+			QualifiedName:       c.QualifiedName,
+			RelevanceScore:      c.RelevanceScore,
+			EmbeddingSimilarity: c.EmbeddingSimilarity,
+			Freshness:           c.Freshness,
+			Rationale:           c.Rationale,
+			DomainType:          c.DomainType,
+			RelatedDomains:      c.RelatedDomains,
+		}
+	}
+
+	return a.pipeline.QueryWithTriage(ctx, &reason.TriageResultInput{
+		RefinedQuery:   triageInput.RefinedQuery,
+		Candidates:     candidates,
+		ModelCallCount: triageInput.ModelCallCount,
 	})
 }

@@ -189,7 +189,7 @@ func humanReadableName(qualifiedName string) string {
 
 	// Title-case the domain, replacing hyphens with spaces.
 	display := strings.ReplaceAll(domain, "-", " ")
-	display = strings.Title(display) //nolint:staticcheck // strings.Title is fine for simple domain names
+	display = simpleTitleCase(display)
 
 	return fmt.Sprintf("%s (%s)", display, repo)
 }
@@ -205,6 +205,27 @@ func staleDomainList(resp *response.ReasoningResponse) string {
 		names[i] = humanReadableName(sd.QualifiedName)
 	}
 	return strings.Join(names, ", ")
+}
+
+// simpleTitleCase capitalizes the first letter of each word, where word
+// boundaries are spaces and slashes. Replaces deprecated strings.Title
+// for simple ASCII domain names (e.g., "feat/materialization" -> "Feat/Materialization").
+func simpleTitleCase(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+	capitalizeNext := true
+	for _, r := range s {
+		if r == ' ' || r == '/' {
+			b.WriteRune(r)
+			capitalizeNext = true
+		} else if capitalizeNext {
+			b.WriteString(strings.ToUpper(string(r)))
+			capitalizeNext = false
+		} else {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
 }
 
 // RenderRateLimited returns blocks for a rate-limited response (TD-03).
