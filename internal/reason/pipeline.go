@@ -340,6 +340,12 @@ type TriageResultInput struct {
 	RefinedQuery   string
 	Candidates     []TriageCandidateInput
 	ModelCallCount int
+
+	// ConversationHistory holds recent conversation turns for multi-turn context.
+	// WS-2: When non-empty, these turns are injected into the system prompt as a
+	// CONVERSATION HISTORY section before source material. The handler populates
+	// this from ConversationManager's thread history.
+	ConversationHistory []reasoncontext.ConversationTurn
 }
 
 // QueryWithTriage runs the reasoning pipeline using pre-computed triage results.
@@ -417,8 +423,8 @@ func (p *Pipeline) QueryWithTriage(ctx context.Context, triageInput *TriageResul
 		}, nil
 	}
 
-	// Assemble context window using triage candidates.
-	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org)
+	// WS-2: Assemble context window using triage candidates and conversation history.
+	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org, triageInput.ConversationHistory)
 
 	// Build intent summary from triage.
 	intentSummary := response.IntentSummary{
@@ -502,8 +508,8 @@ func (p *Pipeline) QueryStream(ctx context.Context, triageInput *TriageResultInp
 		}, nil
 	}
 
-	// Assemble context window.
-	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org)
+	// WS-2: Assemble context window with conversation history.
+	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org, triageInput.ConversationHistory)
 
 	intentSummary := response.IntentSummary{
 		Tier:       "OBSERVE",

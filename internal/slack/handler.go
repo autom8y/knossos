@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	reasoncontext "github.com/autom8y/knossos/internal/reason/context"
 	"github.com/autom8y/knossos/internal/reason/response"
 	"github.com/autom8y/knossos/internal/serve/webhook"
 	"github.com/autom8y/knossos/internal/slack/conversation"
@@ -221,6 +222,11 @@ type TriageResultInputData struct {
 	RefinedQuery   string
 	Candidates     []TriageCandidateData
 	ModelCallCount int
+
+	// ConversationHistory holds recent conversation turns for multi-turn synthesis.
+	// WS-2: Populated from ConversationManager's thread history. Passed through
+	// to the reasoning pipeline which injects it into the system prompt.
+	ConversationHistory []reasoncontext.ConversationTurn
 }
 
 // TriageRunner abstracts the triage orchestrator for testability.
@@ -545,6 +551,7 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 
 		// Get conversation history for multi-turn context.
 		var threadHistory []TriageThreadMessage
+		var conversationTurns []reasoncontext.ConversationTurn
 		if deps.ConversationMgr != nil {
 			ctx := context.Background()
 			history := deps.ConversationMgr.GetThreadHistory(ctx, threadTS)
@@ -552,10 +559,13 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 				cmResult = "hit"
 				// BC-04: Convert conversation.ThreadMessage to handler-local type.
 				threadHistory = convertThreadHistory(history)
+				// WS-2: Convert to ConversationTurn for synthesis prompt injection.
+				conversationTurns = convertToConversationTurns(history)
 				slog.Info("conversation history retrieved",
 					"thread_ts", threadTS,
 					"total_messages", history.TotalMessageCount,
 					"recent_messages", len(history.RecentMessages),
+					"conversation_turns", len(conversationTurns),
 					"has_summary", history.Summary != "",
 				)
 			} else {
@@ -568,7 +578,7 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 			deps.Metrics.RecordPrePipelineLatency(cmResult, time.Since(prePipelineStart))
 		}
 
-		processMessage(msg.Channel, threadTS, msg.Text, deps, threadHistory)
+		processMessage(msg.Channel, threadTS, msg.Text, deps, threadHistory, conversationTurns)
 	}()
 }
 
@@ -590,9 +600,29 @@ func convertThreadHistory(history *conversation.ThreadHistory) []TriageThreadMes
 	return messages
 }
 
+// convertToConversationTurns converts conversation.ThreadHistory to ConversationTurn
+// for injection into the synthesis system prompt.
+// WS-2: Uses the reason/context.ConversationTurn type (consumer-side definition).
+// Default: 3 user turns (windowed by buildHistory's user-turn algorithm).
+func convertToConversationTurns(history *conversation.ThreadHistory) []reasoncontext.ConversationTurn {
+	if history == nil {
+		return nil
+	}
+
+	var turns []reasoncontext.ConversationTurn
+	for _, m := range history.RecentMessages {
+		turns = append(turns, reasoncontext.ConversationTurn{
+			Role:    m.Role,
+			Content: m.Content,
+		})
+	}
+	return turns
+}
+
 // processMessage runs the reasoning pipeline and posts the response.
 // Runs in a goroutine -- must not reference the http.ResponseWriter.
-func processMessage(channelID, threadTS, question string, deps HandlerDeps, threadHistory []TriageThreadMessage) {
+// WS-2: conversationTurns carries recent thread turns for synthesis prompt injection.
+func processMessage(channelID, threadTS, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn) {
 	client := deps.Client
 
 	// Set "thinking" status.
@@ -611,8 +641,9 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 	var err error
 
 	// Sprint 5/6: Wire triage with thread history into message handling.
+	// WS-2: Pass conversation turns for synthesis prompt injection.
 	if deps.TriageRunner != nil {
-		resp, err = processWithTriage(ctx, question, deps, threadHistory)
+		resp, err = processWithTriage(ctx, question, deps, threadHistory, conversationTurns)
 	} else {
 		resp, err = deps.Pipeline.Query(ctx, question)
 	}
@@ -681,7 +712,8 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 // through to the assembler for BC-07 weighted-mean freshness computation.
 // Falls back to v1 pipeline (Query) when triage returns nil, errors, or
 // TriagePipeline is not wired.
-func processWithTriage(ctx context.Context, question string, deps HandlerDeps, threadHistory []TriageThreadMessage) (*response.ReasoningResponse, error) {
+// WS-2: conversationTurns is forwarded to the pipeline for synthesis prompt injection.
+func processWithTriage(ctx context.Context, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn) (*response.ReasoningResponse, error) {
 	// Run triage (Stages 0-3) with thread history for multi-turn context.
 	triageStart := time.Now()
 	triageResult, err := deps.TriageRunner.Assess(ctx, question, threadHistory)
@@ -724,9 +756,10 @@ func processWithTriage(ctx context.Context, question string, deps HandlerDeps, t
 	// back to position-weighted chain computation.
 	if deps.TriagePipeline != nil {
 		triageInput := &TriageResultInputData{
-			RefinedQuery:   refinedQuery,
-			Candidates:     triageResult.Candidates,
-			ModelCallCount: triageResult.ModelCallCount,
+			RefinedQuery:        refinedQuery,
+			Candidates:          triageResult.Candidates,
+			ModelCallCount:      triageResult.ModelCallCount,
+			ConversationHistory: conversationTurns, // WS-2: forward conversation turns to pipeline.
 		}
 		return deps.TriagePipeline.QueryWithTriage(ctx, triageInput)
 	}

@@ -451,6 +451,157 @@ func TestDeployGap_MetricsTrackDeployGap(t *testing.T) {
 	assert.True(t, hasTTLExpired, "metrics must track ttl_expired miss reason")
 }
 
+// ---- WS-2: User-turn windowing tests ----
+
+func TestBuildHistory_UserTurnWindowing_PreservesPairs(t *testing.T) {
+	// WS-2 (Gap B2): User-turn windowing must keep user+assistant pairs intact.
+	// With MaxRecentMessages=2 (user-turn limit), storing 3 user-assistant pairs
+	// should return the last 2 complete pairs.
+	cfg := testConfig()
+	cfg.MaxRecentMessages = 2 // 2 user turns.
+	mgr := NewManager(cfg, nil, nil)
+	defer mgr.Stop()
+
+	ctx := context.Background()
+
+	// Store 3 user-assistant pairs.
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "Question 1"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", "Answer 1"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "Question 2"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", "Answer 2"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "Question 3"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", "Answer 3"))
+
+	history := mgr.GetThreadHistory(ctx, "thread-1")
+	require.NotNil(t, history)
+	assert.Equal(t, 6, history.TotalMessageCount)
+
+	// Should keep last 2 user turns and their paired assistant responses.
+	// That means: Q2, A2, Q3, A3 (4 messages).
+	require.Len(t, history.RecentMessages, 4,
+		"WS-2: 2-user-turn window should return 4 messages (2 pairs)")
+	assert.Equal(t, "user", history.RecentMessages[0].Role)
+	assert.Equal(t, "Question 2", history.RecentMessages[0].Content)
+	assert.Equal(t, "assistant", history.RecentMessages[1].Role)
+	assert.Equal(t, "Answer 2", history.RecentMessages[1].Content)
+	assert.Equal(t, "user", history.RecentMessages[2].Role)
+	assert.Equal(t, "Question 3", history.RecentMessages[2].Content)
+	assert.Equal(t, "assistant", history.RecentMessages[3].Role)
+	assert.Equal(t, "Answer 3", history.RecentMessages[3].Content)
+}
+
+func TestBuildHistory_UserTurnWindowing_UnpairedLastMessage(t *testing.T) {
+	// When the last message is a user message without a paired assistant response,
+	// the window should still include it.
+	cfg := testConfig()
+	cfg.MaxRecentMessages = 1 // 1 user turn.
+	mgr := NewManager(cfg, nil, nil)
+	defer mgr.Stop()
+
+	ctx := context.Background()
+
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "Question 1"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", "Answer 1"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "Question 2"))
+	// No assistant response yet for Question 2.
+
+	history := mgr.GetThreadHistory(ctx, "thread-1")
+	require.NotNil(t, history)
+	assert.Equal(t, 3, history.TotalMessageCount)
+
+	// Window of 1 user turn: should return Q2 only (the most recent user turn).
+	require.Len(t, history.RecentMessages, 1,
+		"WS-2: 1-user-turn window with trailing user message should return 1 message")
+	assert.Equal(t, "Question 2", history.RecentMessages[0].Content)
+}
+
+func TestBuildHistory_UserTurnWindowing_AllAssistantThread(t *testing.T) {
+	// Edge case: all-assistant thread (no user messages). Should fall back
+	// to raw message count windowing (minimum-message fallback).
+	cfg := testConfig()
+	cfg.MaxRecentMessages = 2
+	mgr := NewManager(cfg, nil, nil)
+	defer mgr.Stop()
+
+	ctx := context.Background()
+
+	// Store 5 assistant-only messages (unlikely but defensive).
+	for i := 0; i < 5; i++ {
+		mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", fmt.Sprintf("Message %d", i)))
+	}
+
+	history := mgr.GetThreadHistory(ctx, "thread-1")
+	require.NotNil(t, history)
+	assert.Equal(t, 5, history.TotalMessageCount)
+
+	// Fallback: raw message count window (last 2 messages).
+	require.Len(t, history.RecentMessages, 2,
+		"WS-2: all-assistant thread should fall back to raw message count window")
+	assert.Equal(t, "Message 3", history.RecentMessages[0].Content)
+	assert.Equal(t, "Message 4", history.RecentMessages[1].Content)
+}
+
+func TestBuildHistory_UserTurnWindowing_EmptyThread(t *testing.T) {
+	// Empty thread should return nil.
+	cfg := testConfig()
+	mgr := NewManager(cfg, nil, nil)
+	defer mgr.Stop()
+
+	mgr.InitThread("thread-1", "C001")
+
+	history := mgr.GetThreadHistory(context.Background(), "thread-1")
+	assert.Nil(t, history, "WS-2: empty thread should return nil")
+}
+
+func TestBuildHistory_UserTurnWindowing_FewMessages(t *testing.T) {
+	// Fewer messages than the window limit: return all messages.
+	cfg := testConfig()
+	cfg.MaxRecentMessages = 5 // 5 user turns.
+	mgr := NewManager(cfg, nil, nil)
+	defer mgr.Stop()
+
+	ctx := context.Background()
+
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "Question 1"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", "Answer 1"))
+
+	history := mgr.GetThreadHistory(ctx, "thread-1")
+	require.NotNil(t, history)
+	assert.Len(t, history.RecentMessages, 2,
+		"WS-2: fewer messages than limit should return all messages")
+}
+
+func TestBuildHistory_UserTurnWindowing_BoundaryCoherence(t *testing.T) {
+	// The original bug: raw message count windowing could split a user message
+	// from its paired assistant response at the boundary. User-turn windowing
+	// must never do this.
+	cfg := testConfig()
+	cfg.MaxRecentMessages = 2 // 2 user turns.
+	mgr := NewManager(cfg, nil, nil)
+	defer mgr.Stop()
+
+	ctx := context.Background()
+
+	// Store: U1, A1, U2, A2, U3
+	// Raw count window of 2 would return [A2, U3] -- broken pair.
+	// But MaxRecentMessages is now user-turn count, so:
+	// 2 user turns backward = U2, A2, U3 (3 messages).
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "U1"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", "A1"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "U2"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("assistant", "A2"))
+	mgr.StoreMessage(ctx, "thread-1", "", makeMsg("user", "U3"))
+
+	history := mgr.GetThreadHistory(ctx, "thread-1")
+	require.NotNil(t, history)
+
+	// First message in the window must be a user message (not an orphaned assistant).
+	assert.Equal(t, "user", history.RecentMessages[0].Role,
+		"WS-2: window boundary must start at a user message, never an orphaned assistant")
+	assert.Equal(t, "U2", history.RecentMessages[0].Content,
+		"WS-2: window should start at the 2nd-from-last user turn")
+}
+
 func TestDeployGap_StartupTimestamp(t *testing.T) {
 	// The manager records its startup timestamp for deploy-gap detection.
 	// Any thread access before the startup time must be classified as deploy_gap.

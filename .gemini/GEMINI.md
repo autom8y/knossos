@@ -7,15 +7,15 @@ Use the available agents and slash commands. Agents activate automatically when 
 <!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
 ## Quick Start
 
-5-agent workflow (hygiene):
+5-agent workflow (10x-dev):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates code hygiene initiative phases |
-| **code-smeller** | Detects code smells and quality issues across codebase |
-| **architect-enforcer** | Plans refactoring approach and enforces architecture standards |
-| **janitor** | Executes code cleanup and improvements |
-| **audit-lead** | Audits cleanup results and provides quality signoff |
+| **potnia** | Coordinates development lifecycle phases and routes work to specialists |
+| **requirements-analyst** | Gathers requirements and produces PRD artifacts |
+| **architect** | Creates technical design documents and architecture decisions |
+| **principal-engineer** | Implements code according to design specifications |
+| **qa-adversary** | Validates implementation through adversarial testing |
 
 Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
@@ -43,11 +43,11 @@ Agents cannot spawn other agents — only the main thread can dispatch sub-agent
 
 Prompts in `.gemini/agents/`:
 
-- `potnia.md` - Coordinates code hygiene initiative phases
-- `code-smeller.md` - Detects code smells and quality issues across codebase
-- `architect-enforcer.md` - Plans refactoring approach and enforces architecture standards
-- `janitor.md` - Executes code cleanup and improvements
-- `audit-lead.md` - Audits cleanup results and provides quality signoff
+- `potnia.md` - Coordinates development lifecycle phases and routes work to specialists
+- `requirements-analyst.md` - Gathers requirements and produces PRD artifacts
+- `architect.md` - Creates technical design documents and architecture decisions
+- `principal-engineer.md` - Implements code according to design specifications
+- `qa-adversary.md` - Validates implementation through adversarial testing
 
 ### Summonable Heroes
 Operational agents available on demand. Their commands handle the lifecycle:

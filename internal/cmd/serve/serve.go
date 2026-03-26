@@ -949,8 +949,9 @@ func (a *triagePipelineQueryAdapter) QueryWithTriage(ctx context.Context, triage
 	}
 
 	return a.pipeline.QueryWithTriage(ctx, &reason.TriageResultInput{
-		RefinedQuery:   triageInput.RefinedQuery,
-		Candidates:     candidates,
-		ModelCallCount: triageInput.ModelCallCount,
+		RefinedQuery:        triageInput.RefinedQuery,
+		Candidates:          candidates,
+		ModelCallCount:      triageInput.ModelCallCount,
+		ConversationHistory: triageInput.ConversationHistory, // WS-2: forward conversation turns.
 	})
 }

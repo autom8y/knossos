@@ -76,16 +76,20 @@ type candidate struct {
 // diversityBonus: 1.0 for first source from domain, 0.3 for second, 0.0 for third+.
 // Candidates are sorted descending by inclusionScore, then greedily packed until
 // SourceBudgetTokens is exhausted.
+//
+// WS-2: conversationHistory is optional. When provided, it is passed through to
+// RenderSystemPrompt which inserts a CONVERSATION HISTORY section before source material.
 func (a *Assembler) Assemble(
 	results []search.SearchResult,
 	chain *trust.ProvenanceChain,
 	score trust.ConfidenceScore,
 	question string,
 	org string,
+	conversationHistory ...[]ConversationTurn,
 ) *AssembledContext {
 	if len(results) == 0 {
 		// No results: return minimal context with empty sources.
-		systemPrompt := RenderSystemPrompt(org, score.Tier, nil)
+		systemPrompt := RenderSystemPrompt(org, score.Tier, nil, conversationHistory...)
 		budgetMgr := NewBudgetManager(a.config.SourceBudgetTokens)
 		report := budgetMgr.Report()
 		report.SystemPromptTokens = a.counter.Count(systemPrompt)
@@ -185,7 +189,7 @@ func (a *Assembler) Assemble(
 	}
 
 	if len(candidates) == 0 {
-		systemPrompt := RenderSystemPrompt(org, score.Tier, nil)
+		systemPrompt := RenderSystemPrompt(org, score.Tier, nil, conversationHistory...)
 		budgetMgr := NewBudgetManager(a.config.SourceBudgetTokens)
 		report := budgetMgr.Report()
 		report.SystemPromptTokens = a.counter.Count(systemPrompt)
@@ -245,8 +249,8 @@ func (a *Assembler) Assemble(
 		// even after a skip -- a smaller candidate may still fit.
 	}
 
-	// Render system prompt with included sources.
-	systemPrompt := RenderSystemPrompt(org, score.Tier, included)
+	// Render system prompt with included sources and conversation history.
+	systemPrompt := RenderSystemPrompt(org, score.Tier, included, conversationHistory...)
 
 	// Compute final budget report.
 	report := budgetMgr.Report()

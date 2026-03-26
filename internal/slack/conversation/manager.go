@@ -352,6 +352,16 @@ func (m *Manager) waitForResurrection(ctx context.Context, entry *threadEntry, s
 }
 
 // buildHistory constructs a ThreadHistory from a threadEntry.
+//
+// WS-2 (Gap B2): Uses user-turn windowing instead of raw message count windowing.
+// Counting user turns backward ensures each kept user turn retains its paired
+// assistant response at the window boundary. This prevents splitting a user message
+// from its paired assistant response, which breaks conversational coherence.
+//
+// Algorithm: walk backward counting user-role messages. When the count exceeds
+// MaxRecentMessages (used as user-turn limit), slice from the last seen user index.
+// Minimum-message fallback: if the result would be empty (e.g., all-assistant thread),
+// fall back to the last MaxRecentMessages messages.
 func (m *Manager) buildHistory(entry *threadEntry) *ThreadHistory {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -361,10 +371,30 @@ func (m *Manager) buildHistory(entry *threadEntry) *ThreadHistory {
 		return nil
 	}
 
-	// Determine the recent window.
+	// User-turn windowing: walk backward, count user messages.
+	// MaxRecentMessages serves as the user-turn limit.
+	limit := m.config.MaxRecentMessages
 	windowStart := 0
-	if total > m.config.MaxRecentMessages {
-		windowStart = total - m.config.MaxRecentMessages
+
+	userCount := 0
+	lastUserIdx := total
+	for i := total - 1; i >= 0; i-- {
+		if entry.messages[i].Role == "user" {
+			userCount++
+			if userCount > limit {
+				// Exceeded limit: slice from lastUserIdx (the start of the
+				// Nth-from-end user turn, which includes its assistant response).
+				windowStart = lastUserIdx
+				break
+			}
+			lastUserIdx = i
+		}
+	}
+
+	// Minimum-message fallback: if no user messages found (all-assistant thread),
+	// fall back to raw message count windowing to return something useful.
+	if userCount == 0 && total > limit {
+		windowStart = total - limit
 	}
 
 	recent := make([]ThreadMessage, total-windowStart)

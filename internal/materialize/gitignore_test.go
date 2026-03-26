@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -370,4 +371,142 @@ func TestUntrackKnossosFiles_ExcludesOutliers(t *testing.T) {
 	// CLAUDE.md should still be tracked
 	tracked := gitTrackedFiles(t, projectRoot, paths.ClaudeChannel{}.DirName())
 	assert.True(t, tracked[paths.ClaudeChannel{}.DirName()+"/"+paths.ClaudeChannel{}.ContextFile()], "CLAUDE.md should remain tracked")
+}
+
+// --- ensureRootGitignoreChannelEntries tests ---
+
+func TestEnsureRootGitignore_CreatesFileIfMissing(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+
+	written, err := ensureRootGitignoreChannelEntries(dir)
+	require.NoError(t, err)
+	assert.True(t, written)
+
+	content, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	require.NoError(t, err)
+	text := string(content)
+
+	// Markers present
+	assert.Contains(t, text, rootGitignoreStartMarker)
+	assert.Contains(t, text, rootGitignoreEndMarker)
+
+	// All channels present
+	for _, ch := range paths.AllChannels() {
+		assert.Contains(t, text, ch.DirName()+"/")
+	}
+
+	// Root-level generated files present
+	assert.Contains(t, text, ".mcp.json")
+}
+
+func TestEnsureRootGitignore_AppendsToExistingFile(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+
+	// Pre-populate with user content
+	userContent := "# My custom ignores\n*.log\nbuild/\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".gitignore"), []byte(userContent), 0644))
+
+	written, err := ensureRootGitignoreChannelEntries(dir)
+	require.NoError(t, err)
+	assert.True(t, written)
+
+	content, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	require.NoError(t, err)
+	text := string(content)
+
+	// Original user content preserved
+	assert.Contains(t, text, "*.log")
+	assert.Contains(t, text, "build/")
+
+	// Managed region appended
+	assert.Contains(t, text, rootGitignoreStartMarker)
+	assert.Contains(t, text, rootGitignoreEndMarker)
+	assert.Contains(t, text, ".claude/")
+	assert.Contains(t, text, ".gemini/")
+}
+
+func TestEnsureRootGitignore_ReplacesExistingRegion(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+
+	// Pre-populate with an old managed region
+	oldContent := "# User stuff\n*.log\n\n" +
+		rootGitignoreStartMarker + "\n" +
+		".claude/\n" +
+		rootGitignoreEndMarker + "\n" +
+		"\n# More user stuff\nbin/\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".gitignore"), []byte(oldContent), 0644))
+
+	written, err := ensureRootGitignoreChannelEntries(dir)
+	require.NoError(t, err)
+	assert.True(t, written)
+
+	content, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	require.NoError(t, err)
+	text := string(content)
+
+	// User content before and after the region preserved
+	assert.Contains(t, text, "*.log")
+	assert.Contains(t, text, "bin/")
+
+	// Region updated with all channels (not just .claude/)
+	assert.Contains(t, text, ".gemini/")
+	assert.Contains(t, text, ".mcp.json")
+
+	// Only one START and one END marker
+	assert.Equal(t, 1, strings.Count(text, rootGitignoreStartMarker))
+	assert.Equal(t, 1, strings.Count(text, rootGitignoreEndMarker))
+}
+
+func TestEnsureRootGitignore_Idempotent(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+
+	// First call creates
+	written1, err := ensureRootGitignoreChannelEntries(dir)
+	require.NoError(t, err)
+	assert.True(t, written1)
+
+	content1, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	require.NoError(t, err)
+
+	// Second call — no write (identical content)
+	written2, err := ensureRootGitignoreChannelEntries(dir)
+	require.NoError(t, err)
+	assert.False(t, written2, "second call should not write (identical content)")
+
+	content2, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	require.NoError(t, err)
+	assert.Equal(t, string(content1), string(content2))
+}
+
+func TestEnsureRootGitignore_EntriesSorted(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+
+	_, err := ensureRootGitignoreChannelEntries(dir)
+	require.NoError(t, err)
+
+	content, err := os.ReadFile(filepath.Join(dir, ".gitignore"))
+	require.NoError(t, err)
+	text := string(content)
+
+	// Extract entries between markers (skip comment lines)
+	startIdx := strings.Index(text, rootGitignoreStartMarker)
+	endIdx := strings.Index(text, rootGitignoreEndMarker)
+	require.Greater(t, startIdx, -1)
+	require.Greater(t, endIdx, startIdx)
+
+	region := text[startIdx+len(rootGitignoreStartMarker) : endIdx]
+	var entries []string
+	for _, line := range strings.Split(region, "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" && !strings.HasPrefix(line, "#") {
+			entries = append(entries, line)
+		}
+	}
+
+	assert.True(t, sort.StringsAreSorted(entries), "entries should be sorted: %v", entries)
 }

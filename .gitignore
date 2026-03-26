@@ -1,15 +1,18 @@
 # Compiled binaries
 ari
 
-# Knossos-managed runtime directory
-# Canonical sources: knossos (ecosystem), rites/*/ (team definitions)
-# .claude/ is regenerated via knossos-sync and rite swap
-#
-# WORKTREE NOTE: .claude/, .sos/, and .knossos/ are gitignored and absent in
-# linked worktrees created via `git worktree add` or CC EnterWorktree. Run
+# KNOSSOS:START channel-ignores
+# Auto-managed by ari sync — channel directories are regenerated on every sync.
+# Each channel also has a provenance-driven .gitignore for per-file precision.
+.claude/
+.gemini/
+.mcp.json
+# KNOSSOS:END channel-ignores
+
+# WORKTREE NOTE: Channel dirs, .sos/, and .knossos/ are gitignored and absent
+# in linked worktrees created via `git worktree add` or CC EnterWorktree. Run
 # `ari sync` once in the worktree to scaffold all required framework directories
 # and inherit the active rite from the main worktree (see ADR-0029).
-.claude/
 
 # Session state and lifecycle (sessions, locks, cc-map, archive, wip)
 # Tracks .sos/land/ (cross-session synthesis) via negation
@@ -25,10 +28,6 @@ ari
 **/.ledge/*
 !**/.ledge/shelf/
 !**/.ledge/shelf/**
-
-# Agent memory (persistent per-agent learning state, not committed)
-.claude/agent-memory/
-.claude/agent-memory-local/
 
 # Knossos internal state (ephemeral, not tracked — any depth)
 **/.knossos/

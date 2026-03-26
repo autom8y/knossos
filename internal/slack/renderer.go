@@ -7,6 +7,7 @@ import (
 	slackapi "github.com/slack-go/slack"
 
 	"github.com/autom8y/knossos/internal/reason/response"
+	"github.com/autom8y/knossos/internal/slack/format"
 	"github.com/autom8y/knossos/internal/trust"
 )
 
@@ -222,49 +223,28 @@ func simpleTitleCase(s string) string {
 	return b.String()
 }
 
-// splitAnswerBlocks splits a long answer into multiple Slack section blocks.
-// Slack section block text has a 3000 character limit. This splits at paragraph
-// boundaries (double newline) to keep blocks readable.
+// splitAnswerBlocks converts a GFM answer to Slack mrkdwn and splits it into
+// multiple section blocks. Slack section block text has a 3000 character limit.
 func splitAnswerBlocks(answer string) []slackapi.Block {
-	const maxLen = 2900 // Leave margin below 3000 for safety
+	const maxLen = 2900
 
-	if len(answer) <= maxLen {
-		return []slackapi.Block{
-			slackapi.NewSectionBlock(
-				slackapi.NewTextBlockObject(slackapi.MarkdownType, answer, false, false),
-				nil, nil,
-			),
+	converted := format.Convert(answer)
+	chunks := format.Chunk(converted, maxLen)
+
+	blocks := make([]slackapi.Block, 0, len(chunks))
+	for _, chunk := range chunks {
+		if strings.TrimSpace(chunk) == "" {
+			continue
 		}
-	}
-
-	var blocks []slackapi.Block
-	remaining := answer
-
-	for len(remaining) > 0 {
-		if len(remaining) <= maxLen {
-			blocks = append(blocks, slackapi.NewSectionBlock(
-				slackapi.NewTextBlockObject(slackapi.MarkdownType, remaining, false, false),
-				nil, nil,
-			))
-			break
-		}
-
-		// Find a paragraph break within the limit.
-		cutPoint := strings.LastIndex(remaining[:maxLen], "\n\n")
-		if cutPoint <= 0 {
-			// No paragraph break — try a single newline.
-			cutPoint = strings.LastIndex(remaining[:maxLen], "\n")
-		}
-		if cutPoint <= 0 {
-			// No newline at all — hard cut.
-			cutPoint = maxLen
-		}
-
-		chunk := remaining[:cutPoint]
-		remaining = strings.TrimLeft(remaining[cutPoint:], "\n")
-
 		blocks = append(blocks, slackapi.NewSectionBlock(
 			slackapi.NewTextBlockObject(slackapi.MarkdownType, chunk, false, false),
+			nil, nil,
+		))
+	}
+
+	if len(blocks) == 0 {
+		blocks = append(blocks, slackapi.NewSectionBlock(
+			slackapi.NewTextBlockObject(slackapi.MarkdownType, answer, false, false),
 			nil, nil,
 		))
 	}

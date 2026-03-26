@@ -7,9 +7,21 @@ import (
 	"github.com/autom8y/knossos/internal/trust"
 )
 
+// ConversationTurn represents a single turn in a multi-turn conversation.
+// Defined in reason/context/ (consumer side). The producer side (slack/) creates
+// instances of this type. This direction is safe: slack/ imports reason/, never reverse.
+type ConversationTurn struct {
+	Role    string // "user" or "assistant"
+	Content string
+}
+
 // RenderSystemPrompt assembles the complete system prompt from components.
-// Concatenates: identity section + tier behavior section + few-shot examples + source material section.
-func RenderSystemPrompt(org string, tier trust.ConfidenceTier, sources []SourceMaterial) string {
+// Concatenates: identity section + tier behavior section + conversation history (optional) + source material section.
+//
+// WS-2: When conversationHistory is non-empty, a CONVERSATION HISTORY section is
+// rendered BEFORE the source material section so Claude has conversational context.
+// Conversation history is ADDITIONAL context -- it does NOT reduce the 8K source material budget.
+func RenderSystemPrompt(org string, tier trust.ConfidenceTier, sources []SourceMaterial, conversationHistory ...[]ConversationTurn) string {
 	var b strings.Builder
 
 	// Identity section
@@ -20,6 +32,14 @@ func RenderSystemPrompt(org string, tier trust.ConfidenceTier, sources []SourceM
 	b.WriteString(renderTierBehavior(tier))
 	b.WriteString("\n\n")
 
+	// WS-2: Conversation history section (before source material).
+	// Variadic parameter preserves backward compatibility: existing callers
+	// that omit the parameter produce identical output.
+	if len(conversationHistory) > 0 && len(conversationHistory[0]) > 0 {
+		b.WriteString(renderConversationHistory(conversationHistory[0]))
+		b.WriteString("\n\n")
+	}
+
 	// Source material section.
 	// BC-14: When no sources are available, instruct Sonnet to acknowledge the gap
 	// rather than hallucinate. This is a required implementation branch.
@@ -27,6 +47,47 @@ func RenderSystemPrompt(org string, tier trust.ConfidenceTier, sources []SourceM
 		b.WriteString(renderSourceMaterial(sources))
 	} else {
 		b.WriteString(renderNoSourcesGapAdmission())
+	}
+
+	return b.String()
+}
+
+// renderConversationHistory formats conversation turns for inclusion in the system prompt.
+// WS-2: Each turn is rendered as [Role]: Content for clear delineation.
+//
+// Token footprint measurement (WS-2, Change 4):
+// Using ~4 chars/token approximation for English text:
+//
+//   Section overhead (header + instructions): ~140 chars = ~35 tokens
+//   Per-turn overhead ([Role]: wrapper + newlines): ~16 chars = ~4 tokens
+//
+//   1-turn history (short user question): ~50 chars content = ~50 tokens total
+//   3-turn history (3 user + 3 assistant, typical Q&A):
+//     ~100 chars avg user question + ~400 chars avg assistant answer = ~500 chars/pair
+//     3 pairs = 1,500 chars + overhead = ~415 tokens
+//   5-turn history (5 pairs, verbose answers):
+//     5 pairs x 600 chars avg = 3,000 chars + overhead = ~785 tokens
+//
+// Worst case with verbose 5-turn answers (~800 chars each):
+//   5 pairs x 900 chars = 4,500 chars + overhead = ~1,160 tokens
+//
+// This is ADDITIONAL context that does NOT reduce the 8K source material budget.
+// If conversation history crowds out retrieval quality, consider adding a
+// configurable history token budget (e.g., max 2,000 tokens for conversation history).
+func renderConversationHistory(turns []ConversationTurn) string {
+	var b strings.Builder
+	b.WriteString("--- CONVERSATION HISTORY ---\n\n")
+	b.WriteString("The following is the recent conversation in this thread. Use it to understand\n")
+	b.WriteString("follow-up questions in context and maintain conversational continuity.\n\n")
+
+	for _, turn := range turns {
+		role := turn.Role
+		if role == "user" {
+			role = "User"
+		} else if role == "assistant" {
+			role = "Assistant"
+		}
+		b.WriteString(fmt.Sprintf("[%s]: %s\n\n", role, turn.Content))
 	}
 
 	return b.String()

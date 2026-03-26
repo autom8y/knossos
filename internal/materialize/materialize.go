@@ -688,6 +688,12 @@ func (m *Materializer) Sync(opts SyncOptions) (*SyncResult, error) {
 		} else {
 			result.RiteResult = riteResult
 		}
+
+		// Ensure root .gitignore has managed entries for all channel directories
+		// and root-level generated files (non-fatal, best-effort).
+		if _, gitErr := ensureRootGitignoreChannelEntries(m.resolver.ProjectRoot()); gitErr != nil {
+			slog.Warn("failed to ensure root .gitignore channel entries", "error", gitErr)
+		}
 	}
 
 	// Phase 1.5: Org scope

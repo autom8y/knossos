@@ -2,13 +2,21 @@ package materialize
 
 import (
 	"log/slog"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/autom8y/knossos/internal/fileutil"
+	"github.com/autom8y/knossos/internal/paths"
 	"github.com/autom8y/knossos/internal/provenance"
+)
+
+// Root .gitignore managed region markers, adapted from inscription marker convention.
+const (
+	rootGitignoreStartMarker = "# KNOSSOS:START channel-ignores"
+	rootGitignoreEndMarker   = "# KNOSSOS:END channel-ignores"
 )
 
 // gitignoreHeader is the comment block at the top of generated channel .gitignore files.
@@ -163,4 +171,85 @@ func shouldExcludeFromGitignore(path string) bool {
 	default:
 		return false
 	}
+}
+
+// ensureRootGitignoreChannelEntries manages a KNOSSOS:START/END region in the
+// project root .gitignore that lists all channel directories and root-level
+// generated files (e.g., .mcp.json). This ensures that every channel directory
+// is blanket-ignored at the root level, preventing tracked-file noise regardless
+// of whether per-channel .gitignore files exist.
+//
+// The managed region uses inscription-style comment markers:
+//
+//	# KNOSSOS:START channel-ignores
+//	.claude/
+//	.gemini/
+//	.mcp.json
+//	# KNOSSOS:END channel-ignores
+//
+// If the region already exists, its contents are replaced. If absent, it is
+// appended after any existing content. Entries outside the managed region are
+// not touched — duplicate entries (e.g., a manual .claude/ line) are harmless.
+//
+// Non-fatal: callers should log warnings on error, not abort the pipeline.
+func ensureRootGitignoreChannelEntries(projectRoot string) (bool, error) {
+	gitignorePath := filepath.Join(projectRoot, ".gitignore")
+
+	// Build the managed region content from all registered channels.
+	channels := paths.AllChannels()
+	var entries []string
+	for _, ch := range channels {
+		entries = append(entries, ch.DirName()+"/")
+	}
+
+	// Root-level generated files that live outside channel dirs.
+	entries = append(entries, ".mcp.json")
+
+	sort.Strings(entries)
+
+	var region strings.Builder
+	region.WriteString(rootGitignoreStartMarker)
+	region.WriteString("\n")
+	region.WriteString("# Auto-managed by ari sync — channel directories are regenerated on every sync.\n")
+	region.WriteString("# Each channel also has a provenance-driven .gitignore for per-file precision.\n")
+	for _, e := range entries {
+		region.WriteString(e)
+		region.WriteString("\n")
+	}
+	region.WriteString(rootGitignoreEndMarker)
+	region.WriteString("\n")
+
+	managedBlock := region.String()
+
+	// Read existing .gitignore (may not exist yet).
+	existing, err := os.ReadFile(gitignorePath)
+	if err != nil && !os.IsNotExist(err) {
+		return false, err
+	}
+	content := string(existing)
+
+	// Replace or append the managed region.
+	startIdx := strings.Index(content, rootGitignoreStartMarker)
+	endIdx := strings.Index(content, rootGitignoreEndMarker)
+
+	var newContent string
+	if startIdx >= 0 && endIdx > startIdx {
+		// Replace existing region (include the end marker line + newline).
+		endOfEndMarker := endIdx + len(rootGitignoreEndMarker)
+		if endOfEndMarker < len(content) && content[endOfEndMarker] == '\n' {
+			endOfEndMarker++
+		}
+		newContent = content[:startIdx] + managedBlock + content[endOfEndMarker:]
+	} else {
+		// Append: ensure trailing newline before the new block.
+		if len(content) > 0 && !strings.HasSuffix(content, "\n") {
+			content += "\n"
+		}
+		if len(content) > 0 && !strings.HasSuffix(content, "\n\n") {
+			content += "\n"
+		}
+		newContent = content + managedBlock
+	}
+
+	return fileutil.WriteIfChanged(gitignorePath, []byte(newContent), 0644)
 }
