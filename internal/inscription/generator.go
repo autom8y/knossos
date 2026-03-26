@@ -533,8 +533,16 @@ func (g *Generator) generateAgentConfigsContent() (string, error) {
 			sb.WriteString(agent.Command)
 			sb.WriteString("`\n")
 		}
-		sb.WriteString("\nSummon: `ari agent summon {name}` then restart CC.\n")
-		sb.WriteString("Dismiss: `ari agent dismiss {name}` then restart CC.")
+		restartText := "restart CC"
+		if g.Context != nil && g.Context.Channel == "gemini" {
+			restartText = "restart Gemini Code Assist"
+		}
+		sb.WriteString("\nSummon: `ari agent summon {name}` then ")
+		sb.WriteString(restartText)
+		sb.WriteString(".\n")
+		sb.WriteString("Dismiss: `ari agent dismiss {name}` then ")
+		sb.WriteString(restartText)
+		sb.WriteString(".")
 	}
 
 	return sb.String(), nil
@@ -652,7 +660,9 @@ func (g *Generator) getDefaultCommandsContent() string {
 | Slash command | User types ` + "`/name`" + ` | ` + "`.gemini/commands/`" + ` |
 | Skill | Loaded into context | ` + "`.gemini/skills/`" + ` |
 | Agent | Activates on description match | ` + "`.gemini/agents/`" + ` |
-| Hook | Auto-fires on lifecycle events | ` + "`.gemini/settings.local.json`" + ` |`
+| Hook | Auto-fires on lifecycle events | ` + "`.gemini/settings.local.json`" + ` |
+
+Agents cannot spawn other agents — only the main thread can dispatch sub-agents.`
 		}
 		return `## CC Primitives
 
@@ -674,7 +684,9 @@ Agents cannot spawn other agents — only the main thread has Task tool access.`
 | Skill | **Legomena** | Loaded into context | ` + "`.gemini/skills/`" + ` |
 | Agent | **Agent** | Activates on description match | ` + "`.gemini/agents/`" + ` |
 | Hook | **Hook** | Auto-fires on lifecycle events | ` + "`.gemini/settings.local.json`" + ` |
-| GEMINI.md | **Inscription** | Always in context | ` + "`knossos/templates/`" + ` |`
+| GEMINI.md | **Inscription** | Always in context | ` + "`knossos/templates/`" + ` |
+
+Agents cannot spawn other agents — only the main thread can dispatch sub-agents.`
 	}
 	return `## CC Primitives
 

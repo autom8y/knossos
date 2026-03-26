@@ -1,3 +1,8 @@
+---
+name: a11y-check
+description: "Run WCAG 2.2 AA accessibility validation on UI code or components — checks semantic HTML, color contrast, keyboard interaction, form patterns, dynamic content, and new 2.2 criteria."
+---
+
 ## Context
 
 Run an accessibility validation check against WCAG 2.2 AA standards. Reviews code or describes a UI for structural accessibility issues across the four testable layers: static analysis, automated audit patterns, keyboard interaction, and authoring-time patterns.

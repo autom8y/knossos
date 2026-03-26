@@ -27,7 +27,7 @@ type: prototyper
 tools: Bash, Glob, Grep, Read, Edit, Write, mcp:browserbase/browserbase_session_create, mcp:browserbase/browserbase_session_close, mcp:browserbase/browserbase_stagehand_navigate, mcp:browserbase/browserbase_stagehand_observe, mcp:browserbase/browserbase_stagehand_act, mcp:browserbase/browserbase_stagehand_extract, mcp:browserbase/browserbase_screenshot
 disallowedTools: Task
 model: sonnet
-color: pink
+color: orange
 maxTurns: 80
 contract:
   must_not:

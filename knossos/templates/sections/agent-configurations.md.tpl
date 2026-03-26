@@ -16,8 +16,8 @@ Operational agents available on demand. Their commands handle the lifecycle:
 - **{{ .Name }}** - {{ .Role }} -> `{{ .Command }}`
 {{- end }}
 
-Summon: `ari agent summon {name}` then restart CC.
-Dismiss: `ari agent dismiss {name}` then restart CC.
+Summon: `ari agent summon {name}` then {{ if eq .Channel "gemini" }}restart Gemini Code Assist{{ else }}restart CC{{ end }}.
+Dismiss: `ari agent dismiss {name}` then {{ if eq .Channel "gemini" }}restart Gemini Code Assist{{ else }}restart CC{{ end }}.
 {{- end }}
 {{- if not .Agents }}{{- if not .SummonableAgents }}
 No agents installed. Run `ari sync --rite=<name>` to install.

@@ -1,3 +1,8 @@
+---
+name: perf-budget
+description: "Check performance budget compliance for a route, page, or component — evaluates Core Web Vitals (LCP < 2.5s, INP < 200ms, CLS < 0.1) and JavaScript budget (365 KB gzipped)."
+---
+
 ## Context
 
 Check performance budget compliance for a route, page, or component. Evaluates against Core Web Vitals thresholds (LCP < 2.5s, INP < 200ms, CLS < 0.1) and JavaScript budget (365 KB gzipped for 3-second TTI on P75 global devices).

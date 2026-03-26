@@ -19,6 +19,7 @@
 | Agent | Activates on description match | `.gemini/agents/` |
 | Hook | Auto-fires on lifecycle events | `.gemini/settings.local.json` |
 {{ end -}}
+Agents cannot spawn other agents — only the main thread can dispatch sub-agents.
 {{- else -}}
 ## CC Primitives
 {{ if .IsKnossosProject }}

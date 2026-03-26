@@ -27,7 +27,7 @@ type: architect
 tools: Read, Glob, Grep, Write, Skill
 disallowedTools: Bash, Edit, Task
 model: sonnet
-color: purple
+color: blue
 maxTurns: 40
 skills: []
 contract:

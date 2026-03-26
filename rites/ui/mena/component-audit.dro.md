@@ -1,3 +1,8 @@
+---
+name: component-audit
+description: "Audit a UI component against design system standards — checks token compliance, tier classification (Primitive/Composite/Pattern), API design, accessibility wiring, and lifecycle status."
+---
+
 ## Context
 
 Audit a component against design system standards. Checks token usage, component tier classification, API design, accessibility wiring, and lifecycle status.

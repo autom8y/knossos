@@ -92,6 +92,16 @@ var expectedForkState = map[string]bool{
 	"security": true, "sre": true, "strategy": true,
 	"arch": true, "slop-chop": true, "clinic": true,
 	"releaser": true, "review": true, "thermia": true,
+
+	// UI rite dromena — dispatchers (INLINE) and one-shot assessments (FORK)
+	"discover":    false, // dispatches Agent("myron") via Task tool
+	"reflect":     false, // main-thread scoring pipeline, no subagent dispatch
+	"naxos":       false, // dispatches Agent("naxos") via Task tool
+	"shape":       false, // dispatches Pythia via Task; explicitly must NOT fork (per anti-patterns)
+	"compose":     false, // dispatches potnia via Task tool
+	"evolve":      false, // dispatches potnia via Task tool
+	"motion-audit": true, // standalone motion assessment — no Task dispatch, isolated report
+	"touchup":     false, // dispatches potnia via Task tool
 }
 
 // Finding is a single lint issue.
@@ -366,6 +376,16 @@ var approvedAgentNames = map[string]string{
 	"triage-nurse":             "functional",
 	"user-researcher":          "functional",
 	"workflow-engineer":        "functional",
+
+	// UI rite specialists
+	"a11y-engineer":          "functional",
+	"component-engineer":     "functional",
+	"design-system-steward":  "functional",
+	"frontend-fanatic":       "functional",
+	"interaction-prototyper": "functional",
+	"motion-architect":       "functional",
+	"rendering-architect":    "functional",
+	"stylist":                "functional",
 }
 
 var archetypeMaxTurns = map[string]int{
@@ -375,6 +395,13 @@ var archetypeMaxTurns = map[string]int{
 	"designer":     150,
 	"engineer":     150,
 	"reviewer":     100,
+	"architect":    150,
+	"builder":      150,
+	"evaluator":    100,
+	"prototyper":   100,
+	"validator":    100,
+	"scout":        80,
+	"meta":         40,
 }
 
 func lintAgents(projectRoot string, report *LintReport) {
@@ -807,6 +834,22 @@ func lintLegomenFile(_, relPath string, data []byte, report *LintReport) {
 		})
 	}
 
+	// MENA-06: mena frontmatter field validation for cross-harness compilation.
+	// Empty name/description fail compilation in secondary harnesses even when
+	// the field key is present. Lower severity than the primary CRIT/HIGH rules.
+	if fm.Name == "" {
+		report.Legomena = append(report.Legomena, Finding{
+			File: relPath, Severity: SevMedium, Rule: "mena-name-missing",
+			Message: "mena 'name' field is empty — required for cross-harness command compilation",
+		})
+	}
+	if fm.Description == "" {
+		report.Legomena = append(report.Legomena, Finding{
+			File: relPath, Severity: SevLow, Rule: "mena-description-missing",
+			Message: "mena 'description' field is empty — required for cross-harness command compilation",
+		})
+	}
+
 	// Triggers keyword check
 	if fm.Description != "" && !strings.Contains(strings.ToLower(fm.Description), "triggers:") {
 		report.Legomena = append(report.Legomena, Finding{
@@ -917,6 +960,9 @@ var skillAtExclusions = map[string]bool{
 	"deprecated":    true, // JSDoc @deprecated
 	"pytest":        true, // Python @pytest.mark
 	"acme":          true, // npm @acme/sdk example
+	"layer":         true, // CSS @layer at-rule
+	"scope":         true, // CSS @scope at-rule
+	"property":      true, // CSS @property at-rule
 }
 
 // checkSkillAtRefs scans body content for @skill-name references and appends findings.
