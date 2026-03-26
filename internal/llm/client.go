@@ -43,7 +43,7 @@ type CompletionRequest struct {
 	// MaxTokens is the maximum response tokens. Must be > 0.
 	MaxTokens int
 
-	// Model is the model identifier (e.g., "claude-haiku-4-5-20250315").
+	// Model is the model identifier (e.g., "claude-haiku-4-5").
 	// When empty, defaults to the client's configured model.
 	Model string
 }
@@ -54,7 +54,7 @@ type ClientConfig struct {
 	APIKey string
 
 	// DefaultModel is the default model for requests that don't specify one.
-	// Default: "claude-haiku-4-5-20250315".
+	// Default: "claude-haiku-4-5".
 	DefaultModel string
 
 	// DefaultMaxTokens is used when CompletionRequest.MaxTokens is 0.
@@ -65,7 +65,7 @@ type ClientConfig struct {
 // DefaultClientConfig returns production defaults for the Haiku client.
 func DefaultClientConfig() ClientConfig {
 	return ClientConfig{
-		DefaultModel:     "claude-haiku-4-5-20250315",
+		DefaultModel:     "claude-haiku-4-5",
 		DefaultMaxTokens: 800,
 	}
 }
