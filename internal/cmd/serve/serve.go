@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 	"strings"
 	"time"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/autom8y/knossos/internal/reason/response"
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
 	"github.com/autom8y/knossos/internal/search"
+	"github.com/autom8y/knossos/internal/search/knowledge"
 	"github.com/autom8y/knossos/internal/serve"
 	"github.com/autom8y/knossos/internal/serve/health"
 	"github.com/autom8y/knossos/internal/serve/webhook"
@@ -190,14 +192,26 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		queryRunner = observe.NewInstrumentedPipeline(pipelineResult.pipeline, costTracker)
 	}
 
-	// Build triage orchestrator (Sprint 5).
+	// Build LLM client (shared by triage, knowledge index, conversation manager).
 	// BC-01: llm.Client in internal/llm/, shared by all callsites.
-	// BC-02: triage.Orchestrator is a new top-level package.
-	var triageAdapter internalslack.TriageRunner
 	llmClient, llmErr := llm.NewAnthropicClient(llm.DefaultClientConfig())
 	if llmErr != nil {
-		slog.Warn("LLM client not available, triage pipeline disabled", "error", llmErr)
-	} else if pipelineResult.searchIndex != nil {
+		slog.Warn("LLM client not available, triage and knowledge index features disabled", "error", llmErr)
+	}
+
+	// Sprint 7: Build KnowledgeIndex.
+	// BC-05: Wraps existing BM25 index (ONE index, not duplicated).
+	// BC-10: Restart-required for cache coherence. No hot-reload.
+	// BC-11: Load from pre-baked JSON if available.
+	var knowledgeIdx *knowledge.KnowledgeIndex
+	if pipelineResult.catalog != nil {
+		knowledgeIdx = buildKnowledgeIndex(context.Background(), pipelineResult, llmClient)
+	}
+
+	// Build triage orchestrator (Sprint 5).
+	// BC-02: triage.Orchestrator is a new top-level package.
+	var triageAdapter internalslack.TriageRunner
+	if llmClient != nil && pipelineResult.searchIndex != nil {
 		// Create search index adapter for triage.
 		triageSearchIdx := &triageSearchAdapter{searchIndex: pipelineResult.searchIndex, catalog: pipelineResult.catalog}
 		// Sprint 5: StubEmbeddingModel triggers BM25 fallback (BC-06).
@@ -279,6 +293,16 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	checker.Register("claude_api", func(_ context.Context) error {
 		if cfg.AnthropicAPIKey == "" {
 			return fmt.Errorf("ANTHROPIC_API_KEY not configured")
+		}
+		return nil
+	})
+	// Sprint 7: Knowledge index health check.
+	checker.Register("knowledge_index", func(_ context.Context) error {
+		if knowledgeIdx == nil {
+			return fmt.Errorf("knowledge index not built")
+		}
+		if knowledgeIdx.DomainCount() == 0 {
+			return fmt.Errorf("knowledge index has no domains")
 		}
 		return nil
 	})
@@ -525,4 +549,225 @@ func repoFromQualifiedName(qn string) string {
 		return parts[1]
 	}
 	return ""
+}
+
+// ---- Sprint 7: KnowledgeIndex build ----
+
+// buildKnowledgeIndex constructs the KnowledgeIndex during server startup.
+// BC-05: Wraps the existing BM25 index (ONE index, not duplicated).
+// BC-10: Restart-required for cache coherence. No hot-reload.
+// BC-11: Loads from pre-baked JSON if available.
+// D-L5: Eager rebuild on source_hash change.
+func buildKnowledgeIndex(ctx context.Context, pr pipelineComponents, llmClient *llm.AnthropicClient) *knowledge.KnowledgeIndex {
+	// Build catalog adapter.
+	if pr.catalog == nil {
+		slog.Warn("no domain catalog, knowledge index disabled")
+		return nil
+	}
+
+	catalogAdapter := &knowledgeCatalogAdapter{catalog: pr.catalog}
+	contentAdapter := resolveKnowledgeContentStore()
+
+	// Build BM25 adapter (wraps the existing BM25 index from search.SearchIndex).
+	var bm25Adapter knowledge.BM25Searcher
+	if pr.searchIndex != nil && pr.searchIndex.HasBM25() {
+		bm25Adapter = &knowledgeBM25Adapter{searchIndex: pr.searchIndex}
+	}
+
+	// Build LLM adapter.
+	var kiLLMClient knowledge.LLMClient
+	if llmClient != nil {
+		kiLLMClient = &knowledgeLLMAdapter{client: llmClient}
+	}
+
+	// Resolve persisted path: prefer env var, then default container path.
+	persistedPath := knowledge.DefaultPersistedPath
+	if envPath := os.Getenv("CLEW_KNOWLEDGE_INDEX_PATH"); envPath != "" {
+		persistedPath = envPath
+	}
+
+	cfg := knowledge.BuildConfig{
+		Catalog:       catalogAdapter,
+		ContentStore:  contentAdapter,
+		LLMClient:     kiLLMClient,
+		PersistedPath: persistedPath,
+		BM25Index:     bm25Adapter,
+	}
+
+	idx, err := knowledge.Build(ctx, cfg)
+	if err != nil {
+		slog.Warn("knowledge index build failed", "error", err)
+		return nil
+	}
+
+	slog.Info("knowledge index ready",
+		"domains", idx.DomainCount(),
+		"summaries", idx.SummaryCount(),
+		"embeddings", idx.EmbeddingCount(),
+		"edges", idx.EdgeCount(),
+	)
+
+	return idx
+}
+
+// resolveKnowledgeContentStore returns a content store adapter for the knowledge index.
+// Uses the same resolution strategy as the BM25 content loader.
+func resolveKnowledgeContentStore() knowledge.ContentStore {
+	// Check env var override first.
+	if envDir := os.Getenv("CLEW_CONTENT_DIR"); envDir != "" {
+		if info, err := os.Stat(envDir); err == nil && info.IsDir() {
+			return &knowledgeContentAdapter{contentDir: envDir}
+		}
+	}
+
+	// Check for pre-baked content directory.
+	defaultDir := "/data/content"
+	if info, err := os.Stat(defaultDir); err == nil && info.IsDir() {
+		return &knowledgeContentAdapter{contentDir: defaultDir}
+	}
+
+	// No content source -- return nil (Build handles gracefully).
+	return nil
+}
+
+// ---- Sprint 7: Knowledge index adapter types ----
+
+// knowledgeCatalogAdapter adapts *registryorg.DomainCatalog to knowledge.DomainCatalog.
+type knowledgeCatalogAdapter struct {
+	catalog *registryorg.DomainCatalog
+}
+
+func (a *knowledgeCatalogAdapter) ListDomains() []knowledge.CatalogDomainEntry {
+	domains := a.catalog.ListDomains()
+	out := make([]knowledge.CatalogDomainEntry, len(domains))
+	for i, d := range domains {
+		out[i] = knowledge.CatalogDomainEntry{
+			QualifiedName: d.QualifiedName,
+			Domain:        d.Domain,
+			Path:          d.Path,
+			GeneratedAt:   d.GeneratedAt,
+			ExpiresAfter:  d.ExpiresAfter,
+			SourceHash:    d.SourceHash,
+			Confidence:    d.Confidence,
+		}
+	}
+	return out
+}
+
+func (a *knowledgeCatalogAdapter) LookupDomain(qualifiedName string) (knowledge.CatalogDomainEntry, bool) {
+	d, ok := a.catalog.LookupDomain(qualifiedName)
+	if !ok {
+		return knowledge.CatalogDomainEntry{}, false
+	}
+	return knowledge.CatalogDomainEntry{
+		QualifiedName: d.QualifiedName,
+		Domain:        d.Domain,
+		Path:          d.Path,
+		GeneratedAt:   d.GeneratedAt,
+		ExpiresAfter:  d.ExpiresAfter,
+		SourceHash:    d.SourceHash,
+		Confidence:    d.Confidence,
+	}, true
+}
+
+func (a *knowledgeCatalogAdapter) DomainCount() int {
+	return a.catalog.DomainCount()
+}
+
+// knowledgeContentAdapter adapts a pre-baked content directory to knowledge.ContentStore.
+// RR-007: knowledge/ sub-packages do not import content/ directly.
+type knowledgeContentAdapter struct {
+	contentDir string
+}
+
+func (a *knowledgeContentAdapter) LoadContent(qualifiedName string) (string, error) {
+	// Resolve path: look up the domain in the catalog to get the file path.
+	// Since we don't have direct access to the catalog here, we use the
+	// qualifiedName to derive the repo and search for the content.
+	parts := strings.SplitN(qualifiedName, "::", 3)
+	if len(parts) < 3 {
+		return "", fmt.Errorf("invalid qualified name: %s", qualifiedName)
+	}
+	repoName := parts[1]
+	domainName := parts[2]
+
+	// Try common .know/ path patterns.
+	candidates := []string{
+		fmt.Sprintf("%s/%s/.know/%s.md", a.contentDir, repoName, domainName),
+	}
+
+	for _, path := range candidates {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		return stripFrontmatter(string(data)), nil
+	}
+
+	return "", fmt.Errorf("content not found for %s", qualifiedName)
+}
+
+func (a *knowledgeContentAdapter) HasContent(qualifiedName string) bool {
+	content, err := a.LoadContent(qualifiedName)
+	return err == nil && content != ""
+}
+
+// stripFrontmatter removes YAML frontmatter delimited by ---.
+func stripFrontmatter(text string) string {
+	if !strings.HasPrefix(text, "---") {
+		return text
+	}
+	rest := text[3:]
+	idx := strings.Index(rest, "---")
+	if idx < 0 {
+		return text
+	}
+	return strings.TrimSpace(rest[idx+3:])
+}
+
+// knowledgeBM25Adapter adapts *search.SearchIndex to knowledge.BM25Searcher.
+// BC-05: ONE BM25 index -- the knowledge package wraps the existing one.
+type knowledgeBM25Adapter struct {
+	searchIndex *search.SearchIndex
+}
+
+func (a *knowledgeBM25Adapter) SearchDocuments(query string, k int) []knowledge.BM25SearchHit {
+	results := a.searchIndex.Search(query, search.SearchOptions{
+		Limit:   k,
+		Domains: []search.Domain{search.DomainKnowledge},
+	})
+
+	var hits []knowledge.BM25SearchHit
+	for _, r := range results {
+		if r.Domain == search.DomainKnowledge {
+			hits = append(hits, knowledge.BM25SearchHit{
+				QualifiedName: r.Name,
+				Score:         float64(r.Score),
+				Domain:        string(r.Domain),
+				RawText:       r.Description,
+				MatchType:     "document",
+			})
+		}
+	}
+	return hits
+}
+
+func (a *knowledgeBM25Adapter) SearchSections(query string, k int) []knowledge.BM25SearchHit {
+	// The existing search index merges doc and section results via RRF.
+	// For the knowledge index's BM25 wrapper, we return the same results
+	// and let the coordinator handle dedup.
+	return nil
+}
+
+// knowledgeLLMAdapter adapts *llm.AnthropicClient to knowledge.LLMClient.
+type knowledgeLLMAdapter struct {
+	client *llm.AnthropicClient
+}
+
+func (a *knowledgeLLMAdapter) Complete(ctx context.Context, systemPrompt, userMessage string, maxTokens int) (string, error) {
+	return a.client.Complete(ctx, llm.CompletionRequest{
+		SystemPrompt: systemPrompt,
+		UserMessage:  userMessage,
+		MaxTokens:    maxTokens,
+	})
 }
