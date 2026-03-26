@@ -40,13 +40,6 @@
           "valueFrom": "arn:aws:secretsmanager:us-east-1:696318035277:secret:clew/anthropic-api-key-pkPelo"
         }
       ],
-      "healthCheck": {
-        "command": ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"],
-        "interval": 10,
-        "timeout": 5,
-        "retries": 3,
-        "startPeriod": 600
-      },
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {

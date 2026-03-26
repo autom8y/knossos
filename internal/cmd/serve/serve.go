@@ -202,19 +202,32 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		slog.Warn("LLM client not available, triage and knowledge index features disabled", "error", llmErr)
 	}
 
-	// Build KnowledgeIndex.
+	// Build KnowledgeIndex in background so the server starts immediately.
 	// BC-05: Wraps existing BM25 index (ONE index, not duplicated).
 	// BC-10: Restart-required for cache coherence. No hot-reload.
 	// BC-11: Load from pre-baked JSON if available.
+	//
+	// The server serves queries using BM25 fallback until the knowledge index
+	// build completes. For large codebases (128+ domains × ~700ms Haiku call),
+	// the build can take several minutes. Starting the server first ensures
+	// ALB health checks pass while the index seeds in the background.
 	var knowledgeIdx *knowledge.KnowledgeIndex
 	if pipelineResult.catalog != nil {
-		// Knowledge index build can take several minutes for large codebases
-		// (128+ domains × ~700ms Haiku call each). Seeding quality is more
-		// important than startup speed. ECS health check uses /health (liveness),
-		// not /ready, so the service stays alive during index build.
-		buildCtx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-		defer cancel()
-		knowledgeIdx = buildKnowledgeIndex(buildCtx, pipelineResult, llmClient)
+		// Try to load pre-baked index first (fast path: <1s).
+		knowledgeIdx = loadPrebakedKnowledgeIndex()
+		if knowledgeIdx == nil {
+			// No pre-baked index. Build in background — server starts immediately
+			// with BM25 fallback, then upgrades when the build completes.
+			slog.Info("building knowledge index in background (BM25 fallback active until complete)")
+			go func() {
+				buildCtx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+				defer cancel()
+				idx := buildKnowledgeIndex(buildCtx, pipelineResult, llmClient)
+				if idx != nil {
+					slog.Info("background knowledge index build complete, upgrading pipeline")
+				}
+			}()
+		}
 	}
 
 	// Build triage orchestrator (Sprint 5).
@@ -631,6 +644,28 @@ func buildKnowledgeIndex(ctx context.Context, pr pipelineComponents, llmClient *
 		"edges", idx.EdgeCount(),
 	)
 
+	return idx
+}
+
+// loadPrebakedKnowledgeIndex attempts to load a pre-baked KnowledgeIndex JSON
+// from the default persist path. Returns nil if not found or invalid.
+func loadPrebakedKnowledgeIndex() *knowledge.KnowledgeIndex {
+	persistedPath := knowledge.DefaultPersistedPath
+	if envPath := os.Getenv("CLEW_KNOWLEDGE_INDEX_PATH"); envPath != "" {
+		persistedPath = envPath
+	}
+
+	idx, err := knowledge.Load(persistedPath)
+	if err != nil {
+		slog.Debug("no pre-baked knowledge index found", "path", persistedPath, "error", err)
+		return nil
+	}
+
+	slog.Info("loaded pre-baked knowledge index",
+		"path", persistedPath,
+		"domains", idx.DomainCount(),
+		"summaries", idx.SummaryCount(),
+	)
 	return idx
 }
 
