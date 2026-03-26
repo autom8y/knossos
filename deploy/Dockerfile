@@ -8,9 +8,16 @@
 # deploy/registry/domains.yaml, and rebuild. Future iterations will add
 # webhook-driven incremental updates via HandlePushEvent.
 #
+# Content strategy: .know/ files are pre-baked from deploy/content/{repo}/.know/.
+# This provides the BM25 index with actual domain content for search and synthesis.
+# To refresh, run `deploy/scripts/collect-content.sh` which clones repos and
+# copies their .know/ directories into deploy/content/. The ContentStore reads
+# from /data/content/ at runtime.
+#
 # XDG path layout (distroless nonroot, HOME=/home/nonroot):
 #   /home/nonroot/.local/share/knossos/registry/autom8y/domains.yaml
 #   /home/nonroot/.local/share/knossos/orgs/autom8y/org.yaml
+#   /data/content/{repo}/.know/*.md
 
 # ---------- Builder ----------
 FROM golang:1.25 AS builder
@@ -43,6 +50,13 @@ COPY --chown=nonroot:nonroot \
 COPY --chown=nonroot:nonroot \
     deploy/registry/org.yaml \
     /home/nonroot/.local/share/knossos/orgs/autom8y/org.yaml
+
+# Pre-bake .know/ content for BM25 indexing and context assembly (C-1 fix).
+# The ContentStore reads from /data/content/{repo}/.know/ at runtime.
+# Directory structure: deploy/content/{repoName}/.know/*.md
+COPY --chown=nonroot:nonroot \
+    deploy/content/ \
+    /data/content/
 
 EXPOSE 8080
 

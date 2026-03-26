@@ -1,11 +1,11 @@
 ---
 domain: release/platform-profile
-generated_at: "2026-03-23T20:50:00Z"
+generated_at: "2026-03-25T10:20:00Z"
 expires_after: "30d"
 source_scope:
   - "./.know/release/"
 generator: cartographer
-source_hash: "d0e9fec9"
+source_hash: "e891116a"
 confidence: 0.85
 format_version: "1.0"
 update_mode: "full"
@@ -73,9 +73,19 @@ Terminal stage: e2e-distribution.yml (has health check)
 | validate-orchestrators.yml | pull_request, push, workflow_dispatch | ci |
 | verify-doctrine.yml | push, pull_request, workflow_dispatch | ci |
 
+## CI Workflows
+
+| Workflow | Triggers | Classification |
+|----------|----------|---------------|
+| ariadne-tests.yml | pull_request, push, workflow_dispatch | ci |
+| release.yml | push_tags_v_star | build |
+| e2e-distribution.yml | release_published, workflow_dispatch | deploy |
+| validate-orchestrators.yml | pull_request, push, workflow_dispatch | ci |
+| verify-doctrine.yml | push, pull_request, workflow_dispatch | ci |
+| deploy-clew.yml | push (main), workflow_dispatch | deployment |
+
 ## Known Issues
 
-- None. Full pipeline chain verified green as of v0.15.4 (2026-03-23).
-- 18 broken documentation links identified (missing ADRs/guides) — demoted to warnings.
-- golangci-lint upgraded to v2 configuration.
-- scripts/docs/verify-doctrine.sh restored and fixed.
+- deploy-clew.yml: RED — AWS OIDC role ARN has empty account ID (`arn:aws:iam:::role/clew-github-actions`). Requires infra fix.
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking).
+- Go minimum bumped to 1.25 (slack-go requirement) as of v0.16.0.

@@ -1,10 +1,10 @@
 ---
 domain: release/history
-generated_at: "2026-03-23T13:22:30Z"
+generated_at: "2026-03-25T10:20:00Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
-source_hash: "78abb186"
+source_hash: "e891116a"
 confidence: 0.90
 format_version: "1.0"
 update_mode: "full"
@@ -386,3 +386,31 @@ max_incremental_cycles: 0
 - Fix-forward chain: v0.15.1 (CI fail) -> v0.15.2 (CI fail) -> v0.15.3 (CI fail) -> v0.15.4 (PASS)
 - Remediated: .golangci.yml v2 upgrade, 50+ errcheck fixes in tests/benchmarks, restored verify-doctrine.sh, fixed bash subshell/arithmetic bugs.
 - 18 broken documentation links identified (missing ADRs/guides) — demoted to warnings to unblock release.
+
+### v0.16.0 — 2026-03-25
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-25 |
+| Version | v0.15.4 -> v0.16.0 (minor) |
+| Commits | 2 (1 feat, 1 chore) |
+| Complexity | PATCH (user-invoked), semver MINOR |
+| Tag SHA | f99aa2c1c5010f704675599d3f0247fa7cdb7789 |
+| Commit SHA | e891116a |
+| release.yml | GREEN (147s, run 23535913368) |
+| e2e-distribution.yml | GREEN (46s, run 23536006631) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (v0.16.0, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~4 min (execution) + ~3 min (monitoring) |
+
+**Notes:**
+- Twenty-ninth consecutive PASS verdict (v0.3.2 -> ... -> v0.15.4 -> v0.16.0)
+- Total chain: ~193s (release.yml 147s + e2e 46s; slightly above historical baseline ~150-190s)
+- macOS E2E: GREEN (20s), Linux E2E: GREEN (45s)
+- Dispatch latency: 1s (release published → e2e triggered)
+- Homebrew tap propagation: 1s
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking)
+- Ancillary: deploy-clew.yml RED — AWS OIDC role ARN missing account ID (first deploy attempt, infra config gap)
+- Headline: Clew MVP — organizational intelligence Slack bot (`ari serve`, `ari registry`), 16 new internal packages, 3 new external deps (anthropic-sdk-go, slack-go, opentelemetry), Go 1.25 minimum, Dockerfile + ECS task definition, 380+ tests across 76 packages
