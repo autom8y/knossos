@@ -1,11 +1,11 @@
 ---
 domain: release/platform-profile
-generated_at: "2026-03-25T10:20:00Z"
+generated_at: "2026-03-26T11:25:00Z"
 expires_after: "30d"
 source_scope:
   - "./.know/release/"
 generator: cartographer
-source_hash: "e891116a"
+source_hash: "b053fe92"
 confidence: 0.85
 format_version: "1.0"
 update_mode: "full"

@@ -1,6 +1,6 @@
 ---
 domain: release/history
-generated_at: "2026-03-25T10:20:00Z"
+generated_at: "2026-03-26T11:25:00Z"
 source_scope:
   - "./.know/release/"
 generator: pipeline-monitor
@@ -414,3 +414,33 @@ max_incremental_cycles: 0
 - 4 Dependabot vulnerability alerts on main (informational, non-blocking)
 - Ancillary: deploy-clew.yml RED — AWS OIDC role ARN missing account ID (first deploy attempt, infra config gap)
 - Headline: Clew MVP — organizational intelligence Slack bot (`ari serve`, `ari registry`), 16 new internal packages, 3 new external deps (anthropic-sdk-go, slack-go, opentelemetry), Go 1.25 minimum, Dockerfile + ECS task definition, 380+ tests across 76 packages
+
+### v0.17.0 — 2026-03-26
+
+| Field | Value |
+|-------|-------|
+| Date | 2026-03-26 |
+| Version | v0.16.0 -> v0.17.0 (minor) |
+| Commits | 26 (since v0.16.0; multiple feat) |
+| Complexity | PATCH (user-invoked), semver-escalated to MINOR |
+| Tag SHA | b053fe92 |
+| Commit SHA | b053fe92 |
+| release.yml | GREEN (143s, run 23591640958) |
+| e2e-distribution.yml | GREEN (48s, run 23591734762) |
+| Assets | 5/5 (4 platform binaries + checksums.txt) |
+| Homebrew tap | Updated (a99c4625, 1s dispatch lag) |
+| Verdict | PASS |
+| Duration | ~5 min (execution + fix) + ~5 min (monitoring) |
+
+**Notes:**
+- Thirtieth consecutive PASS verdict (v0.3.2 -> ... -> v0.16.0 -> v0.17.0)
+- Total chain: ~195s (release.yml 143s + e2e 48s; within historical baseline ~150-211s)
+- macOS E2E: GREEN, Linux E2E: GREEN
+- Dispatch latency: 2s (release published → e2e triggered)
+- Homebrew tap propagation: 1s
+- Cached release knowledge skipped cartographer, dependency-resolver, and release-planner entirely
+- Fix-forward: agent JSON schema missing `scout` type (Go validAgentTypes had it, schema did not) — caught by TestAllUserAgentSpecs
+- 4 Dependabot vulnerability alerts on main (informational, non-blocking); 1 critical alert flagged by GitHub push
+- Ancillary: deploy-clew.yml RED — AWS OIDC role ARN missing account ID (pre-existing, non-blocking)
+- Ancillary: ariadne-tests.yml informational — golangci-lint built with go1.24 refusing go1.25 project (pre-existing)
+- Headline: Summonable Heroes (WS-1/WS-5: summon/dismiss/roster, Myron discovery), Gemini dromena (10x/architect/build/discover), Docker .know/ pre-bake for BM25, GitHub MCP swap, clew production hardening, literature reviews (GraphRAG, MoE)
