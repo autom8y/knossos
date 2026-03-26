@@ -880,6 +880,195 @@ func TestSyncUserResource_FallsBackToEmbedded(t *testing.T) {
 	}
 }
 
+// --- Tests for isSummonableAgent ---
+
+func TestIsSummonableAgent_Summonable(t *testing.T) {
+	t.Parallel()
+	content := []byte(`---
+name: myron
+description: "Feature discovery agent"
+tier: summonable
+tools: Read, Bash
+---
+
+# Myron
+`)
+	if !isSummonableAgent(content) {
+		t.Error("isSummonableAgent() = false, want true for tier: summonable")
+	}
+}
+
+func TestIsSummonableAgent_Standing(t *testing.T) {
+	t.Parallel()
+	content := []byte(`---
+name: potnia
+description: "Coordinates phases"
+tier: standing
+tools: Read
+---
+
+# Potnia
+`)
+	if isSummonableAgent(content) {
+		t.Error("isSummonableAgent() = true, want false for tier: standing")
+	}
+}
+
+func TestIsSummonableAgent_NoTier(t *testing.T) {
+	t.Parallel()
+	content := []byte(`---
+name: regular-agent
+description: "Agent without tier field"
+tools: Read, Bash
+---
+
+# Regular Agent
+`)
+	if isSummonableAgent(content) {
+		t.Error("isSummonableAgent() = true, want false for absent tier")
+	}
+}
+
+func TestIsSummonableAgent_InvalidContent(t *testing.T) {
+	t.Parallel()
+	// No frontmatter delimiters — Parse will fail
+	content := []byte(`not valid frontmatter at all`)
+	if isSummonableAgent(content) {
+		t.Error("isSummonableAgent() = true, want false for invalid content")
+	}
+}
+
+func TestIsSummonableAgent_EmptyContent(t *testing.T) {
+	t.Parallel()
+	if isSummonableAgent([]byte{}) {
+		t.Error("isSummonableAgent() = true, want false for empty content")
+	}
+}
+
+// --- Tests for summonable exclusion in sync pipeline ---
+
+func TestSyncUserResource_SkipsSummonableAgent(t *testing.T) {
+	t.Parallel()
+	summonableContent := `---
+name: myron
+description: "Feature discovery agent"
+tier: summonable
+tools: Read, Bash, Glob, Grep
+---
+
+# Myron
+`
+	knossosHome, userChannelDir := setupAgentSync(t, map[string]string{
+		"myron.md":  summonableContent,
+		"potnia.md": "---\nname: potnia\ndescription: Orchestrator\ntools: Read\n---\n\n# Potnia\n",
+	})
+
+	manifest := &provenance.ProvenanceManifest{
+		Entries: map[string]*provenance.ProvenanceEntry{},
+	}
+	checker := &CollisionChecker{}
+	s := &syncer{}
+
+	result, err := s.syncUserResource(ResourceAgents, knossosHome, userChannelDir, manifest, checker, SyncOptions{})
+	if err != nil {
+		t.Fatalf("syncUserResource: %v", err)
+	}
+
+	// potnia should be added; myron should be skipped
+	if result.Summary.Added != 1 {
+		t.Errorf("expected 1 added (potnia), got %d", result.Summary.Added)
+	}
+	if result.Summary.Skipped != 1 {
+		t.Errorf("expected 1 skipped (myron summonable), got %d", result.Summary.Skipped)
+	}
+
+	// myron should NOT be in the target directory
+	myronPath := filepath.Join(userChannelDir, "agents", "myron.md")
+	if _, err := os.Stat(myronPath); !os.IsNotExist(err) {
+		t.Error("summonable agent should not be copied to target")
+	}
+
+	// Skip reason should mention summonable
+	found := false
+	for _, skip := range result.Changes.Skipped {
+		if skip.Name == "agents/myron.md" && skip.Reason == "summonable: use 'ari agent summon'" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected skipped entry with reason 'summonable: use ari agent summon', got %v", result.Changes.Skipped)
+	}
+}
+
+func TestSyncUserResourceFromEmbedded_SkipsSummonableAgent(t *testing.T) {
+	t.Parallel()
+	tmpDir := t.TempDir()
+	userChannelDir := filepath.Join(tmpDir, "user-claude")
+	os.MkdirAll(filepath.Join(userChannelDir, "agents"), 0755)
+
+	summonableContent := []byte(`---
+name: myron
+description: "Feature discovery agent"
+tier: summonable
+tools: Read, Bash
+---
+
+# Myron
+`)
+	normalContent := []byte(`---
+name: potnia
+description: "Orchestrator"
+tools: Read
+---
+
+# Potnia
+`)
+
+	embeddedFS := fstest.MapFS{
+		"agents/myron.md":  &fstest.MapFile{Data: summonableContent},
+		"agents/potnia.md": &fstest.MapFile{Data: normalContent},
+	}
+
+	manifest := &provenance.ProvenanceManifest{
+		Entries: map[string]*provenance.ProvenanceEntry{},
+	}
+	checker := &CollisionChecker{}
+	s := &syncer{embeddedAgents: embeddedFS}
+
+	result, err := s.syncUserResourceFromEmbedded(
+		ResourceAgents, embeddedFS, "agents",
+		userChannelDir, manifest, checker, SyncOptions{},
+	)
+	if err != nil {
+		t.Fatalf("syncUserResourceFromEmbedded: %v", err)
+	}
+
+	// potnia should be added; myron should be skipped
+	if result.Summary.Added != 1 {
+		t.Errorf("expected 1 added (potnia), got %d", result.Summary.Added)
+	}
+	if result.Summary.Skipped != 1 {
+		t.Errorf("expected 1 skipped (myron summonable), got %d", result.Summary.Skipped)
+	}
+
+	// myron should NOT be written
+	myronPath := filepath.Join(userChannelDir, "agents", "myron.md")
+	if _, err := os.Stat(myronPath); !os.IsNotExist(err) {
+		t.Error("summonable agent should not be written to target")
+	}
+
+	// Skip reason check
+	found := false
+	for _, skip := range result.Changes.Skipped {
+		if skip.Name == "agents/myron.md" && skip.Reason == "summonable: use 'ari agent summon'" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected skipped entry with summonable reason, got %v", result.Changes.Skipped)
+	}
+}
+
 // manifestKeys returns all keys from a provenance manifest for debugging.
 func manifestKeys(m *provenance.ProvenanceManifest) []string {
 	keys := make([]string, 0, len(m.Entries))

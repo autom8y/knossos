@@ -1069,6 +1069,104 @@ func TestValidate_MemoryScope_Valid(t *testing.T) {
 	}
 }
 
+func TestValidate_Tier_Valid(t *testing.T) {
+	t.Parallel()
+	tiers := []string{"", "standing", "rite", "summonable"}
+	for _, tier := range tiers {
+		t.Run("tier="+tier, func(t *testing.T) {
+			t.Parallel()
+			fm := AgentFrontmatter{
+				Name:        "test-agent",
+				Description: "A test agent",
+				Tier:        tier,
+			}
+			if err := fm.Validate(); err != nil {
+				t.Errorf("Validate() error = %v, want nil for tier %q", err, tier)
+			}
+		})
+	}
+}
+
+func TestValidate_Tier_Invalid(t *testing.T) {
+	t.Parallel()
+	fm := AgentFrontmatter{
+		Name:        "test-agent",
+		Description: "A test agent",
+		Tier:        "invalid",
+	}
+
+	err := fm.Validate()
+	if err == nil {
+		t.Fatal("Validate() expected error for invalid tier, got nil")
+	}
+	if !containsStr(err.Error(), "invalid tier") {
+		t.Errorf("Validate() error = %q, want to contain %q", err.Error(), "invalid tier")
+	}
+}
+
+func TestParseAgentFrontmatter_WithTier(t *testing.T) {
+	t.Parallel()
+	content := []byte(`---
+name: myron
+description: "Feature discovery agent"
+type: scout
+tier: summonable
+tools: Read, Bash, Glob, Grep
+---
+
+# Myron
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.Tier != "summonable" {
+		t.Errorf("tier = %q, want %q", fm.Tier, "summonable")
+	}
+	if fm.Type != "scout" {
+		t.Errorf("type = %q, want %q", fm.Type, "scout")
+	}
+
+	if err := fm.Validate(); err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+}
+
+func TestParseAgentFrontmatter_TierAbsent(t *testing.T) {
+	t.Parallel()
+	content := []byte(`---
+name: regular-agent
+description: "A regular agent without tier"
+tools: Read
+---
+
+# Regular Agent
+`)
+
+	fm, err := ParseAgentFrontmatter(content)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if fm.Tier != "" {
+		t.Errorf("tier = %q, want empty string (absent)", fm.Tier)
+	}
+}
+
+func TestValidAgentTypes_Scout(t *testing.T) {
+	t.Parallel()
+	fm := AgentFrontmatter{
+		Name:        "myron",
+		Description: "Feature discovery agent",
+		Type:        "scout",
+	}
+	if err := fm.Validate(); err != nil {
+		t.Errorf("Validate() error = %v, want nil for type scout", err)
+	}
+}
+
 func containsStr(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsSubstring(s, substr))
 }

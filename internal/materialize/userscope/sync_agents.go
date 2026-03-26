@@ -74,6 +74,16 @@ func (s *syncer) syncUserResourceFromEmbedded(
 			return err
 		}
 
+		// Skip summonable agents — they are not deployed via ari sync.
+		// Users must invoke 'ari agent summon' to install them explicitly.
+		if resourceType == ResourceAgents && isSummonableAgent(content) {
+			result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+				Name:   manifestKey,
+				Reason: "summonable: use 'ari agent summon'",
+			})
+			return nil
+		}
+
 		sourceChecksum := checksum.Bytes(content)
 
 		// Check existing manifest entry
@@ -216,6 +226,23 @@ func (s *syncer) syncUserResourceFromEmbedded(
 	}
 
 	return result, nil
+}
+
+// isSummonableAgent checks if agent content has tier: summonable in frontmatter.
+// Returns false for any parse error, missing tier, or non-summonable tier.
+// Summonable agents are excluded from default ari sync — use 'ari agent summon' instead.
+func isSummonableAgent(content []byte) bool {
+	yamlBytes, _, err := frontmatter.Parse(content)
+	if err != nil {
+		return false
+	}
+	var fm struct {
+		Tier string `yaml:"tier"`
+	}
+	if err := yaml.Unmarshal(yamlBytes, &fm); err != nil {
+		return false
+	}
+	return fm.Tier == "summonable"
 }
 
 // copyAgentFile copies an agent file to the target, applying gemini compilation

@@ -320,6 +320,19 @@ func (s *syncer) syncUserResource(
 			return err
 		}
 
+		// Skip summonable agents — they are not deployed via ari sync.
+		// Read agent content to check tier; overhead is negligible (agents are ~2-10KB).
+		if resourceType == ResourceAgents {
+			agentContent, readErr := os.ReadFile(path)
+			if readErr == nil && isSummonableAgent(agentContent) {
+				result.Changes.Skipped = append(result.Changes.Skipped, UserSkippedEntry{
+					Name:   manifestKey,
+					Reason: "summonable: use 'ari agent summon'",
+				})
+				return nil
+			}
+		}
+
 		// Check existing manifest entry
 		entry, exists := manifest.Entries[manifestKey]
 

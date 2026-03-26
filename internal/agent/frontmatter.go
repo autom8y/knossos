@@ -20,6 +20,11 @@ type AgentFrontmatter struct {
 	Description string `yaml:"description" json:"description"`
 	Role        string `yaml:"role,omitempty" json:"role,omitempty"`
 
+	// Agent tier classification for materialization lifecycle.
+	// Valid values: "standing", "rite", "summonable", or empty (defaults to rite-scoped).
+	// Summonable agents are excluded from default ari sync — use 'ari agent summon' instead.
+	Tier string `yaml:"tier,omitempty" json:"tier,omitempty"`
+
 	// Archetype
 	Type string `yaml:"type,omitempty" json:"type,omitempty"`
 
@@ -83,6 +88,7 @@ var validAgentTypes = map[string]bool{
 	"evaluator":    true,
 	"prototyper":   true,
 	"validator":    true,
+	"scout":        true,
 }
 
 // mcpToolPattern matches MCP tool references like "mcp:github" or "mcp:github/create_issue".
@@ -143,6 +149,15 @@ func (f *AgentFrontmatter) validateCore() error {
 			return errors.New(errors.CodeValidationFailed,
 				fmt.Sprintf("agent frontmatter: invalid type %q, must be one of: %s",
 					f.Type, validAgentTypesList()))
+		}
+	}
+
+	// Validate tier if present
+	if f.Tier != "" {
+		validTiers := map[string]bool{"standing": true, "rite": true, "summonable": true}
+		if !validTiers[f.Tier] {
+			return errors.New(errors.CodeValidationFailed,
+				fmt.Sprintf("agent frontmatter: invalid tier %q, must be standing, rite, or summonable", f.Tier))
 		}
 	}
 
