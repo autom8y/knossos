@@ -36,7 +36,10 @@ type AssemblerConfig struct {
 // DefaultAssemblerConfig returns production default configuration.
 func DefaultAssemblerConfig() AssemblerConfig {
 	return AssemblerConfig{
-		SourceBudgetTokens: 4000,
+		// Source budget expanded from 4,000 to 8,000 tokens to accommodate
+		// full .know/ content (typically 3 domains x 2,500 tokens each).
+		// The previous 4,000-token budget was designed for 200-char stubs.
+		SourceBudgetTokens: 8000,
 		RelevanceWeight:    0.50,
 		FreshnessWeight:    0.30,
 		DiversityWeight:    0.20,
@@ -258,6 +261,37 @@ func (a *Assembler) Assemble(
 		Budget:       report,
 		Tier:         score.Tier,
 	}
+}
+
+// TriageCandidateInfo holds triage candidate data for the assembler.
+// This is a data-only struct passed by value -- reason/ does NOT import triage/.
+type TriageCandidateInfo struct {
+	QualifiedName  string
+	RelevanceScore float64
+	Freshness      float64
+	DomainType     string
+}
+
+// WeightedMeanFreshness computes the relevance-weighted mean freshness from triage candidates.
+// BC-07: Formula: sum(RelevanceScore_i * FreshnessScore_i) / sum(RelevanceScore_i)
+// This replaces the position-weighted model when triage candidates are available.
+// Returns 0.0 when candidates is empty or all relevance scores are zero.
+func WeightedMeanFreshness(candidates []TriageCandidateInfo) float64 {
+	if len(candidates) == 0 {
+		return 0.0
+	}
+
+	var weightedSum, weightSum float64
+	for _, c := range candidates {
+		weightedSum += c.RelevanceScore * c.Freshness
+		weightSum += c.RelevanceScore
+	}
+
+	if weightSum == 0 {
+		return 0.0
+	}
+
+	return weightedSum / weightSum
 }
 
 // freshnessLabel returns a human-readable freshness annotation.

@@ -299,20 +299,31 @@ func TestIntegration_TrustScoring_LowTier(t *testing.T) {
 	assert.NotNil(t, score.Gap, "LOW tier must have GapAdmission")
 }
 
-func TestIntegration_TrustScoring_ZeroInput_AlwaysLow(t *testing.T) {
+func TestIntegration_TrustScoring_ZeroInput_ArithmeticFallback(t *testing.T) {
 	scorer := trust.NewScorer(trust.DefaultConfig())
+	cfg := trust.DefaultConfig()
+	wf := cfg.Weights.Freshness
+	wr := cfg.Weights.Retrieval
+	wc := cfg.Weights.Coverage
+	wSum := wf + wr + wc
 
-	// Any zero input -> zero overall -> LOW (geometric mean property).
+	// WS-2.4: A single zero input no longer collapses to 0.0. Instead, the arithmetic
+	// mean fallback produces a score proportional to the non-zero components. This prevents
+	// false LOW-tier refusals when one signal happens to be zero but others are strong.
 	testCases := []struct {
-		name      string
-		freshness float64
-		retrieval float64
-		coverage  float64
+		name        string
+		freshness   float64
+		retrieval   float64
+		coverage    float64
+		wantOverall float64
 	}{
-		{"zero_freshness", 0.0, 0.9, 1.0},
-		{"zero_retrieval", 0.9, 0.0, 1.0},
-		{"zero_coverage", 0.9, 0.9, 0.0},
-		{"all_zero", 0.0, 0.0, 0.0},
+		{"zero_freshness", 0.0, 0.9, 1.0,
+			(wf*0.0 + wr*0.9 + wc*1.0) / wSum},
+		{"zero_retrieval", 0.9, 0.0, 1.0,
+			(wf*0.9 + wr*0.0 + wc*1.0) / wSum},
+		{"zero_coverage", 0.9, 0.9, 0.0,
+			(wf*0.9 + wr*0.9 + wc*0.0) / wSum},
+		{"all_zero", 0.0, 0.0, 0.0, 0.0},
 	}
 
 	for _, tc := range testCases {
@@ -322,10 +333,8 @@ func TestIntegration_TrustScoring_ZeroInput_AlwaysLow(t *testing.T) {
 				RetrievalQuality: tc.retrieval,
 				DomainCoverage:   tc.coverage,
 			})
-			assert.Equal(t, trust.TierLow, score.Tier,
-				"zero input must always produce LOW tier")
-			assert.Equal(t, 0.0, score.Overall,
-				"zero input must produce zero overall")
+			assert.InDelta(t, tc.wantOverall, score.Overall, 0.001,
+				"arithmetic mean fallback should produce expected overall")
 		})
 	}
 }
@@ -499,7 +508,13 @@ func TestIntegration_BackwardCompat_NilCatalog_NoResponse(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, resp, "PT-09 C7: nil catalog must return non-nil response")
-	assert.Equal(t, trust.TierLow, resp.Tier, "PT-09 C7: nil catalog -> LOW tier")
+	// WS-2.4: With arithmetic mean fallback, nil catalog (freshness=0, retrieval>0, coverage=1.0)
+	// no longer collapses to 0.0. The score may land in MEDIUM if BM25 returns any hits.
+	// The important invariant is that the response is non-nil with no provenance sources.
+	if resp.Provenance != nil {
+		assert.True(t, resp.Provenance.IsEmpty(),
+			"PT-09 C7: nil catalog -> empty provenance chain (no sources)")
+	}
 }
 
 func TestIntegration_BackwardCompat_EmptyCatalog(t *testing.T) {

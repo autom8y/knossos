@@ -300,6 +300,142 @@ func repoFromQualifiedName(qn string) string {
 	return ""
 }
 
+// TriageCandidateInput holds triage candidate data passed to the pipeline.
+// This is a data-only struct -- reason/ does NOT import triage/.
+// The handler in slack/ converts triage.TriageCandidate to this type.
+type TriageCandidateInput struct {
+	QualifiedName       string
+	RelevanceScore      float64
+	EmbeddingSimilarity float64
+	Freshness           float64
+	Rationale           string
+	DomainType          string
+	RelatedDomains      []string
+}
+
+// TriageResultInput holds triage results passed to the pipeline.
+// This is a data-only struct -- reason/ does NOT import triage/.
+type TriageResultInput struct {
+	RefinedQuery   string
+	Candidates     []TriageCandidateInput
+	ModelCallCount int
+}
+
+// QueryWithTriage runs the reasoning pipeline using pre-computed triage results.
+// This method takes pre-computed triage results instead of doing its own intent
+// classification and search. Used by the Slack handler when triage is available.
+//
+// Keep existing Query() for backwards compatibility (tests, non-Slack callers).
+func (p *Pipeline) QueryWithTriage(ctx context.Context, triageInput *TriageResultInput) (*response.ReasoningResponse, error) {
+	if p.assembler == nil || p.generator == nil || p.scorer == nil {
+		return nil, fmt.Errorf("pipeline has nil dependencies")
+	}
+
+	if triageInput == nil || len(triageInput.Candidates) == 0 {
+		// No triage candidates -- fall back to v1 pipeline.
+		return p.Query(ctx, triageInput.RefinedQuery)
+	}
+
+	question := triageInput.RefinedQuery
+
+	// Build search results from triage candidates to reuse existing pipeline.
+	searchResults := triageCandidatesToSearchResults(triageInput.Candidates)
+
+	// Build provenance chain from triage candidates + catalog.
+	linkInputs := buildProvenanceLinkInputs(searchResults, p.catalog)
+	now := time.Now()
+	decay := p.scorer.Config().Decay
+	chain := trust.NewProvenanceChain(linkInputs, &decay, now)
+
+	// BC-07: Compute weighted-mean freshness using triage RelevanceScores.
+	candidateInfos := make([]reasoncontext.TriageCandidateInfo, len(triageInput.Candidates))
+	for i, c := range triageInput.Candidates {
+		candidateInfos[i] = reasoncontext.TriageCandidateInfo{
+			QualifiedName:  c.QualifiedName,
+			RelevanceScore: c.RelevanceScore,
+			Freshness:      c.Freshness,
+			DomainType:     c.DomainType,
+		}
+	}
+
+	freshness := reasoncontext.WeightedMeanFreshness(candidateInfos)
+	if freshness == 0 {
+		// Triage freshness not available (Tier 1 default) -- fall back to chain.
+		freshness = trust.FreshnessFromChain(&chain)
+	}
+
+	// Compute confidence score.
+	scoreInput := trust.ScoreInput{
+		Freshness:        freshness,
+		RetrievalQuality: normalizeTriageRelevance(triageInput.Candidates),
+		DomainCoverage:   1.0, // Triage already selected relevant domains.
+		Chain:            &chain,
+		StaleDomains:     findStaleDomains(chain, p.scorer.Config().Thresholds.LowThreshold),
+	}
+	confidence := p.scorer.Score(scoreInput)
+
+	slog.Info("triage confidence score computed",
+		"overall", confidence.Overall,
+		"freshness", confidence.Freshness,
+		"retrieval", confidence.Retrieval,
+		"tier", confidence.Tier.String(),
+		"triage_candidates", len(triageInput.Candidates),
+	)
+
+	// LOW tier short-circuit.
+	if confidence.Tier == trust.TierLow {
+		return &response.ReasoningResponse{
+			Answer: "insufficient knowledge to answer this question reliably",
+			Tier:   trust.TierLow,
+			Gap:    confidence.Gap,
+		}, nil
+	}
+
+	// Assemble context window using triage candidates.
+	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org)
+
+	// Build intent summary from triage.
+	intentSummary := response.IntentSummary{
+		Tier:       "OBSERVE",
+		Answerable: true,
+	}
+
+	// Generate response.
+	return p.generator.Generate(ctx, assembled, confidence, &chain, intentSummary)
+}
+
+// triageCandidatesToSearchResults converts triage candidates to search results
+// so the existing assembler can process them.
+func triageCandidatesToSearchResults(candidates []TriageCandidateInput) []search.SearchResult {
+	var results []search.SearchResult
+	for _, c := range candidates {
+		score := int(c.RelevanceScore * 1000)
+		results = append(results, search.SearchResult{
+			SearchEntry: search.SearchEntry{
+				Name:   c.QualifiedName,
+				Domain: search.DomainKnowledge,
+			},
+			Score:     score,
+			MatchType: "triage",
+		})
+	}
+	return results
+}
+
+// normalizeTriageRelevance returns the top candidate's relevance score as the
+// retrieval quality signal.
+func normalizeTriageRelevance(candidates []TriageCandidateInput) float64 {
+	if len(candidates) == 0 {
+		return 0.0
+	}
+	// Top candidate relevance score is already in [0, 1].
+	top := candidates[0].RelevanceScore
+	if top > 1.0 {
+		return 1.0
+	}
+	return top
+}
+
 // extractSearchDomains converts DomainHints to search.Domain filter list.
 // Returns nil (unfiltered) when hints is empty.
 func extractSearchDomains(hints []intent.DomainHint) []search.Domain {

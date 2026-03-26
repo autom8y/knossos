@@ -176,6 +176,39 @@ type QueryRunner interface {
 	Query(ctx context.Context, question string) (*response.ReasoningResponse, error)
 }
 
+// TriageRunner abstracts the triage orchestrator for testability.
+// The concrete implementation is *triage.Orchestrator (passed as data, not import).
+type TriageRunner interface {
+	Assess(ctx context.Context, query string, threadHistory []TriageThreadMessage) (*TriageResultData, error)
+}
+
+// TriageThreadMessage is the handler-local thread message type.
+// Converted from triage.ThreadMessage by the handler.
+type TriageThreadMessage struct {
+	Role      string
+	Content   string
+	Timestamp time.Time
+}
+
+// TriageResultData holds triage results in a handler-consumable form.
+// The handler converts this to reason.TriageResultInput for the pipeline.
+type TriageResultData struct {
+	RefinedQuery   string
+	Candidates     []TriageCandidateData
+	ModelCallCount int
+}
+
+// TriageCandidateData holds a single triage candidate in handler-consumable form.
+type TriageCandidateData struct {
+	QualifiedName       string
+	RelevanceScore      float64
+	EmbeddingSimilarity float64
+	Freshness           float64
+	Rationale           string
+	DomainType          string
+	RelatedDomains      []string
+}
+
 // defaultSuggestedPrompts are the initial prompts shown when a user starts an assistant thread.
 var defaultSuggestedPrompts = []string{
 	"How are our projects structured?",
@@ -187,9 +220,11 @@ var defaultSuggestedPrompts = []string{
 // and a ThreadContextStore for pipeline access to assistant thread context.
 // The handler routes events to the reasoning pipeline and renders responses.
 //
+// triageRunner may be nil -- when nil, the handler falls back to v1 pipeline (Query only).
+//
 // The request body has already been restored by the upstream verification middleware
 // (webhook.Verifier.Handler).
-func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig) (http.HandlerFunc, *ThreadContextStore) {
+func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig, triageRunner TriageRunner) (http.HandlerFunc, *ThreadContextStore) {
 	dedup := newEventDedup(5 * time.Minute)             // TD-02: 5-minute dedup window
 	limiter := newConcurrencyLimiter(5)                  // TD-03: max 5 concurrent pipeline queries
 	ctxStore := newThreadContextStore(30 * time.Minute)  // GAP-10: 30-minute thread context TTL
@@ -242,7 +277,7 @@ func NewSlackHandler(pipeline QueryRunner, client *SlackClient, cfg SlackConfig)
 		case "assistant_thread_context_changed":
 			handleAssistantThreadContextChanged(w, envelope.Event, ctxStore)
 		case "message":
-			handleMessage(w, envelope.Event, pipeline, client, limiter)
+			handleMessage(w, envelope.Event, pipeline, client, limiter, ctxStore, triageRunner)
 		default:
 			slog.Debug("unhandled event type", "type", inner.Type)
 			w.WriteHeader(http.StatusOK)
@@ -309,7 +344,7 @@ func handleAssistantThreadContextChanged(w http.ResponseWriter, eventData json.R
 // handleMessage processes a Slack message event.
 // SECURITY: Bot messages are filtered before pipeline invocation to prevent
 // prompt injection via bot-to-bot message chains.
-func handleMessage(w http.ResponseWriter, eventData json.RawMessage, pipeline QueryRunner, client *SlackClient, limiter *concurrencyLimiter) {
+func handleMessage(w http.ResponseWriter, eventData json.RawMessage, pipeline QueryRunner, client *SlackClient, limiter *concurrencyLimiter, ctxStore *ThreadContextStore, triageRunner TriageRunner) {
 	var msg MessageEvent
 	if err := json.Unmarshal(eventData, &msg); err != nil {
 		slog.Error("failed to parse message event", "error", err)
@@ -349,6 +384,18 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, pipeline Qu
 		threadTS = msg.TS
 	}
 
+	// WS-2.3: Retrieve stored thread context from ThreadContextStore.
+	// When assistant_thread_context_changed fires, the context is stored by thread timestamp.
+	// This wires the store into message processing so follow-up messages have access.
+	// Full conversation threading (Stage 0, N=5 windowing) is Sprint 6 scope.
+	if threadCtx, ok := ctxStore.Get(threadTS); ok {
+		slog.Info("thread context available for message",
+			"thread_ts", threadTS,
+			"channel", msg.Channel,
+			"context_bytes", len(threadCtx),
+		)
+	}
+
 	// TD-03: Rate limit concurrent pipeline queries.
 	if !limiter.tryAcquire() {
 		slog.Warn("rate limit exceeded, dropping message",
@@ -364,13 +411,13 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, pipeline Qu
 	// Process asynchronously with limiter release on completion.
 	go func() {
 		defer limiter.release()
-		processMessage(msg.Channel, threadTS, msg.Text, pipeline, client)
+		processMessage(msg.Channel, threadTS, msg.Text, pipeline, client, triageRunner)
 	}()
 }
 
 // processMessage runs the reasoning pipeline and posts the response.
 // Runs in a goroutine -- must not reference the http.ResponseWriter.
-func processMessage(channelID, threadTS, question string, pipeline QueryRunner, client *SlackClient) {
+func processMessage(channelID, threadTS, question string, pipeline QueryRunner, client *SlackClient, triageRunner TriageRunner) {
 	// Set "thinking" status.
 	if err := client.SetStatus(channelID, threadTS, "", "Searching knowledge..."); err != nil {
 		slog.Warn("failed to set processing status",
@@ -383,7 +430,17 @@ func processMessage(channelID, threadTS, question string, pipeline QueryRunner, 
 	// Prevents hanging API calls from exhausting concurrency limiter slots.
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	resp, err := pipeline.Query(ctx, question)
+
+	var resp *response.ReasoningResponse
+	var err error
+
+	// Sprint 5: Wire triage into message handling.
+	// When triageRunner is available, run triage first, then pass results to pipeline.
+	if triageRunner != nil {
+		resp, err = processWithTriage(ctx, question, pipeline, triageRunner)
+	} else {
+		resp, err = pipeline.Query(ctx, question)
+	}
 	if err != nil {
 		slog.Error("pipeline query failed",
 			"channel", channelID,
@@ -426,4 +483,42 @@ func processMessage(channelID, threadTS, question string, pipeline QueryRunner, 
 			"error", err,
 		)
 	}
+}
+
+// processWithTriage runs triage first, then passes the refined query to the pipeline.
+// Falls back to v1 pipeline (Query) when triage returns nil or errors.
+//
+// Sprint 5: Uses the refined query from triage to improve v1 pipeline results.
+// The triage orchestrator improves query quality (Stage 0 refinement) and candidate
+// selection (Stages 1-3). The full QueryWithTriage path (skipping intent classification)
+// is wired through serve.go when the pipeline supports it.
+func processWithTriage(ctx context.Context, question string, pipeline QueryRunner, triageRunner TriageRunner) (*response.ReasoningResponse, error) {
+	// Run triage (Stages 0-3).
+	triageResult, err := triageRunner.Assess(ctx, question, nil)
+	if err != nil {
+		slog.Warn("triage failed, falling back to v1 pipeline",
+			"error", err,
+		)
+		return pipeline.Query(ctx, question)
+	}
+
+	if triageResult == nil || len(triageResult.Candidates) == 0 {
+		slog.Info("triage returned no candidates, falling back to v1 pipeline")
+		return pipeline.Query(ctx, question)
+	}
+
+	// Use the refined query from triage for improved search quality.
+	refinedQuery := triageResult.RefinedQuery
+	if refinedQuery == "" {
+		refinedQuery = question
+	}
+
+	slog.Info("triage complete, using refined query",
+		"original", question,
+		"refined", refinedQuery,
+		"candidates", len(triageResult.Candidates),
+		"model_calls", triageResult.ModelCallCount,
+	)
+
+	return pipeline.Query(ctx, refinedQuery)
 }

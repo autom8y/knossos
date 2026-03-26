@@ -100,6 +100,7 @@ type SearchResult struct {
 	Score         float64
 	MatchType     string // "document" or "section"
 	Domain        string
+	RawText       string // Full .know/ content (frontmatter stripped).
 }
 
 // SearchDocuments searches the document-level index and returns top-k ranked results.
@@ -140,6 +141,7 @@ func (idx *Index) SearchDocuments(query string, k int) []SearchResult {
 			Score:         r.score,
 			MatchType:     "document",
 			Domain:        r.unit.Domain,
+			RawText:       r.unit.RawText,
 		}
 	}
 	return out
@@ -183,6 +185,7 @@ func (idx *Index) SearchSections(query string, k int) []SearchResult {
 			Score:         r.score,
 			MatchType:     "section",
 			Domain:        r.unit.Domain,
+			RawText:       r.unit.RawText,
 		}
 	}
 	return out

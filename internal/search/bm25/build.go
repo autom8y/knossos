@@ -85,8 +85,15 @@ func BuildFromCatalog(catalog *registryorg.DomainCatalog, loader ContentLoader) 
 			continue
 		}
 
-		// Document-level indexing.
-		freqs, totalTerms := BuildTermFreqs(content)
+		// G-4: Build boosted content that includes domain names, qualified names,
+		// repo names, and section headings alongside the full content body.
+		// This ensures queries like "autom8y-sms" that reference repo/domain
+		// names directly produce BM25 signal even when the name does not appear
+		// in the prose body.
+		boostedContent := buildBoostedContent(d, content)
+
+		// Document-level indexing with field-boosted content.
+		freqs, totalTerms := BuildTermFreqs(boostedContent)
 		if totalTerms == 0 {
 			continue
 		}
@@ -95,7 +102,7 @@ func BuildFromCatalog(catalog *registryorg.DomainCatalog, loader ContentLoader) 
 			QualifiedName: d.QualifiedName,
 			Domain:        d.Domain,
 			Title:         d.Domain,
-			RawText:       truncate(content, 200),
+			RawText:       content, // RawText keeps original content for display.
 			TermFreqs:     freqs,
 			TotalTerms:    totalTerms,
 			GeneratedAt:   d.GeneratedAt,
@@ -118,7 +125,7 @@ func BuildFromCatalog(catalog *registryorg.DomainCatalog, loader ContentLoader) 
 				QualifiedName: SectionQualifiedName(d.QualifiedName, slug),
 				Domain:        d.Domain,
 				Title:         sec.Heading,
-				RawText:       truncate(sec.Body, 150),
+				RawText:       sec.Body,
 				TermFreqs:     secFreqs,
 				TotalTerms:    secTotal,
 				GeneratedAt:   d.GeneratedAt,
@@ -131,10 +138,50 @@ func BuildFromCatalog(catalog *registryorg.DomainCatalog, loader ContentLoader) 
 	return idx, nil
 }
 
-// truncate returns the first n characters of a string, appending "..." if truncated.
-func truncate(s string, n int) string {
-	if len(s) <= n {
-		return s
+// buildBoostedContent prepends metadata fields to content for BM25 indexing.
+// G-4: BM25 must index domain names, qualified names, repo names, and section
+// headings alongside the summary/body text. Without this, queries referencing
+// repo names (like "autom8y-sms") produce zero BM25 signal.
+//
+// The metadata is repeated 3 times to boost its weight relative to body text.
+// This is a simple field-boosting strategy that avoids multi-field BM25 complexity.
+func buildBoostedContent(entry registryorg.DomainEntry, content string) string {
+	var b strings.Builder
+
+	// Extract repo name from qualified name.
+	parts := strings.SplitN(entry.QualifiedName, "::", 3)
+	repoName := ""
+	if len(parts) >= 2 {
+		repoName = parts[1]
 	}
-	return s[:n] + "..."
+
+	// Collect section headings from content.
+	sections := SplitSections(content)
+	var headings []string
+	for _, sec := range sections {
+		if sec.Heading != "" {
+			headings = append(headings, sec.Heading)
+		}
+	}
+
+	// Repeat metadata fields 3x for BM25 field boosting.
+	for i := 0; i < 3; i++ {
+		b.WriteString(entry.Domain)
+		b.WriteString(" ")
+		b.WriteString(entry.QualifiedName)
+		b.WriteString(" ")
+		if repoName != "" {
+			b.WriteString(repoName)
+			b.WriteString(" ")
+		}
+		for _, h := range headings {
+			b.WriteString(h)
+			b.WriteString(" ")
+		}
+	}
+
+	// Append full content body (no truncation -- removed 200-char limit).
+	b.WriteString(content)
+
+	return b.String()
 }

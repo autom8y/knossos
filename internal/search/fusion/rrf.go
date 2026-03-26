@@ -36,6 +36,10 @@ type FusedResult struct {
 	// Freshness is the search-level freshness score (0.0-1.0).
 	// Only populated for BM25 results.
 	Freshness float64
+
+	// RawText is the full .know/ content (frontmatter stripped).
+	// Populated from BM25 IndexedUnit.RawText; empty for structural results.
+	RawText string
 }
 
 // StructuralResult represents a result from the existing 4-tier structural scorer.
@@ -171,6 +175,7 @@ func RRFMerge(bm25Doc []bm25.SearchResult, bm25Sec []bm25.SearchResult,
 				MatchType:     mt,
 				Domain:        r.Domain,
 				SourceChannel: "bm25",
+				RawText:       r.RawText,
 			}
 		}
 

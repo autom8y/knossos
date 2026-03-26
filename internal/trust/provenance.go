@@ -141,6 +141,35 @@ func (pc *ProvenanceChain) MeanFreshness() float64 {
 	return sum / float64(len(pc.Sources))
 }
 
+// WeightedMeanFreshness returns the position-weighted mean freshness score.
+// Sources earlier in the chain (more relevant) receive higher weight.
+// Weight for source at position i (0-indexed) = n - i, where n = total sources.
+// This gives a linear decay from most-relevant to least-relevant source.
+//
+// Example with 3 sources [0.9, 0.5, 0.2]:
+//
+//	weighted = (3*0.9 + 2*0.5 + 1*0.2) / (3+2+1) = (2.7+1.0+0.2) / 6 = 0.65
+//
+// vs MinFreshness = 0.2, MeanFreshness = 0.533
+//
+// Returns 0.0 for an empty chain.
+func (pc *ProvenanceChain) WeightedMeanFreshness() float64 {
+	n := len(pc.Sources)
+	if n == 0 {
+		return 0.0
+	}
+	var weightedSum, weightSum float64
+	for i, s := range pc.Sources {
+		weight := float64(n - i)
+		weightedSum += weight * s.FreshnessAtQuery
+		weightSum += weight
+	}
+	if weightSum == 0 {
+		return 0.0
+	}
+	return weightedSum / weightSum
+}
+
 // StaleSources returns sources with freshness below the given threshold.
 func (pc *ProvenanceChain) StaleSources(threshold float64) []ProvenanceLink {
 	var stale []ProvenanceLink

@@ -2,6 +2,7 @@ package search
 
 import (
 	"log/slog"
+	"os"
 	"sort"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/autom8y/knossos/internal/paths"
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
 	"github.com/autom8y/knossos/internal/search/bm25"
+	"github.com/autom8y/knossos/internal/search/content"
 	"github.com/autom8y/knossos/internal/search/fusion"
 )
 
@@ -90,6 +92,13 @@ func Build(root *cobra.Command, resolver *paths.Resolver) *SearchIndex {
 
 // tryBuildBM25Index attempts to load the org catalog and build a BM25 index.
 // Returns nil for both values if the registry is not available.
+//
+// Content loading strategy (C-1 fix):
+//   - Container: uses PreBakedStore reading from /data/content/{repo}/.know/
+//   - Local dev: uses LocalStore with repo paths from org config
+//
+// Falls back gracefully: if no content store can load any files, the BM25
+// index will be empty and Search() returns structural-only results.
 func tryBuildBM25Index() (*registryorg.DomainCatalog, *bm25.Index) {
 	orgCtx, err := config.DefaultOrgContext()
 	if err != nil {
@@ -106,26 +115,53 @@ func tryBuildBM25Index() (*registryorg.DomainCatalog, *bm25.Index) {
 		return catalog, nil
 	}
 
-	// Build repo path map for content loading.
-	// For now, only local repos are supported. Cross-repo content loading
-	// via GitHub API is deferred to a future sprint.
-	repoPaths := make(map[string]string)
-	// Repo path population is deferred to sprint-4+ when cross-repo
-	// path resolution from org config is implemented. For now, content
-	// loading relies on repos being accessible locally.
+	// Resolve content loader: prefer pre-baked content (container), fall back
+	// to local filesystem repos (dev). The content.Store types satisfy
+	// bm25.ContentLoader (same LoadContent signature).
+	loader := resolveContentLoader()
 
-	loader := &bm25.LocalContentLoader{RepoPaths: repoPaths}
 	bm25Idx, err := bm25.BuildFromCatalog(catalog, loader)
 	if err != nil {
 		slog.Debug("BM25 index build failed", "error", err)
 		return catalog, nil
 	}
 
+	slog.Info("BM25 index built",
+		"documents", bm25Idx.TotalDocs,
+		"sections", bm25Idx.TotalSecs,
+	)
+
 	if bm25Idx.TotalDocs == 0 {
 		return catalog, nil
 	}
 
 	return catalog, bm25Idx
+}
+
+// resolveContentLoader returns a content loader appropriate for the runtime
+// environment. In a container, pre-baked content exists at /data/content/.
+// For local dev, the CLEW_CONTENT_DIR env var can point to a pre-baked
+// directory, or the BM25 index will be empty (structural-only fallback).
+func resolveContentLoader() bm25.ContentLoader {
+	// Check env var override first (useful for local dev testing).
+	if envDir := os.Getenv("CLEW_CONTENT_DIR"); envDir != "" {
+		if info, err := os.Stat(envDir); err == nil && info.IsDir() {
+			slog.Info("using content store from CLEW_CONTENT_DIR", "dir", envDir)
+			return content.NewPreBakedStore(envDir)
+		}
+		slog.Warn("CLEW_CONTENT_DIR set but not a valid directory", "dir", envDir)
+	}
+
+	// Check for pre-baked content directory (container deployment).
+	if info, err := os.Stat(content.DefaultContentDir); err == nil && info.IsDir() {
+		slog.Info("using pre-baked content store", "dir", content.DefaultContentDir)
+		return content.NewPreBakedStore(content.DefaultContentDir)
+	}
+
+	// No content source available. Return an empty local store that will
+	// fail-open on every domain (BuildFromCatalog skips load failures).
+	slog.Warn("no content source available, BM25 index will be empty")
+	return content.NewLocalStore(map[string]string{})
 }
 
 // HasBM25 returns true if a BM25 knowledge index is available.
@@ -240,11 +276,12 @@ func (idx *SearchIndex) Search(query string, opts SearchOptions) []SearchResult 
 
 		if fr.SourceChannel == "bm25" {
 			sr.Domain = DomainKnowledge
-			sr.SearchEntry.Summary = fr.Domain
+			sr.SearchEntry.Summary = freshnessAnnotation(fr, now)
 			sr.SearchEntry.Action = "ari knows read " + fr.Domain
 
-			// Add freshness annotation (display only, D-5).
-			sr.SearchEntry.Description = freshnessAnnotation(fr, now)
+			// C-2 fix: Surface actual .know/ content through Description
+			// so the assembler receives real knowledge content, not stubs.
+			sr.SearchEntry.Description = fr.RawText
 		} else {
 			// Reconstruct structural entry fields from the original results.
 			for _, orig := range structuralResults {

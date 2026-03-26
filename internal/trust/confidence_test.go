@@ -65,18 +65,21 @@ func TestConfidenceScoring_C1_TierDifferentiation(t *testing.T) {
 			"Min freshness is low but retrieval and coverage are solid"},
 
 		// === LOW tier scenarios (7 cases) ===
-		{"zero-freshness", 0.0, 0.90, 1.0, TierLow,
-			"Unparseable timestamp -> freshness 0.0 -> overall 0.0"},
-		{"zero-coverage", 0.90, 0.85, 0.0, TierLow,
-			"No matching domains found"},
-		{"zero-retrieval", 0.90, 0.0, 1.0, TierLow,
-			"Completely irrelevant results"},
+		// WS-2.4: Zero inputs use arithmetic mean fallback. A single zero no longer
+		// collapses overall to 0.0. Cases with strong non-zero signals now classify
+		// higher, which is the intended fix (preventing false refusals).
+		{"zero-freshness-strong-others", 0.0, 0.90, 1.0, TierMedium,
+			"Unparseable timestamp but good retrieval and coverage -> arithmetic mean ~0.525"},
+		{"zero-coverage-strong-others", 0.90, 0.85, 0.0, TierMedium,
+			"No matching domains but strong freshness and retrieval -> arithmetic mean ~0.618"},
+		{"zero-retrieval-strong-others", 0.90, 0.0, 1.0, TierHigh,
+			"No search results but fresh knowledge with full coverage -> arithmetic mean ~0.705"},
 		{"all-zeros", 0.0, 0.0, 0.0, TierLow,
-			"No knowledge, no match, no coverage"},
+			"No knowledge, no match, no coverage -> 0.0"},
 		{"very-stale-poor-match", 0.10, 0.20, 0.30, TierLow,
 			"Everything is weak"},
 		{"unknown-domain-no-coverage", 0.0, 0.10, 0.0, TierLow,
-			"Query about unknown topic with no registry entries"},
+			"Query about unknown topic with no registry entries -> arithmetic mean ~0.025"},
 		{"slightly-above-zero-all-signals", 0.15, 0.15, 0.15, TierLow,
 			"All signals barely present but insufficient"},
 	}
@@ -184,19 +187,32 @@ func TestScore_GeometricMeanProperties(t *testing.T) {
 	assert.LessOrEqual(t, score.Overall, arithmeticMean)
 }
 
-func TestScore_ZeroIntolerance(t *testing.T) {
+func TestScore_ZeroFallback(t *testing.T) {
 	scorer := NewScorer(DefaultConfig())
+	cfg := DefaultConfig()
+	wf := cfg.Weights.Freshness  // 0.45
+	wr := cfg.Weights.Retrieval  // 0.25
+	wc := cfg.Weights.Coverage   // 0.30
+	wSum := wf + wr + wc
 
-	// Any single zero input forces overall to zero
+	// WS-2.4: Zero inputs use arithmetic mean fallback instead of collapsing to 0.
+	// This prevents genuine knowledge from being refused when one signal happens to be 0.
 	tests := []struct {
-		name string
-		f, r, c float64
+		name        string
+		f, r, c     float64
+		wantOverall float64
+		wantTier    ConfidenceTier
 	}{
-		{"zero-freshness", 0.0, 0.9, 0.9},
-		{"zero-retrieval", 0.9, 0.0, 0.9},
-		{"zero-coverage", 0.9, 0.9, 0.0},
-		{"all-zero", 0.0, 0.0, 0.0},
-		{"two-zeros", 0.0, 0.0, 0.9},
+		{"zero-freshness", 0.0, 0.9, 0.9,
+			(wf*0.0 + wr*0.9 + wc*0.9) / wSum, TierMedium},
+		{"zero-retrieval", 0.9, 0.0, 0.9,
+			(wf*0.9 + wr*0.0 + wc*0.9) / wSum, TierMedium},
+		{"zero-coverage", 0.9, 0.9, 0.0,
+			(wf*0.9 + wr*0.9 + wc*0.0) / wSum, TierMedium},
+		{"all-zero", 0.0, 0.0, 0.0,
+			0.0, TierLow},
+		{"two-zeros", 0.0, 0.0, 0.9,
+			(wf*0.0 + wr*0.0 + wc*0.9) / wSum, TierLow},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -205,14 +221,20 @@ func TestScore_ZeroIntolerance(t *testing.T) {
 				RetrievalQuality: tt.r,
 				DomainCoverage:   tt.c,
 			})
-			assert.Equal(t, 0.0, score.Overall)
-			assert.Equal(t, TierLow, score.Tier)
+			assert.InDelta(t, tt.wantOverall, score.Overall, 0.001,
+				"arithmetic mean fallback should produce expected overall")
+			assert.Equal(t, tt.wantTier, score.Tier)
 		})
 	}
 }
 
 func TestScore_ClampOutOfRange(t *testing.T) {
 	scorer := NewScorer(DefaultConfig())
+	cfg := DefaultConfig()
+	wf := cfg.Weights.Freshness
+	wr := cfg.Weights.Retrieval
+	wc := cfg.Weights.Coverage
+	wSum := wf + wr + wc
 
 	// Values > 1.0 clamped to 1.0; values < 0.0 clamped to 0.0
 	score := scorer.Score(ScoreInput{
@@ -221,9 +243,11 @@ func TestScore_ClampOutOfRange(t *testing.T) {
 		DomainCoverage:   0.8,
 	})
 	assert.Equal(t, 1.0, score.Freshness)
-	assert.Equal(t, 0.0, score.Retrieval) // clamped -> zero -> overall = 0
-	assert.Equal(t, 0.0, score.Overall)
-	assert.Equal(t, TierLow, score.Tier)
+	assert.Equal(t, 0.0, score.Retrieval) // clamped to zero
+	// With arithmetic fallback: (0.45*1.0 + 0.25*0.0 + 0.30*0.8) / 1.0 = 0.69
+	expectedOverall := (wf*1.0 + wr*0.0 + wc*0.8) / wSum
+	assert.InDelta(t, expectedOverall, score.Overall, 0.001)
+	assert.Equal(t, TierMedium, score.Tier)
 }
 
 func TestScore_EqualWeights(t *testing.T) {
@@ -353,6 +377,8 @@ func TestScore_WorkedExample2_StaleTestCoverage(t *testing.T) {
 
 func TestScore_WorkedExample4_CompletelyUnknown(t *testing.T) {
 	// TDD Example 4: Completely unknown topic
+	// WS-2.4: Arithmetic mean fallback: (0.45*0 + 0.25*0.1 + 0.30*0) / 1.0 = 0.025
+	// Still LOW tier (well below 0.4 threshold) -- this is genuine missing knowledge.
 	scorer := NewScorer(DefaultConfig())
 
 	score := scorer.Score(ScoreInput{
@@ -362,7 +388,7 @@ func TestScore_WorkedExample4_CompletelyUnknown(t *testing.T) {
 		MissingDomains:   []string{"kubernetes-migration"},
 	})
 
-	assert.Equal(t, 0.0, score.Overall)
+	assert.InDelta(t, 0.025, score.Overall, 0.001)
 	assert.Equal(t, TierLow, score.Tier)
 	require.NotNil(t, score.Gap)
 	assert.Contains(t, score.Gap.Suggestions[0], "kubernetes-migration")
@@ -403,8 +429,13 @@ func TestFreshnessFromChain(t *testing.T) {
 	}, &cfg.Decay, now)
 
 	freshness := FreshnessFromChain(&chain)
-	// Should be the minimum (the stale test-coverage entry)
-	assert.Less(t, freshness, 0.1)
+	// WS-2.4: Now uses WeightedMeanFreshness instead of MinFreshness.
+	// Source "a" (architecture, generated today) has freshness ~1.0, weight 2.
+	// Source "b" (test-coverage, 30 days ago on 5-day half-life) has freshness ~0.016, weight 1.
+	// Weighted mean = (2*1.0 + 1*0.016) / 3 ~= 0.672
+	// The old MinFreshness would have been ~0.016 -- a single stale source dragging everything down.
+	assert.Greater(t, freshness, 0.5, "weighted mean should not be dragged down by single stale source")
+	assert.Less(t, freshness, 1.0, "weighted mean should be below 1.0 due to stale source")
 }
 
 func TestFreshnessFromChain_NilChain(t *testing.T) {
@@ -441,11 +472,14 @@ func TestNewScorer_Config(t *testing.T) {
 }
 
 func TestScore_MonotonicallyDecreasing(t *testing.T) {
-	// As freshness decreases, overall should decrease (holding others constant)
+	// As freshness decreases, overall should decrease (holding others constant).
+	// WS-2.4: This property holds within the geometric mean domain (all inputs > 0).
+	// At the zero boundary, the arithmetic mean fallback may produce a higher value
+	// than the geometric mean near zero -- this is intentional (prevents false refusals).
 	scorer := NewScorer(DefaultConfig())
 
 	prev := 2.0
-	for f := 100; f >= 0; f -= 5 {
+	for f := 100; f >= 5; f -= 5 {
 		score := scorer.Score(ScoreInput{
 			Freshness:        float64(f) / 100.0,
 			RetrievalQuality: 0.8,
@@ -455,6 +489,16 @@ func TestScore_MonotonicallyDecreasing(t *testing.T) {
 			"overall should decrease as freshness decreases (f=%d)", f)
 		prev = score.Overall
 	}
+
+	// At f=0, arithmetic fallback kicks in. Verify it produces a reasonable
+	// score rather than collapsing to 0.0 (the old behavior).
+	zeroScore := scorer.Score(ScoreInput{
+		Freshness:        0.0,
+		RetrievalQuality: 0.8,
+		DomainCoverage:   0.9,
+	})
+	assert.Greater(t, zeroScore.Overall, 0.0,
+		"zero freshness should not collapse to 0.0 with arithmetic fallback")
 }
 
 func TestScore_SymmetricWithEqualWeights(t *testing.T) {
@@ -502,4 +546,92 @@ func TestEndToEnd_ProvenanceThroughScoring(t *testing.T) {
 	assert.Equal(t, TierHigh, score.Tier)
 	assert.Greater(t, score.Overall, 0.7)
 	assert.InDelta(t, 0.781, freshness, 0.01) // 5 days on 14-day halflife
+}
+
+// WS-2.4: Weighted mean freshness tests
+
+func TestFreshnessFromChain_WeightedMean_SingleSource(t *testing.T) {
+	// With a single source, weighted mean = that source's freshness.
+	chain := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.8},
+		},
+	}
+	assert.InDelta(t, 0.8, FreshnessFromChain(&chain), 0.001)
+}
+
+func TestFreshnessFromChain_WeightedMean_MultipleSourcesMixedFreshness(t *testing.T) {
+	// 3 sources: [0.9, 0.5, 0.2] with weights [3, 2, 1]
+	// Weighted mean = (3*0.9 + 2*0.5 + 1*0.2) / (3+2+1) = (2.7+1.0+0.2)/6 = 0.65
+	chain := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.9},
+			{QualifiedName: "b", FreshnessAtQuery: 0.5},
+			{QualifiedName: "c", FreshnessAtQuery: 0.2},
+		},
+	}
+	freshness := FreshnessFromChain(&chain)
+	assert.InDelta(t, 0.65, freshness, 0.001)
+
+	// Verify it is higher than MinFreshness (0.2)
+	assert.Greater(t, freshness, chain.MinFreshness())
+	// Verify it is higher than MeanFreshness (0.533)
+	assert.Greater(t, freshness, chain.MeanFreshness())
+}
+
+func TestFreshnessFromChain_WeightedMean_StaleSourceDoesNotDragDown(t *testing.T) {
+	// The core WS-2.4 fix: adding a mildly stale source to fresh sources
+	// should NOT pull the entire freshness to MEDIUM/LOW.
+	chainFresh := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.95},
+			{QualifiedName: "b", FreshnessAtQuery: 0.90},
+			{QualifiedName: "c", FreshnessAtQuery: 0.85},
+		},
+	}
+	chainWithStale := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.95},
+			{QualifiedName: "b", FreshnessAtQuery: 0.90},
+			{QualifiedName: "c", FreshnessAtQuery: 0.85},
+			{QualifiedName: "d", FreshnessAtQuery: 0.30}, // stale addition
+		},
+	}
+	freshOnly := FreshnessFromChain(&chainFresh)
+	withStale := FreshnessFromChain(&chainWithStale)
+
+	// Adding a stale source should lower freshness somewhat but not catastrophically.
+	// MinFreshness would drop from 0.85 to 0.30 -- a 65% drop.
+	// Weighted mean should drop much less.
+	assert.Greater(t, withStale, 0.7, "weighted mean should stay above 0.7 with one stale source among fresh ones")
+	assert.Less(t, withStale, freshOnly, "adding a stale source should lower the score somewhat")
+}
+
+// WS-2.4: Arithmetic mean fallback prevents false LOW-tier refusals
+
+func TestScore_ArithmeticFallback_GenuineLowVsFalseRefusal(t *testing.T) {
+	scorer := NewScorer(DefaultConfig())
+
+	// Case 1: Genuine missing knowledge -- should still be LOW.
+	// All zeros = truly no knowledge.
+	genuineLow := scorer.Score(ScoreInput{
+		Freshness:        0.0,
+		RetrievalQuality: 0.0,
+		DomainCoverage:   0.0,
+		MissingDomains:   []string{"unknown-feature"},
+	})
+	assert.Equal(t, TierLow, genuineLow.Tier, "all-zero should still be LOW")
+	assert.NotNil(t, genuineLow.Gap, "all-zero should have gap admission")
+
+	// Case 2: Fresh knowledge with zero retrieval (exact-match query that BM25 misses).
+	// Previously collapsed to 0.0 and refused. Now should produce a reasonable score.
+	falseRefusal := scorer.Score(ScoreInput{
+		Freshness:        0.95,
+		RetrievalQuality: 0.0,
+		DomainCoverage:   1.0,
+	})
+	assert.Greater(t, falseRefusal.Overall, 0.4,
+		"fresh knowledge with full coverage should not be refused just because retrieval is 0")
+	assert.NotEqual(t, TierLow, falseRefusal.Tier,
+		"this is a false refusal that the arithmetic fallback should prevent")
 }

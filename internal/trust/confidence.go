@@ -98,11 +98,15 @@ type ScoreInput struct {
 
 // Score computes a ConfidenceScore from the input signals.
 //
-// ## Composite Scoring Algorithm: Weighted Geometric Mean
+// ## Composite Scoring Algorithm: Weighted Geometric Mean with Arithmetic Fallback
 //
-// Formula:
+// Primary formula (when all inputs > 0):
 //
 //	Overall = (F^wf * R^wr * C^wc) ^ (1 / (wf + wr + wc))
+//
+// Fallback formula (when any input is 0):
+//
+//	Overall = (wf*F + wr*R + wc*C) / (wf + wr + wc)
 //
 // Where:
 //
@@ -112,16 +116,18 @@ type ScoreInput struct {
 //	wf, wr, wc = configured weights (default: 0.45, 0.25, 0.30)
 //
 // Properties:
-//   - Zero-intolerance: any zero input produces zero overall
+//   - Zero-tolerant: a single zero component uses arithmetic mean fallback instead
+//     of collapsing to 0.0. This prevents genuine knowledge from being refused
+//     when one signal (e.g., RetrievalQuality for exact-match queries) happens to be 0.
 //   - Weighted sensitivity: higher-weighted inputs have more influence
-//   - Diminishing returns: improving already-strong signals has less impact
+//   - Diminishing returns: improving already-strong signals has less impact (geometric mode)
 func (s *Scorer) Score(input ScoreInput) ConfidenceScore {
 	// Clamp inputs to [0.0, 1.0]
 	freshness := clamp01(input.Freshness)
 	retrieval := clamp01(input.RetrievalQuality)
 	coverage := clamp01(input.DomainCoverage)
 
-	// Compute weighted geometric mean
+	// Compute weighted geometric mean with arithmetic fallback for zero inputs.
 	wf := s.config.Weights.Freshness
 	wr := s.config.Weights.Retrieval
 	wc := s.config.Weights.Coverage
@@ -129,8 +135,10 @@ func (s *Scorer) Score(input ScoreInput) ConfidenceScore {
 
 	var overall float64
 	if freshness == 0 || retrieval == 0 || coverage == 0 {
-		// Short-circuit: any zero input -> zero overall (geometric mean property)
-		overall = 0.0
+		// Arithmetic mean fallback: prevents a single zero component from
+		// collapsing the entire score to 0.0. This ensures LOW-tier gap admissions
+		// are genuine (missing knowledge) not artifacts of zero-intolerance.
+		overall = (wf*freshness + wr*retrieval + wc*coverage) / wSum
 	} else {
 		// Weighted geometric mean via log-space computation for numerical stability:
 		// log(G) = (wf*log(F) + wr*log(R) + wc*log(C)) / (wf+wr+wc)
@@ -159,17 +167,24 @@ func (s *Scorer) Score(input ScoreInput) ConfidenceScore {
 }
 
 // FreshnessFromChain computes the freshness input from a ProvenanceChain.
-// Uses the minimum freshness across all sources (weakest-link model).
+// Uses weighted-mean freshness: each source's freshness is weighted by its
+// relative position (higher-ranked sources contribute more). This replaces the
+// previous weakest-link (MinFreshness) model which penalized breadth -- a single
+// mildly stale document would pull the entire response to MEDIUM/LOW even when
+// other sources were fresh.
+//
+// Weight scheme: source at position i gets weight (n - i) where n = total sources.
+// This gives the most relevant source the highest influence on the freshness signal.
 // Returns 0.0 for empty or nil chains.
 func FreshnessFromChain(chain *ProvenanceChain) float64 {
 	if chain == nil {
 		return 0.0
 	}
-	return chain.MinFreshness()
+	return chain.WeightedMeanFreshness()
 }
 
 // ComputeFreshness is a convenience function that computes the freshness score
-// for a set of domain entries. Returns the minimum freshness across all entries.
+// for a set of domain entries. Returns the weighted-mean freshness across all entries.
 // This is the recommended way to compute the freshness input for Score().
 func ComputeFreshness(entries []ProvenanceLinkInput, decay *DecayConfig, now time.Time) float64 {
 	if len(entries) == 0 {

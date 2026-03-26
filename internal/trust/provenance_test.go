@@ -223,3 +223,72 @@ func TestProvenanceChain_BuiltAtTimestamp(t *testing.T) {
 	chain := NewProvenanceChain(nil, &cfg.Decay, now)
 	assert.Equal(t, now, chain.BuiltAt)
 }
+
+// WS-2.4: WeightedMeanFreshness tests
+
+func TestProvenanceChain_WeightedMeanFreshness_Empty(t *testing.T) {
+	chain := ProvenanceChain{}
+	assert.Equal(t, 0.0, chain.WeightedMeanFreshness())
+}
+
+func TestProvenanceChain_WeightedMeanFreshness_SingleSource(t *testing.T) {
+	chain := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.75},
+		},
+	}
+	// Single source: weight=1, sum=1 -> 0.75/1 = 0.75
+	assert.InDelta(t, 0.75, chain.WeightedMeanFreshness(), 0.001)
+}
+
+func TestProvenanceChain_WeightedMeanFreshness_PositionWeighted(t *testing.T) {
+	chain := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.9}, // weight 3 (most relevant)
+			{QualifiedName: "b", FreshnessAtQuery: 0.5}, // weight 2
+			{QualifiedName: "c", FreshnessAtQuery: 0.2}, // weight 1 (least relevant)
+		},
+	}
+	// (3*0.9 + 2*0.5 + 1*0.2) / (3+2+1) = (2.7+1.0+0.2) / 6 = 0.65
+	assert.InDelta(t, 0.65, chain.WeightedMeanFreshness(), 0.001)
+}
+
+func TestProvenanceChain_WeightedMeanFreshness_HigherThanMin(t *testing.T) {
+	chain := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.95},
+			{QualifiedName: "b", FreshnessAtQuery: 0.90},
+			{QualifiedName: "c", FreshnessAtQuery: 0.10}, // stale outlier
+		},
+	}
+	weighted := chain.WeightedMeanFreshness()
+	min := chain.MinFreshness()
+	mean := chain.MeanFreshness()
+
+	// Weighted mean should favor the higher-ranked fresh sources
+	assert.Greater(t, weighted, min, "weighted mean should be above min (0.10)")
+	assert.Greater(t, weighted, mean, "weighted mean should be above simple mean for this distribution")
+	assert.Greater(t, weighted, 0.7, "weighted mean should stay high with position weighting")
+}
+
+func TestProvenanceChain_WeightedMeanFreshness_AllZero(t *testing.T) {
+	chain := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.0},
+			{QualifiedName: "b", FreshnessAtQuery: 0.0},
+		},
+	}
+	assert.Equal(t, 0.0, chain.WeightedMeanFreshness())
+}
+
+func TestProvenanceChain_WeightedMeanFreshness_EqualFreshness(t *testing.T) {
+	// When all sources have equal freshness, weighted mean = that freshness
+	chain := ProvenanceChain{
+		Sources: []ProvenanceLink{
+			{QualifiedName: "a", FreshnessAtQuery: 0.6},
+			{QualifiedName: "b", FreshnessAtQuery: 0.6},
+			{QualifiedName: "c", FreshnessAtQuery: 0.6},
+		},
+	}
+	assert.InDelta(t, 0.6, chain.WeightedMeanFreshness(), 0.001)
+}

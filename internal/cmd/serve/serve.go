@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -13,6 +14,7 @@ import (
 	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/envload"
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/llm"
 	"github.com/autom8y/knossos/internal/observe"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/reason"
@@ -26,6 +28,7 @@ import (
 	"github.com/autom8y/knossos/internal/serve/webhook"
 	internalslack "github.com/autom8y/knossos/internal/slack"
 	"github.com/autom8y/knossos/internal/tokenizer"
+	"github.com/autom8y/knossos/internal/triage"
 	"github.com/autom8y/knossos/internal/trust"
 )
 
@@ -185,11 +188,28 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		queryRunner = observe.NewInstrumentedPipeline(pipelineResult.pipeline, costTracker)
 	}
 
+	// Build triage orchestrator (Sprint 5).
+	// BC-01: llm.Client in internal/llm/, shared by all callsites.
+	// BC-02: triage.Orchestrator is a new top-level package.
+	var triageAdapter internalslack.TriageRunner
+	llmClient, llmErr := llm.NewAnthropicClient(llm.DefaultClientConfig())
+	if llmErr != nil {
+		slog.Warn("LLM client not available, triage pipeline disabled", "error", llmErr)
+	} else if pipelineResult.searchIndex != nil {
+		// Create search index adapter for triage.
+		triageSearchIdx := &triageSearchAdapter{searchIndex: pipelineResult.searchIndex, catalog: pipelineResult.catalog}
+		// Sprint 5: StubEmbeddingModel triggers BM25 fallback (BC-06).
+		embeddingModel := &triage.StubEmbeddingModel{}
+		triageOrch := triage.NewOrchestrator(llmClient, triageSearchIdx, embeddingModel)
+		triageAdapter = &triageOrchestratorAdapter{orch: triageOrch}
+		slog.Info("triage orchestrator initialized (Sprint 5: BM25 fallback mode)")
+	}
+
 	// Create Slack client and handler.
 	slackClient := internalslack.NewSlackClient(cfg.SlackBotToken)
 	slackCfg := internalslack.DefaultSlackConfig()
 	slackCfg.BotToken = cfg.SlackBotToken
-	slackHandler, _ := internalslack.NewSlackHandler(queryRunner, slackClient, slackCfg)
+	slackHandler, ctxStore := internalslack.NewSlackHandler(queryRunner, slackClient, slackCfg, triageAdapter)
 
 	// Register webhook verification middleware wrapping the Slack handler.
 	verifier := webhook.NewVerifier(cfg.SlackSigningSecret)
@@ -242,9 +262,13 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 
 	// Start blocks until shutdown signal.
 	if err := srv.Start(context.Background()); err != nil {
+		ctxStore.Stop()
 		return common.PrintAndReturn(printer,
 			errors.Wrap(errors.CodeServerStartFailed, "server failed to start", err))
 	}
+
+	// Stop the ThreadContextStore cleanup goroutine on graceful shutdown.
+	ctxStore.Stop()
 
 	return nil
 }
@@ -342,4 +366,126 @@ func buildPipeline() pipelineComponents {
 	)
 
 	return result
+}
+
+// ---- Triage adapters (bridges triage package types to handler types) ----
+
+// triageSearchAdapter adapts *search.SearchIndex to triage.SearchIndex interface.
+type triageSearchAdapter struct {
+	searchIndex *search.SearchIndex
+	catalog     *registryorg.DomainCatalog
+}
+
+func (a *triageSearchAdapter) SearchByBM25(query string, k int) []triage.BM25Result {
+	if a.searchIndex == nil || !a.searchIndex.HasBM25() {
+		return nil
+	}
+
+	results := a.searchIndex.Search(query, search.SearchOptions{
+		Limit:   k,
+		Domains: []search.Domain{search.DomainKnowledge},
+	})
+
+	var out []triage.BM25Result
+	for _, r := range results {
+		if r.Domain == search.DomainKnowledge {
+			out = append(out, triage.BM25Result{
+				QualifiedName: r.Name,
+				Score:         float64(r.Score),
+				Domain:        string(r.Domain),
+				RawText:       r.Description,
+			})
+		}
+	}
+	return out
+}
+
+func (a *triageSearchAdapter) GetMetadata(qualifiedName string) (*triage.DomainMetadata, bool) {
+	if a.catalog == nil {
+		return nil, false
+	}
+
+	entry, ok := a.catalog.LookupDomain(qualifiedName)
+	if !ok {
+		return nil, false
+	}
+
+	return &triage.DomainMetadata{
+		QualifiedName:  entry.QualifiedName,
+		DomainType:     entry.Domain,
+		Repo:           repoFromQualifiedName(entry.QualifiedName),
+		FreshnessScore: 0, // Tier 1: freshness computed at query time, not stored.
+		GeneratedAt:    entry.GeneratedAt,
+	}, true
+}
+
+func (a *triageSearchAdapter) ListAllDomains() []triage.DomainMetadata {
+	if a.catalog == nil {
+		return nil
+	}
+
+	domains := a.catalog.ListDomains()
+	var out []triage.DomainMetadata
+	for _, d := range domains {
+		out = append(out, triage.DomainMetadata{
+			QualifiedName:  d.QualifiedName,
+			DomainType:     d.Domain,
+			Repo:           repoFromQualifiedName(d.QualifiedName),
+			FreshnessScore: 0, // Tier 1: freshness computed at query time.
+			GeneratedAt:    d.GeneratedAt,
+		})
+	}
+	return out
+}
+
+// triageOrchestratorAdapter adapts *triage.Orchestrator to internalslack.TriageRunner.
+type triageOrchestratorAdapter struct {
+	orch *triage.Orchestrator
+}
+
+func (a *triageOrchestratorAdapter) Assess(ctx context.Context, query string, threadHistory []internalslack.TriageThreadMessage) (*internalslack.TriageResultData, error) {
+	// Convert handler thread messages to triage thread messages.
+	var triageHistory []triage.ThreadMessage
+	for _, m := range threadHistory {
+		triageHistory = append(triageHistory, triage.ThreadMessage{
+			Role:      m.Role,
+			Content:   m.Content,
+			Timestamp: m.Timestamp,
+		})
+	}
+
+	result, err := a.orch.Assess(ctx, query, triageHistory)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, nil
+	}
+
+	// Convert triage result to handler type.
+	data := &internalslack.TriageResultData{
+		RefinedQuery:   result.RefinedQuery,
+		ModelCallCount: result.ModelCallCount,
+	}
+	for _, c := range result.Candidates {
+		data.Candidates = append(data.Candidates, internalslack.TriageCandidateData{
+			QualifiedName:       c.QualifiedName,
+			RelevanceScore:      c.RelevanceScore,
+			EmbeddingSimilarity: c.EmbeddingSimilarity,
+			Freshness:           c.Freshness,
+			Rationale:           c.Rationale,
+			DomainType:          c.DomainType,
+			RelatedDomains:      c.RelatedDomains,
+		})
+	}
+	return data, nil
+}
+
+// repoFromQualifiedName extracts the repo from "org::repo::domain".
+func repoFromQualifiedName(qn string) string {
+	parts := strings.SplitN(qn, "::", 3)
+	if len(parts) >= 2 {
+		return parts[1]
+	}
+	return ""
 }
