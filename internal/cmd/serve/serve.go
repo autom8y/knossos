@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -620,11 +621,8 @@ func buildKnowledgeIndex(ctx context.Context, pr pipelineComponents, llmClient *
 		kiLLMClient = &knowledgeLLMAdapter{client: llmClient}
 	}
 
-	// Resolve persisted path: prefer env var, then default container path.
-	persistedPath := knowledge.DefaultPersistedPath
-	if envPath := os.Getenv("CLEW_KNOWLEDGE_INDEX_PATH"); envPath != "" {
-		persistedPath = envPath
-	}
+	// Resolve persisted path: env var > XDG data dir > container default.
+	persistedPath := resolveKnowledgeIndexPath()
 
 	cfg := knowledge.BuildConfig{
 		Catalog:       catalogAdapter,
@@ -650,13 +648,22 @@ func buildKnowledgeIndex(ctx context.Context, pr pipelineComponents, llmClient *
 	return idx
 }
 
-// loadPrebakedKnowledgeIndex attempts to load a pre-baked KnowledgeIndex JSON
-// from the default persist path. Returns nil if not found or invalid.
-func loadPrebakedKnowledgeIndex() *knowledge.KnowledgeIndex {
-	persistedPath := knowledge.DefaultPersistedPath
+// resolveKnowledgeIndexPath returns the path for persisting the knowledge index.
+// Resolution order: CLEW_KNOWLEDGE_INDEX_PATH env var > XDG data dir > container default.
+func resolveKnowledgeIndexPath() string {
 	if envPath := os.Getenv("CLEW_KNOWLEDGE_INDEX_PATH"); envPath != "" {
-		persistedPath = envPath
+		return envPath
 	}
+	// Use XDG data dir for local dev; falls back to container path if
+	// XDG resolution returns the container-specific nonroot path.
+	xdgPath := filepath.Join(config.XDGDataDir(), "knowledge-index.json")
+	return xdgPath
+}
+
+// loadPrebakedKnowledgeIndex attempts to load a pre-baked KnowledgeIndex JSON
+// from the resolved persist path. Returns nil if not found or invalid.
+func loadPrebakedKnowledgeIndex() *knowledge.KnowledgeIndex {
+	persistedPath := resolveKnowledgeIndexPath()
 
 	idx, err := knowledge.Load(persistedPath)
 	if err != nil {
