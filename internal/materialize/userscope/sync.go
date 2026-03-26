@@ -269,6 +269,11 @@ func (s *syncer) syncUserResource(
 
 	for key, entry := range manifest.Entries {
 		if entry.Owner == provenance.OwnerKnossos && prefix != "" && strings.HasPrefix(key, prefix) {
+			// Exclude summoned agents from orphan tracking — their lifecycle is
+			// managed by ari agent summon/dismiss, not by ari sync.
+			if strings.HasPrefix(entry.SourcePath, "summon:") {
+				continue
+			}
 			snapshot[key] = false
 		}
 	}

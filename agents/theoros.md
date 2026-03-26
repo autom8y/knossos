@@ -5,6 +5,7 @@ description: |
   Use when: running theoria audits, evaluating domain health, producing
   "State of the X" reports. Triggers: audit, theoria, domain evaluation,
   state-of, health check, theoros.
+tier: summonable
 type: analyst
 tools: Bash, Glob, Grep, Read, Skill
 model: sonnet
@@ -16,7 +17,7 @@ skills:
 disallowedTools:
   - Write
   - Edit
-  - Task
+  - Agent
   - NotebookEdit
 contract:
   must_not:

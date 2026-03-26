@@ -35,6 +35,16 @@ Some code paths already read the file for other reasons (Phase 0 time-only, Phas
 
 ## Codebase Domain Pipeline (Default)
 
+## Pre-flight: Theoros Availability
+
+Check if theoros is currently available:
+1. Run `ls ~/.claude/agents/theoros.md 2>/dev/null` via Bash
+2. If file exists: proceed to Pre-flight argument parsing
+3. If file missing:
+   a. Run `ari agent summon theoros` via Bash
+   b. Tell user: "Theoros summoned. Restart CC to activate, then re-run /know."
+   c. STOP — do not attempt Agent("theoros") until restart
+
 ## Pre-flight
 
 1. **Parse arguments**:
@@ -1106,3 +1116,10 @@ Regenerate all: `/know --scope=feature --force`
 - **Skipping the human gate in feature flow**: The census-to-generation gate is MANDATORY. Do NOT proceed to per-feature generation without explicit user confirmation. The census may contain incorrect feature boundaries that the user must review.
 - **Generating features marked SKIP**: Only features with GENERATE recommendation enter the generation queue. SKIP features are excluded unless the user edits INDEX.md to change the recommendation before confirming.
 - **Sequential feature dispatch**: When generating multiple features, ALL Task calls MUST be in one response block (Argus Pattern). Sequential dispatch wastes wall-clock time.
+
+## Closure: Theoros Dismissal
+
+After ALL knowledge generation is complete (all domains written, verified, and any feature flow finished):
+
+1. Run `ari agent dismiss theoros` via Bash
+2. Note: dismissal takes effect on next CC restart (or session end via autopark safety net)

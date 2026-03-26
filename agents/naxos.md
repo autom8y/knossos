@@ -5,13 +5,14 @@ description: |
   triages by severity, and produces structured handoff artifact.
   Use when: cleaning up abandoned sessions, triaging stale sessions,
   assessing session hygiene. Triggers: orphan, triage, cleanup, stale, hygiene.
+tier: summonable
 model: sonnet
 color: orange
 maxTurns: 30
 tools: Read, Write, Bash, Glob, Grep
 disallowedTools:
   - Edit
-  - Task
+  - Agent
   - NotebookEdit
   - Skill
 contract:

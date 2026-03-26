@@ -5,6 +5,7 @@ description: |
   produces domain-scoped persistent knowledge files in .sos/land/{domain}.md.
   Use when: synthesizing archived sessions, generating land files, building
   cross-session knowledge. Triggers: synthesize, land, knowledge synthesis.
+tier: summonable
 model: opus
 color: purple
 maxTurns: 75
@@ -12,7 +13,7 @@ tools: Read, Write, Glob, Grep
 disallowedTools:
   - Bash
   - Edit
-  - Task
+  - Agent
   - NotebookEdit
   - Skill
 contract:
