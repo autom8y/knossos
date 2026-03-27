@@ -254,6 +254,56 @@ func printDiagnosticOutput(
 		}
 	}
 
+	// CE Mechanisms section.
+	if resp.CEDiagnostics != nil {
+		diag := resp.CEDiagnostics
+		fmt.Fprintf(w, "\n%s CE Mechanisms %s\n", diagSep, strings.Repeat("━", 33))
+		fmt.Fprintf(w, "Budget: %d tokens | Ceiling: %d per type\n", diag.SourceBudget, diag.TypeCeiling)
+		fmt.Fprintf(w, "Packed: %d total (%d sections)\n", diag.TotalCandidatesPacked, diag.SectionCandidatesPacked)
+
+		if len(diag.TypeTokenBreakdown) > 0 {
+			fmt.Fprintf(w, "Type token breakdown:\n")
+			totalTokens := 0
+			for _, v := range diag.TypeTokenBreakdown {
+				totalTokens += v
+			}
+			for typ, tokens := range diag.TypeTokenBreakdown {
+				pct := 0.0
+				if totalTokens > 0 {
+					pct = float64(tokens) / float64(totalTokens) * 100
+				}
+				fmt.Fprintf(w, "  %-20s %5d tokens (%4.1f%%)\n", typ, tokens, pct)
+			}
+		}
+
+		if len(diag.DiversityFloorEvents) > 0 {
+			fmt.Fprintf(w, "Diversity floor enforced:\n")
+			for _, e := range diag.DiversityFloorEvents {
+				summaryNote := ""
+				if e.UsedSummary {
+					summaryNote = " (summary)"
+				}
+				fmt.Fprintf(w, "  + %-20s via %s (score=%.2f)%s\n",
+					e.FloorType, e.QualifiedName, e.Score, summaryNote)
+			}
+		}
+
+		if len(diag.TypeCeilingHits) > 0 {
+			fmt.Fprintf(w, "Type ceiling hits:\n")
+			for _, h := range diag.TypeCeilingHits {
+				action := "packed"
+				if h.Skipped {
+					action = "SKIPPED"
+				}
+				if h.UsedSummary {
+					action += " (summary)"
+				}
+				fmt.Fprintf(w, "  ! %-20s %s: %d+%d > %d -> %s\n",
+					h.DomainType, h.QualifiedName, h.TokensBefore, h.CandidateTokens, h.Ceiling, action)
+			}
+		}
+	}
+
 	// Response section.
 	fmt.Fprintf(w, "\n%s Response %s\n", diagSep, strings.Repeat("━", 37))
 	fmt.Fprintln(w, resp.Answer)
@@ -326,12 +376,24 @@ func printTriageDiagnostic(result *triage.TriageResult, elapsed time.Duration) {
 	fmt.Fprintf(w, "Candidates: %d | Model calls: %d | Latency: %s\n",
 		len(result.Candidates), result.ModelCallCount, formatDuration(elapsed))
 
+	graphInjectedCount := 0
 	for i, c := range result.Candidates {
-		fmt.Fprintf(w, "  #%d %-45s score=%.2f freshness=%.2f\n",
-			i+1, c.QualifiedName, c.RelevanceScore, c.Freshness)
+		flags := ""
+		if c.MatchType == "section" {
+			flags += " [section]"
+		}
+		if len(c.RelatedDomains) > 0 {
+			flags += " [graph-injected]"
+			graphInjectedCount++
+		}
+		fmt.Fprintf(w, "  #%d %-45s score=%.2f type=%-18s%s\n",
+			i+1, c.QualifiedName, c.RelevanceScore, c.DomainType, flags)
 		if c.Rationale != "" {
 			fmt.Fprintf(w, "     %s\n", c.Rationale)
 		}
+	}
+	if graphInjectedCount > 0 {
+		fmt.Fprintf(w, "  Graph injected: %d candidates\n", graphInjectedCount)
 	}
 }
 

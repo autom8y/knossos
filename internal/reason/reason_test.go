@@ -151,6 +151,10 @@ func TestPipeline_ActIntent_NotCallsClaude(t *testing.T) {
 }
 
 func TestPipeline_LowConfidence_NeverCallsClaude(t *testing.T) {
+	// Prevent CLEW_CONTENT_DIR from polluting BM25 with section candidates
+	// that resolve to catalog parents via provenance chain.
+	t.Setenv("CLEW_CONTENT_DIR", "")
+
 	// Empty search results -> zero retrieval quality -> TierLow -> Claude NOT called.
 	mock := &response.MockClaudeClient{}
 	p := buildTestPipeline(mock)
@@ -169,6 +173,10 @@ func TestPipeline_LowConfidence_NeverCallsClaude(t *testing.T) {
 
 func TestPipeline_EmptySearchResults_LowConfidence(t *testing.T) {
 	// Explicit zero-search scenario.
+	// Clear CLEW_CONTENT_DIR to prevent environment-dependent BM25 results
+	// from producing section candidates that resolve to catalog parents.
+	t.Setenv("CLEW_CONTENT_DIR", "")
+
 	mock := &response.MockClaudeClient{}
 	p := buildTestPipeline(mock)
 

@@ -63,6 +63,54 @@ type AssembledContext struct {
 
 	// Tier is the confidence tier governing prompt behavior.
 	Tier trust.ConfidenceTier
+
+	// CEDiagnostics tracks contextual-equilibrium mechanism activity.
+	// Non-nil when assembly completes with CE mechanisms active.
+	CEDiagnostics *CEDiagnostics
+}
+
+// CEDiagnostics captures contextual-equilibrium mechanism activity during assembly.
+// Populated by the Assembler to verify all five CE mechanisms are observable.
+type CEDiagnostics struct {
+	// TypeTokenBreakdown maps domain type -> total tokens consumed.
+	TypeTokenBreakdown map[string]int
+
+	// DiversityFloorEvents lists floor enforcement actions (WS-1).
+	DiversityFloorEvents []DiversityFloorEvent
+
+	// TypeCeilingHits lists per-type budget ceiling events (WS-5).
+	TypeCeilingHits []TypeCeilingHit
+
+	// SectionCandidatesPacked is the count of section-type candidates included (WS-2).
+	SectionCandidatesPacked int
+
+	// TotalCandidatesPacked is the total count of candidates included.
+	TotalCandidatesPacked int
+
+	// SourceBudget is the resolved source budget in tokens.
+	SourceBudget int
+
+	// TypeCeiling is the per-type budget ceiling in tokens (0 = disabled).
+	TypeCeiling int
+}
+
+// DiversityFloorEvent records a single floor enforcement action.
+type DiversityFloorEvent struct {
+	FloorType     string  // The domain type that was missing
+	QualifiedName string  // The candidate that was force-included
+	Score         float64 // The candidate's relevance score
+	UsedSummary   bool    // Whether summary substitution was used
+}
+
+// TypeCeilingHit records when a domain type hit its budget ceiling.
+type TypeCeilingHit struct {
+	DomainType      string // The type that hit the ceiling
+	QualifiedName   string // The candidate that triggered it
+	TokensBefore    int    // Tokens already consumed by this type
+	CandidateTokens int    // Tokens the candidate would have consumed
+	Ceiling         int    // The per-type ceiling
+	UsedSummary     bool   // Whether summary substitution was attempted
+	Skipped         bool   // Whether the candidate was ultimately skipped
 }
 
 // BudgetReport tracks token allocation for a single context assembly.

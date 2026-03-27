@@ -3,6 +3,7 @@
 package response
 
 import (
+	reasoncontext "github.com/autom8y/knossos/internal/reason/context"
 	"github.com/autom8y/knossos/internal/trust"
 )
 
@@ -43,6 +44,10 @@ type ReasoningResponse struct {
 
 	// DegradedReason explains why the response is degraded, if applicable.
 	DegradedReason string
+
+	// CEDiagnostics tracks contextual-equilibrium mechanism activity.
+	// Non-nil when assembly completed with CE mechanisms active.
+	CEDiagnostics *reasoncontext.CEDiagnostics
 }
 
 // IntentSummary is a lightweight copy of intent.IntentResult for inclusion in the response.

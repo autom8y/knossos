@@ -240,15 +240,34 @@ func (a *Assembler) Assemble(
 			freshness = 0.0
 		}
 
+		// Resolve domain and repo. For section candidates (QN contains "##"),
+		// fall back to the parent document QN for provenance chain lookups.
+		domain := domainByQN[qn]
+		repo := repoByQN[qn]
+		generatedAt := generatedAtByQN[qn]
+		if domain == "" {
+			if idx := strings.Index(qn, "##"); idx > 0 {
+				parentQN := qn[:idx]
+				domain = domainByQN[parentQN]
+				repo = repoByQN[parentQN]
+				if generatedAt.IsZero() {
+					generatedAt = generatedAtByQN[parentQN]
+				}
+				if !hasFreshness {
+					freshness = freshnessByQN[parentQN]
+				}
+			}
+		}
+
 		src := SourceMaterial{
 			QualifiedName:  qn,
 			Content:        content,
 			TokenCount:     tokenCount,
 			Freshness:      freshness,
 			FreshnessLabel: freshnessLabel(freshness),
-			GeneratedAt:    generatedAtByQN[qn],
-			Domain:         domainByQN[qn],
-			Repo:           repoByQN[qn],
+			GeneratedAt:    generatedAt,
+			Domain:         domain,
+			Repo:           repo,
 			RelevanceScore: relevanceScore,
 		}
 
@@ -324,6 +343,13 @@ func (a *Assembler) Assemble(
 	}
 	var included []SourceMaterial
 
+	// CE diagnostic tracking.
+	diag := &CEDiagnostics{
+		TypeTokenBreakdown: make(map[string]int),
+		SourceBudget:       sourceBudget,
+		TypeCeiling:        typeCeiling,
+	}
+
 	for i, c := range candidates {
 		src := c.source
 
@@ -341,18 +367,29 @@ func (a *Assembler) Assemble(
 		// Ceiling enforcement starts with the second candidate of the same type.
 		if typeCeiling > 0 && typeTokens[src.Domain] > 0 &&
 			typeTokens[src.Domain]+src.TokenCount > typeCeiling {
+			ceilingHit := TypeCeilingHit{
+				DomainType:      src.Domain,
+				QualifiedName:   src.QualifiedName,
+				TokensBefore:    typeTokens[src.Domain],
+				CandidateTokens: src.TokenCount,
+				Ceiling:         typeCeiling,
+			}
 			// Type ceiling would be exceeded. Try summary substitution.
 			if a.config.SummaryLookup != nil {
 				if summary, ok := a.config.SummaryLookup(src.QualifiedName); ok && summary != "" {
 					src.Content = summary
 					src.TokenCount = a.counter.Count(summary)
+					ceilingHit.UsedSummary = true
 				}
 			}
 			// Re-check after substitution.
 			if typeTokens[src.Domain]+src.TokenCount > typeCeiling {
 				// Still exceeds ceiling — skip this candidate.
+				ceilingHit.Skipped = true
+				diag.TypeCeilingHits = append(diag.TypeCeilingHits, ceilingHit)
 				continue
 			}
+			diag.TypeCeilingHits = append(diag.TypeCeilingHits, ceilingHit)
 		}
 
 		// Consume() returns true if the item fits and increments included.
@@ -366,7 +403,17 @@ func (a *Assembler) Assemble(
 	}
 
 	// WS-1: Diversity floor post-pass — ensure floor types are represented.
-	included = a.diversityFloorPass(included, candidates, budgetMgr)
+	included, floorEvents := a.diversityFloorPass(included, candidates, budgetMgr)
+	diag.DiversityFloorEvents = floorEvents
+
+	// Compute final CE diagnostics from included sources.
+	diag.TotalCandidatesPacked = len(included)
+	for _, src := range included {
+		diag.TypeTokenBreakdown[src.Domain] += src.TokenCount
+		if strings.Contains(src.QualifiedName, "##") {
+			diag.SectionCandidatesPacked++
+		}
+	}
 
 	// Render system prompt with included sources and conversation history.
 	systemPrompt := RenderSystemPrompt(org, score.Tier, included, a.config.OrgTopology, conversationHistory...)
@@ -378,11 +425,12 @@ func (a *Assembler) Assemble(
 	report.TotalTokens = report.SystemPromptTokens + report.SourceMaterialTokens + report.UserMessageTokens
 
 	return &AssembledContext{
-		SystemPrompt: systemPrompt,
-		UserMessage:  question,
-		Sources:      included,
-		Budget:       report,
-		Tier:         score.Tier,
+		SystemPrompt:  systemPrompt,
+		UserMessage:   question,
+		Sources:       included,
+		Budget:        report,
+		Tier:          score.Tier,
+		CEDiagnostics: diag,
 	}
 }
 
@@ -446,10 +494,12 @@ func scopeRelevance(qualifiedName, query string) float64 {
 //
 // WS-1: Post-greedy-pass correction. Floor types are configurable (AP-4).
 // Floor enforcement is gated by relevance threshold (R-6 mitigation).
-func (a *Assembler) diversityFloorPass(included []SourceMaterial, candidates []candidate, budgetMgr *BudgetManager) []SourceMaterial {
+func (a *Assembler) diversityFloorPass(included []SourceMaterial, candidates []candidate, budgetMgr *BudgetManager) ([]SourceMaterial, []DiversityFloorEvent) {
 	if len(a.config.DiversityFloorTypes) == 0 {
-		return included
+		return included, nil
 	}
+
+	var events []DiversityFloorEvent
 
 	// Build set of domain types already represented.
 	representedTypes := make(map[string]bool)
@@ -488,12 +538,14 @@ func (a *Assembler) diversityFloorPass(included []SourceMaterial, candidates []c
 		}
 
 		src := best.source
+		usedSummary := false
 
 		// Try summary substitution first (lower token cost).
 		if a.config.SummaryLookup != nil {
 			if summary, ok := a.config.SummaryLookup(src.QualifiedName); ok && summary != "" {
 				src.Content = summary
 				src.TokenCount = a.counter.Count(summary)
+				usedSummary = true
 			}
 		}
 
@@ -503,10 +555,16 @@ func (a *Assembler) diversityFloorPass(included []SourceMaterial, candidates []c
 			budgetMgr.Consume(src.TokenCount)
 			included = append(included, src)
 			representedTypes[floorType] = true
+			events = append(events, DiversityFloorEvent{
+				FloorType:     floorType,
+				QualifiedName: src.QualifiedName,
+				Score:         best.source.RelevanceScore,
+				UsedSummary:   usedSummary,
+			})
 		}
 	}
 
-	return included
+	return included, events
 }
 
 // freshnessLabel returns a human-readable freshness annotation.

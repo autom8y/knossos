@@ -94,6 +94,7 @@ func TestClassifier_ObserveCorpus(t *testing.T) {
 // TestPipeline_LowConfidence_NeverCallsClaude_CorpusValidation validates that
 // with an empty search index, all queries produce LOW tier and never call Claude (D-9).
 func TestPipeline_LowConfidence_NeverCallsClaude_CorpusValidation(t *testing.T) {
+	t.Setenv("CLEW_CONTENT_DIR", "")
 	for _, q := range testdata.LowConfidenceQueries {
 		q := q
 		t.Run(q.ID, func(t *testing.T) {
@@ -188,6 +189,7 @@ func TestPipeline_ThreeTierDistinction(t *testing.T) {
 // TestPipeline_GapDetection validates that LOW confidence responses contain
 // actionable gap information (PT-06-C4).
 func TestPipeline_GapDetection(t *testing.T) {
+	t.Setenv("CLEW_CONTENT_DIR", "")
 	mock := &response.MockClaudeClient{}
 	p := buildTestPipeline(mock)
 

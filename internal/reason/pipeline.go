@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/autom8y/knossos/internal/know"
@@ -139,7 +140,12 @@ func (p *Pipeline) Query(ctx context.Context, question string) (*response.Reason
 	intentSummary := buildIntentSummary(intentResult)
 
 	// Step 9: Generate response (HIGH or MEDIUM tier).
-	return p.generator.Generate(ctx, assembled, confidence, &chain, intentSummary)
+	resp, err := p.generator.Generate(ctx, assembled, confidence, &chain, intentSummary)
+	if err != nil {
+		return nil, err
+	}
+	resp.CEDiagnostics = assembled.CEDiagnostics
+	return resp, nil
 }
 
 // unsupportedResponse creates a response for Record/Act intents (Tier 2/3).
@@ -293,7 +299,17 @@ func buildProvenanceLinkInputs(
 		}
 		seen[qn] = true
 
-		entry, ok := catalog.LookupDomain(qn)
+		// For section candidates (QN contains "##"), look up the parent
+		// document in the catalog. Section QNs aren't in the catalog directly.
+		lookupQN := qn
+		if idx := strings.Index(lookupQN, "##"); idx > 0 {
+			lookupQN = lookupQN[:idx]
+			if seen[lookupQN] {
+				continue // Parent already added via another candidate.
+			}
+		}
+
+		entry, ok := catalog.LookupDomain(lookupQN)
 		if !ok {
 			continue
 		}
@@ -423,7 +439,12 @@ func (p *Pipeline) QueryWithTriage(ctx context.Context, triageInput *TriageResul
 	}
 
 	// Generate response.
-	return p.generator.Generate(ctx, assembled, confidence, &chain, intentSummary)
+	resp, err := p.generator.Generate(ctx, assembled, confidence, &chain, intentSummary)
+	if err != nil {
+		return nil, err
+	}
+	resp.CEDiagnostics = assembled.CEDiagnostics
+	return resp, nil
 }
 
 // QueryStream runs the reasoning pipeline with streaming output using pre-computed triage results.
@@ -507,7 +528,12 @@ func (p *Pipeline) QueryStream(ctx context.Context, triageInput *TriageResultInp
 	}
 
 	// Generate with streaming.
-	return p.generator.GenerateStream(ctx, assembled, confidence, &chain, intentSummary, onChunk)
+	resp, err := p.generator.GenerateStream(ctx, assembled, confidence, &chain, intentSummary, onChunk)
+	if err != nil {
+		return nil, err
+	}
+	resp.CEDiagnostics = assembled.CEDiagnostics
+	return resp, nil
 }
 
 // triageCandidatesToSearchResults converts triage candidates to search results
