@@ -17,9 +17,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"strings"
 	"time"
 
+	"github.com/autom8y/knossos/internal/know"
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
 	"github.com/autom8y/knossos/internal/search"
 	"github.com/autom8y/knossos/internal/trust"
@@ -304,21 +304,11 @@ func buildProvenanceLinkInputs(
 			SourceHash:    entry.SourceHash,
 			FilePath:      entry.Path,
 			Domain:        entry.Domain,
-			Repo:          repoFromQualifiedName(entry.QualifiedName),
+			Repo:          know.RepoFromQualifiedName(entry.QualifiedName),
 		})
 	}
 
 	return inputs
-}
-
-// repoFromQualifiedName extracts the repo component from a qualified name "org::repo::domain".
-// Returns empty string if the format is not as expected.
-func repoFromQualifiedName(qn string) string {
-	parts := strings.SplitN(qn, "::", 3)
-	if len(parts) >= 2 {
-		return parts[1]
-	}
-	return ""
 }
 
 // TriageCandidateInput holds triage candidate data passed to the pipeline.

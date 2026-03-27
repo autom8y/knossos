@@ -11,6 +11,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/search/knowledge/embedding"
 	"github.com/autom8y/knossos/internal/search/knowledge/graph"
 	"github.com/autom8y/knossos/internal/search/knowledge/summary"
@@ -97,7 +98,7 @@ func Build(ctx context.Context, cfg BuildConfig) (*KnowledgeIndex, error) {
 		meta := &DomainMetadata{
 			QualifiedName:  qn,
 			DomainType:     d.Domain,
-			Repo:           repoFromQualifiedName(qn),
+			Repo:           know.RepoFromQualifiedName(qn),
 			SourceHash:     currentHash,
 			GeneratedAt:    d.GeneratedAt,
 			FreshnessScore: 0, // BC-12: zero in Tier 1.
@@ -346,15 +347,6 @@ func slugify(heading string) string {
 		result = result[:60]
 	}
 	return result
-}
-
-// repoFromQualifiedName extracts the repo from "org::repo::domain".
-func repoFromQualifiedName(qn string) string {
-	parts := strings.SplitN(qn, "::", 3)
-	if len(parts) >= 2 {
-		return parts[1]
-	}
-	return ""
 }
 
 // truncateForEmbedding truncates text to maxChars while trying to break at a word boundary.

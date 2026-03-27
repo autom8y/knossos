@@ -26,11 +26,14 @@ type OrgContext interface {
 
 // DomainEntry records a single .know/ domain discovered from a repo.
 type DomainEntry struct {
-	// QualifiedName is the canonical cross-repo address: "org::repo::domain".
+	// QualifiedName is the canonical cross-repo address: "org::repo[/scope]::domain".
 	QualifiedName string `yaml:"qualified_name"`
 	// Domain is the bare domain name as found in the .know/ file's frontmatter.
 	Domain string `yaml:"domain"`
-	// Path is the file path within the repo (e.g., ".know/architecture.md").
+	// Scope is the path from repo root to the .know/ directory (e.g., "services/ads").
+	// Empty for root-scope domains.
+	Scope string `yaml:"scope,omitempty"`
+	// Path is the file path within the repo (e.g., ".know/architecture.md" or "services/ads/.know/architecture.md").
 	Path string `yaml:"path"`
 	// GeneratedAt is the RFC3339 timestamp from the domain file's frontmatter.
 	GeneratedAt string `yaml:"generated_at"`
@@ -102,7 +105,7 @@ type DomainCatalog struct {
 	Repos []RepoEntry `yaml:"repos"`
 }
 
-const catalogSchemaVersion = "1.0"
+const catalogSchemaVersion = "1.1"
 
 // NewCatalog creates an empty DomainCatalog for the given org.
 // The SyncedAt and repo entries are populated by SyncRegistry.

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/autom8y/knossos/internal/know"
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -75,7 +76,7 @@ func TestPreBakedStore_LoadContent(t *testing.T) {
 
 			// Create the file if content is provided.
 			if tt.fileContent != "" {
-				repoName := repoFromQualifiedName(tt.entry.QualifiedName)
+				repoName := know.RepoFromQualifiedName(tt.entry.QualifiedName)
 				filePath := filepath.Join(tmpDir, repoName, tt.entry.Path)
 				require.NoError(t, os.MkdirAll(filepath.Dir(filePath), 0o755))
 				require.NoError(t, os.WriteFile(filePath, []byte(tt.fileContent), 0o644))
@@ -160,24 +161,6 @@ func TestLocalStore_MissingRepo(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "no local path for repo")
 	assert.False(t, store.HasContent(entry))
-}
-
-func TestRepoFromQualifiedName(t *testing.T) {
-	tests := []struct {
-		qn   string
-		want string
-	}{
-		{"autom8y::knossos::architecture", "knossos"},
-		{"autom8y::auth::conventions", "auth"},
-		{"org::repo::domain", "repo"},
-		{"bad-format", ""},
-		{"", ""},
-	}
-	for _, tt := range tests {
-		t.Run(tt.qn, func(t *testing.T) {
-			assert.Equal(t, tt.want, repoFromQualifiedName(tt.qn))
-		})
-	}
 }
 
 func TestStripFrontmatter(t *testing.T) {

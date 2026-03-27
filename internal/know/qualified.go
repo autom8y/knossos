@@ -7,59 +7,91 @@ import (
 )
 
 // QualifiedDomainName is the canonical cross-repo knowledge address.
-// Format: "org::repo::domain" where domain may contain "/" (e.g., "feat/materialization").
-// The "::" separator is consistent with the existing monorepo prefix convention
-// used in ReadMeta() which prefixes nested .know/ domains with "service/path::domain".
+// Format: "org::repo[/scope]::domain"
+//   - org:    GitHub organization name
+//   - repo:   GitHub repository name (no "/" -- GitHub constraint)
+//   - scope:  path from repo root to .know/ directory (may contain "/", empty for root)
+//   - domain: bare domain name (may contain "/" for feat/X, release/X)
+//
+// The first "/" in the second "::" segment separates repo from scope.
+// GitHub repo names cannot contain "/", making this unambiguous.
 type QualifiedDomainName struct {
 	Org    string
 	Repo   string
+	Scope  string
 	Domain string
 }
 
-// Parse parses a qualified domain name string of the form "org::repo::domain".
-// The domain segment may contain "/" characters (e.g., "feat/materialization").
-// Returns an error if the string does not contain exactly two "::" separators or
-// if any segment is empty.
+// Parse parses "org::repo[/scope]::domain" into its components.
 func Parse(s string) (QualifiedDomainName, error) {
 	if s == "" {
 		return QualifiedDomainName{}, fmt.Errorf("qualified domain name must not be empty")
 	}
 
-	// Split on "::" to extract org, repo, and domain segments.
-	// We split into at most 3 parts to allow domain to contain "::".
-	// However, per the spec, domain may contain "/" but NOT "::".
-	// We require exactly 2 occurrences of "::" — i.e., 3 segments.
 	parts := strings.SplitN(s, "::", 3)
 	if len(parts) != 3 {
 		return QualifiedDomainName{}, fmt.Errorf("qualified domain name %q must have format org::repo::domain", s)
 	}
 
-	org := parts[0]
-	repo := parts[1]
-	domain := parts[2]
+	org, repoSegment, domain := parts[0], parts[1], parts[2]
 
 	if strings.TrimSpace(org) == "" {
 		return QualifiedDomainName{}, fmt.Errorf("qualified domain name %q: org segment must not be empty", s)
 	}
-	if strings.TrimSpace(repo) == "" {
+	if strings.TrimSpace(repoSegment) == "" {
 		return QualifiedDomainName{}, fmt.Errorf("qualified domain name %q: repo segment must not be empty", s)
 	}
 	if strings.TrimSpace(domain) == "" {
 		return QualifiedDomainName{}, fmt.Errorf("qualified domain name %q: domain segment must not be empty", s)
 	}
-	// Reject "::" inside domain — domain may only contain "/" as a sub-separator
 	if strings.Contains(domain, "::") {
 		return QualifiedDomainName{}, fmt.Errorf("qualified domain name %q: domain segment must not contain '::'", s)
 	}
 
-	return QualifiedDomainName{
-		Org:    org,
-		Repo:   repo,
-		Domain: domain,
-	}, nil
+	repo, scope, hasScope := strings.Cut(repoSegment, "/")
+	if repo == "" {
+		return QualifiedDomainName{}, fmt.Errorf("qualified domain name %q: repo name must not be empty", s)
+	}
+	if hasScope && scope == "" {
+		return QualifiedDomainName{}, fmt.Errorf("qualified domain name %q: scope must not be empty when '/' present", s)
+	}
+
+	return QualifiedDomainName{Org: org, Repo: repo, Scope: scope, Domain: domain}, nil
 }
 
-// String returns the canonical string form: "org::repo::domain".
+// String returns the canonical string form.
 func (q QualifiedDomainName) String() string {
-	return q.Org + "::" + q.Repo + "::" + q.Domain
+	if q.Scope == "" {
+		return q.Org + "::" + q.Repo + "::" + q.Domain
+	}
+	return q.Org + "::" + q.Repo + "/" + q.Scope + "::" + q.Domain
+}
+
+// RepoSegment returns the full second "::" segment ("repo" or "repo/scope").
+func (q QualifiedDomainName) RepoSegment() string {
+	if q.Scope == "" {
+		return q.Repo
+	}
+	return q.Repo + "/" + q.Scope
+}
+
+// New creates a root-scope QualifiedDomainName.
+func New(org, repo, domain string) QualifiedDomainName {
+	return QualifiedDomainName{Org: org, Repo: repo, Domain: domain}
+}
+
+// NewScoped creates a scoped QualifiedDomainName. Pass "" for root scope.
+func NewScoped(org, repo, scope, domain string) QualifiedDomainName {
+	return QualifiedDomainName{Org: org, Repo: repo, Scope: scope, Domain: domain}
+}
+
+// RepoFromQualifiedName extracts just the repo name from a qualified name string.
+// Handles scoped names: "org::repo/scope::domain" returns "repo".
+func RepoFromQualifiedName(qn string) string {
+	parts := strings.SplitN(qn, "::", 3)
+	if len(parts) < 2 {
+		return ""
+	}
+	repo, _, _ := strings.Cut(parts[1], "/")
+	return repo
 }

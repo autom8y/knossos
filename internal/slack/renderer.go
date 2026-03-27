@@ -6,6 +6,7 @@ import (
 
 	slackapi "github.com/slack-go/slack"
 
+	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/reason/response"
 	"github.com/autom8y/knossos/internal/slack/format"
 	"github.com/autom8y/knossos/internal/trust"
@@ -179,7 +180,7 @@ func humanReadableName(qualifiedName string) string {
 	if len(parts) != 3 {
 		return qualifiedName
 	}
-	repo := parts[1]
+	repo := know.RepoFromQualifiedName(qualifiedName)
 	domain := parts[2]
 
 	// Title-case the domain, replacing hyphens with spaces.

@@ -125,7 +125,7 @@ func TestRenderTopology_FullConfig(t *testing.T) {
 		"knossos":            47,
 	}
 
-	result := RenderTopology(topo, domainCounts)
+	result := RenderTopology(topo, domainCounts, nil)
 
 	// Header.
 	if !strings.Contains(result, "--- ORG TOPOLOGY ---") {
@@ -196,7 +196,7 @@ func TestRenderTopology_NoEdges(t *testing.T) {
 		"app-b": 5,
 	}
 
-	result := RenderTopology(topo, domainCounts)
+	result := RenderTopology(topo, domainCounts, nil)
 
 	if !strings.Contains(result, "app-a (3 domains) -- frontend") {
 		t.Error("missing app-a repo line")
@@ -231,7 +231,7 @@ func TestRenderTopology_UncategorizedRepos(t *testing.T) {
 		"another-repo":  1,
 	}
 
-	result := RenderTopology(topo, domainCounts)
+	result := RenderTopology(topo, domainCounts, nil)
 
 	// Uncategorized repos should appear under "Other" group.
 	if !strings.Contains(result, "Other:") {
@@ -254,7 +254,7 @@ func TestRenderTopology_UncategorizedRepos(t *testing.T) {
 }
 
 func TestRenderTopology_NilConfig(t *testing.T) {
-	result := RenderTopology(nil, map[string]int{"foo": 5})
+	result := RenderTopology(nil, map[string]int{"foo": 5}, nil)
 	if result != "" {
 		t.Errorf("RenderTopology(nil) should return empty string, got %q", result)
 	}
@@ -274,7 +274,7 @@ func TestRenderTopology_ZeroDomainCounts(t *testing.T) {
 		},
 	}
 
-	result := RenderTopology(topo, map[string]int{})
+	result := RenderTopology(topo, map[string]int{}, nil)
 
 	if !strings.Contains(result, "new-repo (0 domains) -- not yet cataloged") {
 		t.Error("repos not in domainCounts should show 0 domains")
@@ -323,6 +323,205 @@ func TestDomainCountsFromCatalog_NilCatalog(t *testing.T) {
 	counts := DomainCountsFromCatalog(nil)
 	if len(counts) != 0 {
 		t.Errorf("nil catalog should return empty map, got %d entries", len(counts))
+	}
+}
+
+// ---- DomainInfoFromCatalog tests ----
+
+func TestDomainInfoFromCatalog(t *testing.T) {
+	catalog := &DomainCatalog{
+		Repos: []RepoEntry{
+			{
+				Name: "monorepo",
+				Domains: []DomainEntry{
+					{QualifiedName: "org::monorepo::arch", Scope: ""},
+					{QualifiedName: "org::monorepo::conventions", Scope: ""},
+					{QualifiedName: "org::monorepo/svc-a::arch", Scope: "svc-a"},
+					{QualifiedName: "org::monorepo/svc-a::conventions", Scope: "svc-a"},
+					{QualifiedName: "org::monorepo/svc-b::arch", Scope: "svc-b"},
+				},
+			},
+			{
+				Name: "simple-repo",
+				Domains: []DomainEntry{
+					{QualifiedName: "org::simple-repo::arch", Scope: ""},
+					{QualifiedName: "org::simple-repo::conventions", Scope: ""},
+				},
+			},
+			{
+				Name:    "empty-repo",
+				Domains: nil,
+			},
+		},
+	}
+
+	info := DomainInfoFromCatalog(catalog)
+
+	tests := []struct {
+		name        string
+		repo        string
+		wantTotal   int
+		wantRoot    int
+		wantScoped  int
+		wantScopes  int
+	}{
+		{"monorepo with scopes", "monorepo", 5, 2, 3, 2},
+		{"simple repo no scopes", "simple-repo", 2, 2, 0, 0},
+		{"empty repo", "empty-repo", 0, 0, 0, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			si, ok := info[tt.repo]
+			if !ok {
+				t.Fatalf("missing ScopeInfo for %q", tt.repo)
+			}
+			if si.Total != tt.wantTotal {
+				t.Errorf("Total = %d, want %d", si.Total, tt.wantTotal)
+			}
+			if si.RootCount != tt.wantRoot {
+				t.Errorf("RootCount = %d, want %d", si.RootCount, tt.wantRoot)
+			}
+			if si.ScopedCount != tt.wantScoped {
+				t.Errorf("ScopedCount = %d, want %d", si.ScopedCount, tt.wantScoped)
+			}
+			if si.ScopeCount != tt.wantScopes {
+				t.Errorf("ScopeCount = %d, want %d", si.ScopeCount, tt.wantScopes)
+			}
+		})
+	}
+}
+
+func TestDomainInfoFromCatalog_NilCatalog(t *testing.T) {
+	info := DomainInfoFromCatalog(nil)
+	if len(info) != 0 {
+		t.Errorf("nil catalog should return empty map, got %d entries", len(info))
+	}
+}
+
+// ---- Scope-enriched RenderTopology tests ----
+
+func TestRenderTopology_ScopeEnrichedFormat(t *testing.T) {
+	topo := &TopologyConfig{
+		SchemaVersion: "1.0",
+		Org:           "testorg",
+		Groups: []TopologyGroup{
+			{
+				Name: "Core",
+				Repos: []TopologyRepo{
+					{Name: "monorepo", Role: "monorepo"},
+					{Name: "simple-repo", Role: "library"},
+				},
+			},
+		},
+	}
+
+	domainCounts := map[string]int{
+		"monorepo":    91,
+		"simple-repo": 8,
+	}
+
+	scopeInfo := map[string]ScopeInfo{
+		"monorepo": {Total: 91, RootCount: 20, ScopedCount: 71, ScopeCount: 5},
+		"simple-repo": {Total: 8, RootCount: 8, ScopedCount: 0, ScopeCount: 0},
+	}
+
+	result := RenderTopology(topo, domainCounts, scopeInfo)
+
+	// Repo with scoped domains renders enriched format.
+	if !strings.Contains(result, "monorepo (91 domains: 20 root, 71 scoped) -- monorepo") {
+		t.Errorf("scope-enriched format missing for monorepo, got: %s", result)
+	}
+
+	// Repo without scoped domains renders original format.
+	if !strings.Contains(result, "simple-repo (8 domains) -- library") {
+		t.Errorf("plain format missing for simple-repo, got: %s", result)
+	}
+}
+
+func TestRenderTopology_ScopeInfoZeroScoped(t *testing.T) {
+	topo := &TopologyConfig{
+		SchemaVersion: "1.0",
+		Org:           "testorg",
+		Groups: []TopologyGroup{
+			{
+				Name: "Apps",
+				Repos: []TopologyRepo{
+					{Name: "app-x", Role: "service"},
+				},
+			},
+		},
+	}
+
+	domainCounts := map[string]int{"app-x": 5}
+	scopeInfo := map[string]ScopeInfo{
+		"app-x": {Total: 5, RootCount: 5, ScopedCount: 0, ScopeCount: 0},
+	}
+
+	result := RenderTopology(topo, domainCounts, scopeInfo)
+
+	// ScopeInfo with zero ScopedCount should render original format.
+	if !strings.Contains(result, "app-x (5 domains) -- service") {
+		t.Errorf("expected plain format for zero-scoped repo, got: %s", result)
+	}
+	if strings.Contains(result, "root") || strings.Contains(result, "scoped") {
+		t.Error("should not contain scope details when ScopedCount is 0")
+	}
+}
+
+func TestRenderTopology_NilScopeInfo(t *testing.T) {
+	topo := &TopologyConfig{
+		SchemaVersion: "1.0",
+		Org:           "testorg",
+		Groups: []TopologyGroup{
+			{
+				Name: "All",
+				Repos: []TopologyRepo{
+					{Name: "repo-a", Role: "backend"},
+				},
+			},
+		},
+	}
+
+	domainCounts := map[string]int{"repo-a": 12}
+
+	// nil scopeInfo should render original format (backward compat).
+	result := RenderTopology(topo, domainCounts, nil)
+
+	if !strings.Contains(result, "repo-a (12 domains) -- backend") {
+		t.Errorf("nil scopeInfo should render plain format, got: %s", result)
+	}
+}
+
+func TestRenderTopology_ScopeEnrichedUncategorized(t *testing.T) {
+	topo := &TopologyConfig{
+		SchemaVersion: "1.0",
+		Org:           "testorg",
+		Groups: []TopologyGroup{
+			{
+				Name: "Core",
+				Repos: []TopologyRepo{
+					{Name: "core-api", Role: "API server"},
+				},
+			},
+		},
+	}
+
+	domainCounts := map[string]int{
+		"core-api":     10,
+		"scoped-extra": 15,
+	}
+
+	scopeInfo := map[string]ScopeInfo{
+		"core-api":     {Total: 10, RootCount: 10, ScopedCount: 0, ScopeCount: 0},
+		"scoped-extra": {Total: 15, RootCount: 5, ScopedCount: 10, ScopeCount: 3},
+	}
+
+	result := RenderTopology(topo, domainCounts, scopeInfo)
+
+	// Uncategorized repo with scopes should also render enriched format.
+	if !strings.Contains(result, "scoped-extra (15 domains: 5 root, 10 scoped)") {
+		t.Errorf("uncategorized repo should use scope-enriched format, got: %s", result)
 	}
 }
 

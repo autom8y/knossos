@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/autom8y/knossos/internal/know"
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
 )
 
@@ -82,7 +83,7 @@ func (s *PreBakedStore) HasContent(entry registryorg.DomainEntry) bool {
 
 // resolvePath maps a DomainEntry to a filesystem path within the pre-baked directory.
 func (s *PreBakedStore) resolvePath(entry registryorg.DomainEntry) (string, error) {
-	repoName := repoFromQualifiedName(entry.QualifiedName)
+	repoName := know.RepoFromQualifiedName(entry.QualifiedName)
 	if repoName == "" {
 		return "", fmt.Errorf("cannot extract repo name from qualified name: %s", entry.QualifiedName)
 	}
@@ -107,7 +108,7 @@ func NewLocalStore(repoPaths map[string]string) *LocalStore {
 // LoadContent reads a .know/ file from a local repo, strips YAML frontmatter,
 // and returns the body text.
 func (s *LocalStore) LoadContent(entry registryorg.DomainEntry) (string, error) {
-	repoName := repoFromQualifiedName(entry.QualifiedName)
+	repoName := know.RepoFromQualifiedName(entry.QualifiedName)
 	if repoName == "" {
 		return "", fmt.Errorf("cannot extract repo name from qualified name: %s", entry.QualifiedName)
 	}
@@ -128,7 +129,7 @@ func (s *LocalStore) LoadContent(entry registryorg.DomainEntry) (string, error) 
 
 // HasContent returns true if the .know/ file exists in the local repo.
 func (s *LocalStore) HasContent(entry registryorg.DomainEntry) bool {
-	repoName := repoFromQualifiedName(entry.QualifiedName)
+	repoName := know.RepoFromQualifiedName(entry.QualifiedName)
 	if repoName == "" {
 		return false
 	}
@@ -141,15 +142,6 @@ func (s *LocalStore) HasContent(entry registryorg.DomainEntry) bool {
 	filePath := filepath.Join(repoRoot, entry.Path)
 	_, err := os.Stat(filePath)
 	return err == nil
-}
-
-// repoFromQualifiedName extracts the repo component from "org::repo::domain".
-func repoFromQualifiedName(qn string) string {
-	parts := strings.SplitN(qn, "::", 3)
-	if len(parts) >= 2 {
-		return parts[1]
-	}
-	return ""
 }
 
 // stripFrontmatter removes YAML frontmatter delimited by ---.

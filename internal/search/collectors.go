@@ -14,6 +14,7 @@ import (
 	"github.com/autom8y/knossos/internal/concept"
 	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/frontmatter"
+	"github.com/autom8y/knossos/internal/know"
 	procmena "github.com/autom8y/knossos/internal/materialize/procession"
 	"github.com/autom8y/knossos/internal/paths"
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
@@ -421,12 +422,8 @@ func CollectKnowledgeDomains() []SearchEntry {
 
 	entries := make([]SearchEntry, 0, len(domains))
 	for _, d := range domains {
-		// Parse the qualified name to extract repo for context.
-		var repoName string
-		parts := strings.SplitN(d.QualifiedName, "::", 3)
-		if len(parts) >= 2 {
-			repoName = parts[1]
-		}
+		// Extract repo name from qualified name for context.
+		repoName := know.RepoFromQualifiedName(d.QualifiedName)
 
 		summary := d.Domain
 		if repoName != "" {

@@ -73,8 +73,8 @@ func TestNewCatalog(t *testing.T) {
 	if c.Org != "autom8y" {
 		t.Errorf("Org = %q, want %q", c.Org, "autom8y")
 	}
-	if c.SchemaVersion != "1.0" {
-		t.Errorf("SchemaVersion = %q, want %q", c.SchemaVersion, "1.0")
+	if c.SchemaVersion != "1.1" {
+		t.Errorf("SchemaVersion = %q, want %q", c.SchemaVersion, "1.1")
 	}
 	if len(c.Repos) != 0 {
 		t.Errorf("Repos should be empty, got %d", len(c.Repos))

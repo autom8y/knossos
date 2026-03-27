@@ -9,8 +9,12 @@
 #   --catalog  Path to domains.yaml (default: deploy/registry/domains.yaml).
 #
 # This script reads the domains.yaml catalog, determines which repos have
-# .know/ domains, and copies their .know/ files into deploy/content/{repo}/.know/.
-# The Docker build then COPYs this directory into the container image at /data/content/.
+# .know/ domains, and copies their .know/ files into deploy/content/{repo}/
+# preserving directory structure including nested scopes.
+#
+# For a repo with nested .know/ directories:
+#   {repo}/.know/architecture.md           -> deploy/content/{repo}/.know/architecture.md
+#   {repo}/services/ads/.know/arch.md      -> deploy/content/{repo}/services/ads/.know/arch.md
 #
 # Prerequisites:
 #   - All repos must be cloned locally (siblings of the knossos repo, or specified via
@@ -111,72 +115,108 @@ rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
 # Extract unique repo names from the catalog.
-# Uses grep to find "name:" entries under repos, then extracts the value.
 REPOS=$(grep -E '^\s+- name:' "$CATALOG" | sed 's/.*name:\s*//' | sort -u)
 
 total=0
 skipped=0
+scoped=0
 for repo in $REPOS; do
     repo_path="$REPO_BASE_DIR/$repo"
-    know_dir="$repo_path/.know"
 
-    if [ ! -d "$know_dir" ]; then
-        echo "  SKIP $repo (no .know/ directory at $repo_path)"
+    if [ ! -d "$repo_path" ]; then
+        echo "  SKIP $repo (directory not found at $repo_path)"
         skipped=$((skipped + 1))
         continue
     fi
 
-    # Count .know/ files.
-    count=$(find "$know_dir" -name '*.md' -type f | wc -l | tr -d ' ')
-    if [ "$count" -eq 0 ]; then
-        echo "  SKIP $repo (no .md files in .know/)"
+    # Find ALL .know/ directories within the repo, excluding vendor/node_modules/etc.
+    know_dirs=$(find "$repo_path" -type d -name '.know' \
+        -not -path '*/vendor/*' \
+        -not -path '*/node_modules/*' \
+        -not -path '*/.git/*' \
+        -not -path '*/.terraform/*' \
+        -not -path '*/.knossos/worktrees/*' \
+        2>/dev/null || true)
+
+    if [ -z "$know_dirs" ]; then
+        echo "  SKIP $repo (no .know/ directories found)"
         skipped=$((skipped + 1))
         continue
     fi
 
-    # Copy .know/ directory.
-    target="$OUTPUT_DIR/$repo/.know"
-    mkdir -p "$target"
+    repo_count=0
+    while IFS= read -r know_dir; do
+        # Compute the relative path from repo root to this .know/ directory.
+        rel_know="${know_dir#$repo_path/}"
 
-    # Copy preserving subdirectory structure (e.g., .know/feat/).
-    (cd "$know_dir" && find . -name '*.md' -type f -exec sh -c '
-        for f; do
-            dir=$(dirname "$f")
-            mkdir -p "'"$target"'/$dir"
-            cp "$f" "'"$target"'/$f"
-        done
-    ' _ {} +)
+        # Count .md files in this .know/ directory (non-recursive, but include feat/release).
+        count=$(find "$know_dir" -name '*.md' -type f | wc -l | tr -d ' ')
+        if [ "$count" -eq 0 ]; then
+            continue
+        fi
 
-    echo "  OK   $repo ($count files)"
-    total=$((total + count))
+        # Determine scope from the relative path.
+        # ".know" -> root scope, "services/ads/.know" -> scoped
+        scope_label="root"
+        if [ "$rel_know" != ".know" ]; then
+            scope_label="${rel_know%/.know}"
+            scoped=$((scoped + count))
+        fi
+
+        # Copy all .md files preserving subdirectory structure.
+        target="$OUTPUT_DIR/$repo/$rel_know"
+        mkdir -p "$target"
+        (cd "$know_dir" && find . -name '*.md' -type f -exec sh -c '
+            for f; do
+                dir=$(dirname "$f")
+                mkdir -p "'"$target"'/$dir"
+                cp "$f" "'"$target"'/$f"
+            done
+        ' _ {} +)
+
+        repo_count=$((repo_count + count))
+    done <<< "$know_dirs"
+
+    if [ "$repo_count" -gt 0 ]; then
+        echo "  OK   $repo ($repo_count files)"
+        total=$((total + repo_count))
+    else
+        echo "  SKIP $repo (no .md files in any .know/ directory)"
+        skipped=$((skipped + 1))
+    fi
 done
 
-# Validate: check for catalog domains that have no collected content.
+# Validate: check catalog domains against collected content using the path field.
 echo ""
 echo "--- Validation ---"
-# Extract all qualified_name entries from the catalog.
-DOMAIN_NAMES=$(grep -E '^\s+qualified_name:' "$CATALOG" 2>/dev/null | sed 's/.*qualified_name:\s*//' | tr -d '"' || echo "")
+# Extract all path entries paired with their repo from the catalog.
+# Uses the "path:" field which already contains the correct repo-relative path.
+DOMAIN_ENTRIES=$(grep -E '^\s+(qualified_name|path):' "$CATALOG" 2>/dev/null | tr -d '"' || echo "")
 missing=0
-if [ -n "$DOMAIN_NAMES" ]; then
-    while IFS= read -r qn; do
-        # Extract repo from qualified name (org::repo::domain -> repo).
-        repo=$(echo "$qn" | cut -d: -f3)  # Using : delimiter; qualified names use ::
-        repo=$(echo "$qn" | sed 's/.*::\(.*\)::.*/\1/')
-        domain=$(echo "$qn" | sed 's/.*:://')
-
-        content_file="$OUTPUT_DIR/$repo/.know/$domain.md"
-        if [ ! -f "$content_file" ]; then
-            echo "  MISSING: $qn (expected at $content_file)"
-            missing=$((missing + 1))
+if [ -n "$DOMAIN_ENTRIES" ]; then
+    current_qn=""
+    while IFS= read -r line; do
+        if echo "$line" | grep -q 'qualified_name:'; then
+            current_qn=$(echo "$line" | sed 's/.*qualified_name:\s*//')
+        elif echo "$line" | grep -q 'path:'; then
+            domain_path=$(echo "$line" | sed 's/.*path:\s*//')
+            # Extract repo name from qualified name: org::repo[/scope]::domain -> repo
+            # The repo is everything between first :: and first / or second ::
+            repo=$(echo "$current_qn" | sed 's/[^:]*::\([^:/]*\).*/\1/')
+            content_file="$OUTPUT_DIR/$repo/$domain_path"
+            if [ ! -f "$content_file" ]; then
+                echo "  MISSING: $current_qn (expected at $content_file)"
+                missing=$((missing + 1))
+            fi
         fi
-    done <<< "$DOMAIN_NAMES"
+    done <<< "$DOMAIN_ENTRIES"
 fi
 
 echo ""
 echo "=== Summary ==="
 echo "  Repos processed:   $(echo "$REPOS" | wc -w | tr -d ' ')"
 echo "  Repos skipped:     $skipped"
-echo "  Files collected:   $total"
+echo "  Files collected:   $total (root) + $scoped (scoped)"
 echo "  Domains missing:   $missing"
 echo "  Output directory:  $OUTPUT_DIR"
 

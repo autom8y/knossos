@@ -307,3 +307,29 @@ func TestAssembler_MediumTier_SystemPromptContainsMediumBehavior(t *testing.T) {
 	require.NotNil(t, ctx)
 	assert.Contains(t, ctx.SystemPrompt, "MEDIUM", "medium tier prompt should contain MEDIUM")
 }
+
+func TestScopeRelevance(t *testing.T) {
+	tests := []struct {
+		name     string
+		qn       string
+		query    string
+		wantZero bool
+	}{
+		{"root scope", "autom8y::knossos::architecture", "knossos architecture", true},
+		{"matching scope", "autom8y::autom8y/services/ads::architecture", "ads service architecture", false},
+		{"non-matching scope", "autom8y::autom8y/services/ads::architecture", "auth service design", true},
+		{"short segment filtered", "autom8y::autom8y/a/b::arch", "a b architecture", true},
+		{"multi-level match", "autom8y::autom8y/sdks/python/autom8y-meta::conventions", "python sdk conventions", false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := scopeRelevance(tc.qn, tc.query)
+			if tc.wantZero && got != 0.0 {
+				t.Errorf("scopeRelevance(%q, %q) = %f, want 0.0", tc.qn, tc.query, got)
+			}
+			if !tc.wantZero && got == 0.0 {
+				t.Errorf("scopeRelevance(%q, %q) = 0.0, want > 0", tc.qn, tc.query)
+			}
+		})
+	}
+}

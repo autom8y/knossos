@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/search"
 	"github.com/autom8y/knossos/internal/session"
@@ -131,7 +132,7 @@ With a project, also searches rites, agents, dromena, and routing.`,
 
 				// For knowledge results, extract repo source and freshness annotation.
 				if r.Domain == search.DomainKnowledge {
-					entry.Source = extractRepoFromQN(r.Name)
+					entry.Source = know.RepoFromQualifiedName(r.Name)
 					entry.Freshness = r.Description // Contains freshness annotation.
 				}
 
@@ -209,17 +210,6 @@ func buildAskSessionContext(signals *search.SessionSignals) *AskSessionContext {
 	}
 
 	return sc
-}
-
-// extractRepoFromQN extracts the repo name from a qualified name.
-// "org::repo::domain" -> "repo"
-// Returns empty string if the qualified name is not in the expected format.
-func extractRepoFromQN(qn string) string {
-	parts := strings.SplitN(qn, "::", 3)
-	if len(parts) >= 2 {
-		return parts[1]
-	}
-	return ""
 }
 
 // formatDuration converts a duration to a human-readable string like "2m", "1h", "3d".

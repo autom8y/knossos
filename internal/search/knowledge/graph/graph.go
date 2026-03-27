@@ -15,6 +15,8 @@ package graph
 import (
 	"sort"
 	"strings"
+
+	"github.com/autom8y/knossos/internal/know"
 )
 
 // EdgeType classifies entity graph relationships.
@@ -102,12 +104,12 @@ func Build(domains []DomainInfo) *Graph {
 			continue
 		}
 		for i, a := range qns {
-			repoA := repoFromQN(a)
+			repoA := know.RepoFromQualifiedName(a)
 			for j, b := range qns {
 				if i == j {
 					continue
 				}
-				repoB := repoFromQN(b)
+				repoB := know.RepoFromQualifiedName(b)
 				// Only create same_type edges across different repos.
 				if repoA == repoB {
 					continue
@@ -208,15 +210,6 @@ func (g *Graph) addEdge(source string, edge Edge) {
 		}
 	}
 	g.edges[source] = append(g.edges[source], edge)
-}
-
-// repoFromQN extracts the repo component from "org::repo::domain".
-func repoFromQN(qn string) string {
-	parts := strings.SplitN(qn, "::", 3)
-	if len(parts) >= 2 {
-		return parts[1]
-	}
-	return ""
 }
 
 // sameRepoStrength computes edge strength inversely proportional to repo size.

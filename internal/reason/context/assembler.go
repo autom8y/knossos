@@ -2,8 +2,10 @@ package context
 
 import (
 	"sort"
+	"strings"
 	"time"
 
+	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/search"
 	"github.com/autom8y/knossos/internal/trust"
 )
@@ -266,6 +268,9 @@ func (a *Assembler) Assemble(
 		candidates[i].inclusionScore = (a.config.RelevanceWeight * candidates[i].source.RelevanceScore) +
 			(a.config.FreshnessWeight * candidates[i].source.Freshness) +
 			(a.config.DiversityWeight * diversityBonus)
+
+		// Scope relevance: boost candidates whose scope matches query terms.
+		candidates[i].inclusionScore += scopeRelevance(candidates[i].source.QualifiedName, question)
 		candidates[i].source.InclusionScore = candidates[i].inclusionScore
 	}
 
@@ -351,6 +356,28 @@ func WeightedMeanFreshness(candidates []TriageCandidateInfo) float64 {
 	}
 
 	return weightedSum / weightSum
+}
+
+// scopeRelevance returns an additive bonus when the candidate's scope path
+// contains a segment that appears in the query. Root-scope domains (no scope)
+// return 0.0 -- they are neither boosted nor penalized.
+//
+// Sprint 5: Scope-aware packing. Segments shorter than 3 characters are
+// skipped to avoid false positives on short path components like "a" or "db".
+func scopeRelevance(qualifiedName, query string) float64 {
+	qdn, err := know.Parse(qualifiedName)
+	if err != nil || qdn.Scope == "" {
+		return 0.0
+	}
+
+	lowerQuery := strings.ToLower(query)
+	segments := strings.Split(strings.ToLower(qdn.Scope), "/")
+	for _, seg := range segments {
+		if len(seg) >= 3 && strings.Contains(lowerQuery, seg) {
+			return 0.15
+		}
+	}
+	return 0.0
 }
 
 // freshnessLabel returns a human-readable freshness annotation.

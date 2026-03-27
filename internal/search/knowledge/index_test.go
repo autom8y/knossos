@@ -611,21 +611,3 @@ func TestSlugify(t *testing.T) {
 	}
 }
 
-func TestRepoFromQualifiedName(t *testing.T) {
-	tests := []struct {
-		qn   string
-		want string
-	}{
-		{"org::repo::domain", "repo"},
-		{"org::knossos::arch", "knossos"},
-		{"single", ""},
-		{"org::repo", "repo"},
-	}
-
-	for _, tt := range tests {
-		got := repoFromQualifiedName(tt.qn)
-		if got != tt.want {
-			t.Errorf("repoFromQualifiedName(%q) = %q, want %q", tt.qn, got, tt.want)
-		}
-	}
-}

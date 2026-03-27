@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/llm"
 )
 
@@ -380,7 +381,7 @@ func (o *Orchestrator) stage3HaikuAssessment(ctx context.Context, query string, 
 	for i, c := range candidates {
 		repo := c.metadata.Repo
 		if repo == "" {
-			repo = repoFromQualifiedName(c.metadata.QualifiedName)
+			repo = know.RepoFromQualifiedName(c.metadata.QualifiedName)
 		}
 		llmCandidates[i] = candidateForLLM{
 			QualifiedName:       c.metadata.QualifiedName,
@@ -719,11 +720,3 @@ func (o *Orchestrator) injectPriorDomains(refinedQuery string, candidates []stag
 	return candidates
 }
 
-// repoFromQualifiedName extracts the repo component from "org::repo::domain".
-func repoFromQualifiedName(qn string) string {
-	parts := strings.SplitN(qn, "::", 3)
-	if len(parts) >= 2 {
-		return parts[1]
-	}
-	return ""
-}

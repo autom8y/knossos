@@ -67,8 +67,11 @@ func LoadTopology(path string) (*TopologyConfig, error) {
 
 // RenderTopology produces the plain-text topology section for the system prompt.
 // domainCounts maps repo name to the number of knowledge domains cataloged.
+// scopeInfo optionally provides scope-enriched domain breakdowns per repo;
+// repos with scoped domains render as "N domains: X root, Y scoped" instead
+// of the plain "N domains" format. Pass nil for backward-compatible behavior.
 // Returns an empty string if topo is nil.
-func RenderTopology(topo *TopologyConfig, domainCounts map[string]int) string {
+func RenderTopology(topo *TopologyConfig, domainCounts map[string]int, scopeInfo map[string]ScopeInfo) string {
 	if topo == nil {
 		return ""
 	}
@@ -113,8 +116,9 @@ func RenderTopology(topo *TopologyConfig, domainCounts map[string]int) string {
 	for _, g := range topo.Groups {
 		b.WriteString(fmt.Sprintf("\n%s:\n", g.Name))
 		for _, r := range g.Repos {
-			dc := domainCounts[r.Name]
-			b.WriteString(fmt.Sprintf("  %s (%d domains) -- %s\n", r.Name, dc, r.Role))
+			b.WriteString(fmt.Sprintf("  %s", r.Name))
+			renderDomainCount(&b, r.Name, domainCounts, scopeInfo)
+			b.WriteString(fmt.Sprintf(" -- %s\n", r.Role))
 
 			// Inbound edges: other repos that depend on this repo.
 			for _, e := range inbound[r.Name] {
@@ -136,12 +140,25 @@ func RenderTopology(topo *TopologyConfig, domainCounts map[string]int) string {
 		sortStrings(uncategorized)
 		b.WriteString("\nOther:\n")
 		for _, name := range uncategorized {
-			dc := domainCounts[name]
-			b.WriteString(fmt.Sprintf("  %s (%d domains)\n", name, dc))
+			b.WriteString(fmt.Sprintf("  %s", name))
+			renderDomainCount(&b, name, domainCounts, scopeInfo)
+			b.WriteString("\n")
 		}
 	}
 
 	return b.String()
+}
+
+// renderDomainCount writes the domain count annotation for a repo.
+// Uses scope-enriched format when the repo has scoped domains, otherwise
+// falls back to the plain "(N domains)" format.
+func renderDomainCount(b *strings.Builder, repoName string, domainCounts map[string]int, scopeInfo map[string]ScopeInfo) {
+	if si, ok := scopeInfo[repoName]; ok && si.ScopedCount > 0 {
+		b.WriteString(fmt.Sprintf(" (%d domains: %d root, %d scoped)", si.Total, si.RootCount, si.ScopedCount))
+	} else {
+		dc := domainCounts[repoName]
+		b.WriteString(fmt.Sprintf(" (%d domains)", dc))
+	}
 }
 
 // sortStrings sorts a string slice in place. Avoids importing "sort" for a
@@ -165,4 +182,35 @@ func DomainCountsFromCatalog(catalog *DomainCatalog) map[string]int {
 		counts[repo.Name] = len(repo.Domains)
 	}
 	return counts
+}
+
+// ScopeInfo holds domain count breakdown for a repo with scope awareness.
+type ScopeInfo struct {
+	Total       int // Total domain count
+	RootCount   int // Domains with empty scope
+	ScopedCount int // Domains with non-empty scope
+	ScopeCount  int // Number of distinct scopes
+}
+
+// DomainInfoFromCatalog builds a map of repo name -> ScopeInfo from a DomainCatalog.
+func DomainInfoFromCatalog(catalog *DomainCatalog) map[string]ScopeInfo {
+	info := make(map[string]ScopeInfo)
+	if catalog == nil {
+		return info
+	}
+	for _, repo := range catalog.Repos {
+		si := ScopeInfo{Total: len(repo.Domains)}
+		scopes := make(map[string]bool)
+		for _, d := range repo.Domains {
+			if d.Scope == "" {
+				si.RootCount++
+			} else {
+				si.ScopedCount++
+				scopes[d.Scope] = true
+			}
+		}
+		si.ScopeCount = len(scopes)
+		info[repo.Name] = si
+	}
+	return info
 }

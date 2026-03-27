@@ -17,6 +17,7 @@ import (
 	"github.com/autom8y/knossos/internal/config"
 	"github.com/autom8y/knossos/internal/envload"
 	"github.com/autom8y/knossos/internal/errors"
+	"github.com/autom8y/knossos/internal/know"
 	"github.com/autom8y/knossos/internal/llm"
 	"github.com/autom8y/knossos/internal/observe"
 	"github.com/autom8y/knossos/internal/output"
@@ -464,7 +465,8 @@ func buildPipeline() pipelineComponents {
 			slog.Warn("topology config parse error, continuing without topology", "error", topoErr)
 		} else if topoCfg != nil {
 			domainCounts := registryorg.DomainCountsFromCatalog(result.catalog)
-			orgTopology = registryorg.RenderTopology(topoCfg, domainCounts)
+			scopeInfo := registryorg.DomainInfoFromCatalog(result.catalog)
+			orgTopology = registryorg.RenderTopology(topoCfg, domainCounts, scopeInfo)
 			slog.Info("org topology loaded", "groups", len(topoCfg.Groups), "edges", len(topoCfg.Edges))
 		}
 	} else {
@@ -564,7 +566,7 @@ func (a *triageSearchAdapter) GetMetadata(qualifiedName string) (*triage.DomainM
 	return &triage.DomainMetadata{
 		QualifiedName:  entry.QualifiedName,
 		DomainType:     entry.Domain,
-		Repo:           repoFromQualifiedName(entry.QualifiedName),
+		Repo:           know.RepoFromQualifiedName(entry.QualifiedName),
 		FreshnessScore: 0, // Tier 1: freshness computed at query time, not stored.
 		GeneratedAt:    entry.GeneratedAt,
 	}, true
@@ -581,7 +583,7 @@ func (a *triageSearchAdapter) ListAllDomains() []triage.DomainMetadata {
 		out = append(out, triage.DomainMetadata{
 			QualifiedName:  d.QualifiedName,
 			DomainType:     d.Domain,
-			Repo:           repoFromQualifiedName(d.QualifiedName),
+			Repo:           know.RepoFromQualifiedName(d.QualifiedName),
 			FreshnessScore: 0, // Tier 1: freshness computed at query time.
 			GeneratedAt:    d.GeneratedAt,
 		})
@@ -638,15 +640,6 @@ func (a *triageOrchestratorAdapter) Assess(ctx context.Context, query string, th
 		})
 	}
 	return data, nil
-}
-
-// repoFromQualifiedName extracts the repo from "org::repo::domain".
-func repoFromQualifiedName(qn string) string {
-	parts := strings.SplitN(qn, "::", 3)
-	if len(parts) >= 2 {
-		return parts[1]
-	}
-	return ""
 }
 
 // ---- Sprint 7: KnowledgeIndex build ----
@@ -891,7 +884,7 @@ func (a *knowledgeContentAdapter) LoadContent(qualifiedName string) (string, err
 	if len(parts) < 3 {
 		return "", fmt.Errorf("invalid qualified name: %s", qualifiedName)
 	}
-	repoName := parts[1]
+	repoName := know.RepoFromQualifiedName(qualifiedName)
 	domainName := parts[2]
 
 	// Try common .know/ path patterns.
