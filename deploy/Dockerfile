@@ -81,6 +81,10 @@ EXPOSE 8080
 # This env var is read by config.ActiveOrg() -> config.DefaultOrgContext().
 ENV KNOSSOS_ORG=autom8y
 
+# Force knowledge index path resolution to the pre-baked JSON.
+# This bypasses XDG resolution which may differ between build and runtime.
+ENV CLEW_KNOWLEDGE_INDEX_PATH=/home/nonroot/.local/share/knossos/knowledge-index.json
+
 USER nonroot:nonroot
 
 ENTRYPOINT ["/ari", "serve"]
