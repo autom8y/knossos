@@ -93,7 +93,7 @@ func TestBuildStandingSection_ContainsAllThreeAgents(t *testing.T) {
 	for _, e := range entries {
 		names[e.Name] = true
 	}
-	for _, expected := range []string{"pythia", "moirai", "metis"} {
+	for _, expected := range []string{"pythia", "moirai"} {
 		if !names[expected] {
 			t.Errorf("buildStandingSection: missing expected agent %q", expected)
 		}

@@ -124,7 +124,7 @@ func TestExtractTierField_WithInvalidFrontmatter(t *testing.T) {
 // --- standingAgents deny-list ---
 
 func TestSummonCmd_StandingAgent_ReturnsError(t *testing.T) {
-	for _, name := range []string{"pythia", "moirai", "metis"} {
+	for _, name := range []string{"pythia", "moirai"} {
 		t.Run(name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 			outputFmt := "text"

@@ -91,7 +91,7 @@ func newRosterCmd(ctx *cmdContext) *cobra.Command {
 		Short: "Show the agent roster: standing, summoned, and available agents",
 		Long: `Displays three sections of the agent roster:
 
-  Standing:  Core platform agents (pythia, moirai, metis) — always active.
+  Standing:  Core platform agents (pythia, moirai) — always active.
   Summoned:  Agents you have summoned with 'ari agent summon'.
   Available: Agents available to summon (tier: summonable in source).
 
@@ -143,7 +143,7 @@ func runRoster(ctx *cmdContext, opts rosterOptions) error {
 // Attempts to read description from the user channel dir's agents folder
 // (where they may have been materialized by ari sync).
 func buildStandingSection(userChannelDir string) []rosterEntry {
-	names := []string{"pythia", "moirai", "metis"}
+	names := []string{"pythia", "moirai"}
 	entries := make([]rosterEntry, 0, len(names))
 
 	for _, name := range names {

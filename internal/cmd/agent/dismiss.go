@@ -33,7 +33,7 @@ func newDismissCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Dismisses a previously summoned agent from your user-level Claude configuration.
 
 Only agents that were summoned via 'ari agent summon' can be dismissed.
-Standing agents (pythia, moirai, metis) and manually created agents are
+Standing agents (pythia, moirai) and manually created agents are
 not affected.
 
 Examples:
@@ -60,7 +60,7 @@ func runDismiss(ctx *cmdContext, args []string, opts dismissOptions) error {
 	if standingAgents[name] {
 		err := errors.NewWithDetails(errors.CodeValidationFailed,
 			fmt.Sprintf("%q is a standing agent and cannot be dismissed", name),
-			map[string]any{"agent": name, "standing_agents": []string{"pythia", "moirai", "metis"}})
+			map[string]any{"agent": name, "standing_agents": []string{"pythia", "moirai"}})
 		return common.PrintAndReturn(printer, err)
 	}
 

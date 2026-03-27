@@ -29,7 +29,6 @@ import (
 var standingAgents = map[string]bool{
 	"pythia": true,
 	"moirai": true,
-	"metis":  true,
 }
 
 // knossosOnlySummonFields are knossos-internal frontmatter fields stripped during summon
@@ -61,7 +60,7 @@ func newSummonCmd(ctx *cmdContext) *cobra.Command {
 		Long: `Summons a named agent to your user-level Claude configuration (~/.claude/agents/).
 
 Summonable agents are those published with tier: summonable in their source
-frontmatter. Standing agents (pythia, moirai, metis) cannot be summoned.
+frontmatter. Standing agents (pythia, moirai) cannot be summoned.
 
 Examples:
   ari agent summon theoros       # Summon the theoros agent
@@ -85,7 +84,7 @@ func runSummon(ctx *cmdContext, args []string, opts summonOptions) error {
 	if standingAgents[name] {
 		err := errors.NewWithDetails(errors.CodeValidationFailed,
 			fmt.Sprintf("%q is a standing agent and cannot be summoned", name),
-			map[string]any{"agent": name, "standing_agents": []string{"pythia", "moirai", "metis"}})
+			map[string]any{"agent": name, "standing_agents": []string{"pythia", "moirai"}})
 		return common.PrintAndReturn(printer, err)
 	}
 

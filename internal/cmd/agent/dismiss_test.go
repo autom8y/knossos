@@ -13,7 +13,7 @@ import (
 // --- dismiss standing agent guard ---
 
 func TestDismissCmd_StandingAgent_ReturnsError(t *testing.T) {
-	for _, name := range []string{"pythia", "moirai", "metis"} {
+	for _, name := range []string{"pythia", "moirai"} {
 		t.Run(name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 			outputFmt := "text"
