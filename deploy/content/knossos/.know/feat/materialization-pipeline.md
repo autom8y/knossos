@@ -1,16 +1,14 @@
 ---
 domain: feat/materialization-pipeline
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/materialize/**/*.go"
   - "./internal/cmd/sync/**/*.go"
-  - "./docs/decisions/ADR-sync*.md"
-  - "./docs/decisions/TDD-single-binary-completion.md"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.88
+source_hash: "b329d719"
+confidence: 0.82
 format_version: "1.0"
 ---
 
@@ -18,61 +16,23 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Core engine converting declarative rite definitions into `.claude/` directory structure. Makes `.claude/` a fully derived artifact regenerated from canonical sources via `ari sync`.
-
-**ADR-0016**: Chezmoi-inspired generation model. Generation over symlinks. Single idempotent command. Crash-only design. **ADR-0026**: Unified provenance model. **TDD-single-binary**: Binary embeds all assets.
+Converts rite source definitions into channel-ready configuration directories (.claude/ or .gemini/). Three non-negotiable invariants: idempotency (writeIfChanged guards every write, preventing CC file watcher crashes), user content preservation (satellite regions, user agents never destroyed), harness agnosticism (ChannelCompiler interface projects same source to any channel). Provenance lives in .knossos/ not .claude/ (keeps it out of CC context window). Embedded assets enable single-binary distribution.
 
 ## Conceptual Model
 
-### 11-Stage Materialization Lifecycle
-
-0. Pre-validate CLAUDE.md → 1. Resolve rite (6-tier) → 2. Load provenance → 2.5. Clear stale invocations → 3. Handle orphan agents → 3.5. Resolve hook/skill defaults → 4. Materialize agents → 5. Materialize mena → 6. Materialize rules → 7. Materialize CLAUDE.md → 8. Materialize settings → 9. Track state → 9.5. Materialize workflow → 10. Write ACTIVE_RITE → 11. Save provenance
-
-### Three Sync Phases
-
-Phase 1 (rite scope) → Phase 1.5 (org scope) → Phase 2 (user scope)
-
-### 6-Tier Source Resolution
-
-1. Explicit → 2. Project satellite → 3. User → 4. Org → 5. Knossos platform → 6. Embedded
-
-### Key Modes
-
-- **Soft mode**: Skips mena/rules/settings/workflow (CC-safe live update)
-- **El-cheapo mode**: Forces haiku model on all agents (ephemeral)
-- **Minimal mode**: Cross-cutting, no rite (CLAUDE.md + settings only)
+**Three-scope architecture:** Rite (project .claude/), Org (user ~/.claude/), User (user ~/.claude/). **6-tier source resolution:** explicit > project > user > org > platform > embedded. **Three agent tiers:** standing (always), rite (per-sync), summonable (on-demand). **Mena priority:** platform < shared < dependency < active rite. **Provenance:** two YAML manifests (rite + user scope), SHA-256 checksums, orphan detection. **Collision checker** prevents user-scope shadowing rite-owned resources.
 
 ## Implementation Map
 
-Hub package: `/Users/tomtenuta/Code/knossos/internal/materialize/` (48 files). Sub-packages: `source/`, `mena/`, `hooks/`, `userscope/`, `orgscope/`. CLI: `/Users/tomtenuta/Code/knossos/internal/cmd/sync/`.
-
-### Key Types
-
-`Materializer`, `RiteManifest`, `Options` (Soft, ElCheapo, DryRun, OverwriteDiverged), `SyncOptions` (Scope, RiteName), `SourceResolver`, `ResolvedRite`.
-
-### 26 Test Files
-
-Most heavily tested package. SCAR regression tests cover SCAR-002, 003, 004, 005, 006, 008, 015, 016, 018, 020, 021, 023, 024, 027.
-
-### Load-Bearing Code
-
-- **LOAD-001**: `provenance.Save()` structural equality guard
-- **LOAD-002**: `fileutil.WriteIfChanged()` for all writes
-- **LOAD-003**: `inscription.MergeRegions()` satellite preservation
-- **LOAD-004**: `namespace.resolveNamespace()` provenance-based collision detection
+CLI: `internal/cmd/sync/sync.go` + `budget.go`. Core: `internal/materialize/materialize.go` -- MaterializeWithOptions() 20+ step pipeline (resolve rite, validate, load manifest, ensure dirs, load provenance, detect divergence, handle orphans, resolve hooks/skills/MCP, materializeAgents, materializeMena, materializeRules, materializeInscription, materializeSettings, materializeMcp, track state, materialize workflow, write ACTIVE_RITE, save provenance, generate .gitignore, untrack). Agent transform: strip knossosOnlyFields, inject defaults, apply skill policies, inject MCP servers. Mena engine: 4-pass algorithm (collect, namespace resolve, apply flat names, write). Compiler: ClaudeCompiler (pass-through) vs GeminiCompiler (TOML commands, key-stripped agents).
 
 ## Boundaries and Failure Modes
 
-- Does NOT manage session state, rite workflows, or remote sources
-- SCAR-002: Never rename `.claude/`
-- SCAR-004: Provenance parse errors abort, never bootstrap silently
-- SCAR-005: Never `os.RemoveAll` on agents/commands/skills
-- SCAR-006: Satellite rites use `KnossosHome()` for shared mena
-- SCAR-024: Rite switch cleans stale throughline IDs
-- RISK-002: `materializeMena()` discards collision warnings
+Fatal: source resolution failure, manifest parse failure, CLAUDE.md pre-validation failure. Non-fatal: rite reference warnings, divergence detection, org/user scope failures in scope=all. Idempotency: writeIfChanged (LB-001), no pre-delete (SCAR-005/LB-007), selective write from managed-set. Non-transactional pipeline (RZ-001). channelDirOverride save-and-restore (TENSION-002). Soft mode skips mena/rules/settings. El-cheapo injects haiku model override.
 
 ## Knowledge Gaps
 
-1. `userscope/sync.go` and `orgscope/sync.go` not read in full.
-2. `materialize_agents.go` selective write logic not read.
-3. `ACTIVE_WORKFLOW.yaml` format not examined.
+1. procession sub-package not read
+2. User-scope mena sync details not fully verified
+3. Inscription full merge pipeline not traced
+4. ADR-0016 not found on disk

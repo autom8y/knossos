@@ -1,571 +1,202 @@
 ---
 domain: design-constraints
-generated_at: "2026-03-23T18:00:00Z"
+generated_at: "2026-03-26T17:14:25Z"
 expires_after: "7d"
 source_scope:
   - "./cmd/**/*.go"
   - "./internal/**/*.go"
   - "./go.mod"
 generator: theoros
-source_hash: "78abb186"
-confidence: 0.91
+source_hash: "a73d68a6"
+confidence: 0.88
 format_version: "1.0"
 update_mode: "full"
 incremental_cycle: 0
 max_incremental_cycles: 3
 land_sources:
   - ".sos/land/initiative-history.md"
-land_hash: "08704d8d5bd3b4b8b2c6a8a1590586893f35aa5a3c3d6f27c260cee86fca82b0"
+land_hash: "77ed0121d9982cb4e1bf8e7c09b414494a561c0ccd3b9ea546d210acd7354553"
 ---
 
 # Codebase Design Constraints
 
 ## Tension Catalog Completeness
 
-### TENSION-001: Dual `OwnerType` Types for Different Ownership Concepts
+17 TENSION-NNN entries cataloged. 16 accurate, 1 stale-resolved (TENSION-015).
 
-**Location**: `internal/provenance/provenance.go:91` and `internal/inscription/types.go:14`
+**TENSION-001** (`internal/provenance/provenance.go:91`, `internal/inscription/types.go:14`): Dual `OwnerType` types in separate packages — distinct types with same name, cross-referenced by comments.
 
-**Type**: Naming mismatch / semantic divergence
+**TENSION-002** (`internal/materialize/materialize.go:118,284-289,390-391`): `channelDirOverride` mutation-with-defer pattern — saves and restores channel dir override to support multi-channel materialization.
 
-Two distinct `OwnerType` types exist in separate packages:
-- `provenance.OwnerType`: `knossos / user / untracked` — file ownership in the channel dir
-- `inscription.OwnerType`: `knossos / satellite / regenerate` — region ownership in CLAUDE.md
+**TENSION-003** (`internal/perspective/context.go:60`, `internal/perspective/resolvers.go:274`): Hardcoded `.claude/` paths marked with `// HA-FS:` annotations — blocks Gemini feature parity.
 
-Both share the value `"knossos"` for platform-managed content but diverge from there.
+**TENSION-004** (`internal/agent/frontmatter.go:38-43`): `maxTurns`, `disallowedTools`, `permissionMode`, `mcpServers` as direct struct fields alongside `Contract *BehavioralContract` which also contains `MaxTurns`.
 
-**Historical reason**: Inscription and provenance were designed independently. Merging would require provenance (a leaf package per ADR-0026) to import inscription's type definitions, creating an import cycle.
+**TENSION-005** (`internal/resolution/chain.go:5-6`): Zero-import invariant — "This package has ZERO internal imports. All tier paths are injected via constructor to avoid import cycles (TENSION-005)."
 
-**Ideal resolution**: Define a shared `owner` package that both import. Estimated effort: medium.
+**TENSION-006** (`internal/provenance/provenance.go:69-70`): String values must stay in sync with `internal/materialize/source/types.go` — manual synchronization without shared constants.
 
----
+**TENSION-007** (`internal/hook/env.go:86-93`): `GetAdapter()` defaults to ClaudeAdapter when `KNOSSOS_CHANNEL` is unset — implicit default.
 
-### TENSION-002: `channelDirOverride` Mutation-Based Dispatch Hack
+**TENSION-008** (`internal/materialize/sync_types.go:51`): Sync state types coupled to materialization pipeline.
 
-**Location**: `internal/materialize/materialize.go:118,284-289,385-390`
+**TENSION-009** (`internal/materialize/userscope/sync.go`): Partially stale — mechanism changed to `paths.UserChannelDir(params.Opts.Channel)` dynamic resolution, but fallback behavior when channel is unconfigured remains a risk.
 
-**Type**: Over-engineering smell / structural hack
+**TENSION-010** (`internal/agent/frontmatter.go:55-70`): Agent archetype fields duplicated across frontmatter and behavioral contract.
 
-The `Materializer` struct has a `channelDirOverride string` field that is mutated-then-deferred to redirect the Gemini channel write target.
+**TENSION-011** (`internal/materialize/materialize.go:69-70`): `Skills []string` (deprecated) and `Commands []string` (backward compat) both present in `RiteManifest`.
 
-**Historical reason**: Documented in ADR-0031 as "a pragmatic hack." Reuse of the existing pipeline without constructor changes.
+**TENSION-012** (`internal/hook/output.go:28`): `HookEventName: "PreToolUse"` hardcoded wire value — CC reads this exact string for security decisions.
 
-**Ideal resolution**: Thread `channel string` through the constructor or pass it as a pipeline parameter. Blocked by the scope of callers.
+**TENSION-013** (`internal/inscription/pipeline.go:156-163`): Harness-agnosticism gap in inscription pipeline.
 
----
+**TENSION-014** (`internal/tribute/types.go:58,158`, `internal/tribute/renderer.go:64,250`): "Phase 2 - placeholder" comments — tribute feature incomplete.
 
-### TENSION-003: `perspective` Package Hardcodes `.claude/` Channel Directory
+**TENSION-015** (`internal/search/collectors.go:12`): **RESOLVED** — `internal/search` no longer imports `internal/cmd/explain`. Resolved via `internal/concept` extraction. `concept/concept.go` documents: "This package was extracted from internal/cmd/explain to resolve TENSION-015."
 
-**Location**: `internal/perspective/context.go:60` and `resolvers.go:274`
+**TENSION-016** (`internal/config/home.go:11-23`): `sync.Once` singleton for KnossosHome — `ResetKnossosHome()` exists with test-only warning: "RISK-003: KnossosHome is cached via sync.Once."
 
-**Type**: Layering violation / harness-agnosticism gap
-
-The perspective package resolves channel directory unconditionally as `.claude/`. Both lines carry `// HA-FS:` markers. Gemini channel cannot produce a valid perspective document.
-
-**Ideal resolution**: Add `channel string` to `perspective.Options`; use `paths.ChannelByName()`. Medium effort.
-
----
-
-### TENSION-004: CC-Native Frontmatter Fields Embedded in `AgentFrontmatter`
-
-**Location**: `internal/agent/frontmatter.go:33-40`
-
-**Type**: Abstraction gap / harness-agnosticism
-
-`AgentFrontmatter` uses CC camelCase wire-format field names as its canonical Go struct fields: `maxTurns`, `disallowedTools`, `permissionMode`, `mcpServers`, `hooks`. The Gemini compiler strips most of them. There is no intermediate canonical representation.
-
-**Historical reason**: ADR-0032 defined canonical equivalents (`BehavioralContract.MaxTurns`), but the struct was never migrated.
-
----
-
-### TENSION-005: `resolution` Package Zero-Import Policy Creates DI Burden
-
-**Location**: `internal/resolution/chain.go:1-6`
-
-**Type**: Under/over-engineering tension
-
-The package explicitly documents: `"This package has ZERO internal imports."` This forces callers to construct `Tier{}` structs with raw string paths.
-
-**Historical reason**: Prevents import cycles from higher-level packages.
-
-**Ideal resolution**: Acceptable as-is. The zero-import discipline is load-bearing.
-
----
-
-### TENSION-006: `provenance.SourceType` Uses Plain Strings to Avoid Import Cycle
-
-**Location**: `internal/provenance/provenance.go:68-72`
-
-**Type**: Naming mismatch / leaf package constraint
-
-Provenance uses untyped `string` for `SourceType` rather than importing `source.SourceType`. The comment reads: "String values must stay in sync manually."
-
-**Historical reason**: Importing `materialize/source` from `provenance` would break the leaf package guarantee of ADR-0026.
-
----
-
-### TENSION-007: `GetAdapter()` Defaults to `ClaudeAdapter` When `KNOSSOS_CHANNEL` Unset
-
-**Location**: `internal/hook/env.go:86-94`
-
-**Type**: Harness-agnosticism gap / backward-compatibility constraint
-
-When `KNOSSOS_CHANNEL` is unset, `GetAdapter()` silently returns `&ClaudeAdapter{}`. Tracked as PKG-010 in harness-agnosticism initiative.
-
----
-
-### TENSION-008: `Soft bool // CC-safe mode` Comment Is Channel-Specific
-
-**Location**: `internal/materialize/sync_types.go:51`; `materialize.go:29`
-
-**Type**: Naming mismatch (cosmetic)
-
-Soft mode is functionally channel-agnostic but the comment labels it `"CC-safe mode"`.
-
----
-
-### TENSION-009: `userscope/sync.go` Hardcodes `"claude"` Fallback Default
-
-**Location**: `internal/materialize/userscope/sync.go:33`
-
-**Type**: Harness-agnosticism gap
-
-Defaults to `paths.UserChannelDir("claude")` when no channel configured. Gemini user files never synced unless caller explicitly passes `userChannelDir`.
-
----
-
-### TENSION-010: `knownTools` Validator Is CC-Specific
-
-**Location**: `internal/agent/frontmatter.go:55-70`
-
-**Type**: Harness-agnosticism gap
-
-The `knownTools` map contains CC wire tool names only. Gemini tool names not in the validator.
-
----
-
-### TENSION-011: `RiteManifest.Skills` and `.Commands` Deprecated Fields Present
-
-**Location**: `internal/materialize/materialize.go:69-70`
-
-**Type**: Zombie abstraction
-
-Both fields must be checked by every manifest reader. No removal date set.
-
----
-
-### TENSION-012: `PreToolUseOutput.HookEventName = "PreToolUse"` Is Frozen CC Wire Format
-
-**Location**: `internal/hook/output.go:28`
-
-**Type**: Frozen / wire protocol constraint
-
-The value `"PreToolUse"` is the CC protocol value. Changing it would bypass the write guard silently. This is a security boundary.
-
----
-
-### TENSION-013: `inscription` Package `NewPipeline()` Hardcodes `.claude/CLAUDE.md`
-
-**Location**: `internal/inscription/pipeline.go:156-163`
-
-**Type**: Harness-agnosticism gap
-
-The default constructor hardcodes the CC channel context file path. Gemini requires `NewPipelineWithPaths()`.
-
----
-
-### TENSION-014: `tribute/Commits` Section Is a Phase 2 Placeholder
-
-**Location**: `internal/tribute/types.go:58,158`; `renderer.go:64,250`
-
-**Type**: Premature abstraction (incomplete)
-
-`Commit` struct and `renderCommits()` exist but are marked as "Phase 2 - placeholder." No commit data is populated.
-
----
-
-### TENSION-015: `search/collectors.go` Imports `cmd/explain` Across Layer Boundary
-
-**Location**: `internal/search/collectors.go:12`
-
-**Type**: Layering violation (latent circular risk)
-
-`internal/search` imports `internal/cmd/explain`. If `cmd/explain` ever imports `search`, a circular dependency results. Currently safe — risk is latent.
-
----
-
-### TENSION-016: `config.KnossosHome()` Uses `sync.Once` Singleton — Test Cache Poisoning
-
-**Location**: `internal/config/home.go:11-23`
-
-**Type**: Load-bearing jank / test isolation risk
-
-A test that calls `KnossosHome()` before setting `KNOSSOS_HOME` poisons the cache for all subsequent tests. `ResetKnossosHome()` must be called.
-
----
-
-### TENSION-017: `.mcp.json` Written to Project Root, Not Channel Dir
-
-**Location**: `internal/materialize/materialize.go:570-577` (SCAR-028)
-
-**Type**: Structural asymmetry
-
-MCP servers in `.mcp.json` at project root; hooks in `{channelDir}/settings.local.json`. Two-location config split.
+**TENSION-017** (`internal/materialize/materialize.go:579-584`): Settings to channel dir, MCP to project root — split output targets.
 
 ---
 
 ## Trade-off Documentation
 
-### Trade-off 1: WriteIfChanged Over Atomic Write for CC Stability
+**Trade-off 1 (WriteIfChanged):** CC file watcher behavior requires avoiding unnecessary file writes. `writeIfChanged()` compares content before writing. Current state persists because CC file watcher crashes are worse than the overhead.
 
-**Chosen**: `fileutil.WriteIfChanged()` for all writes to `.claude/`
-**Rejected**: Plain `os.WriteFile()` or unconditional atomic rename
-**Why current persists**: CC's file watcher crashes on DELETE events. `WriteIfChanged` reads first; if identical, no write occurs.
+**Trade-off 2 (Dual read path, v1/v2/v3):** `internal/session/events_read.go:82-117` — dual-format event reader. Persists until "all pre-ADR-0027 sessions are archived."
 
----
+**Trade-off 3 (Provenance in `.knossos/`):** Provenance manifests stored in `.knossos/` not `.claude/` — CC context window exposure risk.
 
-### Trade-off 2: Dual Read Path for Events (v1/v2/v3) Instead of Migration
+**Trade-off 4 (CC event names as lingua franca):** ADR-0032 confirmed — rejected a third vocabulary. CC wire names are the canonical representation.
 
-**Chosen**: Format-sniffing reader at `session/events_read.go:82-117`
-**Rejected**: One-time migration script
-**Why current persists**: Sessions may resume across format versions. Safe to remove once all pre-ADR-0027 sessions are archived.
+**Trade-off 5 (XDG logic duplicated):** `config.ActiveOrg()` at `home.go:84` duplicates path resolution — import cycle constraint prevents sharing with paths package.
 
----
+**Trade-off 6 (Two-manifest architecture):** Rite-scope and user-scope provenance manifests are separate to avoid cross-contamination during sync.
 
-### Trade-off 3: Provenance Manifest Lives in `.knossos/`, Not `.claude/`
+**Trade-off 7 (channelDirOverride save-and-restore):** ADR-0031 acknowledges as "pragmatic hack." Constructor refactor would affect 15+ call sites.
 
-**Chosen**: `PROVENANCE_MANIFEST.yaml` in `.knossos/`
-**Rejected**: Storing provenance in `.claude/`
-**Why current persists**: `.knossos/` is gitignored infrastructure. Writing to `.claude/` exposes internal tracking to CC's context window.
-
----
-
-### Trade-off 4: CC-Canonical Hook Event Names as Internal Lingua Franca
-
-**Chosen**: CC event names (`PreToolUse`, `PostToolUse`) as internal canonical
-**Rejected**: A third neutral vocabulary
-**Why current persists**: ADR-0032 explicitly rejected a third vocabulary. Translation at adapter boundary.
-
----
-
-### Trade-off 5: XDG Config Path Inlined in `config.ActiveOrg()` to Avoid Import Cycle
-
-**Chosen**: Duplicate XDG logic in `config.ActiveOrg()`
-**Rejected**: Import `internal/paths` from `internal/config`
-**Why current persists**: `paths` imports `config`. Reverse import creates cycle.
-
----
-
-### Trade-off 6: Two-Manifest Architecture (Rite + User Provenance)
-
-**Chosen**: Separate `PROVENANCE_MANIFEST.yaml` and `USER_PROVENANCE_MANIFEST.yaml`
-**Rejected**: Single unified manifest
-**Why current persists**: Rite scope is per-project; user scope is global. Merging requires project-keyed namespacing.
-
----
-
-### Trade-off 7: `channelDirOverride` Save-and-Restore vs. Constructor Threading
-
-**Chosen**: Mutation-with-defer pattern
-**Rejected**: Thread channel through constructor
-**Why current persists**: ADR-0031 acknowledges "pragmatic hack." Constructor refactor touches 15+ call sites.
-
----
-
-### Trade-off 8: `ClaudeCompiler` as Pass-Through (No Transformation)
-
-**Chosen**: `ClaudeCompiler` returns content unchanged
-**Rejected**: Symmetric pipeline where both compilers transform
-**Why current persists**: CC consumes raw markdown. No transformation required.
+**Trade-off 8 (ClaudeCompiler as pass-through):** Symmetric pipeline rejected — Gemini needs active compilation, Claude is mostly pass-through.
 
 ---
 
 ## Abstraction Gap Mapping
 
-### AGM-001: `perspective` Package Has No Channel Abstraction
+**AGM-001** (`internal/perspective/`): Hardcoded `.claude/` paths with `// HA-FS:` markers. Blocks Gemini feature parity.
 
-**Location**: `internal/perspective/context.go:60`, `resolvers.go:274`
+**AGM-002** (`internal/agent/frontmatter.go`): `MaxTurns int` at direct field level coexists with `Contract *BehavioralContract` containing `MaxTurns`.
 
-Both hardcode `.claude/` paths. Blocks Gemini feature parity for `ari ask`.
+**AGM-003** (`AGENTS.md` compilation): No AGENTS.md (OpenAI/ChatGPT format) compilation exists in materialize pipeline.
 
----
+**AGM-004** (`BehavioralContract.MaxTurns` not wired): Contract MaxTurns not plumbed through to agent output.
 
-### AGM-002: `AgentFrontmatter` Mixes Canonical and CC-Wire Fields
+**AGM-005** (`RiteManifest.Commands` and `.Skills`): Both deprecated fields still present at `materialize.go:69-70`.
 
-**Location**: `internal/agent/frontmatter.go:17-51`
+**AGM-006** (Duplicate resolution logic): Both `materialize/source` and `resolution` packages implement tier traversal. Moderate duplication.
 
-CC-wire `maxTurns` field and canonical `BehavioralContract.MaxTurns` coexist. The canonical path is designed but never connected.
+**AGM-007** (`tribute/Commits` placeholder): Type surface with "Phase 2 - placeholder" — feature incomplete.
 
----
-
-### AGM-003: `AGENTS.md` Compilation Target Designed But Not Implemented
-
-ADR-0032 references `AGENTS.md` as a third compilation target. No implementation exists.
-
----
-
-### AGM-004: `BehavioralContract.MaxTurns` Not Wired to CC Wire Format
-
-**Location**: `internal/agent/frontmatter.go:47-48`
-
-The compiler pipeline reads from the direct CC-wire field, not from `Contract.MaxTurns`.
-
----
-
-### AGM-005: `RiteManifest.Commands` and `.Skills` Backward-Compat Fields
-
-**Location**: `internal/materialize/materialize.go:68-70`
-
-Every manifest reader must check both deprecated and current field names. No removal date.
-
----
-
-### AGM-006: Duplicate Resolution Logic in `materialize/source` and `resolution` Packages
-
-Both implement priority-ordered tier traversal. Moderate code duplication.
-
----
-
-### AGM-007: `tribute/Commits` Placeholder Occupies API Surface Without Implementation
-
-**Location**: `internal/tribute/types.go:58,158`; `renderer.go:250`
-
-Type surface committed, git integration deferred indefinitely.
-
----
-
-### AGM-008: `fileutil.AtomicWriteFile` vs. User-Scope `os.WriteFile`
-
-**Location**: `internal/materialize/userscope/sync.go:50`
-
-Rite scope uses `WriteIfChanged()`; user scope uses `os.WriteFile`. Documented as intentional but asymmetric.
+**AGM-008** (`fileutil.AtomicWriteFile` vs. `os.WriteFile`): `userscope/sync.go` uses `os.WriteFile` while most of the pipeline uses `AtomicWriteFile`. Intentional but asymmetric.
 
 ---
 
 ## Load-Bearing Code Identification
 
-### LB-001: `fileutil.WriteIfChanged()` — CC Stability Invariant
+**LB-001** (`internal/fileutil/fileutil.go:66-72`): `WriteIfChanged()` — naive replacement with `os.WriteFile` causes CC file watcher to crash.
 
-**File**: `internal/fileutil/fileutil.go:66-72`
+**LB-002** (`internal/provenance`): `structurallyEqual()` — prevents unnecessary writes that would trigger CC file watcher.
 
-Every write to `.claude/` passes through this function. Removing the equality check triggers CC file watcher crashes.
+**LB-003** (`internal/materialize/mena/content_rewrite.go:128-138`): Three-pass rewrite ordering (INDEX.lego.md -> SKILL.md precedes general `.lego.md -> .md`). Wrong order causes double-rewrite corruption.
 
----
+**LB-004** (`internal/session/events_read.go:82-117`): Dual-format event reader. Wrong format order causes silent event misread.
 
-### LB-002: `provenance.structurallyEqual()` — Timestamp-Only Write Suppression
+**LB-005** (`internal/hook/clewcontract/type_rename.go:14-22`): Append-only event type rename map. Removing entries breaks backward compatibility.
 
-Avoids writing the provenance manifest when only timestamps changed.
+**LB-006** (`internal/config/home.go:11-23`): `sync.Once` singleton for KnossosHome. `ResetKnossosHome()` only for tests.
 
----
+**LB-007** (`internal/materialize/materialize_agents.go:42-45`): No pre-delete before agent overwrite — CC watcher fires DELETE events that cause agent disappearance.
 
-### LB-003: `applyRewrites()` Three-Pass Ordering in `content_rewrite.go`
+**LB-008** (`internal/inscription`): Satellite region preservation in `Merger` — core invariant protecting user content from being destroyed during CLAUDE.md regeneration.
 
-**File**: `internal/materialize/mena/content_rewrite.go:128-138`
+**LB-009** (`internal/provenance`): `LoadOrBootstrap()` aborts on corrupt manifests — not fail-open.
 
-`INDEX.lego.md -> SKILL.md` must be applied before general `{name}.lego.md -> {name}.md`. Fence-split pass precedes both.
+**LB-010** (`internal/hook/output.go:28`): `HookEventName: "PreToolUse"` hardcoded wire format string — security boundary. CC reads this exact string for permission decisions.
 
----
-
-### LB-004: `ReadEvents()` Format Detection Order
-
-**File**: `internal/session/events_read.go:82-117`
-
-v3 events must be checked first, before v2 and v1. Wrong order silently misreads all v3 events.
-
----
-
-### LB-005: `RenameV2Type()` — Append-Only Event Rename Map
-
-**File**: `internal/hook/clewcontract/type_rename.go:14-22`
-
-Must be append-only while any v2 event files exist on disk.
-
----
-
-### LB-006: `config.KnossosHome()` — sync.Once Singleton
-
-**File**: `internal/config/home.go:11-23`
-
-Load-bearing for performance; creates test cache poisoning risk.
-
----
-
-### LB-007: `materializeAgents()` — NO Pre-Delete Before Overwrite
-
-**File**: `internal/materialize/materialize_agents.go:42-45`
-
-Pre-deletion causes CC file watcher DELETE events, crashing active sessions.
-
----
-
-### LB-008: Satellite Region Preservation in `inscription.Merger`
-
-Regions with `Owner == OwnerSatellite` are never overwritten. Core invariant protecting user content in CLAUDE.md.
-
----
-
-### LB-009: `provenance.LoadOrBootstrap()` — Abort-on-Corrupt Contract
-
-All errors except file-not-found propagate and abort the pipeline.
-
----
-
-### LB-010: `hook/output.go` PreToolUse Wire Format String
-
-**File**: `internal/hook/output.go:28`
-
-`HookEventName: "PreToolUse"` is the CC wire protocol value. If changed, CC bypasses writeguard. Security boundary.
-
----
-
-### LB-011: `materialize.go` Pipeline Step Ordering
-
-**File**: `internal/materialize/materialize.go:457-627`
-
-10+ step pipeline with implicit ordering dependencies. Non-transactional — partial failure leaves inconsistent state.
+**LB-011** (`internal/materialize/materialize.go:457-627`): Pipeline step ordering — non-transactional, partial failures possible.
 
 ---
 
 ## Evolution Constraint Documentation
 
-### SAFE areas (local changes only)
+### SAFE (local change only)
+- `internal/resolution/chain.go` — zero-import policy, self-contained
+- `internal/tribute/types.go` — placeholder types, no external callers
+- `internal/concept/concept.go` — isolated concept registry
+- `internal/tokenizer` — stdlib wrapper
+- `internal/fileutil` — utility functions
+- `internal/checksum` — hash utilities
 
-- `internal/errors/` — adding new error codes is contained
-- `internal/session/fsm.go` — adding states is self-contained
-- `internal/channel/tools.go` — adding tool mappings is additive
-- `internal/resolution/chain.go` — purely algorithmic
-- `internal/tribute/types.go` `Commit` struct — placeholder, zero-risk
-- `internal/lock/lock.go` `DefaultTimeout` — safe; `StaleThreshold` is load-bearing for long commands
+### COORDINATED (multi-file, no external break)
+- Adding a new `TargetChannel`: minimum 5 files across 4 packages
+- New hook handler: handler file + hooks.yaml + test + CLAUDE.md regeneration
+- New agent frontmatter field: `agent/frontmatter.go` + transform + test + lint rule
+- New session state: `status.go` FSM + `NormalizeStatus()` + migrate
+- New mena type: `mena/source.go` routing + materialize pipeline + lint
 
-### COORDINATED areas (require cross-file changes)
+### MIGRATION (breaking change to callers)
+- Provenance schema version bump (`CurrentSchemaVersion = "2.0"`) — requires migration function
+- Session context schema change — requires `internal/cmd/session/migrate.go` entry
+- Inscription schema version — `DefaultSchemaVersion = "1.0"`
+- Deprecated field removal (`RiteManifest.Skills`, `.Commands`) — multi-rite impact
 
-- **Adding a new `TargetChannel`**: Minimum 5 files across 4 packages
-- **Changing `provenance.SourceType` values**: Must sync with `materialize/source/types.go`
-- **Adding a new inscription region**: Schema version bump, template, manifest migration
-- **Adding a new `HookEvent`**: Constant, translation tables, hooks.yaml, switch statements
-- **Removing `RiteManifest.Skills` or `.Commands`**: All `manifest.yaml` files across all satellite repos
+### FROZEN (do not touch without explicit decision)
+- `internal/hook/output.go` `HookEventName: "PreToolUse"` — CC security boundary
+- `.claude/` directory name — CC hardcoded expectation
+- `PROVENANCE_MANIFEST.yaml` filename — referenced in multiple packages
+- `KNOSSOS_CHANNEL` env var name — harness detection mechanism
+- `.knossos/` directory structure — project detection marker
 
-### MIGRATION areas (on-disk migration required)
-
-- `provenance.CurrentSchemaVersion = "2.0"` — v3 bump requires new migration function
-- `inscription.DefaultSchemaVersion = "1.0"` — format changes require manifest migration
-- `RiteManifest.Commands` and `.Skills` — removal requires all satellite repo manifests updated
-- MCP server location split (SCAR-028): stale entries cleaned by `cleanupStaleBlanketSettings()`
-
-### FROZEN areas (cannot change without breaking wire protocol)
-
-- `hook/output.go` `HookEventName: "PreToolUse"` — CC protocol value
-- `.claude/` directory name — CC hardcodes this
-- `PROVENANCE_MANIFEST.yaml` filename for Claude channel
-- `KNOSSOS_CHANNEL` environment variable name
-- `.knossos/` directory name — used by `FindProjectRoot()`
-
-### Deprecated markers (still present)
-
-| Item | Location | Replacement |
-|---|---|---|
-| `RiteManifest.Skills` | `materialize.go:70` | `Legomena` |
-| `RiteManifest.Commands` | `materialize.go:69` | `Dromena` + `Legomena` |
-| `paths.AgentsDir()` | `paths/paths.go:169` | `AgentsDirForChannel()` |
-| `materialize.ResolveUserResources()` | `materialize/source.go:71` | `ResolveUserResourcesForChannel()` |
-
-### In-progress migrations (parked or active)
-
-- ADR-0032 PKG-010: `GetAdapter()` CC default (TENSION-007, parked)
-- `perspective` channel-awareness (TENSION-003, unresolved)
-- ADR-0032 `AGENTS.md` compilation target (AGM-003, not implemented)
-- `BehavioralContract.MaxTurns` wiring (AGM-004, not connected)
-- `tribute` git commits Phase 2 (AGM-007, deferred indefinitely)
+### Deprecated Markers
+| Location | Deprecated | Replacement |
+|----------|-----------|-------------|
+| `materialize.go:70` | `RiteManifest.Skills` | `Legomena` |
+| `materialize.go:69` | `RiteManifest.Commands` | `Dromena` |
+| `session/status.go:44-51` | `COMPLETE`/`COMPLETED` aliases | `ARCHIVED` |
+| `hook/env.go` | `.current-session` file | Priority chain resolution |
 
 ---
 
 ## Risk Zone Mapping
 
-### RZ-001: `materialize/` — No Rollback on Partial Write Failure
+**RZ-001** (non-transactional materialize pipeline): `internal/materialize/materialize.go:454-627` — partial failures accumulate; no rollback. "Partial failures are non-fatal."
 
-**Location**: `internal/materialize/materialize.go:454-627`
+**RZ-002** (`config.KnossosHome()` test cache): `sync.Once` singleton. Cross-referenced to TENSION-016. `ResetKnossosHome()` mitigation for tests only.
 
-10+ step pipeline is not transactional. Mid-pipeline failure leaves agents on disk with no CLAUDE.md update.
+**RZ-003** (search circular layer risk): **PARTIALLY STALE** — original import resolved via `internal/concept` extraction. Latent risk mitigated but hypothetically reintroducible.
 
----
+**RZ-004** (Mena namespace collision): Mixed dro/lego warnings but no hard failure on collision.
 
-### RZ-002: `config.KnossosHome()` Test Cache Poisoning
+**RZ-005** (time-based lock stale threshold): `internal/lock/lock.go:32` — 5-minute timeout. No heartbeat mechanism.
 
-**Location**: `internal/config/home.go:81-96`
+**RZ-006** (`org_scope.go` silently non-fatal): `org_scope.go:54,69` — "Non-fatal: accumulate error and continue."
 
-A test calling `KnossosHome()` before setting `KNOSSOS_HOME` poisons `sync.Once` for all subsequent tests.
+**RZ-007** (`userscope/sync.go` fallback channel): Mechanism changed to `paths.UserChannelDir(params.Opts.Channel)` but fallback when channel unconfigured remains a risk.
 
----
+**RZ-008** (`perspective/context.go` channel dir hardcode): Both `// HA-FS:` markers confirmed — blocks multi-harness.
 
-### RZ-003: `search/collectors.go` Circular Layer Risk
+**RZ-009** (`procession/resolver.go` global config calls): `resolver.go:38-43` calls `config.KnossosHome()` and `config.ActiveOrg()` directly without injection.
 
-**Location**: `internal/search/collectors.go:12`
-
-`internal/search` imports `internal/cmd/explain`. Soft constraint enforced only by discipline.
-
----
-
-### RZ-004: Mena Namespace Collision Across Rites
-
-Collisions produce warnings but no hard failure. Callers may silently deliver incomplete mena.
-
----
-
-### RZ-005: Lock Stale Threshold Is Time-Based (5 min), Not Process-Based
-
-**Location**: `internal/lock/lock.go:32`
-
-Long-running commands (>5 min) may have locks classified as stale. No heartbeat mechanism.
-
----
-
-### RZ-006: Org Scope Sync Silently Non-Fatal on Error
-
-**Location**: `internal/materialize/org_scope.go:63-73`
-
-Per-channel errors accumulated but execution continues. Misconfigured org silently produces partial sync.
-
----
-
-### RZ-007: `userscope/sync.go` Fallback Channel Default
-
-**Location**: `internal/materialize/userscope/sync.go:33`
-
-Defaults to `"claude"` when no channel configured. No error or warning emitted.
-
----
-
-### RZ-008: `perspective/context.go` Channel Dir Hardcode
-
-**Location**: `internal/perspective/context.go:60`, `resolvers.go:274`
-
-Gemini perspective assembly resolves against `.claude/` unconditionally. Silently incorrect results.
-
----
-
-### RZ-009: `procession/resolver.go` Calls Global Config Functions Directly
-
-**Location**: `internal/materialize/procession/resolver.go:36-50`
-
-`ResolveProcessions()` calls global config functions rather than injected parameters. Test isolation requires env var overrides.
-
----
-
-### RZ-010: `isGitWorktree()` External Process Call With 10s Timeout
-
-**Location**: `internal/materialize/worktree.go:22-49`
-
-Git subprocess in materialization path. On NFS/CI, adds latency. On timeout, returns `false` (safe default) but misses rite inheritance.
+**RZ-010** (`isGitWorktree()` 10s timeout): `context.WithTimeout(context.Background(), 10*time.Second)` — no cancellation propagation from caller.
 
 ---
 
 ## Knowledge Gaps
 
-1. **`internal/naxos/triage.go`**: Debt triage scoring heuristics not inspected.
-2. **`internal/sails/`**: White sails signaling constraints not traced.
-3. **`internal/session/fsm.go`**: State machine transition invariants not fully enumerated.
-4. **`internal/procession/` (non-materialize)**: Template schema validation constraints not verified.
-5. **`internal/validation/schemas/`**: JSON schema versioning constraints not documented.
-6. **`hooks.yaml` canonical structure**: Hook configuration format constraints not inspected end-to-end.
-7. **`internal/registry/`**: Registry package constraints on rite registration not examined.
-8. **`internal/materialize/mcp_ownership.go`**: MCP ownership model constraints not captured.
+1. `internal/naxos/triage.go` — debt triage scoring heuristics
+2. `internal/sails/` — white sails signaling constraints (`gate.go`, `thresholds.go`, `contract.go`, `proofs.go` uncharted)
+3. `internal/session/fsm.go` — state machine transition invariants
+4. `internal/procession/` — template schema validation constraints
+5. `internal/validation/schemas/` — JSON schema versioning constraints
+6. `hooks.yaml` — canonical structure end-to-end format constraints
+7. `internal/registry/` — rite registration constraints
+8. `internal/materialize/mcp_ownership.go` — MCP ownership model

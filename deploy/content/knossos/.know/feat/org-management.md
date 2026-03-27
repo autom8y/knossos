@@ -1,14 +1,14 @@
 ---
 domain: feat/org-management
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/cmd/org/**/*.go"
   - "./internal/materialize/orgscope/**/*.go"
-  - "./internal/materialize/source/resolver.go"
+  - "./internal/config/**/*.go"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
+source_hash: "b329d719"
 confidence: 0.88
 format_version: "1.0"
 ---
@@ -17,46 +17,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-Org-level resource management solves the multi-project sharing problem: teams using Knossos across multiple repositories share agents, mena, and rites via a named org at tier 4 in the 6-tier resolution hierarchy.
-
-**Key decisions**: Org commands do NOT require project context. Active org via `$KNOSSOS_ORG` env var or `$XDG_CONFIG_HOME/knossos/active-org` file. Graceful no-org behavior (returns `status: "skipped"`). Separate `ORG_PROVENANCE_MANIFEST.yaml`.
+Lets multiple projects share rites, agents, and mena without duplication. Two distinct concerns: resource materialization (orgscope: copies to ~/.claude/ at sync time) and knowledge registry (registry/org: cross-repo domain catalog for Clew). Org resources go to user channel dir (not project dir) for cross-project availability. Active org resolution: KNOSSOS_ORG env var > config file.
 
 ## Conceptual Model
 
-### Org Directory Structure
-
-```
-$XDG_DATA_HOME/knossos/orgs/<org-name>/
-  org.yaml          ← metadata
-  rites/            ← org-level rite definitions
-  agents/           ← synced to ~/.claude/agents/
-  mena/             ← synced to ~/.claude/skills/
-```
-
-### Active Org Resolution
-
-1. `$KNOSSOS_ORG` env var (CI/CD override)
-2. `$XDG_CONFIG_HOME/knossos/active-org` file (developer workstation)
+**Three tiers:** Config (active-org pointer at XDG config), Data (org resources + metadata at XDG data), Registry (cross-repo catalog). **OrgContext interface:** Name(), DataDir(), RegistryDir(), Repos(). **Scope levels:** all/rite/org/user in sync pipeline. Org scope fires at Phase 1.5 (after rite, before user). **Provenance:** ORG_PROVENANCE_MANIFEST.yaml with ScopeOrg. **Qualified names:** org::repo::domain for cross-repo addressing.
 
 ## Implementation Map
 
-| Command | File | Purpose |
-|---------|------|---------|
-| `ari org init` | `internal/cmd/org/init.go` | Create org directory + `org.yaml` |
-| `ari org set` | `internal/cmd/org/set.go` | Write active-org config |
-| `ari org list` | `internal/cmd/org/list.go` | Enumerate orgs |
-| `ari org current` | `internal/cmd/org/current.go` | Display `ActiveOrg()` result |
-
-Sync engine: `/Users/tomtenuta/Code/knossos/internal/materialize/orgscope/sync.go` — copies agents + mena, tracks provenance. Phase 1.5 in the materialize pipeline.
+CLI: `internal/cmd/org/` (init, set, list, current -- NeedsProject=false). Config: `internal/config/` (ActiveOrg, OrgContext interface, DefaultOrgContext). Paths: `internal/paths/paths.go` (OrgDataDir, OrgRitesDir, OrgAgentsDir, OrgMenaDir). Sync: `internal/materialize/orgscope/sync.go` (SyncOrgScope -- flat files only, no subdirectories). Registry: `internal/registry/org/` (DomainCatalog, SyncRegistry, HandlePushEvent, LoadCatalog/SaveCatalog).
 
 ## Boundaries and Failure Modes
 
-- Flat-files-only constraint: subdirectories in `agents/` and `mena/` silently skipped
-- Org mena routed entirely to `~/.claude/skills/` (NOT split between commands/skills)
-- `ActiveOrg()` reads file on every call (not cached like `KnossosHome()`)
+Org scope does not affect project-scope resources. Registry sync decoupled from resource sync. Flat file only (subdirectories in org agents/mena silently skipped). No rite-level metadata for org agents. No org configured: status=skipped (non-fatal). Individual file failures: warn and continue. ActiveOrg caches via sync.Once (test must ResetKnossosHome). No webhook receiver route wired in serve.go.
 
 ## Knowledge Gaps
 
-1. `--org` flag wiring in sync CLI not confirmed.
-2. Org mena routing intent (all to skills/) undocumented.
-3. Multi-org scenarios not supported (single-active-org model).
+1. Collision detection between org and user scope not read
+2. Procession org integration not traced
+3. ari sync --org flag passing path not confirmed

@@ -1,14 +1,14 @@
 ---
 domain: feat/explain-command
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/cmd/explain/**/*.go"
-  - "./internal/cmd/explain/concepts/*.md"
+  - "./internal/concept/**/*.go"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.88
+source_hash: "b329d719"
+confidence: 0.96
 format_version: "1.0"
 ---
 
@@ -16,46 +16,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-`ari explain` solves the onboarding and vocabulary problem in a domain-heavy framework. Knossos introduces dense mythological vocabulary (rite, dromena, legomena, mena, inscription, sails, tribute, clew, naxos) that has no intuitive meaning to new users.
-
-**Design decisions**: Embedded concept files via `//go:embed concepts/*.md`. Project-optional (`needsProject=false`). Markdown frontmatter format for concepts. Two output modes (list all vs single lookup). `cc_term` bridging field maps knossos terms to CC terms.
+Zero-dependency, offline concept glossary for knossos domain vocabulary. Discoverability for newcomers to mythology terminology. Harness-agnostic bridging via harness_term field. Project-aware contextualization with live counts. Concept package extracted from cmd/explain to resolve TENSION-015 (internal/search needed concept data without crossing CLI layer boundary).
 
 ## Conceptual Model
 
-### Lookup Chain
-
-1. Normalize: `strings.ToLower(strings.TrimSpace(input))`
-2. Exact match in registry
-3. Alias match (e.g., `skills` → `legomena`, `commands` → `dromena`)
-4. Levenshtein suggestion (threshold: dist <= 3 AND dist < len(input)/2)
-5. Error with "Available concepts:" list
-
-### 13 Embedded Concepts
-
-`agent`, `dromena`, `inscription`, `knossos`, `know`, `ledge`, `legomena`, `mena`, `rite`, `sails`, `session`, `sos`, `tribute`
-
-### Project Context Injection
-
-When a project root is available, dynamic context is appended (active rite, session count, agent count, mena count). 10 context functions in `/Users/tomtenuta/Code/knossos/internal/cmd/explain/context.go`.
+**16 embedded concepts** with YAML frontmatter (summary, see_also, aliases, harness_term). **Lookup chain:** exact match -> alias match -> Levenshtein suggestion (distance <=3 AND < len/2). **Context injection:** 10 of 16 concepts have live inspection functions reading project state. **Two output modes:** list (table of name+summary) and lookup (full description + context). **Display name:** "{name} ({harness_term})" when harness_term present.
 
 ## Implementation Map
 
-5 files in `/Users/tomtenuta/Code/knossos/internal/cmd/explain/`: `explain.go`, `concepts.go`, `models.go`, `context.go`, `explain_test.go` (53 test cases).
-
-### Key Types
-
-- `ConceptEntry` — parsed concept with name, summary, description, seeAlso, aliases, ccTerm
-- `ConceptOutput` / `ConceptListOutput` — output types implementing `output.Textable` / `output.Tabular`
+`internal/concept/concept.go` (registry via init(), LookupConcept, AllConcepts, parseConcept, levenshtein, suggestConcept). 16 embedded .md files in concepts/. `internal/cmd/explain/` (explain.go, concepts.go re-export shim, context.go with 10 contextFuncs, models.go output types). Search integration: CollectConcepts in internal/search/collectors.go feeds ari ask index.
 
 ## Boundaries and Failure Modes
 
-- `init()` panics on embedded file corruption (intentional — compile-time error)
-- Context injection is silent-fail (returns empty string on any filesystem error)
-- Levenshtein threshold: 2-character inputs never get suggestions
-- `readSessionStatus` in context.go re-implements minimal frontmatter parsing (parallel to `internal/session`)
+panic-on-init for malformed concept files (broken build detection). Context functions hardcode ClaudeChannel (Gemini-only projects get wrong counts). Sessions directory unreadable: graceful "0 sessions" message. Unrecognized concept: error with sorted list + optional suggestion. No NLP/fuzzy search (Levenshtein only). Six concepts without context functions.
 
 ## Knowledge Gaps
 
-1. No ADR for explain command design.
-2. `context.go` is fully untested (18 functions, 0% coverage) — documented as DEBT-103.
-3. Error format inconsistency on failed lookup (stdlib `fmt.Errorf` vs `*errors.Error`).
+1. potnia.md references "pythia" in see_also but no pythia concept exists
+2. contextSOS implementation is shallow ("directory exists" only)
+3. No pythia concept file despite codebase references

@@ -1,14 +1,14 @@
 ---
 domain: feat/tribute-generation
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/tribute/**/*.go"
   - "./internal/cmd/tribute/**/*.go"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.88
+source_hash: "b329d719"
+confidence: 0.92
 format_version: "1.0"
 ---
 
@@ -16,48 +16,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-TRIBUTE.md is a session archive receipt — a single summary document capturing all significant outcomes (decisions, artifacts, phases, handoffs, metrics) from a Knossos session. Generated from SESSION_CONTEXT.md, events.jsonl, WHITE_SAILS.yaml, and git history.
-
-**Key design decisions**: Graceful degradation (only SESSION_CONTEXT.md required; events and sails optional). Schema versioning via YAML frontmatter (`schema_version: "1.0"`). Dual event schema compatibility (pre/post ADR-0027). Git commit extraction deferred to Phase 2. Standalone CLI, NOT auto-integrated into `ari session wrap` (design gap).
-
-**TDD**: `/Users/tomtenuta/Code/knossos/docs/design/TDD-minos-tribute.md`
+Converts ephemeral session artifacts (context, events, sails, registry) into durable machine-parseable summary. Derived not authored (reads facts from events.jsonl, not agent impressions). Dual consumer: human-readable markdown + JSON-serializable counts. Idempotent (overwrite existing). Graceful degradation as first-class principle (missing sources produce valid output with empty sections).
 
 ## Conceptual Model
 
-### Generator Pipeline (8 steps)
-
-1. Validate session path → 2. Load SESSION_CONTEXT.md → 3. Extract events (graceful) → 4. Extract artifacts/decisions/phases/handoffs/metrics → 5. Load WHITE_SAILS.yaml (graceful) → 6. Extract notes → 7. Calculate timing → 8. Render and write TRIBUTE.md
-
-The generator is **read-only** with respect to session state. Idempotent (tested explicitly).
+**Sources:** SESSION_CONTEXT.md (required), events.jsonl (optional, tri-format), WHITE_SAILS.yaml (optional), artifact registry (optional, requires ProjectRoot). **Event taxonomy:** tool.artifact_created -> Artifact, agent.decision -> Decision, phase.transitioned -> PhaseRecord (linked list with duration), handoff events -> Handoff, tool.call -> Metrics.ToolCalls, tool.file_change -> Metrics.FilesModified. **Duration:** endedAt - startedAt (archived_at or now). **Artifact type cascade:** event field -> metadata -> path inference.
 
 ## Implementation Map
 
-### Package Structure
-
-| File | Purpose |
-|------|---------|
-| `/Users/tomtenuta/Code/knossos/internal/tribute/types.go` | All types (273 lines). `GenerateResult`, `Artifact`, `Decision`, `EventData` with dual-schema accessors |
-| `/Users/tomtenuta/Code/knossos/internal/tribute/extractor.go` | Data extraction from session files (456 lines) |
-| `/Users/tomtenuta/Code/knossos/internal/tribute/generator.go` | Orchestration (184 lines). `Generate()` entry point |
-| `/Users/tomtenuta/Code/knossos/internal/tribute/renderer.go` | Markdown rendering (354 lines). 12 render steps |
-| `/Users/tomtenuta/Code/knossos/internal/cmd/tribute/tribute.go` | CLI entry point (57 lines) |
-| `/Users/tomtenuta/Code/knossos/internal/cmd/tribute/generate.go` | `ari tribute generate` subcommand (162 lines) |
-
-### Test Coverage
-
-- `extractor_test.go` — unit tests for all extraction functions
-- `generator_test.go` — integration tests including idempotency
-- `renderer_test.go` — unit tests for conditional rendering
+`internal/tribute/` (4 files): types.go (GenerateResult, all data types), extractor.go (per-source extractors), generator.go (Generator.Generate 11-step pipeline), renderer.go (YAML frontmatter + 12 markdown sections). CLI: `internal/cmd/tribute/generate.go` (3 session resolution paths: --session-dir, --session-id, default current).
 
 ## Boundaries and Failure Modes
 
-- Does NOT integrate with `ari session wrap` automatically (no tribute call in wrap.go)
-- Does NOT extract git commits (Phase 2 placeholder)
-- Uses `os.WriteFile` instead of `fileutil.WriteIfChanged` (exception to codebase convention)
-- Handoff correlation can lose first event if same agent pair hands off twice
+Hard failures: missing session path, non-directory, unreadable SESSION_CONTEXT.md. Graceful: missing events.jsonl (empty data), malformed JSON lines (skipped silently), missing WHITE_SAILS.yaml (nil sails). Schema version hardcoded "1.0" (no migration). Commits data is Phase 2 placeholder. Handoff correlation key collision (same agent pair, last wins). Last phase always has Duration=0. --session-dir bypasses ProjectRoot (graduated artifacts omitted).
 
 ## Knowledge Gaps
 
-1. Wrap integration status unclear (TDD specifies it, code doesn't implement it).
-2. Git extraction path is fully scaffolded but unimplemented.
-3. Concept doc (`explain/concepts/tribute.md`) describes sails, not tribute — factual error.
+1. internal/artifact package internals not read
+2. session.Context full schema not read
+3. Renderer test coverage patterns not read

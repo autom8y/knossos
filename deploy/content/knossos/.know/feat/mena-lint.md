@@ -1,13 +1,13 @@
 ---
 domain: feat/mena-lint
-generated_at: "2026-03-03T21:30:00Z"
+generated_at: "2026-03-26T19:10:59Z"
 expires_after: "14d"
 source_scope:
   - "./internal/cmd/lint/**/*.go"
   - "./.know/architecture.md"
 generator: theoros
-source_hash: "18042fc"
-confidence: 0.88
+source_hash: "b329d719"
+confidence: 0.93
 format_version: "1.0"
 ---
 
@@ -15,65 +15,22 @@ format_version: "1.0"
 
 ## Purpose and Design Rationale
 
-`ari lint` is a pre-sync validation gate for knossos source files — mena (dromena + legomena) and agent prompts. It catches structural and semantic errors in source artifacts *before* they are projected into `.claude/` and silently break Claude Code behavior.
-
-**Why it exists**: The materialization pipeline is one-directional and silent about semantic errors. SCAR-017 (195+ `@skill-name` references silently ignored by CC), SCAR-019 (invalid agent colors silently dropped), and SCAR-027 (session artifact persisted permanently in shared mena) each established a lint rule.
-
-**Design position**: Lint operates on *source* artifacts under `rites/*/agents/`, `rites/*/mena/`, and `mena/` — not on materialized `.claude/` output.
+Pre-sync validation gate for source artifacts. Driven by three SCARs: SCAR-017 (195+ @skill-name references silently ignored by CC), SCAR-019 (invalid agent colors dropped), SCAR-027 (session artifacts in shared mena). Operates on source (rites/*/agents/, rites/*/mena/, mena/), not materialized output. --check=preferential-language is the only non-zero exit path. Registration: NeedsProject=true.
 
 ## Conceptual Model
 
-### Severity Hierarchy
-
-| Level | Meaning |
-|-------|---------|
-| `CRIT` | Structural failure — file unreadable, frontmatter absent |
-| `HIGH` | Semantic failure — CC will silently ignore or misroute |
-| `MED` | Convention violation — deviation from platform patterns |
-| `LOW` | Style gap — minor reference inconsistency |
-
-### Rule Taxonomy
-
-**Agent rules**: frontmatter validation, type/description checks, `agent-invalid-color` (SCAR-019), `skill-at-syntax` (SCAR-017), `maxTurns-deviation`, `agent-oversized`.
-
-**Dromena rules**: frontmatter, `context-fork-expected/unexpected` (SCAR-018), `name-collision`, `skill-at-syntax`, source path leak detection.
-
-**Legomena rules**: frontmatter, `triggers-missing`, `legomen-oversized`, `skill-at-syntax`, source path leaks.
-
-**Cross-cutting**: `session-artifact-in-shared-mena` (SCAR-027).
-
-### The Fork/Inline Allowlist
-
-The `expectedForkState` map at `/Users/tomtenuta/Code/knossos/internal/cmd/lint/lint.go:46-88` is a compile-time registry of every known dromenon's deliberate fork classification.
+**Four severity levels:** CRIT (structural), HIGH (CC will silently ignore), MED (convention violation), LOW (style gap). **Agent rules:** frontmatter-missing/parse, name/description/type, maxTurns-deviation, agent-oversized, agent-invalid-color, color-duplicate, skill-at-syntax, naming-provenance, domain-jurisdiction. **Dromena rules:** frontmatter, context-fork-expected/unexpected/unclassified, fork-task-conflict (SCAR-018), workflow-not-model-invocable, name-collision, source-path-leaks. **Legomena rules:** triggers-missing, oversized, mena-name/description. **Cross-cutting:** session-artifact-in-shared-mena (SCAR-027), preferential-language (harness-agnosticism).
 
 ## Implementation Map
 
-Single-file implementation: `/Users/tomtenuta/Code/knossos/internal/cmd/lint/lint.go` (852 lines), tests in `lint_test.go` (275 lines).
-
-### Key Dependencies
-
-- `internal/frontmatter` — YAML frontmatter extraction
-- `internal/mena` — `MenaSource`, `Walk()` for filesystem enumeration
-- `internal/output` — text/JSON/YAML output
+`internal/cmd/lint/` (4 files): lint.go (1141 lines -- all rules, expectedForkState allowlist, lintAgents/lintDromena/lintLegomena/lintMenaNamespace/lintSessionArtifactsInSharedMena), lint_preferential.go (209 lines -- Go source + mena content harness-agnosticism scans), lint_test.go (403 lines), lint_preferential_test.go (476 lines). Uses internal/mena.Walk (filesystem only, skips embedded) and internal/frontmatter.Parse.
 
 ## Boundaries and Failure Modes
 
-### What lint does NOT cover
-
-- Cross-rite agents (`agents/` at project root) — only scans `rites/*/agents/`
-- User-scope agents (`~/.claude/agents/`)
-- Materialized `.claude/` output
-- Embedded FS sources
-- Manifest validity or hook configurations
-
-### Known Limitations
-
-- `expectedForkState` staleness: hardcoded at compile time, new dromena get LOW finding
-- No exit code differentiation by severity (lint is informational, not a hard gate)
-- Agent discovery is rite-scoped only
+Does not lint materialized .claude/ output or user-scope agents. expectedForkState staleness (compile-time allowlist). No --fail-on-critical flag (only --check=preferential-language forces non-zero exit). Preferential-language false positives (word-boundary regex on "claude"/"gemini"). mena.Walk skips embedded FS sources. session-artifact check exempts examples/ subdirectory. No test coverage for agent color/size/turns rules.
 
 ## Knowledge Gaps
 
-1. Cross-rite agent lint coverage gap is undocumented as intentional or oversight.
-2. Exit code behavior under findings has no test coverage.
-3. Agent-specific rules (`maxTurns-deviation`, `agent-oversized`) have no dedicated tests.
+1. Census referenced "models" file that doesn't exist
+2. Exit code design (informational vs gate) not documented
+3. No --check support for individual standard rules
