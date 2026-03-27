@@ -288,3 +288,225 @@ func TestRenderSystemPrompt_TopologyOrdering(t *testing.T) {
 	assert.Less(t, topoIdx, historyIdx, "topology before conversation history")
 	assert.Less(t, historyIdx, sourcesIdx, "conversation history before sources")
 }
+
+// ---- Sprint 3: Domain-specific freshness caveat tests ----
+
+func TestRenderFreshnessCaveat_NoStaleDomains(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives:           map[trust.DomainType]float64{},
+	}
+
+	result := RenderFreshnessCaveat(nil, decay)
+	assert.Empty(t, result, "no stale domains should produce empty string")
+
+	result = RenderFreshnessCaveat([]trust.StaleDomainInfo{}, decay)
+	assert.Empty(t, result, "empty stale domains should produce empty string")
+}
+
+func TestRenderFreshnessCaveat_OneStaleDomain(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives: map[trust.DomainType]float64{
+			trust.DomainArchitecture: 14.0,
+		},
+	}
+	staleDomains := []trust.StaleDomainInfo{
+		{
+			QualifiedName:      "autom8y::knossos::architecture",
+			Domain:             "architecture",
+			Repo:               "knossos",
+			Freshness:          0.3,
+			DaysSinceGenerated: 12,
+		},
+	}
+
+	result := RenderFreshnessCaveat(staleDomains, decay)
+
+	assert.Contains(t, result, "KNOWLEDGE FRESHNESS NOTICE",
+		"must include freshness notice header")
+	assert.Contains(t, result, "autom8y::knossos::architecture",
+		"must include qualified domain name")
+	assert.Contains(t, result, "12 days ago",
+		"must include days since generation")
+	assert.Contains(t, result, "14-day half-life",
+		"must include domain-specific half-life")
+	assert.Contains(t, result, "Factor this into your response",
+		"must include uncertainty instruction")
+}
+
+func TestRenderFreshnessCaveat_MultipleStaleDomains(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives: map[trust.DomainType]float64{
+			trust.DomainArchitecture: 14.0,
+			trust.DomainTestCoverage: 5.0,
+		},
+	}
+	staleDomains := []trust.StaleDomainInfo{
+		{
+			QualifiedName:      "autom8y::knossos::architecture",
+			Domain:             "architecture",
+			Repo:               "knossos",
+			Freshness:          0.3,
+			DaysSinceGenerated: 12,
+		},
+		{
+			QualifiedName:      "autom8y::knossos::test-coverage",
+			Domain:             "test-coverage",
+			Repo:               "knossos",
+			Freshness:          0.15,
+			DaysSinceGenerated: 25,
+		},
+	}
+
+	result := RenderFreshnessCaveat(staleDomains, decay)
+
+	assert.Contains(t, result, "KNOWLEDGE FRESHNESS NOTICE",
+		"must include freshness notice header")
+	assert.Contains(t, result, "autom8y::knossos::architecture",
+		"must include first stale domain")
+	assert.Contains(t, result, "12 days ago",
+		"must include first domain age")
+	assert.Contains(t, result, "14-day half-life",
+		"must include architecture half-life")
+	assert.Contains(t, result, "autom8y::knossos::test-coverage",
+		"must include second stale domain")
+	assert.Contains(t, result, "25 days ago",
+		"must include second domain age")
+	assert.Contains(t, result, "5-day half-life",
+		"must include test-coverage half-life")
+}
+
+func TestRenderFreshnessCaveat_UsesDefaultHalfLife(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives:           map[trust.DomainType]float64{},
+	}
+	staleDomains := []trust.StaleDomainInfo{
+		{
+			QualifiedName:      "autom8y::knossos::unknown-domain",
+			Domain:             "unknown-domain",
+			Repo:               "knossos",
+			DaysSinceGenerated: 10,
+		},
+	}
+
+	result := RenderFreshnessCaveat(staleDomains, decay)
+
+	assert.Contains(t, result, "7-day half-life",
+		"unknown domain type must fall back to default half-life")
+}
+
+func TestInjectFreshnessCaveat_MediumTierWithStaleDomains(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives: map[trust.DomainType]float64{
+			trust.DomainArchitecture: 14.0,
+		},
+	}
+	staleDomains := []trust.StaleDomainInfo{
+		{
+			QualifiedName:      "autom8y::knossos::architecture",
+			Domain:             "architecture",
+			DaysSinceGenerated: 12,
+		},
+	}
+
+	assembled := &AssembledContext{
+		SystemPrompt: "Some preamble\n\n--- KNOWLEDGE SOURCES ---\n\nSource content",
+		Tier:         trust.TierMedium,
+	}
+
+	InjectFreshnessCaveat(assembled, staleDomains, decay)
+
+	assert.Contains(t, assembled.SystemPrompt, "KNOWLEDGE FRESHNESS NOTICE",
+		"MEDIUM tier must inject freshness caveat")
+	assert.Equal(t, staleDomains, assembled.StaleDomains,
+		"must store stale domains on context")
+
+	// Verify ordering: freshness notice before knowledge sources.
+	freshnessIdx := strings.Index(assembled.SystemPrompt, "KNOWLEDGE FRESHNESS NOTICE")
+	sourcesIdx := strings.Index(assembled.SystemPrompt, "--- KNOWLEDGE SOURCES ---")
+	assert.Less(t, freshnessIdx, sourcesIdx,
+		"freshness notice must appear before knowledge sources")
+}
+
+func TestInjectFreshnessCaveat_HighTierNoOp(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives:           map[trust.DomainType]float64{},
+	}
+	staleDomains := []trust.StaleDomainInfo{
+		{
+			QualifiedName:      "autom8y::knossos::architecture",
+			Domain:             "architecture",
+			DaysSinceGenerated: 12,
+		},
+	}
+
+	original := "Some preamble\n\n--- KNOWLEDGE SOURCES ---\n\nSource content"
+	assembled := &AssembledContext{
+		SystemPrompt: original,
+		Tier:         trust.TierHigh,
+	}
+
+	InjectFreshnessCaveat(assembled, staleDomains, decay)
+
+	assert.Equal(t, original, assembled.SystemPrompt,
+		"HIGH tier must not modify system prompt")
+	assert.Nil(t, assembled.StaleDomains,
+		"HIGH tier must not store stale domains")
+}
+
+func TestInjectFreshnessCaveat_EmptyStaleDomains(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives:           map[trust.DomainType]float64{},
+	}
+
+	original := "Some preamble\n\n--- KNOWLEDGE SOURCES ---\n\nSource content"
+	assembled := &AssembledContext{
+		SystemPrompt: original,
+		Tier:         trust.TierMedium,
+	}
+
+	InjectFreshnessCaveat(assembled, nil, decay)
+
+	assert.Equal(t, original, assembled.SystemPrompt,
+		"empty stale domains must not modify system prompt")
+}
+
+func TestInjectFreshnessCaveat_InsertBeforeConversationHistory(t *testing.T) {
+	decay := &trust.DecayConfig{
+		DefaultHalfLifeDays: 7.0,
+		HalfLives: map[trust.DomainType]float64{
+			trust.DomainArchitecture: 14.0,
+		},
+	}
+	staleDomains := []trust.StaleDomainInfo{
+		{
+			QualifiedName:      "autom8y::knossos::architecture",
+			Domain:             "architecture",
+			DaysSinceGenerated: 12,
+		},
+	}
+
+	assembled := &AssembledContext{
+		SystemPrompt: "Preamble\n\n--- CONVERSATION HISTORY ---\n\nHistory\n\n--- KNOWLEDGE SOURCES ---\n\nSources",
+		Tier:         trust.TierMedium,
+	}
+
+	InjectFreshnessCaveat(assembled, staleDomains, decay)
+
+	// Freshness notice should appear before conversation history.
+	freshnessIdx := strings.Index(assembled.SystemPrompt, "KNOWLEDGE FRESHNESS NOTICE")
+	conversationIdx := strings.Index(assembled.SystemPrompt, "--- CONVERSATION HISTORY ---")
+	sourcesIdx := strings.Index(assembled.SystemPrompt, "--- KNOWLEDGE SOURCES ---")
+
+	assert.Greater(t, freshnessIdx, 0, "freshness notice must be present")
+	assert.Less(t, freshnessIdx, conversationIdx,
+		"freshness notice must appear before conversation history")
+	assert.Less(t, conversationIdx, sourcesIdx,
+		"conversation history must appear before knowledge sources")
+}

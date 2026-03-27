@@ -136,6 +136,9 @@ func (p *Pipeline) Query(ctx context.Context, question string) (*response.Reason
 	// Step 7: Assemble context window.
 	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org)
 
+	// Step 7b: Inject domain-specific freshness caveat for MEDIUM tier.
+	reasoncontext.InjectFreshnessCaveat(assembled, scoreInput.StaleDomains, &decay)
+
 	// Step 8: Build intent summary for response.
 	intentSummary := buildIntentSummary(intentResult)
 
@@ -432,6 +435,9 @@ func (p *Pipeline) QueryWithTriage(ctx context.Context, triageInput *TriageResul
 	// WS-2: Assemble context window using triage candidates and conversation history.
 	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org, triageInput.ConversationHistory)
 
+	// Inject domain-specific freshness caveat for MEDIUM tier.
+	reasoncontext.InjectFreshnessCaveat(assembled, scoreInput.StaleDomains, &decay)
+
 	// Build intent summary from triage.
 	intentSummary := response.IntentSummary{
 		Tier:       "OBSERVE",
@@ -521,6 +527,9 @@ func (p *Pipeline) QueryStream(ctx context.Context, triageInput *TriageResultInp
 
 	// WS-2: Assemble context window with conversation history.
 	assembled := p.assembler.Assemble(searchResults, &chain, confidence, question, p.config.Org, triageInput.ConversationHistory)
+
+	// Inject domain-specific freshness caveat for MEDIUM tier.
+	reasoncontext.InjectFreshnessCaveat(assembled, scoreInput.StaleDomains, &decay)
 
 	intentSummary := response.IntentSummary{
 		Tier:       "OBSERVE",

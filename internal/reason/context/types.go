@@ -64,6 +64,11 @@ type AssembledContext struct {
 	// Tier is the confidence tier governing prompt behavior.
 	Tier trust.ConfidenceTier
 
+	// StaleDomains lists domains whose freshness is below the staleness threshold.
+	// Populated by the pipeline for MEDIUM-tier responses to enable domain-specific
+	// freshness caveats in the system prompt.
+	StaleDomains []trust.StaleDomainInfo
+
 	// CEDiagnostics tracks contextual-equilibrium mechanism activity.
 	// Non-nil when assembly completes with CE mechanisms active.
 	CEDiagnostics *CEDiagnostics

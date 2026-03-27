@@ -99,6 +99,20 @@ func (c *SlackClient) SetTitle(channelID, threadTS, title string) error {
 	return c.rawAPICall("assistant.threads.setTitle", payload)
 }
 
+// AddReaction adds an emoji reaction to a message.
+// Uses the reactions.add Slack API method via rawAPICall.
+// channelID is the channel containing the message, timestamp identifies the
+// specific message to react to (msg.TS, not thread_ts), and emoji is the
+// reaction name without colons (e.g., "eyes" not ":eyes:").
+func (c *SlackClient) AddReaction(channelID, timestamp, emoji string) error {
+	payload := map[string]any{
+		"channel":   channelID,
+		"timestamp": timestamp,
+		"name":      emoji,
+	}
+	return c.rawAPICall("reactions.add", payload)
+}
+
 // HealthCheck verifies connectivity to the Slack API by calling auth.test.
 func (c *SlackClient) HealthCheck(ctx context.Context) error {
 	_, err := c.api.AuthTest()

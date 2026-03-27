@@ -551,6 +551,13 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 			}
 		}()
 
+		// Emoji ACK: react to the triggering message with eyes emoji for immediate
+		// visual feedback (~200ms) that the bot received the message. Fire-and-forget:
+		// reaction failure must not block or delay the pipeline.
+		if err := deps.Client.AddReaction(msg.Channel, msg.TS, "eyes"); err != nil {
+			slog.Debug("emoji ack failed", "channel", msg.Channel, "ts", msg.TS, "error", err)
+		}
+
 		// Pre-pipeline timing starts here (includes ConversationManager lookup).
 		prePipelineStart := time.Now()
 		cmResult := "no_cm"

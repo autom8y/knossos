@@ -97,7 +97,7 @@ func renderConversationHistory(turns []ConversationTurn) string {
 		} else if role == "assistant" {
 			role = "Assistant"
 		}
-		b.WriteString(fmt.Sprintf("[%s]: %s\n\n", role, turn.Content))
+		fmt.Fprintf(&b, "[%s]: %s\n\n", role, turn.Content)
 	}
 
 	return b.String()
@@ -186,6 +186,70 @@ valid citation target unless it also appears as its own "Source:" entry.`
 		// LOW tier never reaches Claude (D-9), but return a safe fallback.
 		return "Confidence: LOW -- insufficient knowledge. Do not generate an answer."
 	}
+}
+
+// InjectFreshnessCaveat appends the freshness caveat into an AssembledContext's
+// system prompt when the tier is MEDIUM and stale domains are present.
+// Also stores the stale domains on the context for diagnostics.
+// No-op when tier is not MEDIUM, staleDomains is empty, or decay is nil.
+func InjectFreshnessCaveat(ctx *AssembledContext, staleDomains []trust.StaleDomainInfo, decay *trust.DecayConfig) {
+	if ctx == nil || ctx.Tier != trust.TierMedium || len(staleDomains) == 0 || decay == nil {
+		return
+	}
+	caveat := RenderFreshnessCaveat(staleDomains, decay)
+	if caveat == "" {
+		return
+	}
+	ctx.StaleDomains = staleDomains
+	// Inject the freshness notice after the tier behavior section (before source material).
+	// The tier behavior section ends with the CITATION PROVENANCE RULE block.
+	// Insert after the tier behavior by prepending to the KNOWLEDGE SOURCES / NO KNOWLEDGE SOURCES section.
+	const knowledgeMarker = "--- KNOWLEDGE SOURCES ---"
+	const noKnowledgeMarker = "--- NO KNOWLEDGE SOURCES AVAILABLE ---"
+	const conversationMarker = "--- CONVERSATION HISTORY ---"
+
+	// Find the best injection point: before conversation history if present,
+	// otherwise before knowledge sources.
+	insertBefore := ""
+	if idx := strings.Index(ctx.SystemPrompt, conversationMarker); idx >= 0 {
+		insertBefore = conversationMarker
+	} else if idx := strings.Index(ctx.SystemPrompt, knowledgeMarker); idx >= 0 {
+		insertBefore = knowledgeMarker
+	} else if idx := strings.Index(ctx.SystemPrompt, noKnowledgeMarker); idx >= 0 {
+		insertBefore = noKnowledgeMarker
+	}
+
+	if insertBefore != "" {
+		ctx.SystemPrompt = strings.Replace(ctx.SystemPrompt, insertBefore, caveat+"\n"+insertBefore, 1)
+	} else {
+		// Fallback: append to end of prompt.
+		ctx.SystemPrompt += "\n\n" + caveat
+	}
+}
+
+// RenderFreshnessCaveat produces a KNOWLEDGE FRESHNESS NOTICE block for injection
+// into MEDIUM-tier system prompts when stale domains are present. Returns an empty
+// string when staleDomains is empty (no notice needed).
+//
+// The notice lists each stale domain with its age and the domain-specific half-life
+// from the decay configuration, giving the model concrete staleness context to
+// calibrate its confidence per-claim.
+func RenderFreshnessCaveat(staleDomains []trust.StaleDomainInfo, decay *trust.DecayConfig) string {
+	if len(staleDomains) == 0 {
+		return ""
+	}
+
+	var b strings.Builder
+	b.WriteString("KNOWLEDGE FRESHNESS NOTICE: Some sources backing this answer have aged beyond their expected refresh interval:\n")
+
+	for _, sd := range staleDomains {
+		halfLife := decay.DomainHalfLife(sd.Domain)
+		fmt.Fprintf(&b, "- the %s domain was last indexed %d days ago (%.0f-day half-life)\n",
+			sd.QualifiedName, sd.DaysSinceGenerated, halfLife)
+	}
+
+	b.WriteString("Factor this into your response. Where information may have changed, note the uncertainty.\n")
+	return b.String()
 }
 
 // renderNoSourcesGapAdmission returns instructions for when no source material is available.
