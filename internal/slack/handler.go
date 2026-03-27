@@ -13,7 +13,6 @@ import (
 	"github.com/autom8y/knossos/internal/reason/response"
 	"github.com/autom8y/knossos/internal/serve/webhook"
 	"github.com/autom8y/knossos/internal/slack/conversation"
-	"github.com/autom8y/knossos/internal/slack/streaming"
 )
 
 // eventDedup provides event ID deduplication with TTL-based expiration (TD-02 fix).
@@ -216,6 +215,15 @@ type StreamingQueryRunner interface {
 	QueryStream(ctx context.Context, triageInput *TriageResultInputData, onChunk func(chunk string)) (*response.ReasoningResponse, error)
 }
 
+// StreamSender abstracts the streaming sender for testability.
+// The concrete implementation is *streaming.Sender.
+type StreamSender interface {
+	StartStream(ctx context.Context, channelID string, threadTS string) (string, error)
+	AppendStream(ctx context.Context, streamID string, chunk string) error
+	StopStream(ctx context.Context, streamID string) error
+	StopStreamWithError(ctx context.Context, streamID string, errorText string) error
+}
+
 // TriageResultInputData is the handler-local TriageResultInput for the pipeline.
 // Avoids importing reason/ types directly in the interface.
 type TriageResultInputData struct {
@@ -305,7 +313,7 @@ type HandlerDeps struct {
 
 	// StreamSender renders progressive streaming responses.
 	// May be nil -- when nil, responses are posted as single messages.
-	StreamSender *streaming.Sender
+	StreamSender StreamSender
 
 	// StreamingRunner executes the streaming pipeline.
 	// May be nil -- when nil, uses non-streaming pipeline.

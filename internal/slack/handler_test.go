@@ -800,3 +800,308 @@ func TestHandler_StreamingFallbackWhenRunnerNil(t *testing.T) {
 	calls := pipeline.queryCalls()
 	require.Len(t, calls, 1)
 }
+
+// --- Additional mock types for error-recovery tests ---
+
+// mockTriagePipeline implements TriageQueryRunner for tests.
+type mockTriagePipeline struct {
+	mu       sync.Mutex
+	calls    int
+	response *response.ReasoningResponse
+	err      error
+}
+
+func (m *mockTriagePipeline) QueryWithTriage(_ context.Context, _ *TriageResultInputData) (*response.ReasoningResponse, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.calls++
+	return m.response, m.err
+}
+
+func (m *mockTriagePipeline) triageCalls() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.calls
+}
+
+// mockStreamSender implements StreamSender with configurable StartStream failure.
+// Used to test the H-1 sync fallback path when StartStream returns an error.
+type mockStreamSender struct {
+	mu             sync.Mutex
+	startErr       error
+	startStreamID  string
+	startCalls     int
+	stopCalls      int
+	stopErrCalls   int
+	appendCalls    int
+}
+
+func (m *mockStreamSender) StartStream(_ context.Context, _ string, _ string) (string, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.startCalls++
+	if m.startErr != nil {
+		return "", m.startErr
+	}
+	return m.startStreamID, nil
+}
+
+func (m *mockStreamSender) AppendStream(_ context.Context, _ string, _ string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.appendCalls++
+	return nil
+}
+
+func (m *mockStreamSender) StopStream(_ context.Context, _ string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.stopCalls++
+	return nil
+}
+
+func (m *mockStreamSender) StopStreamWithError(_ context.Context, _ string, _ string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.stopErrCalls++
+	return nil
+}
+
+// waitForTriagePipelineCalls polls until the triage pipeline has at least `expected` calls.
+func waitForTriagePipelineCalls(t *testing.T, tp *mockTriagePipeline, expected int, timeout time.Duration) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if tp.triageCalls() >= expected {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatalf("timed out waiting for %d triage pipeline calls, got %d", expected, tp.triageCalls())
+}
+
+// --- Streaming error-recovery tests ---
+
+func TestHandler_StreamingFallbackOnStartStreamError(t *testing.T) {
+	t.Run("TriagePipeline_nil_falls_back_to_Pipeline_Query", func(t *testing.T) {
+		sender := &mockStreamSender{
+			startErr: fmt.Errorf("test_start_stream_error"),
+		}
+
+		streamRunner := &mockStreamingRunner{
+			response: &response.ReasoningResponse{Answer: "should not be used", Tier: trust.TierHigh},
+		}
+
+		triageRunner := &mockTriageRunner{
+			result: &TriageResultData{
+				RefinedQuery:   "refined query",
+				Candidates:     []TriageCandidateData{{QualifiedName: "test::domain", RelevanceScore: 0.9}},
+				ModelCallCount: 1,
+			},
+		}
+
+		pipeline := &mockPipeline{
+			response: &response.ReasoningResponse{Answer: "Sync fallback response", Tier: trust.TierHigh},
+		}
+
+		client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
+		cfg := DefaultSlackConfig()
+		cfg.StreamingEnabled = true
+
+		handler, _, stop := NewSlackHandlerWithDeps(HandlerDeps{
+			Pipeline:        pipeline,
+			Client:          client,
+			Config:          cfg,
+			TriageRunner:    triageRunner,
+			StreamingRunner: streamRunner,
+			StreamSender:    sender,
+			// TriagePipeline deliberately nil — forces fallback to Pipeline.Query.
+		})
+		defer stop()
+
+		event := MessageEvent{
+			Type:    "message",
+			Text:    "test question",
+			User:    "U001",
+			Channel: "C001",
+			TS:      "1234567890.444444",
+		}
+		body := makeEnvelope(t, event)
+
+		req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		// Wait for sync pipeline to be called as fallback.
+		waitForCalls(t, pipeline, 1, 3*time.Second)
+
+		// Verify Pipeline.Query was called with the refined query.
+		pCalls := pipeline.queryCalls()
+		require.Len(t, pCalls, 1)
+		assert.Equal(t, "refined query", pCalls[0])
+
+		// Verify streaming runner was NOT called (StartStream failed before streaming path).
+		assert.Empty(t, streamRunner.queryStreamCalls(), "streaming runner should not be called when StartStream fails")
+	})
+
+	t.Run("TriagePipeline_set_falls_back_to_QueryWithTriage", func(t *testing.T) {
+		sender := &mockStreamSender{
+			startErr: fmt.Errorf("test_start_stream_error"),
+		}
+
+		streamRunner := &mockStreamingRunner{
+			response: &response.ReasoningResponse{Answer: "should not be used", Tier: trust.TierHigh},
+		}
+
+		triageRunner := &mockTriageRunner{
+			result: &TriageResultData{
+				RefinedQuery:   "refined query",
+				Candidates:     []TriageCandidateData{{QualifiedName: "test::domain", RelevanceScore: 0.9}},
+				ModelCallCount: 1,
+			},
+		}
+
+		pipeline := &mockPipeline{
+			response: &response.ReasoningResponse{Answer: "Should not be used", Tier: trust.TierHigh},
+		}
+
+		triagePipeline := &mockTriagePipeline{
+			response: &response.ReasoningResponse{Answer: "Triage pipeline fallback response", Tier: trust.TierHigh},
+		}
+
+		client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
+		cfg := DefaultSlackConfig()
+		cfg.StreamingEnabled = true
+
+		handler, _, stop := NewSlackHandlerWithDeps(HandlerDeps{
+			Pipeline:        pipeline,
+			Client:          client,
+			Config:          cfg,
+			TriageRunner:    triageRunner,
+			StreamingRunner: streamRunner,
+			StreamSender:    sender,
+			TriagePipeline:  triagePipeline,
+		})
+		defer stop()
+
+		event := MessageEvent{
+			Type:    "message",
+			Text:    "test question",
+			User:    "U001",
+			Channel: "C001",
+			TS:      "1234567890.444445",
+		}
+		body := makeEnvelope(t, event)
+
+		req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		// Wait for TriagePipeline.QueryWithTriage to be called as fallback.
+		waitForTriagePipelineCalls(t, triagePipeline, 1, 3*time.Second)
+
+		// Verify TriagePipeline was called.
+		assert.Equal(t, 1, triagePipeline.triageCalls(), "TriagePipeline.QueryWithTriage should be called once")
+
+		// Verify Pipeline.Query was NOT called (TriagePipeline takes precedence).
+		assert.Empty(t, pipeline.queryCalls(), "Pipeline.Query should not be called when TriagePipeline is set")
+
+		// Verify streaming runner was NOT called (StartStream failed before streaming path).
+		assert.Empty(t, streamRunner.queryStreamCalls(), "streaming runner should not be called when StartStream fails")
+	})
+}
+
+func TestHandler_StreamingQueryStreamError(t *testing.T) {
+	mockServer := newStreamingSlackServer(t)
+	defer mockServer.server.Close()
+
+	streamSender := streaming.NewSenderForTest("xoxb-test", "T001", mockServer.server.URL+"/api/")
+
+	streamRunner := &mockStreamingRunner{
+		err: fmt.Errorf("test_query_stream_error"), // QueryStream will fail.
+	}
+
+	triageRunner := &mockTriageRunner{
+		result: &TriageResultData{
+			RefinedQuery:   "refined",
+			Candidates:     []TriageCandidateData{{QualifiedName: "test::domain", RelevanceScore: 0.9}},
+			ModelCallCount: 1,
+		},
+	}
+
+	pipeline := &mockPipeline{
+		response: &response.ReasoningResponse{Answer: "Should not be used", Tier: trust.TierHigh},
+	}
+
+	client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
+	cfg := DefaultSlackConfig()
+	cfg.StreamingEnabled = true
+
+	handler, _, stop := NewSlackHandlerWithDeps(HandlerDeps{
+		Pipeline:        pipeline,
+		Client:          client,
+		Config:          cfg,
+		TriageRunner:    triageRunner,
+		StreamingRunner: streamRunner,
+		StreamSender:    streamSender,
+	})
+	defer stop()
+
+	event := MessageEvent{
+		Type:    "message",
+		Text:    "test question",
+		User:    "U001",
+		Channel: "C001",
+		TS:      "1234567890.555555",
+	}
+	body := makeEnvelope(t, event)
+
+	req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Wait for QueryStream to be called (it returns error immediately).
+	waitForStreamCalls(t, streamRunner, 1, 3*time.Second)
+
+	// Verify QueryStream was called.
+	streamCalls := streamRunner.queryStreamCalls()
+	require.Len(t, streamCalls, 1)
+
+	// Verify sync pipeline was NOT called (no fallback to sync on mid-stream error).
+	assert.Empty(t, pipeline.queryCalls(), "sync pipeline should not be called on mid-stream error")
+
+	// Verify streaming API calls: startStream was called, then stopStream (from StopStreamWithError).
+	// Poll for stopStream — runs after QueryStream error is handled.
+	deadline := time.Now().Add(3 * time.Second)
+	for time.Now().Before(deadline) {
+		methods := mockServer.getCallMethods()
+		hasStop := false
+		for _, m := range methods {
+			if m == "chat.stopStream" {
+				hasStop = true
+				break
+			}
+		}
+		if hasStop {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+
+	methods := mockServer.getCallMethods()
+	assert.Contains(t, methods, "chat.startStream", "should call startStream")
+	assert.Contains(t, methods, "chat.stopStream", "should call stopStream via StopStreamWithError")
+
+	// The deferred StopStream should be a no-op because StopStreamWithError already
+	// deleted the stream from activeStreams. Count stopStream calls: should be exactly 1.
+	stopCount := 0
+	for _, m := range methods {
+		if m == "chat.stopStream" {
+			stopCount++
+		}
+	}
+	assert.Equal(t, 1, stopCount, "only StopStreamWithError should call stopStream; deferred StopStream should be no-op")
+}
