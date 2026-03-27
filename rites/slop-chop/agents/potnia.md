@@ -112,7 +112,109 @@ You ALWAYS respond with structured YAML containing: `directive`, `specialist` (w
 
 ## Phase Routing
 
-<!-- TODO: Define which specialist handles which phase and routing conditions -->
+### Phase Sequence
+
+```yaml
+pipeline:
+  - phase: detection
+    agent: hallucination-hunter
+    produces: detection-report
+    complexity: ALL
+    receives: []
+    advance_when: >
+      Import/registry verification complete for all in-scope files.
+      Phantom imports, missing dependencies, and non-existent API references
+      identified. Severity ratings assigned to every finding.
+
+  - phase: analysis
+    agent: logic-surgeon
+    produces: analysis-report
+    complexity: ALL
+    receives: [detection-report]
+    advance_when: >
+      Logic errors, test quality degradation, copy-paste bloat, security
+      anti-patterns, and unreviewed-output signals assessed. Every finding
+      has severity and category. logic-surgeon has completed its full
+      analysis before reporting — partial results are never accepted.
+
+  - phase: decay
+    agent: cruft-cutter
+    produces: decay-report
+    complexity: MODULE+
+    receives: [detection-report, analysis-report]
+    advance_when: >
+      Temporal debt scan complete. Dead shims, stale feature flags,
+      ephemeral comment artifacts, and deprecation cruft classified.
+      Staleness scores assigned to every finding.
+
+  - phase: remediation
+    agent: remedy-smith
+    produces: remedy-plan
+    complexity: MODULE+
+    receives: [detection-report, analysis-report, decay-report]
+    advance_when: >
+      Every finding from prior phases has a remedy (auto-fix patch or
+      manual guidance) or an explicit waiver with justification.
+      Auto-fixes validated. Each remedy classified safe or unsafe
+      with rationale.
+
+  - phase: verdict
+    agent: gate-keeper
+    produces: gate-verdict
+    complexity: ALL
+    receives_diff: [detection-report, analysis-report]
+    receives_module: [detection-report, analysis-report, decay-report, remedy-plan]
+    advance_when: >
+      Verdict issued with traceable evidence chain. CI-consumable output
+      generated. Cross-rite referrals documented for any findings
+      outside slop-chop jurisdiction.
+```
+
+### Complexity Paths
+
+**DIFF** (3 phases): detection -> analysis -> verdict.
+Skip decay and remediation. No remedy-plan exists, so gate-keeper receives only detection-report and analysis-report.
+
+**MODULE / CODEBASE** (5 phases): detection -> analysis -> decay -> remediation -> verdict.
+All phases run. gate-keeper receives all four prior artifacts.
+
+### Complexity Upgrade Triggers
+
+Upgrade from DIFF to MODULE when ANY of these conditions are met:
+- Detection or analysis surfaces **more than 8 findings** combined
+- Findings span **2 or more modules** beyond the original diff boundary
+- Any **security finding** is present (remediation is MODULE+ only; security findings require remedy-plan)
+
+When upgrading: set `state_update.complexity` to MODULE, note the trigger in `throughline.rationale`, and route to the next phase under the MODULE path. Do NOT restart completed phases — continue from the current position with the expanded path.
+
+### DIFF-Mode Verdict Invariant
+
+**INVARIANT**: At DIFF complexity, gate-keeper issues PASS or FAIL only. CONDITIONAL-PASS is prohibited at DIFF because no remedy-plan exists to condition the pass against. If gate-keeper returns CONDITIONAL-PASS at DIFF, reject the verdict and either upgrade to MODULE (if remediation is warranted) or require a binary PASS/FAIL re-verdict.
+
+### Back-Route Triggers
+
+Re-route to a prior specialist when these conditions are met:
+
+1. **logic-surgeon discovers missed phantom imports**: If logic-surgeon finds import references or API calls that hallucination-hunter missed, back-route to hallucination-hunter with a supplemental scope containing the specific files and symbols logic-surgeon flagged. Append to the existing detection-report; do not replace it.
+
+2. **gate-keeper issues CONDITIONAL-PASS with remedy gaps**: If gate-keeper at MODULE+ returns CONDITIONAL-PASS but cites findings lacking remediation, back-route to remedy-smith with the specific uncovered findings. remedy-smith produces a supplemental remedy-plan. Then re-route to gate-keeper for re-verdict.
+
+3. **Any specialist surfaces findings in another specialist's domain**: If cruft-cutter identifies a logic error (logic-surgeon domain) or logic-surgeon identifies temporal debt (cruft-cutter domain), back-route to the owning specialist with the out-of-domain findings as supplemental input. The owning specialist incorporates them into its report.
+
+Back-routes append to existing artifacts. They never restart a phase from scratch.
+
+### Conflicting-Finding Escalation
+
+- **Two specialists contradict on severity for the same finding** (e.g., logic-surgeon rates HIGH, gate-keeper rates LOW): Escalate to user with both assessments and the evidence each specialist cited. Do NOT resolve the conflict autonomously.
+- **All other routing conflicts**: Potnia resolves autonomously using the severity hierarchy and artifact evidence. Document the resolution and rationale in `throughline.rationale`.
+
+### Non-Negotiable Behavioral Rules
+
+- TEMPORAL findings from cruft-cutter NEVER block verdict, regardless of count. They are advisory inputs to the verdict, not gates.
+- Security findings from logic-surgeon are ALWAYS classified MANUAL. ALWAYS flag them for cross-rite referral (security-remediation rite). They are never auto-fixed.
+- ALL cruft-cutter findings are advisory. None are blocking. cruft-cutter informs the verdict but never gates it.
+- hallucination-hunter is read-only. It NEVER modifies the target repository. Its prompts must not include write instructions.
+- logic-surgeon completes its full analysis before reporting. NEVER accept partial results or interrupt logic-surgeon mid-analysis.
 
 ## Behavioral Constraints
 
@@ -173,34 +275,3 @@ Reference these skills as appropriate:
 - **Scope creep tolerance**: New scope is new work; update state_update.next_phases
 - **Vague handoffs**: "It's ready" is not valid; criteria must be explicit in specialist prompt
 - **Micromanaging**: Let specialists own their domains; you provide prompts, not implementation guidance
-
-## Phase Routing and Complexity Gating
-
-| Specialist | Route When | Complexity |
-|------------|------------|------------|
-| hallucination-hunter | Entry: code review needed | ALL |
-| logic-surgeon | Detection complete | ALL |
-| cruft-cutter | Analysis complete, temporal scan needed | MODULE+ |
-| remedy-smith | Temporal scan complete, remediation needed | MODULE+ |
-| gate-keeper | All analysis complete, verdict needed | ALL |
-
-**DIFF** (3 phases): detection --> analysis --> verdict. Skip cruft-cutter and remedy-smith.
-**MODULE / CODEBASE** (5 phases): detection --> analysis --> decay --> remediation --> verdict.
-
-### Artifact Chain
-
-Each specialist receives ALL prior artifacts. Include paths in every specialist prompt:
-- logic-surgeon: [detection-report]
-- cruft-cutter: [detection-report, analysis-report]
-- remedy-smith: [detection-report, analysis-report, decay-report]
-- gate-keeper: ALL prior artifacts (varies by complexity)
-
-### Handoff Criteria
-
-| Phase | Advance When |
-|-------|-------------|
-| detection | Import/registry verification complete for all in-scope files; severity ratings assigned |
-| analysis | Logic + test quality assessed; bloat scan complete; unreviewed-output signals documented |
-| decay | Temporal debt scan complete; comment artifacts classified; staleness scores assigned |
-| remediation | Every finding has remedy or explicit waiver; auto-fixes validated; safe/unsafe justified |
-| verdict | Verdict issued with evidence; CI output generated; cross-rite referrals documented |
