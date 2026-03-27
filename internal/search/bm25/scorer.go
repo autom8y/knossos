@@ -16,9 +16,23 @@ type BM25 struct {
 	B  float64 // Length normalization parameter
 }
 
-// NewBM25 returns a BM25 scorer with the empirically validated parameters.
+// NewBM25 returns a BM25 scorer with the ari ask pipeline parameters.
 func NewBM25() *BM25 {
 	return &BM25{K1: BM25K1, B: BM25B}
+}
+
+// NewBM25WithParams returns a BM25 scorer with custom parameters.
+// Use this when a pipeline requires different length normalization behavior
+// than the ari ask defaults (e.g., Clew knowledge retrieval).
+func NewBM25WithParams(k1, b float64) *BM25 {
+	return &BM25{K1: k1, B: b}
+}
+
+// NewClewBM25 returns a BM25 scorer tuned for Clew knowledge retrieval.
+// Higher length normalization (b=0.55) makes specialist domains competitive
+// with longer architecture documents.
+func NewClewBM25() *BM25 {
+	return &BM25{K1: ClewBM25K1, B: ClewBM25B}
 }
 
 // IDF computes the Inverse Document Frequency using the Robertson-Sparck Jones formula.

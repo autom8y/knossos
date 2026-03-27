@@ -126,6 +126,10 @@ func (o *Orchestrator) Assess(ctx context.Context, query string, threadHistory [
 		modelCalls++
 	}
 
+	// WS-3: Post-triage graph injection — surface same_repo adjacent-type domains
+	// as supplemental candidates at baseline priority below any triage-scored candidate.
+	injected := o.graphInjectionPass(result)
+
 	result.RefinedQuery = refinedQuery
 	result.TriageLatency = time.Since(start)
 	result.ModelCallCount = modelCalls
@@ -133,6 +137,7 @@ func (o *Orchestrator) Assess(ctx context.Context, query string, threadHistory [
 
 	slog.Info("triage complete",
 		"candidates", len(result.Candidates),
+		"graph_injected", injected,
 		"latency_ms", result.TriageLatency.Milliseconds(),
 		"model_calls", result.ModelCallCount,
 		"bm25_fallback", usedBM25Fallback,
@@ -289,6 +294,7 @@ type stage2Candidate struct {
 	metadata            DomainMetadata
 	embeddingSimilarity float64
 	bm25Score           float64
+	matchType           string // "document" or "section"
 }
 
 // stage2EmbeddingFilter uses cosine similarity for pre-filtering.
@@ -308,10 +314,20 @@ func (o *Orchestrator) stage2EmbeddingFilter(ctx context.Context, query string, 
 // stage2BM25Fallback uses BM25 search as the Stage 2 replacement.
 // BC-06: This is an explicit, required fallback -- not optional defensive coding.
 // Narrows to top-20 to avoid sending all 128 candidates to Haiku.
+//
+// WS-2: Merges document-level and section-level BM25 results. Section candidates
+// are first-class — they compete with document candidates on equal footing.
 func (o *Orchestrator) stage2BM25Fallback(query string, candidates []DomainMetadata) []stage2Candidate {
 	bm25Results := o.searchIndex.SearchByBM25(query, 20)
 
-	if len(bm25Results) == 0 {
+	// WS-2: Also search sections and merge with document results.
+	sectionResults := o.searchIndex.SearchSectionsByBM25(query, 10)
+
+	allResults := make([]BM25Result, 0, len(bm25Results)+len(sectionResults))
+	allResults = append(allResults, bm25Results...)
+	allResults = append(allResults, sectionResults...)
+
+	if len(allResults) == 0 {
 		// BM25 returned nothing -- pass through all Stage 1 candidates
 		// (capped at 20 by caller).
 		slog.Warn("BM25 fallback returned no results, passing Stage 1 candidates through")
@@ -323,9 +339,19 @@ func (o *Orchestrator) stage2BM25Fallback(query string, candidates []DomainMetad
 	}
 
 	// Build a set of BM25 result qualified names for O(1) lookup.
-	bm25Set := make(map[string]float64, len(bm25Results))
-	for _, r := range bm25Results {
-		bm25Set[r.QualifiedName] = r.Score
+	// For sections, extract the parent domain QN for metadata lookup.
+	bm25Set := make(map[string]float64, len(allResults))
+	matchTypes := make(map[string]string, len(allResults))
+	for _, r := range allResults {
+		// Keep the highest score when a QN appears in both doc and section results.
+		if existing, ok := bm25Set[r.QualifiedName]; !ok || r.Score > existing {
+			bm25Set[r.QualifiedName] = r.Score
+			mt := r.MatchType
+			if mt == "" {
+				mt = "document"
+			}
+			matchTypes[r.QualifiedName] = mt
+		}
 	}
 
 	// Match BM25 results against Stage 1 candidates.
@@ -335,25 +361,45 @@ func (o *Orchestrator) stage2BM25Fallback(query string, candidates []DomainMetad
 			result = append(result, stage2Candidate{
 				metadata:  c,
 				bm25Score: score,
+				matchType: matchTypes[c.QualifiedName],
 			})
 		}
 	}
 
-	// If BM25 found results that were not in Stage 1 candidates,
-	// add them directly (BM25 may find domains Stage 1 missed).
+	// Add BM25 results not in Stage 1 candidates (doc and section).
 	candidateSet := make(map[string]bool, len(candidates))
 	for _, c := range candidates {
 		candidateSet[c.QualifiedName] = true
 	}
-	for _, r := range bm25Results {
-		if !candidateSet[r.QualifiedName] {
-			md, ok := o.searchIndex.GetMetadata(r.QualifiedName)
-			if ok {
-				result = append(result, stage2Candidate{
-					metadata:  *md,
-					bm25Score: r.Score,
-				})
-			}
+	for _, r := range allResults {
+		if candidateSet[r.QualifiedName] {
+			continue
+		}
+		candidateSet[r.QualifiedName] = true // Prevent duplicates
+
+		// For section candidates, look up parent domain metadata.
+		lookupQN := r.QualifiedName
+		if strings.Contains(lookupQN, "##") {
+			lookupQN = strings.SplitN(lookupQN, "##", 2)[0]
+		}
+
+		md, ok := o.searchIndex.GetMetadata(lookupQN)
+		if !ok {
+			continue
+		}
+
+		mt := r.MatchType
+		if mt == "" {
+			mt = "document"
+		}
+		result = append(result, stage2Candidate{
+			metadata:  *md,
+			bm25Score: r.Score,
+			matchType: mt,
+		})
+		// Override QN for section candidates to preserve section address.
+		if mt == "section" {
+			result[len(result)-1].metadata.QualifiedName = r.QualifiedName
 		}
 	}
 
@@ -452,10 +498,14 @@ func parseStage3Response(resp string, stage2Candidates []stage2Candidate) (*Tria
 	embeddingMap := make(map[string]float64, len(stage2Candidates))
 	freshnessMap := make(map[string]float64, len(stage2Candidates))
 	domainTypeMap := make(map[string]string, len(stage2Candidates))
+	matchTypeMap := make(map[string]string, len(stage2Candidates))
 	for _, c := range stage2Candidates {
 		embeddingMap[c.metadata.QualifiedName] = c.embeddingSimilarity
 		freshnessMap[c.metadata.QualifiedName] = c.metadata.FreshnessScore
 		domainTypeMap[c.metadata.QualifiedName] = c.metadata.DomainType
+		if c.matchType != "" {
+			matchTypeMap[c.metadata.QualifiedName] = c.matchType
+		}
 	}
 
 	var triageCandidates []TriageCandidate
@@ -464,6 +514,10 @@ func parseStage3Response(resp string, stage2Candidates []stage2Candidate) (*Tria
 		if domainType == "" {
 			domainType = domainTypeMap[c.QualifiedName]
 		}
+		mt := matchTypeMap[c.QualifiedName]
+		if mt == "" {
+			mt = "document"
+		}
 		tc := TriageCandidate{
 			QualifiedName:       c.QualifiedName,
 			RelevanceScore:      c.RelevanceScore,
@@ -471,6 +525,7 @@ func parseStage3Response(resp string, stage2Candidates []stage2Candidate) (*Tria
 			Freshness:           freshnessMap[c.QualifiedName],
 			Rationale:           c.Rationale,
 			DomainType:          domainType,
+			MatchType:           mt,
 		}
 		triageCandidates = append(triageCandidates, tc)
 	}
@@ -505,12 +560,17 @@ func (o *Orchestrator) stage2FallbackResult(query string, candidates []stage2Can
 			// Normalize BM25 score to [0, 1] range using max normalization.
 			score = 0.5 // Default moderate relevance for BM25 fallback.
 		}
+		mt := c.matchType
+		if mt == "" {
+			mt = "document"
+		}
 		triageCandidates = append(triageCandidates, TriageCandidate{
 			QualifiedName:       c.metadata.QualifiedName,
 			RelevanceScore:      score,
 			EmbeddingSimilarity: c.embeddingSimilarity,
 			Freshness:           c.metadata.FreshnessScore,
 			DomainType:          c.metadata.DomainType,
+			MatchType:           mt,
 		})
 	}
 
@@ -718,5 +778,112 @@ func (o *Orchestrator) injectPriorDomains(refinedQuery string, candidates []stag
 	)
 
 	return candidates
+}
+
+// graphInjectionPass traverses same_repo edges for each triage candidate and
+// injects adjacent-type domains as supplemental candidates at baseline priority.
+//
+// WS-3: Graph injection surfaces related-but-undiscovered domains at zero LLM cost.
+// Injected candidates receive a baseline score below any triage-scored candidate.
+// Injection is bounded to maxGraphInjectPerCandidate per primary candidate
+// and maxGraphInjectTotal total injections.
+//
+// Returns the number of injected candidates.
+func (o *Orchestrator) graphInjectionPass(result *TriageResult) int {
+	const maxGraphInjectPerCandidate = 2
+	const maxGraphInjectTotal = 4
+	const baselineScore = 0.15 // Below any real triage score (min ~0.3)
+
+	if result == nil || len(result.Candidates) == 0 {
+		return 0
+	}
+
+	// Build set of already-present QNs (including section parents).
+	present := make(map[string]bool, len(result.Candidates))
+	for _, c := range result.Candidates {
+		present[c.QualifiedName] = true
+		// Also mark parent domain for section candidates.
+		if idx := strings.Index(c.QualifiedName, "##"); idx > 0 {
+			present[c.QualifiedName[:idx]] = true
+		}
+	}
+
+	// Collect present domain types for diversity checking.
+	presentTypes := make(map[string]bool)
+	for _, c := range result.Candidates {
+		presentTypes[c.DomainType] = true
+	}
+
+	var injected []TriageCandidate
+	totalInjected := 0
+
+	for _, c := range result.Candidates {
+		if totalInjected >= maxGraphInjectTotal {
+			break
+		}
+
+		// Get graph edges for this candidate.
+		lookupQN := c.QualifiedName
+		if idx := strings.Index(lookupQN, "##"); idx > 0 {
+			lookupQN = lookupQN[:idx]
+		}
+
+		edges := o.searchIndex.GetRelationships(lookupQN)
+		perCandidateInjected := 0
+
+		for _, edge := range edges {
+			if perCandidateInjected >= maxGraphInjectPerCandidate {
+				break
+			}
+			if totalInjected >= maxGraphInjectTotal {
+				break
+			}
+
+			// Only inject via same_repo edges (cross-type discovery).
+			if edge.Type != "same_repo" {
+				continue
+			}
+
+			// Skip if already present.
+			if present[edge.Target] {
+				continue
+			}
+
+			// Look up metadata for the injection target.
+			md, ok := o.searchIndex.GetMetadata(edge.Target)
+			if !ok {
+				continue
+			}
+
+			// Only inject if the target is a different domain type (cross-type).
+			if presentTypes[md.DomainType] {
+				continue
+			}
+
+			injected = append(injected, TriageCandidate{
+				QualifiedName:  edge.Target,
+				RelevanceScore: baselineScore,
+				Freshness:      md.FreshnessScore,
+				DomainType:     md.DomainType,
+				MatchType:      "document",
+				RelatedDomains: []string{lookupQN}, // provenance: injected from this candidate
+			})
+
+			present[edge.Target] = true
+			presentTypes[md.DomainType] = true
+			perCandidateInjected++
+			totalInjected++
+		}
+	}
+
+	if totalInjected > 0 {
+		result.Candidates = append(result.Candidates, injected...)
+		slog.Info("WS-3 graph injection",
+			"injected", totalInjected,
+			"total_candidates", len(result.Candidates),
+		)
+	}
+
+	return totalInjected
 }
 

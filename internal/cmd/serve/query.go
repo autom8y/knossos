@@ -16,6 +16,7 @@ import (
 	"github.com/autom8y/knossos/internal/output"
 	"github.com/autom8y/knossos/internal/reason"
 	"github.com/autom8y/knossos/internal/reason/response"
+	"github.com/autom8y/knossos/internal/search/bm25"
 	"github.com/autom8y/knossos/internal/search/knowledge"
 	"github.com/autom8y/knossos/internal/triage"
 )
@@ -97,9 +98,16 @@ func runQuery(ctx *cmdContext, opts queryOptions, question string) error {
 		}
 
 		if llmClient != nil && pipelineResult.searchIndex != nil {
+			// Build Clew-specific BM25 index with higher length normalization.
+			var clewIdx *bm25.Index
+			if pipelineResult.searchIndex.HasBM25() {
+				clewIdx = buildClewBM25Index(pipelineResult.catalog)
+			}
 			triageSearchIdx := &triageSearchAdapter{
-				searchIndex: pipelineResult.searchIndex,
-				catalog:     pipelineResult.catalog,
+				searchIndex:     pipelineResult.searchIndex,
+				clewBM25:        clewIdx,
+				catalog:         pipelineResult.catalog,
+				knowledgeIdxPtr: pipelineResult.knowledgeIdxPtr,
 			}
 			embeddingModel := &triage.StubEmbeddingModel{}
 			triageOrch = triage.NewOrchestrator(llmClient, triageSearchIdx, embeddingModel)

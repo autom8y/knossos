@@ -3,7 +3,8 @@
 // Sprint-2 parameter sweep (100 combinations: 5 k1 x 4 b x 5 RRF-k, 187-doc corpus).
 package bm25
 
-// BM25 scoring parameters.
+// BM25 scoring parameters for the ari ask pipeline.
+// Tuned for a 187-doc corpus where the most important documents are the longest.
 const (
 	// BM25K1 is the term frequency saturation parameter.
 	// Higher values increase the contribution of high-frequency terms.
@@ -19,6 +20,23 @@ const (
 	// RRFConstK is the Reciprocal Rank Fusion smoothing constant.
 	// Standard range; lower k gives more weight to top-ranked results.
 	RRFConstK = 40.0
+)
+
+// Clew knowledge pipeline BM25 parameters.
+// Tuned for contextual diversity: specialist domains (conventions, scar-tissue,
+// design-constraints) must compete with architecture files on term density,
+// not document length. Higher b increases length normalization, penalizing
+// long architecture documents and elevating shorter, denser specialist domains.
+const (
+	// ClewBM25K1 matches the ari ask k1 — term frequency saturation is
+	// corpus-independent at this scale.
+	ClewBM25K1 = 1.2
+
+	// ClewBM25B uses moderate length normalization (0.55 vs ari ask's 0.25).
+	// At b=0.55, a document 2x average length gets a 1.55x denominator penalty
+	// (vs 1.25x at b=0.25). This makes specialist domains with high term density
+	// in shorter documents structurally competitive with long architecture files.
+	ClewBM25B = 0.55
 )
 
 // Decay half-life constants in days, empirically calibrated from a 187-document corpus.

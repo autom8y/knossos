@@ -27,6 +27,7 @@ import (
 	"github.com/autom8y/knossos/internal/reason/response"
 	registryorg "github.com/autom8y/knossos/internal/registry/org"
 	"github.com/autom8y/knossos/internal/search"
+	"github.com/autom8y/knossos/internal/search/bm25"
 	"github.com/autom8y/knossos/internal/search/knowledge"
 	"github.com/autom8y/knossos/internal/serve"
 	"github.com/autom8y/knossos/internal/serve/health"
@@ -251,13 +252,28 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	// BC-02: triage.Orchestrator is a new top-level package.
 	var triageAdapter internalslack.TriageRunner
 	if llmClient != nil && pipelineResult.searchIndex != nil {
-		// Create search index adapter for triage.
-		triageSearchIdx := &triageSearchAdapter{searchIndex: pipelineResult.searchIndex, catalog: pipelineResult.catalog}
+		// Build Clew-specific BM25 index with higher length normalization.
+		// R-4 isolation: Clew BM25 params (b=0.55) are independent from
+		// ari ask params (b=0.25). The Clew index makes specialist domains
+		// competitive with architecture files.
+		var clewIdx *bm25.Index
+		if pipelineResult.searchIndex.HasBM25() {
+			clewIdx = buildClewBM25Index(pipelineResult.catalog)
+		}
+
+		triageSearchIdx := &triageSearchAdapter{
+			searchIndex:     pipelineResult.searchIndex,
+			clewBM25:        clewIdx,
+			catalog:         pipelineResult.catalog,
+			knowledgeIdxPtr: pipelineResult.knowledgeIdxPtr,
+		}
 		// StubEmbeddingModel triggers BM25 fallback (BC-06).
 		embeddingModel := &triage.StubEmbeddingModel{}
 		triageOrch := triage.NewOrchestrator(llmClient, triageSearchIdx, embeddingModel)
 		triageAdapter = &triageOrchestratorAdapter{orch: triageOrch}
-		slog.Info("triage orchestrator initialized (Sprint 5: BM25 fallback mode)")
+		slog.Info("triage orchestrator initialized",
+			"clew_bm25_isolated", clewIdx != nil,
+		)
 	}
 
 	// Create Slack client.
@@ -524,12 +540,34 @@ func buildPipeline() pipelineComponents {
 // ---- Triage adapters (bridges triage package types to handler types) ----
 
 // triageSearchAdapter adapts *search.SearchIndex to triage.SearchIndex interface.
+// Uses a dedicated Clew BM25 index with higher length normalization (b=0.55)
+// to make specialist domains competitive with architecture files.
+// R-4 isolation: Clew BM25 configuration is independent from ari ask.
 type triageSearchAdapter struct {
-	searchIndex *search.SearchIndex
-	catalog     *registryorg.DomainCatalog
+	searchIndex  *search.SearchIndex
+	clewBM25     *bm25.Index // Dedicated Clew BM25 index (separate scorer)
+	catalog      *registryorg.DomainCatalog
+	knowledgeIdxPtr *atomic.Pointer[knowledge.KnowledgeIndex] // For graph relationships (WS-3)
 }
 
 func (a *triageSearchAdapter) SearchByBM25(query string, k int) []triage.BM25Result {
+	// Prefer the dedicated Clew BM25 index with Clew-specific params.
+	if a.clewBM25 != nil {
+		docs := a.clewBM25.SearchDocuments(query, k)
+		var out []triage.BM25Result
+		for _, r := range docs {
+			out = append(out, triage.BM25Result{
+				QualifiedName: r.QualifiedName,
+				Score:         r.Score,
+				Domain:        r.Domain,
+				RawText:       r.RawText,
+				MatchType:     "document",
+			})
+		}
+		return out
+	}
+
+	// Fallback: use the ari ask search pipeline if no Clew index available.
 	if a.searchIndex == nil || !a.searchIndex.HasBM25() {
 		return nil
 	}
@@ -547,10 +585,31 @@ func (a *triageSearchAdapter) SearchByBM25(query string, k int) []triage.BM25Res
 				Score:         float64(r.Score),
 				Domain:        string(r.Domain),
 				RawText:       r.Description,
+				MatchType:     "document",
 			})
 		}
 	}
 	return out
+}
+
+// SearchSectionsByBM25 returns section-level BM25 results from the Clew index.
+// WS-2: Section candidates compete with document candidates on equal footing.
+func (a *triageSearchAdapter) SearchSectionsByBM25(query string, k int) []triage.BM25Result {
+	if a.clewBM25 != nil {
+		secs := a.clewBM25.SearchSections(query, k)
+		var out []triage.BM25Result
+		for _, r := range secs {
+			out = append(out, triage.BM25Result{
+				QualifiedName: r.QualifiedName,
+				Score:         r.Score,
+				Domain:        r.Domain,
+				RawText:       r.RawText,
+				MatchType:     "section",
+			})
+		}
+		return out
+	}
+	return nil
 }
 
 func (a *triageSearchAdapter) GetMetadata(qualifiedName string) (*triage.DomainMetadata, bool) {
@@ -586,6 +645,28 @@ func (a *triageSearchAdapter) ListAllDomains() []triage.DomainMetadata {
 			Repo:           know.RepoFromQualifiedName(d.QualifiedName),
 			FreshnessScore: 0, // Tier 1: freshness computed at query time.
 			GeneratedAt:    d.GeneratedAt,
+		})
+	}
+	return out
+}
+
+// GetRelationships returns entity graph edges for a domain.
+// WS-3: Used by the post-triage graph injection pass.
+func (a *triageSearchAdapter) GetRelationships(qualifiedName string) []triage.GraphEdge {
+	if a.knowledgeIdxPtr == nil {
+		return nil
+	}
+	ki := a.knowledgeIdxPtr.Load()
+	if ki == nil {
+		return nil
+	}
+	rels := ki.GetRelationships(qualifiedName)
+	var out []triage.GraphEdge
+	for _, r := range rels {
+		out = append(out, triage.GraphEdge{
+			Target:   r.Target,
+			Type:     string(r.Type),
+			Strength: r.Strength,
 		})
 	}
 	return out
@@ -695,6 +776,41 @@ func buildKnowledgeIndex(ctx context.Context, pr pipelineComponents, llmClient *
 		"edges", idx.EdgeCount(),
 	)
 
+	return idx
+}
+
+// buildClewBM25Index builds a BM25 index with Clew-specific parameters for
+// the triage pipeline. Uses higher length normalization (b=0.55) to make
+// specialist domains (conventions, scar-tissue, design-constraints) competitive
+// with longer architecture documents.
+//
+// R-4 isolation: This index is separate from the ari ask BM25 index.
+// The ari ask index keeps b=0.25 (unchanged). Returns nil if the catalog
+// is unavailable or no content can be loaded.
+func buildClewBM25Index(catalog *registryorg.DomainCatalog) *bm25.Index {
+	if catalog == nil || catalog.DomainCount() == 0 {
+		return nil
+	}
+
+	loader := search.ResolveContentLoader()
+	scorer := bm25.NewClewBM25()
+
+	idx, err := bm25.BuildFromCatalogWithScorer(catalog, loader, scorer)
+	if err != nil {
+		slog.Warn("Clew BM25 index build failed, falling back to ari ask index",
+			"error", err)
+		return nil
+	}
+
+	if idx.TotalDocs == 0 {
+		return nil
+	}
+
+	slog.Info("Clew BM25 index built",
+		"documents", idx.TotalDocs,
+		"sections", idx.TotalSecs,
+		"b_param", bm25.ClewBM25B,
+	)
 	return idx
 }
 

@@ -70,6 +70,10 @@ type TriageCandidate struct {
 	// DomainType is the domain classification (architecture, scar-tissue, etc.).
 	DomainType string
 
+	// MatchType is "document" or "section". Section candidates carry a qualified
+	// name with "##section-slug" suffix and are packed with section body only.
+	MatchType string
+
 	// RelatedDomains are domains connected via the entity graph.
 	RelatedDomains []string
 }
@@ -105,14 +109,20 @@ type BM25Result struct {
 	Score         float64
 	Domain        string
 	RawText       string
+	MatchType     string // "document" or "section"
 }
 
 // SearchIndex is the interface the triage orchestrator uses to access search.
 // This is a narrow interface adapted from the existing search package, avoiding
 // a direct import dependency on the full search.SearchIndex struct.
 type SearchIndex interface {
-	// SearchByBM25 performs a BM25 search and returns the top-k results.
+	// SearchByBM25 performs a document-level BM25 search and returns the top-k results.
 	SearchByBM25(query string, k int) []BM25Result
+
+	// SearchSectionsByBM25 performs a section-level BM25 search and returns the
+	// top-k results. Section candidates carry MatchType "section" and have
+	// qualified names with "##section-slug" suffix.
+	SearchSectionsByBM25(query string, k int) []BM25Result
 
 	// GetMetadata returns domain metadata by qualified name.
 	// Returns false if the domain is not found.
@@ -120,6 +130,19 @@ type SearchIndex interface {
 
 	// ListAllDomains returns metadata for all indexed domains.
 	ListAllDomains() []DomainMetadata
+
+	// GetRelationships returns entity graph edges for a domain.
+	// Used by the post-triage graph injection pass (WS-3).
+	// Returns nil if no graph is available.
+	GetRelationships(qualifiedName string) []GraphEdge
+}
+
+// GraphEdge represents a typed edge in the entity graph.
+// Narrow type to avoid importing knowledge/graph.
+type GraphEdge struct {
+	Target   string
+	Type     string // "same_repo", "same_type", "scope_overlap"
+	Strength float64
 }
 
 // AssessOptions provides optional parameters for the Assess method.

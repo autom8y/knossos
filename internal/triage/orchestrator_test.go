@@ -43,6 +43,14 @@ func (m *mockSearchIndex) GetMetadata(qn string) (*DomainMetadata, bool) {
 	return md, ok
 }
 
+func (m *mockSearchIndex) SearchSectionsByBM25(_ string, _ int) []BM25Result {
+	return nil // Default: no section results in existing tests.
+}
+
+func (m *mockSearchIndex) GetRelationships(_ string) []GraphEdge {
+	return nil // Default: no graph edges in existing tests.
+}
+
 func (m *mockSearchIndex) ListAllDomains() []DomainMetadata {
 	return m.allDomains
 }

@@ -44,14 +44,36 @@ type Index struct {
 
 	AvgDocLen float64 // Average document length (terms)
 	AvgSecLen float64 // Average section length (terms)
+
+	scorer *BM25 // Scorer used for search; nil = use default NewBM25()
 }
 
-// NewIndex creates an empty index.
+// NewIndex creates an empty index with default BM25 parameters.
 func NewIndex() *Index {
 	return &Index{
 		DocFreq: make(map[string]int),
 		SecFreq: make(map[string]int),
 	}
+}
+
+// NewIndexWithScorer creates an empty index with a custom BM25 scorer.
+// The scorer is used by SearchDocuments and SearchSections instead of the
+// default parameters. Use this to isolate Clew knowledge search from
+// ari ask search (R-4 mitigation).
+func NewIndexWithScorer(scorer *BM25) *Index {
+	return &Index{
+		DocFreq: make(map[string]int),
+		SecFreq: make(map[string]int),
+		scorer:  scorer,
+	}
+}
+
+// getScorer returns the index's scorer, falling back to default params.
+func (idx *Index) getScorer() *BM25 {
+	if idx.scorer != nil {
+		return idx.scorer
+	}
+	return NewBM25()
 }
 
 // AddDocument indexes a document-level unit.
@@ -110,7 +132,7 @@ func (idx *Index) SearchDocuments(query string, k int) []SearchResult {
 		return nil
 	}
 
-	bm := NewBM25()
+	bm := idx.getScorer()
 
 	type scored struct {
 		unit  *IndexedUnit
@@ -154,7 +176,7 @@ func (idx *Index) SearchSections(query string, k int) []SearchResult {
 		return nil
 	}
 
-	bm := NewBM25()
+	bm := idx.getScorer()
 
 	type scored struct {
 		unit  *IndexedUnit
@@ -191,13 +213,20 @@ func (idx *Index) SearchSections(query string, k int) []SearchResult {
 	return out
 }
 
-// LookupContent returns the RawText for a document matching the given qualified
-// name. Returns ("", false) if no document matches. O(n) scan — acceptable
-// because the document count is small (typically < 50 domains).
+// LookupContent returns the RawText for a document or section matching the
+// given qualified name. Searches documents first, then sections.
+// Returns ("", false) if no match. O(n) scan — acceptable because the
+// document and section counts are small (typically < 200 total).
 func (idx *Index) LookupContent(qualifiedName string) (string, bool) {
 	for _, doc := range idx.Documents {
 		if doc.QualifiedName == qualifiedName {
 			return doc.RawText, true
+		}
+	}
+	// WS-2: Also search sections for section-qualified names ("##slug" suffix).
+	for _, sec := range idx.Sections {
+		if sec.QualifiedName == qualifiedName {
+			return sec.RawText, true
 		}
 	}
 	return "", false

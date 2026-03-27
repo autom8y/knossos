@@ -34,6 +34,27 @@ type AssemblerConfig struct {
 	// Default: 0.20.
 	DiversityWeight float64
 
+	// DiversityFloorTypes lists domain types that should be represented in the
+	// assembled context when available. After greedy packing, if a floor type
+	// has no representation and a candidate of that type scores above
+	// DiversityFloorThreshold, the assembler includes it.
+	// WS-1: Driven by configuration, not hardcoded domain name lists (AP-4).
+	DiversityFloorTypes []string
+
+	// DiversityFloorThreshold is the minimum relevance score for a floor-type
+	// candidate to be force-included. Floor enforcement is skipped when the
+	// best candidate of the required type scores below this threshold (R-6).
+	// Default: 0.10.
+	DiversityFloorThreshold float64
+
+	// MaxTypeFraction is the maximum fraction of SourceBudgetTokens that any
+	// single domain type may consume. When a candidate would exceed the ceiling
+	// for its type, the assembler substitutes summary content if available.
+	// WS-5: Prevents architecture monoculture at the budget level.
+	// Default: 0.50 (no single type may consume more than half the budget).
+	// Set to 0 to disable per-type budget ceilings.
+	MaxTypeFraction float64
+
 	// TriageDomainCount is the number of triage candidates, used to dynamically
 	// resolve the source budget via resolveSourceBudget(). When zero, the static
 	// SourceBudgetTokens is used as the fallback.
@@ -63,6 +84,14 @@ func DefaultAssemblerConfig() AssemblerConfig {
 		RelevanceWeight:    0.50,
 		FreshnessWeight:    0.30,
 		DiversityWeight:    0.20,
+		// WS-1: Domain types that should be represented when available.
+		// Driven by configuration (AP-4), not hardcoded domain name lists.
+		DiversityFloorTypes: []string{
+			"conventions", "scar-tissue", "design-constraints", "test-coverage",
+		},
+		DiversityFloorThreshold: 0.10,
+		// WS-5: Conservative ceiling — no single type consumes more than half.
+		MaxTypeFraction: 0.50,
 	}
 }
 
@@ -285,7 +314,14 @@ func (a *Assembler) Assemble(
 	// Greedy packing: include candidates until token budget is exhausted.
 	// FM-3: Candidates at position 4+ (0-indexed 3+) use summary content
 	// when a SummaryLookup is available.
+	// WS-5: Per-source-type budget ceilings prevent any single type from
+	// dominating the context window.
 	budgetMgr := NewBudgetManager(sourceBudget)
+	typeTokens := make(map[string]int) // domain type -> tokens consumed
+	typeCeiling := 0
+	if a.config.MaxTypeFraction > 0 {
+		typeCeiling = int(float64(sourceBudget) * a.config.MaxTypeFraction)
+	}
 	var included []SourceMaterial
 
 	for i, c := range candidates {
@@ -300,14 +336,37 @@ func (a *Assembler) Assemble(
 			// Fail-open: if summary not found, use full content.
 		}
 
+		// WS-5: Per-type budget ceiling check.
+		// The first candidate of any type is always allowed (up to overall budget).
+		// Ceiling enforcement starts with the second candidate of the same type.
+		if typeCeiling > 0 && typeTokens[src.Domain] > 0 &&
+			typeTokens[src.Domain]+src.TokenCount > typeCeiling {
+			// Type ceiling would be exceeded. Try summary substitution.
+			if a.config.SummaryLookup != nil {
+				if summary, ok := a.config.SummaryLookup(src.QualifiedName); ok && summary != "" {
+					src.Content = summary
+					src.TokenCount = a.counter.Count(summary)
+				}
+			}
+			// Re-check after substitution.
+			if typeTokens[src.Domain]+src.TokenCount > typeCeiling {
+				// Still exceeds ceiling — skip this candidate.
+				continue
+			}
+		}
+
 		// Consume() returns true if the item fits and increments included.
 		// It returns false and increments skipped if it doesn't fit.
 		if budgetMgr.Consume(src.TokenCount) {
 			included = append(included, src)
+			typeTokens[src.Domain] += src.TokenCount
 		}
 		// Bin-packing heuristic: continue trying subsequent candidates
 		// even after a skip -- a smaller candidate may still fit.
 	}
+
+	// WS-1: Diversity floor post-pass — ensure floor types are represented.
+	included = a.diversityFloorPass(included, candidates, budgetMgr)
 
 	// Render system prompt with included sources and conversation history.
 	systemPrompt := RenderSystemPrompt(org, score.Tier, included, a.config.OrgTopology, conversationHistory...)
@@ -378,6 +437,76 @@ func scopeRelevance(qualifiedName, query string) float64 {
 		}
 	}
 	return 0.0
+}
+
+// diversityFloorPass checks whether each configured floor type is represented
+// in the included sources. If a floor type is missing and a candidate of that
+// type exists above the relevance threshold, it is force-included using summary
+// content if available, or full content if it fits.
+//
+// WS-1: Post-greedy-pass correction. Floor types are configurable (AP-4).
+// Floor enforcement is gated by relevance threshold (R-6 mitigation).
+func (a *Assembler) diversityFloorPass(included []SourceMaterial, candidates []candidate, budgetMgr *BudgetManager) []SourceMaterial {
+	if len(a.config.DiversityFloorTypes) == 0 {
+		return included
+	}
+
+	// Build set of domain types already represented.
+	representedTypes := make(map[string]bool)
+	for _, src := range included {
+		representedTypes[src.Domain] = true
+	}
+
+	// Build set of included QNs to avoid duplicates.
+	includedQNs := make(map[string]bool, len(included))
+	for _, src := range included {
+		includedQNs[src.QualifiedName] = true
+	}
+
+	for _, floorType := range a.config.DiversityFloorTypes {
+		if representedTypes[floorType] {
+			continue // Already represented.
+		}
+
+		// Find the highest-scoring candidate of this type that wasn't included.
+		var best *candidate
+		for i := range candidates {
+			if candidates[i].source.Domain == floorType && !includedQNs[candidates[i].source.QualifiedName] {
+				if best == nil || candidates[i].inclusionScore > best.inclusionScore {
+					best = &candidates[i]
+				}
+			}
+		}
+
+		if best == nil {
+			continue // No candidate of this type available.
+		}
+
+		// R-6: Skip if below relevance threshold.
+		if best.source.RelevanceScore < a.config.DiversityFloorThreshold {
+			continue
+		}
+
+		src := best.source
+
+		// Try summary substitution first (lower token cost).
+		if a.config.SummaryLookup != nil {
+			if summary, ok := a.config.SummaryLookup(src.QualifiedName); ok && summary != "" {
+				src.Content = summary
+				src.TokenCount = a.counter.Count(summary)
+			}
+		}
+
+		// Attempt to include if budget allows.
+		// Use CanFit first to avoid incrementing the skip counter.
+		if budgetMgr.CanFit(src.TokenCount) {
+			budgetMgr.Consume(src.TokenCount)
+			included = append(included, src)
+			representedTypes[floorType] = true
+		}
+	}
+
+	return included
 }
 
 // freshnessLabel returns a human-readable freshness annotation.

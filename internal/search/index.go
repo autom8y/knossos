@@ -118,7 +118,7 @@ func tryBuildBM25Index() (*registryorg.DomainCatalog, *bm25.Index) {
 	// Resolve content loader: prefer pre-baked content (container), fall back
 	// to local filesystem repos (dev). The content.Store types satisfy
 	// bm25.ContentLoader (same LoadContent signature).
-	loader := resolveContentLoader()
+	loader := ResolveContentLoader()
 
 	bm25Idx, err := bm25.BuildFromCatalog(catalog, loader)
 	if err != nil {
@@ -138,11 +138,11 @@ func tryBuildBM25Index() (*registryorg.DomainCatalog, *bm25.Index) {
 	return catalog, bm25Idx
 }
 
-// resolveContentLoader returns a content loader appropriate for the runtime
+// ResolveContentLoader returns a content loader appropriate for the runtime
 // environment. In a container, pre-baked content exists at /data/content/.
 // For local dev, the CLEW_CONTENT_DIR env var can point to a pre-baked
 // directory, or the BM25 index will be empty (structural-only fallback).
-func resolveContentLoader() bm25.ContentLoader {
+func ResolveContentLoader() bm25.ContentLoader {
 	// Check env var override first (useful for local dev testing).
 	if envDir := os.Getenv("CLEW_CONTENT_DIR"); envDir != "" {
 		if info, err := os.Stat(envDir); err == nil && info.IsDir() {
@@ -167,6 +167,17 @@ func resolveContentLoader() bm25.ContentLoader {
 // HasBM25 returns true if a BM25 knowledge index is available.
 func (idx *SearchIndex) HasBM25() bool {
 	return idx.bm25Index != nil
+}
+
+// BM25Index returns the underlying BM25 index for direct access.
+// Used by the Clew triage pipeline to perform BM25 search with
+// pipeline-specific scoring parameters (R-4 isolation).
+// Returns nil if no BM25 index is available.
+func (idx *SearchIndex) BM25Index() *bm25.Index {
+	if idx == nil {
+		return nil
+	}
+	return idx.bm25Index
 }
 
 // LookupContent returns the raw .know/ content for a given qualified name.
