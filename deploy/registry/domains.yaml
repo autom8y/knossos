@@ -7,16 +7,6 @@ repos:
       default_branch: main
       last_synced: "2026-03-25T12:42:15Z"
       domains: []
-    - name: autom8-core
-      url: https://github.com/autom8y/autom8-core
-      default_branch: main
-      last_synced: "2026-03-25T12:42:16Z"
-      domains: []
-    - name: charter
-      url: https://github.com/autom8y/charter
-      default_branch: main
-      last_synced: "2026-03-25T12:42:16Z"
-      domains: []
     - name: autom8y-asana
       url: https://github.com/autom8y/autom8y-asana
       default_branch: main
@@ -352,11 +342,6 @@ repos:
           source_hash: 5f94481
           confidence: 0.85
           format_version: "1.0"
-    - name: auth-client-go
-      url: https://github.com/autom8y/auth-client-go
-      default_branch: main
-      last_synced: "2026-03-25T12:42:30Z"
-      domains: []
     - name: knossos
       url: https://github.com/autom8y/knossos
       default_branch: main
@@ -786,11 +771,6 @@ repos:
           source_hash: 78abb186
           confidence: 0.88
           format_version: "1.0"
-    - name: homebrew-tap
-      url: https://github.com/autom8y/homebrew-tap
-      default_branch: main
-      last_synced: "2026-03-25T12:42:45Z"
-      domains: []
     - name: autom8y-sms
       url: https://github.com/autom8y/autom8y-sms
       default_branch: main
