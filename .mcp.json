@@ -1,5 +1,17 @@
 {
   "mcpServers": {
+    "browserbase": {
+      "args": [
+        "-y",
+        "@autom8y/mcp-stagehand"
+      ],
+      "command": "npx",
+      "env": {
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "CUA_MODEL": "anthropic/claude-sonnet-4-6",
+        "STAGEHAND_ENV": "LOCAL"
+      }
+    },
     "github": {
       "args": [
         "-y",
@@ -9,6 +21,16 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
+    },
+    "go-semantic": {
+      "command": "go-semantic-mcp"
+    },
+    "terraform": {
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-terraform"
+      ],
+      "command": "npx"
     }
   }
 }

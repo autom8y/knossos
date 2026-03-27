@@ -4,18 +4,19 @@
 Use the available agents and slash commands. Agents activate automatically when your prompt matches their description.
 <!-- KNOSSOS:END execution-mode -->
 
-<!-- KNOSSOS:START quick-start regenerate=true source=ACTIVE_RITE+agents -->
+<!-- KNOSSOS:START quick-start source=ACTIVE_RITE+agents regenerate=true -->
 ## Quick Start
 
-5-agent workflow (10x-dev):
+6-agent workflow (ecosystem):
 
 | Agent | Role |
 | ----- | ---- |
-| **potnia** | Coordinates development lifecycle phases and routes work to specialists |
-| **requirements-analyst** | Gathers requirements and produces PRD artifacts |
-| **architect** | Creates technical design documents and architecture decisions |
-| **principal-engineer** | Implements code according to design specifications |
-| **qa-adversary** | Validates implementation through adversarial testing |
+| **potnia** | Coordinates ecosystem infrastructure phases |
+| **ecosystem-analyst** | Traces sync pipeline/knossos problems to root causes and produces gap analysis |
+| **context-architect** | Designs context solutions, schemas, and ecosystem patterns |
+| **integration-engineer** | Implements sync pipeline and knossos changes with integration tests |
+| **documentation-engineer** | Creates migration runbooks and compatibility documentation |
+| **compatibility-tester** | Validates ecosystem changes across satellite configurations |
 
 Agents activate when your prompt matches their description.
 <!-- KNOSSOS:END quick-start -->
@@ -43,11 +44,12 @@ Agents cannot spawn other agents — only the main thread can dispatch sub-agent
 
 Prompts in `.gemini/agents/`:
 
-- `potnia.md` - Coordinates development lifecycle phases and routes work to specialists
-- `requirements-analyst.md` - Gathers requirements and produces PRD artifacts
-- `architect.md` - Creates technical design documents and architecture decisions
-- `principal-engineer.md` - Implements code according to design specifications
-- `qa-adversary.md` - Validates implementation through adversarial testing
+- `potnia.md` - Coordinates ecosystem infrastructure phases
+- `ecosystem-analyst.md` - Traces sync pipeline/knossos problems to root causes and produces gap analysis
+- `context-architect.md` - Designs context solutions, schemas, and ecosystem patterns
+- `integration-engineer.md` - Implements sync pipeline and knossos changes with integration tests
+- `documentation-engineer.md` - Creates migration runbooks and compatibility documentation
+- `compatibility-tester.md` - Validates ecosystem changes across satellite configurations
 
 ### Summonable Heroes
 Operational agents available on demand. Their commands handle the lifecycle:

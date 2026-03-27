@@ -1,17 +1,17 @@
 ---
 domain: architecture
-generated_at: "2026-03-26T17:14:25Z"
+generated_at: "2026-03-27T19:57:42Z"
 expires_after: "7d"
 source_scope:
   - "./cmd/**/*.go"
   - "./internal/**/*.go"
   - "./go.mod"
 generator: theoros
-source_hash: "a73d68a6"
-confidence: 0.84
+source_hash: "5501b0aa"
+confidence: 0.85
 format_version: "1.0"
-update_mode: "incremental"
-incremental_cycle: 1
+update_mode: "full"
+incremental_cycle: 0
 max_incremental_cycles: 3
 land_sources:
   - ".sos/land/initiative-history.md"
@@ -22,153 +22,162 @@ land_hash: "77ed0121d9982cb4e1bf8e7c09b414494a561c0ccd3b9ea546d210acd7354553"
 
 ## Package Structure
 
-The knossos repository is a Go module (`github.com/autom8y/knossos`) with two major subsystems sharing a single binary: the **ari CLI** (agentic workflow harness) and the **Clew Slack bot** (organizational intelligence).
+The knossos codebase is a Go module (`github.com/autom8y/knossos`) with a single binary (`ari`, named Ariadne). Source is organized under two top-level directories: `cmd/` (entry point) and `internal/` (all implementation). There are 45 packages under `internal/`, ranging from 1 to 57 files.
 
-### Entry Points
+### Module Root
 
-**`cmd/ari/main.go`** — Single entry point. Minimal wiring:
-1. Sets version info (injected at build time via `ldflags`)
-2. Calls `common.SetEmbeddedAssets` and `common.SetEmbeddedUserAssets` to register embedded FSes
-3. Delegates to `root.Execute()`
+`embed.go` — Package `knossos` (module root). Hosts all `//go:embed` directives so they can reference top-level directories (`rites/`, `knossos/templates/`, `agents/`, `mena/`, `processions/`, `config/hooks.yaml`). Imported by `cmd/ari/main.go` to wire embedded assets into the binary for single-binary distribution.
 
-**`embed.go`** (module root) — Holds all `//go:embed` directives, creating five embedded FSes: `EmbeddedRites`, `EmbeddedTemplates`, `EmbeddedHooksYAML`, `EmbeddedAgents`, `EmbeddedMena`, `EmbeddedProcessions`. These make knossos a single distributable binary.
-
-### `cmd/` Directory
+### cmd/
 
 | Directory | Purpose |
-|---|---|
-| `cmd/ari/` | Binary entry point, single `main.go` file |
+|-----------|---------|
+| `cmd/ari/` | Single entry point. `main.go` calls `root.SetVersion`, `common.SetBuildVersion`, `common.SetEmbeddedAssets`, `common.SetEmbeddedUserAssets`, `common.SetEmbeddedProcessions`, then delegates to `root.Execute()`. Minimal logic — wires version and embedded FS only. |
 
-### `internal/` Package Inventory
+### internal/ Package Inventory
 
-**CLI Surface layer (`internal/cmd/`)**
+**Leaf packages** (zero internal imports — foundational utilities consumed by all):
 
 | Package | Files | Purpose |
-|---|---|---|
-| `internal/cmd/root` | `root.go` | Cobra root command, registers all 35+ subcommands, global flags |
-| `internal/cmd/common` | 6 files | `BaseContext`, `SessionContext`, embedded asset refs, annotation-based `NeedsProject` |
-| `internal/cmd/agent` | 12 files | `ari agent` subcommands: `summon`, `dismiss`, `roster`, `list`, `new`, `embody`, `update`, `validate`, `query` |
-| `internal/cmd/artifact` | — | `ari artifact` subcommands |
-| `internal/cmd/ask` | `ask.go`, `models.go` | `ari ask` — semantic search over codebase via `SearchIndex` |
-| `internal/cmd/complaint` | — | `ari complaint` — file framework friction reports |
-| `internal/cmd/explain` | — | `ari explain` |
-| `internal/cmd/handoff` | — | `ari handoff` |
-| `internal/cmd/hook` | 25+ files | `ari hook` subcommands — all hook handlers (writeguard, autopark, agentguard, clew, gitconventions, etc.) |
-| `internal/cmd/initialize` | — | `ari init` |
-| `internal/cmd/inscription` | — | `ari inscription` — CLAUDE.md management |
-| `internal/cmd/knows` | — | `ari know` |
-| `internal/cmd/land` | — | `ari land` |
-| `internal/cmd/ledge` | — | `ari ledge` |
-| `internal/cmd/lint` | — | `ari lint` |
-| `internal/cmd/manifest` | — | `ari manifest` |
-| `internal/cmd/naxos` | — | `ari naxos` |
-| `internal/cmd/org` | — | `ari org` |
-| `internal/cmd/procession` | — | `ari procession` |
-| `internal/cmd/provenance` | — | `ari provenance` |
-| `internal/cmd/registry` | — | `ari registry` |
-| `internal/cmd/rite` | — | `ari rite` — rite management |
-| `internal/cmd/sails` | — | `ari sails` |
-| `internal/cmd/serve` | `serve.go`, `serve_test.go`, `query.go`, `query_test.go` | `ari serve` — full Clew HTTP server startup and wiring |
-| `internal/cmd/session` | 25+ files | `ari session` subcommands (create, park, resume, wrap, audit, log, fray, gc, migrate, etc.) |
-| `internal/cmd/status` | — | `ari status` |
-| `internal/cmd/sync` | `sync.go`, `budget.go` | `ari sync` — materialization trigger |
-| `internal/cmd/tour` | — | `ari tour` |
-| `internal/cmd/tribute` | — | `ari tribute` |
-| `internal/cmd/validate` | — | `ari validate` |
-| `internal/cmd/worktree` | — | `ari worktree` |
+|---------|-------|---------|
+| `internal/errors` | 2 | Domain-specific error types with exit codes. `Error` struct carries `Code string`, `ExitCode int`. Named codes: `GENERAL_ERROR`, `FILE_NOT_FOUND`, `SESSION_NOT_FOUND`, `PROJECT_NOT_FOUND`, `LOCK_TIMEOUT`, `SCHEMA_INVALID`, `LIFECYCLE_VIOLATION`, and ~14 others. |
+| `internal/output` | 4 | Format-aware CLI output. `Printer` struct emits JSON, YAML, or text (table). `Format` type. `NewPrinter(format, out, errOut, verbose)`. Implements `Textable` and `Tabular` interfaces. |
+| `internal/fileutil` | 2 | Canonical atomic file write utilities. |
+| `internal/frontmatter` | 4 | YAML frontmatter parsing. `FlexibleStringSlice` (accepts both comma-separated strings and YAML lists). `Parse(content []byte) (yamlBytes, body, err)`. |
+| `internal/checksum` | 2 | File checksum computation. |
+| `internal/channel` | 2 | Harness-agnostic tool name mapping. `CanonicalTool` map: canonical knossos tool names -> per-channel wire names (`claude`, `gemini`, etc.). |
+| `internal/resolution` | 3 | Multi-tier resolution chain. `Chain` with `Tier` (label, dir, fs). Five tiers: project > user > org > platform > embedded. **Zero internal imports** — all paths injected via constructor (TENSION-005). |
+| `internal/assets` | 1 | Embedded asset accessors. |
+| `internal/llm` | 2 | Shared LLM client (Anthropic SDK transport). Used by: triage query refinement, domain reasoning, summary generation, conversation summarization. |
+| `internal/tokenizer` | 2 | Token counting using `tiktoken-go` with `cl100k_base` encoding. |
+| `internal/suggest` | 3 | CLI suggestion generation. Max 2 suggestions per event. |
+| `internal/mena` | 8 | Mena (commands + skills) discovery across filesystem tiers. |
+| `internal/trust` | 11 | Confidence scoring. `ConfidenceTier`, `ConfidenceScore`, `Scorer`, `ScoreInput`. Decay configs per domain type. `ProvenanceChain` and `ProvenanceLink` types. |
 
-**Domain Logic layer (`internal/`)**
+**Domain packages** (primary business logic):
 
-| Package | Key Types | Purpose |
-|---|---|---|
-| `internal/agent` | `AgentFrontmatter`, `FlexibleStringSlice`, `MemoryField`, `BehavioralContract` | Agent frontmatter parsing, validation, 3 archetypes |
-| `internal/channel` | `manifest.go`, `output.go`, `rite.go` | Channel directory abstractions; harness agnosticism utilities |
-| `internal/checksum` | — | SHA-256 checksum utilities (prefix format: `sha256:`) |
-| `internal/config` | `OrgContext`, `RepoConfig`, `Settings` | XDG config home, org context, active-org resolution |
-| `internal/errors` | `AriError`, 15+ exit codes, 20+ error codes | Domain error types, exit codes, JSON-serializable errors |
-| `internal/envload` | `ServeConfig`, `Overrides` | Config resolution for `ari serve`: flags > env > org env file > defaults. `MaxConcurrent` is a first-class field plumbed from CLI flag through to `SlackHandler` and `ConcurrencyLimit` middleware. |
-| `internal/fileutil` | — | Atomic file write, directory utilities |
-| `internal/frontmatter` | — | YAML frontmatter `---` block parsing |
-| `internal/hook` | `StdinPayload`, `HookEvent`, canonical↔wire event map, `clewcontract/` | Hook payload parsing, event naming, CC contract JSONL writer |
-| `internal/inscription` | `RenderContext`, `AgentInfo`, `SummonableAgentInfo`, generator | CLAUDE.md generation: region-based merge, satellite region preservation |
-| `internal/know` | `QualifiedDomainName`, `Parse()`, `String()` | `.know/` domain management; parses `"org::repo::domain"` strings, enforcing exactly-2-`::` format and rejecting `::` inside domain segment |
-| `internal/ledge` | — | `.ledge/` artifact management |
-| `internal/lock` | `LockMetadata` | JSON v2 lock files, 5-minute stale threshold |
-| `internal/manifest` | `RiteManifest` (in materialize), diff/merge/schema | Rite manifest YAML operations |
-| `internal/materialize` | `Materializer`, `RiteManifest`, `Options`, `Result`, `TransformContext` | Core sync pipeline: source -> transform -> channel dir output |
-| `internal/mena` | `StripMenaExtension`, `RouteMenaFile`, `DetectMenaType` | Mena file routing: `.dro.md`->`commands/`, `.lego.md`->`skills/` |
-| `internal/naxos` | — | Session hygiene utilities |
-| `internal/observe` | `MetricsRecorder` (interface), `emfMetrics`, `CostTracker`, OTEL middleware | CloudWatch EMF metrics, OTEL tracing, structured logging for Clew serve |
-| `internal/output` | `Printer`, `Format` (text/json/yaml) | Format-aware output (tabwriter, JSON, YAML) |
-| `internal/paths` | `Resolver`, `FindProjectRoot` | XDG path resolution, project root discovery |
-| `internal/perspective` | — | Perspective/viewpoint utilities |
-| `internal/procession` | `template.go` | Procession (coordinated workflow) generation |
-| `internal/provenance` | `ProvenanceManifest`, `ProvenanceEntry`, `OwnerType`, `ScopeType`, `Collector` | File provenance tracking v2.0: two manifests (rite + user scope) |
-| `internal/registry` | `RefKey`, `RefEntry`, `Registry` | LEAF package: stable key->value map; zero internal imports |
-| `internal/registry/org` | `DomainEntry`, `DomainCatalog`, `OrgContext` | Clew knowledge address space: cross-repo `.know/` domain catalog |
-| `internal/resolution` | `Chain`, `Tier`, `ResolvedItem` | Multi-tier resolution (project > user > org > platform > embedded); zero internal imports |
-| `internal/rite` | `Rite`, `Discovery`, `BudgetCalculator` | Rite discovery via resolution chain, budget estimation |
-| `internal/sails` | `contract.go`, `gate.go`, `color.go` | Sails (session health/color) contract |
-| `internal/search` | `SearchIndex`, collectors (commands/concepts/rites/agents/dromena/routing) | `ari ask` BM25+RRF search over project artifacts |
-| `internal/search/bm25` | `Index` | BM25 text search index, decay model |
-| `internal/search/content` | — | Content extraction for search |
-| `internal/search/fusion` | RRF | Reciprocal Rank Fusion |
-| `internal/search/knowledge` | `KnowledgeIndex`, `BM25Searcher` interface, `persistedIndex` | Clew-specific semantic index: BM25 + embedding + graph + summary stores. `DefaultPersistedPath` is the container fallback; runtime path resolved by `resolveKnowledgeIndexPath()` in `internal/cmd/serve`. |
-| `internal/search/knowledge/embedding` | `Store` | Cosine similarity search over domain embeddings |
-| `internal/search/knowledge/graph` | `Graph` | Entity relationship graph |
-| `internal/search/knowledge/summary` | `Store` | Domain summary store |
-| `internal/session` | `Context`, `Status`, `FSM`, `Event`, `ClewEvent` | Session lifecycle (NONE->ACTIVE->PARKED->ARCHIVED FSM), context YAML, event log |
-| `internal/serve` | `Server`, `ServerConfig`, `Option`, `Middleware` | HTTP server infrastructure: mux, health checks, middleware chain, graceful shutdown |
-| `internal/serve/health` | `Checker` | Health check registry for `/health` and `/ready` endpoints |
-| `internal/serve/webhook` | `Verifier` | HMAC-SHA256 Slack signature verification |
-| `internal/slack` | `SlackHandler`, `ThreadContextStore`, `eventDedup`, `SlackClient` | Slack event handler: dedup, thread context, event dispatch |
-| `internal/slack/conversation` | `Manager`, `Metrics`, `Summarizer` | Thread history with TTL eviction and LLM summarization |
-| `internal/slack/streaming` | `Sender`, `citations.go` | Progressive message rendering to Slack |
-| `internal/suggest` | — | Suggestion utilities |
-| `internal/sync` | (see materialize) | Sync state management |
-| `internal/tokenizer` | — | Token counting (tiktoken-go) |
-| `internal/triage` | `Orchestrator`, 4-stage pipeline | RAG triage: Stage 0 (query refine), Stage 1 (metadata filter), Stage 2 (embedding/BM25), Stage 3 (Haiku assess) |
-| `internal/tribute` | `extractor.go`, `generator.go`, `renderer.go` | Tribute (session report) generation |
-| `internal/trust` | `Scorer`, `ConfidenceScore`, `ConfidenceTier`, `TrustConfig` | Multi-axis confidence: freshness x retrieval x coverage -> geometric mean |
-| `internal/llm` | `Client` (interface), `CompletionRequest`, `ClientConfig` | LLM client abstraction: Anthropic transport, cost tracking, metrics, tracing |
-| `internal/reason` | `Pipeline`, `TriageCandidateInput`, `TriageResultInput` | Top-level Clew reasoning orchestrator: intent->retrieval->trust->context->response. `contentLookup()` resolves qualified names to raw `.know/` content via BM25 index. |
-| `internal/reason/context` | `Assembler` | Context assembly with token budgeting |
-| `internal/reason/intent` | `Classifier` | Keyword-heuristic query classification (Observe/Record/Act tiers) |
-| `internal/reason/response` | `Generator`, `ReasoningResponse` | Claude API call with structured output schema (`clew_answer`) or streaming free-form text |
-| `internal/validation` | — | YAML/JSON schema validation |
-| `internal/worktree` | — | Git worktree management |
+| Package | Files | Internal Imports | Purpose |
+|---------|-------|-----------------|---------|
+| `internal/manifest` | 8 | errors, fileutil | Manifest loading, validation, diffing, merging. `Manifest{Path, Format, Content map[string]any, Raw}`. Supports JSON, YAML, TOML formats. Includes schema validation via JSON Schema. |
+| `internal/session` | 27 | errors, fileutil, hook/clewcontract, paths, validation | Session lifecycle FSM. Key types: `Status` (NONE/ACTIVE/PARKED/ARCHIVED), `Phase` (requirements/design/implementation/validation/complete), `FSM`, `Context`, `Snapshot`, `Event` (legacy), `ClewEvent` (current). Event log: `events.jsonl` (dual-format reader per ADR-0027). `ChannelLifecycleMap` normalizes per-harness event names. |
+| `internal/hook` | 13 | channel, errors | Hook data model. `StdinPayload` (CC sends hook data as JSON on stdin, NOT env vars). `HookEvent` constants: pre_tool, post_tool, post_tool_failure, permission_request, stop, session_start/end, pre_prompt, pre_compact, subagent_start/stop, notification, teammate_idle, task_completed, pre_model, post_model. `LifecycleAdapter` interface: `ParsePayload`, `FormatResponse`, `ChannelName`. Implementations: `ClaudeAdapter`, `GeminiAdapter`. |
+| `internal/hook/clewcontract` | 17+ | (internal leaf) | Clew Contract v2 event schema. `Event` struct with `ts`, `type`, `channel`, `data`. `EventType` constants: tool.call, tool.file_change, agent.decision, context_switch, quality.sails_generated, session.*, phase.transitioned, lock.*, artifact.*. `BufferedEventWriter` for canonical event emission. |
+| `internal/rite` | 16 | config, errors, fileutil, paths, resolution | Rite management. `RiteManifest{Name, Version, Description, EntryAgent, Phases, Agents, Skills, Dependencies, ComplexityLevels, Budget}`. `Rite{Name, Path}`. `Invoker` with `InvokeOptions`/`InvokeResult`. `BudgetCalculator`. `ContextLoader`. `RiteForm` type. |
+| `internal/materialize` | 57 | checksum, config, errors, fileutil, frontmatter, inscription, paths, provenance, registry, sync + all internal sub-packages | Core materialization engine. Largest package (57 files). `Materializer` struct with builder pattern. `MaterializeWithOptions(riteName, opts)` and `Sync(opts)` are the primary entry points. Reads rite source files -> renders templates -> writes channel directory. Sub-packages: `compiler/`, `hooks/`, `mena/`, `orgscope/`, `procession/`, `source/`, `userscope/`. |
+| `internal/inscription` | 16 | (session-related) | Context file (CLAUDE.md / GEMINI.md) generation. `Generator` with `GenerateSection(regionName)` and `GenerateAll()`. `RenderContext` carries manifest + session data. Templates in `knossos/templates/sections/*.md.tpl` with Go equivalents for single-binary distribution. |
+| `internal/paths` | 4 | errors | XDG-aware path resolution. `Resolver` struct with all `.sos/` path computations: `SOSDir`, `SessionsDir`, `SessionDir(id)`, `SessionContextFile`, `SessionEventsFile`, `LockFile`, `CurrentSessionFile`, `ActiveRiteFile`. Also: `FindProjectRoot(startDir)` (walks up filesystem). Multi-channel: `AgentsDirForChannel(ch)`, `UserChannelDir`, `UserAgentsDirForChannel`, etc. |
+| `internal/sync` | 2 | checksum, errors, fileutil, paths | Sync state management. Tracks active rite name and last sync timestamp in a state file. |
+| `internal/provenance` | 8 | paths | File provenance manifest for channel directory. Tracks origin and ownership of all materialized files. Enables divergence detection. |
+| `internal/config` | 6 | (stdlib only) | `KnossosHome()`, `ActiveOrg()`, `XDGDataDir()`, `RegistryDir(orgName)`. `OrgContext` interface. `Settings` struct loaded from `settings.yaml`. |
+| `internal/agent` | 17 | errors, frontmatter, validation | Agent file parsing and management. Reads agent YAML frontmatter. |
+| `internal/know` | 13 | (parsed from context) | `.know/` file parsing. `Meta` (frontmatter), `DomainStatus`. AST-based semantic diffing (`SemanticDiff`, `DeclChange`). `ServiceBoundary` discovery. `QualifiedDomainName`. Validation (`BrokenRef`, `ValidationReport`). |
+| `internal/perspective` | 7 | materialize (via source) | First-person agent context view. `Assemble(ctx, opts, start)` builds `PerspectiveDocument` from layers: identity, capability, constraint, memory, behavioral contract. |
+| `internal/search` | 11 | agent, concept, config, frontmatter, know, materialize/procession, paths, registry/org, rite, session | Natural language query matching across the knossos CLI surface. `Domain` type. BM25 fusion search. |
+| `internal/sails` | 13 | errors, hook/clewcontract, paths, session, validation | White Sails confidence signaling. Color computation algorithm (White/Gray/Black). |
+| `internal/triage` | 5 | know, llm | LLM-assisted triage reasoning pipeline. |
+| `internal/tribute` | 7 | (session/events) | `TRIBUTE.md` auto-generation for session summaries. `Extractor`, `Generator`, `Renderer`. |
+| `internal/naxos` | 10 | fileutil, paths, sails, session | Session hygiene triage. Scans for orphaned sessions. |
+| `internal/procession` | 2 | (procession template loading) | Cross-rite coordinated workflow templates. |
+| `internal/slack` | 9 | (8 internal imports) | Slack surface for Clew Slack bot. `SlackClient`, `SlackHandler`, `ThreadContextStore`. Routes Slack events to reasoning pipeline. |
+| `internal/observe` | 10 | reason/response | OpenTelemetry observability. `CostTracker` (token usage accumulation), pipeline middleware, metrics. |
+| `internal/reason` | 5 (+ 3 sub-pkgs) | context/, intent/, response/ | Query reasoning pipeline. `ReasoningConfig`, pipeline stages. Sub-packages: `context/` (prompt assembler), `intent/` (classifier), `response/` (generator + stream). |
+| `internal/lock` | 4 | (stdlib) | Advisory file locking with stale detection. |
+| `internal/ledge` | 4 | artifact, errors | Work product artifact management (`.ledge/decisions/`, `.ledge/specs/`, etc.). |
+| `internal/artifact` | 8 | errors | Workflow artifact file types and management. |
+| `internal/validation` | 12 | (JSON Schema) | Artifact validation against JSON Schema. |
+| `internal/worktree` | 8 | (git) | Git worktree management for parallel sessions. |
+| `internal/envload` | 5 | (stdlib) | Environment variable loading from `.env` files. |
+| `internal/concept` | 1 | (stdlib) | Knossos concept registry. Extracted from `internal/cmd/explain` to resolve TENSION-015 (cross-layer import). |
+| `internal/registry` | 4 | (stdlib — **zero internal imports**) | Unified denial-recovery registry. Maps stable keys -> concrete values with recovery hints. **Explicitly a leaf package.** |
+| `internal/serve` | 4 | (stdlib) | HTTP server configuration for `ari serve`. `ServerConfig`. |
 
-**Hub vs Leaf classification:**
+### internal/cmd/ Package Inventory
 
-- **Hub packages** (import many siblings): `internal/cmd/serve` (imports 15+ packages), `internal/cmd/root` (imports 30+ cmd packages), `internal/materialize` (imports: frontmatter, paths, provenance, registry, compiler, mena, source, etc.)
-- **Leaf packages** (no internal imports): `internal/registry`, `internal/resolution`, `internal/mena`, `internal/errors`, `internal/output`
+Each `internal/cmd/{name}/` package wires a CLI subcommand group, delegating to domain packages in `internal/`:
+
+| Package | CLI Command | Purpose |
+|---------|------------|---------|
+| `internal/cmd/root` | `ari` | Root command, registers all subcommands, global flags |
+| `internal/cmd/common` | -- | Shared command context (`BaseContext`, `SessionContext`), embedded asset injection |
+| `internal/cmd/session` | `ari session` | Session lifecycle management |
+| `internal/cmd/sync` | `ari sync` | Rite and user resource synchronization |
+| `internal/cmd/hook` | `ari hook` | Hook handlers: agent-guard, autopark, budget, clew, context, drift-detect, git-conventions, precompact, session-end, subagent, validate, write-guard, worktree-remove, worktree-seed |
+| `internal/cmd/manifest` | `ari manifest` | Manifest file management |
+| `internal/cmd/inscription` | `ari inscription` | Context file (CLAUDE.md) inscription management |
+| `internal/cmd/rite` | `ari rite` | Rite invocation and composition |
+| `internal/cmd/agent` | `ari agent` | Agent management (summon/dismiss) |
+| `internal/cmd/knows` | `ari knows` | `.know/` freshness inspection |
+| `internal/cmd/artifact` | `ari artifact` | Workflow artifact management |
+| `internal/cmd/sails` | `ari sails` | White Sails quality gate |
+| `internal/cmd/naxos` | `ari naxos` | Orphaned session cleanup |
+| `internal/cmd/tribute` | `ari tribute` | `TRIBUTE.md` generation |
+| `internal/cmd/handoff` | `ari handoff` | Agent handoff execution |
+| `internal/cmd/procession` | `ari procession` | Cross-rite workflow management |
+| `internal/cmd/worktree` | `ari worktree` | Git worktree management |
+| `internal/cmd/validate` | `ari validate` | Artifact validation |
+| `internal/cmd/status` | `ari status` | Unified project health dashboard |
+| `internal/cmd/serve` | `ari serve` | HTTP webhook server for Clew |
+| `internal/cmd/explain` | `ari explain` | Concept explanation |
+| `internal/cmd/tour` | `ari tour` | Project directory walkthrough |
+| `internal/cmd/ask` | `ari ask` | Natural language command discovery |
+| `internal/cmd/complaint` | `ari complaint` | Complaint management |
+| `internal/cmd/land` | `ari land` | Cross-session knowledge synthesis |
+| `internal/cmd/lint` | `ari lint` | Mena and agent source validation |
+| `internal/cmd/org` | `ari org` | Organization management |
+| `internal/cmd/registry` | `ari registry` | Org knowledge domain registry |
+| `internal/cmd/provenance` | `ari provenance` | Channel directory provenance inspection |
+| `internal/cmd/ledge` | `ari ledge` | Work product artifact management |
+| `internal/cmd/initialize` | `ari init` | Project initialization |
+
+**Hub packages** (import the most internal packages):
+
+1. `internal/materialize` — 17 distinct internal imports. Core of the sync pipeline.
+2. `internal/search` — 13 internal imports. Cross-cutting query across all domains.
+3. `internal/slack` — 8 internal imports. Clew Slack surface.
+4. `internal/reason` — 7 internal imports. LLM reasoning pipeline.
 
 ---
 
 ## Layer Boundaries
 
-The codebase has four clearly separable layers, enforced primarily by convention and a few explicit import restrictions documented in source:
+The import graph follows a strict three-layer model:
 
 ```
-+-------------------------------------------------------------+
-|  CLI Surface  cmd/ari/main.go -> internal/cmd/root           |
-|              internal/cmd/* (35+ command packages)            |
-+-------------------------------------------------------------+
-|  Command Wiring  internal/cmd/common (BaseContext,            |
-|                  SessionContext, embedded assets)              |
-+-------------------------------------------------------------+
-|  Domain Logic  internal/{session, rite, materialize,          |
-|                provenance, hook, inscription, search,         |
-|                reason, trust, triage, slack, serve, llm}      |
-+-------------------------------------------------------------+
-|  Infrastructure/Leaf  internal/{errors, output, paths,        |
-|                         registry, resolution, mena,           |
-|                         frontmatter, fileutil, checksum,      |
-|                         tokenizer, channel, config}            |
-+-------------------------------------------------------------+
+cmd/ari/main.go
+      |
+      v
+internal/cmd/root/           <- CLI surface layer (cobra command wiring)
+      |
+      v
+internal/cmd/{subcommand}/   <- Command wiring layer (each subcommand group)
+      |
+      v
+internal/{domain}/           <- Domain logic layer (business logic, no CLI deps)
+      |
+      v
+internal/{leaf}/             <- Infrastructure layer (errors, output, paths, fileutil, etc.)
 ```
 
-**Documented import invariants** (from source comments):
+### Layer Rules Observed
+
+**CLI surface layer** (`cmd/ari/`) imports:
+- `internal/cmd/root` — command dispatch
+- `internal/errors` — exit code handling
+- `internal/output` — format-aware printing
+- Module root (`github.com/autom8y/knossos`) — embedded FS
+
+**Command wiring layer** (`internal/cmd/*/`) imports:
+- `internal/cmd/common` — shared context types
+- Domain packages (e.g., `internal/materialize`, `internal/session`)
+- Infrastructure: `internal/errors`, `internal/output`, `internal/paths`
+- No `internal/cmd/*` imports from other command packages
+
+**Domain logic layer** (`internal/materialize`, `internal/session`, etc.) imports only:
+- Sibling domain packages (directional, acyclic)
+- Infrastructure leaf packages
+- Never imports `internal/cmd/*` (no upward imports)
+
+### Documented Import Invariants (from source comments)
 
 - `internal/reason/pipeline.go`: "reason/ does NOT import internal/serve/ or internal/cmd/. trust/ and search/ do NOT import reason/"
 - `internal/reason/pipeline.go` (TriageCandidateInput): "reason/ does NOT import triage/. The handler in slack/ converts triage.TriageCandidate to this type."
@@ -176,100 +185,95 @@ The codebase has four clearly separable layers, enforced primarily by convention
 - `internal/registry/registry.go`: "LEAF package -- imports only stdlib"
 - `internal/provenance`: "One-way dependency: materialize imports provenance, never the reverse"
 
-**Clew serve pipeline layer invariants** (from serve.go and triage, reason, trust packages):
-```
-internal/cmd/serve -> internal/serve (HTTP infra)
-                   -> internal/slack (handler)
-                   -> internal/reason (pipeline)
-                       -> internal/reason/intent
-                       -> internal/reason/context
-                       -> internal/reason/response -> (external: Anthropic SDK)
-                       -> internal/trust
-                       -> internal/search (BM25+RRF)
-                   -> internal/triage (RAG stages 0-3)
-                       -> internal/llm (Haiku API)
-                   -> internal/search/knowledge (KnowledgeIndex)
-                   -> internal/observe (CloudWatch EMF)
-                   -> internal/llm (shared transport)
-```
+### Hub vs Leaf Classification
 
-**Import direction summary:**
-- `cmd/*` -> domain logic packages (never reverse)
-- `materialize` -> `provenance`, `paths`, `frontmatter`, `mena`, `agent`, `registry` (never reverse)
-- `reason` -> `trust`, `search`, `registry/org` (trust/search never import reason)
-- `reason` does NOT import `triage` -- data transfer via `TriageCandidateInput`/`TriageResultInput` structs; `slack/` performs the conversion
-- `resolution`, `registry`, `errors`, `output`, `mena` are leaves: no internal imports
+**Hubs** (imported by many, import many):
+- `internal/materialize` — 17 unique internal imports
+- `internal/search` — 13 unique internal imports
+- `internal/slack` — 8 imports
+
+**True leaves** (zero internal imports):
+`errors`, `output`, `fileutil`, `frontmatter`, `checksum`, `channel`, `resolution`, `assets`, `llm`, `tokenizer`, `suggest`, `mena`, `trust`, `registry`
+
+### Boundary Enforcement Patterns
+
+1. **TENSION-005** (resolved): `internal/resolution` has zero internal imports. All tier paths injected via constructor.
+2. **TENSION-015** (resolved): `internal/concept` extracted from `internal/cmd/explain`. Prevented cross-layer import.
+3. **BC-01**: `internal/llm` lives at infrastructure layer, not inside any domain package.
 
 ---
 
 ## Entry Points and API Surface
 
-### CLI Entry Point Trace
+### Binary Entry Point
+
+`cmd/ari/main.go` — `func main()`:
 
 ```
-cmd/ari/main.go -> root.SetVersion()
-               -> common.SetEmbeddedAssets(EmbeddedRites, EmbeddedTemplates, EmbeddedHooksYAML)
-               -> common.SetEmbeddedUserAssets(EmbeddedAgents, EmbeddedMena)
-               -> common.SetEmbeddedProcessions(EmbeddedProcessions)
-               -> root.Execute() -> rootCmd.Execute() [cobra]
+main()
+  -> root.SetVersion(version, commit, date)
+  -> common.SetBuildVersion(version)
+  -> common.SetEmbeddedAssets(EmbeddedRites, EmbeddedTemplates, EmbeddedHooksYAML)
+  -> common.SetEmbeddedUserAssets(EmbeddedAgents, EmbeddedMena)
+  -> common.SetEmbeddedProcessions(EmbeddedProcessions)
+  -> root.Execute()
+     -> cobra rootCmd.Execute()
+        -> PersistentPreRunE: output format validation, initConfig (Viper), FindProjectRoot
+        -> subcommand dispatch
 ```
+
+Build version info (`version`, `commit`, `date`) is injected at link time via `-ldflags`.
 
 ### Global Flags on Root Command
 
 `-o/--output` (text/json/yaml), `-v/--verbose`, `--config`, `-p/--project-dir`, `-s/--session-id`, `--channel` (claude/gemini/all)
 
-### `PersistentPreRunE` initialization path
-
-For each command: validate output format -> `initConfig()` (viper: XDG config file + env vars) -> `paths.FindProjectRoot()` -> set `globalOpts.ProjectDir`.
-
 ### CLI Subcommand Table
 
 | Subcommand | Package | Description |
 |---|---|---|
-| `ari session` | `internal/cmd/session` | Session lifecycle: start, park, resume, wrap, status, log, audit, migrate, fray, snapshot |
-| `ari manifest` | `internal/cmd/manifest` | Rite manifest operations |
-| `ari inscription` | `internal/cmd/inscription` | CLAUDE.md generation and management |
-| `ari sync` | `internal/cmd/sync` | Materialize rite to channel directory |
-| `ari validate` | `internal/cmd/validate` | Validate rite/manifest/agent structures |
-| `ari handoff` | `internal/cmd/handoff` | Session handoff between agents |
-| `ari procession` | `internal/cmd/procession` | Coordinated workflow processions |
-| `ari worktree` | `internal/cmd/worktree` | Git worktree management |
-| `ari hook` | `internal/cmd/hook` | Hook handlers: writeguard, autopark, agentguard, clew, gitconventions, sessionend, subagent, precompact, driftdetect, cheapo_revert, validate, suggest |
-| `ari know` | `internal/cmd/knows` | Knowledge domain management |
-| `ari artifact` | `internal/cmd/artifact` | Session artifact management |
-| `ari sails` | `internal/cmd/sails` | Sails (session health) contracts |
-| `ari naxos` | `internal/cmd/naxos` | Session hygiene |
-| `ari rite` | `internal/cmd/rite` | Rite listing, switching, validation |
-| `ari agent` | `internal/cmd/agent` | Agent management: summon, dismiss, roster, list, new, embody, update, validate, query |
-| `ari tribute` | `internal/cmd/tribute` | Session tribute/report generation |
-| `ari init` | `internal/cmd/initialize` | Initialize knossos in a new project |
-| `ari provenance` | `internal/cmd/provenance` | Provenance manifest inspection |
-| `ari org` | `internal/cmd/org` | Org management |
-| `ari registry` | `internal/cmd/registry` | Registry operations |
-| `ari land` | `internal/cmd/land` | Knowledge synthesis landing |
-| `ari ledge` | `internal/cmd/ledge` | Ledge artifact management |
-| `ari lint` | `internal/cmd/lint` | Lint rite/agent files |
-| `ari status` | `internal/cmd/status` | Project/session status |
-| `ari explain` | `internal/cmd/explain` | Explain knossos concepts |
-| `ari tour` | `internal/cmd/tour` | Interactive tour |
-| `ari ask` | `internal/cmd/ask` | Semantic search over project artifacts (BM25+RRF) |
-| `ari complaint` | `internal/cmd/complaint` | File Cassandra complaints |
-| `ari serve` | `internal/cmd/serve` | Start Clew HTTP webhook server |
-| `ari serve query` | `internal/cmd/serve` | Query the reasoning pipeline directly (subcommand of serve) |
-| `ari version` | `internal/cmd/root` | Print version, commit, date, Go/OS/Arch |
+| `ari session` | `internal/cmd/session` | Manage workflow sessions |
+| `ari manifest` | `internal/cmd/manifest` | Manage manifest files |
+| `ari inscription` | `internal/cmd/inscription` | Manage context file inscription system |
+| `ari sync` | `internal/cmd/sync` | Synchronize rite and user resources |
+| `ari validate` | `internal/cmd/validate` | Validate an artifact file against its schema |
+| `ari handoff` | `internal/cmd/handoff` | Manage agent handoffs |
+| `ari procession` | `internal/cmd/procession` | Manage cross-rite coordinated workflows |
+| `ari worktree` | `internal/cmd/worktree` | Manage git worktrees |
+| `ari hook` | `internal/cmd/hook` | Harness hook infrastructure |
+| `ari knows` | `internal/cmd/knows` | Inspect `.know/` freshness |
+| `ari artifact` | `internal/cmd/artifact` | Manage workflow artifacts |
+| `ari sails` | `internal/cmd/sails` | White Sails quality gate |
+| `ari naxos` | `internal/cmd/naxos` | Cleanup abandoned sessions |
+| `ari rite` | `internal/cmd/rite` | Manage rite invocations |
+| `ari agent` | `internal/cmd/agent` | Agent management |
+| `ari tribute` | `internal/cmd/tribute` | Session summary operations |
+| `ari init` | `internal/cmd/initialize` | Project initialization |
+| `ari provenance` | `internal/cmd/provenance` | Display provenance manifest |
+| `ari org` | `internal/cmd/org` | Manage organizations |
+| `ari registry` | `internal/cmd/registry` | Manage the org knowledge domain registry |
+| `ari land` | `internal/cmd/land` | Manage cross-session knowledge synthesis |
+| `ari ledge` | `internal/cmd/ledge` | Work product artifact management |
+| `ari lint` | `internal/cmd/lint` | Validate mena and agent sources |
+| `ari status` | `internal/cmd/status` | Show unified project health dashboard |
+| `ari explain` | `internal/cmd/explain` | Explain a knossos concept |
+| `ari tour` | `internal/cmd/tour` | Walk project directory structure |
+| `ari ask` | `internal/cmd/ask` | Find the right command for any task |
+| `ari complaint` | `internal/cmd/complaint` | Manage complaints |
+| `ari serve` | `internal/cmd/serve` | Start the HTTP webhook server (Clew) |
+| `ari version` | `internal/cmd/root` | Show version information |
 
 ### Key Exported Interfaces
 
-| Interface | Package | Consumers |
-|---|---|---|
-| `output.Printer` | `internal/output` | Every `internal/cmd/*` package |
-| `paths.Resolver` | `internal/paths` | `internal/cmd/common`, most domain packages |
-| `provenance.Collector` | `internal/provenance` | `internal/materialize` (threaded through pipeline stages) |
-| `llm.Client` | `internal/llm` | `internal/triage`, `internal/reason/response`, `internal/search/knowledge`, `internal/slack/conversation` |
-| `observe.MetricsRecorder` | `internal/observe` | `internal/cmd/serve`, `internal/slack` |
-| `triage.SearchIndex` (local interface) | `internal/triage` | `internal/triage.Orchestrator` |
-| `resolution.Chain` | `internal/resolution` | `internal/rite.Discovery`, `internal/materialize` |
-| `config.OrgContext` | `internal/config` | `internal/registry/org`, `internal/envload` |
+| Interface | Package | Consuming Packages | Description |
+|-----------|---------|-------------------|-------------|
+| `output.Textable` | `internal/output` | All cmd packages | Implement `Text() string` for human-readable output |
+| `output.Tabular` | `internal/output` | All cmd packages | Implement for table rendering |
+| `hook.LifecycleAdapter` | `internal/hook` | `internal/cmd/hook` | Per-channel hook parsing/formatting |
+| `config.OrgContext` | `internal/config` | `internal/materialize` | Org-scoped configuration |
+| `resolution.Chain` | `internal/resolution` | `internal/rite`, `internal/materialize` | Multi-tier resource resolution |
+| `llm.Client` | `internal/llm` | `internal/triage`, `internal/reason/response`, `internal/search/knowledge`, `internal/slack/conversation` | LLM transport |
+| `observe.MetricsRecorder` | `internal/observe` | `internal/cmd/serve`, `internal/slack` | Observability |
 
 ---
 
@@ -277,32 +281,29 @@ For each command: validate output format -> `initConfig()` (viper: XDG config fi
 
 ### Core Types and Their Usage
 
-**1. `paths.Resolver` (`internal/paths/paths.go`)** — Central path resolver. Injected into every command via `common.BaseContext.GetResolver()`. Methods: `ProjectRoot()`, `KnossosDir()`, `SOSDir()`, `SessionsDir()`, `RitesDir()`, `UserChannelDir()`.
+**1. `materialize.Materializer` (`internal/materialize/materialize.go`)** — The central engine. Builder-pattern construction with `NewMaterializer(resolver)` and `.WithEmbeddedFS()` chain. Primary methods: `MaterializeWithOptions(riteName, opts)`, `Sync(opts)`.
 
-**2. `materialize.RiteManifest` (`internal/materialize/materialize.go`)** — YAML schema for `manifest.yaml`. Drives the entire sync/materialization pipeline.
+**2. `resolution.Chain` (`internal/resolution/chain.go`)** — Five-tier priority resolution: project > user > org > platform > embedded. Zero internal imports — all paths injected. `chain.Resolve(name, validate)` returns first match; `chain.ResolveAll(validate)` returns all with shadowing.
 
-**3. `agent.AgentFrontmatter` (`internal/agent/frontmatter.go`)** — Agent `.md` file frontmatter. Key fields: `Name`, `Description`, `Tier` (standing/rite/summonable), `Tools`, `MaxTurns`, `Skills`, `DisallowedTools`, `Memory`, `WriteGuard`.
+**3. `session.FSM` + `session.Context` (`internal/session/`)** — Session lifecycle state machine. Status: NONE -> ACTIVE <-> PARKED -> ARCHIVED. Phase: requirements -> design -> implementation -> validation -> complete.
 
-**4. `session.Context` (`internal/session/context.go`)** — Session state document. Written only by Moirai agent or ari CLI -- never directly.
+**4. `hook.StdinPayload` (`internal/hook/env.go`)** — Critical operational knowledge: CC sends all hook data as JSON on stdin, NOT via environment variables. Only four env vars exist: `CLAUDE_PROJECT_DIR`, `CLAUDE_PLUGIN_ROOT`, `CLAUDE_CODE_REMOTE`, `CLAUDE_ENV_FILE`.
 
-**5. `session.FSM` (`internal/session/fsm.go`)** — State machine transitions per TLA+ spec. NONE->ACTIVE, ACTIVE->{PARKED, ARCHIVED}, PARKED->{ACTIVE, ARCHIVED}. ARCHIVED is terminal.
+**5. `rite.RiteManifest` (`internal/rite/manifest.go`)** — Schema for `manifest.yaml`. Key fields: `Name`, `Version`, `EntryAgent`, `Phases`, `Agents`, `Skills`, `Dependencies`, `ComplexityLevels`, `Budget`.
 
-**6. `provenance.ProvenanceManifest` (`internal/provenance/provenance.go`)** — File provenance tracking v2.0: two manifests (rite + user scope). SHA-256 checksums.
+**6. `frontmatter.FlexibleStringSlice` (`internal/frontmatter/`)** — YAML type accepting both comma-separated strings and proper YAML lists. Prevents agent frontmatter breakage.
 
-**7. `hook.StdinPayload` (`internal/hook/env.go`)** — CC lifecycle hook data. Critical: CC sends hook data as JSON on stdin, NOT environment variables.
+**7. `hook/clewcontract.Event` (`internal/hook/clewcontract/event.go`)** — Canonical event record for `events.jsonl`. ADR-0027 established this as the unified write path.
 
-**8. `resolution.Chain` (`internal/resolution/chain.go`)** — Multi-tier resolution: project > user > org > platform > embedded. Zero internal imports.
+**8. `paths.Resolver` (`internal/paths/paths.go`)** — Central path authority. All `.sos/` paths computed from project root. Per-channel: `AgentsDirForChannel(ch)`, `ContextFileForChannel(ch)`.
 
-**9. `materialize.TransformContext` (`internal/materialize/agent_transform.go`)** — Agent content transformation policy. Strips knossos-only frontmatter fields before writing to channel directory.
+**9. `channel.CanonicalTool` (`internal/channel/`)** — Harness-agnostic tool vocabulary map. Templates reference canonical names; channel compiler resolves at projection time.
 
-**10. `reason.Pipeline` (`internal/reason/pipeline.go`)** — Clew reasoning orchestrator. Three query methods:
-- `Query()` -- full pipeline (intent classify -> BM25 search -> trust -> assemble -> generate)
-- `QueryWithTriage()` -- uses pre-computed `TriageResultInput`; delegates to `Query()` if no candidates
-- `QueryStream()` -- streaming with `onChunk` callback (free-form text with inline citation markers)
+**10. `output.Printer` (`internal/output/output.go`)** — Shared output abstraction. `NewPrinter(format, out, errOut, verbose)`. Data types implement `Textable` for human-readable mode.
 
-`contentLookup()` method (Sprint 4-prime) returns a closure over `search.SearchIndex.LookupContent` so `triageCandidatesToSearchResults()` populates `SearchEntry.Description` with real `.know/` content instead of empty stubs.
+**11. `know.QualifiedDomainName` (`internal/know/qualified.go`)** — Parses `"org::repo::domain"` strings. Enforces exactly two `::` separators; `##section` suffixes stripped at parse time.
 
-**11. `know.QualifiedDomainName` (`internal/know/qualified.go`)** — Parses `"org::repo::domain"` strings. Enforces exactly two `::` separators; `##section` suffixes stripped/rejected at parse time for citation normalization.
+**12. `reason.Pipeline` (`internal/reason/pipeline.go`)** — Clew reasoning orchestrator. Three query methods: `Query()` (full pipeline), `QueryWithTriage()` (pre-computed triage), `QueryStream()` (streaming with `onChunk` callback).
 
 ### Design Patterns
 
@@ -310,7 +311,7 @@ For each command: validate output format -> `initConfig()` (viper: XDG config fi
 
 **Envelope Pattern (Hook Output):** Legacy `Result` and CC-native `PreToolUseOutput` coexist. CC reads `permissionDecision` from `hookSpecificOutput`, not top-level.
 
-**Registry Pattern (Org Domain Catalog):** `internal/registry/org.DomainCatalog` maps `"org::repo::domain"` qualified names to `DomainEntry` structs.
+**Registry Pattern (Org Domain Catalog):** `internal/registry/org.DomainCatalog` maps qualified names to `DomainEntry` structs.
 
 **Idempotency Invariant:** `materialize.Sync()` is idempotent. `writeIfChanged()` prevents unnecessary CC file watcher triggers.
 
@@ -319,8 +320,6 @@ For each command: validate output format -> `initConfig()` (viper: XDG config fi
 **Mena Routing Convention:** `.dro.md` -> `commands/` (dromena: transient). `.lego.md` -> `skills/` (legomena: persistent).
 
 **Three-tier Agent Lifecycle:** `standing` (always materialized), `rite` (via `ari sync`), `summonable` (via `ari agent summon`).
-
-**Citation Provenance Rule (Sprint 4-prime):** HIGH and MEDIUM tier system prompts include explicit `CITATION PROVENANCE RULE`: Claude may only cite sources listed in `KNOWLEDGE SOURCES` section. Citing qualified names from within content bodies is prohibited.
 
 ---
 
@@ -407,13 +406,9 @@ POST /slack/events
   observe.EMFRecorder (CloudWatch metrics via structured slog)
 ```
 
-**Configuration hierarchy for `ari serve`:** CLI flags -> process env vars -> org env file (`$XDG_DATA_HOME/knossos/orgs/{org}/serve.env`) -> hardcoded defaults. Managed by `internal/envload.Load()`. `MaxConcurrent` passes through the full hierarchy to both `serve.ConcurrencyLimit` middleware and `slack.HandlerDeps.MaxConcurrent`.
-
-**Knowledge index path resolution (Sprint 4-prime):** `resolveKnowledgeIndexPath()` in `internal/cmd/serve/serve.go` resolves: `CLEW_KNOWLEDGE_INDEX_PATH` env var -> `config.XDGDataDir()/knowledge-index.json` -> container fallback. Fixes Sprint 3 bug where persist path was hardcoded to container nonroot path.
+**Configuration hierarchy for `ari serve`:** CLI flags -> process env vars -> org env file -> hardcoded defaults. Managed by `internal/envload.Load()`.
 
 **Knowledge index startup:** Server starts immediately with BM25 fallback. `KnowledgeIndex` builds in background goroutine (10-minute timeout). On completion, pipeline upgrades to full semantic search.
-
-**Content population (Sprint 4-prime):** `triageCandidatesToSearchResults()` now takes a `contentLookup` function (closure over `SearchIndex.LookupContent`) to populate `Description` with real `.know/` content instead of empty stubs. Applies to both `QueryWithTriage()` and `QueryStream()`.
 
 ### 5. `ari ask` Search Pipeline
 
@@ -431,14 +426,10 @@ User: ari ask "what is a rite?"
 
 ## Knowledge Gaps
 
-1. **`internal/cmd/session` subcommand details**: 25+ files not individually read.
-2. **`internal/hook/clewcontract/`**: 16 event types and BufferedEventWriter not individually read.
-3. **`internal/inscription/` full merge pipeline**: Region-based merge engine not fully traced.
-4. **`internal/materialize/compiler/`**: Archetype compilation sub-package not examined.
-5. **`internal/materialize/source/`**: `SourceResolver` type not fully traced.
-6. **`internal/procession/`, `internal/tribute/`, `internal/naxos/`, `internal/sails/`, `internal/worktree/`, `internal/perspective/`**: Package purposes identified from listings; types not read.
-7. **`internal/search/knowledge/builder.go`**: Background build path not read in detail.
-8. **`internal/llm/` remaining files** (cost.go, metrics.go, tracer.go): Cost tracking infrastructure not fully read.
-9. **`internal/sync/`**: State management not examined directly.
-10. **Gemini channel specifics**: `--channel gemini` path not traced in detail.
-11. **`internal/triage/orchestrator.go` Stage 3**: Full Haiku scoring prompt not read.
+1. **`internal/materialize/compiler/` sub-package** — 57-file package with 7 sub-packages not individually documented.
+2. **`internal/inscription/` full merge pipeline** — Region-based merge engine not fully traced.
+3. **`internal/reason/` LLM pipeline stages** — Pipeline configuration and stage boundaries not traced end-to-end.
+4. **`internal/registry/org/` sub-package** — Referenced by `internal/search` imports but not individually examined.
+5. **`internal/materialize/source/` SourceResolver** — Tier enumeration logic not traced.
+6. **Hook sub-handler details** — 16+ hook handler files each not individually examined for decision logic.
+7. **Org scope and registry** — `internal/cmd/org/` and `internal/cmd/registry/` manage org-level configuration not traced.
