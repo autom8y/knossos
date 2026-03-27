@@ -37,7 +37,7 @@ func (m *MockClient) Complete(_ context.Context, req CompletionRequest) (string,
 
 func TestDefaultClientConfig(t *testing.T) {
 	cfg := DefaultClientConfig()
-	assert.Equal(t, "claude-haiku-4-5", cfg.DefaultModel)
+	assert.Equal(t, DefaultTriageModel, cfg.DefaultModel)
 	assert.Equal(t, 800, cfg.DefaultMaxTokens)
 }
 
@@ -59,7 +59,7 @@ func TestNewAnthropicClient_WithExplicitAPIKey(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.NotNil(t, client)
-	assert.Equal(t, "claude-haiku-4-5", client.config.DefaultModel)
+	assert.Equal(t, DefaultTriageModel, client.config.DefaultModel)
 	assert.Equal(t, 800, client.config.DefaultMaxTokens)
 }
 

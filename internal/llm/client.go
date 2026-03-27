@@ -62,10 +62,18 @@ type ClientConfig struct {
 	DefaultMaxTokens int
 }
 
+// DefaultTriageModel is the model used for triage classification and summarization.
+// This is the fast, cost-efficient model for the 4-stage RAG triage pipeline.
+//
+// Upgrade path: When Anthropic deprecates this model, update this constant to the
+// successor model identifier. All triage, Stage 0 query refinement, Stage 3 domain
+// scoring, and summarization calls will use the new model automatically.
+const DefaultTriageModel = "claude-haiku-4-5"
+
 // DefaultClientConfig returns production defaults for the Haiku client.
 func DefaultClientConfig() ClientConfig {
 	return ClientConfig{
-		DefaultModel:     "claude-haiku-4-5",
+		DefaultModel:     DefaultTriageModel,
 		DefaultMaxTokens: 800,
 	}
 }
