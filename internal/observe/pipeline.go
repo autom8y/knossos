@@ -87,6 +87,32 @@ func (p *InstrumentedPipeline) Query(ctx context.Context, question string) (*res
 		if p.cost != nil {
 			p.cost.Record(resp.TokensUsed)
 		}
+
+		// CE mechanism metrics from assembly diagnostics.
+		if resp.CEDiagnostics != nil {
+			diag := resp.CEDiagnostics
+			for i := 0; i < diag.SectionCandidatesPacked; i++ {
+				p.metrics.IncrSectionCandidate()
+			}
+			for _, e := range diag.DiversityFloorEvents {
+				p.metrics.IncrDiversityFloorEnforced(e.FloorType)
+			}
+			for _, h := range diag.TypeCeilingHits {
+				if h.Skipped {
+					p.metrics.IncrTypeCeilingHit(h.DomainType)
+				}
+			}
+			totalTokens := 0
+			for _, v := range diag.TypeTokenBreakdown {
+				totalTokens += v
+			}
+			if totalTokens > 0 {
+				for typ, tokens := range diag.TypeTokenBreakdown {
+					fraction := float64(tokens) / float64(totalTokens)
+					p.metrics.RecordAssemblerTypeFraction(typ, fraction)
+				}
+			}
+		}
 	}
 
 	return resp, nil

@@ -48,6 +48,13 @@ type MetricsRecorder interface {
 
 	// Pre-pipeline metrics (Sprint 5).
 	RecordPrePipelineLatency(cmResult string, duration time.Duration)
+
+	// Contextual-equilibrium metrics (CE follow-up WS-E).
+	IncrSectionCandidate()
+	IncrGraphInjected(count int)
+	IncrDiversityFloorEnforced(domainType string)
+	IncrTypeCeilingHit(domainType string)
+	RecordAssemblerTypeFraction(domainType string, fraction float64)
 }
 
 // emfMetric defines a CloudWatch EMF metric entry.
@@ -392,6 +399,51 @@ func (r *EMFRecorder) RecordPrePipelineLatency(cmResult string, duration time.Du
 	)
 }
 
+// --- Contextual-equilibrium metrics ---
+
+// IncrSectionCandidate records clew_ce_section_candidate_total.
+func (r *EMFRecorder) IncrSectionCandidate() {
+	metricName := "clew_ce_section_candidate_total"
+	r.emitEMF(metricName, "Count", nil,
+		slog.Int(metricName, 1),
+	)
+}
+
+// IncrGraphInjected records clew_ce_graph_injected_total.
+func (r *EMFRecorder) IncrGraphInjected(count int) {
+	metricName := "clew_ce_graph_injected_total"
+	r.emitEMF(metricName, "Count", nil,
+		slog.Int(metricName, count),
+	)
+}
+
+// IncrDiversityFloorEnforced records clew_ce_diversity_floor_enforced_total{domain_type}.
+func (r *EMFRecorder) IncrDiversityFloorEnforced(domainType string) {
+	metricName := "clew_ce_diversity_floor_enforced_total"
+	r.emitEMF(metricName, "Count", [][]string{{"domain_type"}},
+		slog.String("domain_type", domainType),
+		slog.Int(metricName, 1),
+	)
+}
+
+// IncrTypeCeilingHit records clew_ce_type_ceiling_hit_total{domain_type}.
+func (r *EMFRecorder) IncrTypeCeilingHit(domainType string) {
+	metricName := "clew_ce_type_ceiling_hit_total"
+	r.emitEMF(metricName, "Count", [][]string{{"domain_type"}},
+		slog.String("domain_type", domainType),
+		slog.Int(metricName, 1),
+	)
+}
+
+// RecordAssemblerTypeFraction records clew_ce_assembler_type_fraction{domain_type}.
+func (r *EMFRecorder) RecordAssemblerTypeFraction(domainType string, fraction float64) {
+	metricName := "clew_ce_assembler_type_fraction"
+	r.emitEMF(metricName, "None", [][]string{{"domain_type"}},
+		slog.String("domain_type", domainType),
+		slog.Float64(metricName, fraction),
+	)
+}
+
 // --- Snapshot methods for testing and diagnostics ---
 
 // MetricsSnapshot returns a point-in-time snapshot of counter values.
@@ -512,3 +564,8 @@ func (NopRecorder) RecordStartupTotal(string, time.Duration)                  {}
 func (NopRecorder) SetDedupMapSize(int)                                       {}
 func (NopRecorder) IncrDedupDrops()                                           {}
 func (NopRecorder) RecordPrePipelineLatency(string, time.Duration)            {}
+func (NopRecorder) IncrSectionCandidate()                                     {}
+func (NopRecorder) IncrGraphInjected(int)                                     {}
+func (NopRecorder) IncrDiversityFloorEnforced(string)                         {}
+func (NopRecorder) IncrTypeCeilingHit(string)                                 {}
+func (NopRecorder) RecordAssemblerTypeFraction(string, float64)               {}
