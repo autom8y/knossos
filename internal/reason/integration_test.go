@@ -420,6 +420,7 @@ func TestIntegration_GapAdmission_MixedMissingAndStale(t *testing.T) {
 // ---- Group E: Full Pipeline Integration ----
 
 func TestIntegration_FullPipeline_LowTier_EmptySearch(t *testing.T) {
+	t.Setenv("CLEW_CONTENT_DIR", "")
 	// Empty search index -> no results -> LOW tier -> Claude NOT called.
 	mock := &response.MockClaudeClient{}
 	now := time.Now().UTC()

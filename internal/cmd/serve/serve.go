@@ -3,8 +3,11 @@ package serve
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -298,8 +301,11 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		"cleanup_interval", convConfig.CleanupInterval,
 	)
 
+	// Resolve teamID from Slack auth.test for DM streaming support.
+	teamID := resolveTeamID(cfg.SlackBotToken)
+
 	// Construct StreamSender for progressive response rendering.
-	streamSender := streaming.NewSender(cfg.SlackBotToken, "")
+	streamSender := streaming.NewSender(cfg.SlackBotToken, teamID)
 
 	// Build TriagePipeline adapter (WARNING-03 fix: passes triage candidates
 	// through to Pipeline.QueryWithTriage for BC-07 weighted-mean freshness).
@@ -1090,6 +1096,59 @@ func (a *knowledgeLLMAdapter) Complete(ctx context.Context, systemPrompt, userMe
 		UserMessage:  userMessage,
 		MaxTokens:    maxTokens,
 	})
+}
+
+// resolveTeamID calls the Slack auth.test API to resolve the team_id for DM streaming.
+// Called once at server startup. Returns empty string on failure (graceful degradation:
+// native streaming DMs fall back to edit-based rendering).
+func resolveTeamID(botToken string) string {
+	if botToken == "" {
+		slog.Warn("streaming teamID resolution skipped: no bot token configured")
+		return ""
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://slack.com/api/auth.test", nil)
+	if err != nil {
+		slog.Warn("streaming teamID resolution failed: request creation error", "error", err)
+		return ""
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", botToken))
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		slog.Warn("streaming teamID resolution failed: auth.test request error", "error", err)
+		return ""
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		slog.Warn("streaming teamID resolution failed: response read error", "error", err)
+		return ""
+	}
+
+	var result struct {
+		OK     bool   `json:"ok"`
+		TeamID string `json:"team_id"`
+		Error  string `json:"error,omitempty"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		slog.Warn("streaming teamID resolution failed: response parse error", "error", err)
+		return ""
+	}
+	if !result.OK {
+		slog.Warn("streaming teamID resolution failed: auth.test returned error",
+			"error", result.Error,
+		)
+		return ""
+	}
+
+	slog.Info("streaming teamID resolved from auth.test", "team_id", result.TeamID)
+	return result.TeamID
 }
 
 // convertTriageCandidates converts handler-local TriageCandidateData to reason.TriageCandidateInput.

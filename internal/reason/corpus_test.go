@@ -142,6 +142,7 @@ func TestPipeline_BudgetCompliance_CorpusValidation(t *testing.T) {
 // distinct response shapes (PT-06-C5).
 func TestPipeline_ThreeTierDistinction(t *testing.T) {
 	t.Run("LOW_tier_no_claude_no_provenance", func(t *testing.T) {
+		t.Setenv("CLEW_CONTENT_DIR", "")
 		// With empty search index, all queries produce LOW tier.
 		mock := &response.MockClaudeClient{}
 		p := buildTestPipeline(mock)
