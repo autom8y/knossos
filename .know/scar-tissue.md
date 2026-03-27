@@ -22,7 +22,7 @@ land_hash: "91df3a763b10021ddd9c7dd6dafb17e4bbc463258383c169d4a7a9067985bc51"
 
 ## Failure Catalog Completeness
 
-**Catalog total**: 37 entries — 33 numbered SCAR entries (SCAR-001 through SCAR-033), 3 unnumbered GO entries (GO-001/002/003), and 1 unnumbered writeguard path traversal entry. Sources: `internal/materialize/scar_regression_test.go`, `internal/materialize/mena/content_rewrite_test.go`, `internal/materialize/source/source_test.go`, `internal/agent/regenerate_test.go`, git history, `.sos/land/scar-tissue.md`.
+**Catalog total**: 38 entries — 34 numbered SCAR entries (SCAR-001 through SCAR-034), 3 unnumbered GO entries (GO-001/002/003), and 1 unnumbered writeguard path traversal entry. Sources: `internal/materialize/scar_regression_test.go`, `internal/materialize/mena/content_rewrite_test.go`, `internal/materialize/source/source_test.go`, `internal/agent/regenerate_test.go`, git history, `.sos/land/scar-tissue.md`.
 
 ### SCAR-001: TOCTOU Race in Stale Lock Reclamation
 **Category**: race_condition | **Fix**: `internal/lock/lock.go:117-134` — atomic flock-on-existing-fd | **Tests**: `TestManager_StaleLockReclamation`, `TestManager_StaleLockReclamation_Concurrent`
@@ -123,6 +123,9 @@ land_hash: "91df3a763b10021ddd9c7dd6dafb17e4bbc463258383c169d4a7a9067985bc51"
 ### SCAR-033: Config Canonicalization Timing
 **Category**: integration_failure | **Fix**: Operational pattern: build + install binary BEFORE committing config changes.
 
+### SCAR-034: Ghost Agent Propagation (Naming Contract)
+**Category**: integration_failure | **Fix**: `TestStandingAgentRegistryInvariant` in `internal/cmd/agent/standing_invariant_test.go` validates every `standingAgents` map entry has a corresponding `agents/{name}.md` file and `Agent{Name}` registry constant. A single ghost entry (`"metis": true` in `standingAgents` with no backing file or constant) propagated to 7 downstream locations (help text, error messages, roster output, test assertions). Code compiled and tests passed because nothing validated map entries against real entities. 9-layer rename protocol (Registry, Dromenon bodies, Agent prompts, Inscription templates, Manifests, Legomenon bodies, Doctrine, .know/ files, Go code/tests) prevents incomplete renames. | **Tests**: `TestStandingAgentRegistryInvariant` | **Reference**: `.ledge/decisions/ADR-naming-contract.md`, Project Semantic Exorcism (2026-03-27)
+
 ### Unnumbered: Writeguard Path Traversal Check
 **Category**: integration_failure | **Fix**: `internal/cmd/hook/writeguard.go` — removal of overly broad `filepath.IsAbs` check.
 
@@ -135,7 +138,7 @@ land_hash: "91df3a763b10021ddd9c7dd6dafb17e4bbc463258383c169d4a7a9067985bc51"
 
 | Category | Count | SCAR IDs |
 |----------|-------|----------|
-| integration_failure | 13 | 002, 006, 009, 012, 013, 018, 020, 021, 024, 028, 033, Writeguard, Sync Orphan |
+| integration_failure | 14 | 002, 006, 009, 012, 013, 018, 020, 021, 024, 028, 033, 034, Writeguard, Sync Orphan |
 | data_corruption | 7 | 004, 005, 015, 022, 025, GO-001/002/003 |
 | configuration_drift | 6 | 008, 011, 017, 019, 023, 029 |
 | schema_evolution | 3 | 007, 014, 016 |
@@ -182,6 +185,7 @@ Compound fixes fully mapped: SCAR-009, SCAR-010, SCAR-012, GO-001/002/003 (4+ fi
 | 027 | `session-artifact-in-shared-mena` lint | Lint | `TestSCAR027_*` |
 | 028 | `materializeMcpJson()` to `.mcp.json` | Behavioral + Comment | `TestSCAR028_*` |
 | GO-001/002/003 | `RewriteMenaContentPaths` in ALL copy paths | Behavioral | `TestSCAR_ContentRewriteNotBypassed` |
+| 034 | Registry invariant test validates standingAgents against files + constants; 9-layer rename protocol | Test + Checklist | `TestStandingAgentRegistryInvariant` |
 
 ---
 
@@ -215,6 +219,7 @@ Compound fixes fully mapped: SCAR-009, SCAR-010, SCAR-012, GO-001/002/003 (4+ fi
 | 032 | platform-wide (test authors) | `common.SetEmbeddedAssets()` mutates global state |
 | 033 | integration-engineer | Build binary before committing config changes |
 | GO-001/002/003 | integration-engineer | RewriteMenaContentPaths in ALL copy paths |
+| 034 | integration-engineer, context-architect, documentation-engineer | Ghost agent propagation: standingAgents map entries must have backing files + registry constants. 9-layer rename protocol for agent renames |
 
 ---
 
