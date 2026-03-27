@@ -64,6 +64,17 @@ func NewSender(botToken string, teamID string) *Sender {
 	}
 }
 
+// NewSenderForTest creates a Sender with a custom API base URL for testing.
+// The baseURL should include a trailing slash (e.g., "http://localhost:1234/api/").
+func NewSenderForTest(botToken, teamID, baseURL string) *Sender {
+	return &Sender{
+		botToken:     botToken,
+		teamID:       teamID,
+		apiBaseURL:   baseURL,
+		activeStreams: make(map[string]*streamState),
+	}
+}
+
 // StartStream initiates a streaming response in a Slack channel/thread.
 // Returns a stream_id for subsequent Append/Stop calls.
 // On failure, automatically falls back to edit-based mode.

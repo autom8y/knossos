@@ -654,12 +654,19 @@ func convertToConversationTurns(history *conversation.ThreadHistory) []reasoncon
 func processMessage(channelID, threadTS, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn, priorDomains []string) {
 	client := deps.Client
 
-	// Set "thinking" status.
+	// Set "thinking" status (used during triage phase; streaming replaces once tokens flow).
 	if err := client.SetStatus(channelID, threadTS, "", "Searching knowledge..."); err != nil {
 		slog.Warn("failed to set processing status",
 			"channel", channelID,
 			"error", err,
 		)
+	}
+
+	// Streaming path: when all streaming deps are available and enabled.
+	// Triage is required for streaming (streaming needs candidates for QueryStream).
+	if deps.Config.StreamingEnabled && deps.StreamingRunner != nil && deps.StreamSender != nil && deps.TriageRunner != nil {
+		processWithStreaming(channelID, threadTS, question, deps, threadHistory, conversationTurns, priorDomains)
+		return
 	}
 
 	// GAP-6: Run the reasoning pipeline with a 60-second timeout.
@@ -817,4 +824,245 @@ func processWithTriage(ctx context.Context, question string, deps HandlerDeps, t
 	slog.Warn("TriagePipeline not wired, triage candidates discarded")
 	resp, err := deps.Pipeline.Query(ctx, refinedQuery)
 	return resp, triageDomains, err
+}
+
+// processWithStreaming runs triage, then streams the pipeline response via StreamSender.
+// Sprint 1: Streaming pipeline activation — replaces sync rendering with progressive output.
+//
+// BC-03: reason/ does NOT import slack/ — callback pattern maintained via onChunk.
+// BC-09: StopStream is deferred immediately after StartStream for cleanup on any exit path.
+// WS-2: conversationTurns forwarded to the streaming pipeline for synthesis prompt injection.
+// FM-3: triage domains stored on assistant message for next-turn carryover.
+func processWithStreaming(channelID, threadTS, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn, priorDomains []string) {
+	client := deps.Client
+
+	// GAP-6: 60-second timeout for the full streaming pipeline.
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	// --- Triage phase (reuses processWithTriage logic) ---
+	triageStart := time.Now()
+	var triageOpts []TriageAssessOptions
+	if len(priorDomains) > 0 {
+		triageOpts = append(triageOpts, TriageAssessOptions{
+			PriorTurnDomains: priorDomains,
+		})
+	}
+	triageResult, err := deps.TriageRunner.Assess(ctx, question, threadHistory, triageOpts...)
+	triageElapsed := time.Since(triageStart)
+	if err != nil {
+		slog.Warn("streaming: triage failed, falling back to sync pipeline",
+			"error", err,
+		)
+		resp, syncErr := deps.Pipeline.Query(ctx, question)
+		if syncErr != nil {
+			slog.Error("pipeline query failed",
+				"channel", channelID,
+				"question", question,
+				"error", syncErr,
+			)
+			_ = client.SetStatus(channelID, threadTS, "", "Error: "+syncErr.Error())
+			return
+		}
+		postSyncResponse(channelID, threadTS, question, resp, nil, deps)
+		return
+	}
+
+	if triageResult == nil || len(triageResult.Candidates) == 0 {
+		slog.Info("streaming: triage returned no candidates, falling back to sync pipeline")
+		resp, syncErr := deps.Pipeline.Query(ctx, question)
+		if syncErr != nil {
+			slog.Error("pipeline query failed",
+				"channel", channelID,
+				"question", question,
+				"error", syncErr,
+			)
+			_ = client.SetStatus(channelID, threadTS, "", "Error: "+syncErr.Error())
+			return
+		}
+		postSyncResponse(channelID, threadTS, question, resp, nil, deps)
+		return
+	}
+
+	// FM-3: Extract qualified names from triage candidates for next-turn carryover.
+	triageDomains := make([]string, len(triageResult.Candidates))
+	for i, c := range triageResult.Candidates {
+		triageDomains[i] = c.QualifiedName
+	}
+
+	// Record triage metrics.
+	if deps.Metrics != nil {
+		deps.Metrics.RecordHaikuCalls(triageResult.ModelCallCount)
+		deps.Metrics.RecordPrePipelineLatency("triage", triageElapsed)
+	}
+
+	refinedQuery := triageResult.RefinedQuery
+	if refinedQuery == "" {
+		refinedQuery = question
+	}
+
+	slog.Info("streaming: triage complete, starting stream",
+		"original", question,
+		"refined", refinedQuery,
+		"candidates", len(triageResult.Candidates),
+		"model_calls", triageResult.ModelCallCount,
+	)
+
+	// --- Streaming phase ---
+	triageInput := &TriageResultInputData{
+		RefinedQuery:        refinedQuery,
+		Candidates:          triageResult.Candidates,
+		ModelCallCount:      triageResult.ModelCallCount,
+		ConversationHistory: conversationTurns, // WS-2: forward conversation turns.
+	}
+
+	streamID, err := deps.StreamSender.StartStream(ctx, channelID, threadTS)
+	if err != nil {
+		slog.Error("streaming: StartStream failed, falling back to sync pipeline",
+			"channel", channelID,
+			"error", err,
+		)
+		// Fallback: run sync pipeline path.
+		if deps.TriagePipeline != nil {
+			resp, syncErr := deps.TriagePipeline.QueryWithTriage(ctx, triageInput)
+			if syncErr != nil {
+				_ = client.SetStatus(channelID, threadTS, "", "Error: "+syncErr.Error())
+				return
+			}
+			postSyncResponse(channelID, threadTS, question, resp, triageDomains, deps)
+		} else {
+			resp, syncErr := deps.Pipeline.Query(ctx, refinedQuery)
+			if syncErr != nil {
+				_ = client.SetStatus(channelID, threadTS, "", "Error: "+syncErr.Error())
+				return
+			}
+			postSyncResponse(channelID, threadTS, question, resp, triageDomains, deps)
+		}
+		return
+	}
+
+	// BC-09: Defer StopStream immediately after StartStream for cleanup on any exit path.
+	defer func() {
+		if stopErr := deps.StreamSender.StopStream(ctx, streamID); stopErr != nil {
+			slog.Warn("streaming: StopStream failed",
+				"stream_id", streamID,
+				"error", stopErr,
+			)
+		}
+	}()
+
+	// Stream response chunks via onChunk callback.
+	onChunk := func(chunk string) {
+		if appendErr := deps.StreamSender.AppendStream(ctx, streamID, chunk); appendErr != nil {
+			slog.Warn("streaming: AppendStream failed",
+				"stream_id", streamID,
+				"error", appendErr,
+			)
+		}
+	}
+
+	resp, err := deps.StreamingRunner.QueryStream(ctx, triageInput, onChunk)
+	if err != nil {
+		slog.Error("streaming: QueryStream failed",
+			"channel", channelID,
+			"question", question,
+			"error", err,
+		)
+		// BC-09: StopStreamWithError on mid-stream failure.
+		_ = deps.StreamSender.StopStreamWithError(ctx, streamID, "\n\n_Error: "+err.Error()+"_")
+		return
+	}
+
+	// Store conversation history (same as sync path).
+	// FM-3: Store triage domains on assistant message for next-turn carryover.
+	if deps.ConversationMgr != nil {
+		deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
+			Role:      "user",
+			Content:   question,
+			Timestamp: time.Now(),
+		})
+		if resp != nil && resp.Answer != "" {
+			deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
+				Role:              "assistant",
+				Content:           resp.Answer,
+				Timestamp:         time.Now(),
+				LastTriageDomains: triageDomains,
+			})
+		}
+	}
+
+	// Set thread title (first 60 chars of question).
+	title := question
+	if len(title) > 60 {
+		title = title[:60]
+	}
+	if err := client.SetTitle(channelID, threadTS, title); err != nil {
+		slog.Warn("failed to set thread title",
+			"channel", channelID,
+			"error", err,
+		)
+	}
+
+	// Clear status — streaming is complete.
+	if err := client.SetStatus(channelID, threadTS, "", ""); err != nil {
+		slog.Warn("failed to clear status",
+			"channel", channelID,
+			"error", err,
+		)
+	}
+}
+
+// postSyncResponse handles the common sync response rendering: store history, send blocks,
+// set title, clear status. Used by processWithStreaming fallback paths.
+func postSyncResponse(channelID, threadTS, question string, resp *response.ReasoningResponse, triageDomains []string, deps HandlerDeps) {
+	client := deps.Client
+
+	// Store conversation history.
+	if deps.ConversationMgr != nil {
+		ctx := context.Background()
+		deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
+			Role:      "user",
+			Content:   question,
+			Timestamp: time.Now(),
+		})
+		if resp != nil && resp.Answer != "" {
+			deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
+				Role:              "assistant",
+				Content:           resp.Answer,
+				Timestamp:         time.Now(),
+				LastTriageDomains: triageDomains,
+			})
+		}
+	}
+
+	// Render and send response as Block Kit blocks.
+	blocks := RenderResponse(resp)
+	if err := client.SendBlocks(channelID, threadTS, blocks); err != nil {
+		slog.Error("failed to send response blocks",
+			"channel", channelID,
+			"error", err,
+		)
+		_ = client.SetStatus(channelID, threadTS, "", "Error sending response")
+		return
+	}
+
+	// Set thread title.
+	title := question
+	if len(title) > 60 {
+		title = title[:60]
+	}
+	if err := client.SetTitle(channelID, threadTS, title); err != nil {
+		slog.Warn("failed to set thread title",
+			"channel", channelID,
+			"error", err,
+		)
+	}
+
+	// Clear status.
+	if err := client.SetStatus(channelID, threadTS, "", ""); err != nil {
+		slog.Warn("failed to clear status",
+			"channel", channelID,
+			"error", err,
+		)
+	}
 }
