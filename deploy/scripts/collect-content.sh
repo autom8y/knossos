@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # collect-content.sh - Collect .know/ files from org repos for Docker pre-baking.
 #
-# Usage: deploy/scripts/collect-content.sh [--sync] [--catalog path]
+# Usage: deploy/scripts/collect-content.sh [--sync] [--check-freshness] [--catalog path]
 #
 # Options:
-#   --sync     Run 'ari registry sync --org autom8y' before collecting to ensure
-#              the domains.yaml catalog is up to date.
+#   --sync                Run 'ari registry sync --org autom8y' before collecting to ensure
+#                         the domains.yaml catalog is up to date.
+#   --check-freshness     Validate per-domain freshness against expires_after thresholds.
+#                         Exits 1 if stale domains exceed threshold (default: 10).
+#   --freshness-threshold N  Set the stale domain threshold for --check-freshness (default: 10).
 #   --catalog  Path to domains.yaml (default: deploy/registry/domains.yaml).
 #
 # This script reads the domains.yaml catalog, determines which repos have
@@ -36,12 +39,22 @@ PROJECT_ROOT="$(dirname "$DEPLOY_DIR")"
 
 # Parse arguments.
 SYNC=false
+CHECK_FRESHNESS=false
+FRESHNESS_THRESHOLD=10
 CATALOG=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --sync)
             SYNC=true
             shift
+            ;;
+        --check-freshness)
+            CHECK_FRESHNESS=true
+            shift
+            ;;
+        --freshness-threshold)
+            FRESHNESS_THRESHOLD="$2"
+            shift 2
             ;;
         --catalog)
             CATALOG="$2"
@@ -225,6 +238,72 @@ if [ "$missing" -gt 0 ]; then
     echo "WARNING: $missing catalog domains have no content."
     echo "  These domains will appear in startup coherence warnings."
     echo "  To fix: ensure repos are cloned at $REPO_BASE_DIR and re-run."
+fi
+
+# --- Freshness Check ---
+# When --check-freshness is set, validate per-domain freshness against expires_after thresholds.
+if [ "$CHECK_FRESHNESS" = true ] && command -v python3 &>/dev/null; then
+    echo ""
+    echo "--- Freshness Check ---"
+    STALE_COUNT=$(python3 -c "
+import yaml
+from datetime import datetime, timezone
+
+with open('$CATALOG') as f:
+    data = yaml.safe_load(f)
+
+now = datetime.now(timezone.utc)
+stale = 0
+total = 0
+by_repo = {}
+
+for repo in data.get('repos', []):
+    rn = repo['name']
+    repo_stale = 0
+    repo_total = 0
+    for domain in repo.get('domains', []):
+        total += 1
+        repo_total += 1
+        gen_at = domain.get('generated_at', '')
+        exp = domain.get('expires_after', '14d')
+        exp_days = int(exp.replace('d','')) if exp.endswith('d') else 14
+        if gen_at:
+            try:
+                dt = datetime.fromisoformat(gen_at.replace('Z', '+00:00'))
+                age = (now - dt).days
+                if age > exp_days:
+                    stale += 1
+                    repo_stale += 1
+            except:
+                stale += 1
+                repo_stale += 1
+    if repo_total > 0:
+        by_repo[rn] = (repo_total, repo_stale)
+
+for rn in sorted(by_repo):
+    t, s = by_repo[rn]
+    status = 'STALE' if s > 0 else 'FRESH'
+    print(f'  {rn:<25} {t:>3} domains, {s:>3} stale  [{status}]')
+
+print(f'')
+print(f'  Total: {total} domains, {stale} stale')
+print(stale)  # Last line is the count for shell to capture
+" 2>/dev/null)
+
+    # Extract the last line as the stale count.
+    STALE_NUM=$(echo "$STALE_COUNT" | tail -1)
+    # Print all but the last line as the report.
+    echo "$STALE_COUNT" | sed '$ d'
+
+    if [ "$STALE_NUM" -gt "$FRESHNESS_THRESHOLD" ] 2>/dev/null; then
+        echo ""
+        echo "FRESHNESS GATE FAILED: $STALE_NUM stale domains (threshold: $FRESHNESS_THRESHOLD)"
+        echo "  Run 'ari know --all' in repos with stale domains, then re-collect."
+        exit 1
+    else
+        echo ""
+        echo "Freshness gate passed: $STALE_NUM stale domains (<= $FRESHNESS_THRESHOLD threshold)"
+    fi
 fi
 
 echo ""
