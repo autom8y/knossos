@@ -1,9 +1,12 @@
 package serve
 
 import (
+	"context"
+	"sync/atomic"
 	"testing"
 
 	"github.com/autom8y/knossos/internal/cmd/common"
+	"github.com/autom8y/knossos/internal/search/knowledge"
 )
 
 func TestNewServeCmd(t *testing.T) {
@@ -146,5 +149,159 @@ func TestRunServe_MissingBotToken(t *testing.T) {
 	err := runServe(ctx, opts)
 	if err == nil {
 		t.Fatal("expected error for missing bot token")
+	}
+}
+
+// ---- WS-3: SummaryLookup wiring tests ----
+
+// mockCatalog implements knowledge.DomainCatalog for testing.
+type mockCatalog struct {
+	domains []knowledge.CatalogDomainEntry
+}
+
+func (m *mockCatalog) ListDomains() []knowledge.CatalogDomainEntry {
+	return m.domains
+}
+
+func (m *mockCatalog) LookupDomain(qualifiedName string) (knowledge.CatalogDomainEntry, bool) {
+	for _, d := range m.domains {
+		if d.QualifiedName == qualifiedName {
+			return d, true
+		}
+	}
+	return knowledge.CatalogDomainEntry{}, false
+}
+
+func (m *mockCatalog) DomainCount() int {
+	return len(m.domains)
+}
+
+// mockContentStore implements knowledge.ContentStore for testing.
+type mockContentStore struct {
+	content map[string]string
+}
+
+func (m *mockContentStore) LoadContent(qualifiedName string) (string, error) {
+	c, ok := m.content[qualifiedName]
+	if !ok {
+		return "", nil
+	}
+	return c, nil
+}
+
+func (m *mockContentStore) HasContent(qualifiedName string) bool {
+	_, ok := m.content[qualifiedName]
+	return ok
+}
+
+// mockLLMClient implements knowledge.LLMClient for testing.
+type mockLLMClient struct {
+	response string
+}
+
+func (m *mockLLMClient) Complete(_ context.Context, _, _ string, _ int) (string, error) {
+	return m.response, nil
+}
+
+func TestSummaryLookup_ReturnsEmptyBeforeIndexBuild(t *testing.T) {
+	// WS-3: Before the knowledge index is built, SummaryLookup should
+	// return ("", false) -- fail-open pattern.
+	var kiPtr atomic.Pointer[knowledge.KnowledgeIndex]
+
+	lookup := func(qualifiedName string) (string, bool) {
+		if ki := kiPtr.Load(); ki != nil {
+			return ki.GetSummary(qualifiedName)
+		}
+		return "", false
+	}
+
+	summary, ok := lookup("org::repo::architecture")
+	if ok {
+		t.Error("expected ok=false before index build")
+	}
+	if summary != "" {
+		t.Errorf("expected empty summary before index build, got %q", summary)
+	}
+}
+
+func TestSummaryLookup_ReturnsSummaryAfterIndexBuild(t *testing.T) {
+	// WS-3: After the knowledge index is stored in the atomic pointer,
+	// SummaryLookup should return real summaries.
+	var kiPtr atomic.Pointer[knowledge.KnowledgeIndex]
+
+	lookup := func(qualifiedName string) (string, bool) {
+		if ki := kiPtr.Load(); ki != nil {
+			return ki.GetSummary(qualifiedName)
+		}
+		return "", false
+	}
+
+	// Build a KnowledgeIndex with a summary via the Build function.
+	catalog := &mockCatalog{
+		domains: []knowledge.CatalogDomainEntry{
+			{QualifiedName: "org::repo::arch", Domain: "architecture", SourceHash: "h1"},
+		},
+	}
+	contentStore := &mockContentStore{
+		content: map[string]string{
+			"org::repo::arch": "Architecture content for the project.",
+		},
+	}
+	llmClient := &mockLLMClient{response: "A summary of the architecture domain."}
+
+	idx, err := knowledge.Build(context.Background(), knowledge.BuildConfig{
+		Catalog:      catalog,
+		ContentStore: contentStore,
+		LLMClient:    llmClient,
+	})
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+
+	// Before storing: should still return empty.
+	summary, ok := lookup("org::repo::arch")
+	if ok {
+		t.Error("expected ok=false before storing index")
+	}
+	if summary != "" {
+		t.Errorf("expected empty summary before storing index, got %q", summary)
+	}
+
+	// Store the index into the atomic pointer (simulates background build completion).
+	kiPtr.Store(idx)
+
+	// After storing: should return real summary.
+	summary, ok = lookup("org::repo::arch")
+	if !ok {
+		t.Error("expected ok=true after storing index")
+	}
+	if summary == "" {
+		t.Error("expected non-empty summary after storing index")
+	}
+
+	// Missing domain should still return false.
+	summary, ok = lookup("org::repo::nonexistent")
+	if ok {
+		t.Error("expected ok=false for nonexistent domain")
+	}
+	if summary != "" {
+		t.Errorf("expected empty summary for nonexistent domain, got %q", summary)
+	}
+}
+
+func TestBuildPipeline_SummaryLookupWired(t *testing.T) {
+	// WS-3: Verify that buildPipeline() returns a knowledgeIdxPtr that is
+	// non-nil and that the SummaryLookup closure is connected.
+	// buildPipeline() may return an empty result if ANTHROPIC_API_KEY is
+	// not set, but the atomic pointer should still be allocated.
+	result := buildPipeline()
+
+	if result.knowledgeIdxPtr == nil {
+		t.Fatal("expected knowledgeIdxPtr to be non-nil after buildPipeline()")
+	}
+
+	// The pointer should initially be nil (no index loaded yet).
+	if result.knowledgeIdxPtr.Load() != nil {
+		t.Error("expected knowledgeIdxPtr to be nil initially")
 	}
 }

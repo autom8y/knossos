@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -219,7 +220,13 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	if pipelineResult.catalog != nil {
 		// Try to load pre-baked index first (fast path: <1s).
 		knowledgeIdx = loadPrebakedKnowledgeIndex()
-		if knowledgeIdx == nil {
+		if knowledgeIdx != nil {
+			// WS-3: Store pre-baked index into atomic pointer so SummaryLookup
+			// starts returning real summaries immediately.
+			if pipelineResult.knowledgeIdxPtr != nil {
+				pipelineResult.knowledgeIdxPtr.Store(knowledgeIdx)
+			}
+		} else {
 			// No pre-baked index. Build in background — server starts immediately
 			// with BM25 fallback, then upgrades when the build completes.
 			slog.Info("building knowledge index in background (BM25 fallback active until complete)")
@@ -228,6 +235,11 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 				defer cancel()
 				idx := buildKnowledgeIndex(buildCtx, pipelineResult, llmClient)
 				if idx != nil {
+					// WS-3: Store built index into atomic pointer so SummaryLookup
+					// starts returning real summaries.
+					if pipelineResult.knowledgeIdxPtr != nil {
+						pipelineResult.knowledgeIdxPtr.Store(idx)
+					}
 					slog.Info("background knowledge index build complete, upgrading pipeline")
 				}
 			}()
@@ -404,6 +416,11 @@ type pipelineComponents struct {
 	pipeline    *reason.Pipeline
 	catalog     *registryorg.DomainCatalog
 	searchIndex *search.SearchIndex
+	// knowledgeIdxPtr is an atomic pointer used by the SummaryLookup closure.
+	// Store the KnowledgeIndex here after background build completes so the
+	// assembler's SummaryLookup starts returning real summaries. Fail-open:
+	// returns ("", false) while nil.
+	knowledgeIdxPtr *atomic.Pointer[knowledge.KnowledgeIndex]
 }
 
 // buildPipeline constructs the full reasoning pipeline from environment configuration.
@@ -423,7 +440,18 @@ func buildPipeline() pipelineComponents {
 	}
 
 	// Step 3: Context assembler.
+	// WS-3: Wire SummaryLookup via atomic pointer so the summary tier activates
+	// once the KnowledgeIndex is available (either pre-baked or background-built).
+	// Fail-open: returns ("", false) while the pointer is nil.
+	var kiPtr atomic.Pointer[knowledge.KnowledgeIndex]
+	result.knowledgeIdxPtr = &kiPtr
 	reasoningCfg := reason.DefaultReasoningConfig()
+	reasoningCfg.Assembler.SummaryLookup = func(qualifiedName string) (string, bool) {
+		if ki := kiPtr.Load(); ki != nil {
+			return ki.GetSummary(qualifiedName)
+		}
+		return "", false
+	}
 	assembler := reasoncontext.NewAssembler(counter, reasoningCfg.Assembler)
 
 	// Step 4: Claude client (requires ANTHROPIC_API_KEY).
