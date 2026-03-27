@@ -14,7 +14,7 @@ func TestRegistryCompleteness(t *testing.T) {
 		AgentPotnia,
 		AgentMoirai,
 		AgentPythia,
-		AgentContextEngineer,
+		AgentMyron,
 		CLISessionFieldSet,
 		CLISessionLog,
 		CLISessionWrap,

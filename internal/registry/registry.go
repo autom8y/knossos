@@ -38,7 +38,7 @@ const (
 	AgentPotnia          RefKey = "agent.potnia"
 	AgentMoirai          RefKey = "agent.moirai"
 	AgentPythia          RefKey = "agent.pythia"
-	AgentContextEngineer RefKey = "agent.context-engineer"
+	AgentMyron           RefKey = "agent.myron"
 
 	// CLI commands
 	CLISessionFieldSet RefKey = "cli.session-field-set"
@@ -93,9 +93,9 @@ var entries = map[RefKey]RefEntry{
 		Value:    "pythia",
 		Recovery: "",
 	},
-	AgentContextEngineer: {
+	AgentMyron: {
 		Category: CategoryAgent,
-		Value:    "context-engineer",
+		Value:    "myron",
 		Recovery: "",
 	},
 	CLISessionFieldSet: {
@@ -126,7 +126,7 @@ var throughlineKeys = []RefKey{
 	AgentPotnia,
 	AgentMoirai,
 	AgentPythia,
-	AgentContextEngineer,
+	AgentMyron,
 }
 
 // Ref returns the concrete value for a registry key.

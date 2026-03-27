@@ -197,7 +197,7 @@ func parseHooksYAMLForSCAR008(t *testing.T, data []byte) ([]hooks.HookEntry, err
 
 // TestSCAR021_CrossRiteAgents_ProjectScopeExclusion is a labeled regression test for SCAR-021.
 //
-// Background: Global agents (pythia, moirai, context-engineer, theoros) were
+// Background: Global agents (pythia, moirai, myron, theoros) were
 // materialized into project channel agents/ alongside rite agents, causing shadowing
 // issues and orphan accumulation across rite switches. Fix: materializeCrossRiteAgents()
 // was removed from the rite-scope pipeline. Cross-rite agents now exclusively use
@@ -218,7 +218,7 @@ func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 	// Simulate cross-rite agents in the top-level agents/ directory.
 	crossRiteDir := filepath.Join(projectDir, "agents")
 	require.NoError(t, os.MkdirAll(crossRiteDir, 0755))
-	for _, name := range []string{"moirai", "pythia", "context-engineer", "theoros"} {
+	for _, name := range []string{"moirai", "pythia", "myron", "theoros"} {
 		require.NoError(t, os.WriteFile(
 			filepath.Join(crossRiteDir, name+".md"),
 			[]byte("# "+name+"\n"),
@@ -236,7 +236,7 @@ func TestSCAR021_CrossRiteAgents_ProjectScopeExclusion(t *testing.T) {
 		"SCAR-021 regression: rite agent must be materialized to project level")
 
 	// Cross-rite agents must NOT be present at project level.
-	for _, name := range []string{"moirai", "pythia", "context-engineer", "theoros"} {
+	for _, name := range []string{"moirai", "pythia", "myron", "theoros"} {
 		assert.NoFileExists(t, filepath.Join(agentsDir, name+".md"),
 			"SCAR-021 regression: cross-rite agent %q must NOT be materialized to project channel agents/. "+
 				"Cross-rite agents belong in user scope (user channel agents/). "+

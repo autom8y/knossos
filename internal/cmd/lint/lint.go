@@ -320,7 +320,7 @@ var approvedAgentNames = map[string]string{
 	"compliance-architect":     "functional",
 	"competitive-analyst":      "functional",
 	"context-architect":        "functional",
-	"context-engineer":         "functional",
+	"myron":                     "functional",
 	"cruft-cutter":             "functional",
 	"debt-collector":           "functional",
 	"dependency-analyst":       "functional",

@@ -496,15 +496,15 @@ color: purple
 
 func TestParseAgentFrontmatter_NoToolsField(t *testing.T) {
 	t.Parallel()
-	// Some agents like context-engineer lack a tools field
+	// Some agents like myron lack a tools field
 	content := []byte(`---
-name: context-engineer
+name: myron
 description: "Context architecture specialist"
 model: opus
 color: orange
 ---
 
-# Context Engineer
+# Myron
 `)
 
 	fm, err := ParseAgentFrontmatter(content)
@@ -512,8 +512,8 @@ color: orange
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if fm.Name != "context-engineer" {
-		t.Errorf("name = %q, want %q", fm.Name, "context-engineer")
+	if fm.Name != "myron" {
+		t.Errorf("name = %q, want %q", fm.Name, "myron")
 	}
 	if len(fm.Tools) != 0 {
 		t.Errorf("tools count = %d, want 0 (no tools field)", len(fm.Tools))

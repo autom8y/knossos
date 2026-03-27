@@ -75,7 +75,7 @@ func TestCollisionChecker_AgentExactMatch(t *testing.T) {
 		manifestLoaded: true,
 		riteEntries: map[string]bool{
 			"agents/pythia.md":      true,
-			"agents/context-engineer.md": true,
+			"agents/myron.md": true,
 		},
 	}
 
@@ -84,9 +84,9 @@ func TestCollisionChecker_AgentExactMatch(t *testing.T) {
 		t.Error("Expected exact match collision for agents/pythia.md")
 	}
 
-	collision, _ = c.CheckCollision("agents/context-engineer.md")
+	collision, _ = c.CheckCollision("agents/myron.md")
 	if !collision {
-		t.Error("Expected exact match collision for agents/context-engineer.md")
+		t.Error("Expected exact match collision for agents/myron.md")
 	}
 
 	// Different agent should not collide

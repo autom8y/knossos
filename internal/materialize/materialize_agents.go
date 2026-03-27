@@ -307,7 +307,7 @@ func compileAgentContent(agentName string, content []byte, comp compiler.Channel
 }
 
 // NOTE: listCrossRiteAgents and materializeCrossRiteAgents were removed.
-// Cross-rite agents (pythia, moirai, context-engineer, theoros) are
+// Cross-rite agents (pythia, moirai, myron, theoros) are
 // user-scope owned: synced from KNOSSOS_HOME/agents/ to the user channel agents dir
 // by user-scope sync. They are NOT copied to the project channel agents dir.
 

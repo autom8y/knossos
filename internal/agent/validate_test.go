@@ -220,13 +220,13 @@ func TestValidateAgentFrontmatter_MissingTools_WarnMode(t *testing.T) {
 	av := newTestValidator(t)
 
 	content := []byte(`---
-name: context-engineer
+name: myron
 description: "Context architecture specialist who optimizes how Claude is leveraged"
 model: opus
 color: orange
 ---
 
-# Context Engineer
+# Myron
 `)
 
 	result, err := av.ValidateAgentFrontmatter(content, ValidationModeWarn)
@@ -256,14 +256,14 @@ func TestValidateAgentFrontmatter_MissingTools_StrictMode(t *testing.T) {
 	av := newTestValidator(t)
 
 	content := []byte(`---
-name: context-engineer
+name: myron
 description: "Context architecture specialist who optimizes how Claude is leveraged"
 type: specialist
 model: opus
 color: orange
 ---
 
-# Context Engineer
+# Myron
 `)
 
 	result, err := av.ValidateAgentFrontmatter(content, ValidationModeStrict)
