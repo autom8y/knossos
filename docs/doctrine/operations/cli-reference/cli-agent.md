@@ -60,7 +60,7 @@ ari agent roster [flags]
 **Description**:
 Displays three sections of the agent roster:
 
-- **Standing**: Core platform agents (pythia, moirai, metis) — always active
+- **Standing**: Core platform agents (pythia, moirai) — always active
 - **Summoned**: Agents you have summoned with `ari agent summon`
 - **Available**: Agents available to summon (`tier: summonable` in source)
 
@@ -91,7 +91,7 @@ ari agent summon <name> [flags]
 ```
 
 **Description**:
-Summons a named agent to your user-level harness configuration (`~/.claude/agents/`). Only agents published with `tier: summonable` in their source frontmatter can be summoned. Standing agents (pythia, moirai, metis) cannot be summoned — they are always active.
+Summons a named agent to your user-level harness configuration (`~/.claude/agents/`). Only agents published with `tier: summonable` in their source frontmatter can be summoned. Standing agents (pythia, moirai) cannot be summoned — they are always active.
 
 This is the [Klesis](../../reference/GLOSSARY.md) operation — agent summoning via the Summonable Heroes tier.
 
@@ -126,7 +126,7 @@ ari agent dismiss <name> [flags]
 ```
 
 **Description**:
-Removes a previously summoned agent from your user-level harness configuration. Only agents summoned via `ari agent summon` can be dismissed. Standing agents (pythia, moirai, metis) and manually created agents are not affected.
+Removes a previously summoned agent from your user-level harness configuration. Only agents summoned via `ari agent summon` can be dismissed. Standing agents (pythia, moirai) and manually created agents are not affected.
 
 This is the [Apolysis](../../reference/GLOSSARY.md) operation — agent dismissal.
 
@@ -328,7 +328,7 @@ Knossos agents fall into three tiers:
 
 | Tier | Examples | Behavior |
 |------|----------|----------|
-| **Standing** | pythia, moirai, metis | Always active; cannot be summoned/dismissed |
+| **Standing** | pythia, moirai | Always active; cannot be summoned/dismissed |
 | **Rite** | potnia, specialist agents | Active when rite is materialized |
 | **Summonable Heroes** | theoros, naxos | On-demand; materialized via `ari agent summon` |
 
