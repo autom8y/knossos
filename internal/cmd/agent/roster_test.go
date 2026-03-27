@@ -87,7 +87,7 @@ func TestRosterOutput_Text_EmptySectionsShowNone(t *testing.T) {
 
 // --- buildStandingSection ---
 
-func TestBuildStandingSection_ContainsAllThreeAgents(t *testing.T) {
+func TestBuildStandingSection_ContainsStandingAgents(t *testing.T) {
 	entries := buildStandingSection("")
 	names := make(map[string]bool)
 	for _, e := range entries {
