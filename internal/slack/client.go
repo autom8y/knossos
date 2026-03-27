@@ -21,8 +21,9 @@ type SlackAPI interface {
 
 // SlackClient wraps SlackAPI with Clew-specific convenience methods.
 type SlackClient struct {
-	api      SlackAPI
-	botToken string
+	api            SlackAPI
+	botToken       string
+	rawAPIBaseURL  string // Override for tests; empty uses https://slack.com/api/.
 }
 
 // NewSlackClient creates a SlackClient with the given bot token.
@@ -130,7 +131,11 @@ func (c *SlackClient) rawAPICall(method string, payload map[string]any) error {
 		return fmt.Errorf("marshal %s payload: %w", method, err)
 	}
 
-	url := fmt.Sprintf("https://slack.com/api/%s", method)
+	baseURL := c.rawAPIBaseURL
+	if baseURL == "" {
+		baseURL = "https://slack.com/api/"
+	}
+	url := baseURL + method
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("create %s request: %w", method, err)

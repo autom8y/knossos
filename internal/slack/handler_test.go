@@ -491,9 +491,10 @@ func (m *mockTriageRunner) assessCalls() []string {
 
 // streamingSlackServer creates a mock Slack API server that records streaming API calls.
 type streamingSlackServer struct {
-	mu     sync.Mutex
-	calls  []streamAPICall
-	server *httptest.Server
+	mu         sync.Mutex
+	calls      []streamAPICall
+	server     *httptest.Server
+	errMethods map[string]string // method -> error string; returns {"ok":false,"error":"..."} for these.
 }
 
 type streamAPICall struct {
@@ -513,7 +514,14 @@ func newStreamingSlackServer(t *testing.T) *streamingSlackServer {
 
 		m.mu.Lock()
 		m.calls = append(m.calls, streamAPICall{method: method, body: body})
+		errMsg := m.errMethods[method]
 		m.mu.Unlock()
+
+		// Return error if method is configured to fail.
+		if errMsg != "" {
+			_, _ = fmt.Fprintf(w, `{"ok":false,"error":"%s"}`, errMsg)
+			return
+		}
 
 		// Return appropriate responses for each Slack API method.
 		switch method {
@@ -553,6 +561,32 @@ func (m *streamingSlackServer) getCallMethods() []string {
 		methods[i] = c.method
 	}
 	return methods
+}
+
+// getReactionCalls returns all reactions.add calls recorded by the mock server.
+func (m *streamingSlackServer) getReactionCalls() []streamAPICall {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var reactions []streamAPICall
+	for _, c := range m.calls {
+		if c.method == "reactions.add" {
+			reactions = append(reactions, c)
+		}
+	}
+	return reactions
+}
+
+// waitForReactionCalls polls until the mock server has at least `expected` reactions.add calls.
+func waitForReactionCalls(t *testing.T, server *streamingSlackServer, expected int, timeout time.Duration) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if len(server.getReactionCalls()) >= expected {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	t.Fatalf("timed out waiting for %d reaction calls, got %d", expected, len(server.getReactionCalls()))
 }
 
 // waitForStreamCalls polls until the streaming runner has at least `expected` calls.
@@ -1104,4 +1138,227 @@ func TestHandler_StreamingQueryStreamError(t *testing.T) {
 		}
 	}
 	assert.Equal(t, 1, stopCount, "only StopStreamWithError should call stopStream; deferred StopStream should be no-op")
+}
+
+// --- Emoji ACK (AddReaction) observability tests (H-3) ---
+
+func TestHandler_EmojiACKOnStreamingPath(t *testing.T) {
+	// Verify that AddReaction("eyes") is called with correct channel/TS
+	// on the streaming path.
+	mockServer := newStreamingSlackServer(t)
+	defer mockServer.server.Close()
+
+	streamSender := &mockStreamSender{
+		startStreamID: "test-stream-001",
+	}
+
+	streamRunner := &mockStreamingRunner{
+		chunks: []string{"Hello ", "World!"},
+		response: &response.ReasoningResponse{
+			Answer: "Hello World!",
+			Tier:   trust.TierHigh,
+		},
+	}
+
+	triageRunner := &mockTriageRunner{
+		result: &TriageResultData{
+			RefinedQuery:   "refined test question",
+			Candidates:     []TriageCandidateData{{QualifiedName: "test::domain", RelevanceScore: 0.9}},
+			ModelCallCount: 1,
+		},
+	}
+
+	pipeline := &mockPipeline{
+		response: &response.ReasoningResponse{
+			Answer: "Sync fallback - should not be used",
+			Tier:   trust.TierHigh,
+		},
+	}
+
+	// Point client rawAPICall to mock server so AddReaction calls are captured.
+	client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
+	client.rawAPIBaseURL = mockServer.server.URL + "/api/"
+
+	cfg := DefaultSlackConfig()
+	cfg.StreamingEnabled = true
+
+	handler, _, stop := NewSlackHandlerWithDeps(HandlerDeps{
+		Pipeline:        pipeline,
+		Client:          client,
+		Config:          cfg,
+		TriageRunner:    triageRunner,
+		StreamingRunner: streamRunner,
+		StreamSender:    streamSender,
+	})
+	defer stop()
+
+	event := MessageEvent{
+		Type:    "message",
+		Text:    "What is streaming?",
+		User:    "U001",
+		Channel: "C001",
+		TS:      "1234567890.666666",
+	}
+	body := makeEnvelope(t, event)
+
+	req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Wait for the streaming pipeline to be called.
+	waitForStreamCalls(t, streamRunner, 1, 3*time.Second)
+
+	// Wait for reactions.add to be recorded by the mock server.
+	waitForReactionCalls(t, mockServer, 1, 3*time.Second)
+
+	// Verify AddReaction was called with correct channel, timestamp, and emoji.
+	reactions := mockServer.getReactionCalls()
+	require.Len(t, reactions, 1)
+	assert.Equal(t, "C001", reactions[0].body["channel"])
+	assert.Equal(t, "1234567890.666666", reactions[0].body["timestamp"])
+	assert.Equal(t, "eyes", reactions[0].body["name"])
+}
+
+func TestHandler_EmojiACKOnTriagePath(t *testing.T) {
+	// Verify that AddReaction("eyes") is called on the triage (non-streaming) path.
+	mockServer := newStreamingSlackServer(t)
+	defer mockServer.server.Close()
+
+	triageRunner := &mockTriageRunner{
+		result: &TriageResultData{
+			RefinedQuery:   "refined",
+			Candidates:     []TriageCandidateData{{QualifiedName: "test::domain", RelevanceScore: 0.9}},
+			ModelCallCount: 1,
+		},
+	}
+
+	pipeline := &mockPipeline{
+		response: &response.ReasoningResponse{
+			Answer: "Triage path response",
+			Tier:   trust.TierHigh,
+		},
+	}
+
+	client := NewSlackClientWithAPI(&recordingSlackAPI{}, "xoxb-test")
+	client.rawAPIBaseURL = mockServer.server.URL + "/api/"
+
+	cfg := DefaultSlackConfig()
+	cfg.StreamingEnabled = false // Streaming disabled — takes triage/sync path.
+
+	handler, _, stop := NewSlackHandlerWithDeps(HandlerDeps{
+		Pipeline:     pipeline,
+		Client:       client,
+		Config:       cfg,
+		TriageRunner: triageRunner,
+	})
+	defer stop()
+
+	event := MessageEvent{
+		Type:    "message",
+		Text:    "What is the architecture?",
+		User:    "U001",
+		Channel: "C002",
+		TS:      "1234567890.777777",
+	}
+	body := makeEnvelope(t, event)
+
+	req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Wait for pipeline to be called.
+	waitForCalls(t, pipeline, 1, 3*time.Second)
+
+	// Wait for reactions.add to be recorded.
+	waitForReactionCalls(t, mockServer, 1, 3*time.Second)
+
+	// Verify AddReaction was called with correct channel and TS.
+	reactions := mockServer.getReactionCalls()
+	require.Len(t, reactions, 1)
+	assert.Equal(t, "C002", reactions[0].body["channel"])
+	assert.Equal(t, "1234567890.777777", reactions[0].body["timestamp"])
+	assert.Equal(t, "eyes", reactions[0].body["name"])
+}
+
+func TestHandler_EmojiACKErrorDoesNotBlockPipeline(t *testing.T) {
+	// Verify that when AddReaction fails, the pipeline still executes.
+	mockServer := newStreamingSlackServer(t)
+	defer mockServer.server.Close()
+
+	// Configure reactions.add to fail.
+	mockServer.mu.Lock()
+	mockServer.errMethods = map[string]string{
+		"reactions.add": "missing_scope",
+	}
+	mockServer.mu.Unlock()
+
+	streamRunner := &mockStreamingRunner{
+		chunks: []string{"Hello!"},
+		response: &response.ReasoningResponse{
+			Answer: "Hello!",
+			Tier:   trust.TierHigh,
+		},
+	}
+
+	triageRunner := &mockTriageRunner{
+		result: &TriageResultData{
+			RefinedQuery:   "refined question",
+			Candidates:     []TriageCandidateData{{QualifiedName: "test::domain", RelevanceScore: 0.9}},
+			ModelCallCount: 1,
+		},
+	}
+
+	pipeline := &mockPipeline{
+		response: &response.ReasoningResponse{
+			Answer: "Should not be used",
+			Tier:   trust.TierHigh,
+		},
+	}
+
+	client := NewSlackClientWithAPI(&noopSlackAPI{}, "xoxb-test")
+	client.rawAPIBaseURL = mockServer.server.URL + "/api/"
+
+	cfg := DefaultSlackConfig()
+	cfg.StreamingEnabled = true
+
+	handler, _, stop := NewSlackHandlerWithDeps(HandlerDeps{
+		Pipeline:        pipeline,
+		Client:          client,
+		Config:          cfg,
+		TriageRunner:    triageRunner,
+		StreamingRunner: streamRunner,
+		StreamSender:    &mockStreamSender{startStreamID: "test-stream-002"},
+	})
+	defer stop()
+
+	event := MessageEvent{
+		Type:    "message",
+		Text:    "Test question",
+		User:    "U001",
+		Channel: "C001",
+		TS:      "1234567890.888888",
+	}
+	body := makeEnvelope(t, event)
+
+	req := httptest.NewRequest(http.MethodPost, "/slack/events", strings.NewReader(body))
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	// Wait for the streaming pipeline to complete despite AddReaction failure.
+	waitForStreamCalls(t, streamRunner, 1, 3*time.Second)
+
+	// Verify the streaming pipeline executed successfully.
+	streamCalls := streamRunner.queryStreamCalls()
+	require.Len(t, streamCalls, 1, "streaming pipeline must execute even when AddReaction fails")
+
+	// Verify reactions.add WAS attempted (and failed).
+	waitForReactionCalls(t, mockServer, 1, 3*time.Second)
+	reactions := mockServer.getReactionCalls()
+	require.Len(t, reactions, 1, "AddReaction should have been attempted")
+
+	// Verify sync pipeline was NOT called — streaming path completed.
+	assert.Empty(t, pipeline.queryCalls(), "sync pipeline should not be called")
 }
