@@ -12,7 +12,7 @@ entry_agent: null
 phases: []
 
 # Shared has no rite-scoped agents — cross-rite agents live in top-level agents/
-# (theoros, moirai, pythia, context-engineer)
+# (theoros, moirai, pythia, myron)
 agents: []
 
 dromena: []
