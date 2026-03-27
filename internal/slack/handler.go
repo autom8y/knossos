@@ -879,6 +879,7 @@ func processWithStreaming(channelID, threadTS, question string, deps HandlerDeps
 			_ = client.SetStatus(channelID, threadTS, "", "Error: "+syncErr.Error())
 			return
 		}
+		// nil triageDomains is intentional: triage failed, so no candidates exist for FM-3 carryover.
 		postSyncResponse(channelID, threadTS, question, resp, nil, deps)
 		return
 	}
@@ -895,6 +896,7 @@ func processWithStreaming(channelID, threadTS, question string, deps HandlerDeps
 			_ = client.SetStatus(channelID, threadTS, "", "Error: "+syncErr.Error())
 			return
 		}
+		// nil triageDomains is intentional: no candidates were returned, so no domains for FM-3 carryover.
 		postSyncResponse(channelID, threadTS, question, resp, nil, deps)
 		return
 	}
