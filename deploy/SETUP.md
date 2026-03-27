@@ -436,14 +436,14 @@ See the dedicated **Rollback Procedure** section below for complete instructions
 
 ---
 
-## Content Lifecycle and `ari org sync`
+## Content Lifecycle and `ari registry sync`
 
 ### How Content Gets Into the Container
 
 Clew's knowledge is pre-baked into the Docker image at build time. The lifecycle is:
 
 1. **theoros** regenerates `.know/` files in individual repos (weekly or on-demand)
-2. **`ari org sync --org autom8y`** detects changed `source_hash` values, updates `deploy/registry/domains.yaml`
+2. **`ari registry sync --org autom8y`** detects changed `source_hash` values, updates `deploy/registry/domains.yaml`
 3. **`deploy/scripts/collect-content.sh --sync`** copies `.know/` files from all repos into `deploy/content/`
 4. **Docker build** bakes content and catalog into the container image
 5. **ECS deploy** starts new container; indexes are built at startup from pre-baked content
@@ -453,7 +453,7 @@ Clew's knowledge is pre-baked into the Docker image at build time. The lifecycle
 
 | Frequency | Action | Why |
 |-----------|--------|-----|
-| Weekly (recommended) | Run `ari org sync --org autom8y` + redeploy | Keeps knowledge fresh; matches theoros regeneration cadence |
+| Weekly (recommended) | Run `ari registry sync --org autom8y` + redeploy | Keeps knowledge fresh; matches theoros regeneration cadence |
 | Alert threshold | Catalog > 7 days stale | `collect-content.sh` warns automatically |
 | On-demand | After major `.know/` changes | Ensures critical updates reach users quickly |
 

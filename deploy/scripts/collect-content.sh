@@ -4,7 +4,7 @@
 # Usage: deploy/scripts/collect-content.sh [--sync] [--catalog path]
 #
 # Options:
-#   --sync     Run 'ari org sync --org autom8y' before collecting to ensure
+#   --sync     Run 'ari registry sync --org autom8y' before collecting to ensure
 #              the domains.yaml catalog is up to date.
 #   --catalog  Path to domains.yaml (default: deploy/registry/domains.yaml).
 #
@@ -61,9 +61,9 @@ REPO_BASE_DIR="${REPO_BASE_DIR:-$(dirname "$PROJECT_ROOT")}"
 
 # Step 0 (optional): Sync the catalog.
 if [ "$SYNC" = true ]; then
-    echo "Syncing catalog via 'ari org sync --org autom8y'..."
+    echo "Syncing catalog via 'ari registry sync --org autom8y'..."
     if command -v ari &>/dev/null; then
-        ari org sync --org autom8y
+        ari registry sync --org autom8y
         echo "  Catalog synced."
     else
         echo "  WARNING: 'ari' not found in PATH, skipping sync."
@@ -93,7 +93,7 @@ except:
 " 2>/dev/null || echo "-1")
         if [ "$DAYS_OLD" -gt 7 ] 2>/dev/null; then
             echo "WARNING: catalog is ${DAYS_OLD} days old (synced_at: $SYNCED_AT)"
-            echo "  Recommended: run with --sync or 'ari org sync --org autom8y'"
+            echo "  Recommended: run with --sync or 'ari registry sync --org autom8y'"
         elif [ "$DAYS_OLD" -ge 0 ] 2>/dev/null; then
             echo "Catalog age: ${DAYS_OLD} days (synced_at: $SYNCED_AT)"
         fi
