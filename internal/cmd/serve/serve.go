@@ -288,10 +288,10 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 	if llmClient != nil {
 		summarizer = conversation.NewLLMSummarizer(llmClient)
 	}
-	// SlackThreadFetcher is nil for now (conversations.replies integration is
-	// wired via the SlackClient in a future PR). ConversationManager degrades
-	// gracefully without it (DORMANT threads return nil).
-	convMgr = conversation.NewManager(convConfig, summarizer, nil, metricsRecorder)
+	// Wire SlackThreadFetcher for cold-start conversation resurrection (KNOWN-GAP-001).
+	// Enables DORMANT -> RESURRECTING -> ACTIVE thread recovery via Slack conversations.replies API.
+	threadFetcher := conversation.NewSlackThreadFetcher(cfg.SlackBotToken)
+	convMgr = conversation.NewManager(convConfig, summarizer, threadFetcher, metricsRecorder)
 	slog.Info("conversation manager initialized",
 		"ttl", convConfig.TTL,
 		"max_recent_messages", convConfig.MaxRecentMessages,
@@ -308,6 +308,13 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		triagePipelineAdapter = &triagePipelineQueryAdapter{pipeline: pipelineResult.pipeline}
 	}
 
+	// Build StreamingRunner adapter (Sprint 1: streaming pipeline activation).
+	// BC-03: Uses onChunk callback pattern — reason/ does NOT import slack/.
+	var streamingRunnerAdapter internalslack.StreamingQueryRunner
+	if pipelineResult.pipeline != nil {
+		streamingRunnerAdapter = &streamingPipelineQueryAdapter{pipeline: pipelineResult.pipeline}
+	}
+
 	// Create handler with full dependencies.
 	slackHandler, ctxStore, stopDedup := internalslack.NewSlackHandlerWithDeps(internalslack.HandlerDeps{
 		Pipeline:        queryRunner,
@@ -315,6 +322,7 @@ func runServe(ctx *cmdContext, opts serveOptions) error {
 		Config:          slackCfg,
 		TriageRunner:    triageAdapter,
 		TriagePipeline:  triagePipelineAdapter,
+		StreamingRunner: streamingRunnerAdapter,
 		ConversationMgr: convMgr,
 		StreamSender:    streamSender,
 		Metrics:         metricsRecorder,
@@ -1119,4 +1127,41 @@ func (a *triagePipelineQueryAdapter) QueryWithTriage(ctx context.Context, triage
 		ModelCallCount:      triageInput.ModelCallCount,
 		ConversationHistory: triageInput.ConversationHistory, // WS-2: forward conversation turns.
 	})
+}
+
+// ---- Sprint 1: StreamingPipeline adapter ----
+
+// streamingPipelineQueryAdapter adapts *reason.Pipeline to internalslack.StreamingQueryRunner.
+// This bridge converts handler-local TriageResultInputData to reason.TriageResultInput
+// and delegates to Pipeline.QueryStream with the onChunk callback.
+// BC-03: reason/ does NOT import slack/ — callback pattern maintained.
+type streamingPipelineQueryAdapter struct {
+	pipeline *reason.Pipeline
+}
+
+func (a *streamingPipelineQueryAdapter) QueryStream(ctx context.Context, triageInput *internalslack.TriageResultInputData, onChunk func(chunk string)) (*response.ReasoningResponse, error) {
+	if triageInput == nil {
+		return a.pipeline.Query(ctx, "")
+	}
+
+	// Convert handler-local types to reason/ types (same conversion as triagePipelineQueryAdapter).
+	candidates := make([]reason.TriageCandidateInput, len(triageInput.Candidates))
+	for i, c := range triageInput.Candidates {
+		candidates[i] = reason.TriageCandidateInput{
+			QualifiedName:       c.QualifiedName,
+			RelevanceScore:      c.RelevanceScore,
+			EmbeddingSimilarity: c.EmbeddingSimilarity,
+			Freshness:           c.Freshness,
+			Rationale:           c.Rationale,
+			DomainType:          c.DomainType,
+			RelatedDomains:      c.RelatedDomains,
+		}
+	}
+
+	return a.pipeline.QueryStream(ctx, &reason.TriageResultInput{
+		RefinedQuery:        triageInput.RefinedQuery,
+		Candidates:          candidates,
+		ModelCallCount:      triageInput.ModelCallCount,
+		ConversationHistory: triageInput.ConversationHistory, // WS-2: forward conversation turns.
+	}, onChunk)
 }
