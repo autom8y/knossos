@@ -239,7 +239,7 @@ The **Summonable Heroes** tier corrects this.
 
 Three categories of agents now govern the labyrinth:
 
-**Standing agents** -- Pythia, the Moirai, and Metis -- are always present. They represent capabilities so fundamental that no session functions without them: cross-rite routing, session lifecycle authority, and context-engineering counsel. These three cannot be summoned or dismissed. They stand.
+**Standing agents** -- Pythia and the Moirai -- are always present. They represent capabilities so fundamental that no session functions without them: cross-rite routing and session lifecycle authority. These two cannot be summoned or dismissed. They stand.
 
 **Rite-scoped agents** -- Potnia and each rite's specialists -- are materialized when a rite is active and absent when it is not. They represent the domain knowledge of a specific practice: the ecosystem rite's analyst, the forge rite's builder, the docs rite's writer. Switching rites (`ari sync --rite=X`) swaps the set.
 
@@ -255,17 +255,17 @@ The inscription advertises this architecture to every session through the "Summo
 
 ### The Strategist: Metis
 
+**Historical note**: Metis was the original name for the context-engineering counsel role. This role is now fulfilled by Myron.
+
 **Metis** was the first wife of Zeus and his equal in wisdom. Foreknowledge told Zeus that her children would surpass their father -- that her counsel, once given form, would grow more powerful than the power that contained it. And so Zeus consumed her entire, so that her wisdom would always be within him, and he could never be separated from her counsel.
 
 The myth encodes a design truth: strategic wisdom is most powerful when it is interior, not external. Not a voice from outside asking "have you considered?" but a capability woven into the very process of decision-making.
 
-In Knossos, Metis is the **context-engineering agent** -- the standing specialist who engineers the context that enables all other work. Where Pythia routes across rites and Potnia presides within them, Metis operates at the meta-level: designing skills architecture, optimizing prompt structures, managing context across multi-turn conversations, and framing initiatives before execution begins. She powers `/frame`, the command that decomposes an initiative into a structured plan Theseus carries into the labyrinth.
+In Knossos, Metis was conceived as the **context-engineering agent** -- a specialist who would engineer the context that enables all other work. Where Pythia routes across rites and Potnia presides within them, Metis was envisioned operating at the meta-level: designing skills architecture, optimizing prompt structures, managing context across multi-turn conversations, and framing initiatives before execution begins. She was to power `/frame`, the command that decomposes an initiative into a structured plan Theseus carries into the labyrinth. This role is now fulfilled by Myron, the feature discovery scout who also serves as the framing intelligence behind `/frame`.
 
 Metis does not enter the labyrinth. She structures the journey before the first step is taken.
 
-The name replaces `context-engineer` -- the functional description that was accurate but bloodless. Context engineering is her domain, but her name carries the philosophical commitment: the counsel within, the wisdom that can never be removed because it has been made interior. When you invoke `/frame`, you are asking Metis to swallow the problem whole and give it back as architecture.
-
-She is a standing agent. She cannot be summoned or dismissed. That is the doctrine made explicit in the implementation.
+The name replaces `context-engineer` -- the functional description that was accurate but bloodless. Context engineering is her domain, but her name carries the philosophical commitment: the counsel within, the wisdom that can never be removed because it has been made interior. When you invoke `/frame`, you are asking the strategist to swallow the problem whole and give it back as architecture.
 
 > *Zeus could have consulted Metis before each decision. Instead he made her part of himself. The context engineer's output is not advice -- it is the structure of the work itself.*
 
