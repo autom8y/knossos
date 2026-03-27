@@ -12,6 +12,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// newSlackThreadFetcherForTest creates a fetcher with an overridden base URL
+// for httptest injection.
+func newSlackThreadFetcherForTest(botToken string, baseURL string) SlackThreadFetcher {
+	return &slackThreadFetcher{
+		botToken:   botToken,
+		apiBaseURL: baseURL,
+	}
+}
+
 func TestFetchThreadMessages_Success(t *testing.T) {
 	const threadTS = "1716000000.000000"
 
@@ -38,7 +47,7 @@ func TestFetchThreadMessages_Success(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	fetcher := NewSlackThreadFetcherForTest("test-token", srv.URL+"/")
+	fetcher := newSlackThreadFetcherForTest("test-token", srv.URL+"/")
 	messages, err := fetcher.FetchThreadMessages(context.Background(), "C123", threadTS, 20)
 
 	require.NoError(t, err)
@@ -61,7 +70,7 @@ func TestFetchThreadMessages_RateLimit(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	fetcher := NewSlackThreadFetcherForTest("test-token", srv.URL+"/")
+	fetcher := newSlackThreadFetcherForTest("test-token", srv.URL+"/")
 	messages, err := fetcher.FetchThreadMessages(context.Background(), "C123", "1716000000.000000", 20)
 
 	assert.Nil(t, messages)
@@ -80,7 +89,7 @@ func TestFetchThreadMessages_APIError(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	fetcher := NewSlackThreadFetcherForTest("test-token", srv.URL+"/")
+	fetcher := newSlackThreadFetcherForTest("test-token", srv.URL+"/")
 	messages, err := fetcher.FetchThreadMessages(context.Background(), "C123", "1716000000.000000", 20)
 
 	assert.Nil(t, messages)
@@ -104,10 +113,35 @@ func TestFetchThreadMessages_EmptyThread(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	fetcher := NewSlackThreadFetcherForTest("test-token", srv.URL+"/")
+	fetcher := newSlackThreadFetcherForTest("test-token", srv.URL+"/")
 	messages, err := fetcher.FetchThreadMessages(context.Background(), "C123", threadTS, 20)
 
 	require.NoError(t, err)
 	require.NotNil(t, messages, "should return empty slice, not nil")
 	assert.Empty(t, messages)
+}
+
+func TestFetchThreadMessages_SubtypeFiltered(t *testing.T) {
+	const threadTS = "1716000000.000000"
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := map[string]any{
+			"ok": true,
+			"messages": []map[string]any{
+				{"user": "U111", "text": "parent", "ts": threadTS},
+				{"user": "U222", "text": "hello", "ts": "1716000001.000000"},
+				{"user": "U333", "text": "joined", "ts": "1716000002.000000", "subtype": "channel_join"},
+			},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}))
+	defer srv.Close()
+
+	fetcher := newSlackThreadFetcherForTest("test-token", srv.URL+"/")
+	messages, err := fetcher.FetchThreadMessages(context.Background(), "C123", threadTS, 20)
+
+	require.NoError(t, err)
+	require.Len(t, messages, 1, "subtype message should be filtered out")
+	assert.Equal(t, "hello", messages[0].Content)
 }

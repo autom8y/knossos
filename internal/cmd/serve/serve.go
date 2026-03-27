@@ -1092,6 +1092,24 @@ func (a *knowledgeLLMAdapter) Complete(ctx context.Context, systemPrompt, userMe
 	})
 }
 
+// convertTriageCandidates converts handler-local TriageCandidateData to reason.TriageCandidateInput.
+// Shared by triagePipelineQueryAdapter and streamingPipelineQueryAdapter to avoid duplication.
+func convertTriageCandidates(candidates []internalslack.TriageCandidateData) []reason.TriageCandidateInput {
+	result := make([]reason.TriageCandidateInput, len(candidates))
+	for i, c := range candidates {
+		result[i] = reason.TriageCandidateInput{
+			QualifiedName:       c.QualifiedName,
+			RelevanceScore:      c.RelevanceScore,
+			EmbeddingSimilarity: c.EmbeddingSimilarity,
+			Freshness:           c.Freshness,
+			Rationale:           c.Rationale,
+			DomainType:          c.DomainType,
+			RelatedDomains:      c.RelatedDomains,
+		}
+	}
+	return result
+}
+
 // ---- WARNING-03 fix: TriagePipeline adapter ----
 
 // triagePipelineQueryAdapter adapts *reason.Pipeline to internalslack.TriageQueryRunner.
@@ -1104,28 +1122,14 @@ type triagePipelineQueryAdapter struct {
 
 func (a *triagePipelineQueryAdapter) QueryWithTriage(ctx context.Context, triageInput *internalslack.TriageResultInputData) (*response.ReasoningResponse, error) {
 	if triageInput == nil {
-		return a.pipeline.Query(ctx, "")
-	}
-
-	// Convert handler-local types to reason/ types.
-	candidates := make([]reason.TriageCandidateInput, len(triageInput.Candidates))
-	for i, c := range triageInput.Candidates {
-		candidates[i] = reason.TriageCandidateInput{
-			QualifiedName:       c.QualifiedName,
-			RelevanceScore:      c.RelevanceScore,
-			EmbeddingSimilarity: c.EmbeddingSimilarity,
-			Freshness:           c.Freshness,
-			Rationale:           c.Rationale,
-			DomainType:          c.DomainType,
-			RelatedDomains:      c.RelatedDomains,
-		}
+		return nil, fmt.Errorf("triageInput is required")
 	}
 
 	return a.pipeline.QueryWithTriage(ctx, &reason.TriageResultInput{
 		RefinedQuery:        triageInput.RefinedQuery,
-		Candidates:          candidates,
+		Candidates:          convertTriageCandidates(triageInput.Candidates),
 		ModelCallCount:      triageInput.ModelCallCount,
-		ConversationHistory: triageInput.ConversationHistory, // WS-2: forward conversation turns.
+		ConversationHistory: triageInput.ConversationHistory,
 	})
 }
 
@@ -1141,27 +1145,13 @@ type streamingPipelineQueryAdapter struct {
 
 func (a *streamingPipelineQueryAdapter) QueryStream(ctx context.Context, triageInput *internalslack.TriageResultInputData, onChunk func(chunk string)) (*response.ReasoningResponse, error) {
 	if triageInput == nil {
-		return a.pipeline.Query(ctx, "")
-	}
-
-	// Convert handler-local types to reason/ types (same conversion as triagePipelineQueryAdapter).
-	candidates := make([]reason.TriageCandidateInput, len(triageInput.Candidates))
-	for i, c := range triageInput.Candidates {
-		candidates[i] = reason.TriageCandidateInput{
-			QualifiedName:       c.QualifiedName,
-			RelevanceScore:      c.RelevanceScore,
-			EmbeddingSimilarity: c.EmbeddingSimilarity,
-			Freshness:           c.Freshness,
-			Rationale:           c.Rationale,
-			DomainType:          c.DomainType,
-			RelatedDomains:      c.RelatedDomains,
-		}
+		return nil, fmt.Errorf("triageInput is required")
 	}
 
 	return a.pipeline.QueryStream(ctx, &reason.TriageResultInput{
 		RefinedQuery:        triageInput.RefinedQuery,
-		Candidates:          candidates,
+		Candidates:          convertTriageCandidates(triageInput.Candidates),
 		ModelCallCount:      triageInput.ModelCallCount,
-		ConversationHistory: triageInput.ConversationHistory, // WS-2: forward conversation turns.
+		ConversationHistory: triageInput.ConversationHistory,
 	}, onChunk)
 }

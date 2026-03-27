@@ -27,15 +27,6 @@ func NewSlackThreadFetcher(botToken string) SlackThreadFetcher {
 	}
 }
 
-// NewSlackThreadFetcherForTest creates a fetcher with an overridden base URL
-// for httptest injection.
-func NewSlackThreadFetcherForTest(botToken string, baseURL string) SlackThreadFetcher {
-	return &slackThreadFetcher{
-		botToken:   botToken,
-		apiBaseURL: baseURL,
-	}
-}
-
 // slackMessage is the minimal Slack message shape for conversations.replies.
 type slackMessage struct {
 	User    string `json:"user"`
@@ -111,6 +102,9 @@ func (f *slackThreadFetcher) FetchThreadMessages(ctx context.Context, channelID 
 			continue
 		}
 
+		// Heuristic: messages without a User field that passed the BotID and SubType
+		// filters above are classified as assistant responses. This is safe because
+		// subtypeless system messages always carry a subtype field and are filtered out.
 		role := "assistant"
 		if msg.User != "" {
 			role = "user"

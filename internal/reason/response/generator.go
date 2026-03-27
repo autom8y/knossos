@@ -9,7 +9,7 @@ import (
 	"time"
 
 	reasoncontext "github.com/autom8y/knossos/internal/reason/context"
-	"github.com/autom8y/knossos/internal/slack/streaming"
+	"github.com/autom8y/knossos/internal/citation"
 	"github.com/autom8y/knossos/internal/trust"
 )
 
@@ -374,7 +374,7 @@ func parseResponse(content string) (StructuredAnswer, bool) {
 	}
 
 	// Extract inline citations using the same regex as the streaming path.
-	qualifiedNames := streaming.ExtractCitations(text)
+	qualifiedNames := citation.ExtractCitations(text)
 	var citations []Citation
 	for _, qn := range qualifiedNames {
 		citations = append(citations, Citation{
