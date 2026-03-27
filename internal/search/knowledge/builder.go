@@ -140,7 +140,6 @@ func Build(ctx context.Context, cfg BuildConfig) (*KnowledgeIndex, error) {
 	g.SetLimit(10)
 
 	for _, w := range work {
-		w := w // capture loop variable
 		g.Go(func() error {
 			if gCtx.Err() != nil {
 				return nil // Parent context cancelled; stop scheduling.
@@ -172,20 +171,24 @@ func Build(ctx context.Context, cfg BuildConfig) (*KnowledgeIndex, error) {
 			}
 
 			// Regenerate summary.
+			// GenerateSummary() performs the LLM I/O without touching the store,
+			// so it runs without the mutex. Only the Set() write acquires the lock.
 			if w.needsSummary && cfg.LLMClient != nil {
 				sections := parseSections(content)
 				llmAdapter := &llmClientAdapter{client: cfg.LLMClient}
 
 				domainCtx, cancel := context.WithTimeout(gCtx, 30*time.Second)
-				mu.Lock()
-				_, genErr := summaryStore.Generate(domainCtx, qn, content, currentHash, sections, llmAdapter)
-				mu.Unlock()
+				ds, genErr := summaryStore.GenerateSummary(domainCtx, qn, content, currentHash, sections, llmAdapter)
 				cancel()
 
 				if genErr != nil {
 					slog.Warn("summary generation failed, using stale if available",
 						"domain", qn, "error", genErr)
 					// Non-fatal: domain still usable via BM25.
+				} else {
+					mu.Lock()
+					summaryStore.Set(ds)
+					mu.Unlock()
 				}
 			} else if w.needsSummary && cfg.LLMClient == nil {
 				slog.Debug("LLM client not available, skipping summary generation",

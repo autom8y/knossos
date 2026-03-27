@@ -243,6 +243,69 @@ func TestStore_Set(t *testing.T) {
 	}
 }
 
+func TestStore_GenerateSummary(t *testing.T) {
+	tests := []struct {
+		name        string
+		llmResponse string
+		llmErr      error
+		wantErr     bool
+		wantDomain  string
+	}{
+		{
+			name:        "returns summary without storing",
+			llmResponse: "Architecture domain covers key patterns and data flow.",
+			wantErr:     false,
+			wantDomain:  "Architecture domain covers key patterns and data flow.",
+		},
+		{
+			name:    "LLM error propagates",
+			llmErr:  fmt.Errorf("rate limit exceeded"),
+			wantErr: true,
+		},
+		{
+			name:    "nil client returns error",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := NewStore()
+
+			var client LLMClient
+			if tt.name != "nil client returns error" {
+				client = &mockLLMClient{response: tt.llmResponse, err: tt.llmErr}
+			}
+
+			result, err := s.GenerateSummary(
+				context.Background(),
+				"org::repo::arch",
+				"Full content body here...",
+				"hash1",
+				nil,
+				client,
+			)
+
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("GenerateSummary() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.wantErr {
+				return
+			}
+
+			if result.DomainSummary != tt.wantDomain {
+				t.Errorf("DomainSummary = %q, want %q", result.DomainSummary, tt.wantDomain)
+			}
+
+			// GenerateSummary must NOT write to the store.
+			if s.Count() != 0 {
+				t.Errorf("store Count() = %d after GenerateSummary, want 0 (should not write)", s.Count())
+			}
+		})
+	}
+}
+
 func TestStore_All(t *testing.T) {
 	s := NewStore()
 	s.Set(&DomainSummary{QualifiedName: "a", DomainSummary: "A", SourceHash: "1"})

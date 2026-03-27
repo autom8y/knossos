@@ -90,13 +90,13 @@ func (s *Store) Set(summary *DomainSummary) {
 	s.summaries[summary.QualifiedName] = summary
 }
 
-// Generate creates a domain summary using the LLM client.
-// The content should be the full .know/ file body (frontmatter stripped).
-// sections is a map of slug -> section body text for per-section summarization.
+// GenerateSummary performs the LLM call and returns a *DomainSummary without
+// writing it to the store. This allows callers to perform the I/O-heavy LLM
+// call outside a mutex and then store the result with Set() under lock.
 //
 // Returns nil and an error if the LLM call fails. The caller should handle
 // degradation (e.g., use stale summary from persisted index).
-func (s *Store) Generate(ctx context.Context, qualifiedName, content, sourceHash string, sections map[string]string, client LLMClient) (*DomainSummary, error) {
+func (s *Store) GenerateSummary(ctx context.Context, qualifiedName, content, sourceHash string, sections map[string]string, client LLMClient) (*DomainSummary, error) {
 	if client == nil {
 		return nil, fmt.Errorf("LLM client is nil, cannot generate summary for %s", qualifiedName)
 	}
@@ -152,9 +152,8 @@ Rules:
 		if line == "" {
 			continue
 		}
-		if strings.HasPrefix(line, "SECTION:") {
+		if rest, ok := strings.CutPrefix(line, "SECTION:"); ok {
 			// Parse "SECTION: slug | summary"
-			rest := strings.TrimPrefix(line, "SECTION:")
 			rest = strings.TrimSpace(rest)
 			parts := strings.SplitN(rest, "|", 2)
 			if len(parts) == 2 {
@@ -177,7 +176,22 @@ Rules:
 		ds.DomainSummary = strings.TrimSpace(resp)
 	}
 
-	s.summaries[qualifiedName] = ds
+	return ds, nil
+}
+
+// Generate creates a domain summary using the LLM client and stores it.
+// Convenience method that calls GenerateSummary() + Set(). For concurrent
+// callers that need to hold a mutex only during the store write, use
+// GenerateSummary() + Set() separately instead.
+//
+// The content should be the full .know/ file body (frontmatter stripped).
+// sections is a map of slug -> section body text for per-section summarization.
+func (s *Store) Generate(ctx context.Context, qualifiedName, content, sourceHash string, sections map[string]string, client LLMClient) (*DomainSummary, error) {
+	ds, err := s.GenerateSummary(ctx, qualifiedName, content, sourceHash, sections, client)
+	if err != nil {
+		return nil, err
+	}
+	s.Set(ds)
 	return ds, nil
 }
 
