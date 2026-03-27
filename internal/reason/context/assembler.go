@@ -44,6 +44,11 @@ type AssemblerConfig struct {
 	// the lookup returns empty, full content is used.
 	// FM-3: Typically backed by summary.Store.GetSummary.
 	SummaryLookup func(qualifiedName string) (string, bool)
+
+	// OrgTopology is the pre-rendered org topology section for the system prompt.
+	// ADR-TOPO-2: Populated at startup from topology.yaml + domain catalog.
+	// Empty string = omit topology section (fail-open).
+	OrgTopology string
 }
 
 // DefaultAssemblerConfig returns production default configuration.
@@ -123,7 +128,7 @@ func (a *Assembler) Assemble(
 ) *AssembledContext {
 	if len(results) == 0 {
 		// No results: return minimal context with empty sources.
-		systemPrompt := RenderSystemPrompt(org, score.Tier, nil, conversationHistory...)
+		systemPrompt := RenderSystemPrompt(org, score.Tier, nil, a.config.OrgTopology, conversationHistory...)
 		budgetMgr := NewBudgetManager(a.config.SourceBudgetTokens)
 		report := budgetMgr.Report()
 		report.SystemPromptTokens = a.counter.Count(systemPrompt)
@@ -223,7 +228,7 @@ func (a *Assembler) Assemble(
 	}
 
 	if len(candidates) == 0 {
-		systemPrompt := RenderSystemPrompt(org, score.Tier, nil, conversationHistory...)
+		systemPrompt := RenderSystemPrompt(org, score.Tier, nil, a.config.OrgTopology, conversationHistory...)
 		budgetMgr := NewBudgetManager(a.config.SourceBudgetTokens)
 		report := budgetMgr.Report()
 		report.SystemPromptTokens = a.counter.Count(systemPrompt)
@@ -300,7 +305,7 @@ func (a *Assembler) Assemble(
 	}
 
 	// Render system prompt with included sources and conversation history.
-	systemPrompt := RenderSystemPrompt(org, score.Tier, included, conversationHistory...)
+	systemPrompt := RenderSystemPrompt(org, score.Tier, included, a.config.OrgTopology, conversationHistory...)
 
 	// Compute final budget report.
 	report := budgetMgr.Report()

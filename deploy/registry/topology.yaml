@@ -1,0 +1,50 @@
+schema_version: "1.0"
+org: autom8y
+
+groups:
+  - name: Service layer
+    repos:
+      - name: autom8y-data
+        role: core data layer
+        direction: upstream
+      - name: autom8y-scheduling
+        role: job orchestration
+      - name: autom8y-asana
+        role: task sync
+      - name: autom8y-ads
+        role: campaign data
+      - name: autom8y-sms
+        role: notifications
+      - name: autom8y-workflows
+        role: workflow execution
+
+  - name: Legacy
+    repos:
+      - name: autom8
+        role: monolith, decomposing into autom8y-* services
+
+  - name: Tooling
+    repos:
+      - name: knossos
+        role: developer platform (this system)
+      - name: a8
+        role: CLI / deployment interface
+
+edges:
+  # "from" depends on "to" (from reads/consumes to)
+  - from: autom8y-scheduling
+    to: autom8y-data
+    label: reads job/campaign data
+  - from: autom8y-asana
+    to: autom8y-data
+    label: syncs task data
+  - from: autom8y-ads
+    to: autom8y-data
+    label: reads campaign data
+  # "from" triggers/writes to "to"
+  - from: autom8y-scheduling
+    to: autom8y-sms
+    label: triggers notifications
+  - from: autom8y-scheduling
+    to: autom8y-workflows
+    label: executes flows

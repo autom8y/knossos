@@ -16,12 +16,15 @@ type ConversationTurn struct {
 }
 
 // RenderSystemPrompt assembles the complete system prompt from components.
-// Concatenates: identity section + tier behavior section + conversation history (optional) + source material section.
+// Concatenates: identity + tier behavior + org topology (optional) + conversation history (optional) + source material.
+//
+// ADR-TOPO-4: When orgTopology is non-empty, it is injected between tier behavior
+// and conversation history so Claude has the organizational map before source material.
 //
 // WS-2: When conversationHistory is non-empty, a CONVERSATION HISTORY section is
 // rendered BEFORE the source material section so Claude has conversational context.
 // Conversation history is ADDITIONAL context -- it does NOT reduce the 8K source material budget.
-func RenderSystemPrompt(org string, tier trust.ConfidenceTier, sources []SourceMaterial, conversationHistory ...[]ConversationTurn) string {
+func RenderSystemPrompt(org string, tier trust.ConfidenceTier, sources []SourceMaterial, orgTopology string, conversationHistory ...[]ConversationTurn) string {
 	var b strings.Builder
 
 	// Identity section
@@ -31,6 +34,13 @@ func RenderSystemPrompt(org string, tier trust.ConfidenceTier, sources []SourceM
 	// Tier behavior section
 	b.WriteString(renderTierBehavior(tier))
 	b.WriteString("\n\n")
+
+	// ADR-TOPO-4: Org topology section (between tier behavior and conversation history).
+	// Fail-open: empty string = omit section entirely.
+	if orgTopology != "" {
+		b.WriteString(orgTopology)
+		b.WriteString("\n")
+	}
 
 	// WS-2: Conversation history section (before source material).
 	// Variadic parameter preserves backward compatibility: existing callers

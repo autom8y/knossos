@@ -439,7 +439,39 @@ func buildPipeline() pipelineComponents {
 		return result
 	}
 
-	// Step 3: Context assembler.
+	// orgTopology holds the pre-rendered topology section for the system prompt.
+	// ADR-TOPO-6: Empty string when topology.yaml is missing (fail-open).
+	var orgTopology string
+
+	// Step 3: Load DomainCatalog from registry for provenance chains (TD-01 fix).
+	// Loaded early so domain counts are available for topology rendering.
+	// Fail-open: nil catalog means provenance chains will be empty but pipeline still works.
+	if orgCtx, err := config.DefaultOrgContext(); err == nil {
+		catalogPath := registryorg.CatalogPath(orgCtx)
+		if loaded, err := registryorg.LoadCatalog(catalogPath); err == nil {
+			result.catalog = loaded
+			slog.Info("domain catalog loaded", "org", orgCtx.Name(), "domains", loaded.DomainCount())
+		} else {
+			slog.Warn("domain catalog not found, provenance chains will be empty", "error", err)
+		}
+
+		// Step 3b: Load topology.yaml and render org topology section.
+		// ADR-TOPO-3: Pre-rendered at startup, cached for server lifetime.
+		// ADR-TOPO-6: Fail-open when topology.yaml is missing.
+		topoPath := registryorg.TopologyPath(orgCtx)
+		topoCfg, topoErr := registryorg.LoadTopology(topoPath)
+		if topoErr != nil {
+			slog.Warn("topology config parse error, continuing without topology", "error", topoErr)
+		} else if topoCfg != nil {
+			domainCounts := registryorg.DomainCountsFromCatalog(result.catalog)
+			orgTopology = registryorg.RenderTopology(topoCfg, domainCounts)
+			slog.Info("org topology loaded", "groups", len(topoCfg.Groups), "edges", len(topoCfg.Edges))
+		}
+	} else {
+		slog.Debug("no org context configured, provenance chains will be empty")
+	}
+
+	// Step 4: Context assembler.
 	// WS-3: Wire SummaryLookup via atomic pointer so the summary tier activates
 	// once the KnowledgeIndex is available (either pre-baked or background-built).
 	// Fail-open: returns ("", false) while the pointer is nil.
@@ -452,39 +484,27 @@ func buildPipeline() pipelineComponents {
 		}
 		return "", false
 	}
+	// ADR-TOPO-2: Set pre-rendered topology on assembler config.
+	reasoningCfg.Assembler.OrgTopology = orgTopology
 	assembler := reasoncontext.NewAssembler(counter, reasoningCfg.Assembler)
 
-	// Step 4: Claude client (requires ANTHROPIC_API_KEY).
+	// Step 5: Claude client (requires ANTHROPIC_API_KEY).
 	claudeClient, err := response.NewAnthropicClient()
 	if err != nil {
 		slog.Warn("claude client initialization failed, pipeline disabled", "error", err)
 		return result
 	}
 
-	// Step 5: Response generator.
+	// Step 6: Response generator.
 	generator := response.NewGenerator(claudeClient, reasoningCfg.Generator)
 
-	// Step 6: Trust scorer.
+	// Step 7: Trust scorer.
 	trustCfg := trust.DefaultConfig()
 	scorer := trust.NewScorer(trustCfg)
 
-	// Step 7: Search index (uses a minimal cobra root; knowledge domains are the key channel).
+	// Step 8: Search index (uses a minimal cobra root; knowledge domains are the key channel).
 	minimalRoot := &cobra.Command{Use: "ari"}
 	result.searchIndex = search.Build(minimalRoot, nil)
-
-	// Step 8: Load DomainCatalog from registry for provenance chains (TD-01 fix).
-	// Fail-open: nil catalog means provenance chains will be empty but pipeline still works.
-	if orgCtx, err := config.DefaultOrgContext(); err == nil {
-		catalogPath := registryorg.CatalogPath(orgCtx)
-		if loaded, err := registryorg.LoadCatalog(catalogPath); err == nil {
-			result.catalog = loaded
-			slog.Info("domain catalog loaded", "org", orgCtx.Name(), "domains", loaded.DomainCount())
-		} else {
-			slog.Warn("domain catalog not found, provenance chains will be empty", "error", err)
-		}
-	} else {
-		slog.Debug("no org context configured, provenance chains will be empty")
-	}
 
 	result.pipeline = reason.NewPipeline(
 		classifier,

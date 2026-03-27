@@ -22,7 +22,7 @@ func TestRenderSystemPrompt_WithSources(t *testing.T) {
 		},
 	}
 
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, sources)
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, sources, "")
 
 	assert.Contains(t, prompt, "KNOWLEDGE SOURCES", "should include source material section")
 	assert.Contains(t, prompt, "architecture", "should include source content")
@@ -31,7 +31,7 @@ func TestRenderSystemPrompt_WithSources(t *testing.T) {
 
 func TestRenderSystemPrompt_ZeroSources_GapAdmission(t *testing.T) {
 	// BC-14: Sonnet prompt MUST handle len(SourceBlocks) == 0 explicitly.
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil)
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, "")
 
 	assert.Contains(t, prompt, "NO KNOWLEDGE SOURCES",
 		"BC-14: zero sources must trigger gap admission instructions")
@@ -43,14 +43,14 @@ func TestRenderSystemPrompt_ZeroSources_GapAdmission(t *testing.T) {
 
 func TestRenderSystemPrompt_EmptySliceSources_GapAdmission(t *testing.T) {
 	// Empty slice (as opposed to nil) should also trigger gap admission.
-	prompt := RenderSystemPrompt("autom8y", trust.TierMedium, []SourceMaterial{})
+	prompt := RenderSystemPrompt("autom8y", trust.TierMedium, []SourceMaterial{}, "")
 
 	assert.Contains(t, prompt, "NO KNOWLEDGE SOURCES",
 		"BC-14: empty slice sources must also trigger gap admission")
 }
 
 func TestRenderSystemPrompt_AlwaysHasIdentity(t *testing.T) {
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil)
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, "")
 
 	assert.Contains(t, prompt, "Clew", "should always include identity section")
 	assert.Contains(t, prompt, "autom8y", "should include org name")
@@ -60,7 +60,7 @@ func TestRenderSystemPrompt_AlwaysHasTierBehavior(t *testing.T) {
 	tiers := []trust.ConfidenceTier{trust.TierHigh, trust.TierMedium, trust.TierLow}
 
 	for _, tier := range tiers {
-		prompt := RenderSystemPrompt("autom8y", tier, nil)
+		prompt := RenderSystemPrompt("autom8y", tier, nil, "")
 		assert.True(t, strings.Contains(prompt, "Confidence:"),
 			"tier %s: should include tier behavior section", tier.String())
 	}
@@ -121,7 +121,7 @@ func TestRenderSystemPrompt_WithConversationHistory(t *testing.T) {
 		},
 	}
 
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, sources, history)
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, sources, "", history)
 
 	// Must contain CONVERSATION HISTORY section.
 	assert.Contains(t, prompt, "CONVERSATION HISTORY",
@@ -157,7 +157,7 @@ func TestRenderSystemPrompt_BackwardCompatibility_NoHistory(t *testing.T) {
 		},
 	}
 
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, sources)
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, sources, "")
 
 	assert.NotContains(t, prompt, "CONVERSATION HISTORY",
 		"WS-2 backward compat: no history param must not include conversation history section")
@@ -169,7 +169,7 @@ func TestRenderSystemPrompt_BackwardCompatibility_NoHistory(t *testing.T) {
 
 func TestRenderSystemPrompt_EmptyConversationHistory(t *testing.T) {
 	// Empty slice should not produce a conversation history section.
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, []ConversationTurn{})
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, "", []ConversationTurn{})
 
 	assert.NotContains(t, prompt, "CONVERSATION HISTORY",
 		"WS-2: empty conversation history must not render a section")
@@ -177,7 +177,7 @@ func TestRenderSystemPrompt_EmptyConversationHistory(t *testing.T) {
 
 func TestRenderSystemPrompt_NilConversationHistory(t *testing.T) {
 	// Nil history slice (passed explicitly) should not produce a section.
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, nil)
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, "", nil)
 
 	assert.NotContains(t, prompt, "CONVERSATION HISTORY",
 		"WS-2: nil conversation history must not render a section")
@@ -188,7 +188,7 @@ func TestRenderSystemPrompt_SingleTurnHistory(t *testing.T) {
 		{Role: "user", Content: "Hello"},
 	}
 
-	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, history)
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, "", history)
 
 	assert.Contains(t, prompt, "CONVERSATION HISTORY",
 		"WS-2: single-turn history must render section")
@@ -232,4 +232,59 @@ func TestRenderConversationHistory_RoleCapitalization(t *testing.T) {
 	assert.Contains(t, result, "[User]:", "user role must be capitalized")
 	assert.Contains(t, result, "[Assistant]:", "assistant role must be capitalized")
 	assert.Contains(t, result, "[system]:", "unknown roles pass through unchanged")
+}
+
+// ---- ADR-TOPO: Org topology tests ----
+
+func TestRenderSystemPrompt_WithTopology(t *testing.T) {
+	topology := "--- ORG TOPOLOGY ---\n\nOrganization: autom8y (10 repos, ~130 knowledge domains)\n"
+
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, topology)
+
+	assert.Contains(t, prompt, "--- ORG TOPOLOGY ---",
+		"ADR-TOPO: must include topology section when provided")
+	assert.Contains(t, prompt, "autom8y (10 repos",
+		"ADR-TOPO: must include topology content")
+
+	// Topology must appear after tier behavior.
+	tierIdx := strings.Index(prompt, "Confidence: HIGH")
+	topoIdx := strings.Index(prompt, "--- ORG TOPOLOGY ---")
+	assert.Less(t, tierIdx, topoIdx,
+		"ADR-TOPO-4: topology must appear after tier behavior")
+}
+
+func TestRenderSystemPrompt_EmptyTopology(t *testing.T) {
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, nil, "")
+
+	assert.NotContains(t, prompt, "ORG TOPOLOGY",
+		"ADR-TOPO: empty topology string must not render a topology section")
+}
+
+func TestRenderSystemPrompt_TopologyOrdering(t *testing.T) {
+	topology := "--- ORG TOPOLOGY ---\n\nOrganization: autom8y\n"
+	history := []ConversationTurn{
+		{Role: "user", Content: "test question"},
+	}
+	sources := []SourceMaterial{
+		{
+			QualifiedName:  "autom8y::knossos::arch",
+			Content:        "content",
+			Freshness:      0.9,
+			FreshnessLabel: "fresh",
+		},
+	}
+
+	prompt := RenderSystemPrompt("autom8y", trust.TierHigh, sources, topology, history)
+
+	// Verify ordering: identity -> tier -> topology -> conversation -> sources.
+	identityIdx := strings.Index(prompt, "Clew")
+	tierIdx := strings.Index(prompt, "Confidence: HIGH")
+	topoIdx := strings.Index(prompt, "--- ORG TOPOLOGY ---")
+	historyIdx := strings.Index(prompt, "--- CONVERSATION HISTORY ---")
+	sourcesIdx := strings.Index(prompt, "--- KNOWLEDGE SOURCES ---")
+
+	assert.Less(t, identityIdx, tierIdx, "identity before tier")
+	assert.Less(t, tierIdx, topoIdx, "tier before topology")
+	assert.Less(t, topoIdx, historyIdx, "topology before conversation history")
+	assert.Less(t, historyIdx, sourcesIdx, "conversation history before sources")
 }
