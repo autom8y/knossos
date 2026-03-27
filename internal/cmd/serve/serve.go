@@ -546,7 +546,7 @@ type triageOrchestratorAdapter struct {
 	orch *triage.Orchestrator
 }
 
-func (a *triageOrchestratorAdapter) Assess(ctx context.Context, query string, threadHistory []internalslack.TriageThreadMessage) (*internalslack.TriageResultData, error) {
+func (a *triageOrchestratorAdapter) Assess(ctx context.Context, query string, threadHistory []internalslack.TriageThreadMessage, opts ...internalslack.TriageAssessOptions) (*internalslack.TriageResultData, error) {
 	// Convert handler thread messages to triage thread messages.
 	var triageHistory []triage.ThreadMessage
 	for _, m := range threadHistory {
@@ -557,7 +557,15 @@ func (a *triageOrchestratorAdapter) Assess(ctx context.Context, query string, th
 		})
 	}
 
-	result, err := a.orch.Assess(ctx, query, triageHistory)
+	// Convert handler assess options to triage assess options.
+	var triageOpts []triage.AssessOptions
+	if len(opts) > 0 {
+		triageOpts = append(triageOpts, triage.AssessOptions{
+			PriorTurnDomains: opts[0].PriorTurnDomains,
+		})
+	}
+
+	result, err := a.orch.Assess(ctx, query, triageHistory, triageOpts...)
 	if err != nil {
 		return nil, err
 	}

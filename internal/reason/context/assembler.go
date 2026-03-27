@@ -17,7 +17,7 @@ type TokenCounter interface {
 // AssemblerConfig controls context assembly behavior.
 type AssemblerConfig struct {
 	// SourceBudgetTokens is the maximum tokens for source material.
-	// Default: 4000.
+	// Default: 8000. Used as fallback when triage domain count is unavailable.
 	SourceBudgetTokens int
 
 	// RelevanceWeight controls the influence of BM25 score on inclusion priority.
@@ -31,6 +31,19 @@ type AssemblerConfig struct {
 	// DiversityWeight controls the influence of domain diversity on inclusion priority.
 	// Default: 0.20.
 	DiversityWeight float64
+
+	// TriageDomainCount is the number of triage candidates, used to dynamically
+	// resolve the source budget via resolveSourceBudget(). When zero, the static
+	// SourceBudgetTokens is used as the fallback.
+	// FM-3: Set by the caller (pipeline) when triage results are available.
+	TriageDomainCount int
+
+	// SummaryLookup returns a summary for a given qualified name.
+	// When non-nil and a summary is found, candidates at position 4+ use
+	// summary content instead of full content. Fail-open: when nil or when
+	// the lookup returns empty, full content is used.
+	// FM-3: Typically backed by summary.Store.GetSummary.
+	SummaryLookup func(qualifiedName string) (string, bool)
 }
 
 // DefaultAssemblerConfig returns production default configuration.
@@ -57,6 +70,27 @@ func NewAssembler(counter TokenCounter, config AssemblerConfig) *Assembler {
 	return &Assembler{
 		counter: counter,
 		config:  config,
+	}
+}
+
+// resolveSourceBudget returns a dynamic source budget based on triage domain count.
+// When triageDomainCount is zero, the fallback (configured default) is used.
+//
+// FM-3 Progressive Context Disclosure:
+//   - 1-2 domains: fallback (8000) -- narrow query, top domains only
+//   - 3-4 domains: 12000 -- medium cross-domain synthesis
+//   - 5+ domains: 16000 -- broad org intelligence query
+func resolveSourceBudget(triageDomainCount int, fallback int) int {
+	if triageDomainCount <= 0 {
+		return fallback
+	}
+	switch {
+	case triageDomainCount <= 2:
+		return fallback
+	case triageDomainCount <= 4:
+		return 12000
+	default:
+		return 16000
 	}
 }
 
@@ -235,15 +269,31 @@ func (a *Assembler) Assemble(
 		return candidates[i].inclusionScore > candidates[j].inclusionScore
 	})
 
+	// FM-3: Resolve source budget dynamically based on triage domain count.
+	sourceBudget := resolveSourceBudget(a.config.TriageDomainCount, a.config.SourceBudgetTokens)
+
 	// Greedy packing: include candidates until token budget is exhausted.
-	budgetMgr := NewBudgetManager(a.config.SourceBudgetTokens)
+	// FM-3: Candidates at position 4+ (0-indexed 3+) use summary content
+	// when a SummaryLookup is available.
+	budgetMgr := NewBudgetManager(sourceBudget)
 	var included []SourceMaterial
 
-	for _, c := range candidates {
+	for i, c := range candidates {
+		src := c.source
+
+		// FM-3: Summary tier for positions 4+ (0-indexed >= 3).
+		if i >= 3 && a.config.SummaryLookup != nil {
+			if summary, ok := a.config.SummaryLookup(src.QualifiedName); ok && summary != "" {
+				src.Content = summary
+				src.TokenCount = a.counter.Count(summary)
+			}
+			// Fail-open: if summary not found, use full content.
+		}
+
 		// Consume() returns true if the item fits and increments included.
 		// It returns false and increments skipped if it doesn't fit.
-		if budgetMgr.Consume(c.source.TokenCount) {
-			included = append(included, c.source)
+		if budgetMgr.Consume(src.TokenCount) {
+			included = append(included, src)
 		}
 		// Bin-packing heuristic: continue trying subsequent candidates
 		// even after a skip -- a smaller candidate may still fit.

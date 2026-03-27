@@ -122,6 +122,16 @@ type SearchIndex interface {
 	ListAllDomains() []DomainMetadata
 }
 
+// AssessOptions provides optional parameters for the Assess method.
+// When PriorTurnDomains is non-empty and threadHistory is non-empty,
+// the follow-up enhancement path is activated (entity extraction,
+// BM25-rescored domain carryover).
+type AssessOptions struct {
+	// PriorTurnDomains are the qualified names from the immediately prior
+	// turn's triage result. Single-turn carryover ONLY -- not accumulated.
+	PriorTurnDomains []string
+}
+
 // EmbeddingModel abstracts embedding computation for Stage 2.
 // Sprint 5 uses a stub that returns errors (triggering BM25 fallback).
 // Sprint 7 provides the real implementation.

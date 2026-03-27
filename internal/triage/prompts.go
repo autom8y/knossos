@@ -28,8 +28,18 @@ Current query: "Now compare that to ads"
 Refined: "Compare the scheduling service retry handling to the ads service retry handling"`
 
 // stage0UserMessage formats the Stage 0 user message with thread history.
-func stage0UserMessage(currentQuery string, history []ThreadMessage) string {
+// priorEntities, when non-empty, are rendered as a dedicated section BEFORE
+// conversation history (not injected as synthetic history messages).
+func stage0UserMessage(currentQuery string, history []ThreadMessage, priorEntities ...[]string) string {
 	var b strings.Builder
+
+	// FM-3: Render prior entities as a dedicated section before history.
+	if len(priorEntities) > 0 && len(priorEntities[0]) > 0 {
+		b.WriteString("Prior turn entities: [")
+		b.WriteString(strings.Join(priorEntities[0], ", "))
+		b.WriteString("]\n\n")
+	}
+
 	b.WriteString("Conversation history:\n")
 	for _, msg := range history {
 		b.WriteString(fmt.Sprintf("[%s]: %s\n", msg.Role, msg.Content))

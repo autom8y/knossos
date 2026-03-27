@@ -229,10 +229,16 @@ type TriageResultInputData struct {
 	ConversationHistory []reasoncontext.ConversationTurn
 }
 
+// TriageAssessOptions provides optional parameters for the triage Assess method.
+// Mirrors triage.AssessOptions without importing the triage package.
+type TriageAssessOptions struct {
+	PriorTurnDomains []string
+}
+
 // TriageRunner abstracts the triage orchestrator for testability.
 // The concrete implementation is *triage.Orchestrator (passed as data, not import).
 type TriageRunner interface {
-	Assess(ctx context.Context, query string, threadHistory []TriageThreadMessage) (*TriageResultData, error)
+	Assess(ctx context.Context, query string, threadHistory []TriageThreadMessage, opts ...TriageAssessOptions) (*TriageResultData, error)
 }
 
 // TriageThreadMessage is the handler-local thread message type.
@@ -552,6 +558,7 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 		// Get conversation history for multi-turn context.
 		var threadHistory []TriageThreadMessage
 		var conversationTurns []reasoncontext.ConversationTurn
+		var priorDomains []string
 		if deps.ConversationMgr != nil {
 			ctx := context.Background()
 			history := deps.ConversationMgr.GetThreadHistory(ctx, threadTS)
@@ -561,11 +568,14 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 				threadHistory = convertThreadHistory(history)
 				// WS-2: Convert to ConversationTurn for synthesis prompt injection.
 				conversationTurns = convertToConversationTurns(history)
+				// FM-3: Extract prior triage domains for single-turn carryover.
+				priorDomains = extractPriorTriageDomains(history)
 				slog.Info("conversation history retrieved",
 					"thread_ts", threadTS,
 					"total_messages", history.TotalMessageCount,
 					"recent_messages", len(history.RecentMessages),
 					"conversation_turns", len(conversationTurns),
+					"prior_triage_domains", len(priorDomains),
 					"has_summary", history.Summary != "",
 				)
 			} else {
@@ -578,7 +588,7 @@ func handleMessage(w http.ResponseWriter, eventData json.RawMessage, deps Handle
 			deps.Metrics.RecordPrePipelineLatency(cmResult, time.Since(prePipelineStart))
 		}
 
-		processMessage(msg.Channel, threadTS, msg.Text, deps, threadHistory, conversationTurns)
+		processMessage(msg.Channel, threadTS, msg.Text, deps, threadHistory, conversationTurns, priorDomains)
 	}()
 }
 
@@ -598,6 +608,24 @@ func convertThreadHistory(history *conversation.ThreadHistory) []TriageThreadMes
 		})
 	}
 	return messages
+}
+
+// extractPriorTriageDomains retrieves the triage domains from the last
+// assistant message in the conversation history. Returns nil if no prior
+// triage domains are available.
+// FM-3: Single-turn carryover -- only the immediately prior turn.
+func extractPriorTriageDomains(history *conversation.ThreadHistory) []string {
+	if history == nil {
+		return nil
+	}
+	// Walk backward to find the last assistant message with triage domains.
+	for i := len(history.RecentMessages) - 1; i >= 0; i-- {
+		m := history.RecentMessages[i]
+		if m.Role == "assistant" && len(m.LastTriageDomains) > 0 {
+			return m.LastTriageDomains
+		}
+	}
+	return nil
 }
 
 // convertToConversationTurns converts conversation.ThreadHistory to ConversationTurn
@@ -622,7 +650,8 @@ func convertToConversationTurns(history *conversation.ThreadHistory) []reasoncon
 // processMessage runs the reasoning pipeline and posts the response.
 // Runs in a goroutine -- must not reference the http.ResponseWriter.
 // WS-2: conversationTurns carries recent thread turns for synthesis prompt injection.
-func processMessage(channelID, threadTS, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn) {
+// FM-3: priorDomains enables single-turn domain carryover.
+func processMessage(channelID, threadTS, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn, priorDomains []string) {
 	client := deps.Client
 
 	// Set "thinking" status.
@@ -639,11 +668,13 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 
 	var resp *response.ReasoningResponse
 	var err error
+	var triageDomains []string
 
 	// Sprint 5/6: Wire triage with thread history into message handling.
 	// WS-2: Pass conversation turns for synthesis prompt injection.
+	// FM-3: Pass prior triage domains for single-turn carryover.
 	if deps.TriageRunner != nil {
-		resp, err = processWithTriage(ctx, question, deps, threadHistory, conversationTurns)
+		resp, triageDomains, err = processWithTriage(ctx, question, deps, threadHistory, conversationTurns, priorDomains)
 	} else {
 		resp, err = deps.Pipeline.Query(ctx, question)
 	}
@@ -658,6 +689,7 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 	}
 
 	// Store the user message and assistant response in conversation history.
+	// FM-3: Store triage domains on the assistant message for next-turn carryover.
 	if deps.ConversationMgr != nil {
 		deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
 			Role:      "user",
@@ -666,9 +698,10 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 		})
 		if resp != nil && resp.Answer != "" {
 			deps.ConversationMgr.StoreMessage(ctx, threadTS, channelID, conversation.ThreadMessage{
-				Role:      "assistant",
-				Content:   resp.Answer,
-				Timestamp: time.Now(),
+				Role:              "assistant",
+				Content:           resp.Answer,
+				Timestamp:         time.Now(),
+				LastTriageDomains: triageDomains,
 			})
 		}
 	}
@@ -713,21 +746,36 @@ func processMessage(channelID, threadTS, question string, deps HandlerDeps, thre
 // Falls back to v1 pipeline (Query) when triage returns nil, errors, or
 // TriagePipeline is not wired.
 // WS-2: conversationTurns is forwarded to the pipeline for synthesis prompt injection.
-func processWithTriage(ctx context.Context, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn) (*response.ReasoningResponse, error) {
-	// Run triage (Stages 0-3) with thread history for multi-turn context.
+// FM-3: priorDomains enables single-turn domain carryover.
+func processWithTriage(ctx context.Context, question string, deps HandlerDeps, threadHistory []TriageThreadMessage, conversationTurns []reasoncontext.ConversationTurn, priorDomains []string) (*response.ReasoningResponse, []string, error) {
+	// Run triage (Stages 0-3) with thread history and prior domains for multi-turn context.
 	triageStart := time.Now()
-	triageResult, err := deps.TriageRunner.Assess(ctx, question, threadHistory)
+	var triageOpts []TriageAssessOptions
+	if len(priorDomains) > 0 {
+		triageOpts = append(triageOpts, TriageAssessOptions{
+			PriorTurnDomains: priorDomains,
+		})
+	}
+	triageResult, err := deps.TriageRunner.Assess(ctx, question, threadHistory, triageOpts...)
 	triageElapsed := time.Since(triageStart)
 	if err != nil {
 		slog.Warn("triage failed, falling back to v1 pipeline",
 			"error", err,
 		)
-		return deps.Pipeline.Query(ctx, question)
+		resp, err := deps.Pipeline.Query(ctx, question)
+		return resp, nil, err
 	}
 
 	if triageResult == nil || len(triageResult.Candidates) == 0 {
 		slog.Info("triage returned no candidates, falling back to v1 pipeline")
-		return deps.Pipeline.Query(ctx, question)
+		resp, err := deps.Pipeline.Query(ctx, question)
+		return resp, nil, err
+	}
+
+	// FM-3: Extract qualified names from triage candidates for next-turn carryover.
+	triageDomains := make([]string, len(triageResult.Candidates))
+	for i, c := range triageResult.Candidates {
+		triageDomains[i] = c.QualifiedName
 	}
 
 	// Record triage metrics: Haiku call count and stage 3 latency.
@@ -761,10 +809,12 @@ func processWithTriage(ctx context.Context, question string, deps HandlerDeps, t
 			ModelCallCount:      triageResult.ModelCallCount,
 			ConversationHistory: conversationTurns, // WS-2: forward conversation turns to pipeline.
 		}
-		return deps.TriagePipeline.QueryWithTriage(ctx, triageInput)
+		resp, err := deps.TriagePipeline.QueryWithTriage(ctx, triageInput)
+		return resp, triageDomains, err
 	}
 
 	// Fallback: TriagePipeline not wired. Use v1 pipeline with refined query.
 	slog.Warn("TriagePipeline not wired, triage candidates discarded")
-	return deps.Pipeline.Query(ctx, refinedQuery)
+	resp, err := deps.Pipeline.Query(ctx, refinedQuery)
+	return resp, triageDomains, err
 }

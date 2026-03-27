@@ -36,20 +36,40 @@ func NewOrchestrator(llmClient llm.Client, searchIndex SearchIndex, embeddingMod
 
 // Assess runs the full triage pipeline and returns ranked candidates.
 //
+// When opts provides PriorTurnDomains AND threadHistory is non-empty,
+// the follow-up enhancement path activates:
+//   - Entity extraction from the last assistant message (vocabulary-seeded)
+//   - Enhanced Stage 0 with prior entities
+//   - BM25-rescored domain carryover after Stage 2
+//
 // Fail-open chain:
 //   - Stage 3 fails -> use Stage 2 scores only
 //   - Stage 2 fails -> BM25 fallback (BC-06: explicit, required)
 //   - All stages fail -> return nil (caller falls back to v1)
-func (o *Orchestrator) Assess(ctx context.Context, query string, threadHistory []ThreadMessage) (*TriageResult, error) {
+func (o *Orchestrator) Assess(ctx context.Context, query string, threadHistory []ThreadMessage, opts ...AssessOptions) (*TriageResult, error) {
 	start := time.Now()
 	modelCalls := 0
 
+	// Resolve options.
+	var priorDomains []string
+	if len(opts) > 0 {
+		priorDomains = opts[0].PriorTurnDomains
+	}
+
+	// Determine if follow-up enhancement is active.
+	isFollowUp := len(threadHistory) > 0
+	enhanceFollowUp := isFollowUp && len(priorDomains) > 0
+
+	// Extract entities from the last assistant message for Stage 0 enhancement.
+	var priorEntities []string
+	if enhanceFollowUp {
+		priorEntities = o.extractPriorEntities(threadHistory)
+	}
+
 	// Stage 0: Multi-Turn Context Resolution (conditional).
 	refinedQuery := query
-	isFollowUp := len(threadHistory) > 0
-
 	if isFollowUp && o.llmClient != nil {
-		refined, err := o.stage0RefineQuery(ctx, query, threadHistory)
+		refined, err := o.stage0RefineQuery(ctx, query, threadHistory, priorEntities)
 		if err != nil {
 			// Fail-open: use original query if refinement fails.
 			slog.Warn("stage 0 query refinement failed, using original query",
@@ -80,6 +100,11 @@ func (o *Orchestrator) Assess(ctx context.Context, query string, threadHistory [
 	if len(stage2Candidates) == 0 {
 		slog.Warn("stage 2 pre-filter returned no candidates")
 		return nil, nil
+	}
+
+	// FM-3: BM25-rescored domain carryover after Stage 2.
+	if enhanceFollowUp {
+		stage2Candidates = o.injectPriorDomains(refinedQuery, stage2Candidates, priorDomains)
 	}
 
 	// Cap to 20 candidates for Stage 3.
@@ -117,11 +142,13 @@ func (o *Orchestrator) Assess(ctx context.Context, query string, threadHistory [
 
 // stage0RefineQuery uses Haiku to resolve implicit references in follow-up queries.
 // P2-5: Uses a 2-second timeout to bound latency for the optional refinement step.
-func (o *Orchestrator) stage0RefineQuery(ctx context.Context, query string, history []ThreadMessage) (string, error) {
+// priorEntities, when non-empty, are injected as a dedicated prompt section before
+// conversation history (not as a synthetic message).
+func (o *Orchestrator) stage0RefineQuery(ctx context.Context, query string, history []ThreadMessage, priorEntities []string) (string, error) {
 	stage0Ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
-	userMsg := stage0UserMessage(query, history)
+	userMsg := stage0UserMessage(query, history, priorEntities)
 
 	resp, err := o.llmClient.Complete(stage0Ctx, llm.CompletionRequest{
 		SystemPrompt: stage0SystemPrompt,
@@ -546,6 +573,150 @@ func attemptPartialJSONRecovery(resp string) stage3Response {
 	}
 
 	return result
+}
+
+// extractPriorEntities extracts entity names from the last assistant message
+// in threadHistory using the vocabulary-seeded keyword matcher.
+func (o *Orchestrator) extractPriorEntities(history []ThreadMessage) []string {
+	// Find the last assistant message.
+	var lastAssistant string
+	for i := len(history) - 1; i >= 0; i-- {
+		if history[i].Role == "assistant" {
+			lastAssistant = history[i].Content
+			break
+		}
+	}
+	if lastAssistant == "" {
+		return nil
+	}
+
+	// Build vocabulary from the search index's domain catalog.
+	vocabulary := buildDomainVocabulary(o.searchIndex.ListAllDomains())
+	return extractEntities(lastAssistant, vocabulary)
+}
+
+// buildDomainVocabulary builds a keyword list from domain qualified names
+// by splitting on "::" and "-". Deduplicates and filters tokens shorter
+// than 3 characters to avoid noise.
+func buildDomainVocabulary(domains []DomainMetadata) []string {
+	seen := make(map[string]bool)
+	var vocab []string
+
+	for _, d := range domains {
+		// Split qualified name on "::" to get org, repo, domain parts.
+		parts := strings.Split(d.QualifiedName, "::")
+		for _, part := range parts {
+			// Split each part on "-" to get individual tokens.
+			tokens := strings.Split(part, "-")
+			for _, tok := range tokens {
+				tok = strings.ToLower(strings.TrimSpace(tok))
+				if len(tok) < 3 {
+					continue
+				}
+				if !seen[tok] {
+					seen[tok] = true
+					vocab = append(vocab, tok)
+				}
+			}
+		}
+	}
+
+	return vocab
+}
+
+// extractEntities performs case-insensitive vocabulary keyword matching
+// against text. Deduplicates and caps at 5 entities. Minimum token
+// length of 3 characters is enforced by the vocabulary builder.
+//
+// NO regex. NO LLM call. Just vocabulary keyword matching.
+func extractEntities(text string, vocabulary []string) []string {
+	textLower := strings.ToLower(text)
+
+	seen := make(map[string]bool)
+	var entities []string
+
+	for _, token := range vocabulary {
+		if seen[token] {
+			continue
+		}
+		if strings.Contains(textLower, token) {
+			seen[token] = true
+			entities = append(entities, token)
+			if len(entities) >= 5 {
+				break
+			}
+		}
+	}
+
+	return entities
+}
+
+// injectPriorDomains adds prior-turn domains to the Stage 2 candidate list
+// using BM25-rescored relevance. Domains already in Stage 2 are skipped.
+// Injected domains receive their actual BM25 score against the refined query,
+// or a soft floor of 0.1 if they don't appear in BM25 results.
+//
+// Single-turn carryover ONLY -- priorDomains represents the immediately prior turn.
+func (o *Orchestrator) injectPriorDomains(refinedQuery string, candidates []stage2Candidate, priorDomains []string) []stage2Candidate {
+	if len(priorDomains) == 0 {
+		return candidates
+	}
+
+	// Build set of already-present qualified names.
+	present := make(map[string]bool, len(candidates))
+	for _, c := range candidates {
+		present[c.metadata.QualifiedName] = true
+	}
+
+	// Filter to prior domains NOT already in Stage 2.
+	var missing []string
+	for _, qn := range priorDomains {
+		if !present[qn] {
+			missing = append(missing, qn)
+		}
+	}
+	if len(missing) == 0 {
+		return candidates
+	}
+
+	// BM25 re-score: search the refined query and build a score lookup.
+	bm25Results := o.searchIndex.SearchByBM25(refinedQuery, 20)
+	bm25Scores := make(map[string]float64, len(bm25Results))
+	for _, r := range bm25Results {
+		bm25Scores[r.QualifiedName] = r.Score
+	}
+
+	// Inject missing prior domains with BM25 scores (or soft floor).
+	for _, qn := range missing {
+		md, ok := o.searchIndex.GetMetadata(qn)
+		if !ok {
+			continue
+		}
+		score := 0.1 // Soft floor for domains not in BM25 results.
+		if bm25Score, found := bm25Scores[qn]; found {
+			score = bm25Score
+		}
+		candidates = append(candidates, stage2Candidate{
+			metadata:  *md,
+			bm25Score: score,
+		})
+	}
+
+	// Re-sort by BM25 score descending after injection.
+	sort.Slice(candidates, func(i, j int) bool {
+		if candidates[i].bm25Score != candidates[j].bm25Score {
+			return candidates[i].bm25Score > candidates[j].bm25Score
+		}
+		return candidates[i].embeddingSimilarity > candidates[j].embeddingSimilarity
+	})
+
+	slog.Info("FM-3 injected prior-turn domains",
+		"prior_domains", len(priorDomains),
+		"injected", len(missing),
+		"total_candidates", len(candidates),
+	)
+
+	return candidates
 }
 
 // repoFromQualifiedName extracts the repo component from "org::repo::domain".

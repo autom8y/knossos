@@ -422,3 +422,351 @@ func (m *multiResponseMock) Complete(_ context.Context, _ llm.CompletionRequest)
 	}
 	return "", errors.New("no more responses configured")
 }
+
+// ---- FM-3: extractEntities tests ----
+
+func TestExtractEntities_VocabularyMatching(t *testing.T) {
+	vocabulary := []string{"triage", "search", "pipeline", "knossos", "trust"}
+
+	entities := extractEntities("The triage pipeline uses a search engine for knossos queries.", vocabulary)
+
+	assert.Contains(t, entities, "triage")
+	assert.Contains(t, entities, "search")
+	assert.Contains(t, entities, "pipeline")
+	assert.Contains(t, entities, "knossos")
+}
+
+func TestExtractEntities_CaseInsensitive(t *testing.T) {
+	vocabulary := []string{"triage", "pipeline"}
+
+	entities := extractEntities("The TRIAGE Pipeline handles all queries.", vocabulary)
+
+	assert.Contains(t, entities, "triage")
+	assert.Contains(t, entities, "pipeline")
+}
+
+func TestExtractEntities_Deduplication(t *testing.T) {
+	vocabulary := []string{"triage", "search"}
+
+	entities := extractEntities("triage and triage and triage again, with search.", vocabulary)
+
+	// Each token should appear only once.
+	triageCount := 0
+	for _, e := range entities {
+		if e == "triage" {
+			triageCount++
+		}
+	}
+	assert.Equal(t, 1, triageCount, "should deduplicate entity matches")
+}
+
+func TestExtractEntities_CapAt5(t *testing.T) {
+	vocabulary := []string{"alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf"}
+
+	text := "alpha bravo charlie delta echo foxtrot golf"
+	entities := extractEntities(text, vocabulary)
+
+	assert.LessOrEqual(t, len(entities), 5, "should cap at 5 entities")
+}
+
+func TestExtractEntities_MinimumLength(t *testing.T) {
+	// The vocabulary builder filters tokens < 3 chars, but if someone passes
+	// short tokens in, extractEntities still matches them. The min-length
+	// enforcement is in buildDomainVocabulary.
+	vocabulary := []string{"ab", "abc", "triage"}
+
+	entities := extractEntities("ab and abc and triage", vocabulary)
+
+	// "ab" is 2 chars but if it's in vocabulary it still matches.
+	// The constraint is that buildDomainVocabulary filters these out.
+	assert.Contains(t, entities, "abc")
+	assert.Contains(t, entities, "triage")
+}
+
+func TestExtractEntities_NoMatchReturnsEmpty(t *testing.T) {
+	vocabulary := []string{"triage", "search"}
+
+	entities := extractEntities("completely unrelated text about cooking", vocabulary)
+
+	assert.Empty(t, entities)
+}
+
+func TestExtractEntities_EmptyVocabulary(t *testing.T) {
+	entities := extractEntities("some text", nil)
+	assert.Empty(t, entities)
+}
+
+// ---- FM-3: buildDomainVocabulary tests ----
+
+func TestBuildDomainVocabulary_SplitsQualifiedNames(t *testing.T) {
+	domains := []DomainMetadata{
+		{QualifiedName: "autom8y::knossos::clew-rag-triage"},
+	}
+
+	vocab := buildDomainVocabulary(domains)
+
+	assert.Contains(t, vocab, "autom8y")
+	assert.Contains(t, vocab, "knossos")
+	assert.Contains(t, vocab, "clew")
+	assert.Contains(t, vocab, "rag")
+	assert.Contains(t, vocab, "triage")
+}
+
+func TestBuildDomainVocabulary_FiltersShortTokens(t *testing.T) {
+	domains := []DomainMetadata{
+		{QualifiedName: "a::bb::ccc-dd"},
+	}
+
+	vocab := buildDomainVocabulary(domains)
+
+	// "a" (1 char) and "bb" (2 chars) and "dd" (2 chars) should be filtered.
+	for _, token := range vocab {
+		assert.GreaterOrEqual(t, len(token), 3, "token %q should be >= 3 chars", token)
+	}
+	assert.Contains(t, vocab, "ccc")
+}
+
+func TestBuildDomainVocabulary_DeduplicatesAcrossDomains(t *testing.T) {
+	domains := []DomainMetadata{
+		{QualifiedName: "autom8y::knossos::triage"},
+		{QualifiedName: "autom8y::knossos::search"},
+	}
+
+	vocab := buildDomainVocabulary(domains)
+
+	// "autom8y" and "knossos" appear in both domains but should be deduped.
+	autom8yCount := 0
+	for _, tok := range vocab {
+		if tok == "autom8y" {
+			autom8yCount++
+		}
+	}
+	assert.Equal(t, 1, autom8yCount, "should deduplicate across domains")
+}
+
+// ---- FM-3: Domain carryover (injectPriorDomains) tests ----
+
+func TestInjectPriorDomains_BM25Rescored(t *testing.T) {
+	idx := &mockSearchIndex{
+		bm25Results: []BM25Result{
+			{QualifiedName: "autom8y::knossos::scar-tissue", Score: 0.6},
+		},
+		metadata: testMetadataMap(),
+		allDomains: testDomains(),
+	}
+	orch := &Orchestrator{searchIndex: idx}
+
+	candidates := []stage2Candidate{
+		{metadata: DomainMetadata{QualifiedName: "autom8y::knossos::architecture"}, bm25Score: 0.9},
+	}
+
+	result := orch.injectPriorDomains("architecture overview", candidates, []string{
+		"autom8y::knossos::scar-tissue",
+	})
+
+	// Should have injected scar-tissue with its actual BM25 score (0.6).
+	assert.Len(t, result, 2)
+	var injectedScore float64
+	for _, c := range result {
+		if c.metadata.QualifiedName == "autom8y::knossos::scar-tissue" {
+			injectedScore = c.bm25Score
+		}
+	}
+	assert.Equal(t, 0.6, injectedScore, "should use actual BM25 score, not hardcoded 0.5")
+}
+
+func TestInjectPriorDomains_SoftFloor(t *testing.T) {
+	// BM25 returns results that do NOT include the prior domain.
+	idx := &mockSearchIndex{
+		bm25Results: []BM25Result{
+			{QualifiedName: "autom8y::knossos::architecture", Score: 0.9},
+		},
+		metadata: testMetadataMap(),
+		allDomains: testDomains(),
+	}
+	orch := &Orchestrator{searchIndex: idx}
+
+	candidates := []stage2Candidate{
+		{metadata: DomainMetadata{QualifiedName: "autom8y::knossos::architecture"}, bm25Score: 0.9},
+	}
+
+	result := orch.injectPriorDomains("architecture overview", candidates, []string{
+		"autom8y::knossos::scar-tissue",
+	})
+
+	// scar-tissue is NOT in BM25 results for this query, should get soft floor 0.1.
+	var injectedScore float64
+	for _, c := range result {
+		if c.metadata.QualifiedName == "autom8y::knossos::scar-tissue" {
+			injectedScore = c.bm25Score
+		}
+	}
+	assert.Equal(t, 0.1, injectedScore, "should use soft floor 0.1 when not in BM25 results")
+}
+
+func TestInjectPriorDomains_NoDuplicates(t *testing.T) {
+	idx := testSearchIndex()
+	orch := &Orchestrator{searchIndex: idx}
+
+	candidates := []stage2Candidate{
+		{metadata: DomainMetadata{QualifiedName: "autom8y::knossos::architecture"}, bm25Score: 0.9},
+	}
+
+	// Inject architecture again -- should NOT duplicate.
+	result := orch.injectPriorDomains("architecture", candidates, []string{
+		"autom8y::knossos::architecture",
+	})
+
+	assert.Len(t, result, 1, "should not duplicate already-present domains")
+}
+
+func TestInjectPriorDomains_EmptyPriorDomains(t *testing.T) {
+	idx := testSearchIndex()
+	orch := &Orchestrator{searchIndex: idx}
+
+	candidates := []stage2Candidate{
+		{metadata: DomainMetadata{QualifiedName: "autom8y::knossos::architecture"}, bm25Score: 0.9},
+	}
+
+	result := orch.injectPriorDomains("architecture", candidates, nil)
+	assert.Len(t, result, 1, "empty prior domains should return candidates unchanged")
+}
+
+func TestInjectPriorDomains_ResortsDescending(t *testing.T) {
+	idx := &mockSearchIndex{
+		bm25Results: []BM25Result{
+			{QualifiedName: "autom8y::knossos::scar-tissue", Score: 0.95},
+		},
+		metadata: testMetadataMap(),
+		allDomains: testDomains(),
+	}
+	orch := &Orchestrator{searchIndex: idx}
+
+	candidates := []stage2Candidate{
+		{metadata: DomainMetadata{QualifiedName: "autom8y::knossos::architecture"}, bm25Score: 0.5},
+	}
+
+	result := orch.injectPriorDomains("bugs", candidates, []string{
+		"autom8y::knossos::scar-tissue",
+	})
+
+	// scar-tissue (0.95) should be sorted before architecture (0.5).
+	assert.Equal(t, "autom8y::knossos::scar-tissue", result[0].metadata.QualifiedName,
+		"injected domain with higher BM25 should sort first")
+}
+
+// ---- FM-3: Assess with opts tests ----
+
+func TestAssess_WithPriorDomains_EnhancesFollowUp(t *testing.T) {
+	callCount := 0
+	orch := &Orchestrator{
+		llmClient: &multiResponseMock{
+			responses: []string{
+				"Tell me about knossos architecture and scar tissue",
+				validStage3JSON(),
+			},
+			callCount: &callCount,
+		},
+		searchIndex:    testSearchIndex(),
+		embeddingModel: &StubEmbeddingModel{},
+	}
+
+	history := []ThreadMessage{
+		{Role: "user", Content: "How is knossos structured?", Timestamp: time.Now()},
+		{Role: "assistant", Content: "The knossos architecture uses layered patterns with scar-tissue tracking.", Timestamp: time.Now()},
+	}
+
+	opts := AssessOptions{
+		PriorTurnDomains: []string{"autom8y::knossos::conventions"},
+	}
+
+	result, err := orch.Assess(context.Background(), "Tell me more about that", history, opts)
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.True(t, result.Intent.IsFollowUp)
+}
+
+func TestAssess_FirstTurn_BehavesIdentically(t *testing.T) {
+	// First turn (no history) with opts should behave identically to without opts.
+	mock := &mockLLMClient{response: validStage3JSON()}
+	orch := NewOrchestrator(mock, testSearchIndex(), &StubEmbeddingModel{})
+
+	opts := AssessOptions{
+		PriorTurnDomains: []string{"autom8y::knossos::conventions"},
+	}
+
+	result, err := orch.Assess(context.Background(), "What is the architecture?", nil, opts)
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.False(t, result.Intent.IsFollowUp, "first turn should not be a follow-up")
+	assert.Equal(t, "What is the architecture?", result.RefinedQuery, "first turn should not be refined")
+}
+
+func TestAssess_NoOpts_BehavesAsOriginal(t *testing.T) {
+	// Calling Assess without opts should work exactly like the original.
+	mock := &mockLLMClient{response: validStage3JSON()}
+	orch := NewOrchestrator(mock, testSearchIndex(), &StubEmbeddingModel{})
+
+	result, err := orch.Assess(context.Background(), "What is the architecture?", nil)
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	assert.False(t, result.Intent.IsFollowUp)
+}
+
+// ---- FM-3: Stage 0 entity context in prompts ----
+
+func TestStage0UserMessage_WithEntities(t *testing.T) {
+	history := []ThreadMessage{
+		{Role: "user", Content: "What is knossos?"},
+	}
+
+	entities := []string{"triage", "search", "pipeline"}
+	msg := stage0UserMessage("Tell me more", history, entities)
+
+	assert.Contains(t, msg, "Prior turn entities: [triage, search, pipeline]")
+	assert.Contains(t, msg, "Conversation history:")
+	// Entities should appear BEFORE conversation history.
+	entitiesIdx := len("Prior turn entities:") // rough position
+	historyIdx := len(msg) - 1                 // rough position
+	_ = entitiesIdx
+	_ = historyIdx
+	// More precise check: entities section precedes history section.
+	assert.True(t,
+		indexOfString(msg, "Prior turn entities:") < indexOfString(msg, "Conversation history:"),
+		"entities should appear before conversation history",
+	)
+}
+
+func TestStage0UserMessage_WithoutEntities(t *testing.T) {
+	history := []ThreadMessage{
+		{Role: "user", Content: "What is knossos?"},
+	}
+
+	msg := stage0UserMessage("Tell me more", history)
+
+	assert.NotContains(t, msg, "Prior turn entities:")
+	assert.Contains(t, msg, "Conversation history:")
+}
+
+func TestStage0UserMessage_EmptyEntities(t *testing.T) {
+	history := []ThreadMessage{
+		{Role: "user", Content: "What is knossos?"},
+	}
+
+	msg := stage0UserMessage("Tell me more", history, []string{})
+
+	assert.NotContains(t, msg, "Prior turn entities:")
+}
+
+// indexOfString returns the index of the first occurrence of substr in s.
+func indexOfString(s, substr string) int {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return i
+		}
+	}
+	return -1
+}

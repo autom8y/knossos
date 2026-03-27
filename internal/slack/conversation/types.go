@@ -21,6 +21,11 @@ type ThreadMessage struct {
 	Role      string    // "user" or "assistant"
 	Content   string    // Full text (user) or truncated (assistant)
 	Timestamp time.Time // Slack message timestamp
+
+	// LastTriageDomains holds the qualified names from the triage result
+	// associated with this turn. Populated on assistant messages after triage.
+	// FM-3: Used for single-turn domain carryover on the next turn.
+	LastTriageDomains []string
 }
 
 // ThreadHistory is the resolved conversation context for a thread.
